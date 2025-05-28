@@ -1,14 +1,14 @@
-# pyre-unsafe
+# pyre-strict
 import re
 
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 
 
 class WalkStkCommandTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="slow/reified-generics/reified-parent.php")
+    def file(self) -> str:
+        return "slow/reified-generics/reified-parent.php"
 
-    def test_walkstk_command(self):
+    def test_walkstk_command(self) -> None:
         # Just check we have a stack of the correct form; the specific
         # number of frames, line numbers, etc. may vary.
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")

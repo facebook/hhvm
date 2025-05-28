@@ -15,7 +15,6 @@ import sys
 import time
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 
@@ -27,7 +26,7 @@ class LLVMVersion(enum.Enum):
     LLVM17 = "17"
 
 
-_LLVMVersion = None
+_LLVMVersion: LLVMVersion | None = None
 
 
 class Command(abc.ABC):
@@ -41,13 +40,17 @@ class Command(abc.ABC):
     """ Additional information to display after the usage """
     epilog: typing.Optional[str] = None
 
-    # pyre-fixme[11]: Annotation `SBDebugger` is not defined as a type.
-    def __init__(self, debugger: lldb.SBDebugger, _internal_dict):
-        self.parser = self.create_parser()
-        self.help_string = self.parser.format_help()
+    def __init__(self, _debugger: lldb.SBDebugger, _internal_dict) -> None:
+        self.parser: argparse.ArgumentParser = self.create_parser()
+        self.help_string: str = self.parser.format_help()
 
     @classmethod
-    def register_lldb_command(cls, debugger, module_name, top_module="") -> None:
+    def register_lldb_command(
+        cls,
+        debugger: lldb.SBDebugger,
+        module_name: str,
+        top_module: str = "",
+    ) -> None:
         parser = cls.create_parser()
         cls.__doc__ = parser.format_help()
         command = f"command script add -o -c {top_module + '.' if top_module else ''}{module_name}.{cls.__name__} {cls.command}"
@@ -85,14 +88,11 @@ class Command(abc.ABC):
         self,
         debugger: lldb.SBDebugger,
         command: str,
-        # pyre-fixme[11]: Annotation `SBExecutionContext` is not defined as a type.
         exe_ctx: lldb.SBExecutionContext,
-        # pyre-fixme[11]: Annotation `SBCommandReturnObject` is not defined as a type.
         result: lldb.SBCommandReturnObject,
-    ): ...
+    ) -> None: ...
 
 
-# pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
 def get_llvm_version(target: lldb.SBTarget) -> LLVMVersion:
     global _LLVMVersion
     if _LLVMVersion is not None:
@@ -101,6 +101,7 @@ def get_llvm_version(target: lldb.SBTarget) -> LLVMVersion:
     found_version = None
     try:
         hhvm_module = get_hhvm_module(target)
+        assert hhvm_module is not None
         section = hhvm_module.FindSection(".comment")
         size = section.GetFileByteSize()
         data = section.GetSectionData()
@@ -125,10 +126,10 @@ def get_llvm_version(target: lldb.SBTarget) -> LLVMVersion:
         debug_print(f"Failed in get_llvm_version: {str(e)}")
 
     if found_version is None:
-        _LLVMVersion = LLVMVersion.LLVM15
-        print(f"Unable to determine LLVM version, assuming it's {_LLVMVersion.value}")
-    else:
-        _LLVMVersion = found_version
+        found_version = LLVMVersion.LLVM15
+        print(f"Unable to determine LLVM version, assuming it's {LLVMVersion.LLVM15}")
+
+    _LLVMVersion = found_version
     return _LLVMVersion
 
 
@@ -139,7 +140,7 @@ class LLVMVersionCommand(Command):
     )
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         subparsers = parser.add_subparsers(dest="cmd")
         subparsers.add_parser(
@@ -152,10 +153,13 @@ class LLVMVersionCommand(Command):
         set_parser.add_argument("version", choices=[v.value for v in LLVMVersion])
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -238,7 +242,6 @@ def get_target_cache_dict(target: lldb.SBTarget) -> typing.Dict[str, typing.Any]
     return _target_cache[target_idx]
 
 
-# pyre-fixme[11]: Annotation `SBModule` is not defined as a type.
 def get_hhvm_module(target: lldb.SBTarget) -> typing.Optional[lldb.SBModule]:
     """Get the module that contains the HHVM globals and types"""
 
@@ -258,7 +261,6 @@ def get_hhvm_module(target: lldb.SBTarget) -> typing.Optional[lldb.SBModule]:
     return None
 
 
-# pyre-fixme[11]: Annotation `SBType` is not defined as a type.
 def get_cached_type(name: str, target: lldb.SBTarget) -> typing.Optional[lldb.SBType]:
     """Get a type by name (trying from the HHVM module first) and cache the results"""
 
@@ -298,7 +300,6 @@ def get_cached_type(name: str, target: lldb.SBTarget) -> typing.Optional[lldb.SB
 def get_cached_global(
     name: str,
     target: lldb.SBTarget,
-    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 ) -> typing.Optional[lldb.SBValue]:
     """Get a global by name (trying from the HHVM module first) and cache the results"""
 
@@ -347,7 +348,7 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
         An SBType wrapping the HHVM type
     """
     ty = get_cached_type(name, target)
-    assert ty.IsValid(), f"couldn't find type '{name}'"
+    assert ty is not None and ty.IsValid(), f"couldn't find type '{name}'"
     return ty
 
 
@@ -365,7 +366,7 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
         SBValue wrapping the global variable
     """
     g = get_cached_global(name, target)
-    assert g.GetError().Success(), f"couldn't find global '{name}'"
+    assert g is not None and g.GetError().Success(), f"couldn't find global '{name}'"
     return g
 
 
@@ -373,7 +374,6 @@ def Enum(
     enum_name: str,
     elem: typing.Union[str, int],
     target: lldb.SBTarget,
-    # pyre-fixme[11]: Annotation `SBTypeEnumMember` is not defined as a type.
 ) -> lldb.SBTypeEnumMember:
     """Look up the value of an enum member
 
@@ -503,7 +503,7 @@ def template_type(t: lldb.SBType) -> str:
     return destruct(rawtype(t).name.split("<")[0])
 
 
-def unsigned_cast(v: lldb.SBValue, t: lldb.SBValue) -> lldb.SBValue:
+def unsigned_cast(v: lldb.SBValue, t: lldb.SBType) -> lldb.SBValue:
     """Perform a cast of `v` to `t` with C compatible unsigned widening.
 
     Use this in place of SBValue::Cast for cases where you are widening a
@@ -545,7 +545,7 @@ def nullptr(target: lldb.SBTarget):
     return target.CreateValueFromExpression("nullptr", "(void *)0")
 
 
-def is_nullptr(val: lldb.SBValue):
+def is_nullptr(val: lldb.SBValue) -> bool:
     return val.TypeIsPointerType() and val.unsigned == 0
 
 
@@ -609,8 +609,8 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     return None
 
 
-kMaxTagSize = 16
-kShiftAmount = 64 - kMaxTagSize  # 64 = std::numeric_limits<uintptr_t>::digits
+kMaxTagSize: int = 16
+kShiftAmount: int = 64 - kMaxTagSize  # 64 = std::numeric_limits<uintptr_t>::digits
 
 
 class TokenOrPtr:
@@ -739,7 +739,7 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 
     sd = None
 
-    def _od_name(od):
+    def _od_name(od: lldb.SBValue) -> lldb.SBValue:
         cls = deref(get(od, "m_cls"))
         pre_class = deref(get(cls, "m_preClass"))
         sd = get(pre_class, "m_name")
@@ -747,7 +747,9 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 
     if t == "HPHP::Func":
         sd = get(val, "m_fullName")
-        if rawptr(sd).unsigned == 1:
+        v = rawptr(sd)
+        assert v is not None
+        if v.unsigned == 1:
             return _full_func_name(val)
     elif t == "HPHP::Class":
         pre_class = deref(get(val, "m_preClass"))
@@ -769,7 +771,7 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 # Intel CRC32
 
 
-def _bit_reflect(num, nbits):
+def _bit_reflect(num: int, nbits: int) -> int:
     """Perform bit reflection on the bottom 'nbits' of 'num'"""
 
     out = 0
@@ -781,7 +783,7 @@ def _bit_reflect(num, nbits):
     return out
 
 
-def crc32q(crc, quad):
+def crc32q(crc: int, quad: int) -> int:
     """Intel SSE4 CRC32 implementation"""
 
     crc = _bit_reflect(crc, 32)
@@ -806,8 +808,7 @@ def crc32q(crc, quad):
 
 def read_cstring(
     addr: typing.Union[int, lldb.SBValue],
-    len: str,
-    # pyre-fixme[11]: Annotation `SBProcess` is not defined as a type.
+    len: int,
     process: lldb.SBProcess,
     keep_case: bool = True,
 ) -> str:
@@ -852,7 +853,7 @@ def read_cstring(
     return f"<invalid string with addr 0x{addr:0x} and length {len}>"
 
 
-def _unpack(s):
+def _unpack(s: str) -> int:
     return 0xDFDFDFDFDFDFDFDF & struct.unpack("<Q", bytes(s, encoding="utf-8"))[0]
 
 
@@ -878,7 +879,7 @@ def hash_string(s: str) -> int:
     return crc >> 1
 
 
-def is_char_pointer_type(t: lldb.SBType, target: lldb.SBTarget):
+def is_char_pointer_type(t: lldb.SBType, target: lldb.SBTarget) -> bool:
     return (
         re.match(r"char((8|16|32)_t)? \*", t.name) is not None
         or re.match(r"char \[\d*\]$", t.name) is not None
@@ -905,13 +906,13 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.
     if is_char_pointer_type(t, s.target):
         # Note: 1024 is very arbitrary; the string may
         # very well be longer than this.
-        # pyre-fixme[6]: For 2nd argument expected `str` but got `int`.
         data = read_cstring(s.deref.load_addr, 1024, s.process)
     else:
         sd = deref(s)
         ty_name = rawtype(sd.type).name
         if ty_name in ("HPHP::String", "HPHP::StaticString"):
             sd = rawptr(get(sd, "m_str"))
+            assert sd is not None
             sd = deref(sd)
         elif ty_name == "HPHP::StrNR":
             sd = deref(get(sd, "m_px"))
@@ -938,7 +939,7 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.
     return retval
 
 
-def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
+def string_data_val(val: lldb.SBValue, keep_case: bool = True) -> str:
     """Convert an HPHP::StringData[*] to a Python string
 
     Arguments:
@@ -967,7 +968,7 @@ def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
 # Resource helpers
 
 
-def pretty_resource_data(data: lldb.SBValue, print_header=False) -> str:
+def pretty_resource_data(data: lldb.SBValue, print_header: bool = False) -> str:
     """Convert an HPHP::ResourceData[*] to a Python string
 
     Arguments:
@@ -985,7 +986,7 @@ def pretty_resource_data(data: lldb.SBValue, print_header=False) -> str:
     return str(hex(data.load_addr))
 
 
-def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
+def pretty_resource_header(header: lldb.SBValue, print_data: bool = True) -> str:
     """Convert an HPHP::ResourceHdr[*] to a Python string
 
     Arguments:
@@ -1011,15 +1012,13 @@ def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
         )
         data = pretty_resource_data(data)
 
-    header = str(hex(header.load_addr))
+    header_str = str(hex(header.load_addr))
 
-    return f"(hdr = {header}" + (f", data = {data}" if data else "") + ")"
+    return f"(hdr = {header_str}" + (f", data = {data}" if data else "") + ")"
 
 
 # ------------------------------------------------------------------------------
 # TypedValue helpers
-
-_Current_key = None
 
 
 def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
@@ -1044,6 +1043,7 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
 
     val = None
     name = None
+    typ_str: str | None = None
 
     if typ.unsigned in [DT("Uninit"), DT("Null")]:
         pass
@@ -1101,18 +1101,18 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     else:
         typ_as_int8_t = typ.Cast(Type("int8_t", target))
         num = get(data, "num").signed
-        typ = "Invalid Type (%d)" % typ_as_int8_t.signed
+        typ_str = "Invalid Type (%d)" % typ_as_int8_t.signed
         val = "0x%x" % num
 
-    if isinstance(typ, lldb.SBValue):
-        typ = typ.value
+    if typ_str is None:
+        typ_str = typ.value
 
     if val is None:
-        out = "{ %s }" % typ
+        out = "{ %s }" % typ_str
     elif name is None:
-        out = "{ %s, %s }" % (typ, str(val))
+        out = "{ %s, %s }" % (typ_str, str(val))
     else:
-        out = '{ %s, %s ("%s") }' % (typ, str(val), name)
+        out = '{ %s, %s ("%s") }' % (typ_str, str(val), name)
 
     return out
 
@@ -1241,7 +1241,6 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
         }
 
 
-# pyre-fixme[11]: Annotation `SBFrame` is not defined as a type.
 def reg(common_name: str, frame: lldb.SBFrame) -> lldb.SBValue:
     """Get the value of a register given its common name (e.g. "fp", "sp", etc.)
 
@@ -1284,7 +1283,7 @@ def parse_argv(
 # ------------------------------------------------------------------------------
 # Debugging
 
-_Debug = False
+_Debug: bool = False
 
 
 class DebugCommand(Command):
@@ -1292,17 +1291,20 @@ class DebugCommand(Command):
     description = "Enable/disable printing information to aid in debugging LLDB scripts"
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         subparsers = parser.add_subparsers(dest="cmd")
         subparsers.add_parser("on", help="Enable LLDB script debugging information")
         subparsers.add_parser("off", help="Disable LLDB script debugging information")
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -1340,7 +1342,7 @@ def timer(func):
     return wrapper
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(debugger: lldb.SBDebugger, top_module: str = "") -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -1349,7 +1351,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

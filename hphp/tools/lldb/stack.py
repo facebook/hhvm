@@ -1,13 +1,12 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
-# pyre-unsafe
+# pyre-strict
 
 import argparse
 import shlex
 import traceback
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -30,10 +29,7 @@ except ModuleNotFoundError:
 
 
 def function_name_for_rip(
-    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
-    # pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
     rip: typing.Union[int, lldb.SBValue],
-    # pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
     target: lldb.SBTarget,
 ) -> typing.Optional[str]:
     """Try getting the name of the function containing `rip`.
@@ -54,7 +50,7 @@ def function_name_for_rip(
         return None
 
 
-def address_type(arg):
+def address_type(arg: str) -> int:
     try:
         return int(arg, 0)
     except ValueError:
@@ -75,7 +71,7 @@ The output backtrace has the following format:
 """
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument(
             "fp",
@@ -86,10 +82,13 @@ The output backtrace has the following format:
         )
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -116,7 +115,9 @@ The output backtrace has the following format:
             # Start walking the stack from the user-provided `fp`
             fp_raw = exe_ctx.frame.EvaluateExpression(str(options.fp))
             fp = utils.unsigned_cast(fp_raw, fp_type)
-            rip = utils.unsigned_cast(idx.at(fp, 1), rip_type)
+            v1 = idx.at(fp, 1)
+            assert v1 is not None
+            rip = utils.unsigned_cast(v1, rip_type)
 
             # Try to find a corresponding native frame
             while native_frame is not None and rip.unsigned != native_frame.parent.pc:
@@ -174,8 +175,12 @@ The output backtrace has the following format:
                 rip = fp[1]
                 fp = fp[0]
             else:
-                rip = utils.unsigned_cast(idx.at(fp, 1), rip_type)
-                fp = utils.unsigned_cast(idx.at(fp, 0), fp_type)
+                v1 = idx.at(fp, 1)
+                assert v1 is not None
+                rip = utils.unsigned_cast(v1, rip_type)
+                v0 = idx.at(fp, 0)
+                assert v0 is not None
+                fp = utils.unsigned_cast(v0, fp_type)
 
             utils.debug_print(
                 f"walkstk(): rip=0x{rip.unsigned:x}, fp=0x{fp.unsigned:x}"
@@ -227,6 +232,7 @@ The output backtrace has the following format:
                     frames = []
 
                     while native_frame.IsValid() and (
+                        # pyre-fixme[16]: Optional[SBValue] has no attribute `unsigned`.
                         fp.unsigned == 0x0 or idx.at(fp, 1).unsigned != native_frame.pc
                     ):
                         frames.append(
@@ -295,7 +301,7 @@ The output backtrace has the following format:
 """
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument(
             "fp",
@@ -313,10 +319,13 @@ The output backtrace has the following format:
         )
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -369,8 +378,12 @@ The output backtrace has the following format:
                 rip = fp[1]
                 fp = fp[0]
             else:
-                rip = utils.unsigned_cast(idx.at(fp, 1), uintptr_type)
-                fp = utils.unsigned_cast(idx.at(fp, 0), fp_type)
+                v1 = idx.at(fp, 1)
+                assert v1 is not None
+                rip = utils.unsigned_cast(v1, uintptr_type)
+                v0 = idx.at(fp, 0)
+                assert v0 is not None
+                fp = utils.unsigned_cast(v0, fp_type)
 
             try:
                 if frame.is_jitted(rip):
@@ -414,7 +427,7 @@ The output backtrace has the following format:
                 break
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(debugger: lldb.SBDebugger, top_module: str = "") -> None:
     """Register the stack-related commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -423,7 +436,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

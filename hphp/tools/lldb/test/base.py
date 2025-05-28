@@ -1,7 +1,8 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-# pyre-unsafe
+# pyre-strict
 
+import abc
 import os
 import pathlib
 import subprocess
@@ -14,7 +15,7 @@ from libfb.py.testutil import BaseFacebookTestCase
 
 # For lldb, until there's a buck-visible library we can use.
 # Its path on TW containers starts at /host-mounts.
-lldb_path = None
+lldb_path: str | None = None
 for path in [
     os.getenv("HHVM_TEST_LLDB_BIN", ""),
     "/opt/llvm/bin/lldb",
@@ -33,20 +34,21 @@ assert lldb_path, "Couldn't find lldb on host"
 sys.path.append(lldb_path)
 import hphp.tools.lldb.utils as utils
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 # pyre-fixme[21]: Could not find module `fblldb.utils`.
 from fblldb.utils import get_lldb_object_description, run_lldb_command
 
-hhvm_path = pathlib.Path(__file__).parent.parent / "hhvm"
-hhvm_types_path = pathlib.Path(__file__).parent.parent / "hhvm_types_for_lldb_tests"
-hhvm_test_path = os.environ["HHVM_TEST_DIR"]
-scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]
+hhvm_path: pathlib.Path = pathlib.Path(__file__).parent.parent / "hhvm"
+hhvm_types_path: pathlib.Path = (
+    pathlib.Path(__file__).parent.parent / "hhvm_types_for_lldb_tests"
+)
+hhvm_test_path: str = os.environ["HHVM_TEST_DIR"]
+scripts_path: str = os.environ["HHVM_LLDB_SCRIPTS"]
 
 
-class LLDBTestBase(BaseFacebookTestCase):
-    def setUp(self):
+class LLDBTestBase(BaseFacebookTestCase, abc.ABC):
+    def setUp(self) -> None:
         """Set up a debugger for each test case instance"""
         utils.clear_caches()
 
@@ -87,30 +89,26 @@ class LLDBTestBase(BaseFacebookTestCase):
 
         self.debugger = debugger
 
-    def launchProcess(self) -> bool:
-        return True
+    @abc.abstractmethod
+    def launchProcess(self) -> bool: ...
 
-    # pyre-fixme[16]: Module `typing` has no attribute `abstractmethod`.
-    @typing.abstractmethod
-    def getTargetPath(self) -> str:
-        pass
+    @abc.abstractmethod
+    def getTargetPath(self) -> str: ...
 
-    def getArgs(self) -> typing.List[str]:
-        return []
+    @abc.abstractmethod
+    def getArgs(self) -> typing.List[str]: ...
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up the debugger"""
         lldb.SBDebugger.Destroy(self.debugger)
         self.debugger = None
 
     @property
-    # pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
     def target(self) -> lldb.SBTarget:
         """Get the target associated wih the debugger"""
         return self.debugger.GetSelectedTarget()
 
     @property
-    # pyre-fixme[11]: Annotation `SBProcess` is not defined as a type.
     def process(self) -> lldb.SBProcess:
         """Get the process associated wih the debugger's target"""
         process = self.target.GetProcess()
@@ -120,13 +118,12 @@ class LLDBTestBase(BaseFacebookTestCase):
         return process
 
     @property
-    # pyre-fixme[11]: Annotation `SBThread` is not defined as a type.
     def thread(self) -> lldb.SBThread:
         """Get the process associated wih the debugger's target"""
         return self.process.GetSelectedThread()
 
     @property
-    def frame(self) -> lldb.SBProcess:
+    def frame(self) -> lldb.SBFrame:
         """Get the topmost frame associated with the current thread"""
         return self.thread.GetFrameAtIndex(0)
 
@@ -150,7 +147,7 @@ class LLDBTestBase(BaseFacebookTestCase):
         # pyre-fixme[61]: `output` is undefined, or not always defined.
         return (status, output)
 
-    def run_until_breakpoint(self, breakpoint: str):
+    def run_until_breakpoint(self, breakpoint: str) -> None:
         """Run until the breakpoint given by a function name is hit"""
         breakpoint = self.debugger.GetSelectedTarget().BreakpointCreateByName(
             breakpoint
@@ -167,40 +164,45 @@ class LLDBTestBase(BaseFacebookTestCase):
 
 
 class TestHHVMBinary(LLDBTestBase):
-    def setUp(
-        self, launch_process=True, test_file=None, interp=False, allow_hhas=False
-    ):
-        self.launch_process = launch_process
-        self.test_file = test_file
-        self.interp = interp
-        self.allow_hhas = allow_hhas
-        super().setUp()
+    def file(self) -> str | None:
+        return None
 
     def launchProcess(self) -> bool:
-        return self.launch_process
+        return True
 
     def getTargetPath(self) -> str:
         return hhvm_path.as_posix()
 
+    def __isHhas(self) -> bool:
+        test_file = self.file()
+        return test_file is not None and test_file.endswith(".hhas")
+
+    def interp(self) -> bool:
+        return self.__isHhas()
+
     def getArgs(self) -> typing.List[str]:
         hhvm_args = []
-        if self.test_file:
-            hhvm_args.extend(["--file", f"{hhvm_test_path}/{self.test_file}"])
-        if self.interp:
+        test_file = self.file()
+        if test_file:
+            hhvm_args.extend(["--file", f"{hhvm_test_path}/{test_file}"])
+
+        if self.interp():
             hhvm_args.extend(["-vEval.Jit=0"])
-        if self.allow_hhas:
+
+        if self.__isHhas():
             hhvm_args.extend(["-vEval.AllowHhas=true"])
         return hhvm_args
 
 
 class TestHHVMTypesBinary(LLDBTestBase):
-    # pyre-fixme[14]: `setUp` overrides method defined in `LLDBTestBase` inconsistently.
-    def setUp(self, test_type: str):
-        self.test_type = test_type
-        super().setUp()
+    @abc.abstractmethod
+    def kindOfTest(self) -> str: ...
+
+    def launchProcess(self) -> bool:
+        return True
 
     def getTargetPath(self) -> str:
         return hhvm_types_path.as_posix()
 
     def getArgs(self) -> typing.List[str]:
-        return [self.test_type]
+        return [self.kindOfTest()]

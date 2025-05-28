@@ -1,15 +1,15 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 
 
 class NameOfCommandTestCase(base.TestHHVMTypesBinary):
-    def setUp(self):
-        super().setUp(test_type="nameof-values")
+    def kindOfTest(self) -> str:
+        return "nameof-values"
 
-    def test_nameof(self):
+    def test_nameof(self) -> None:
         with self.subTest("nameof Class"):
             self.run_until_breakpoint("takeClass")
             _, output = self.run_commands(["nameof v"])

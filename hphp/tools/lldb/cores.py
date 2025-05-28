@@ -1,11 +1,11 @@
-# pyre-unsafe
+# pyre-strict
 """
 LLDB command for extracting various information from cores
 """
 
+import argparse
 import shlex
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -27,7 +27,7 @@ class ExtractCommand(utils.Command):
     )
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument(
             "type",
@@ -40,19 +40,13 @@ class ExtractCommand(utils.Command):
         )
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
     def __call__(
         self,
-        # pyre-fixme[11]: Annotation `SBDebugger` is not defined as a type.
         debugger: lldb.SBDebugger,
         command: str,
-        # pyre-fixme[11]: Annotation `SBExecutionContext` is not defined as a type.
         exe_ctx: lldb.SBExecutionContext,
-        # pyre-fixme[11]: Annotation `SBCommandReturnObject` is not defined as a type.
         result: lldb.SBCommandReturnObject,
-    ):
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -97,7 +91,10 @@ class ExtractCommand(utils.Command):
             result.write(memory.decode("utf-8"))
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(
+    debugger: lldb.SBDebugger,
+    top_module: str = "",
+) -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows

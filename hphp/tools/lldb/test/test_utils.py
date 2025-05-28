@@ -1,20 +1,17 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
+# pyre-strict
 
-# pyre-unsafe
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hphp.tools.lldb.utils as utils
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 
 class UtilsGivenTargetTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(
-            launch_process=False
-        )  # No Hack file needed; just load HHVM target
+    def launchProcess(self) -> bool:
+        return False
 
-    def test_Type(self):
+    def test_Type(self) -> None:
         # Make sure some base HPHP types can be found by the debugger
         main_types = [
             "HPHP::ActRec",
@@ -36,22 +33,22 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
                 typ = utils.Type(name, self.target)
                 self.assertTrue(typ.IsValid())
 
-    def test_Global(self):
+    def test_Global(self) -> None:
         g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
         self.assertTrue(g_code.type.IsPointerType())
 
-    def test_Enum(self):
+    def test_Enum(self) -> None:
         k_vec_kind = utils.Enum("HPHP::ArrayData::ArrayKind", "kVecKind", self.target)
         self.assertTrue(k_vec_kind.GetName(), "kVecKind")
 
-    def test_rawtype_remove_typedef(self):
+    def test_rawtype_remove_typedef(self) -> None:
         ty = utils.Type("HPHP::Native::NativeDataInfo::InitFunc", self.target)
         self.assertTrue(ty.IsTypedefType())
         raw = utils.rawtype(ty)
         self.assertFalse(raw.IsTypedefType())
         self.assertEqual(raw.name, "void (*)(HPHP::ObjectData *)")
 
-    def test_template_type(self):
+    def test_template_type(self) -> None:
         if utils.get_llvm_version(self.target) == utils.LLVMVersion.LLVM15:
             ty = utils.Type("HPHP::VMFixedVector<HPHP::Func::ParamInfo>", self.target)
         else:
@@ -62,10 +59,13 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
 
 
 class UtilsGivenFrameTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="quick/method2.php", interp=True)
+    def file(self) -> str:
+        return "quick/method2.php"
 
-    def test_get_global(self):
+    def interp(self) -> bool:
+        return True
+
+    def test_get_global(self) -> None:
         self.run_until_breakpoint("lookupObjMethod")
         g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
         try:
@@ -73,58 +73,60 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
         except Exception:
             self.fail("Unable to get m_threadLocalStart from HPHP::jit::tc::g_code")
 
-    def test_get_thread_local(self):
+    def test_get_thread_local(self) -> None:
         self.run_until_breakpoint("lookupObjMethod")
         tl_base = utils.Global("HPHP::rds::tl_base", self.target)
         self.assertTrue(tl_base.IsValid())
         self.assertTrue(tl_base.GetError().Success())
 
-    def test_nameof_func(self):
+    def test_nameof_func(self) -> None:
         self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])
         func = self.frame.FindVariable("func")
         name = utils.nameof(func)
         self.assertEqual(name, "B::foo")
 
-    def test_nameof_class(self):
+    def test_nameof_class(self) -> None:
         self.run_until_breakpoint("lookupObjMethod")
         cls = self.frame.FindVariable("cls")
         name = utils.nameof(cls)
         self.assertEqual(name, "B")
 
-    def test_rawtype_remove_const(self):
+    def test_rawtype_remove_const(self) -> None:
         self.run_until_breakpoint("lookupObjMethod")
         cls = self.frame.FindVariable("cls")
         self.assertEqual(cls.type.name, "const HPHP::Class *")
         raw_type = utils.rawtype(cls.type)
         self.assertEqual(raw_type.name, "HPHP::Class *")
 
-    def test_nameof_objectdata(self):
+    def test_nameof_objectdata(self) -> None:
         self.run_commands(["b newObjImpl", "continue", "thread step-out"])
         od = self.thread.return_value
         name = utils.nameof(od)
         self.assertEqual(name, "B")
 
-    def test_rawptr(self):
+    def test_rawptr(self) -> None:
         self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])
         func = self.frame.FindVariable("func")
         smart_ptr = func.GetChildMemberWithName("m_fullName")
         raw_ptr = utils.rawptr(smart_ptr)
+        self.assertIsNotNone(raw_ptr)
         self.assertTrue(raw_ptr.type.IsPointerType())
         self.assertEqual(raw_ptr.unsigned, 1)
 
-    def test_rawptr_std_unique_ptr(self):
+    def test_rawptr_std_unique_ptr(self) -> None:
         self.run_until_breakpoint("lookupObjMethod")
         try:
-            s_func_vec = utils.Global("HPHP::Func::s_funcVec")
+            s_func_vec = utils.Global("HPHP::Func::s_funcVec", self.target)
         except Exception:
             # lowptr builds don't have a funcVec
             return
         smart_ptr = utils.get(s_func_vec, "m_vals")
         self.assertEqual(utils.template_type(smart_ptr.type), "std::unique_ptr")
         raw_ptr = utils.rawptr(smart_ptr)
+        self.assertIsNotNone(raw_ptr)
         self.assertEqual(utils.template_type(raw_ptr.type), "HPHP::detail::LowPtrImpl")
 
-    def test_arch_regs(self):
+    def test_arch_regs(self) -> None:
         # Make sure we're consistent with what LLDB is telling us are FP, PC, SP,
         # for both x86 and ARM
         fp = utils.reg("fp", self.frame)
@@ -136,10 +138,10 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
 
 
 class UtilsOnTypesBinaryTestCase(base.TestHHVMTypesBinary):
-    def setUp(self):
-        super().setUp(test_type="utility")
+    def kindOfTest(self) -> str:
+        return "utility"
 
-    def test_utility_functions(self):
+    def test_utility_functions(self) -> None:
         with self.subTest("HHVMString"):
             self.run_until_breakpoint("takeHHVMString")
             s = self.frame.FindVariable("v")

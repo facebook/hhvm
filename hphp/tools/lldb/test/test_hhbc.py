@@ -1,6 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hphp.tools.lldb.hhbc as hhbc
@@ -24,12 +24,10 @@ commands_to_get_to_bc_region = [
 
 
 class HHBCTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(
-            test_file="quick/asm_iterbreak.hhas", interp=True, allow_hhas=True
-        )
+    def file(self) -> str:
+        return "quick/asm_iterbreak.hhas"
 
-    def test_hhx(self):
+    def test_hhx(self) -> None:
         self.run_commands(commands_to_get_to_bc_region)
         _, output = self.run_commands(["hhx bc bc+bclen"])
         # TODO replace Ids in 'String <Id>' with actual string value when lookup_litstr works
@@ -96,7 +94,7 @@ class HHBCTestCase(base.TestHHVMBinary):
             line = "+" + line.split("+")[1]
             self.assertEqual(line, expected_bc)
 
-    def test_helper_functions(self):
+    def test_helper_functions(self) -> None:
         op_name_to_immeds = {
             "Nop": [],
             "PopL": ["LA"],
@@ -113,6 +111,7 @@ class HHBCTestCase(base.TestHHVMBinary):
             op = utils.Enum("HPHP::Op", op_name, self.target)
 
             with self.subTest(f"HHBC.num_imms({op_name})"):
+                # pyre-fixme[6]: For 1st argument expected `SBValue` but got `SBTypeEnumMember`.
                 num_imms = hhbc.HHBC.num_imms(op, self.target)
                 self.assertEqual(num_imms, len(immeds))
 
@@ -122,6 +121,7 @@ class HHBCTestCase(base.TestHHVMBinary):
 
             with self.subTest(f"HHBC.imm_type({op_name})"):
                 for ix, immed in enumerate(immeds):
+                    # pyre-fixme[6]: For 1st argument expected `SBValue` but got `SBTypeEnumMember`.
                     immtype = hhbc.HHBC.imm_type(op, ix, self.target)
                     self.assertEqual(immtype.value, immed)
 
@@ -161,10 +161,10 @@ class HHBCTestCase(base.TestHHVMBinary):
 
 
 class HHBCTestCase2(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="quick/asm_array.hhas", interp=True, allow_hhas=True)
+    def file(self) -> str:
+        return "quick/asm_array.hhas"
 
-    def test_hhx(self):
+    def test_hhx(self) -> None:
         self.run_commands(commands_to_get_to_bc_region)
         _, output = self.run_commands(["hhx bc bc+bclen"])
         # TODO replace Ids in 'String <Id>' with actual string value when lookup_litstr works
@@ -203,10 +203,10 @@ class HHBCTestCase2(base.TestHHVMBinary):
 
 
 class HHBCTestCase3(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="quick/asm_switch.hhas", interp=True, allow_hhas=True)
+    def file(self) -> str:
+        return "quick/asm_switch.hhas"
 
-    def test_hhx(self):
+    def test_hhx(self) -> None:
         self.run_commands(commands_to_get_to_bc_region)
         _, output = self.run_commands(["hhx bc bc+bclen"])
         # TODO replace Ids in 'String <Id>' with actual string value when lookup_litstr works
@@ -246,10 +246,10 @@ class HHBCTestCase3(base.TestHHVMBinary):
 
 
 class HHBCTestCase4(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="quick/asm_assert_t.hhas", interp=True, allow_hhas=True)
+    def file(self) -> str:
+        return "quick/asm_assert_t.hhas"
 
-    def test_hhx(self):
+    def test_hhx(self) -> None:
         self.run_commands(commands_to_get_to_bc_region)
         self.run_commands(["continue"])  # to get to obj_type() function's bytecode
         _, output = self.run_commands(["hhx bc bc+bclen"])

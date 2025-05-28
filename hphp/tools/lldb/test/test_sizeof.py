@@ -1,26 +1,31 @@
-# pyre-unsafe
+# pyre-strict
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hphp.tools.lldb.sizeof as sizeof
 import hphp.tools.lldb.utils as utils
 
 
 class SizeofCommandHHVMTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="quick/properties2.php", interp=True)
+    def file(self) -> str:
+        return "quick/properties2.php"
 
-    def test_sizeof_helper_indexed_string_map(self):
+    def interp(self) -> bool:
+        return True
+
+    def test_sizeof_helper_indexed_string_map(self) -> None:
         self.run_commands(["b newObjImpl", "continue", "thread step-out"])
         this_ = self.thread.return_value
         cls = utils.rawptr(utils.get(this_, "m_cls"))
+        self.assertIsNotNone(cls)
         props_size = sizeof.sizeof(utils.get(cls, "m_declProperties"))
-        self.assertEqual(props_size.unsigned, 1)
+        self.assertIsNotNone(props_size)
+        self.assertEqual(props_size, 1)
 
-    def test_sizeof_command_indexed_string_map(self):
+    def test_sizeof_command_indexed_string_map(self) -> None:
         self.run_commands(["b newObjImpl", "continue", "thread step-out", "next"])
         _, output = self.run_commands(["sizeof this_->m_cls->m_declProperties"])
         self.assertTrue(output, "1")
 
-    def test_sizeof_command_bad_container(self):
+    def test_sizeof_command_bad_container(self) -> None:
         self.run_commands(["b newObjImpl", "continue", "thread step-out", "next"])
         status, output = self.run_commands(["sizeof this_->m_cls"], check=False)
         self.assertNotEqual(status, 0)
@@ -28,10 +33,10 @@ class SizeofCommandHHVMTestCase(base.TestHHVMBinary):
 
 
 class SizeofCommandTypesTestCase(base.TestHHVMTypesBinary):
-    def setUp(self):
-        super().setUp(test_type="sizeof-values")
+    def kindOfTest(self) -> str:
+        return "sizeof-values"
 
-    def test_sizeof(self):
+    def test_sizeof(self) -> None:
         with self.subTest("Array (Dict)"):
             self.run_until_breakpoint("takeArray")
             _, output = self.run_commands(["sizeof v"])

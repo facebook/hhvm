@@ -2,11 +2,11 @@
 
 # pyre-unsafe
 
+import argparse
 import enum
 import traceback
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -42,7 +42,6 @@ are found in:
 
 
 class InstrInfo(typing.NamedTuple):
-    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
     op: lldb.SBValue  # holding an HPHP::Op
     len: int
     imms: typing.List[dict]
@@ -59,7 +58,6 @@ class OpTableNames(enum.Enum):
     ImmSize = "HPHP::immSizeTable"
 
 
-# pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
 def op_table(name: OpTableNames, target: lldb.SBTarget) -> lldb.SBValue:
     """Get the symbol `name` as an int8_t[]"""
     try:
@@ -136,7 +134,7 @@ def rata_arrs(target: lldb.SBTarget) -> typing.List[int]:
     ]
 
 
-def rata_objs(target: lldb.SBTarget) -> typing.List[int]:
+def rata_objs(target: lldb.SBTarget) -> typing.List[lldb.SBTypeEnumMember]:
     return [
         utils.Enum("HPHP::RepoAuthType::Tag", o + s + t, target)
         for o in ["", "Opt"]
@@ -146,7 +144,6 @@ def rata_objs(target: lldb.SBTarget) -> typing.List[int]:
 
 
 def subop_to_name(
-    # pyre-fixme[11]: Annotation `SBTypeEnumMember` is not defined as a type.
     subop: typing.Union[lldb.SBValue, lldb.SBTypeEnumMember],
 ) -> str:
     if isinstance(subop, lldb.SBTypeEnumMember):
@@ -322,7 +319,7 @@ class HHBC:
 
     @staticmethod
     def op_name(
-        op: typing.Union[lldb.SBTypeEnumMember, lldb.SBValue], target: lldb.SBValue
+        op: typing.Union[lldb.SBTypeEnumMember, lldb.SBValue], target: lldb.SBTarget
     ) -> str:
         """Return the name of HPHP::Op `op`"""
 
@@ -349,7 +346,10 @@ class HHBC:
         try:
             # pyre-fixme[20]: Argument `unit` expected.
             litstr = lookup.lookup_litstr(imm)
-            return utils.string_data_val(utils.rawptr(litstr))
+            assert litstr is not None
+            ptr = utils.rawptr(litstr)
+            assert ptr is not None
+            return utils.string_data_val(ptr)
         except Exception:
             return str(imm.unsigned)
 
@@ -368,28 +368,29 @@ class HHBC:
     # Opcode immediate info
     #
     @staticmethod
-    def num_imms(op: lldb.SBTypeEnumMember, target: lldb.SBTarget) -> int:
+    def num_imms(op: lldb.SBValue, target: lldb.SBTarget) -> int:
         """Return the number of immediates for HPHP::Op `op`"""
 
         table = op_table(OpTableNames.NumImmediates, target)
         num_entry = idx.at(table, op.unsigned)
+        assert num_entry is not None
 
         utils.debug_print(f"num_imms(op='{op}'): num_entry={num_entry.unsigned}")
 
         return num_entry.unsigned
 
     @staticmethod
-    def imm_type(
-        op: lldb.SBTypeEnumMember, arg: int, target: lldb.SBTarget
-    ) -> lldb.SBValue:
+    def imm_type(op: lldb.SBValue, arg: int, target: lldb.SBTarget) -> lldb.SBValue:
         """Return the ArgType of the arg'th immediate for HPHP::Op `op`"""
 
         # Has type int8_t[op_count][6]
         table = op_table(OpTableNames.ImmType, target)
 
         imm_entries = idx.at(table, op.unsigned)
+        assert imm_entries is not None
         raw_immtype = idx.at(imm_entries, arg)
         # LLDB puts garbage in the upper bits using the normal .Cast() method!
+        assert raw_immtype is not None
         immtype = utils.unsigned_cast(raw_immtype, utils.Type("HPHP::ArgType", target))
         utils.debug_print(f"imm_type(op='{op}', arg={arg}): immtype={immtype}")
         return immtype
@@ -514,10 +515,12 @@ class HHBC:
                 if tag.unsigned in rata_arrs(target):
                     vid = HHBC.decode_iva(ptr)
                     size += vid["size"]
+                    # pyre-fixme[58]: can't concat str and lldb.SBValue
                     s = " " + lookup.lookup_array(vid["value"])
                 elif tag.unsigned in rata_objs(target):
                     vid = HHBC.decode_iva(ptr)
                     size += vid["size"]
+                    # pyre-fixme[58]: can't concat str and lldb.SBValue
                     # pyre-fixme[20]: Argument `unit` expected.
                     s = " " + lookup.lookup_litstr(vid["value"])
             except Exception:
@@ -702,9 +705,11 @@ class HHBC:
 
             if immtype.unsigned >= 0:
                 table = op_table(OpTableNames.ImmSize, target)
-                size = idx.at(
+                v = idx.at(
                     table, utils.unsigned_cast(immtype, utils.Type("size_t", target))
-                ).unsigned
+                )
+                assert v is not None
+                size = v.unsigned
                 au = ptr.Cast(
                     utils.Type("HPHP::ArgUnion", target).GetPointerType()
                 ).Dereference()
@@ -783,21 +788,27 @@ the previous call left off.
 """
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         # Not using a parser
         return cls.default_parser()
 
-    def get_long_help(self):
+    def get_long_help(self) -> str:
         return self.usage
 
-    def __init__(self, debugger, internal_dict):
+    def __init__(self, debugger: lldb.SBDebugger, internal_dict) -> None:
         self.bcpos: typing.Optional[lldb.SBValue] = None
         self.bcoff: int = 0
         self.count: int = 1
         self.end: typing.Optional[lldb.SBValue] = None
         super().__init__(debugger, internal_dict)
 
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         target = exe_ctx.target
         argv = utils.parse_argv(command, target=target)
 
@@ -818,11 +829,13 @@ the previous call left off.
             self.bcoff = 0
             if argv[1].unsigned > 0xFFFFFFFF:
                 self.end = argv[1].Cast(utils.Type("void", target).GetPointerType())
+                # pyre-fixme[16]: `Optional` has no attribute `unsigned`.
                 self.count = self.end.unsigned - self.bcpos.unsigned
             else:
                 self.end = None
                 self.count = argv[1].unsigned
 
+        assert self.bcpos is not None
         utils.debug_print(
             f"HhxCommand:__init__(): bcpos=0x{self.bcpos.unsigned:x}, bcoff={self.bcoff}, count={self.count}, end={hex(self.end.unsigned) if self.end else None}"
         )
@@ -830,12 +843,14 @@ the previous call left off.
         bctype = (
             utils.Type("uint8_t", target).GetPointerType()
         )  # TODO(T159273123): This was HPHP::PC, but looking up typedefs often fails
+        assert self.bcpos is not None
         self.bcpos = self.bcpos.Cast(bctype)
 
         assert (
             self.bcpos.GetError().Success()
         ), f"Unable to cast bcpos: {self.bcpos.GetError()}"
 
+        # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
         bcstart = utils.ptr_add(self.bcpos, -self.bcoff)
 
         for _i in range(0, self.count):
@@ -847,6 +862,7 @@ the previous call left off.
                 break
 
             try:
+                # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
                 instr = HHBC.instr_info(self.bcpos)
             except Exception as e:
                 if utils._Debug:
@@ -863,11 +879,15 @@ the previous call left off.
                 out += " " + imm_to_str(imm)
             result.write(out + "\n")
 
+            # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
             self.bcpos = utils.ptr_add(self.bcpos, instr.len)
             self.bcoff += instr.len
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(
+    debugger: lldb.SBDebugger,
+    top_module: str = "",
+) -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows

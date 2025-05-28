@@ -1,14 +1,17 @@
-# pyre-unsafe
+# pyre-strict
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hphp.tools.lldb.lookup as lookup
 import hphp.tools.lldb.utils as utils
 
 
 class LookupCommandTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="quick/method2.php", interp=True)
+    def file(self) -> str:
+        return "quick/method2.php"
 
-    def test_lookup_func_command(self):
+    def interp(self) -> bool:
+        return True
+
+    def test_lookup_func_command(self) -> None:
         # Note: We can choose an earlier point to break;
         # just need to make sure the functions are loaded.
         self.run_until_breakpoint("lookupObjMethod")
@@ -19,10 +22,10 @@ class LookupCommandTestCase(base.TestHHVMBinary):
 
 
 class LookupHelperTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="slow/reified-generics/reified-parent.php")
+    def file(self) -> str:
+        return "slow/reified-generics/reified-parent.php"
 
-    def test_lookup_func_from_frame_pointer(self):
+    def test_lookup_func_from_frame_pointer(self) -> None:
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
         act_rec_type = utils.Type("HPHP::ActRec", self.target).GetPointerType()
         fp1 = utils.reg("fp", self.frame.parent)

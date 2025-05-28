@@ -1,11 +1,10 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
-# pyre-unsafe
+# pyre-strict
 
 import dataclasses
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -43,7 +42,6 @@ class Frame:
 # Frame sniffing.
 
 
-# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def is_jitted(ip: lldb.SBValue) -> bool:
     """Determine if the instruction pointer points inside the region of jitted code
 
@@ -83,7 +81,6 @@ def create_native(
     idx: int,
     fp: typing.Union[str, lldb.SBValue],
     rip: lldb.SBValue,
-    # pyre-fixme[11]: Annotation `SBFrame` is not defined as a type.
     native_frame: typing.Optional[lldb.SBFrame] = None,
     name: typing.Optional[str] = None,
 ) -> Frame:
@@ -142,7 +139,7 @@ def create_php(
     idx: int,
     ar: lldb.SBValue,
     rip: typing.Union[str, lldb.SBValue] = "0x????????",
-    pc: typing.Union[int, lldb.SBValue] = None,
+    pc: typing.Union[int, lldb.SBValue] | None = None,
 ) -> Frame:
     """Collect metadata for a PHP frame.
 
@@ -162,7 +159,9 @@ def create_php(
         f"create_php(idx={idx}, ar=0x{ar.unsigned:x}, rip={format_ptr(rip)}, pc={pc if pc else None})"
     )
     func = lookup.lookup_func_from_frame_pointer(ar)  # lldb.SBValue[HPHP::Func *]
+    assert func is not None
     shared = utils.rawptr(utils.get(func, "m_shared"))  # lldb.SBValue[HPHP::SharedData]
+    assert shared is not None
     flags = utils.get(
         shared, "m_allFlags"
     )  # lldb.SBValue[HPHP::Func::SharedData::Flags]
@@ -198,6 +197,7 @@ def create_php(
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
         bc = utils.rawptr(utils.get(shared, "m_bc"))
+        assert bc is not None
         pc = bc.unsigned + (
             utils.get(ar, "m_callOffAndFlags").unsigned
             >> utils.Enum("HPHP::ActRec::Flags", "CallOffsetStart", ar.target).unsigned
@@ -238,7 +238,6 @@ def format_ptr(p: typing.Union[str, int, lldb.SBValue]) -> str:
 # PHP frame info.
 
 
-# pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
 def php_filename(func: lldb.SBValue, target: lldb.SBTarget) -> str:
     """Get the filename where the PHP function is defined
 
@@ -250,10 +249,12 @@ def php_filename(func: lldb.SBValue, target: lldb.SBTarget) -> str:
         The filename as a string
     """
     m_shared = utils.rawptr(utils.get(func, "m_shared"))
+    assert m_shared is not None
     filename = utils.rawptr(utils.get(m_shared, "m_originalUnit"))
-
+    assert filename is not None
     if filename.unsigned == 0:  # null ptr
         filename = utils.rawptr(utils.get(func, "m_unit", "m_origFilepath"))
+        assert filename is not None
 
     return utils.string_data_val(filename)
 
@@ -274,6 +275,7 @@ def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
     utils.debug_print(f"php_line_number(func=0x{func.unsigned:x}, pc=0x{pc:x})")
 
     shared = utils.rawptr(utils.get(func, "m_shared"))
+    assert shared is not None
     line_map = utils.get(shared, "m_lineMap", "val")
 
     if line_map.unsigned != 0:
@@ -315,6 +317,7 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
     )
 
     shared = utils.rawptr(utils.get(func, "m_shared"))
+    assert shared is not None
     line_table = utils.get(shared, "m_lineTable", "val")
     if utils.TokenOrPtr.is_ptr(line_table):
         line_table_type = utils.Type("HPHP::LineTable", func.target).GetPointerType()
@@ -327,10 +330,14 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
         # TODO emulate FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
         return None
 
-    entry = utils.rawptr(utils.get(shared, "m_bc")).unsigned
+    bc_ptr = utils.rawptr(utils.get(shared, "m_bc"))
+    assert bc_ptr is not None
+    entry = bc_ptr.unsigned
     offset = pc - entry
 
-    for i in range(sizeof.sizeof(line_table)):
+    line_table_size = sizeof.sizeof(line_table)
+    assert line_table_size is not None
+    for i in range(line_table_size):
         line_entry = idx.at(line_table, i)
 
         if line_entry is None:

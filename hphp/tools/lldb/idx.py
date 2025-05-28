@@ -2,11 +2,11 @@
 
 # pyre-unsafe
 
+import argparse
 import shlex
 import sys
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -18,7 +18,6 @@ except ModuleNotFoundError:
 
 
 def at(
-    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
     ptr: lldb.SBValue,
     idx: typing.Union[int, lldb.SBValue],
 ) -> typing.Optional[lldb.SBValue]:
@@ -39,7 +38,7 @@ def at(
 
 
 def atomic_low_ptr_vector_at(
-    av: lldb.SBValue, idx: int, hasher=None
+    av: lldb.SBValue, idx: int, hasher: None = None
 ) -> typing.Optional[lldb.SBValue]:
     """Get the value at idx in the atomic vector av
 
@@ -63,6 +62,8 @@ def atomic_low_ptr_vector_at(
 
     if idx < size:
         unique_ptr = utils.rawptr(utils.get(av, "m_vals"))
+        if unique_ptr is None:
+            return None
         return at(unique_ptr, idx)
     else:
         return atomic_low_ptr_vector_at(
@@ -71,7 +72,7 @@ def atomic_low_ptr_vector_at(
 
 
 def fixed_vector_at(
-    fv: lldb.SBValue, idx: int, hasher=None
+    fv: lldb.SBValue, idx: int, hasher: None = None
 ) -> typing.Optional[lldb.SBValue]:
     """Get the value at idx in the fixed vector fv
 
@@ -92,11 +93,13 @@ def fixed_vector_at(
         raise NotImplementedError("hasher argument currently unused")
 
     ptr = utils.rawptr(utils.get(fv, "m_impl", "m_sp"))
+    if ptr is None:
+        return None
     return at(ptr, idx)
 
 
 def compact_vector_at(
-    cv: lldb.SBValue, idx: int, hasher=None
+    cv: lldb.SBValue, idx: int, hasher: None = None
 ) -> typing.Optional[lldb.SBValue]:
     """Get the value at idx in the compact vector cv
 
@@ -143,7 +146,9 @@ def compact_vector_at(
 
 
 @utils.memoized
-def idx_accessors():
+def idx_accessors() -> (
+    dict[str, typing.Callable[[lldb.SBValue, int, None], lldb.SBValue | None]]
+):
     return {
         "HPHP::AtomicLowPtrVector": atomic_low_ptr_vector_at,
         "HPHP::CompactVector": compact_vector_at,
@@ -197,7 +202,7 @@ def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     return tv
 
 
-def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
+def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue | None:
     # base is a generic pointer to the start of the array of typed values
     try:
         if utils.Global("HPHP::VanillaVec::stores_unaligned_typed_values", base.target):
@@ -258,7 +263,7 @@ def dict_at(base: lldb.SBValue, idx: int) -> (str, lldb.SBValue):
     return data
 
 
-def keyset_at(base, idx):
+def keyset_at(base, idx) -> typing.Optional[lldb.SBValue]:
     vde_type = utils.Type("HPHP::VanillaKeysetElm", base.target)
     utils.debug_print(f"Keyset base address (i.e. first element): 0x{base.load_addr:x}")
     offset = vde_type.size * idx
@@ -288,7 +293,9 @@ def keyset_at(base, idx):
     return key
 
 
-def idx(container: lldb.SBValue, index, hasher=None):
+def idx(
+    container: lldb.SBValue, index: int, hasher: None = None
+) -> typing.Optional[lldb.SBValue]:
     if container.type.IsPointerType():
         container = container.deref
 
@@ -325,7 +332,7 @@ hash, if valid, will be used instead of the default hash for the key type.
 """
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument("container", help="A container to index into")
         parser.add_argument("key", help="The index or data member to access")
@@ -337,10 +344,13 @@ hash, if valid, will be used instead of the default hash for the key type.
         )
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -368,7 +378,10 @@ hash, if valid, will be used instead of the default hash for the key type.
         result.write(str(res))
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(
+    debugger: lldb.SBDebugger,
+    top_module: str = "",
+) -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -377,7 +390,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

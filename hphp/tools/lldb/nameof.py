@@ -1,9 +1,12 @@
-# pyre-unsafe
+# pyre-strict
 """
 LLDB command for printing the names of various objects
 """
 
+import argparse
 import shlex
+
+import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -24,15 +27,18 @@ class NameOfCommand(utils.Command):
     )
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument("object", help="An HHVM object to get the name of")
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -49,7 +55,10 @@ class NameOfCommand(utils.Command):
             result.SetError("unrecognized object")
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(
+    debugger: lldb.SBDebugger,
+    top_module: str = "",
+) -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -58,7 +67,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

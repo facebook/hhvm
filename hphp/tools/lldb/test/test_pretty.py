@@ -1,16 +1,16 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import unittest
 
 
 class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
-    def setUp(self):
-        super().setUp(test_type="typed-values")
+    def kindOfTest(self) -> str:
+        return "typed-values"
 
-    def test_pp_tvs(self):
+    def test_pp_tvs(self) -> None:
         # Printing all of them in one execution for efficiency.
         # Thus, the order here matters (i.e. use the order in the DataType enum and
         # order of other calls in the test binary).
@@ -100,7 +100,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             self.assertRegex(output.strip(), expected_output)
 
     @unittest.skip("Caching is interacting strangely with unit tests")
-    def test_pp_tvs_2(self):
+    def test_pp_tvs_2(self) -> None:
         # These were originally in test_pp_tvs, but are showing
         # strange interaction with caching when run alongside the other tests.
         # They pass when run individually.
@@ -145,10 +145,10 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
 
 
 class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
-    def setUp(self):
-        super().setUp(test_type="other-values")
+    def kindOfTest(self) -> str:
+        return "other-values"
 
-    def test_pp_other_values(self):
+    def test_pp_other_values(self) -> None:
         with self.subTest("StringData"):
             self.run_until_breakpoint("takeStringData")
 

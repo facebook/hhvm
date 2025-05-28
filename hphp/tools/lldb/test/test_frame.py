@@ -1,4 +1,4 @@
-# pyre-unsafe
+# pyre-strict
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import unittest
 
@@ -7,13 +7,13 @@ import hphp.tools.lldb.utils as utils
 
 
 class FrameTestCase(base.TestHHVMBinary):
-    def setUp(self):
-        super().setUp(test_file="slow/reified-generics/reified-parent.php")
+    def file(self) -> str:
+        return "slow/reified-generics/reified-parent.php"
 
     @unittest.skip(
         "This test isn't behaving well with non-lowptr; enable once we're testing in lowptr again"
     )
-    def test_create_native_frame(self):
+    def test_create_native_frame(self) -> None:
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
         ar = utils.reg("fp", self.frame).Cast(
             utils.Type("HPHP::ActRec", self.target).GetPointerType()
@@ -24,10 +24,12 @@ class FrameTestCase(base.TestHHVMBinary):
         self.assertEqual(
             native_frame.func.split("(")[0], "HPHP::checkClassReifiedGenericMismatch"
         )
-        self.assertEqual(native_frame.file.split("/")[-1], "reified-generics.cpp")
+        file = native_frame.file
+        self.assertIsNotNone(file)
+        self.assertEqual(file.split("/")[-1], "reified-generics.cpp")
         self.assertIsNotNone(native_frame.line)
 
-    def test_create_php_frame(self):
+    def test_create_php_frame(self) -> None:
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
         frame1 = self.frame.parent
         ar = utils.reg("fp", frame1).Cast(
@@ -37,4 +39,6 @@ class FrameTestCase(base.TestHHVMBinary):
         self.assertTrue(frame.is_jitted(rip))
         php_frame = frame.create_php(1, ar, rip, frame1.pc)
         self.assertEqual(php_frame.func.split("(")[0], "[PHP] C::86reifiedinit")
-        self.assertTrue(php_frame.file.split("/")[-1], "reified-parent.php")
+        file = php_frame.file
+        self.assertIsNotNone(file)
+        self.assertTrue(file.split("/")[-1], "reified-parent.php")

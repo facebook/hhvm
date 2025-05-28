@@ -9,7 +9,6 @@ import sys
 import traceback
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 # pyre-fixme[21]: Could not find module `sizeof`.
@@ -126,7 +125,6 @@ def format(
 
 
 @format("^HPHP::((Unaligned)?TypedValue|Variant|VarNR)$", regex=True)
-# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     m_type = utils.get(val_obj, "m_type")
     m_data = utils.get(val_obj, "m_data")
@@ -142,7 +140,7 @@ def pretty_ptr(val: lldb.SBValue) -> typing.Optional[str]:
 
     ptr = utils.rawptr(val)
 
-    if utils.is_nullptr(ptr):
+    if ptr is None or utils.is_nullptr(ptr):
         return None
 
     inner = utils.deref(ptr)
@@ -173,6 +171,7 @@ def pp_LowPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 @format("^HPHP::OptResource$", regex=True)
 def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     val = utils.rawptr(utils.get(val_obj, "m_res"))
+    assert val is not None
     return utils.pretty_resource_header(val)
 
 
@@ -191,6 +190,7 @@ def pp_String(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     # Note: SBValue.GetChildMemberWithName(), used by utils.get(),
     # will get the members of both pointers and the pointed-to values themselves
     val = utils.rawptr(utils.get(val_obj, "m_str"))
+    assert val is not None
     return '"' + utils.string_data_val(val) + '"'
 
 
@@ -224,7 +224,7 @@ class pp_ArrayData:
     """This conforms to the SyntheticChildrenProvider interface"""
 
     @staticmethod
-    def summary():
+    def summary() -> str:
         # Ideally we'd print the refcount and kind (e.g. Vec/Dict/Keyset),
         # but there's no easy way to do that with the synthetic children API
         # (we have access to a limited set of formatting summary elements),
@@ -233,7 +233,7 @@ class pp_ArrayData:
         # return f"ArrayData[{self.m_kind.value}]: {self.m_size} element(s) refcount={self.m_count}"
         return "${svar%#} element(s)"
 
-    def __init__(self, val_obj, _internal_dict):
+    def __init__(self, val_obj, _internal_dict) -> None:
         # We use this class for both the synthetic children and for the summary.
         # For the summary, we will be given the synthetic lldb.SBValue so we
         # must make sure to get the non-synthetic lldb.SBValue.
@@ -241,8 +241,9 @@ class pp_ArrayData:
             f"pp_ArrayData::__init__ with val_obj (load_addr: 0x{val_obj.load_addr:x}, type: {val_obj.type.name})"
         )
         self.val_obj = val_obj.GetNonSyntheticValue()
-        self.size = None
+        self.size: int | None = None
         self.func = None
+        self.at_func: typing.Callable[[int], lldb.SBValue | None] | None = None
         self.update()
 
     def num_children(self) -> int:
@@ -251,7 +252,7 @@ class pp_ArrayData:
                 "Unable to determine number of children of ArrayData object, returning 0"
             )
             return 0
-        return self.size.unsigned
+        return self.size
 
     def get_child_index(self, name: str) -> int:
         try:
@@ -259,19 +260,18 @@ class pp_ArrayData:
         except ValueError:
             return -1
 
-    def get_child_at_index(self, index: int) -> lldb.SBValue:
+    def get_child_at_index(self, index: int) -> lldb.SBValue | None:
         utils.debug_print(f"pp_ArrayData::get_child_at_index with index {index}")
         if index < 0:
             return None
         if index >= self.num_children():
             return None
-        # pyre-fixme[16]: `pp_ArrayData` has no attribute `at_func`.
         if self.at_func is None:
             print("Invalid array type!", file=sys.stderr)
             return None
         return self.at_func(index)
 
-    def update(self):
+    def update(self) -> bool:
         try:
             return self._update()
         except Exception:
@@ -280,7 +280,7 @@ class pp_ArrayData:
                 traceback.print_exc()
             return False
 
-    def _update(self):
+    def _update(self) -> bool:
         # Doing this in here, rather than __init__(), because the API
         # says we should be re-updating internal state as much as possible (since the
         # state of variables can change since the last invocation).
@@ -311,7 +311,7 @@ class pp_ArrayData:
 
 @format("^HPHP::Array$", regex=True, synthetic_children=True)
 class pp_Array(pp_ArrayData):
-    def __init__(self, val_obj, _internal_dict):
+    def __init__(self, val_obj, _internal_dict) -> None:
         if val_obj.GetError().Fail():
             utils.debug_print(
                 f"Invalid array. Error: {val_obj.GetError().GetCString()}"
@@ -345,9 +345,9 @@ def pp_Object(val_obj: lldb.SBValue, _internal_dict) -> str:
 
 @format("^HPHP::Extension$", regex=True)
 def pp_Extension(val_obj: lldb.SBValue, _internal_dict) -> str:
-    val = utils.deref(val_obj)
+    val: lldb.SBValue = utils.deref(val_obj)
 
-    def cstr(v):
+    def cstr(v: lldb.SBValue) -> str:
         return utils.read_cstring(v, 256, val.process)
 
     name = cstr(utils.deref(utils.get(val, "m_name")))
@@ -368,8 +368,10 @@ def pp_HhbbcBytecode(val_obj: lldb.SBValue, _internal_dict) -> str:
     return "bc::%s { %s }" % (op, val)
 
 
-# pyre-fixme[11]: Annotation `SBDebugger` is not defined as a type.
-def __lldb_init_module(debugger: lldb.SBDebugger, _internal_dict, top_module=""):
+def __lldb_init_module(
+    debugger: lldb.SBDebugger,
+    top_module: str = "",
+) -> None:
     """Register the pretty printers in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -378,7 +380,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _internal_dict, top_module="")
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

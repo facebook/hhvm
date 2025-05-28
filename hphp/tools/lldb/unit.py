@@ -1,9 +1,12 @@
-# pyre-unsafe
+# pyre-strict
 """
 Set the target Unit; used implicitly by some other commands.
 """
 
+import argparse
 import shlex
+
+import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -13,7 +16,7 @@ except ModuleNotFoundError:
     import hphp.tools.lldb.utils as utils
 
 
-cur_unit = None
+cur_unit: lldb.SBValue | None = None
 
 
 class UnitCommand(utils.Command):
@@ -22,7 +25,7 @@ class UnitCommand(utils.Command):
     epilog = "Use `unit none` to unset. Just `unit` displays the current Unit"
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument(
             "unit",
@@ -31,10 +34,13 @@ class UnitCommand(utils.Command):
         )
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         global cur_unit
 
         command_args = shlex.split(command)
@@ -59,7 +65,7 @@ class UnitCommand(utils.Command):
             result.write("no Unit set")
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(debugger: lldb.SBDebugger, top_module: str = "") -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -68,7 +74,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

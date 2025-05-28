@@ -1,13 +1,13 @@
-# pyre-unsafe
+# pyre-strict
 """
 LLDB command for printing the sizes of various containers.
 """
 
+import argparse
 import shlex
 import sys
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -21,8 +21,7 @@ except ModuleNotFoundError:
 # Size accessors
 
 
-# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
-def array_data_size(array_data: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
+def array_data_size(array_data: lldb.SBValue) -> typing.Optional[int]:
     utils.debug_print(
         f"array_data_size(array_data=0x{array_data.load_addr:x} (type={array_data.type.name}))"
     )
@@ -31,17 +30,21 @@ def array_data_size(array_data: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
 
     if utils.has_array_kind(array_data, "Vec"):
         m_size = utils.get(array_data, "m_size")
-        return m_size
+        if m_size is None:
+            return None
+        return m_size.unsigned
     elif utils.has_array_kind(array_data, "Dict", "Keyset"):
         array_data = utils.cast_as_specialized_array_data_kind(array_data)
         m_used = utils.get(array_data.children[1].children[0].children[0], "m_used")
-        return m_used
+        if m_used is None:
+            return None
+        return m_used.unsigned
     else:
         print("Invalid array type!", file=sys.stderr)
         return None
 
 
-def sizeof(container: lldb.SBValue) -> lldb.SBValue:
+def sizeof(container: lldb.SBValue) -> int | None:
     """Get the actual semantic size (i.e. number of elements) of a container
 
     Arguments:
@@ -58,11 +61,11 @@ def sizeof(container: lldb.SBValue) -> lldb.SBValue:
     elif t == "std::priority_queue":
         return sizeof(utils.get(container, "c"))
     elif t == "std::unordered_map" or t == "HPHP::hphp_hash_map":
-        return utils.get(container, "_M_h", "_M_element_count")
+        return utils.get(container, "_M_h", "_M_element_count").unsigned
     elif t == "HPHP::FixedStringMap":
-        return utils.get(container, "m_extra")
+        return utils.get(container, "m_extra").unsigned
     elif t == "HPHP::IndexedStringMap":
-        return utils.get(container, "m_map", "m_extra")
+        return utils.get(container, "m_map", "m_extra").unsigned
     elif t == "HPHP::ArrayData":
         return array_data_size(container)
     elif t == "HPHP::Array":
@@ -81,15 +84,18 @@ class SizeOfCommand(utils.Command):
     description = "Print the semantic size a container"
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         parser.add_argument("container", help="A container to get the size of")
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args)
@@ -101,12 +107,12 @@ class SizeOfCommand(utils.Command):
         size = sizeof(container)
 
         if size is not None:
-            result.write(str(size.unsigned))
+            result.write(str(size))
         else:
             result.SetError("unrecognized container")
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(debugger: lldb.SBDebugger, top_module: str = "") -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -115,7 +121,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

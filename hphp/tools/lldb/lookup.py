@@ -1,8 +1,8 @@
 # pyre-unsafe
+import argparse
 import shlex
 import typing
 
-# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
@@ -25,7 +25,6 @@ except ModuleNotFoundError:
     import hphp.tools.lldb.utils as utils
 
 
-# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     """Find the function corresponding to a given FuncID
 
@@ -64,6 +63,8 @@ def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         )
         result = utils.rawptr(utils.get(func_id, "m_id"))
 
+    if result is None:
+        return None
     func_ptr = result.Cast(utils.Type("HPHP::Func", target).GetPointerType())
     if func_ptr.GetError().Fail():
         return None
@@ -109,6 +110,8 @@ def lookup_litstr(
         token_or_ptr_ty = utils.Type(
             "HPHP::TokenOrPtr<const HPHP::StringData>", str_id.target
         )
+        if elm is None:
+            return None
         elm = elm.Cast(token_or_ptr_ty)
 
         if utils.TokenOrPtr.is_ptr(elm):
@@ -146,17 +149,14 @@ class LookupCommand(utils.Command):
         # argparse will add attributes to this class
         def __init__(
             self,
-            # pyre-fixme[11]: Annotation `SBExecutionContext` is not defined as a type.
             exe_ctx: lldb.SBExecutionContext,
-            # pyre-fixme[11]: Annotation `SBCommandReturnObject` is not defined as a
-            #  type.
             result: lldb.SBCommandReturnObject,
-        ):
+        ) -> None:
             self.exe_ctx = exe_ctx
             self.result = result
 
     @classmethod
-    def create_parser(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
         parser = cls.default_parser()
         subparsers = parser.add_subparsers(
             title="List of lookup subcommands", required=True, dest="command"
@@ -205,21 +205,25 @@ class LookupCommand(utils.Command):
 
         return parser
 
-    def __init__(self, debugger, internal_dict):
-        super().__init__(debugger, internal_dict)
-
-    def __call__(self, debugger, command, exe_ctx, result):
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ) -> None:
         namespace = self.ArgsNamespace(exe_ctx, result)
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args, namespace=namespace)
+            # pyre-fixme[16]: func does exists
             options.func(options)
         except SystemExit:
             result.SetError("option parsing failed")
             return
 
     @classmethod
-    def _lookup_func_prep(cls, options):
+    def _lookup_func_prep(cls, options) -> None:
         func_id_type = utils.Type("HPHP::FuncId", options.exe_ctx.target)
         func_id = options.exe_ctx.frame.EvaluateExpression(options.funcid).Cast(
             func_id_type
@@ -234,7 +238,7 @@ class LookupCommand(utils.Command):
         options.result.write(str(res))
 
     @classmethod
-    def _lookup_litstr_prep(cls, options):
+    def _lookup_litstr_prep(cls, options) -> None:
         id_type = utils.Type("HPHP::Id", options.exe_ctx.target)
         id_val = options.exe_ctx.frame.EvaluateExpression(options.id).Cast(id_type)
 
@@ -259,7 +263,7 @@ class LookupCommand(utils.Command):
         options.result.write(str(res))
 
     @classmethod
-    def _lookup_array_prep(cls, options):
+    def _lookup_array_prep(cls, options) -> None:
         id_type = utils.Type("HPHP::Id", options.exe_ctx.target)
         id_val = options.exe_ctx.frame.EvaluateExpression(options.id).Cast(id_type)
         res = lookup_array(id_val)
@@ -270,7 +274,10 @@ class LookupCommand(utils.Command):
         options.result.write(str(res))
 
 
-def __lldb_init_module(debugger, _internal_dict, top_module=""):
+def __lldb_init_module(
+    debugger: lldb.SBDebugger,
+    top_module: str = "",
+) -> None:
     """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
@@ -279,7 +286,6 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Arguments:
         debugger: Current debugger object
-        _internal_dict: Dict for current script session. For internal use by LLDB only.
 
     Returns:
         None

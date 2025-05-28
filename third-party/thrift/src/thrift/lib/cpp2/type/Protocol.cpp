@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/type/Protocol.h>
 
-#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
 namespace apache::thrift::type {

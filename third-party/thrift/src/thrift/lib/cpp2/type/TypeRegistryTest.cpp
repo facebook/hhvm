@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp2/type/AnyValue.h>
 #include <thrift/lib/cpp2/type/Runtime.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
 namespace apache::thrift::type {

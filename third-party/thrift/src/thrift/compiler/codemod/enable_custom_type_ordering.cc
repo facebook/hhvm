@@ -32,9 +32,10 @@ void codemod_main(source_manager& sm, t_program_bundle& bundle) {
   const_ast_visitor visitor;
   visitor.add_structured_definition_visitor([&](const t_structured&
                                                     structured_type) {
-    const bool hasUri = !structured_type.uri().empty();
-    const bool isAnnotated = structured_type.find_structured_annotation_or_null(
-        kCppEnableCustomTypeOrdering);
+    [[maybe_unused]] const bool hasUri = !structured_type.uri().empty();
+    [[maybe_unused]] const bool isAnnotated =
+        structured_type.find_structured_annotation_or_null(
+            kCppEnableCustomTypeOrdering);
 
     switch (OrderableTypeUtils::get_orderable_condition(
         structured_type,

@@ -320,11 +320,11 @@ class SplMaxHeap<T> extends SplHeap<T> {
    *                  arbitrary relative position.
    */
   protected function compare(T $value1, T $value2): int {
-    // TODO(T125828814): In practice these can be *any* type, not necessarily
-    // just `int`.  However, Hack doesn't have a type for "compararable values,"
-    // so we pick `int` here as the "classic" example.
-    $value1 = HH\FIXME\UNSAFE_CAST<T, int>($value1);
-    $value2 = HH\FIXME\UNSAFE_CAST<T, int>($value2);
+    // TODO(T125828814): In practice these can be *any* type.
+    // However, Hack doesn't have a type for "compararable values,"
+    // so we use `dynamic` in order to keep Hack happy.
+    $value1 = HH\FIXME\UNSAFE_CAST<T, dynamic>($value1);
+    $value2 = HH\FIXME\UNSAFE_CAST<T, dynamic>($value2);
     if ($value1 > $value2) {
       return 1;
     } else if ($value1 < $value2) {
@@ -362,11 +362,11 @@ class SplMinHeap<T> extends SplHeap<T> {
    *                  arbitrary relative position.
    */
   protected function compare(T $value1, T $value2): int {
-    // TODO(T125828814): In practice these can be *any* type, not necessarily
-    // just `int`.  However, Hack doesn't have a type for "compararable values,"
-    // so we pick `int` here as the "classic" example.
-    $value1 = HH\FIXME\UNSAFE_CAST<T, int>($value1);
-    $value2 = HH\FIXME\UNSAFE_CAST<T, int>($value2);
+    // TODO(T125828814): In practice these can be *any* type.
+    // However, Hack doesn't have a type for "compararable values,"
+    // so we use `dynamic` in order to keep Hack happy.
+    $value1 = HH\FIXME\UNSAFE_CAST<T, dynamic>($value1);
+    $value2 = HH\FIXME\UNSAFE_CAST<T, dynamic>($value2);
     if ($value2 > $value1) {
       return 1;
     } else if ($value2 < $value1) {

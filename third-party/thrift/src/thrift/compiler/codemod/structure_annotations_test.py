@@ -512,7 +512,6 @@ class StructureAnnotations(unittest.TestCase):
 
                 typedef i32 (
                     foo,
-                    thriftx.v8.i32 = "Number",
                     hs.type = "hs",
                 ) T (bar = "baz", hs.category = "value")
 
@@ -562,7 +561,6 @@ class StructureAnnotations(unittest.TestCase):
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
                 typedef i32 (
-                    thriftx.v8.i32 = "Number",
                     hs.type = "hs",
                 ) T ( hs.category = "value")
 

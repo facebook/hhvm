@@ -20,7 +20,6 @@
 #include <folly/portability/Sockets.h>
 
 #include <openssl/ssl.h>
-#include <openssl/x509.h>
 
 #include <folly/SocketAddress.h>
 #include <folly/io/async/SSLContext.h>

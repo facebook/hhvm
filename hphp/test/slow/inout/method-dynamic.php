@@ -35,18 +35,18 @@ function main($obj, $foo, $alpha, $beta, $one, $two, $bar, $arr1, $arr2) :mixed{
   $b = 'gamma';
   $x = 41;
   $r1 = $obj->$alpha(inout $a, inout $b);
-  $r2 = $foo::$beta(inout $x);
+  $r2 = HH\dynamic_class_meth($foo, $beta)(inout $x);
   var_dump($a, $b, $x, $r1, $r2);
 
   $t = null;
   $obj->$one(inout $t);
   var_dump($t);
 
-  $foo::$two(inout $t);
+  HH\dynamic_class_meth($foo, $two)(inout $t);
   var_dump($t);
 
   $q = null;
-  Foo::$two(inout $q);
+  HH\dynamic_class_meth(Foo::class, $two)(inout $q);
   var_dump($q);
 
   $r = null;

@@ -109,7 +109,7 @@ function entrypoint_FPushObjMethod(): void {
 
   $c = new C;
     $m = "__construct"; $c->$m();
-    $m = "sMeth"; $c::$m();
+    $m = "sMeth"; HH\dynamic_class_meth(HH\get_class_from_object($c), $m)();
   $c = new F;
     $m = "__construct"; $c->$m();
   $c = new I;
@@ -138,5 +138,5 @@ function entrypoint_FPushObjMethod(): void {
   $z->fZ();
 
   $not_a_string = 123;
-  $foo = C::$not_a_string();
+  $foo = HH\dynamic_class_meth(C::class, $not_a_string)();
 }

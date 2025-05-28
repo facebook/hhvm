@@ -226,7 +226,7 @@ function classname_from_string_unsafe(string $classname)[]: mixed;
 <<__Native>>
 function class_to_classname(readonly class_or_classname<mixed> $cn)[]: classname<mixed>;
 
-<<__Native>>
+<<__Native("NoRecording")>>
 function get_class_from_object(readonly object $o)[]: class<mixed>;
 
 <<__Native>>

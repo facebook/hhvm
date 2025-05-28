@@ -1,0 +1,21 @@
+
+Warning: Method Foo::beta not marked dynamic in %s/inout/method-dynamic.php on line 38
+string(5) "bravo"
+string(7) "charlie"
+int(42)
+string(5) "delta"
+int(41)
+string(3) "one"
+
+Warning: Method Foo::two not marked dynamic in %s/inout/method-dynamic.php on line 45
+string(3) "two"
+
+Warning: Method Foo::two not marked dynamic in %s/inout/method-dynamic.php on line 49
+string(3) "two"
+string(3) "two"
+int(42)
+string(3) "Foo"
+string(3) "Bar"
+string(3) "Foo"
+string(3) "one"
+string(3) "two"

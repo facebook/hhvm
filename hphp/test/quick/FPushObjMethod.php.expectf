@@ -8,6 +8,8 @@ In I::__construct()
 In I::__construct()
 In C::__construct()
 In C::__construct()
+
+Warning: Method C::sMeth not marked dynamic in %s/FPushObjMethod.php on line 112
 In C::sMeth()
 In C::__construct()
 In C::__construct()
@@ -59,4 +61,4 @@ In Z::fZ()
   In Z::fProtected()
   In Z::fPublic()
 
-Fatal error: Function name must be a string in %s on line 141
+Catchable fatal error: Argument 2 passed to HH\dynamic_class_meth() must be an instance of string, int given in %s/FPushObjMethod.php on line 141

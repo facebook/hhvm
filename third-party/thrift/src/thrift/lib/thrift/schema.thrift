@@ -23,6 +23,8 @@ include "thrift/lib/thrift/protocol.thrift"
 include "thrift/lib/thrift/type.thrift"
 include "thrift/annotation/python.thrift"
 
+cpp_include "<deque>"
+
 /**
  * The canonical representations for a Thrift schema.
  *
@@ -719,6 +721,7 @@ struct Program {
 
 /** A list of programs, accessible by `ProgramId`. */
 @python.Py3Hidden
+@cpp.Type{template = "std::deque"}
 typedef list<Program> ProgramList
 
 /** A hash of the value, but stored internally as ValueId */

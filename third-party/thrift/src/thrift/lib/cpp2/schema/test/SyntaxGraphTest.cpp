@@ -115,7 +115,7 @@ TEST_F(ServiceSchemaTest, TransitivePrograms) {
   }
 
   auto secondProgram = findProgramByName(syntaxGraph, "syntax_graph_2");
-  EXPECT_EQ(secondProgram->definitionsByName().size(), 1);
+  EXPECT_EQ(secondProgram->definitionsByName().size(), 2);
   {
     ProgramNode::IncludesList includes = secondProgram->includes();
     EXPECT_EQ(includes.size(), 1);
@@ -725,4 +725,19 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(enumNode.values()[2].name, "VALUE_2");
   EXPECT_EQ(enumNode.values()[2].i32, 2);
 }
+
+TEST(SyntaxGraphTest, getSchemaMerge) {
+  auto& registry = SchemaRegistry::get();
+
+  // getNode will merge new schemas to the existing one.
+  // This test will check after the merging, old nodes are still valid.
+  const auto& other = registry.getNode<test::OtherTestStruct>();
+  const auto& test = registry.getNode<test::TestStruct>();
+  const auto& prog = registry.getDefinitionNode<test::TestStruct2>().program();
+  ASSERT_EQ(prog.includes().size(), 1);
+  EXPECT_EQ(prog.includes()[0]->name(), "syntax_graph");
+  EXPECT_EQ(test.definition().name(), "TestStruct");
+  EXPECT_EQ(other.definition().name(), "OtherTestStruct");
+}
+
 } // namespace apache::thrift::syntax_graph

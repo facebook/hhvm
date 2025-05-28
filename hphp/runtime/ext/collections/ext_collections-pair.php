@@ -118,7 +118,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - an `ImmVector` containing the integer keys of the current
    *           `Pair` as values.
    */
-  /* HH_FIXME[2049] */
   public readonly function keys()[]: ImmVector<int> {
     return ImmVector { 0, 1 };
   }
@@ -131,7 +130,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - an `ImmVector` containing the values of the current `Pair`.
    */
   <<__Native>>
-  /* HH_FIXME[2049] */
   public function values()[]: ImmVector<mixed>;
 
   /**
@@ -171,7 +169,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
     * @return - a `Vector` with the elements of the current `Pair`.
     */
   <<__Native>>
-  /* HH_FIXME[2049] */
   public function toVector()[]: Vector<mixed>;
 
   /**
@@ -181,7 +178,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
     * @return - an `ImmVector` with the elements of the current `Pair`.
     */
   <<__Native>>
-  /* HH_FIXME[2049] */
   public function toImmVector()[]: ImmVector<mixed>;
 
   /**
@@ -192,7 +188,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - an integer-keyed `Map` with the values of the current `Pair`.
    */
   <<__Native>>
-  /* HH_FIXME[2049] */
   public function toMap()[]: Map<int, mixed>;
 
   /**
@@ -204,7 +199,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - an `ImmMap` with the values of the current `Pair`.
    */
   <<__Native>>
-  /* HH_FIXME[2049] */
   public function toImmMap()[]: ImmMap<int, mixed>;
 
   /**
@@ -276,7 +270,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * @guide /hack/collections/examples
    */
-  /* HH_FIXME[2049] */
   public function map<Tu>((function(mixed)[_]: Tu) $callback)[ctx $callback]: ImmVector<Tu> {
     return ImmVector { $callback($this[0]), $callback($this[1]) };
   }
@@ -296,7 +289,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           operation on the current `Pair`'s keys and values is applied.
    */
   public function mapWithKey<Tu>((function(int, mixed)[_]: Tu) $callback)[ctx $callback]:
-    /* HH_FIXME[2049] */
     ImmVector<Tu> {
     return ImmVector { $callback(0, $this[0]), $callback(1, $this[1]) };
   }
@@ -316,18 +308,12 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * @guide /hack/collections/examples
    */
-  /* HH_FIXME[2049] */
   public function filter((function(mixed)[_]: bool) $callback)[ctx $callback]: ImmVector<mixed> {
-    // TODO(T124995052): This code is dead, or at least not usable. The
-    // `UNSAFE_CAST` here covers a legitimate bug, that unset on `varray` has
-    // been dead since late 2020 to early 2021.
-    $values = HH\FIXME\UNSAFE_CAST<varray<mixed>, darray<arraykey, mixed>>(
-      $this->toVArray(),
-    );
-    if (!$callback($values[0])) { unset($values[0]); }
-    if (!$callback($values[1])) { unset($values[1]); }
-    /* HH_FIXME[2049] */
-    return new \HH\ImmVector($values);
+    $values = $this->toVArray();
+    $res = vec[];
+    if ($callback($values[0])) { $res[] = $values[0]; }
+    if ($callback($values[1])) { $res[] = $values[1]; }
+    return new \HH\ImmVector($res);
   }
 
   /**
@@ -346,18 +332,12 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           `Pair`.
    */
   public function filterWithKey((function(int, mixed)[_]: bool) $callback)[ctx $callback]:
-    /* HH_FIXME[2049] */
     ImmVector<mixed> {
-    // TODO(T124995052): This code is dead, or at least not usable. The
-    // `UNSAFE_CAST` here covers a legitimate bug, that unset on `varray` has
-    // been dead since late 2020 to early 2021.
-    $values = HH\FIXME\UNSAFE_CAST<varray<mixed>, darray<arraykey, mixed>>(
-      $this->toVArray(),
-    );
-    if (!$callback(0, $values[0])) { unset($values[0]); }
-    if (!$callback(1, $values[1])) { unset($values[1]); }
-    /* HH_FIXME[2049] */
-    return new \HH\ImmVector($values);
+    $values = $this->toVArray();
+    $res = vec[];
+    if ($callback(0, $values[0])) { $res[] = $values[0]; }
+    if ($callback(1, $values[1])) { $res[] = $values[1]; }
+    return new \HH\ImmVector($res);
   }
 
   /**
@@ -376,7 +356,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable)[]:
-    /* HH_FIXME[2049] */
     ImmVector<\HH\Pair<mixed, Tu>> {
     $ret = vec[];
     $i = 0;
@@ -385,7 +364,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
       $ret[] = \HH\Pair { $this->at($i), $value };
       $i++;
     }
-    /* HH_FIXME[2049] */
     return new ImmVector($ret);
   }
 
@@ -402,7 +380,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - An `ImmVector` containing the first `n` values of the current
    *           `Pair`.
    */
-  /* HH_FIXME[2049] */
   public function take(int $n)[]: ImmVector<mixed> {
     if (!\is_int($n)) {
       throw new \InvalidArgumentException(
@@ -426,7 +403,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           until the callback returns `false`.
    */
   public function takeWhile((function(mixed)[_]: bool) $callback)[ctx $callback]:
-    /* HH_FIXME[2049] */
     ImmVector<mixed> {
     $pair = $this->toVArray();
     if (!$callback($pair[0])) return \HH\ImmVector {};
@@ -449,7 +425,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - An `ImmVector` that contains values after the specified `n`-th
    *           element in the current `Pair`.
    */
-  /* HH_FIXME[2049] */
   public function skip(int $n)[]: ImmVector<mixed> {
     if (!\is_int($n)) {
       throw new \InvalidArgumentException(
@@ -473,7 +448,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           starting after the callback returns `true`.
    */
   public function skipWhile((function(mixed)[_]: bool) $callback)[ctx $callback]:
-    /* HH_FIXME[2049] */
     ImmVector<mixed> {
     $pair = $this->toVArray();
     if (!$callback($pair[0])) return $this->toImmVector();
@@ -511,7 +485,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - An `ImmVector` with values from the current `Pair` starting at
    *           `$start` up to but not including the element `$start + $len`.
    */
-  /* HH_FIXME[2049] */
   public function slice(int $start, int $len)[]: ImmVector<mixed> {
     if (!\is_int($start) || ($start < 0)) {
       throw new \InvalidArgumentException(
@@ -544,13 +517,11 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @guide /hack/generics/constraints
    */
   public function concat<Tu super mixed>(Traversable<Tu> $traversable)[]:
-    /* HH_FIXME[2049] */
     ImmVector<Tu> {
     $ret = vec($this);
     foreach ($traversable as $value) {
       $ret[] = $value;
     }
-    /* HH_FIXME[2049] */
     return new ImmVector($ret);
   }
 

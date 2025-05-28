@@ -1,15 +1,15 @@
 <?hh
 
 class test {
-  public $one = 1;
-  private $priv = 2;
-  public $two = 2;
-  protected $prot = 3;
+  public int $one = 1;
+  private int $priv = 2;
+  public int $two = 2;
+  protected int $prot = 3;
 }
 
 
 <<__EntryPoint>>
-function main_array_public() :mixed{
+function main_array_public() :void{
 $ai = new ArrayIterator(new test());
 
 foreach ($ai as $key=>$val) {

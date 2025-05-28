@@ -41,7 +41,7 @@ pub(crate) fn into_error(e: io::Error) -> Error {
 
 impl From<Error> for std::io::Error {
     fn from(e: Error) -> Self {
-        io::Error::new(io::ErrorKind::Other, e)
+        io::Error::other(e)
     }
 }
 

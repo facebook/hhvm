@@ -540,6 +540,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
       "Unable to serialize unknown list element");
 
   using elem_type = folly::remove_cvref_t<typename Type::value_type>;
+  using elem_class = folly::remove_cvref_t<typename Type::value_type>;
   using elem_methods = protocol_methods<ElemClass, elem_type>;
   using elem_ttype = protocol_type<ElemClass, elem_type>;
 
@@ -557,6 +558,38 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
       elem_methods::read(protocol, emplace_back_default(out));
     }
   }
+
+  template <typename Protocol, typename = void>
+  struct SupportsArithmeticVectors : std::false_type {};
+
+  template <typename Protocol>
+  struct SupportsArithmeticVectors<
+      Protocol,
+      std::void_t<decltype(Protocol::kSupportsArithmeticVectors())>>
+      : std::bool_constant<Protocol::kSupportsArithmeticVectors()> {};
+
+  static constexpr bool kIsSupportedArithmeticElemType =
+      (std::is_same_v<elem_class, float> ||
+       std::is_same_v<elem_class, double> ||
+       std::is_same_v<elem_class, std::int8_t> ||
+       std::is_same_v<elem_class, std::uint8_t> ||
+       std::is_same_v<elem_class, std::int64_t> ||
+       std::is_same_v<elem_class, std::uint64_t> ||
+       std::is_same_v<elem_class, std::int32_t> ||
+       std::is_same_v<elem_class, std::uint32_t> ||
+       std::is_same_v<elem_class, std::int16_t> ||
+       std::is_same_v<elem_class, std::uint16_t>) &&
+      (elem_ttype::value == TType::T_BYTE ||
+       elem_ttype::value == TType::T_FLOAT ||
+       elem_ttype::value == TType::T_DOUBLE ||
+       elem_ttype::value == TType::T_I64 || elem_ttype::value == TType::T_I32 ||
+       elem_ttype::value == TType::T_I16);
+
+  template <typename Protocol, typename ContainerType>
+  static constexpr bool kShouldProcessAsArithmeticVector =
+      SupportsArithmeticVectors<Protocol>::value &&
+      kIsSupportedArithmeticElemType &&
+      folly::is_contiguous_range_v<ContainerType>;
 
  public:
   template <typename Protocol>
@@ -602,12 +635,9 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
           folly::resizeWithoutInitialization(out, list_size);
           // Check if we can do a fast path (memcpy that reverses byte order)
           // instead of processing elements sequentially
-          if constexpr (kShouldProcessAsArithmeticVector<
-                            Protocol,
-                            Type,
-                            elem_type>) {
+          if constexpr (kShouldProcessAsArithmeticVector<Protocol, Type>) {
             protocol.template readArithmeticVector<elem_type>(
-                out.data(), out.size());
+                out.data(), list_size);
           } else {
             // fallback: process element by element
             auto outIt = out.begin();
@@ -644,22 +674,6 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
     read(protocol, out);
   }
 
-  template <typename Protocol, typename = void>
-  struct SupportsArithmeticVectors : std::false_type {};
-
-  template <typename Protocol>
-  struct SupportsArithmeticVectors<
-      Protocol,
-      std::void_t<decltype(Protocol::kSupportsArithmeticVectors())>>
-      : std::bool_constant<Protocol::kSupportsArithmeticVectors()> {};
-
-  template <typename Protocol, typename ContainerType, typename ElementType>
-  static constexpr bool kShouldProcessAsArithmeticVector =
-      !std::is_same_v<elem_type, bool> &&
-      folly::is_contiguous_range_v<ContainerType> &&
-      std::is_arithmetic_v<ElementType> &&
-      SupportsArithmeticVectors<Protocol>::value;
-
   template <typename Protocol>
   static std::size_t write(Protocol& protocol, const Type& out) {
     std::size_t xfer = 0;
@@ -667,7 +681,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
     xfer += protocol.writeListBegin(
         elem_ttype::value, checked_container_size(out.size()));
 
-    if constexpr (kShouldProcessAsArithmeticVector<Protocol, Type, elem_type>) {
+    if constexpr (kShouldProcessAsArithmeticVector<Protocol, Type>) {
       xfer += protocol.template writeArithmeticVector<elem_type>(
           out.data(), out.size());
     } else {

@@ -4,12 +4,12 @@ $enum = IntlTimeZone::createTimeZoneIDEnumeration(
     IntlTimeZone::TYPE_ANY,
     'PT',
     -3600000);
-print_r(iterator_to_array($enum));
+print_r(dict($enum));
 
 $enum = intltz_create_time_zone_id_enumeration(
     IntlTimeZone::TYPE_ANY,
     'PT',
     -3600000);
-print_r(iterator_to_array($enum));
+print_r(dict($enum));
 echo "==DONE==";
 }

@@ -1,5 +1,0 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid dict key: expected a key of type int or string, float given' in %s/iterator_to_array_nonscalar_keys.php:13
-Stack trace:
-#0 %s/iterator_to_array_nonscalar_keys.php(13): iterator_to_array()
-#1 (): main()
-#2 {main}

@@ -45,11 +45,6 @@ function iterator_apply(
 function iterator_count(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
 ): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
-function iterator_to_array(
-  HH\FIXME\MISSING_PARAM_TYPE $obj,
-  bool $use_keys = true,
-): HH\FIXME\MISSING_RETURN_TYPE;
 
 class SplDoublyLinkedList<T>
   implements Iterator<T>, ArrayAccess<int, T>, Countable {

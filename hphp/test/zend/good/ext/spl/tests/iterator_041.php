@@ -78,7 +78,6 @@ class MyArrayIterator extends ArrayIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-MyArrayIterator::test('iterator_to_array');
 MyArrayIterator::test('iterator_count', dict[3 => 6]);
 
 echo "===DONE===\n";

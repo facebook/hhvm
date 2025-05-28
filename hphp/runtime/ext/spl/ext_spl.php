@@ -193,37 +193,3 @@ function iterator_count(mixed $obj): mixed {
   }
   return $count;
 }
-
-/** Copy the elements of an iterator into an array.
- * @param mixed $obj - The iterator being copied.
- * @param bool $use_keys - Whether to use the iterator element keys as index.
- * @return mixed - An array containing the elements of the iterator.
- */
-function iterator_to_array(mixed $obj, bool $use_keys = true): mixed {
-  if (!is_object($obj) || !($obj is \HH\Traversable<_>)) {
-    trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
-    return 0;
-  }
-  $ret = dict[];
-  if ($use_keys) {
-    foreach (
-      HH\FIXME\UNSAFE_CAST<
-        Traversable<mixed>,
-        KeyedTraversable<arraykey, mixed>
-      >(
-        $obj,
-        "We only check that the input is a `Traversable<_>` not a ".
-        "`KeyedTraversable<_, _>`"
-      ) as $k => $v
-    ) {
-      $ret[$k] = $v;
-    }
-  } else {
-    $i = 0;
-    foreach ($obj as $v) {
-      $ret[$i] = $v;
-      $i++;
-    }
-  }
-  return $ret;
-}

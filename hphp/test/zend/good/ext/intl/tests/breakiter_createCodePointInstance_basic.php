@@ -10,6 +10,6 @@ function main_entry(): void {
   var_dump(get_class($codepoint_it));
   $codepoint_it->setText($text);
 
-  print_r(iterator_to_array($codepoint_it));
+  print_r(dict($codepoint_it));
   echo "==DONE==";
 }

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include "hphp/runtime/ext/gd/libgd/gd.h"
@@ -441,7 +440,6 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
  *              Joe Orost               (decvax!vax135!petsd!joe)
  *
  */
-#include <ctype.h>
 
 #define ARGVAL() (*++(*argv) || (--argc && *++argv))
 

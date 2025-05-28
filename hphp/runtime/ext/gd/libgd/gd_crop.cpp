@@ -20,7 +20,6 @@
  **/
 
 #include "hphp/runtime/ext/gd/libgd/gd.h"
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 

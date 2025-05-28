@@ -52,10 +52,8 @@
  */
 
 #include "hphp/runtime/ext/gd/libgd/gd.h"
-#include "hphp/runtime/ext/gd/libgd/gdfonts.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
 #include "hphp/runtime/ext/gd/libgd/wbmp.h"
 

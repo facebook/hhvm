@@ -21,8 +21,6 @@
    *
  */
 
-#include <math.h>
-#include <string.h>
 #include <stdlib.h>
 #include "hphp/runtime/ext/gd/libgd/gd.h"
 #include "hphp/runtime/ext/gd/libgd/gdhelpers.h"

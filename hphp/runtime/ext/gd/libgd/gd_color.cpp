@@ -1,6 +1,5 @@
 #include "hphp/runtime/ext/gd/libgd/gd.h"
 #include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
-#include "hphp/runtime/ext/gd/libgd/gd_intern.h"
 
 /* bring the palette colors in im2 to be closer to im1
  *

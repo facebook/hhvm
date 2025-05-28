@@ -6,7 +6,6 @@
 
 #include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
-#include "hphp/runtime/base/memory-manager.h"
 
 using std::abs;
 

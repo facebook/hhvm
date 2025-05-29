@@ -12,16 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcpp.memory cimport make_unique
+from libcpp.memory cimport make_unique, shared_ptr, static_pointer_cast
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
 
-
+from thrift.python.server_impl.interceptor.service_interceptor cimport (
+    cPythonServiceInterceptor,
+    PythonServiceInterceptor,
+)
 
 cdef class PythonServerModule: 
     def __init__(self, str name):
         self._cpp_module = make_unique[cPythonServerModule](<string>name.encode("utf-8"))
 
-    def add_service_interceptor(self, interceptor):
-        # impl added next diff
-        pass
+    def add_service_interceptor(self, PythonServiceInterceptor interceptor):
+        cdef shared_ptr[ServiceInterceptorBase] ptr = \
+            static_pointer_cast[ServiceInterceptorBase, cPythonServiceInterceptor](interceptor._cpp_interceptor)
+        self._cpp_module.get().addServiceInterceptor(cmove(ptr))

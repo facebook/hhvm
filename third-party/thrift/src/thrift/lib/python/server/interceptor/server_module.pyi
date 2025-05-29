@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
+from thrift.python.server_impl.interceptor.service_interceptor import (
+    PyObservableServiceInterceptor,
+)
+
 class PythonServerModule:
     def __init__(self, name: str) -> None: ...
-    def add_service_interceptor(self, interceptor) -> None: ...
+    def add_service_interceptor(
+        self, interceptor: PyObservableServiceInterceptor
+    ) -> None: ...

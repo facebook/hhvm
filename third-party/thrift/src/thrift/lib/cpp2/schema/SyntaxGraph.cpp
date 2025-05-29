@@ -740,19 +740,27 @@ class TypeSystemFacade final : public type_system::TypeSystem {
       }
 
       auto processStructuredType = [&](const StructuredNode& s) {
+        std::function<void(const TypeRef&)> visitType = [&](const TypeRef& t) {
+          auto enqueue = [&](const DefinitionNode& def) {
+            if (!cache_.count(&def)) {
+              initialAllocationQueue.push(&def);
+            }
+          };
+          t.trueType().visit(
+              [&](const StructuredNode& n) { enqueue(n.definition()); },
+              [&](const EnumNode& n) { enqueue(n.definition()); },
+              [&](const TypedefNode& n) { enqueue(n.definition()); },
+              [&](const List& l) { visitType(l.elementType()); },
+              [&](const Set& l) { visitType(l.elementType()); },
+              [&](const Map& m) {
+                visitType(m.keyType());
+                visitType(m.valueType());
+              },
+              [](const Primitive&) {});
+        };
+
         for (const auto& field : s.fields()) {
-          const DefinitionNode* fieldType =
-              field.type().trueType().visit([](const auto& n) {
-                if constexpr (std::is_base_of_v<
-                                  detail::WithDefinition,
-                                  decltype(n)>) {
-                  return &n.definition();
-                }
-                return nullptr;
-              });
-          if (fieldType && !cache_.count(fieldType)) {
-            initialAllocationQueue.push(fieldType);
-          }
+          visitType(field.type());
         }
 
         // Enqueue the current node to be populated later.

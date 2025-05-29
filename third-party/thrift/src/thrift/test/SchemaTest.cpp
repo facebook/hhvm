@@ -105,7 +105,7 @@ TEST_F(SchemaTest, linked) {
 TEST_F(SchemaTest, static_schema) {
   auto static_schema = schema::detail::mergeSchemas(
       facebook::thrift::test::schema::schema_constants::
-          _fbthrift_schema_542ebcbee39d65d1_includes());
+          _fbthrift_schema_24bb25c6acb15c4_includes());
   const type::Program* static_program = nullptr;
   for (const auto& program : *static_schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
@@ -128,7 +128,7 @@ TEST_F(SchemaTest, static_schema) {
 
 TEST_F(SchemaTest, merged_schema_add_after_access) {
   auto data = facebook::thrift::test::schema::schema_constants::
-      _fbthrift_schema_542ebcbee39d65d1();
+      _fbthrift_schema_24bb25c6acb15c4();
 
   BaseSchemaRegistry base;
   SchemaRegistry registry(base);
@@ -240,6 +240,10 @@ TEST_F(SchemaTest, getTypeSystemDefinitionRef) {
 
   EXPECT_EQ(&dynamicStructNode, &staticStructNode);
   EXPECT_EQ(&dynamicStructNode, &directStructNode);
+
+  // Ensure fields with container types pull in schema of the element type.
+  registry.getTypeSystemDefinitionRef<
+      facebook::thrift::test::schema::NonSchematizedStruct>();
 }
 
 } // namespace apache::thrift::test

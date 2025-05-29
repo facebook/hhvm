@@ -4937,21 +4937,21 @@ function call_method(ClassWithFooBar $mc): void {
                         },
                     },
                     {
-                        "title": "Fix Hack error inline - No instance method `foobaz` in `ClassWithFooBar`",
+                        "title": "Devmate Quick Fix - No instance method `foobaz` in `ClassWithFooBar`",
                         "kind": "quickfix",
                         "diagnostics": [],
                         "edit": {"changes": {}},
                         "command": {
-                            "title": "Fix Hack error inline - No instance method `foobaz` in `ClassWithFooBar`",
+                            "title": "Devmate Quick Fix - No instance method `foobaz` in `ClassWithFooBar`",
                             "command": "code-compose.show-inline-chat",
                             "arguments": [
                                 {
                                     "entrypoint": "FixLintErrorCodeAction",
                                     "predefinedPrompt": {
-                                        "command": "Fix Hack error inline",
+                                        "command": "Devmate Quick Fix",
                                         "displayPrompt": "Fix inline - No instance method `foobaz` in `ClassWithFooBar`",
                                         "userPrompt": "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->[DIAGNOSTIC_START]foobar[DIAGNOSTIC_END]();\n 9 | }\n```\n</SNIPPET>\n<DIAGNOSTIC>\nerror: Typing[4053] No instance method foobaz in ClassWithFooBar\n\nFile code_action_missing_method.php, line 8, character 8 - line 8, character 13:\n\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->»foobar«();\n 9 | }\n\nDid you mean foobar instead?\n\nFile code_action_missing_method.php, line 4, character 19 - line 4, character 24:\n\n 1 | <?hh\n 2 | \n 3 | class ClassWithFooBar {\n 4 |   public function »foobar«(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\nThis is why I think it is an object of type ClassWithFooBar\n\nFile code_action_missing_method.php, line 7, character 22 - line 7, character 36:\n\n 5 | }\n 6 | \n 7 | function call_method(»ClassWithFooBar« $mc): void {\n 8 |   $mc->foobar();\n 9 | }\n\nDeclaration of ClassWithFooBar is here\n\nFile code_action_missing_method.php, line 3, character 7 - line 3, character 21:\n\n 1 | <?hh\n 2 | \n 3 | class »ClassWithFooBar« {\n 4 |   public function foobar(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\n\n</DIAGNOSTIC>\nEdit <SNIPPET> in a way that would fix that lint.\n   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,\n   any further suggestions can be added in the explanation section.",
-                                        "description": "Fix Hack error inline",
+                                        "description": "Devmate Quick Fix",
                                         "model": "iCodeLlama 3.1 70B",
                                     },
                                     "overrideSelection": {

@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor") SELECTED
-Fix Hack error inline - Typing error (CodeActionKind: "quickfix")
+Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

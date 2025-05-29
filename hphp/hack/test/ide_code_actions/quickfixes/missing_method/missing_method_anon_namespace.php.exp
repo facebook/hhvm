@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
 Add stubs for missing interface methods (CodeActionKind: "quickfix") SELECTED
-Fix Hack error inline - This interface is not properly implemented (CodeActionKind: "quickfix")
+Devmate Quick Fix - This interface is not properly implemented (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

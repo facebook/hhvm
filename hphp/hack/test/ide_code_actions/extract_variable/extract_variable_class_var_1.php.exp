@@ -1,5 +1,5 @@
 Code actions available:
 ------------------------------------------
-Fix Hack error inline - Property declarations require a visibility modifier such as `public`, `private` or `protected`. (CodeActionKind: "quickfix")
+Devmate Quick Fix - Property declarations require a visibility modifier such as `public`, `private` or `protected`. (CodeActionKind: "quickfix")
 
 No code action titles match prefix: Extract into variable

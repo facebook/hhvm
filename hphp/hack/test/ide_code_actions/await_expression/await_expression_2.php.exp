@@ -2,7 +2,7 @@ Code actions available:
 ------------------------------------------
 await expression (CodeActionKind: "refactor") SELECTED
 Extract into variable (CodeActionKind: "refactor")
-Fix Hack error inline - Typing error (CodeActionKind: "quickfix")
+Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

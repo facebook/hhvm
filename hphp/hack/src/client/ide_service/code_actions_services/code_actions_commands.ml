@@ -170,8 +170,8 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
     Code_action_types.(
       Show_inline_chat_command_args.
         {
-          command = "Fix Hack error inline";
-          description = Some "Fix Hack error inline";
+          command = "Devmate Quick Fix";
+          description = Some "Devmate Quick Fix";
           display_prompt;
           user_prompt;
           model = Some CODE_31;
@@ -201,7 +201,7 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
             extras;
           })
   in
-  let title = Format.sprintf {|Fix Hack error inline - %s|} (snd claim) in
+  let title = Format.sprintf {|Devmate Quick Fix - %s|} (snd claim) in
   Code_action_types.{ title; command_args }
 
 let errors_to_commands errors selection =

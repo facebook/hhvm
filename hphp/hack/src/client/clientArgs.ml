@@ -321,7 +321,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
             | "highlighted" -> error_format := Some Errors.Highlighted
             | "extended" -> error_format := Some Errors.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+        "<extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );
       ( "--file-dependents",
         Arg.Unit

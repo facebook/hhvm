@@ -233,6 +233,7 @@ let handler ctx =
       let new_env =
         { env with droot = Typing_deps.Dep.GConst (snd gconst.Aast.cst_name) }
       in
+      check_module_if_present new_env gconst.Aast.cst_module;
       new_env
 
     method! at_method_ env m =

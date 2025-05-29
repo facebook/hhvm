@@ -1,0 +1,2 @@
+ERROR: File "module_cst.php", line 3, characters 8-20:
+Unbound name: `doesnotexists` (a module) (Naming[2049])

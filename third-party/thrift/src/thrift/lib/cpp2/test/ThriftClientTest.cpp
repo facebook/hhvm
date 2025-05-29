@@ -471,6 +471,7 @@ TEST_F(ThriftClientTest, FirstResponseTimeout) {
   auto channel = RocketClientChannel::newChannel(std::move(sock));
   auto client = std::make_shared<TestServiceAsyncClient>(std::move(channel));
   auto t = std::thread([&] { evb.loopForever(); });
+  evb.waitUntilRunning();
 
   // send stream request
   RpcOptions options;

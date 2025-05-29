@@ -52,8 +52,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::Cpp2RequestContext* context,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind,
-    std::unique_ptr<
-        apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>>
+    apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr
         callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
   auto [promise, future] =
@@ -83,10 +82,9 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
     apache::thrift::Cpp2RequestContext* context,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind,
-    std::unique_ptr<::apache::thrift::HandlerCallback<
-        ::apache::thrift::ResponseAndServerStream<
-            std::unique_ptr<::folly::IOBuf>,
-            std::unique_ptr<::folly::IOBuf>>>> callback) {
+    ::apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
   auto [promise, future] =
       folly::makePromiseContract<::apache::thrift::ResponseAndServerStream<
@@ -117,7 +115,7 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::Cpp2RequestContext* context,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind,
-    std::unique_ptr<apache::thrift::HandlerCallbackBase>&& callback) {
+    apache::thrift::HandlerCallbackBase::Ptr callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
   const int retcode = handleServerCallbackOneway(
@@ -381,6 +379,38 @@ void PythonAsyncProcessor::executeRequest(
       .via(executor_);
 }
 
+folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestOneway(
+    apache::thrift::protocol::PROTOCOL_TYPES protocol,
+    apache::thrift::Cpp2RequestContext* ctx,
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind,
+    apache::thrift::HandlerCallbackBase::Ptr callback) {
+  return handlePythonServerCallbackOneway(
+      protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+}
+
+folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestStreaming(
+    apache::thrift::protocol::PROTOCOL_TYPES protocol,
+    apache::thrift::Cpp2RequestContext* ctx,
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind,
+    ::apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
+  return handlePythonServerCallbackStreaming(
+      protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+}
+
+folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestResponse(
+    apache::thrift::protocol::PROTOCOL_TYPES protocol,
+    apache::thrift::Cpp2RequestContext* ctx,
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind,
+    HandlerCallback<std::unique_ptr<folly::IOBuf>>::Ptr callback) {
+  return handlePythonServerCallback(
+      protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+}
+
 folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
     apache::thrift::protocol::PROTOCOL_TYPES protocol,
     apache::thrift::Cpp2RequestContext* ctx,
@@ -393,98 +423,106 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind) {
   const char* methodName = ctx->getMethodName().c_str();
-  auto throw_wrapped =
-      protocol == apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
-      ? &detail::throw_wrapped<
-            apache::thrift::BinaryProtocolReader,
-            apache::thrift::BinaryProtocolWriter>
-      : &detail::throw_wrapped<
-            apache::thrift::CompactProtocolReader,
-            apache::thrift::CompactProtocolWriter>;
-
-  if (kind == apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
-    return handlePythonServerCallbackOneway(
-        protocol,
-        ctx,
-        std::move(serializedRequest),
-        kind,
-        std::make_unique<apache::thrift::HandlerCallbackBase>(
-            std::move(req),
-            std::move(ctxStack),
-            serviceName,
-            serviceName, /* definingServiceName */
-            methodName,
-            nullptr,
-            eb,
-            executor,
-            ctx,
-            nullptr,
-            nullptr,
-            requestData));
-  } else if (
-      kind == apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE) {
-    auto return_streaming =
-        protocol == apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
-        ? &detail::return_streaming<
+  auto get_throw_wrapped = [](protocol::PROTOCOL_TYPES protocol) {
+    return protocol ==
+            apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
+        ? &detail::throw_wrapped<
               apache::thrift::BinaryProtocolReader,
               apache::thrift::BinaryProtocolWriter>
-        : &detail::return_streaming<
+        : &detail::throw_wrapped<
               apache::thrift::CompactProtocolReader,
               apache::thrift::CompactProtocolWriter>;
-    return handlePythonServerCallbackStreaming(
-        protocol,
-        ctx,
-        std::move(serializedRequest),
-        kind,
-        std::make_unique<apache::thrift::HandlerCallback<
-            ::apache::thrift::ResponseAndServerStream<
-                std::unique_ptr<::folly::IOBuf>,
-                std::unique_ptr<::folly::IOBuf>>>>(
-            std::move(req),
-            std::move(ctxStack),
-            serviceName,
-            serviceName, /* definingServiceName */
-            methodName,
-            return_streaming,
-            throw_wrapped,
-            ctx->getProtoSeqId(),
-            eb,
-            executor,
-            ctx,
-            nullptr,
-            nullptr,
-            requestData));
-  } else {
-    auto return_serialized =
-        protocol == apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
-        ? &detail::return_serialized<
-              apache::thrift::BinaryProtocolReader,
-              apache::thrift::BinaryProtocolWriter>
-        : &detail::return_serialized<
-              apache::thrift::CompactProtocolReader,
-              apache::thrift::CompactProtocolWriter>;
+  };
 
-    return handlePythonServerCallback(
-        protocol,
-        ctx,
-        std::move(serializedRequest),
-        kind,
-        std::make_unique<
-            apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>>(
-            std::move(req),
-            std::move(ctxStack),
-            serviceName,
-            serviceName, /* definingServiceName */
-            methodName,
-            return_serialized,
-            throw_wrapped,
-            ctx->getProtoSeqId(),
-            eb,
-            executor,
-            ctx,
-            nullptr,
-            nullptr,
-            requestData));
+  switch (kind) {
+    case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE: {
+      auto callback = apache::thrift::HandlerCallbackBase::Ptr::make(
+          std::move(req),
+          std::move(ctxStack),
+          serviceName,
+          serviceName, /* definingServiceName */
+          methodName,
+          nullptr,
+          eb,
+          executor,
+          ctx,
+          nullptr,
+          nullptr,
+          requestData);
+      return dispatchRequestOneway(
+          protocol,
+          ctx,
+          std::move(serializedRequest),
+          kind,
+          std::move(callback));
+    }
+    case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE: {
+      auto return_streaming = protocol ==
+              apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
+          ? &detail::return_streaming<
+                apache::thrift::BinaryProtocolReader,
+                apache::thrift::BinaryProtocolWriter>
+          : &detail::return_streaming<
+                apache::thrift::CompactProtocolReader,
+                apache::thrift::CompactProtocolWriter>;
+      auto callback = apache::thrift::HandlerCallback<
+          ::apache::thrift::ResponseAndServerStream<
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>>>::Ptr::
+          make(
+              std::move(req),
+              std::move(ctxStack),
+              serviceName,
+              serviceName, /* definingServiceName */
+              methodName,
+              return_streaming,
+              get_throw_wrapped(protocol),
+              ctx->getProtoSeqId(),
+              eb,
+              executor,
+              ctx,
+              nullptr,
+              nullptr,
+              requestData);
+      return dispatchRequestStreaming(
+          protocol,
+          ctx,
+          std::move(serializedRequest),
+          kind,
+          std::move(callback));
+    }
+    default: {
+      auto return_serialized = protocol ==
+              apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
+          ? &detail::return_serialized<
+                apache::thrift::BinaryProtocolReader,
+                apache::thrift::BinaryProtocolWriter>
+          : &detail::return_serialized<
+                apache::thrift::CompactProtocolReader,
+                apache::thrift::CompactProtocolWriter>;
+      auto callback = apache::thrift::
+          HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr::make(
+              std::move(req),
+              std::move(ctxStack),
+              serviceName,
+              serviceName, /* definingServiceName */
+              methodName,
+              return_serialized,
+              get_throw_wrapped(protocol),
+              ctx->getProtoSeqId(),
+              eb,
+              executor,
+              ctx,
+              nullptr,
+              nullptr,
+              requestData);
+      return dispatchRequestResponse(
+          protocol,
+          ctx,
+          std::move(serializedRequest),
+          kind,
+          std::move(callback));
+    }
   }
 }
 

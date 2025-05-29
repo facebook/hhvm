@@ -121,7 +121,7 @@ class CountingInterceptorTest(TestCase):
         self.assertEqual(len(self.observer.connection_states), 2)
         # BAD: onRequest and onResponse are not yet invoked by PythonAsyncProcessor
         self.assertEqual(self.counts.onRequest, 0)
-        self.assertEqual(self.counts.onResponse, 0)
+        self.assertEqual(self.counts.onResponse, 2)
 
 
 class ThrowingInterceptorTest(TestCase):

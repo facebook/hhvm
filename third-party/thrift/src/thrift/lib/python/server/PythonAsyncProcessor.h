@@ -126,8 +126,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::Cpp2RequestContext* context,
       apache::thrift::SerializedRequest serializedRequest,
       apache::thrift::RpcKind kind,
-      std::unique_ptr<
-          apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>>
+      apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr
           callback);
 
   folly::SemiFuture<folly::Unit> handlePythonServerCallbackStreaming(
@@ -135,17 +134,17 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::Cpp2RequestContext* context,
       apache::thrift::SerializedRequest serializedRequest,
       apache::thrift::RpcKind kind,
-      std::unique_ptr<::apache::thrift::HandlerCallback<
+      ::apache::thrift::HandlerCallback<
           ::apache::thrift::ResponseAndServerStream<
               std::unique_ptr<::folly::IOBuf>,
-              std::unique_ptr<::folly::IOBuf>>>> callback);
+              std::unique_ptr<::folly::IOBuf>>>::Ptr callback);
 
   folly::SemiFuture<folly::Unit> handlePythonServerCallbackOneway(
       apache::thrift::ProtocolType protocol,
       apache::thrift::Cpp2RequestContext* context,
       apache::thrift::SerializedRequest serializedRequest,
       apache::thrift::RpcKind kind,
-      std::unique_ptr<apache::thrift::HandlerCallbackBase>&& callback);
+      apache::thrift::HandlerCallbackBase::Ptr callback);
 
   folly::SemiFuture<folly::Unit> dispatchRequest(
       apache::thrift::protocol::PROTOCOL_TYPES protocol,
@@ -158,6 +157,31 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       const char* serviceName,
       apache::thrift::SerializedRequest serializedRequest,
       apache::thrift::RpcKind kind);
+
+  folly::SemiFuture<folly::Unit> dispatchRequestOneway(
+      apache::thrift::protocol::PROTOCOL_TYPES protocol,
+      apache::thrift::Cpp2RequestContext* ctx,
+      apache::thrift::SerializedRequest serializedRequest,
+      apache::thrift::RpcKind kind,
+      apache::thrift::HandlerCallbackBase::Ptr callback);
+
+  folly::SemiFuture<folly::Unit> dispatchRequestStreaming(
+      apache::thrift::protocol::PROTOCOL_TYPES protocol,
+      apache::thrift::Cpp2RequestContext* ctx,
+      apache::thrift::SerializedRequest serializedRequest,
+      apache::thrift::RpcKind kind,
+      ::apache::thrift::HandlerCallback<
+          ::apache::thrift::ResponseAndServerStream<
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>>>::Ptr callback);
+
+  folly::SemiFuture<folly::Unit> dispatchRequestResponse(
+      apache::thrift::protocol::PROTOCOL_TYPES protocol,
+      apache::thrift::Cpp2RequestContext* ctx,
+      apache::thrift::SerializedRequest serializedRequest,
+      apache::thrift::RpcKind kind,
+      apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr
+          callback);
 
   void executeReadEventCallbacks(
       apache::thrift::Cpp2RequestContext* ctx,

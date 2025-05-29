@@ -1190,23 +1190,27 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
       check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty
   in
   let check_tparam_constraints (env, ty_errs, cycles_acc) t =
-    match SMap.find_opt (snd t.tp_name) ety_env.substs with
-    | Some ty ->
-      List.fold_left
-        t.tp_constraints
-        ~init:(env, ty_errs, cycles_acc)
-        ~f:(fun (env, ty_errs, cycles_acc) (ck, cstr_ty) ->
-          let ((env, e1, cycles1), cstr_ty) =
-            localize_cstr_ty ~ety_env env cstr_ty t.tp_name
-          in
-          let ty_errs =
-            Option.value_map ~default:ty_errs ~f:(fun e -> e :: ty_errs) e1
-          in
-          let (env, ty_errs) =
-            check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty
-          in
-          (env, ty_errs, cycles1 @ cycles_acc))
-    | None -> (env, ty_errs, cycles_acc)
+    let nm = snd t.tp_name in
+    if SSet.mem nm ety_env.no_substs then
+      (env, ty_errs, cycles_acc)
+    else
+      match SMap.find_opt (snd t.tp_name) ety_env.substs with
+      | Some ty ->
+        List.fold_left
+          t.tp_constraints
+          ~init:(env, ty_errs, cycles_acc)
+          ~f:(fun (env, ty_errs, cycles_acc) (ck, cstr_ty) ->
+            let ((env, e1, cycles1), cstr_ty) =
+              localize_cstr_ty ~ety_env env cstr_ty t.tp_name
+            in
+            let ty_errs =
+              Option.value_map ~default:ty_errs ~f:(fun e -> e :: ty_errs) e1
+            in
+            let (env, ty_errs) =
+              check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty
+            in
+            (env, ty_errs, cycles1 @ cycles_acc))
+      | None -> (env, ty_errs, cycles_acc)
   in
   let (env, ty_errs, cycles) =
     List.fold_left tparams ~init:(env, [], []) ~f:check_tparam_constraints

@@ -1,0 +1,40 @@
+ERROR: File "lambda_wellformed_bad.php", line 13, characters 35-43:
+Some type arguments violate their constraints (Typing[4323])
+  File "lambda_wellformed_bad.php", line 10, characters 18-19:
+  `T2` is a constrained type parameter
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  This type constraint is violated
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  Expected a class with `{type TA as T1}`
+  File "lambda_wellformed_bad.php", line 13, characters 41-42:
+  But got `T2 as B`
+ERROR: File "lambda_wellformed_bad.php", line 13, characters 35-43:
+Some type arguments violate their constraints (Typing[4323])
+  File "lambda_wellformed_bad.php", line 10, characters 18-19:
+  `T2` is a constrained type parameter
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  This type constraint is violated
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  Expected a class with `{type TA as T1}`
+  File "lambda_wellformed_bad.php", line 13, characters 41-42:
+  But got `T2 as B`
+  File "lambda_wellformed_bad.php", line 10, characters 18-19:
+  `T2` is a constrained type parameter
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  This type constraint is violated
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  Expected a class with `{type TA as T1}`
+  File "lambda_wellformed_bad.php", line 13, characters 32-32:
+  But got `B`
+  File "lambda_wellformed_bad.php", line 10, characters 44-45:
+  This `as` or `=` refinement constraint is violated
+  File "lambda_wellformed_bad.php", line 10, characters 18-19:
+  `T2` is a constrained type parameter
+  File "lambda_wellformed_bad.php", line 10, characters 24-47:
+  This type constraint is violated
+  File "lambda_wellformed_bad.php", line 13, characters 37-38:
+  Expected `T1`
+  File "lambda_wellformed_bad.php", line 10, characters 44-45:
+    via this generic `T1`
+  File "lambda_wellformed_bad.php", line 7, characters 29-29:
+  But got `A`

@@ -334,13 +334,60 @@ let where_constrs env = List.concat_map ~f:(where_constr env)
 let requirements env = List.concat_map ~f:(fun (h, _kind) -> hint env h)
 
 let fun_ tenv f =
-  let env =
-    let Aast_defs.{ f_tparams; _ } = f in
-    let typedef_tparams =
-      List.map f_tparams ~f:Aast_defs.tparam_of_hint_tparam
-    in
-    { typedef_tparams; tenv }
+  let support_dynamic_type =
+    Naming_attributes.mem
+      Naming_special_names.UserAttributes.uaSupportDynamicType
+      f.f_user_attributes
+    || Env.get_support_dynamic_type tenv
   in
+  let no_auto_likes =
+    Naming_attributes.mem
+      Naming_special_names.UserAttributes.uaNoAutoLikes
+      f.f_user_attributes
+    || Env.get_no_auto_likes tenv
+  in
+  let add_implicit_upper_bound =
+    support_dynamic_type
+    && (not no_auto_likes)
+    && TypecheckerOptions.everything_sdt tenv.genv.tcopt
+  in
+
+  let (tenv, ty_err_opt) =
+    let tparams =
+      List.map f.f_tparams ~f:(fun ht_param ->
+          (* We have to add the implicit upper bound here *)
+          let tparam = Aast_defs.tparam_of_hint_tparam ht_param in
+          if
+            List.exists
+              tparam.tp_user_attributes
+              ~f:(fun { ua_name = (_, name); _ } ->
+                String.equal
+                  name
+                  Naming_special_names.UserAttributes.uaNoAutoBound)
+            || not add_implicit_upper_bound
+          then
+            tparam
+          else
+            let Aast_defs.{ tp_name = (pos, _); tp_constraints; _ } = tparam in
+            let hint =
+              ( pos,
+                Aast_defs.Happly
+                  ( (pos, Naming_special_names.Classes.cSupportDyn),
+                    [(pos, Hmixed)] ) )
+            in
+            let tp_constraints =
+              (Ast_defs.Constraint_as, hint) :: tp_constraints
+            in
+            { tparam with tp_constraints })
+    in
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      tenv
+      ~ignore_errors:true
+      tparams
+      []
+  in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) ty_err_opt;
+  let env = { typedef_tparams = []; tenv } in
   let errs =
     FunUtils.check_params ~from_abstract_method:false tenv.decl_env f.f_params
   in

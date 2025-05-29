@@ -587,6 +587,17 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
   MyStructPatch patch;
   patch.patchIfSet<ident::boolVal>().invert();
   EXPECT_EQ(
+      to_string(debugTree(patch)),
+      R"(<StructPatch>
+├─ ensure
+│  ╰─ boolVal
+│     ╰─ false
+╰─ patch
+   ╰─ boolVal
+      ╰─ BoolPatch
+         ╰─ invert
+)");
+  EXPECT_EQ(
       to_string(debugTree(
           patch.toObject(),
           getTypeFinder(),

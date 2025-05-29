@@ -18,7 +18,7 @@
 module privacylib;
 
 <<Oncalls('www_privacy_frameworks')>>
-final class ThriftPolicyEnforcerTest extends WWWTest {
+final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
   use ClassLevelTest;
   use TPolicyEnforcerTest;
 

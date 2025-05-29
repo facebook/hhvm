@@ -22,17 +22,18 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
-type rocketExceptionType int16
+// RocketExceptionType is the type of a Thrift Rocket exception.
+type RocketExceptionType int16
 
 const (
-	rocketExceptionUnknown         rocketExceptionType = 0
-	rocketExceptionDeclared        rocketExceptionType = 1
-	rocketExceptionAppUnknown      rocketExceptionType = 2
-	rocketExceptionAny             rocketExceptionType = 3
-	rocketExceptionDeprecatedProxy rocketExceptionType = 4 // This is necessary for SR Proxy timeouts to work
+	rocketExceptionUnknown         RocketExceptionType = 0
+	rocketExceptionDeclared        RocketExceptionType = 1
+	rocketExceptionAppUnknown      RocketExceptionType = 2
+	rocketExceptionAny             RocketExceptionType = 3
+	rocketExceptionDeprecatedProxy RocketExceptionType = 4
 )
 
-func (e rocketExceptionType) String() string {
+func (e RocketExceptionType) String() string {
 	switch e {
 	case rocketExceptionUnknown:
 		return "UnknownException"
@@ -48,14 +49,14 @@ func (e rocketExceptionType) String() string {
 	panic("unreachable")
 }
 
-func (e rocketExceptionType) MarshalJSON() ([]byte, error) {
+func (e RocketExceptionType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
 type rocketException struct {
 	Name          string
 	What          string
-	ExceptionType rocketExceptionType
+	ExceptionType RocketExceptionType
 	Kind          rpcmetadata.ErrorKind
 	Blame         rpcmetadata.ErrorBlame
 	Safety        rpcmetadata.ErrorSafety
@@ -64,7 +65,7 @@ type rocketException struct {
 var _ error = (*rocketException)(nil)
 
 func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *rocketException {
-	err := &rocketException{
+	result := &rocketException{
 		Name:          "unknown",
 		What:          "unknown",
 		ExceptionType: rocketExceptionUnknown,
@@ -73,41 +74,42 @@ func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *ro
 		Safety:        rpcmetadata.ErrorSafety_UNSPECIFIED,
 	}
 	if exception.NameUTF8 != nil {
-		err.Name = *exception.NameUTF8
+		result.Name = *exception.NameUTF8
 	}
 	if exception.WhatUTF8 != nil {
-		err.What = *exception.WhatUTF8
+		result.What = *exception.WhatUTF8
 	}
-	var class *rpcmetadata.ErrorClassification
-	if exception.Metadata != nil {
-		if exception.Metadata.DeclaredException != nil {
-			err.ExceptionType = rocketExceptionDeclared
-			if exception.Metadata.DeclaredException.ErrorClassification != nil {
-				class = exception.Metadata.DeclaredException.ErrorClassification
-			}
-		} else if exception.Metadata.AppUnknownException != nil {
-			err.ExceptionType = rocketExceptionAppUnknown
-			if exception.Metadata.AppUnknownException.ErrorClassification != nil {
-				class = exception.Metadata.AppUnknownException.ErrorClassification
-			}
-		} else if exception.Metadata.AnyException != nil {
-			err.ExceptionType = rocketExceptionAny
-		} else if exception.Metadata.DEPRECATEDProxyException != nil {
-			err.ExceptionType = rocketExceptionDeprecatedProxy
+
+	metadata := exception.Metadata
+	if metadata == nil {
+		// No metadata - we are done here.
+		return result
+	}
+
+	var classification *rpcmetadata.ErrorClassification
+	if metadata.DeclaredException != nil {
+		result.ExceptionType = rocketExceptionDeclared
+		classification = metadata.DeclaredException.ErrorClassification
+	} else if metadata.AppUnknownException != nil {
+		result.ExceptionType = rocketExceptionAppUnknown
+		classification = metadata.AppUnknownException.ErrorClassification
+	} else if metadata.AnyException != nil {
+		result.ExceptionType = rocketExceptionAny
+	} else if metadata.DEPRECATEDProxyException != nil {
+		result.ExceptionType = rocketExceptionDeprecatedProxy
+	}
+	if classification != nil {
+		if classification.Kind != nil {
+			result.Kind = classification.GetKind()
 		}
-		if class != nil {
-			if class.Kind != nil {
-				err.Kind = class.GetKind()
-			}
-			if class.Blame != nil {
-				err.Blame = class.GetBlame()
-			}
-			if class.Safety != nil {
-				err.Safety = class.GetSafety()
-			}
+		if classification.Blame != nil {
+			result.Blame = classification.GetBlame()
+		}
+		if classification.Safety != nil {
+			result.Safety = classification.GetSafety()
 		}
 	}
-	return err
+	return result
 }
 
 func newUnknownPayloadExceptionMetadataBase(name string, what string) *rpcmetadata.PayloadExceptionMetadataBase {

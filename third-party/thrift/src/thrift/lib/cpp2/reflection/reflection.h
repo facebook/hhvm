@@ -384,7 +384,10 @@ struct reflected_annotations {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename Traits>
-struct reflected_struct {
+struct [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] reflected_struct {
   /**
    * A type alias for the struct itself.
    *
@@ -867,8 +870,13 @@ struct reflected_struct_data_member {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename Struct>
-using reflect_struct = fatal::
-    registry_lookup<apache::thrift::detail::struct_traits_metadata_tag, Struct>;
+using reflect_struct [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
+    fatal::registry_lookup<
+        apache::thrift::detail::struct_traits_metadata_tag,
+        Struct>;
 
 /**
  * Retrieves reflection metadata (as a `reflected_struct`) associated with the
@@ -905,10 +913,14 @@ using reflect_struct = fatal::
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename Struct, typename Default = void>
-using try_reflect_struct = fatal::try_registry_lookup<
-    apache::thrift::detail::struct_traits_metadata_tag,
-    Struct,
-    Default>;
+using try_reflect_struct [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
+    fatal::try_registry_lookup<
+        apache::thrift::detail::struct_traits_metadata_tag,
+        Struct,
+        Default>;
 
 /**
  * Tells whether the given type is a Thrift struct with compile-time reflection
@@ -945,8 +957,13 @@ using try_reflect_struct = fatal::try_registry_lookup<
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename T>
-using is_reflectable_struct = std::
-    integral_constant<bool, !std::is_same_v<try_reflect_struct<T, void>, void>>;
+using is_reflectable_struct [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
+    std::integral_constant<
+        bool,
+        !std::is_same_v<try_reflect_struct<T, void>, void>>;
 
 //////////////////////////////////
 // SECTION: VARIANT (UNION) API //
@@ -978,7 +995,10 @@ using is_reflectable_struct = std::
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename T>
-struct reflected_variant {
+struct [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] reflected_variant {
   /**
    * A type alias for the union itself.
    *
@@ -1149,7 +1169,11 @@ struct reflected_variant {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename T>
-using reflect_variant = reflected_variant<T>;
+using reflect_variant [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
+    reflected_variant<T>;
 
 /**
  * Represents Thrift specific metadata for a given union's member.
@@ -1268,7 +1292,11 @@ struct reflected_variant_member_metadata {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename T>
-using is_reflectable_union = fatal::has_variant_traits<T>;
+using is_reflectable_union [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
+    fatal::has_variant_traits<T>;
 } // namespace apache::thrift
 
 #include <thrift/lib/cpp2/reflection/internal/reflection-inl-post.h>

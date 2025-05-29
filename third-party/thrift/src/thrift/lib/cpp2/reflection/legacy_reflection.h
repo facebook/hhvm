@@ -50,7 +50,10 @@ using legacy_reflection_schema_t = reflection::Schema;
  *  See the individual member methods for more information.
  */
 template <typename T>
-struct legacy_reflection {
+struct [[deprecated(
+    "Deprecated in favor of "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] legacy_reflection {
   /***
    *  Registers legacy metadata about Thrift type `T`, and all Thrift types
    *  transitively used by `T`, into `schema` using Thrift's static reflection

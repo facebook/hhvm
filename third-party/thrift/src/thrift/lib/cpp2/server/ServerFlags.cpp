@@ -18,7 +18,7 @@
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 
-THRIFT_FLAG_DEFINE_bool(experimental_use_resource_pools, false);
+THRIFT_FLAG_DEFINE_bool(experimental_use_resource_pools, true);
 FOLLY_GFLAGS_DEFINE_bool(
     thrift_experimental_use_resource_pools,
     false,

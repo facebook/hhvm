@@ -26,10 +26,6 @@
 
 namespace apache::thrift::protocol {
 
-THRIFT_PLUGGABLE_FUNC_SET(bool, useAssignPatchInDiffVisitorForAnyLikeStruct) {
-  return true;
-}
-
 using detail::badge;
 
 class DemoDiffVisitor : public DiffVisitorBase {

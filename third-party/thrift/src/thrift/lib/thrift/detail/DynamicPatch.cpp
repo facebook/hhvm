@@ -34,11 +34,6 @@
 namespace apache::thrift::protocol {
 using detail::badge;
 
-THRIFT_PLUGGABLE_FUNC_REGISTER(
-    bool, useAssignPatchInDiffVisitorForAnyLikeStruct) {
-  return false;
-}
-
 namespace {
 
 // bools, integers or floating pointers.
@@ -1103,8 +1098,7 @@ DynamicPatch DiffVisitorBase::diffStructured(
 
   // If src and dst looks like a thrift.Any, only use assign operator since
   // we can't tell whether we should use AnyPatch or StructPatch.
-  if (useAssignPatchInDiffVisitorForAnyLikeStruct() && maybeAny(src) &&
-      maybeAny(dst)) {
+  if (maybeAny(src) && maybeAny(dst)) {
     DynamicUnknownPatch patch;
     if (src != dst) {
       patch.doNotConvertStringToBinary(badge);

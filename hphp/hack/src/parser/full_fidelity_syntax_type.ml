@@ -143,6 +143,7 @@ struct
   }
 
   and lambda_signature = {
+    lambda_function_keyword: t;
     lambda_type_parameters: t;
     lambda_left_paren: t;
     lambda_parameters: t;
@@ -724,6 +725,7 @@ struct
         lambda_body: t;
       }
     | LambdaSignature of {
+        lambda_function_keyword: t;
         lambda_type_parameters: t;
         lambda_left_paren: t;
         lambda_parameters: t;

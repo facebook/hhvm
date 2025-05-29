@@ -1055,8 +1055,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_signature(_: &C, lambda_type_parameters: Self, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_readonly_return: Self, lambda_type: Self) -> Self {
+    fn make_lambda_signature(_: &C, lambda_function_keyword: Self, lambda_type_parameters: Self, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_readonly_return: Self, lambda_type: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
+            lambda_function_keyword,
             lambda_type_parameters,
             lambda_left_paren,
             lambda_parameters,
@@ -2812,7 +2813,8 @@ where
                 acc
             },
             SyntaxVariant::LambdaSignature(x) => {
-                let LambdaSignatureChildren { lambda_type_parameters, lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_contexts, lambda_colon, lambda_readonly_return, lambda_type } = *x;
+                let LambdaSignatureChildren { lambda_function_keyword, lambda_type_parameters, lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_contexts, lambda_colon, lambda_readonly_return, lambda_type } = *x;
+                let acc = f(lambda_function_keyword, acc);
                 let acc = f(lambda_type_parameters, acc);
                 let acc = f(lambda_left_paren, acc);
                 let acc = f(lambda_parameters, acc);
@@ -4376,7 +4378,7 @@ where
                  lambda_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::LambdaSignature, 8) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
+             (SyntaxKind::LambdaSignature, 9) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
                  lambda_type: ts.pop().unwrap(),
                  lambda_readonly_return: ts.pop().unwrap(),
                  lambda_colon: ts.pop().unwrap(),
@@ -4385,6 +4387,7 @@ where
                  lambda_parameters: ts.pop().unwrap(),
                  lambda_left_paren: ts.pop().unwrap(),
                  lambda_type_parameters: ts.pop().unwrap(),
+                 lambda_function_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::CastExpression, 4) => SyntaxVariant::CastExpression(Box::new(CastExpressionChildren {
@@ -5086,7 +5089,7 @@ where
             SyntaxVariant::ConstructorPattern(x) => unsafe { std::slice::from_raw_parts(&x.constructor_pattern_constructor, 4) },
             SyntaxVariant::RefinementPattern(x) => unsafe { std::slice::from_raw_parts(&x.refinement_pattern_variable, 3) },
             SyntaxVariant::LambdaExpression(x) => unsafe { std::slice::from_raw_parts(&x.lambda_attribute_spec, 5) },
-            SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts(&x.lambda_type_parameters, 8) },
+            SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts(&x.lambda_function_keyword, 9) },
             SyntaxVariant::CastExpression(x) => unsafe { std::slice::from_raw_parts(&x.cast_left_paren, 4) },
             SyntaxVariant::ScopeResolutionExpression(x) => unsafe { std::slice::from_raw_parts(&x.scope_resolution_qualifier, 3) },
             SyntaxVariant::MemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts(&x.member_object, 3) },
@@ -5277,7 +5280,7 @@ where
             SyntaxVariant::ConstructorPattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constructor_pattern_constructor, 4) },
             SyntaxVariant::RefinementPattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.refinement_pattern_variable, 3) },
             SyntaxVariant::LambdaExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_attribute_spec, 5) },
-            SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_type_parameters, 8) },
+            SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_function_keyword, 9) },
             SyntaxVariant::CastExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.cast_left_paren, 4) },
             SyntaxVariant::ScopeResolutionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.scope_resolution_qualifier, 3) },
             SyntaxVariant::MemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.member_object, 3) },
@@ -6222,6 +6225,7 @@ pub struct LambdaExpressionChildren<T, V> {
 #[derive(Debug, Clone)]
 #[repr(C)]
 pub struct LambdaSignatureChildren<T, V> {
+    pub lambda_function_keyword: Syntax<T, V>,
     pub lambda_type_parameters: Syntax<T, V>,
     pub lambda_left_paren: Syntax<T, V>,
     pub lambda_parameters: Syntax<T, V>,
@@ -8164,15 +8168,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             LambdaSignature(x) => {
-                get_index(8).and_then(|index| { match index {
-                        0 => Some(&x.lambda_type_parameters),
-                    1 => Some(&x.lambda_left_paren),
-                    2 => Some(&x.lambda_parameters),
-                    3 => Some(&x.lambda_right_paren),
-                    4 => Some(&x.lambda_contexts),
-                    5 => Some(&x.lambda_colon),
-                    6 => Some(&x.lambda_readonly_return),
-                    7 => Some(&x.lambda_type),
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.lambda_function_keyword),
+                    1 => Some(&x.lambda_type_parameters),
+                    2 => Some(&x.lambda_left_paren),
+                    3 => Some(&x.lambda_parameters),
+                    4 => Some(&x.lambda_right_paren),
+                    5 => Some(&x.lambda_contexts),
+                    6 => Some(&x.lambda_colon),
+                    7 => Some(&x.lambda_readonly_return),
+                    8 => Some(&x.lambda_type),
                         _ => None,
                     }
                 })

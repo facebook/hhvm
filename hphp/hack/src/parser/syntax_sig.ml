@@ -590,6 +590,7 @@ module type Syntax_S = sig
         lambda_body: t;
       }
     | LambdaSignature of {
+        lambda_function_keyword: t;
         lambda_type_parameters: t;
         lambda_left_paren: t;
         lambda_parameters: t;
@@ -1352,7 +1353,7 @@ module type Syntax_S = sig
 
   val make_lambda_expression : t -> t -> t -> t -> t -> t
 
-  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_cast_expression : t -> t -> t -> t -> t
 

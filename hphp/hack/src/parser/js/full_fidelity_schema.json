@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2025-05-20-0000",
+  "version" : "2025-05-27-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1380,6 +1380,7 @@
       "description" : "lambda_signature",
       "prefix" : "lambda",
       "fields" : [
+        { "field_name" : "function_keyword" },
         { "field_name" : "type_parameters" },
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },

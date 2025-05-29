@@ -889,10 +889,11 @@ ss.serialize_field("lambda_arrow", &self.with(arrow))?;
 ss.serialize_field("lambda_body", &self.with(body))?;
       ss.end()
 } 
-SyntaxVariant::LambdaSignature (LambdaSignatureChildren{type_parameters,left_paren,parameters,right_paren,contexts,colon,readonly_return,type_} ) => {
-      let mut ss = s.serialize_struct("", 9)?;
+SyntaxVariant::LambdaSignature (LambdaSignatureChildren{function_keyword,type_parameters,left_paren,parameters,right_paren,contexts,colon,readonly_return,type_} ) => {
+      let mut ss = s.serialize_struct("", 10)?;
       ss.serialize_field("kind", "lambda_signature")?;
-      ss.serialize_field("lambda_type_parameters", &self.with(type_parameters))?;
+      ss.serialize_field("lambda_function_keyword", &self.with(function_keyword))?;
+ss.serialize_field("lambda_type_parameters", &self.with(type_parameters))?;
 ss.serialize_field("lambda_left_paren", &self.with(left_paren))?;
 ss.serialize_field("lambda_parameters", &self.with(parameters))?;
 ss.serialize_field("lambda_right_paren", &self.with(right_paren))?;

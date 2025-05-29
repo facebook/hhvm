@@ -968,6 +968,7 @@ pub struct LambdaExpressionChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct LambdaSignatureChildren<'a, T, V> {
+    pub function_keyword: Syntax<'a, T, V>,
     pub type_parameters: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub parameters: Syntax<'a, T, V>,

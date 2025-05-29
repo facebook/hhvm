@@ -1578,6 +1578,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.LambdaSignature
         {
+          lambda_function_keyword = fun_kw;
           lambda_type_parameters = tp;
           lambda_left_paren = lp;
           lambda_parameters = params;
@@ -1589,6 +1590,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
+          t env fun_kw;
           t env tp;
           t env lp;
           when_present params split;

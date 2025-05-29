@@ -1941,13 +1941,21 @@ where
         (async_, signature)
     }
 
-    fn parse_lambda_signature_type_parameter_list_opt(&mut self) -> S::Output {
+    fn parse_lambda_signature_type_parameter_list_opt(&mut self) -> (S::Output, S::Output) {
         let quant_token = self.optional_token(TokenKind::Function);
 
         if quant_token.is_missing() {
-            quant_token
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+
+            (quant_token, missing)
         } else {
-            self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_generic_type_parameter_list())
+            (
+                quant_token,
+                self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+                    p.parse_generic_type_parameter_list()
+                }),
+            )
         }
     }
 
@@ -1961,11 +1969,13 @@ where
             let token = self.next_token();
             self.sc_mut().make_token(token)
         } else {
-            let typarams = self.parse_lambda_signature_type_parameter_list_opt();
+            let (function_keyword, typarams) =
+                self.parse_lambda_signature_type_parameter_list_opt();
             let (left, params, right) = self.parse_parameter_list_opt();
             let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
             let (colon, readonly_opt, return_type) = self.parse_optional_return();
             self.sc_mut().make_lambda_signature(
+                function_keyword,
                 typarams,
                 left,
                 params,
@@ -2691,7 +2701,9 @@ where
         // parse an optional parameter list; it already takes care of making the
         // type annotations optional.
         let async_ = self.optional_token(TokenKind::Async);
-        let fn_ = self.assert_token(TokenKind::Function);
+        // We can only reach this point if we have determined there was a function
+        // keyword
+        let function_keyword = self.assert_token(TokenKind::Function);
 
         // Lambda signature
         let typarams = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
@@ -2705,6 +2717,7 @@ where
 
         if self.peek_token_kind() == TokenKind::EqualEqualGreaterThan {
             let signature = self.sc_mut().make_lambda_signature(
+                function_keyword,
                 typarams,
                 left_paren,
                 params,
@@ -2736,7 +2749,7 @@ where
             self.sc_mut().make_anonymous_function(
                 attribute_spec,
                 async_,
-                fn_,
+                function_keyword,
                 typarams,
                 left_paren,
                 params,

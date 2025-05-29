@@ -1061,8 +1061,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_signature(ctx: &C, type_parameters: Self, left_paren: Self, parameters: Self, right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, type_: Self) -> Self {
+    fn make_lambda_signature(ctx: &C, function_keyword: Self, type_parameters: Self, left_paren: Self, parameters: Self, right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, type_: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(ctx.get_arena().alloc(LambdaSignatureChildren {
+            function_keyword,
             type_parameters,
             left_paren,
             parameters,

@@ -1341,6 +1341,7 @@ let schema : schema_node list =
       aggregates = [Specifier];
       fields =
         [
+          ("function_keyword", ZeroOrOne Token);
           ("type_parameters", ZeroOrOne (Just "TypeParameters"));
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));

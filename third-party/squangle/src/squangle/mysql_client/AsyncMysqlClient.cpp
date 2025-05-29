@@ -96,7 +96,8 @@ void AsyncMysqlClient::drain(bool also_block_operations) {
       // So here the Operation `run` was not called
       // We don't need to lock the state change in the operation here since the
       // cancelling process is going to fire not matter in which part it is.
-      if ((*it)->state() == OperationState::Unstarted) {
+      if ((*it)->state() == OperationState::Unstarted &&
+          pending.to_remove.contains(*it)) {
         (*it)->cancel();
         it = pending.operations.erase(it);
       } else {

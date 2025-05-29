@@ -247,16 +247,21 @@ class AsyncMysqlClient : public MysqlClientBase {
   // call).
   void deferRemoveOperation(Operation* op) override {
     pending_.withWLock([&](auto& pending) {
-      // If the queue to remove is empty, schedule a cleanup to occur after
-      // this pass through the event loop.
-      if (pending.to_remove.empty()) {
-        if (!runInThread([&]() { cleanupCompletedOperations(); })) {
-          LOG(DFATAL)
-              << "Operation could not be cleaned: error in folly::EventBase";
+      auto sptr = op->getSharedPointer();
+      // Make sure the pending operation is still in the list - it might not be
+      // if the operation was drained.
+      if (pending.operations.contains(sptr)) {
+        // If the queue to remove is empty, schedule a cleanup to occur after
+        // this pass through the event loop.
+        if (pending.to_remove.empty()) {
+          if (!runInThread([&]() { cleanupCompletedOperations(); })) {
+            LOG(DFATAL)
+                << "Operation could not be cleaned: error in folly::EventBase";
+          }
         }
-      }
 
-      pending.to_remove.push_back(op->getSharedPointer());
+        pending.to_remove.insert(std::move(sptr));
+      }
     });
   }
 
@@ -317,7 +322,7 @@ class AsyncMysqlClient : public MysqlClientBase {
     // pointers.
     std::unordered_set<std::shared_ptr<Operation>> operations;
     // See comment for deferRemoveOperation.
-    std::vector<std::shared_ptr<Operation>> to_remove;
+    std::unordered_set<std::shared_ptr<Operation>> to_remove;
     // Are we accepting new connections
     bool block_operations{false};
   };

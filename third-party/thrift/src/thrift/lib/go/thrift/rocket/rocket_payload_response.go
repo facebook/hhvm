@@ -27,7 +27,7 @@ import (
 
 type responsePayload struct {
 	metadata  *rpcmetadata.ResponseRpcMetadata
-	exception *rocketException
+	exception *RocketException
 	data      []byte
 }
 

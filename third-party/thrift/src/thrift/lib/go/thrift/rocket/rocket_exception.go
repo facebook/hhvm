@@ -26,34 +26,36 @@ import (
 type RocketExceptionType int16
 
 const (
-	rocketExceptionUnknown         RocketExceptionType = 0
-	rocketExceptionDeclared        RocketExceptionType = 1
-	rocketExceptionAppUnknown      RocketExceptionType = 2
-	rocketExceptionAny             RocketExceptionType = 3
-	rocketExceptionDeprecatedProxy RocketExceptionType = 4
+	RocketExceptionUnknown         RocketExceptionType = 0
+	RocketExceptionDeclared        RocketExceptionType = 1
+	RocketExceptionAppUnknown      RocketExceptionType = 2
+	RocketExceptionAny             RocketExceptionType = 3
+	RocketExceptionDeprecatedProxy RocketExceptionType = 4
 )
 
 func (e RocketExceptionType) String() string {
 	switch e {
-	case rocketExceptionUnknown:
+	case RocketExceptionUnknown:
 		return "UnknownException"
-	case rocketExceptionDeclared:
+	case RocketExceptionDeclared:
 		return "DeclaredException"
-	case rocketExceptionAppUnknown:
+	case RocketExceptionAppUnknown:
 		return "AppUnknownException"
-	case rocketExceptionAny:
+	case RocketExceptionAny:
 		return "AnyException"
-	case rocketExceptionDeprecatedProxy:
+	case RocketExceptionDeprecatedProxy:
 		return "DEPRECATEDProxyException"
 	}
 	panic("unreachable")
 }
 
+// MarshalJSON implements json.Marshaler.
 func (e RocketExceptionType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-type rocketException struct {
+// RocketException is a Thrift Rocket exception.
+type RocketException struct {
 	Name          string
 	What          string
 	ExceptionType RocketExceptionType
@@ -62,13 +64,13 @@ type rocketException struct {
 	Safety        rpcmetadata.ErrorSafety
 }
 
-var _ error = (*rocketException)(nil)
+var _ error = (*RocketException)(nil)
 
-func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *rocketException {
-	result := &rocketException{
+func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *RocketException {
+	result := &RocketException{
 		Name:          "unknown",
 		What:          "unknown",
-		ExceptionType: rocketExceptionUnknown,
+		ExceptionType: RocketExceptionUnknown,
 		Kind:          rpcmetadata.ErrorKind_UNSPECIFIED,
 		Blame:         rpcmetadata.ErrorBlame_UNSPECIFIED,
 		Safety:        rpcmetadata.ErrorSafety_UNSPECIFIED,
@@ -88,15 +90,15 @@ func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *ro
 
 	var classification *rpcmetadata.ErrorClassification
 	if metadata.DeclaredException != nil {
-		result.ExceptionType = rocketExceptionDeclared
+		result.ExceptionType = RocketExceptionDeclared
 		classification = metadata.DeclaredException.ErrorClassification
 	} else if metadata.AppUnknownException != nil {
-		result.ExceptionType = rocketExceptionAppUnknown
+		result.ExceptionType = RocketExceptionAppUnknown
 		classification = metadata.AppUnknownException.ErrorClassification
 	} else if metadata.AnyException != nil {
-		result.ExceptionType = rocketExceptionAny
+		result.ExceptionType = RocketExceptionAny
 	} else if metadata.DEPRECATEDProxyException != nil {
-		result.ExceptionType = rocketExceptionDeprecatedProxy
+		result.ExceptionType = RocketExceptionDeprecatedProxy
 	}
 	if classification != nil {
 		if classification.Kind != nil {
@@ -113,17 +115,17 @@ func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *ro
 }
 
 func newUnknownPayloadExceptionMetadataBase(name string, what string) *rpcmetadata.PayloadExceptionMetadataBase {
-	return newPayloadExceptionMetadataBase(&rocketException{
+	return newPayloadExceptionMetadataBase(&RocketException{
 		Name:          name,
 		What:          what,
-		ExceptionType: rocketExceptionUnknown,
+		ExceptionType: RocketExceptionUnknown,
 		Safety:        rpcmetadata.ErrorSafety_SAFE,
 		Kind:          rpcmetadata.ErrorKind_TRANSIENT,
 		Blame:         rpcmetadata.ErrorBlame_SERVER,
 	})
 }
 
-func newPayloadExceptionMetadataBase(err *rocketException) *rpcmetadata.PayloadExceptionMetadataBase {
+func newPayloadExceptionMetadataBase(err *RocketException) *rpcmetadata.PayloadExceptionMetadataBase {
 	classification := rpcmetadata.NewErrorClassification().
 		SetKind(&err.Kind).
 		SetBlame(&err.Blame).
@@ -131,19 +133,19 @@ func newPayloadExceptionMetadataBase(err *rocketException) *rpcmetadata.PayloadE
 
 	metadata := rpcmetadata.NewPayloadExceptionMetadata()
 	switch err.ExceptionType {
-	case rocketExceptionDeclared:
+	case RocketExceptionDeclared:
 		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata().
 			SetErrorClassification(classification)
 		metadata.SetDeclaredException(declared)
-	case rocketExceptionAppUnknown:
+	case RocketExceptionAppUnknown:
 		appUnknown := rpcmetadata.NewPayloadAppUnknownExceptionMetdata().
 			SetErrorClassification(classification)
 		metadata.SetAppUnknownException(appUnknown)
-	case rocketExceptionAny:
+	case RocketExceptionAny:
 		metadata.SetAnyException(rpcmetadata.NewPayloadAnyExceptionMetadata())
-	case rocketExceptionDeprecatedProxy:
+	case RocketExceptionDeprecatedProxy:
 		metadata.SetDEPRECATEDProxyException(rpcmetadata.NewPayloadProxyExceptionMetadata())
-	case rocketExceptionUnknown:
+	case RocketExceptionUnknown:
 	default:
 		panic("unreachable")
 	}
@@ -155,7 +157,8 @@ func newPayloadExceptionMetadataBase(err *rocketException) *rpcmetadata.PayloadE
 	return base
 }
 
-func (e *rocketException) Error() string {
+// Error implements the error interface.
+func (e *RocketException) Error() string {
 	data, err := json.Marshal(e)
 	if err != nil {
 		panic(err)
@@ -163,6 +166,7 @@ func (e *rocketException) Error() string {
 	return string(data)
 }
 
-func (e *rocketException) IsDeclared() bool {
-	return e.ExceptionType == rocketExceptionDeclared
+// IsDeclared returns true if the exception is a declared exception.
+func (e *RocketException) IsDeclared() bool {
+	return e.ExceptionType == RocketExceptionDeclared
 }

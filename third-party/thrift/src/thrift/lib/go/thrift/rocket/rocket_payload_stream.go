@@ -27,7 +27,7 @@ import (
 
 type streamPayload struct {
 	metadata  *rpcmetadata.StreamPayloadMetadata
-	exception *rocketException
+	exception *RocketException
 	data      []byte
 }
 

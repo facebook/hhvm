@@ -245,6 +245,7 @@ struct LoggingContext {
   5: i32 requestAttemptId;
 }
 
+@thrift.ReserveIds{ids = [4, 9, 10, 12, 21]}
 struct RequestRpcMetadata {
   // The protocol using which the request payload has been serialized. MUST be
   // set.
@@ -257,7 +258,6 @@ struct RequestRpcMetadata {
   // TODO: this should be extended to support unset kind field (e.g. RPC kind
   // could be derived from the underlying transport message type).
   3: optional RpcKind kind;
-  // 4: Deprecated
   // The amount of time that a client will wait for a response from
   // the server. MAY be set.
   5: optional i32 clientTimeoutMs;
@@ -270,13 +270,10 @@ struct RequestRpcMetadata {
   // MAY be set.
   @cpp.Type{template = "folly::F14NodeMap"}
   8: optional map<string, string> otherMetadata;
-  // 9: Deprecated
-  // 10: Deprecated
   // The CRC32C of the uncompressed request payload. MAY be set. SHOULD be
   // validated if set.
   @cpp.Type{name = "std::uint32_t"}
   11: optional i32 crc32c;
-  // 12: Deprecated
   // The name of the load metric that should be queried as part of this
   // request. MAY be set. If set, load field SHOULD be set in response
   // metadata.
@@ -300,7 +297,6 @@ struct RequestRpcMetadata {
   // Thrift is typically used within a larger framework.
   // This field is for storing framework-specific metadata.
   20: optional IOBufPtr frameworkMetadata;
-  // 21: Deprecated
   @thrift.Box
   22: optional FdMetadata fdMetadata;
   // store client logging metadata such as log sampling ratios, request id, etc. MAY be set.
@@ -329,14 +325,13 @@ struct PayloadDeclaredExceptionMetadata {
 
 struct PayloadProxyExceptionMetadata {}
 
-struct PayloadProxiedExceptionMetadata {}
-
 struct PayloadAppUnknownExceptionMetdata {
   1: optional ErrorClassification errorClassification;
 }
 
 struct PayloadAnyExceptionMetadata {}
 
+@thrift.ReserveIds{ids = [3, 4, 5]}
 union PayloadExceptionMetadata {
   // If set response payload MUST contain serialized declared exception.
   1: PayloadDeclaredExceptionMetadata declaredException;
@@ -345,9 +340,6 @@ union PayloadExceptionMetadata {
   // Deprecated:
   // replaced by PayloadAnyExceptionMetadata
   2: PayloadProxyExceptionMetadata DEPRECATED_proxyException;
-  // 3: Deprecated
-  // 4: Deprecated
-  // 5: Deprecated
   // If set response payload SHOULD be empty.
   // Supported in Rocket protocol version 8+
   6: PayloadAppUnknownExceptionMetdata appUnknownException;
@@ -383,9 +375,8 @@ struct QueueMetadata {
   2: optional i32 queueTimeoutMs;
 }
 
+@thrift.ReserveIds{ids = [1, 2, 11]}
 struct ResponseRpcMetadata {
-  // 1: Deprecated
-  // 2: Deprecated
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
   @cpp.Type{template = "folly::F14NodeMap"}
@@ -410,7 +401,6 @@ struct ResponseRpcMetadata {
   9: optional i32 streamId;
   // Set on a sampled basis for tracking queueing times.
   10: optional QueueMetadata queueMetadata;
-  // 11: Deprecated
   @thrift.Box
   12: optional FdMetadata fdMetadata;
   13: optional IOBufPtr frameworkMetadata;
@@ -520,6 +510,7 @@ struct StreamRpcError {
   4: optional StreamRpcErrorCode code;
 }
 
+@thrift.ReserveIds{ids = [4]}
 struct StreamPayloadMetadata {
   // The compression algorithm that was used to compress stream payload. MUST
   // be set iff stream payload is compressed. SHOULD match the algorithm set
@@ -532,7 +523,6 @@ struct StreamPayloadMetadata {
   // Metadata describing the type of stream payload. MUST be set for protocol
   // version 8+.
   3: optional PayloadMetadata payloadMetadata;
-  // 4: Deprecated
   @thrift.Box
   5: optional FdMetadata fdMetadata;
   // checksum metadata

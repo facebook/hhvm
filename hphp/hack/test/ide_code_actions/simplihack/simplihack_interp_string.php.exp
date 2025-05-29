@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Generate Code for SimpliHack (CodeActionKind: "") SELECTED
+Generate Code for SimpliHack (CodeActionKind: "quickfix") SELECTED
 
 JSON for selected code action:
 ------------------------------------------
@@ -27,7 +27,7 @@ JSON for selected code action:
   "data":{"isAI":true},
   "diagnostics":[],
   "edit":{"changes":{}},
-  "kind":"",
+  "kind":"quickfix",
   "title":"Generate Code for SimpliHack"
 }
 

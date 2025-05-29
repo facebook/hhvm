@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Fix Hack error inline - Invalid argument (CodeActionKind: "") SELECTED
+Fix Hack error inline - Invalid argument (CodeActionKind: "quickfix") SELECTED
 
 JSON for selected code action:
 ------------------------------------------
@@ -30,7 +30,7 @@ JSON for selected code action:
   "data":{"isAI":true},
   "diagnostics":[],
   "edit":{"changes":{}},
-  "kind":"",
+  "kind":"quickfix",
   "title":"Fix Hack error inline - Invalid argument"
 }
 

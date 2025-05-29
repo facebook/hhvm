@@ -141,7 +141,7 @@ let command_to_code_action Code_action_types.{ title; command_args } =
       Lsp.CodeAction.
         {
           title;
-          kind = Lsp.CodeActionKind.empty;
+          kind = Lsp.CodeActionKind.quickfix;
           diagnostics = [];
           action = BothEditThenCommand (edit, command);
           isAI = Some true;

@@ -4938,7 +4938,7 @@ function call_method(ClassWithFooBar $mc): void {
                     },
                     {
                         "title": "Fix Hack error inline - No instance method `foobaz` in `ClassWithFooBar`",
-                        "kind": "",
+                        "kind": "quickfix",
                         "diagnostics": [],
                         "edit": {"changes": {}},
                         "command": {

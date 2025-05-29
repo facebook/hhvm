@@ -112,7 +112,7 @@ using SerializableRecordFieldSet = std::map<FieldId, SerializableRecord>;
 using SerializableRecordList = std::vector<SerializableRecord>;
 using SerializableRecordSet =
     folly::F14FastSet<SerializableRecord, SerializableRecordHasher>;
-using SerializableRecordMap = folly::F14FastMap<
+using SerializableRecordMap = folly::F14VectorMap<
     SerializableRecord,
     SerializableRecord,
     SerializableRecordHasher>;

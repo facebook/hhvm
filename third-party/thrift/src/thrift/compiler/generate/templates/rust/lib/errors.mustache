@@ -338,7 +338,7 @@ pub mod {{service:snake}} {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 {{#function:sink_exceptions}}
-                Self::{{field:rust_name}}(ref inner) => {
+                Self::{{field:rust_name}}(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 {{/function:sink_exceptions}}
@@ -527,7 +527,7 @@ pub mod {{service:snake}} {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 {{#function:sink_final_response_exceptions}}
-                Self::{{field:rust_name}}(ref inner) => {
+                Self::{{field:rust_name}}(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 {{/function:sink_final_response_exceptions}}

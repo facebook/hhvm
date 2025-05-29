@@ -1234,7 +1234,7 @@ pub mod sink_service {
     impl ::std::error::Error for MethodSinkThrowSinkError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::ex(ref inner) => {
+                Self::ex(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(inner) => {
@@ -1735,7 +1735,7 @@ pub mod sink_service {
     impl ::std::error::Error for MethodFinalThrowSinkFinalError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::ex(ref inner) => {
+                Self::ex(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(inner) => {
@@ -1962,7 +1962,7 @@ pub mod sink_service {
     impl ::std::error::Error for MethodBothThrowSinkError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::ex(ref inner) => {
+                Self::ex(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(inner) => {
@@ -2125,7 +2125,7 @@ pub mod sink_service {
     impl ::std::error::Error for MethodBothThrowSinkFinalError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::ex(ref inner) => {
+                Self::ex(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(inner) => {

@@ -567,7 +567,7 @@ void ExecutionContext::registerShutdownFunction(const Variant& function,
 
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
                                                int error_types) {
-  Variant ret;
+  Variant ret{Variant::NullInit{}};
   if (!m_userErrorHandlers.empty()) {
     ret = m_userErrorHandlers.back().first;
   }
@@ -576,7 +576,7 @@ Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
 }
 
 Variant ExecutionContext::pushUserExceptionHandler(const Variant& function) {
-  Variant ret;
+  Variant ret{Variant::NullInit{}};
   if (!m_userExceptionHandlers.empty()) {
     ret = m_userExceptionHandlers.back();
   }

@@ -656,7 +656,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   CallCtx ctx;
   vm_decode_function(function, ctx);
   if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
-    return uninit_null();
+    return init_null();
   }
   return Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
@@ -690,13 +690,13 @@ Variant invoke_static_method(const String& s, const String& method,
   HPHP::Class* class_ = Class::lookup(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
-    return uninit_null();
+    return init_null();
   }
   const HPHP::Func* f = class_->lookupMethod(method.get());
   if (f == nullptr || !f->isStaticInPrologue() ||
     (!isContainer(params) && !params.isNull())) {
     o_invoke_failed(s.data(), method.data(), fatal);
-    return uninit_null();
+    return init_null();
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, nullptr, class_, RuntimeCoeffects::fixme())
@@ -704,8 +704,8 @@ Variant invoke_static_method(const String& s, const String& method,
   return ret;
 }
 
-Variant o_invoke_failed(const char *cls, const char *meth,
-                        bool fatal /* = true */) {
+void o_invoke_failed(const char *cls, const char *meth,
+                     bool fatal /* = true */) {
    if (fatal) {
     string msg = "Unknown method ";
     msg += cls;
@@ -714,7 +714,6 @@ Variant o_invoke_failed(const char *cls, const char *meth,
     raise_fatal_error(msg.c_str());
   } else {
     raise_warning("call_user_func to non-existent method %s::%s", cls, meth);
-    return false;
   }
 }
 
@@ -1068,11 +1067,6 @@ void raise_invalid_argument_warning(const char *fmt, ...) {
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   raise_warning("Invalid argument: %s", msg.c_str());
-}
-
-Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
-  raise_error("Attempt to unset static property %s::$%s", s, prop);
-  return uninit_null();
 }
 
 Variant unserialize_ex(const char* str, int len,

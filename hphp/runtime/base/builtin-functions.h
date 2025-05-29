@@ -213,8 +213,7 @@ Variant invoke(const String& function, const Variant& params,
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal = true);
 
-Variant o_invoke_failed(const char *cls, const char *meth,
-                        bool fatal = true);
+void o_invoke_failed(const char *cls, const char *meth, bool fatal = true);
 
 bool is_constructor_name(const char* func);
 [[noreturn]] void throw_instance_method_fatal(const char *name);
@@ -305,11 +304,6 @@ void raise_expected_array_warning(const char* fn = nullptr);
 void raise_expected_array_or_collection_warning(const char* fn = nullptr);
 void raise_invalid_argument_warning(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
   ATTRIBUTE_PRINTF(1,2) __attribute__((__cold__));
-
-/**
- * Unsetting ClassName::StaticProperty.
- */
-Variant throw_fatal_unset_static_property(const char *s, const char *prop);
 
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"

@@ -449,7 +449,9 @@ Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
   /* It's possible to get a ReflectionProperty for a property which
    * no longer exists.  Silentyly fail to match PHP5 behavior
    */
-  return obj->o_get(prop, false /* error */, cls);
+  auto ret = obj->o_get(prop, false /* error */, cls);
+  if (ret.isInitialized()) return ret;
+  return init_null();
 }
 
 void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,

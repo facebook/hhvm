@@ -245,7 +245,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
   bc_init_num(&result);
   SCOPE_EXIT { bc_free_num(&result); };
   php_str2num(&result, (char*)operand.data());
-  Variant ret;
+  Variant ret{Variant::NullInit{}};
   if (bc_sqrt(&result, scale) != 0) {
     if (result->n_scale > scale) {
       result->n_scale = scale;

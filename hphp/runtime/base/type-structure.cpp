@@ -387,49 +387,56 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
     }
   }
 
+  auto addTypeAndMaybeNamespace = [](std::string& name, TypeStructure::TSDisplayType type, const std::string& typeStr) {
+    if (!forDisplay(type)) {
+      name += s_hh;
+    }
+    name += typeStr;
+  };
+
   TypeStructure::Kind kind = TypeStructure::kind(arr);
   switch (kind) {
     case TypeStructure::Kind::T_null:
-      name += forDisplay(type) ? s_null : s_hh + s_null;
+      addTypeAndMaybeNamespace(name, type, s_null);
       break;
     case TypeStructure::Kind::T_void:
-      name += forDisplay(type) ? s_void : s_hh + s_void;
+      addTypeAndMaybeNamespace(name, type, s_void);
       break;
     case TypeStructure::Kind::T_int:
-      name += forDisplay(type) ? s_int : s_hh + s_int;
+      addTypeAndMaybeNamespace(name, type, s_int);
       break;
     case TypeStructure::Kind::T_bool:
-      name += forDisplay(type) ? s_bool : s_hh + s_bool;
+      addTypeAndMaybeNamespace(name, type, s_bool);
       break;
     case TypeStructure::Kind::T_float:
-      name += forDisplay(type) ? s_float : s_hh + s_float;
+      addTypeAndMaybeNamespace(name, type, s_float);
       break;
     case TypeStructure::Kind::T_string:
-      name += forDisplay(type) ? s_string : s_hh + s_string;
+      addTypeAndMaybeNamespace(name, type, s_string);
       break;
     case TypeStructure::Kind::T_resource:
-      name += forDisplay(type) ? s_resource : s_hh + s_resource;
+      addTypeAndMaybeNamespace(name, type, s_resource);
       break;
     case TypeStructure::Kind::T_num:
-      name += forDisplay(type) ? s_num : s_hh + s_num;
+      addTypeAndMaybeNamespace(name, type, s_num);
       break;
     case TypeStructure::Kind::T_arraykey:
-      name += forDisplay(type) ? s_arraykey : s_hh + s_arraykey;
+      addTypeAndMaybeNamespace(name, type, s_arraykey);
       break;
     case TypeStructure::Kind::T_nothing:
-      name += forDisplay(type) ? s_nothing : s_hh + s_nothing;
+      addTypeAndMaybeNamespace(name, type, s_nothing);
       break;
     case TypeStructure::Kind::T_noreturn:
-      name += forDisplay(type) ? s_noreturn : s_hh + s_noreturn;
+      addTypeAndMaybeNamespace(name, type, s_noreturn);
       break;
     case TypeStructure::Kind::T_mixed:
-      name += forDisplay(type) ? s_mixed : s_hh + s_mixed;
+      addTypeAndMaybeNamespace(name, type, s_mixed);
       break;
     case TypeStructure::Kind::T_dynamic:
-      name += forDisplay(type) ? s_dynamic : s_hh + s_dynamic;
+      addTypeAndMaybeNamespace(name, type, s_dynamic);
       break;
     case TypeStructure::Kind::T_nonnull:
-      name += forDisplay(type) ? s_nonnull : s_hh + s_nonnull;
+      addTypeAndMaybeNamespace(name, type, s_nonnull);
       break;
     case TypeStructure::Kind::T_tuple:
       tupleTypeName(arr, name, type);
@@ -450,7 +457,7 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       genericTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_shape:
-      name += forDisplay(type) ? s_shape : s_hh + s_shape;
+      addTypeAndMaybeNamespace(name, type, s_shape);
       shapeTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_dict:

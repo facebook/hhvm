@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/ldap/ext_ldap.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"

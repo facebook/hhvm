@@ -56,19 +56,22 @@ func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 		return &responsePayload{metadata: &rpcmetadata.ResponseRpcMetadata{}, data: []byte{}}, nil
 	}
 	res := &responsePayload{metadata: &rpcmetadata.ResponseRpcMetadata{}, data: msg.Data()}
-	var err error
+
 	metadataBytes, ok := msg.Metadata()
-	if ok {
-		if err := format.DecodeCompact(metadataBytes, res.metadata); err != nil {
-			return nil, err
-		}
-		res.data, err = maybeDecompress(res.data, res.metadata.GetCompression())
-		if err != nil {
-			return nil, fmt.Errorf("response payload decompression failed: %w", err)
-		}
-		if res.metadata.PayloadMetadata != nil && res.metadata.PayloadMetadata.ExceptionMetadata != nil {
-			res.exception = newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)
-		}
+	if !ok {
+		return res, nil
+	}
+
+	var err error
+	if err := format.DecodeCompact(metadataBytes, res.metadata); err != nil {
+		return nil, err
+	}
+	res.data, err = maybeDecompress(res.data, res.metadata.GetCompression())
+	if err != nil {
+		return nil, fmt.Errorf("response payload decompression failed: %w", err)
+	}
+	if res.metadata.PayloadMetadata != nil && res.metadata.PayloadMetadata.ExceptionMetadata != nil {
+		res.exception = newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)
 	}
 	return res, res.Error()
 }

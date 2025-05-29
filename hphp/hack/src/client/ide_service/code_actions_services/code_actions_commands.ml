@@ -157,14 +157,11 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   (* LSP uses 0-based line numbers *)
   let webview_start_line = Pos.line override_selection - 1 in
   let display_prompt = Format.sprintf {|Fix inline - %s|} (snd claim) in
-  let (user_prompt, legacy_user_prompt) =
-    let legacy_user_prompt =
-      create_legacy_user_prompt override_selection user_error
-    in
+  let user_prompt =
     if is_parser_error (User_error.get_code user_error) then
-      (legacy_user_prompt, legacy_user_prompt)
+      create_legacy_user_prompt override_selection user_error
     else
-      (create_user_prompt override_selection user_error, legacy_user_prompt)
+      create_user_prompt override_selection user_error
   in
   let predefined_prompt =
     Code_action_types.(
@@ -184,10 +181,7 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let extras =
     Hh_json.(
       JSON_Object
-        [
-          ("lineAgnosticHash", string_ (Printf.sprintf "%x" line_agnostic_hash));
-          ("legacyUserPrompt", string_ legacy_user_prompt);
-        ])
+        [("lineAgnosticHash", string_ (Printf.sprintf "%x" line_agnostic_hash))])
   in
   let command_args =
     Code_action_types.(

@@ -4959,10 +4959,7 @@ function call_method(ClassWithFooBar $mc): void {
                                         "end": {"line": 8, "character": 1},
                                     },
                                     "webviewStartLine": 6,
-                                    "extras": {
-                                        "lineAgnosticHash": "6c30c21bea1128b0",
-                                        "legacyUserPrompt": "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->[DIAGNOSTIC_START]foobar[DIAGNOSTIC_END]();\n 9 | }\n```\n</SNIPPET>\n<DIAGNOSTIC>\nNo instance method `foobaz` in `ClassWithFooBar`\n</DIAGNOSTIC>\n<HINT>\nDid you mean `foobar` instead?\nlocation uri:${root_path}/code_action_missing_method.php\n</HINT>\n<HINT>\nThis is why I think it is an object of type ClassWithFooBar\nlocation uri:${root_path}/code_action_missing_method.php\n</HINT>\n<HINT>\nDeclaration of `ClassWithFooBar` is here\nlocation uri:${root_path}/code_action_missing_method.php\n</HINT>\nEdit <SNIPPET> in a way that would fix that lint.\n   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,\n   any further suggestions can be added in the explanation section.",
-                                    },
+                                    "extras": {"lineAgnosticHash": "6c30c21bea1128b0"},
                                 }
                             ],
                         },

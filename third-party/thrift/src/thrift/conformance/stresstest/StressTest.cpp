@@ -16,7 +16,6 @@
 
 #include <thrift/conformance/stresstest/StressTest.h>
 
-#include <fmt/core.h>
 #include <folly/init/Init.h>
 
 #include <thrift/conformance/stresstest/client/TestRunner.h>

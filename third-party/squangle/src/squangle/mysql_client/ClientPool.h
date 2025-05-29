@@ -89,10 +89,6 @@ class ClientPool {
     return client_pool->getClient(key);
   }
 
-  void setPerKeyLimit(int limit) {
-    client_pool_->setPerKeyLimit(limit);
-  }
-
  private:
   std::vector<std::shared_ptr<TClient>> client_pool_;
 };

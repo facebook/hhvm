@@ -36,6 +36,9 @@ class FakeStreamHandle
   folly::CancellationToken getCancelToken() override {
     return cs_.getToken();
   }
+  folly::Optional<uint32_t> getWriteErr() {
+    return writeErr_;
+  }
   folly::SemiFuture<WebTransport::StreamData> readStreamData() override {
     XCHECK(!promise_) << "One read at a time";
     if (writeErr_) {

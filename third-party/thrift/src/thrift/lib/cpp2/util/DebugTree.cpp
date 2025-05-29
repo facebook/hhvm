@@ -296,7 +296,15 @@ scope DebugTree<protocol::Value>::operator()(
 }
 
 namespace {
-std::string toDebugString(const DefinitionNode& definition) {
+std::string formatDefinition(
+    std::string_view type, const DefinitionNode& definition) {
+  return fmt::format(
+      "<{}: {} ({}.thrift)>",
+      type,
+      definition.name(),
+      definition.program().name());
+}
+std::string formatDefinition(const DefinitionNode& definition) {
   std::string_view kindString = definition.visit(
       [](const StructNode&) { return "Struct"; },
       [](const UnionNode&) { return "Union"; },
@@ -306,11 +314,7 @@ std::string toDebugString(const DefinitionNode& definition) {
       [](const ConstantNode&) { return "Constant"; },
       [](const ServiceNode&) { return "Service"; },
       [](const InteractionNode&) { return "Interaction"; });
-  return fmt::format(
-      "Definition(kind={}, name='{}', program='{}.thrift')",
-      kindString,
-      definition.name(),
-      definition.program().name());
+  return formatDefinition(kindString, definition);
 }
 } // namespace
 
@@ -335,7 +339,7 @@ scope DebugTree<protocol::Object>::operator()(
 
   const auto* node = ifStructured(trueType);
   auto ret = scope::make_root(
-      "{}", node ? toDebugString(node->definition()) : "<UNKNOWN STRUCT>");
+      "{}", node ? formatDefinition(node->definition()) : "<UNKNOWN STRUCT>");
   for (auto id : ids) {
     auto next = scope::make_root("{}", getFieldName(node, id));
     next.make_child() =
@@ -656,9 +660,15 @@ static scope debugTreeForDynamicStructurePatch(
     }
   };
 
+  std::string_view typeName = IsUnion ? "UnionPatch" : "StructPatch";
+  std::string name = fmt::format("<{}>", typeName);
+  if (auto p = ifStructured(type)) {
+    name = formatDefinition(typeName, p->definition());
+  }
+
   Visitor v{finder, type};
   patch.customVisit(v);
-  return v.finalize(IsUnion ? "<UnionPatch>" : "<StructPatch>");
+  return v.finalize(std::move(name));
 }
 
 scope DebugTree<protocol::DynamicStructPatch>::operator()(

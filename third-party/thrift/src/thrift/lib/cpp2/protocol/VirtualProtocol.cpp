@@ -19,7 +19,6 @@
 #include <stdexcept>
 
 #include <folly/Conv.h>
-#include <folly/Memory.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 

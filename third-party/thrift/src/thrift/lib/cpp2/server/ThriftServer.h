@@ -2460,15 +2460,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       folly::observer::Observer<wangle::SSLContextConfig> contextObserver) {
     sslContextObserver_ = folly::observer::makeObserver(
         [observer = std::move(contextObserver),
-         tlsRevocationObserver = enableTLSCertRevocation(),
-         tlsRevocationEnforcementObserver = enforceTLSCertRevocation(),
          hybridKexObserver = enableHybridKex(),
          aegisObserver = enableAegis(),
          pskModeObserver = preferPskKe(),
          dcReceiveObserver = enableReceivingDelegatedCreds(),
          dcObserver = enablePresentingDelegatedCredentials()]() {
-          (void)**tlsRevocationObserver;
-          (void)**tlsRevocationEnforcementObserver;
           (void)**hybridKexObserver;
           (void)**aegisObserver;
           (void)**pskModeObserver;
@@ -2677,9 +2673,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   static folly::observer::Observer<bool> enableStopTLS();
-
-  static folly::observer::Observer<bool> enableTLSCertRevocation();
-  static folly::observer::Observer<bool> enforceTLSCertRevocation();
 
   static folly::observer::Observer<bool> enableReceivingDelegatedCreds();
 

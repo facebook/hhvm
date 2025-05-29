@@ -90,9 +90,6 @@ FOLLY_GFLAGS_DEFINE_bool(
 
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
 
-THRIFT_FLAG_DEFINE_bool(enable_mrl_check_for_thrift_server, false);
-THRIFT_FLAG_DEFINE_bool(enforce_mrl_check_for_thrift_server, false);
-
 THRIFT_FLAG_DEFINE_bool(dump_snapshot_on_long_shutdown, true);
 
 THRIFT_FLAG_DEFINE_bool(server_check_unimplemented_extra_interfaces, true);
@@ -2383,14 +2380,6 @@ ThriftServer::defaultNextProtocols() {
 
 folly::observer::Observer<bool> ThriftServer::enableStopTLS() {
   return THRIFT_FLAG_OBSERVE(server_enable_stoptls);
-}
-
-folly::observer::Observer<bool> ThriftServer::enableTLSCertRevocation() {
-  return THRIFT_FLAG_OBSERVE(enable_mrl_check_for_thrift_server);
-}
-
-folly::observer::Observer<bool> ThriftServer::enforceTLSCertRevocation() {
-  return THRIFT_FLAG_OBSERVE(enforce_mrl_check_for_thrift_server);
 }
 
 folly::observer::Observer<bool> ThriftServer::enableReceivingDelegatedCreds() {

@@ -86,21 +86,38 @@ let user_prompt_prefix buf ctxt_pos user_error =
   in
   Buffer.add_string
     buf
-    "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n";
+    "The following snippet of Hack code contains a subtyping error. Line numbers have been inlucded for your reference.";
+  Buffer.add_string
+    buf
+    "You should focus on this code when suggesting a fix and ignore what the user has selected:\n<SNIPPET>\n```hack\n";
   extract_prompt_context buf ~ctxt_pos ~claim_pos;
   Buffer.add_string buf "```\n</SNIPPET>\n"
 
 let user_prompt_suffix buf =
   Buffer.add_string
     buf
-    {|Edit <SNIPPET> in a way that would fix that lint.
-   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,
-   any further suggestions can be added in the explanation section.|}
+    "Edit the code contained in the <SNIPPET> in a way that would fix the error. The suggested edit should be valid Hack code and shouldn't contain line numbers shown in the diagnostic message.\n";
+  Buffer.add_string
+    buf
+    "If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>, any further suggestions can be added in the explanation section."
 
 let extended_diagnostics buf user_error =
-  Buffer.add_string buf "<DIAGNOSTIC>\n";
+  Buffer.add_string
+    buf
+    "The following diagnostic contains a detailed description of how the typechecker discovered the error.\n";
+  Buffer.add_string
+    buf
+    "Each step describes how a type flowed from hints to expressions or how the subtype error was discovered when checking two types.\n";
+  Buffer.add_string
+    buf
+    "The contained code fragments highlight relevant hints, statements and expression using the characters '»' and '«' to indicate the code element .\n";
+  Buffer.add_string
+    buf
+    "The code fragments are given with line numbers to help you understand the context of the error. You should never use those line numbers in suggested edits.\n";
+
+  Buffer.add_string buf "<DIAGNOSTIC>\n\n```hack\n";
   Buffer.add_string buf (Extended_error_formatter.to_string user_error);
-  Buffer.add_string buf "\n</DIAGNOSTIC>\n";
+  Buffer.add_string buf "\n```\n\n</DIAGNOSTIC>\n\n";
   match User_error.custom_errors user_error with
   | [] -> ()
   | msgs ->
@@ -136,7 +153,7 @@ let create_legacy_user_prompt selection user_error =
   user_prompt_suffix buf;
   Buffer.contents buf
 
-let is_parser_error code = code >= 1000 && code < 2000
+let is_subtyping_error code = code >= 4000 && code < 5000
 
 let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let claim = User_error.claim_message user_error in
@@ -156,12 +173,13 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   in
   (* LSP uses 0-based line numbers *)
   let webview_start_line = Pos.line override_selection - 1 in
-  let display_prompt = Format.sprintf {|Fix inline - %s|} (snd claim) in
+  let display_prompt = Format.sprintf {|Devmate Quick Fix - %s|} (snd claim) in
+  (* Only use extended reasons for subtyping errors *)
   let user_prompt =
-    if is_parser_error (User_error.get_code user_error) then
-      create_legacy_user_prompt override_selection user_error
-    else
+    if is_subtyping_error (User_error.get_code user_error) then
       create_user_prompt override_selection user_error
+    else
+      create_legacy_user_prompt override_selection user_error
   in
   let predefined_prompt =
     Code_action_types.(

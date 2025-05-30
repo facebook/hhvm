@@ -21,10 +21,12 @@ from later.unittest import TestCase
 from thrift.lib.python.server.interceptor.test.interceptors import (
     CountingInterceptor,
     OnConnectThrowsInterceptor,
+    OnRequestThrowsInterceptor,
+    OnResponseThrowsInterceptor,
 )
 from thrift.py3.server import SocketAddress
 from thrift.python.client import get_client
-from thrift.python.exceptions import TransportError
+from thrift.python.exceptions import ApplicationError, TransportError
 from thrift.python.server import ServiceInterface, ThriftServer
 from thrift.python.server_impl.interceptor.server_module import PythonServerModule
 
@@ -119,12 +121,14 @@ class CountingInterceptorTest(TestCase):
         self.assertEqual(self.counts.onConnectClosed, 2)
         self.assertEqual(self.counts.onConnect, 2)
         self.assertEqual(len(self.observer.connection_states), 2)
-        # BAD: onRequest and onResponse are not yet invoked by PythonAsyncProcessor
-        self.assertEqual(self.counts.onRequest, 0)
+        self.assertEqual(self.counts.onRequest, 2)
+        self.assertEqual(self.observer.services, {"BasicService"})
+        self.assertEqual(self.observer.defining_services, {"BasicService"})
+        self.assertEqual(self.observer.methods, {"toLowerSnake"})
         self.assertEqual(self.counts.onResponse, 2)
 
 
-class ThrowingInterceptorTest(TestCase):
+class OnConnectThrowsInterceptorTest(TestCase):
     def setUp(self) -> None:
         self.observer = OnConnectThrowsInterceptor()
         self.module = PythonServerModule("TestModule")
@@ -145,3 +149,60 @@ class ThrowingInterceptorTest(TestCase):
                     await client.toLowerSnake("HelloWorld")
 
         self.assertEqual(self.observer.on_connection_throws, 1)
+
+
+class OnRequestThrowsInterceptorTest(TestCase):
+    def setUp(self) -> None:
+        self.observer = OnRequestThrowsInterceptor()
+        self.module = PythonServerModule("TestModule")
+        self.module.add_service_interceptor(
+            PyObservableServiceInterceptor(self.observer)
+        )
+        self.server = TestServer(handler=Handler(), ip="::1")
+        self.server.server.add_server_module(self.module)
+        super().setUp()
+
+    async def test_basic(self) -> None:
+        async with self.server as server_addr:
+            assert server_addr.port and server_addr.ip
+            async with get_client(
+                BasicService, host=server_addr.ip, port=server_addr.port
+            ) as client:
+                with self.assertRaisesRegex(
+                    ApplicationError,
+                    "OnRequestThrowsInterceptor.*Expect the unexpected",
+                ):
+                    await client.toLowerSnake("HelloWorld")
+
+        self.assertEqual(self.observer.on_request_throws, 1)
+        self.assertEqual(self.observer.on_response, 1)
+        self.assertEqual(len(self.observer.response_errors), 1)
+        for err_msg in self.observer.response_errors:
+            print(err_msg)
+            self.assertIn("Expect the unexpected", err_msg)
+
+
+class OnResponseThrowsInterceptorTest(TestCase):
+    def setUp(self) -> None:
+        self.observer = OnResponseThrowsInterceptor()
+        self.module = PythonServerModule("TestModule")
+        self.module.add_service_interceptor(
+            PyObservableServiceInterceptor(self.observer)
+        )
+        self.server = TestServer(handler=Handler(), ip="::1")
+        self.server.server.add_server_module(self.module)
+        super().setUp()
+
+    async def test_basic(self) -> None:
+        async with self.server as server_addr:
+            assert server_addr.port and server_addr.ip
+            async with get_client(
+                BasicService, host=server_addr.ip, port=server_addr.port
+            ) as client:
+                with self.assertRaisesRegex(
+                    ApplicationError,
+                    "OnResponseThrowsInterceptor.*Expect the unexpected",
+                ):
+                    await client.toLowerSnake("HelloWorld")
+
+        self.assertEqual(self.observer.on_response_throws, 1)

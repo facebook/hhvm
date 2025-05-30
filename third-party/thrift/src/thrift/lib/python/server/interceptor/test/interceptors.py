@@ -43,6 +43,7 @@ class CountingInterceptor(AbstractServiceInterceptor[ConnectionState, RequestSta
     def __init__(self) -> None:
         self._counts = CountingInterceptor.Counts()
         self.services: set[str] = set()
+        self.defining_services: set[str] = set()
         self.methods: set[str] = set()
         self.connection_states: set[ConnectionState] = set()
         self.request_states: set[RequestState] = set()
@@ -71,6 +72,7 @@ class CountingInterceptor(AbstractServiceInterceptor[ConnectionState, RequestSta
     ) -> RequestState:
         self.counts.onRequest += 1
         self.services.add(request_info.service_name)
+        self.defining_services.add(request_info.defining_service_name)
         self.methods.add(request_info.method_name)
 
         assert connection_state in self.connection_states
@@ -88,16 +90,19 @@ class CountingInterceptor(AbstractServiceInterceptor[ConnectionState, RequestSta
         self._counts.onResponse += 1
 
         assert connection_state in self.connection_states, "connection_state unknown"
-        # BAD: request_state should match onRequest, but it hasn't been invoked yet
-        assert request_state not in self.request_states, "request_state unknown"
+        assert request_state in self.request_states, "request_state unknown"
         assert response_info is not None, "response_info is not None"
         assert response_info.exception is None, "exception should be None"
-        # assert (
-        #     response_info.service_name == request_state.info.service_name
-        # ), "service name mismatch"
-        # assert (
-        #     response_info.method_name == request_state.info.method_name
-        # ), "method name mismatch"
+        assert (
+            response_info.service_name == request_state.info.service_name
+        ), "service name mismatch"
+        assert (
+            response_info.defining_service_name
+            == request_state.info.defining_service_name
+        ), "service name mismatch"
+        assert (
+            response_info.method_name == request_state.info.method_name
+        ), "method name mismatch"
 
 
 class OnConnectThrowsInterceptor(
@@ -108,4 +113,45 @@ class OnConnectThrowsInterceptor(
 
     def onConnection(self, connection_info: ConnectionInfo) -> ConnectionState:
         self.on_connection_throws += 1
+        raise RuntimeError("Expect the unexpected")
+
+
+class OnRequestThrowsInterceptor(
+    AbstractServiceInterceptor[ConnectionState, RequestState]
+):
+    def __init__(self) -> None:
+        self.on_request_throws: int = 0
+        self.on_response: int = 0
+        self.response_errors: list[str] = []
+
+    def onRequest(
+        self, connection_state: ConnectionState, request_info: RequestInfo
+    ) -> RequestState:
+        self.on_request_throws += 1
+        raise RuntimeError("Expect the unexpected")
+
+    def onResponse(
+        self,
+        request_state: RequestState,
+        connection_state: ConnectionState,
+        response_info: ResponseInfo,
+    ) -> None:
+        self.on_response += 1
+        if response_info.exception is not None:
+            self.response_errors.append(response_info.exception)
+
+
+class OnResponseThrowsInterceptor(
+    AbstractServiceInterceptor[ConnectionState, RequestState]
+):
+    def __init__(self) -> None:
+        self.on_response_throws: int = 0
+
+    def onResponse(
+        self,
+        request_state: RequestState,
+        connection_state: ConnectionState,
+        response_info: ResponseInfo,
+    ) -> None:
+        self.on_response_throws += 1
         raise RuntimeError("Expect the unexpected")

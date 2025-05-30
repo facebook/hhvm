@@ -23,6 +23,10 @@
 
 namespace apache::thrift::python {
 
+using apache::thrift::detail::processServiceInterceptorsOnRequest;
+using apache::thrift::detail::ServiceInterceptorOnRequestArguments;
+using apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest;
+
 namespace {
 
 void do_import() {
@@ -38,6 +42,13 @@ auto get_deserialize_error_function(apache::thrift::ProtocolType protocol) {
             apache::thrift::BinaryProtocolWriter>
       : apache::thrift::detail::ap::process_handle_exn_deserialization<
             apache::thrift::CompactProtocolWriter>;
+}
+
+// C++ ServiceInterceptors (i.e., those installed via cpp Service Framework)
+// are invoked without serializing arguments.
+ServiceInterceptorOnRequestArguments emptyInterceptorsArguments() {
+  static std::tuple empty = std::make_tuple();
+  return ServiceInterceptorOnRequestArguments(empty);
 }
 
 } // namespace
@@ -385,8 +396,23 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestOneway(
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind,
     apache::thrift::HandlerCallbackBase::Ptr callback) {
-  return handlePythonServerCallbackOneway(
-      protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  if (!shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    return handlePythonServerCallbackOneway(
+        protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  }
+  return processServiceInterceptorsOnRequest(
+             *callback, emptyInterceptorsArguments())
+      .semi()
+      // see discussion below about why we don't use `defer`
+      .deferValue([this,
+                   protocol,
+                   ctx,
+                   request = std::move(serializedRequest),
+                   kind,
+                   callback](auto&&) mutable {
+        return handlePythonServerCallbackOneway(
+            protocol, ctx, std::move(request), kind, std::move(callback));
+      });
 }
 
 folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestStreaming(
@@ -397,8 +423,23 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestStreaming(
     ::apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<
         std::unique_ptr<::folly::IOBuf>,
         std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
-  return handlePythonServerCallbackStreaming(
-      protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  if (!shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    return handlePythonServerCallbackStreaming(
+        protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  }
+  return processServiceInterceptorsOnRequest(
+             *callback, emptyInterceptorsArguments())
+      .semi()
+      // see discussion below about why we don't use `defer`
+      .deferValue([this,
+                   protocol,
+                   ctx,
+                   request = std::move(serializedRequest),
+                   kind,
+                   callback](auto&&) mutable {
+        return handlePythonServerCallbackStreaming(
+            protocol, ctx, std::move(request), kind, std::move(callback));
+      });
 }
 
 folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestResponse(
@@ -407,8 +448,29 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestResponse(
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind,
     HandlerCallback<std::unique_ptr<folly::IOBuf>>::Ptr callback) {
-  return handlePythonServerCallback(
-      protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  if (!shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    return handlePythonServerCallback(
+        protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  }
+
+  return processServiceInterceptorsOnRequest(
+             *callback, emptyInterceptorsArguments())
+      .semi()
+      // It may appear that we're discarding exception result of onRequest
+      // interceptor, but it's actually caught via throw_wrapped, which
+      // invokes sendException to report the callback completed with exception,
+      // thereby invoking the onResponse interceptor.
+      // Explicitly handling it here via `defer` + `callback->exception(...)`
+      // results in double invocation.
+      .deferValue([this,
+                   protocol,
+                   ctx,
+                   request = std::move(serializedRequest),
+                   kind,
+                   callback](auto&&) mutable {
+        return handlePythonServerCallback(
+            protocol, ctx, std::move(request), kind, callback);
+      });
 }
 
 folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(

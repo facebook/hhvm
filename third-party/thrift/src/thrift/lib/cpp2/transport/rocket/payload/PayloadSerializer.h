@@ -17,6 +17,7 @@
 #pragma once
 
 #include <variant>
+#include <folly/GLog.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/ChecksumPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/CustomCompressionPayloadSerializerStrategy.h>
@@ -263,6 +264,17 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport) {
+    if (!supportsChecksum()) {
+      if (metadata->checksum().has_value() &&
+          metadata->checksum()->algorithm().value() !=
+              ChecksumAlgorithm::NONE) {
+        FB_LOG_ONCE(WARNING)
+            << "Checksum is not supported, but checksum was set";
+        Checksum c;
+        c.algorithm() = ChecksumAlgorithm::NONE;
+        metadata->checksum() = c;
+      }
+    }
     return visit([&](auto& strategy) {
       return strategy.template packWithFds<Metadata>(
           metadata,

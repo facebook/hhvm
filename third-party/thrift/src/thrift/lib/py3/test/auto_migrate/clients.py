@@ -118,7 +118,6 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
                     easy(),
                 )
 
-    @brokenInAutoMigrate()
     def test_bad_unix_domain_socket_raises_TransportError_on_connection(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir, socket.socket(
             socket.AF_UNIX, socket.SOCK_STREAM
@@ -131,7 +130,6 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
                     pass
 
             loop = asyncio.get_event_loop()
-            # thrift-python raises RuntimeError from AsyncSocketException
             with self.assertRaises(TransportError) as cm:
                 loop.run_until_complete(connect_to_unlistened_socket())
             ex = cm.exception

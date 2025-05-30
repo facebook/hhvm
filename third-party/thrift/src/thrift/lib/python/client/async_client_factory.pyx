@@ -26,6 +26,7 @@ from cython.operator cimport dereference as deref
 from folly.futures cimport bridgeFutureWith
 from libc.stdint cimport uint32_t
 from libcpp.memory cimport make_shared, static_pointer_cast
+from thrift.python.exceptions cimport create_py_exception
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
 from thrift.python.client.async_client cimport AsyncClient
@@ -253,10 +254,7 @@ cdef void requestchannel_callback(
     cdef AsyncClient client = <object> userData
     future = client._connect_future
     if result.hasException():
-        try:
-            result.exception().throw_exception()
-        except Exception as pyex:
-            future.set_exception(pyex)
+        future.set_exception(create_py_exception(result.exception(), None))
     else:
         client.bind_client(cmove(result.value()))
         future.set_result(None)

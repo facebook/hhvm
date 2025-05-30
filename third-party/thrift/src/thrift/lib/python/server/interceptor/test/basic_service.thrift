@@ -19,3 +19,12 @@ namespace py3 thrift.python.service_interceptor
 service BasicService {
   string toLowerSnake(1: string input);
 }
+
+service OnewayService {
+  // @lint-ignore THRIFTCHECKS
+  oneway void toLowerSnake(1: string input);
+}
+
+service StreamingService {
+  stream<string> toLowerSnake(1: string input);
+}

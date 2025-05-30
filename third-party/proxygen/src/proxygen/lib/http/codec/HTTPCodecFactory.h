@@ -21,7 +21,6 @@ class HTTPCodecFactory {
  public:
   struct HTTP1xCodecConfig {
     bool forceHTTP1xCodecTo1_1{false};
-    std::list<std::string> allowedH1UpgradeProtocols;
   };
 
   struct HTTP2CodecConfig {

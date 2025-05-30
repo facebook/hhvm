@@ -62,13 +62,8 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
         return nullptr;
       }
 
-      auto codec = std::make_unique<HTTP1xCodec>(
+      return std::make_unique<HTTP1xCodec>(
           direction, config.h1.forceHTTP1xCodecTo1_1, config.strictValidation);
-      if (!isTLS && direction == TransportDirection::DOWNSTREAM &&
-          !config.h1.allowedH1UpgradeProtocols.empty()) {
-        codec->setAllowedUpgradeProtocols(config.h1.allowedH1UpgradeProtocols);
-      }
-      return codec;
     }
     case CodecProtocol::TUNNEL_LITE:
       LOG(WARNING) << __func__ << " doesn't support TUNNEL_LITE";

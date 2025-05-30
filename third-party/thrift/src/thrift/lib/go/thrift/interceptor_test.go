@@ -31,7 +31,7 @@ func dummyInterceptor(
 	methodName string,
 	pfunc types.ProcessorFunction,
 	args types.Struct,
-) (types.WritableStruct, types.ApplicationException) {
+) (types.WritableStruct, types.ApplicationExceptionIf) {
 	if methodName == "Echo" {
 		if echoArg, ok := args.(*dummyif.DummyEchoArgsDeprecated); ok {
 			echoArg.Value = echoArg.Value + "-intercepted"

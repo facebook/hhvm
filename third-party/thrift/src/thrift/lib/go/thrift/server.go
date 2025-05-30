@@ -66,7 +66,7 @@ func loadFn(stats *thriftstats.ServerStats) uint {
 	return uint(1000. * float64(working) / denominator)
 }
 
-var tooBusyResponse ApplicationException = NewApplicationException(
+var tooBusyResponse = NewApplicationException(
 	UNKNOWN_APPLICATION_EXCEPTION,
 	"server is too busy",
 )

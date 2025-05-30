@@ -23,7 +23,7 @@ import (
 
 func TestPrependError(t *testing.T) {
 	err := NewApplicationException(INTERNAL_ERROR, "original error")
-	err2, ok := PrependError("Prepend: ", err).(ApplicationException)
+	err2, ok := PrependError("Prepend: ", err).(ApplicationExceptionIf)
 	if !ok {
 		t.Fatal("Couldn't cast error ApplicationException")
 	}

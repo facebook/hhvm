@@ -33,7 +33,7 @@ type Interceptor func(
 	methodName string,
 	pfunc types.ProcessorFunction,
 	args types.Struct,
-) (types.WritableStruct, types.ApplicationException)
+) (types.WritableStruct, types.ApplicationExceptionIf)
 
 type interceptorProcessor struct {
 	// Embeds original Processor
@@ -80,6 +80,6 @@ type interceptorProcessorFunction struct {
 	methodName  string
 }
 
-func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationException) {
+func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
 	return pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
 }

@@ -133,7 +133,7 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -152,7 +152,7 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -269,7 +269,7 @@ func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -288,7 +288,7 @@ func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespFactoriesFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -405,7 +405,7 @@ func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, en
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -424,7 +424,7 @@ func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, en
     return err
 }
 
-func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -541,7 +541,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, resul
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -560,7 +560,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, resul
     return err
 }
 
-func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespInteractWithSharedDoSomeSimilarThings()
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {

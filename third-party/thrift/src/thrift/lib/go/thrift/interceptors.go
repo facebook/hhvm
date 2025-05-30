@@ -30,7 +30,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	switch n {
 	case 0:
 		return func(ctx context.Context, name string, pf types.ProcessorFunction,
-			args types.Struct) (types.WritableStruct, types.ApplicationException) {
+			args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
 
 			return pf.RunContext(ctx, args)
 		}
@@ -39,7 +39,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	}
 
 	return func(ctx context.Context, name string, pf types.ProcessorFunction,
-		args types.Struct) (types.WritableStruct, types.ApplicationException) {
+		args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
 
 		handler := &chainHandler{
 			last:         n - 1,
@@ -71,7 +71,7 @@ func (ch *chainHandler) Write(_ int32, _ types.WritableStruct, _ types.Encoder) 
 	return nil
 }
 
-func (ch *chainHandler) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationException) {
+func (ch *chainHandler) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
 	if ch.curI == ch.last {
 		return ch.origHandler.RunContext(ctx, args)
 	}

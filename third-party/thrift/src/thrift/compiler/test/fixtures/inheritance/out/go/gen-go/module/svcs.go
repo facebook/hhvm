@@ -131,7 +131,7 @@ func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -150,7 +150,7 @@ func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespMyRootDoRoot()
     err := p.handler.DoRoot(ctx)
     if err != nil {
@@ -249,7 +249,7 @@ func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, e
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -268,7 +268,7 @@ func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, e
     return err
 }
 
-func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespMyNodeDoMid()
     err := p.handler.DoMid(ctx)
     if err != nil {
@@ -367,7 +367,7 @@ func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -386,7 +386,7 @@ func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespMyLeafDoLeaf()
     err := p.handler.DoLeaf(ctx)
     if err != nil {

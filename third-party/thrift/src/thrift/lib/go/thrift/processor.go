@@ -51,7 +51,7 @@ func errorType(err error) string {
 	return et[len(et)-1]
 }
 
-func getProcessorFunction(processor Processor, messageType types.MessageType, name string) (types.ProcessorFunction, types.ApplicationException) {
+func getProcessorFunction(processor Processor, messageType types.MessageType, name string) (types.ProcessorFunction, types.ApplicationExceptionIf) {
 	if messageType != types.CALL && messageType != types.ONEWAY {
 		// case one: invalid message type
 		return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
@@ -72,7 +72,7 @@ func skipMessage(protocol Protocol) error {
 	return protocol.ReadMessageEnd()
 }
 
-func setRequestHeadersForError(protocol Protocol, err types.ApplicationException) {
+func setRequestHeadersForError(protocol Protocol, err types.ApplicationExceptionIf) {
 	protocol.setRequestHeader("uex", errorType(err))
 	protocol.setRequestHeader("uexw", err.Error())
 }
@@ -88,7 +88,7 @@ func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) 
 
 // sendException is a utility function to send the exception for the specified
 // method.
-func sendException(prot types.Encoder, name string, seqID int32, err types.ApplicationException) error {
+func sendException(prot types.Encoder, name string, seqID int32, err types.ApplicationExceptionIf) error {
 	if e2 := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); e2 != nil {
 		return e2
 	} else if e2 := err.Write(prot); e2 != nil {

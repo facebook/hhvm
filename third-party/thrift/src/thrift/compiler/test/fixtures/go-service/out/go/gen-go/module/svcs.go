@@ -505,7 +505,7 @@ func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -524,7 +524,7 @@ func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetEntity)
     result := newRespGetEntityGetEntity()
     retval, err := p.handler.GetEntity(ctx, args.R)
@@ -557,7 +557,7 @@ func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -576,7 +576,7 @@ func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetBool()
     retval, err := p.handler.GetBool(ctx)
     if err != nil {
@@ -608,7 +608,7 @@ func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -627,7 +627,7 @@ func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetByte()
     retval, err := p.handler.GetByte(ctx)
     if err != nil {
@@ -659,7 +659,7 @@ func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -678,7 +678,7 @@ func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetI16()
     retval, err := p.handler.GetI16(ctx)
     if err != nil {
@@ -710,7 +710,7 @@ func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -729,7 +729,7 @@ func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetI32()
     retval, err := p.handler.GetI32(ctx)
     if err != nil {
@@ -761,7 +761,7 @@ func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -780,7 +780,7 @@ func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetI64()
     retval, err := p.handler.GetI64(ctx)
     if err != nil {
@@ -812,7 +812,7 @@ func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -831,7 +831,7 @@ func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetDouble()
     retval, err := p.handler.GetDouble(ctx)
     if err != nil {
@@ -863,7 +863,7 @@ func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -882,7 +882,7 @@ func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetString()
     retval, err := p.handler.GetString(ctx)
     if err != nil {
@@ -914,7 +914,7 @@ func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -933,7 +933,7 @@ func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetBinary()
     retval, err := p.handler.GetBinary(ctx)
     if err != nil {
@@ -965,7 +965,7 @@ func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -984,7 +984,7 @@ func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetMap()
     retval, err := p.handler.GetMap(ctx)
     if err != nil {
@@ -1016,7 +1016,7 @@ func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1035,7 +1035,7 @@ func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetSet()
     retval, err := p.handler.GetSet(ctx)
     if err != nil {
@@ -1067,7 +1067,7 @@ func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1086,7 +1086,7 @@ func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespGetEntityGetList()
     retval, err := p.handler.GetList(ctx)
     if err != nil {
@@ -1118,7 +1118,7 @@ func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1137,7 +1137,7 @@ func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetLegacyStuff)
     result := newRespGetEntityGetLegacyStuff()
     retval, err := p.handler.GetLegacyStuff(ctx, args.NumPos, args.NumNeg1, args.NumNeg2)
@@ -1170,7 +1170,7 @@ func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1189,7 +1189,7 @@ func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.Writ
     return err
 }
 
-func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetCtxCollision)
     result := newRespGetEntityGetCtxCollision()
     retval, err := p.handler.GetCtxCollision(ctx, args.Ctx)
@@ -1222,7 +1222,7 @@ func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.Wri
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1241,7 +1241,7 @@ func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.Wri
     return err
 }
 
-func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetCtx1Collision)
     result := newRespGetEntityGetCtx1Collision()
     retval, err := p.handler.GetCtx1Collision(ctx, args.Ctx, args.Ctx1)
@@ -1274,7 +1274,7 @@ func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1293,7 +1293,7 @@ func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.
     return err
 }
 
-func (p *procFuncGetEntityGetContextCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetContextCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetContextCollision)
     result := newRespGetEntityGetContextCollision()
     retval, err := p.handler.GetContextCollision(ctx, args.Context)
@@ -1326,7 +1326,7 @@ func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1345,7 +1345,7 @@ func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.Writ
     return err
 }
 
-func (p *procFuncGetEntityGetOutCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetOutCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetOutCollision)
     result := newRespGetEntityGetOutCollision()
     retval, err := p.handler.GetOutCollision(ctx, args.Out)
@@ -1378,7 +1378,7 @@ func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.Wri
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1397,7 +1397,7 @@ func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.Wri
     return err
 }
 
-func (p *procFuncGetEntityGetOut1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetOut1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetOut1Collision)
     result := newRespGetEntityGetOut1Collision()
     retval, err := p.handler.GetOut1Collision(ctx, args.Out, args.Out1)
@@ -1430,7 +1430,7 @@ func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1449,7 +1449,7 @@ func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncGetEntityGetInCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetInCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetInCollision)
     result := newRespGetEntityGetInCollision()
     retval, err := p.handler.GetInCollision(ctx, args.In)
@@ -1482,7 +1482,7 @@ func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1501,7 +1501,7 @@ func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.Writ
     return err
 }
 
-func (p *procFuncGetEntityGetIn1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetIn1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetIn1Collision)
     result := newRespGetEntityGetIn1Collision()
     retval, err := p.handler.GetIn1Collision(ctx, args.In, args.In1)
@@ -1534,7 +1534,7 @@ func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1553,7 +1553,7 @@ func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.Writ
     return err
 }
 
-func (p *procFuncGetEntityGetErrCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetErrCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetErrCollision)
     result := newRespGetEntityGetErrCollision()
     retval, err := p.handler.GetErrCollision(ctx, args.Err)
@@ -1586,7 +1586,7 @@ func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.Wri
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -1605,7 +1605,7 @@ func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.Wri
     return err
 }
 
-func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqGetEntityGetErr1Collision)
     result := newRespGetEntityGetErr1Collision()
     retval, err := p.handler.GetErr1Collision(ctx, args.Err, args.Err1)

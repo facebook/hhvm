@@ -151,7 +151,7 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, encoder th
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -170,7 +170,7 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, encoder th
     return err
 }
 
-func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespCF()
     err := p.handler.F(ctx)
     if err != nil {
@@ -205,7 +205,7 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, encode
         result = &respCThing{
             Bang: v,
         }
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -224,7 +224,7 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, encode
     return err
 }
 
-func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqCThing)
     result := newRespCThing()
     retval, err := p.handler.Thing(ctx, args.A, args.B, args.C)

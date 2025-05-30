@@ -132,7 +132,7 @@ func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationException:
+    case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }
 
@@ -151,7 +151,7 @@ func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqTestServiceInit)
     result := newRespTestServiceInit()
     retval, err := p.handler.Init(ctx, args.Int1)

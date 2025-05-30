@@ -27,8 +27,8 @@ const (
 	PROTOCOL_ERROR                 = 7
 )
 
-// ApplicationException is an application level Thrift exception
-type ApplicationException interface {
+// ApplicationExceptionIf is an application level Thrift exception
+type ApplicationExceptionIf interface {
 	error
 	Struct
 	TypeID() int32
@@ -46,12 +46,12 @@ func (e applicationException) Error() string {
 }
 
 // NewApplicationException creates a new ApplicationException
-func NewApplicationException(exceptionType int32, message string) ApplicationException {
+func NewApplicationException(exceptionType int32, message string) *applicationException {
 	return &applicationException{message: message, exceptionType: exceptionType}
 }
 
 // NewApplicationExceptionCause creates a new ApplicationException with a root cause error
-func NewApplicationExceptionCause(exceptionType int32, message string, cause error) ApplicationException {
+func NewApplicationExceptionCause(exceptionType int32, message string, cause error) *applicationException {
 	return &applicationException{message, exceptionType, cause}
 }
 

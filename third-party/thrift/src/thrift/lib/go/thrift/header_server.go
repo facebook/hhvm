@@ -226,7 +226,7 @@ func (s *server) writeMessage(
 	prot.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
 
 	messageType := REPLY
-	if _, isExc := response.(ApplicationException); isExc {
+	if _, isExc := response.(ApplicationExceptionIf); isExc {
 		messageType = EXCEPTION
 	}
 	// explicitly set seqid for the header to be what was given to us at read message begin.
@@ -478,7 +478,7 @@ func (s *server) scheduleResponse(ctx, rctx context.Context, prot headerProtocol
 			scheduleWrite(response)
 		}()
 		// finally, lets process the request.
-		var runErr ApplicationException
+		var runErr ApplicationExceptionIf
 		response, runErr = processorFunc.RunContext(rctx, request)
 		if pstats := s.pstats[msg.name]; pstats != nil {
 			durationFunc := time.Since(startFunc)

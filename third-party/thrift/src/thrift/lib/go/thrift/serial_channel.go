@@ -142,3 +142,16 @@ func (c *SerialChannel) SendRequestNoResponse(ctx context.Context, method string
 
 	return nil
 }
+
+// SendRequestStream performs a request-stream call.
+func (c *SerialChannel) SendRequestStream(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	response ReadableStruct,
+	onStreamNextFn func(Decoder) error,
+	onStreamErrorFn func(error),
+	onStreamCompleteFn func(),
+) error {
+	return fmt.Errorf("not implemented")
+}

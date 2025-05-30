@@ -212,27 +212,130 @@ func (t *rpcClientConformanceTester) RequestResponseUndeclaredException(ctx cont
 }
 
 func (t *rpcClientConformanceTester) StreamBasic(ctx context.Context) error {
-	return errors.New("not supported")
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	defer streamCancel()
+
+	elemChan, elemErrChan, err := t.client.StreamBasic(streamCtx, t.instruction.StreamBasic.Request)
+	if err != nil {
+		return err
+	}
+
+	responses := make([]*rpc.Response, 0)
+	for elem := range elemChan {
+		responses = append(responses, elem)
+	}
+
+	// Check if streaming encountered and error
+	streamErr := <-elemErrChan
+	if streamErr != nil {
+		return err
+	}
+
+	responseValue := rpc.NewStreamBasicClientTestResult().
+		SetStreamPayloads(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamBasic(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) StreamInitialResponse(ctx context.Context) error {
-	return errors.New("not supported")
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	defer streamCancel()
+
+	initElem, elemChan, elemErrChan, err := t.client.StreamInitialResponse(streamCtx, t.instruction.StreamInitialResponse.Request)
+	if err != nil {
+		return err
+	}
+
+	responses := make([]*rpc.Response, 0)
+	for elem := range elemChan {
+		responses = append(responses, elem)
+	}
+
+	// Check if streaming encountered and error
+	streamErr := <-elemErrChan
+	if streamErr != nil {
+		return err
+	}
+
+	responseValue := rpc.NewStreamInitialResponseClientTestResult().
+		SetInitialResponse(initElem).
+		SetStreamPayloads(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamInitialResponse(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) StreamDeclaredException(ctx context.Context) error {
-	return errors.New("not supported")
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	defer streamCancel()
+
+	elemChan, elemErrChan, err := t.client.StreamDeclaredException(streamCtx, t.instruction.StreamDeclaredException.Request)
+	if err != nil {
+		return err
+	}
+
+	for range elemChan {
+		// Do nothing.
+	}
+
+	// Check if streaming encountered and error
+	streamErr := <-elemErrChan
+
+	responseValue := rpc.NewStreamDeclaredExceptionClientTestResult().
+		SetUserException(streamErr.(*rpc.UserException))
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) StreamUndeclaredException(ctx context.Context) error {
-	return errors.New("not supported")
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	defer streamCancel()
+
+	elemChan, elemErrChan, err := t.client.StreamUndeclaredException(streamCtx, t.instruction.StreamUndeclaredException.Request)
+	if err != nil {
+		return err
+	}
+
+	for range elemChan {
+		// Do nothing.
+	}
+
+	// Check if streaming encountered and error
+	streamErr := <-elemErrChan
+
+	responseValue := rpc.NewStreamUndeclaredExceptionClientTestResult().
+		SetExceptionMessage(streamErr.Error())
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamUndeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) StreamInitialDeclaredException(ctx context.Context) error {
-	return errors.New("not supported")
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	defer streamCancel()
+
+	_, _, err := t.client.StreamInitialDeclaredException(streamCtx, t.instruction.StreamInitialDeclaredException.Request)
+
+	responseValue := rpc.NewStreamInitialDeclaredExceptionClientTestResult().
+		SetUserException(err.(*rpc.UserException))
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamInitialDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) StreamInitialUndeclaredException(ctx context.Context) error {
-	return errors.New("not supported")
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	defer streamCancel()
+
+	_, _, err := t.client.StreamInitialUndeclaredException(streamCtx, t.instruction.StreamInitialUndeclaredException.Request)
+
+	responseValue := rpc.NewStreamInitialUndeclaredExceptionClientTestResult().
+		SetExceptionMessage(err.Error())
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamInitialUndeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) StreamChunkTimeout(ctx context.Context) error {
@@ -244,7 +347,22 @@ func (t *rpcClientConformanceTester) StreamCreditTimeout(ctx context.Context) er
 }
 
 func (t *rpcClientConformanceTester) StreamInitialTimeout(ctx context.Context) error {
-	return errors.New("not supported")
+	timeoutMs := t.instruction.StreamInitialTimeout.GetTimeoutMs()
+	timeoutCtx, timeoutCancel := context.WithTimeout(
+		ctx, time.Duration(timeoutMs)*time.Millisecond,
+	)
+	defer timeoutCancel()
+
+	_, _, err := t.client.StreamInitialTimeout(timeoutCtx, t.instruction.StreamInitialTimeout.Request)
+
+	// We expect to hit a timeout for this test case.
+	isTimeout := (err != nil)
+
+	responseValue := rpc.NewStreamInitialTimeoutClientTestResult().
+		SetTimeoutException(isTimeout)
+	clientTestResult := rpc.NewClientTestResult().
+		SetStreamInitialTimeout(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) SinkBasic(ctx context.Context) error {

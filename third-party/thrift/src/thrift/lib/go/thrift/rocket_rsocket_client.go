@@ -47,6 +47,16 @@ type RSocketClient interface {
 		headers map[string]string,
 		dataBytes []byte,
 	) (map[string]string, []byte, error)
+	RequestStream(
+		ctx context.Context,
+		messageName string,
+		protoID types.ProtocolID,
+		headers map[string]string,
+		dataBytes []byte,
+		onStreamNextFn func([]byte) error,
+		onStreamErrorFn func(error),
+		onStreamComplete func(),
+	) (map[string]string, []byte, error)
 	Close() error
 }
 
@@ -175,9 +185,109 @@ func (r *rsocketClient) FireAndForget(messageName string, protoID types.Protocol
 	return nil
 }
 
+func (r *rsocketClient) RequestStream(
+	ctx context.Context,
+	messageName string,
+	protoID types.ProtocolID,
+	headers map[string]string,
+	dataBytes []byte,
+	onStreamNextFn func([]byte) error,
+	onStreamErrorFn func(error),
+	onStreamComplete func(),
+) (map[string]string, []byte, error) {
+	r.resetDeadline()
+
+	request, err := rocket.EncodeRequestPayload(
+		messageName,
+		protoID,
+		rpcmetadata.RpcKind_SINGLE_REQUEST_STREAMING_RESPONSE,
+		headers,
+		rpcmetadata.CompressionAlgorithm_NONE,
+		dataBytes,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	flux := r.client.RequestStream(request)
+
+	streamCtx, streamCancel := context.WithCancel(ctx)
+	streamPayloadChan, streamErrChan := flux.ToChan(streamCtx, types.DefaultStreamBufferSize)
+
+	firstPayload, err := recvStreamNext(streamCtx, streamPayloadChan, streamErrChan)
+	if err != nil {
+		streamCancel()
+		return nil, nil, err
+	}
+	firstResponse, err := rocket.DecodeResponsePayload(firstPayload)
+	if err != nil {
+		streamCancel()
+		return nil, nil, err
+	}
+
+	go func() {
+		defer streamCancel()
+
+		for {
+			streamPayload, streamErr := recvStreamNext(streamCtx, streamPayloadChan, streamErrChan)
+			if streamErr != nil {
+				onStreamErrorFn(err)
+				return
+			} else if streamPayload != nil {
+				streamResponse, err := rocket.DecodeStreamPayload(streamPayload)
+				if err != nil {
+					onStreamErrorFn(err)
+					return
+				}
+				err = onStreamNextFn(streamResponse.Data())
+				if err != nil {
+					onStreamErrorFn(err)
+					return
+				}
+			} else {
+				// Stream completion
+				onStreamComplete()
+				return
+			}
+		}
+	}()
+
+	return firstResponse.Headers(), firstResponse.Data(), nil
+}
+
 func (r *rsocketClient) Close() error {
 	if r.client != nil {
 		return r.client.Close()
 	}
 	return r.conn.Close()
+}
+
+func recvStreamNext(ctx context.Context, streamPayloadChan <-chan payload.Payload, streamErrChan <-chan error) (payload.Payload, error) {
+	// The logic below allows us to deal with channel-close race conditions
+	// in a graceful manner. It's possible for any (or both) of the channels
+	// to get closed before all the bufferred data is received from them.
+	// The challenge is to figure out if the other channel still has data
+	// to receive if one channel becomes closed. We achieve this by setting
+	// a channel to nil (nil = not ready) and performing another iteration.
+	// (https://stackoverflow.com/a/13666733)
+
+	for range 2 /* max 2 iterations */ {
+		select {
+		case streamPayload, ok := <-streamPayloadChan:
+			if ok {
+				return streamPayload, nil
+			}
+			streamPayloadChan = nil
+		case err, ok := <-streamErrChan:
+			if ok {
+				return nil, err
+			}
+			streamErrChan = nil
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+
+	// (nil, nil) indicates completion - i.e. both channels confirmed closed.
+	return nil, nil
 }

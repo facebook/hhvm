@@ -52,9 +52,6 @@ func (r *streamPayload) Error() error {
 // DecodeStreamPayload decodes a stream payload.
 func DecodeStreamPayload(msg payload.Payload) (*streamPayload, error) {
 	msg = payload.Clone(msg)
-	if msg == nil {
-		return &streamPayload{metadata: &rpcmetadata.StreamPayloadMetadata{}, data: []byte{}}, nil
-	}
 	res := &streamPayload{metadata: &rpcmetadata.StreamPayloadMetadata{}, data: msg.Data()}
 
 	metadataBytes, ok := msg.Metadata()

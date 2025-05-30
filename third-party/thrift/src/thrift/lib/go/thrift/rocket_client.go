@@ -19,6 +19,7 @@ package thrift
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"net"
@@ -182,6 +183,63 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 	reqHeaders := RequestHeadersFromContext(ctx)
 	headers := unionMaps(reqHeaders, p.persistentHeaders)
 	respHeaders, resultData, resultErr := p.client.RequestResponse(ctx, messageName, p.protoID, headers, dataBytes)
+	if resultErr != nil {
+		return resultErr
+	}
+
+	setResponseHeaders(ctx, respHeaders)
+	err = decodeResponse(p.protoID, resultData, response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *rocketClient) SendRequestStream(
+	ctx context.Context,
+	messageName string,
+	request WritableStruct,
+	response ReadableStruct,
+	onStreamNextFn func(Decoder) error,
+	onStreamErrorFn func(error),
+	onStreamCompleteFn func(),
+) error {
+	if ctx.Done() == nil {
+		// We require that the context is cancellable, to prevent goroutine leaks.
+		return errors.New("context does not support cancellation")
+	}
+
+	dataBytes, err := encodeRequest(p.protoID, request)
+	if err != nil {
+		return err
+	}
+
+	if p.ioTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
+		defer cancel()
+	}
+
+	err = p.client.SendSetup(ctx)
+	if err != nil {
+		return err
+	}
+	onStreamNextWrapperFn := func(data []byte) error {
+		reader := bytes.NewBuffer(data)
+		var decoder types.Decoder
+		switch p.protoID {
+		case types.ProtocolIDBinary:
+			decoder = format.NewBinaryDecoder(reader)
+		case types.ProtocolIDCompact:
+			decoder = format.NewCompactDecoder(reader)
+		default:
+			return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
+		}
+		return onStreamNextFn(decoder)
+	}
+	reqHeaders := RequestHeadersFromContext(ctx)
+	headers := unionMaps(reqHeaders, p.persistentHeaders)
+	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, p.protoID, headers, dataBytes, onStreamNextWrapperFn, onStreamErrorFn, onStreamCompleteFn)
 	if resultErr != nil {
 		return resultErr
 	}

@@ -34,6 +34,7 @@ type C interface {
 type CClientInterface interface {
     io.Closer
     F(ctx context.Context) (error)
+    Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error)
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
@@ -64,6 +65,60 @@ func (c *CClient) F(ctx context.Context) (error) {
         return fbthriftEx
     }
     return nil
+}
+
+func (c *CClient) Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error) {
+    // Must be a cancellable context to prevent goroutine leaks
+    if ctx.Done() == nil {
+		return nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
+
+    fbthriftReq := &reqCNumbers{
+    }
+    fbthriftResp := newRespCNumbers()
+
+    fbthriftErrChan := make(chan error, 1)
+    fbthriftElemChan := make(chan Number, thrift.DefaultStreamBufferSize)
+
+    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
+        fbthriftStreamValue := newStreamCNumbers()
+        fbthriftSpecErr := fbthriftStreamValue.Read(d)
+        if fbthriftSpecErr != nil {
+            return fbthriftSpecErr
+        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
+            return fbthriftStreamEx
+        }
+        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
+        return nil
+    }
+    fbthriftOnStreamErrorFn := func(err error) {
+        fbthriftErrChan <- err
+        close(fbthriftElemChan)
+        close(fbthriftErrChan)
+    }
+    fbthriftOnStreamCompleteFn := func() {
+        close(fbthriftElemChan)
+        close(fbthriftErrChan)
+    }
+
+    fbthriftErr := c.ch.SendRequestStream(
+        fbthriftStreamCtx,
+        "numbers",
+        fbthriftReq,
+        fbthriftResp,
+        fbthriftOnStreamNextFn,
+        fbthriftOnStreamErrorFn,
+        fbthriftOnStreamCompleteFn,
+    )
+    if fbthriftErr != nil {
+        fbthriftStreamCancel()
+        return nil, nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        fbthriftStreamCancel()
+        return nil, nil, fbthriftEx
+    }
+    return fbthriftElemChan, fbthriftErrChan, nil
 }
 
 func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {

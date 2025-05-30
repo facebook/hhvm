@@ -706,6 +706,300 @@ func (x *respCF) setDefaults() *respCF {
     return x
 }
 
+type reqCNumbers struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqCNumbers)(nil)
+
+// Deprecated: CNumbersArgsDeprecated is deprecated, since it is supposed to be internal.
+type CNumbersArgsDeprecated = reqCNumbers
+
+func newReqCNumbers() *reqCNumbers {
+    return (&reqCNumbers{}).setDefaults()
+}
+
+
+
+func (x *reqCNumbers) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqCNumbers"); err != nil {
+        return thrift.PrependError("reqCNumbers write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqCNumbers write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqCNumbers write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqCNumbers) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqCNumbers read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqCNumbers field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqCNumbers read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqCNumbers) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqCNumbers) setDefaults() *reqCNumbers {
+    return x
+}
+
+type respCNumbers struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respCNumbers)(nil)
+var _ thrift.WritableResult = (*respCNumbers)(nil)
+
+// Deprecated: CNumbersResultDeprecated is deprecated, since it is supposed to be internal.
+type CNumbersResultDeprecated = respCNumbers
+
+func newRespCNumbers() *respCNumbers {
+    return (&respCNumbers{}).setDefaults()
+}
+
+
+
+func (x *respCNumbers) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respCNumbers) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respCNumbers"); err != nil {
+        return thrift.PrependError("respCNumbers write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respCNumbers write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respCNumbers write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respCNumbers) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respCNumbers read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respCNumbers field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respCNumbers read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respCNumbers) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respCNumbers) setDefaults() *respCNumbers {
+    return x
+}
+
+type streamCNumbers struct {
+    Success *Number `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamCNumbers)(nil)
+var _ thrift.WritableResult = (*streamCNumbers)(nil)
+
+// Deprecated: streamCNumbersResultDeprecated is deprecated, since it is supposed to be internal.
+type streamCNumbersResultDeprecated = streamCNumbers
+
+func newStreamCNumbers() *streamCNumbers {
+    return (&streamCNumbers{}).setDefaults()
+}
+
+func (x *streamCNumbers) GetSuccess() Number {
+    if !x.IsSetSuccess() {
+        return NewNumber()
+    }
+    return *x.Success
+}
+
+func (x *streamCNumbers) SetSuccessNonCompat(value Number) *streamCNumbers {
+    x.Success = &value
+    return x
+}
+
+func (x *streamCNumbers) SetSuccess(value *Number) *streamCNumbers {
+    x.Success = value
+    return x
+}
+
+func (x *streamCNumbers) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamCNumbers) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamCNumbers write field begin error: ", err)
+    }
+
+    item := *x.Success
+    err := WriteNumber(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamCNumbers write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamCNumbers) readField0(p thrift.Decoder) error {  // Success
+    result, err := ReadNumber(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamCNumbers) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamCNumbers) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamCNumbers"); err != nil {
+        return thrift.PrependError("streamCNumbers write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamCNumbers write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamCNumbers write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamCNumbers) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamCNumbers read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamCNumbers field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamCNumbers read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamCNumbers) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamCNumbers) setDefaults() *streamCNumbers {
+    return x
+}
+
 type reqCThing struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B string `thrift:"b,2" json:"b" db:"b"`

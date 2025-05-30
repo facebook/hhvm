@@ -207,6 +207,56 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
+    premadeStructSpec_reqCNumbers =
+        &thrift.StructSpec{
+            Name:                 "reqCNumbers",
+            ScopedName:           "module.reqCNumbers",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respCNumbers =
+        &thrift.StructSpec{
+            Name:                 "respCNumbers",
+            ScopedName:           "module.respCNumbers",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamCNumbers =
+        &thrift.StructSpec{
+            Name:                 "streamCNumbers",
+            ScopedName:           "module.streamCNumbers",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_number,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
     premadeStructSpec_reqCThing =
         &thrift.StructSpec{
             Name:                 "reqCThing",

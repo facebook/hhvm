@@ -244,6 +244,3954 @@ func (x *FooEx2) Error() string {
 }
 
 // Service req/resp structs (below)
+type reqPubSubStreamingServiceReturnstream struct {
+    I32From int32 `thrift:"i32_from,1" json:"i32_from" db:"i32_from"`
+    I32To int32 `thrift:"i32_to,2" json:"i32_to" db:"i32_to"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceReturnstream)(nil)
+
+// Deprecated: PubSubStreamingServiceReturnstreamArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceReturnstreamArgsDeprecated = reqPubSubStreamingServiceReturnstream
+
+func newReqPubSubStreamingServiceReturnstream() *reqPubSubStreamingServiceReturnstream {
+    return (&reqPubSubStreamingServiceReturnstream{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) GetI32From() int32 {
+    return x.I32From
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) GetI32To() int32 {
+    return x.I32To
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) SetI32FromNonCompat(value int32) *reqPubSubStreamingServiceReturnstream {
+    x.I32From = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) SetI32From(value int32) *reqPubSubStreamingServiceReturnstream {
+    x.I32From = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) SetI32ToNonCompat(value int32) *reqPubSubStreamingServiceReturnstream {
+    x.I32To = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) SetI32To(value int32) *reqPubSubStreamingServiceReturnstream {
+    x.I32To = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) writeField1(p thrift.Encoder) error {  // I32From
+    if err := p.WriteFieldBegin("i32_from", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field begin error: ", err)
+    }
+
+    item := x.I32From
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) writeField2(p thrift.Encoder) error {  // I32To
+    if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field begin error: ", err)
+    }
+
+    item := x.I32To
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) readField1(p thrift.Decoder) error {  // I32From
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I32From = result
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) readField2(p thrift.Decoder) error {  // I32To
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I32To = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceReturnstream"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceReturnstream field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i32_from")):  // i32_from
+            fieldReadErr = x.readField1(p)
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i32_to")):  // i32_to
+            fieldReadErr = x.readField2(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) setDefaults() *reqPubSubStreamingServiceReturnstream {
+    return x.
+        SetI32FromNonCompat(0).
+        SetI32ToNonCompat(0)
+}
+
+type respPubSubStreamingServiceReturnstream struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceReturnstream)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceReturnstream)(nil)
+
+// Deprecated: PubSubStreamingServiceReturnstreamResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceReturnstreamResultDeprecated = respPubSubStreamingServiceReturnstream
+
+func newRespPubSubStreamingServiceReturnstream() *respPubSubStreamingServiceReturnstream {
+    return (&respPubSubStreamingServiceReturnstream{}).setDefaults()
+}
+
+
+
+func (x *respPubSubStreamingServiceReturnstream) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceReturnstream"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstream write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstream write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstream write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstream read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceReturnstream field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstream read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceReturnstream) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceReturnstream) setDefaults() *respPubSubStreamingServiceReturnstream {
+    return x
+}
+
+type streamPubSubStreamingServiceReturnstream struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceReturnstream)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceReturnstream)(nil)
+
+// Deprecated: streamPubSubStreamingServiceReturnstreamResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceReturnstreamResultDeprecated = streamPubSubStreamingServiceReturnstream
+
+func newStreamPubSubStreamingServiceReturnstream() *streamPubSubStreamingServiceReturnstream {
+    return (&streamPubSubStreamingServiceReturnstream{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceReturnstream {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) SetSuccess(value *int32) *streamPubSubStreamingServiceReturnstream {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamPubSubStreamingServiceReturnstream) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceReturnstream"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceReturnstream field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstream read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceReturnstream) setDefaults() *streamPubSubStreamingServiceReturnstream {
+    return x
+}
+
+type reqPubSubStreamingServiceStreamthrows struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceStreamthrows)(nil)
+
+// Deprecated: PubSubStreamingServiceStreamthrowsArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceStreamthrowsArgsDeprecated = reqPubSubStreamingServiceStreamthrows
+
+func newReqPubSubStreamingServiceStreamthrows() *reqPubSubStreamingServiceStreamthrows {
+    return (&reqPubSubStreamingServiceStreamthrows{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) SetFooNonCompat(value int32) *reqPubSubStreamingServiceStreamthrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) SetFoo(value int32) *reqPubSubStreamingServiceStreamthrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceStreamthrows"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceStreamthrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceStreamthrows) setDefaults() *reqPubSubStreamingServiceStreamthrows {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceStreamthrows struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceStreamthrows)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceStreamthrows)(nil)
+
+// Deprecated: PubSubStreamingServiceStreamthrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceStreamthrowsResultDeprecated = respPubSubStreamingServiceStreamthrows
+
+func newRespPubSubStreamingServiceStreamthrows() *respPubSubStreamingServiceStreamthrows {
+    return (&respPubSubStreamingServiceStreamthrows{}).setDefaults()
+}
+
+
+
+func (x *respPubSubStreamingServiceStreamthrows) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceStreamthrows"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceStreamthrows write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceStreamthrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceStreamthrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceStreamthrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceStreamthrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceStreamthrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceStreamthrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceStreamthrows) setDefaults() *respPubSubStreamingServiceStreamthrows {
+    return x
+}
+
+type streamPubSubStreamingServiceStreamthrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    E *FooStreamEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceStreamthrows)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceStreamthrows)(nil)
+
+// Deprecated: streamPubSubStreamingServiceStreamthrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceStreamthrowsResultDeprecated = streamPubSubStreamingServiceStreamthrows
+
+func newStreamPubSubStreamingServiceStreamthrows() *streamPubSubStreamingServiceStreamthrows {
+    return (&streamPubSubStreamingServiceStreamthrows{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceStreamthrows {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) SetSuccess(value *int32) *streamPubSubStreamingServiceStreamthrows {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceStreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceStreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooStreamEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+
+func (x *streamPubSubStreamingServiceStreamthrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceStreamthrows"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceStreamthrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) setDefaults() *streamPubSubStreamingServiceStreamthrows {
+    return x
+}
+
+type reqPubSubStreamingServiceServicethrows struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceServicethrows)(nil)
+
+// Deprecated: PubSubStreamingServiceServicethrowsArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceServicethrowsArgsDeprecated = reqPubSubStreamingServiceServicethrows
+
+func newReqPubSubStreamingServiceServicethrows() *reqPubSubStreamingServiceServicethrows {
+    return (&reqPubSubStreamingServiceServicethrows{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) SetFooNonCompat(value int32) *reqPubSubStreamingServiceServicethrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) SetFoo(value int32) *reqPubSubStreamingServiceServicethrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceServicethrows"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceServicethrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceServicethrows) setDefaults() *reqPubSubStreamingServiceServicethrows {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceServicethrows struct {
+    E *FooEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceServicethrows)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceServicethrows)(nil)
+
+// Deprecated: PubSubStreamingServiceServicethrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceServicethrowsResultDeprecated = respPubSubStreamingServiceServicethrows
+
+func newRespPubSubStreamingServiceServicethrows() *respPubSubStreamingServiceServicethrows {
+    return (&respPubSubStreamingServiceServicethrows{}).setDefaults()
+}
+
+func (x *respPubSubStreamingServiceServicethrows) GetE() *FooEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *respPubSubStreamingServiceServicethrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceServicethrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows) SetE(value *FooEx) *respPubSubStreamingServiceServicethrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+func (x *respPubSubStreamingServiceServicethrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceServicethrows"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceServicethrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceServicethrows) setDefaults() *respPubSubStreamingServiceServicethrows {
+    return x
+}
+
+type streamPubSubStreamingServiceServicethrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceServicethrows)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceServicethrows)(nil)
+
+// Deprecated: streamPubSubStreamingServiceServicethrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceServicethrowsResultDeprecated = streamPubSubStreamingServiceServicethrows
+
+func newStreamPubSubStreamingServiceServicethrows() *streamPubSubStreamingServiceServicethrows {
+    return (&streamPubSubStreamingServiceServicethrows{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceServicethrows {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) SetSuccess(value *int32) *streamPubSubStreamingServiceServicethrows {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamPubSubStreamingServiceServicethrows) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceServicethrows"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceServicethrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceServicethrows) setDefaults() *streamPubSubStreamingServiceServicethrows {
+    return x
+}
+
+type reqPubSubStreamingServiceServicethrows2 struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceServicethrows2)(nil)
+
+// Deprecated: PubSubStreamingServiceServicethrows2ArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceServicethrows2ArgsDeprecated = reqPubSubStreamingServiceServicethrows2
+
+func newReqPubSubStreamingServiceServicethrows2() *reqPubSubStreamingServiceServicethrows2 {
+    return (&reqPubSubStreamingServiceServicethrows2{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) SetFooNonCompat(value int32) *reqPubSubStreamingServiceServicethrows2 {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) SetFoo(value int32) *reqPubSubStreamingServiceServicethrows2 {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceServicethrows2"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceServicethrows2 field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceServicethrows2) setDefaults() *reqPubSubStreamingServiceServicethrows2 {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceServicethrows2 struct {
+    E1 *FooEx `thrift:"e1,1,optional" json:"e1,omitempty" db:"e1"`
+    E2 *FooEx2 `thrift:"e2,2,optional" json:"e2,omitempty" db:"e2"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceServicethrows2)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceServicethrows2)(nil)
+
+// Deprecated: PubSubStreamingServiceServicethrows2ResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceServicethrows2ResultDeprecated = respPubSubStreamingServiceServicethrows2
+
+func newRespPubSubStreamingServiceServicethrows2() *respPubSubStreamingServiceServicethrows2 {
+    return (&respPubSubStreamingServiceServicethrows2{}).setDefaults()
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) GetE1() *FooEx {
+    if !x.IsSetE1() {
+        return nil
+    }
+    return x.E1
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) GetE2() *FooEx2 {
+    if !x.IsSetE2() {
+        return nil
+    }
+    return x.E2
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) SetE1NonCompat(value *FooEx) *respPubSubStreamingServiceServicethrows2 {
+    x.E1 = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) SetE1(value *FooEx) *respPubSubStreamingServiceServicethrows2 {
+    x.E1 = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) SetE2NonCompat(value *FooEx2) *respPubSubStreamingServiceServicethrows2 {
+    x.E2 = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) SetE2(value *FooEx2) *respPubSubStreamingServiceServicethrows2 {
+    x.E2 = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) IsSetE1() bool {
+    return x != nil && x.E1 != nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) IsSetE2() bool {
+    return x != nil && x.E2 != nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder) error {  // E1
+    if !x.IsSetE1() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e1", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+    }
+
+    item := x.E1
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) writeField2(p thrift.Encoder) error {  // E2
+    if !x.IsSetE2() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e2", thrift.STRUCT, 2); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+    }
+
+    item := x.E2
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) error {  // E1
+    result := NewFooEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E1 = result
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) readField2(p thrift.Decoder) error {  // E2
+    result := NewFooEx2()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E2 = result
+    return nil
+}
+
+
+
+
+
+func (x *respPubSubStreamingServiceServicethrows2) Exception() thrift.WritableException {
+    if x.E1 != nil {
+        return x.E1
+    }
+    if x.E2 != nil {
+        return x.E2
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceServicethrows2"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceServicethrows2 field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e1")):  // e1
+            fieldReadErr = x.readField1(p)
+        case ((id == 2 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e2")):  // e2
+            fieldReadErr = x.readField2(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) setDefaults() *respPubSubStreamingServiceServicethrows2 {
+    return x
+}
+
+type streamPubSubStreamingServiceServicethrows2 struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceServicethrows2)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceServicethrows2)(nil)
+
+// Deprecated: streamPubSubStreamingServiceServicethrows2ResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceServicethrows2ResultDeprecated = streamPubSubStreamingServiceServicethrows2
+
+func newStreamPubSubStreamingServiceServicethrows2() *streamPubSubStreamingServiceServicethrows2 {
+    return (&streamPubSubStreamingServiceServicethrows2{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceServicethrows2 {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) SetSuccess(value *int32) *streamPubSubStreamingServiceServicethrows2 {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamPubSubStreamingServiceServicethrows2) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceServicethrows2"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceServicethrows2 field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceServicethrows2) setDefaults() *streamPubSubStreamingServiceServicethrows2 {
+    return x
+}
+
+type reqPubSubStreamingServiceBoththrows struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceBoththrows)(nil)
+
+// Deprecated: PubSubStreamingServiceBoththrowsArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceBoththrowsArgsDeprecated = reqPubSubStreamingServiceBoththrows
+
+func newReqPubSubStreamingServiceBoththrows() *reqPubSubStreamingServiceBoththrows {
+    return (&reqPubSubStreamingServiceBoththrows{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) SetFooNonCompat(value int32) *reqPubSubStreamingServiceBoththrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) SetFoo(value int32) *reqPubSubStreamingServiceBoththrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceBoththrows"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceBoththrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceBoththrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceBoththrows) setDefaults() *reqPubSubStreamingServiceBoththrows {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceBoththrows struct {
+    E *FooEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceBoththrows)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceBoththrows)(nil)
+
+// Deprecated: PubSubStreamingServiceBoththrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceBoththrowsResultDeprecated = respPubSubStreamingServiceBoththrows
+
+func newRespPubSubStreamingServiceBoththrows() *respPubSubStreamingServiceBoththrows {
+    return (&respPubSubStreamingServiceBoththrows{}).setDefaults()
+}
+
+func (x *respPubSubStreamingServiceBoththrows) GetE() *FooEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *respPubSubStreamingServiceBoththrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceBoththrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceBoththrows) SetE(value *FooEx) *respPubSubStreamingServiceBoththrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceBoththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *respPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+func (x *respPubSubStreamingServiceBoththrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceBoththrows"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceBoththrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceBoththrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceBoththrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceBoththrows) setDefaults() *respPubSubStreamingServiceBoththrows {
+    return x
+}
+
+type streamPubSubStreamingServiceBoththrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    E *FooStreamEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceBoththrows)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceBoththrows)(nil)
+
+// Deprecated: streamPubSubStreamingServiceBoththrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceBoththrowsResultDeprecated = streamPubSubStreamingServiceBoththrows
+
+func newStreamPubSubStreamingServiceBoththrows() *streamPubSubStreamingServiceBoththrows {
+    return (&streamPubSubStreamingServiceBoththrows{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceBoththrows {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) SetSuccess(value *int32) *streamPubSubStreamingServiceBoththrows {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceBoththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceBoththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooStreamEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+
+func (x *streamPubSubStreamingServiceBoththrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceBoththrows"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceBoththrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceBoththrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) setDefaults() *streamPubSubStreamingServiceBoththrows {
+    return x
+}
+
+type reqPubSubStreamingServiceResponseandstreamstreamthrows struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceResponseandstreamstreamthrows)(nil)
+
+// Deprecated: PubSubStreamingServiceResponseandstreamstreamthrowsArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceResponseandstreamstreamthrowsArgsDeprecated = reqPubSubStreamingServiceResponseandstreamstreamthrows
+
+func newReqPubSubStreamingServiceResponseandstreamstreamthrows() *reqPubSubStreamingServiceResponseandstreamstreamthrows {
+    return (&reqPubSubStreamingServiceResponseandstreamstreamthrows{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) SetFooNonCompat(value int32) *reqPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) SetFoo(value int32) *reqPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) setDefaults() *reqPubSubStreamingServiceResponseandstreamstreamthrows {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceResponseandstreamstreamthrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceResponseandstreamstreamthrows)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceResponseandstreamstreamthrows)(nil)
+
+// Deprecated: PubSubStreamingServiceResponseandstreamstreamthrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceResponseandstreamstreamthrowsResultDeprecated = respPubSubStreamingServiceResponseandstreamstreamthrows
+
+func newRespPubSubStreamingServiceResponseandstreamstreamthrows() *respPubSubStreamingServiceResponseandstreamstreamthrows {
+    return (&respPubSubStreamingServiceResponseandstreamstreamthrows{}).setDefaults()
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) SetSuccessNonCompat(value int32) *respPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.Success = &value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) SetSuccess(value *int32) *respPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.Success = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) setDefaults() *respPubSubStreamingServiceResponseandstreamstreamthrows {
+    return x
+}
+
+type streamPubSubStreamingServiceResponseandstreamstreamthrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    E *FooStreamEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceResponseandstreamstreamthrows)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceResponseandstreamstreamthrows)(nil)
+
+// Deprecated: streamPubSubStreamingServiceResponseandstreamstreamthrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceResponseandstreamstreamthrowsResultDeprecated = streamPubSubStreamingServiceResponseandstreamstreamthrows
+
+func newStreamPubSubStreamingServiceResponseandstreamstreamthrows() *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    return (&streamPubSubStreamingServiceResponseandstreamstreamthrows{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetSuccess(value *int32) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooStreamEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) setDefaults() *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    return x
+}
+
+type reqPubSubStreamingServiceResponseandstreamservicethrows struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceResponseandstreamservicethrows)(nil)
+
+// Deprecated: PubSubStreamingServiceResponseandstreamservicethrowsArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceResponseandstreamservicethrowsArgsDeprecated = reqPubSubStreamingServiceResponseandstreamservicethrows
+
+func newReqPubSubStreamingServiceResponseandstreamservicethrows() *reqPubSubStreamingServiceResponseandstreamservicethrows {
+    return (&reqPubSubStreamingServiceResponseandstreamservicethrows{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) SetFooNonCompat(value int32) *reqPubSubStreamingServiceResponseandstreamservicethrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) SetFoo(value int32) *reqPubSubStreamingServiceResponseandstreamservicethrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) setDefaults() *reqPubSubStreamingServiceResponseandstreamservicethrows {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceResponseandstreamservicethrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    E *FooEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceResponseandstreamservicethrows)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceResponseandstreamservicethrows)(nil)
+
+// Deprecated: PubSubStreamingServiceResponseandstreamservicethrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceResponseandstreamservicethrowsResultDeprecated = respPubSubStreamingServiceResponseandstreamservicethrows
+
+func newRespPubSubStreamingServiceResponseandstreamservicethrows() *respPubSubStreamingServiceResponseandstreamservicethrows {
+    return (&respPubSubStreamingServiceResponseandstreamservicethrows{}).setDefaults()
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) GetE() *FooEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetSuccessNonCompat(value int32) *respPubSubStreamingServiceResponseandstreamservicethrows {
+    x.Success = &value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetSuccess(value *int32) *respPubSubStreamingServiceResponseandstreamservicethrows {
+    x.Success = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceResponseandstreamservicethrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetE(value *FooEx) *respPubSubStreamingServiceResponseandstreamservicethrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) setDefaults() *respPubSubStreamingServiceResponseandstreamservicethrows {
+    return x
+}
+
+type streamPubSubStreamingServiceResponseandstreamservicethrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceResponseandstreamservicethrows)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceResponseandstreamservicethrows)(nil)
+
+// Deprecated: streamPubSubStreamingServiceResponseandstreamservicethrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceResponseandstreamservicethrowsResultDeprecated = streamPubSubStreamingServiceResponseandstreamservicethrows
+
+func newStreamPubSubStreamingServiceResponseandstreamservicethrows() *streamPubSubStreamingServiceResponseandstreamservicethrows {
+    return (&streamPubSubStreamingServiceResponseandstreamservicethrows{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceResponseandstreamservicethrows {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) SetSuccess(value *int32) *streamPubSubStreamingServiceResponseandstreamservicethrows {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) setDefaults() *streamPubSubStreamingServiceResponseandstreamservicethrows {
+    return x
+}
+
+type reqPubSubStreamingServiceResponseandstreamboththrows struct {
+    Foo int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceResponseandstreamboththrows)(nil)
+
+// Deprecated: PubSubStreamingServiceResponseandstreamboththrowsArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceResponseandstreamboththrowsArgsDeprecated = reqPubSubStreamingServiceResponseandstreamboththrows
+
+func newReqPubSubStreamingServiceResponseandstreamboththrows() *reqPubSubStreamingServiceResponseandstreamboththrows {
+    return (&reqPubSubStreamingServiceResponseandstreamboththrows{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) GetFoo() int32 {
+    return x.Foo
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) SetFooNonCompat(value int32) *reqPubSubStreamingServiceResponseandstreamboththrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) SetFoo(value int32) *reqPubSubStreamingServiceResponseandstreamboththrows {
+    x.Foo = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamboththrows"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceResponseandstreamboththrows) setDefaults() *reqPubSubStreamingServiceResponseandstreamboththrows {
+    return x.
+        SetFooNonCompat(0)
+}
+
+type respPubSubStreamingServiceResponseandstreamboththrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    E *FooEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceResponseandstreamboththrows)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceResponseandstreamboththrows)(nil)
+
+// Deprecated: PubSubStreamingServiceResponseandstreamboththrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceResponseandstreamboththrowsResultDeprecated = respPubSubStreamingServiceResponseandstreamboththrows
+
+func newRespPubSubStreamingServiceResponseandstreamboththrows() *respPubSubStreamingServiceResponseandstreamboththrows {
+    return (&respPubSubStreamingServiceResponseandstreamboththrows{}).setDefaults()
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetSuccessNonCompat(value int32) *respPubSubStreamingServiceResponseandstreamboththrows {
+    x.Success = &value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetSuccess(value *int32) *respPubSubStreamingServiceResponseandstreamboththrows {
+    x.Success = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetE(value *FooEx) *respPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceResponseandstreamboththrows"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) setDefaults() *respPubSubStreamingServiceResponseandstreamboththrows {
+    return x
+}
+
+type streamPubSubStreamingServiceResponseandstreamboththrows struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    E *FooStreamEx `thrift:"e,1,optional" json:"e,omitempty" db:"e"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceResponseandstreamboththrows)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceResponseandstreamboththrows)(nil)
+
+// Deprecated: streamPubSubStreamingServiceResponseandstreamboththrowsResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceResponseandstreamboththrowsResultDeprecated = streamPubSubStreamingServiceResponseandstreamboththrows
+
+func newStreamPubSubStreamingServiceResponseandstreamboththrows() *streamPubSubStreamingServiceResponseandstreamboththrows {
+    return (&streamPubSubStreamingServiceResponseandstreamboththrows{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceResponseandstreamboththrows {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetSuccess(value *int32) *streamPubSubStreamingServiceResponseandstreamboththrows {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // E
+    if !x.IsSetE() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+    }
+
+    item := x.E
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField1(p thrift.Decoder) error {  // E
+    result := NewFooStreamEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E = result
+    return nil
+}
+
+
+
+
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Exception() thrift.WritableException {
+    if x.E != nil {
+        return x.E
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceResponseandstreamboththrows"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "e")):  // e
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) setDefaults() *streamPubSubStreamingServiceResponseandstreamboththrows {
+    return x
+}
+
+type reqPubSubStreamingServiceReturnstreamFast struct {
+    I32From int32 `thrift:"i32_from,1" json:"i32_from" db:"i32_from"`
+    I32To int32 `thrift:"i32_to,2" json:"i32_to" db:"i32_to"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPubSubStreamingServiceReturnstreamFast)(nil)
+
+// Deprecated: PubSubStreamingServiceReturnstreamFastArgsDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceReturnstreamFastArgsDeprecated = reqPubSubStreamingServiceReturnstreamFast
+
+func newReqPubSubStreamingServiceReturnstreamFast() *reqPubSubStreamingServiceReturnstreamFast {
+    return (&reqPubSubStreamingServiceReturnstreamFast{}).setDefaults()
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) GetI32From() int32 {
+    return x.I32From
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) GetI32To() int32 {
+    return x.I32To
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32FromNonCompat(value int32) *reqPubSubStreamingServiceReturnstreamFast {
+    x.I32From = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32From(value int32) *reqPubSubStreamingServiceReturnstreamFast {
+    x.I32From = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32ToNonCompat(value int32) *reqPubSubStreamingServiceReturnstreamFast {
+    x.I32To = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32To(value int32) *reqPubSubStreamingServiceReturnstreamFast {
+    x.I32To = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) writeField1(p thrift.Encoder) error {  // I32From
+    if err := p.WriteFieldBegin("i32_from", thrift.I32, 1); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+    }
+
+    item := x.I32From
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) writeField2(p thrift.Encoder) error {  // I32To
+    if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+    }
+
+    item := x.I32To
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) readField1(p thrift.Decoder) error {  // I32From
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I32From = result
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) readField2(p thrift.Decoder) error {  // I32To
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I32To = result
+    return nil
+}
+
+
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqPubSubStreamingServiceReturnstreamFast"); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i32_from")):  // i32_from
+            fieldReadErr = x.readField1(p)
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i32_to")):  // i32_to
+            fieldReadErr = x.readField2(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) setDefaults() *reqPubSubStreamingServiceReturnstreamFast {
+    return x.
+        SetI32FromNonCompat(0).
+        SetI32ToNonCompat(0)
+}
+
+type respPubSubStreamingServiceReturnstreamFast struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPubSubStreamingServiceReturnstreamFast)(nil)
+var _ thrift.WritableResult = (*respPubSubStreamingServiceReturnstreamFast)(nil)
+
+// Deprecated: PubSubStreamingServiceReturnstreamFastResultDeprecated is deprecated, since it is supposed to be internal.
+type PubSubStreamingServiceReturnstreamFastResultDeprecated = respPubSubStreamingServiceReturnstreamFast
+
+func newRespPubSubStreamingServiceReturnstreamFast() *respPubSubStreamingServiceReturnstreamFast {
+    return (&respPubSubStreamingServiceReturnstreamFast{}).setDefaults()
+}
+
+
+
+func (x *respPubSubStreamingServiceReturnstreamFast) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respPubSubStreamingServiceReturnstreamFast"); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respPubSubStreamingServiceReturnstreamFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respPubSubStreamingServiceReturnstreamFast) setDefaults() *respPubSubStreamingServiceReturnstreamFast {
+    return x
+}
+
+type streamPubSubStreamingServiceReturnstreamFast struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamPubSubStreamingServiceReturnstreamFast)(nil)
+var _ thrift.WritableResult = (*streamPubSubStreamingServiceReturnstreamFast)(nil)
+
+// Deprecated: streamPubSubStreamingServiceReturnstreamFastResultDeprecated is deprecated, since it is supposed to be internal.
+type streamPubSubStreamingServiceReturnstreamFastResultDeprecated = streamPubSubStreamingServiceReturnstreamFast
+
+func newStreamPubSubStreamingServiceReturnstreamFast() *streamPubSubStreamingServiceReturnstreamFast {
+    return (&streamPubSubStreamingServiceReturnstreamFast{}).setDefaults()
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceReturnstreamFast {
+    x.Success = &value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) SetSuccess(value *int32) *streamPubSubStreamingServiceReturnstreamFast {
+    x.Success = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamPubSubStreamingServiceReturnstreamFast"); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamPubSubStreamingServiceReturnstreamFast) setDefaults() *streamPubSubStreamingServiceReturnstreamFast {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

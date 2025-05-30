@@ -21,6 +21,9 @@ import (
 	"io"
 )
 
+// DefaultStreamBufferSize is the default size of the buffered channel used for streaming.
+const DefaultStreamBufferSize = 100
+
 // RequestChannel is an API that implements the most minimal surface for
 // generated client code. An implementation:
 //   - Must be thread-safe
@@ -31,6 +34,24 @@ import (
 type RequestChannel interface {
 	io.Closer
 
-	SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error
-	SendRequestNoResponse(ctx context.Context, method string, request WritableStruct) error
+	SendRequestResponse(
+		ctx context.Context,
+		method string,
+		request WritableStruct,
+		response ReadableStruct,
+	) error
+	SendRequestNoResponse(
+		ctx context.Context,
+		method string,
+		request WritableStruct,
+	) error
+	SendRequestStream(
+		ctx context.Context,
+		method string,
+		request WritableStruct,
+		response ReadableStruct,
+		onStreamNextFn func(Decoder) error,
+		onStreamErrorFn func(error),
+		onStreamCompleteFn func(),
+	) error
 }

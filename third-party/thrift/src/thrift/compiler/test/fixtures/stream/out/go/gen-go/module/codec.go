@@ -42,6 +42,20 @@ var (
                 NewFunc:    func() thrift.Struct { return NewFooEx2() },
             },
     }
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
+            },
+    }
 )
 
 // Premade struct specs
@@ -85,6 +99,720 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
+    premadeStructSpec_reqPubSubStreamingServiceReturnstream =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceReturnstream",
+            ScopedName:           "module.reqPubSubStreamingServiceReturnstream",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "i32_from",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.I32,
+                    Name:                 "i32_to",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "i32_from": 0,
+                "i32_to": 1,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceReturnstream =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceReturnstream",
+            ScopedName:           "module.respPubSubStreamingServiceReturnstream",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceReturnstream =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceReturnstream",
+            ScopedName:           "module.streamPubSubStreamingServiceReturnstream",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceStreamthrows =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceStreamthrows",
+            ScopedName:           "module.reqPubSubStreamingServiceStreamthrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceStreamthrows =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceStreamthrows",
+            ScopedName:           "module.respPubSubStreamingServiceStreamthrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceStreamthrows =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceStreamthrows",
+            ScopedName:           "module.streamPubSubStreamingServiceStreamthrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooStreamEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "e": 1,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceServicethrows =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceServicethrows",
+            ScopedName:           "module.reqPubSubStreamingServiceServicethrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceServicethrows =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceServicethrows",
+            ScopedName:           "module.respPubSubStreamingServiceServicethrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "e": 0,
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceServicethrows =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceServicethrows",
+            ScopedName:           "module.streamPubSubStreamingServiceServicethrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceServicethrows2 =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceServicethrows2",
+            ScopedName:           "module.reqPubSubStreamingServiceServicethrows2",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceServicethrows2 =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceServicethrows2",
+            ScopedName:           "module.respPubSubStreamingServiceServicethrows2",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e1",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooEx,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e2",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooEx2,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "e1": 0,
+                "e2": 1,
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceServicethrows2 =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceServicethrows2",
+            ScopedName:           "module.streamPubSubStreamingServiceServicethrows2",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceBoththrows =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceBoththrows",
+            ScopedName:           "module.reqPubSubStreamingServiceBoththrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceBoththrows =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceBoththrows",
+            ScopedName:           "module.respPubSubStreamingServiceBoththrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "e": 0,
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceBoththrows =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceBoththrows",
+            ScopedName:           "module.streamPubSubStreamingServiceBoththrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooStreamEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "e": 1,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceResponseandstreamstreamthrows =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceResponseandstreamstreamthrows",
+            ScopedName:           "module.reqPubSubStreamingServiceResponseandstreamstreamthrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceResponseandstreamstreamthrows =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceResponseandstreamstreamthrows",
+            ScopedName:           "module.respPubSubStreamingServiceResponseandstreamstreamthrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceResponseandstreamstreamthrows =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceResponseandstreamstreamthrows",
+            ScopedName:           "module.streamPubSubStreamingServiceResponseandstreamstreamthrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooStreamEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "e": 1,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceResponseandstreamservicethrows =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceResponseandstreamservicethrows",
+            ScopedName:           "module.reqPubSubStreamingServiceResponseandstreamservicethrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceResponseandstreamservicethrows =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceResponseandstreamservicethrows",
+            ScopedName:           "module.respPubSubStreamingServiceResponseandstreamservicethrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "e": 1,
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceResponseandstreamservicethrows =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceResponseandstreamservicethrows",
+            ScopedName:           "module.streamPubSubStreamingServiceResponseandstreamservicethrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceResponseandstreamboththrows =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceResponseandstreamboththrows",
+            ScopedName:           "module.reqPubSubStreamingServiceResponseandstreamboththrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "foo": 0,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceResponseandstreamboththrows =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceResponseandstreamboththrows",
+            ScopedName:           "module.respPubSubStreamingServiceResponseandstreamboththrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "e": 1,
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceResponseandstreamboththrows =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceResponseandstreamboththrows",
+            ScopedName:           "module.streamPubSubStreamingServiceResponseandstreamboththrows",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "e",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FooStreamEx,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "e": 1,
+            },
+        }
+    premadeStructSpec_reqPubSubStreamingServiceReturnstreamFast =
+        &thrift.StructSpec{
+            Name:                 "reqPubSubStreamingServiceReturnstreamFast",
+            ScopedName:           "module.reqPubSubStreamingServiceReturnstreamFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "i32_from",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.I32,
+                    Name:                 "i32_to",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "i32_from": 0,
+                "i32_to": 1,
+            },
+        }
+    premadeStructSpec_respPubSubStreamingServiceReturnstreamFast =
+        &thrift.StructSpec{
+            Name:                 "respPubSubStreamingServiceReturnstreamFast",
+            ScopedName:           "module.respPubSubStreamingServiceReturnstreamFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamPubSubStreamingServiceReturnstreamFast =
+        &thrift.StructSpec{
+            Name:                 "streamPubSubStreamingServiceReturnstreamFast",
+            ScopedName:           "module.streamPubSubStreamingServiceReturnstreamFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -92,6 +820,8 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooStreamEx.FullName] = premadeCodecTypeSpec_module_FooStreamEx
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooEx.FullName] = premadeCodecTypeSpec_module_FooEx
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooEx2.FullName] = premadeCodecTypeSpec_module_FooEx2
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     return fbthriftTypeSpecsMap
 }()
 

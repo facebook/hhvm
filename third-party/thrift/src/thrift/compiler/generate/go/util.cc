@@ -506,7 +506,7 @@ std::string snakecase(const std::string& name) {
 }
 
 bool is_func_go_client_supported(const t_function* func) {
-  return !func->sink_or_stream() && !func->interaction();
+  return !func->sink() && !func->interaction();
 }
 
 bool is_func_go_server_supported(const t_function* func) {

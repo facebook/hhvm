@@ -40,6 +40,16 @@ var (
                     Name: "module.FooEx2",
                 },
         }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
@@ -47,6 +57,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.FooStreamEx"] = premadeThriftType_module_FooStreamEx
     fbthriftThriftTypesMap["module.FooEx"] = premadeThriftType_module_FooEx
     fbthriftThriftTypesMap["module.FooEx2"] = premadeThriftType_module_FooEx2
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     return fbthriftThriftTypesMap
 }()
 

@@ -86,7 +86,7 @@ func newUpgradeToRocketClient(
 // If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
 func (p *upgradeToRocketClient) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	if p.Protocol == nil {
-		ruClient := rocket_upgrade.NewRocketUpgradeClient(p.headerProtocol)
+		ruClient := rocket_upgrade.NewRocketUpgradeChannelClient(NewSerialChannel(p.headerProtocol))
 		err := ruClient.UpgradeToRocket(context.Background())
 		if err != nil {
 			p.Protocol = p.headerProtocol
@@ -125,10 +125,6 @@ func (p *upgradeToRocketClient) Close() error {
 		return p.headerProtocol.Close()
 	}
 	return p.Protocol.Close()
-}
-
-func (p *upgradeToRocketClient) DO_NOT_USE_WrapChannel() RequestChannel {
-	return NewSerialChannel(p)
 }
 
 func (p *upgradeToRocketClient) DO_NOT_USE_GetResponseHeaders() map[string]string {

@@ -159,10 +159,6 @@ func (p *headerProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
 }
 
-func (p *headerProtocol) DO_NOT_USE_WrapChannel() RequestChannel {
-	return NewSerialChannel(p)
-}
-
 func (p *headerProtocol) DO_NOT_USE_GetResponseHeaders() map[string]string {
 	return p.getResponseHeaders()
 }

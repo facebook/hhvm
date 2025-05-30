@@ -51,14 +51,6 @@ func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceClie
     }
 }
 
-func NewSomeServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *SomeServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewSomeServiceChannelClient(channel)
-}
-
 func (c *SomeServiceClient) Close() error {
     return c.ch.Close()
 }

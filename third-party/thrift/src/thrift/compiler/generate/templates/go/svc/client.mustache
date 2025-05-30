@@ -42,14 +42,6 @@ func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{servi
     }
 }
 
-func New{{service:go_name}}Client(prot thrift.DO_NOT_USE_ChannelWrapper) *{{service:go_name}}Client {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return New{{service:go_name}}ChannelClient(channel)
-}
-
 func (c *{{service:go_name}}Client) Close() error {
     return c.ch.Close()
 }

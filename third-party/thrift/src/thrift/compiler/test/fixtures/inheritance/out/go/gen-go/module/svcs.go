@@ -47,14 +47,6 @@ func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootClient {
     }
 }
 
-func NewMyRootClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyRootClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyRootChannelClient(channel)
-}
-
 func (c *MyRootClient) Close() error {
     return c.ch.Close()
 }
@@ -200,14 +192,6 @@ func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeClient {
     }
 }
 
-func NewMyNodeClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyNodeClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyNodeChannelClient(channel)
-}
-
 func (c *MyNodeClient) Close() error {
     return c.ch.Close()
 }
@@ -324,14 +308,6 @@ func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafClient {
         MyNodeClient: NewMyNodeChannelClient(channel),
         ch: channel,
     }
-}
-
-func NewMyLeafClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyLeafClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyLeafChannelClient(channel)
 }
 
 func (c *MyLeafClient) Close() error {

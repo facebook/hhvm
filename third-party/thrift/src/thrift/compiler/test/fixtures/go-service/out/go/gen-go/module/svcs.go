@@ -89,14 +89,6 @@ func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityClient {
     }
 }
 
-func NewGetEntityClient(prot thrift.DO_NOT_USE_ChannelWrapper) *GetEntityClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewGetEntityChannelClient(channel)
-}
-
 func (c *GetEntityClient) Close() error {
     return c.ch.Close()
 }

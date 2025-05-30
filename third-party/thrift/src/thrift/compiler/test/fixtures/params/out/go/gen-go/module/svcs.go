@@ -55,14 +55,6 @@ func NewNestedContainersChannelClient(channel thrift.RequestChannel) *NestedCont
     }
 }
 
-func NewNestedContainersClient(prot thrift.DO_NOT_USE_ChannelWrapper) *NestedContainersClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewNestedContainersChannelClient(channel)
-}
-
 func (c *NestedContainersClient) Close() error {
     return c.ch.Close()
 }

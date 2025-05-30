@@ -263,10 +263,6 @@ func (p *rocketClient) Close() error {
 	return p.client.Close()
 }
 
-func (p *rocketClient) DO_NOT_USE_WrapChannel() RequestChannel {
-	return NewSerialChannel(p)
-}
-
 func (p *rocketClient) DO_NOT_USE_GetResponseHeaders() map[string]string {
 	return p.getResponseHeaders()
 }

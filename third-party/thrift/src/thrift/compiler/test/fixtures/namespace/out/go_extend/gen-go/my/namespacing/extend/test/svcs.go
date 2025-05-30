@@ -58,14 +58,6 @@ func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *ExtendTes
     }
 }
 
-func NewExtendTestServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *ExtendTestServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewExtendTestServiceChannelClient(channel)
-}
-
 func (c *ExtendTestServiceClient) Close() error {
     return c.ch.Close()
 }

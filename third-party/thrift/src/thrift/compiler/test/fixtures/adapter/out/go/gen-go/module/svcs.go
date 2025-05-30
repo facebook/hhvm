@@ -47,14 +47,6 @@ func NewServiceChannelClient(channel thrift.RequestChannel) *ServiceClient {
     }
 }
 
-func NewServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *ServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewServiceChannelClient(channel)
-}
-
 func (c *ServiceClient) Close() error {
     return c.ch.Close()
 }
@@ -196,14 +188,6 @@ func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *AdapterServi
     return &AdapterServiceClient{
         ch: channel,
     }
-}
-
-func NewAdapterServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *AdapterServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewAdapterServiceChannelClient(channel)
 }
 
 func (c *AdapterServiceClient) Close() error {

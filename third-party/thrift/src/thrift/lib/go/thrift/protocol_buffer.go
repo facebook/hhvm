@@ -102,10 +102,6 @@ func (b *protocolBuffer) getRequestHeaders() map[string]string {
 	return b.reqHeaders
 }
 
-func (b *protocolBuffer) DO_NOT_USE_WrapChannel() RequestChannel {
-	return NewSerialChannel(b)
-}
-
 func (b *protocolBuffer) DO_NOT_USE_GetResponseHeaders() map[string]string {
 	return b.getResponseHeaders()
 }

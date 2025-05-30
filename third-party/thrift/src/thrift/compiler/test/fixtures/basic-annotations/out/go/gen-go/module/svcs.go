@@ -59,14 +59,6 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
     }
 }
 
-func NewMyServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyServiceChannelClient(channel)
-}
-
 func (c *MyServiceClient) Close() error {
     return c.ch.Close()
 }
@@ -610,14 +602,6 @@ func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *MyServi
     }
 }
 
-func NewMyServicePrioParentClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServicePrioParentClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyServicePrioParentChannelClient(channel)
-}
-
 func (c *MyServicePrioParentClient) Close() error {
     return c.ch.Close()
 }
@@ -828,14 +812,6 @@ func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *MyServic
     }
 }
 
-func NewMyServicePrioChildClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServicePrioChildClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyServicePrioChildChannelClient(channel)
-}
-
 func (c *MyServicePrioChildClient) Close() error {
     return c.ch.Close()
 }
@@ -943,14 +919,6 @@ func NewBadServiceChannelClient(channel thrift.RequestChannel) *BadServiceClient
     return &BadServiceClient{
         ch: channel,
     }
-}
-
-func NewBadServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *BadServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewBadServiceChannelClient(channel)
 }
 
 func (c *BadServiceClient) Close() error {
@@ -1092,14 +1060,6 @@ func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *FooBarBazS
     return &FooBarBazServiceClient{
         ch: channel,
     }
-}
-
-func NewFooBarBazServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FooBarBazServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewFooBarBazServiceChannelClient(channel)
 }
 
 func (c *FooBarBazServiceClient) Close() error {

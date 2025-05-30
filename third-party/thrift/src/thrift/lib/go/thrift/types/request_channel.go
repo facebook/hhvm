@@ -34,8 +34,3 @@ type RequestChannel interface {
 	SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error
 	SendRequestNoResponse(ctx context.Context, method string, request WritableStruct) error
 }
-
-// DO NOT USE: temporary migration workaround.
-type DO_NOT_USE_ChannelWrapper interface {
-	DO_NOT_USE_WrapChannel() RequestChannel
-}

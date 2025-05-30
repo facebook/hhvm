@@ -47,14 +47,6 @@ func NewTestServiceChannelClient(channel thrift.RequestChannel) *TestServiceClie
     }
 }
 
-func NewTestServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *TestServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewTestServiceChannelClient(channel)
-}
-
 func (c *TestServiceClient) Close() error {
     return c.ch.Close()
 }

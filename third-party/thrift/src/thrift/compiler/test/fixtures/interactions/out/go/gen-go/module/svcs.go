@@ -49,14 +49,6 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
     }
 }
 
-func NewMyServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyServiceChannelClient(channel)
-}
-
 func (c *MyServiceClient) Close() error {
     return c.ch.Close()
 }
@@ -191,14 +183,6 @@ func NewFactoriesChannelClient(channel thrift.RequestChannel) *FactoriesClient {
     return &FactoriesClient{
         ch: channel,
     }
-}
-
-func NewFactoriesClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FactoriesClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewFactoriesChannelClient(channel)
 }
 
 func (c *FactoriesClient) Close() error {
@@ -337,14 +321,6 @@ func NewPerformChannelClient(channel thrift.RequestChannel) *PerformClient {
     }
 }
 
-func NewPerformClient(prot thrift.DO_NOT_USE_ChannelWrapper) *PerformClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewPerformChannelClient(channel)
-}
-
 func (c *PerformClient) Close() error {
     return c.ch.Close()
 }
@@ -481,14 +457,6 @@ func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) *Interact
     }
 }
 
-func NewInteractWithSharedClient(prot thrift.DO_NOT_USE_ChannelWrapper) *InteractWithSharedClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewInteractWithSharedChannelClient(channel)
-}
-
 func (c *InteractWithSharedClient) Close() error {
     return c.ch.Close()
 }
@@ -622,14 +590,6 @@ func NewBoxServiceChannelClient(channel thrift.RequestChannel) *BoxServiceClient
     return &BoxServiceClient{
         ch: channel,
     }
-}
-
-func NewBoxServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *BoxServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewBoxServiceChannelClient(channel)
 }
 
 func (c *BoxServiceClient) Close() error {

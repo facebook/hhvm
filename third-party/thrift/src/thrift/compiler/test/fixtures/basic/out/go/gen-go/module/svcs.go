@@ -47,14 +47,6 @@ func NewFooServiceChannelClient(channel thrift.RequestChannel) *FooServiceClient
     }
 }
 
-func NewFooServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FooServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewFooServiceChannelClient(channel)
-}
-
 func (c *FooServiceClient) Close() error {
     return c.ch.Close()
 }
@@ -189,14 +181,6 @@ func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *FB303ServiceCl
     return &FB303ServiceClient{
         ch: channel,
     }
-}
-
-func NewFB303ServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FB303ServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewFB303ServiceChannelClient(channel)
 }
 
 func (c *FB303ServiceClient) Close() error {
@@ -354,14 +338,6 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
     return &MyServiceClient{
         ch: channel,
     }
-}
-
-func NewMyServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewMyServiceChannelClient(channel)
 }
 
 func (c *MyServiceClient) Close() error {
@@ -1095,14 +1071,6 @@ func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *DbMix
     return &DbMixedStackArgumentsClient{
         ch: channel,
     }
-}
-
-func NewDbMixedStackArgumentsClient(prot thrift.DO_NOT_USE_ChannelWrapper) *DbMixedStackArgumentsClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewDbMixedStackArgumentsChannelClient(channel)
 }
 
 func (c *DbMixedStackArgumentsClient) Close() error {

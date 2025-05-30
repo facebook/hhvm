@@ -45,14 +45,6 @@ func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) *PubS
     }
 }
 
-func NewPubSubStreamingServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *PubSubStreamingServiceClient {
-    var channel thrift.RequestChannel
-    if prot != nil {
-        channel = prot.DO_NOT_USE_WrapChannel()
-    }
-    return NewPubSubStreamingServiceChannelClient(channel)
-}
-
 func (c *PubSubStreamingServiceClient) Close() error {
     return c.ch.Close()
 }

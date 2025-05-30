@@ -25,10 +25,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/Synchronized.h>
 #include <folly/synchronization/Baton.h>
-#include <thrift/lib/cpp/concurrency/FunctionRunner.h>
-#include <thrift/lib/cpp/concurrency/SFQThreadManager.h>
 
 using namespace apache::thrift::concurrency;
 using namespace std::literals::chrono_literals;

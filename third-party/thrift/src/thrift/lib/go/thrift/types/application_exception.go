@@ -28,45 +28,51 @@ const (
 )
 
 // ApplicationExceptionIf is an application level Thrift exception
+// TODO: to be deprecated and removed.
 type ApplicationExceptionIf interface {
 	error
 	Struct
 	TypeID() int32
 }
 
-type applicationException struct {
+// ApplicationException is an application level Thrift exception
+type ApplicationException struct {
 	message       string
 	exceptionType int32
 	// The original error that caused the application exception
 	cause error
 }
 
-func (e applicationException) Error() string {
-	return e.message
-}
+var _ error = (*ApplicationException)(nil)
+var _ Struct = (*ApplicationException)(nil)
 
 // NewApplicationException creates a new ApplicationException
-func NewApplicationException(exceptionType int32, message string) *applicationException {
-	return &applicationException{message: message, exceptionType: exceptionType}
+func NewApplicationException(exceptionType int32, message string) *ApplicationException {
+	return &ApplicationException{message: message, exceptionType: exceptionType}
 }
 
 // NewApplicationExceptionCause creates a new ApplicationException with a root cause error
-func NewApplicationExceptionCause(exceptionType int32, message string, cause error) *applicationException {
-	return &applicationException{message, exceptionType, cause}
+func NewApplicationExceptionCause(exceptionType int32, message string, cause error) *ApplicationException {
+	return &ApplicationException{message, exceptionType, cause}
+}
+
+// Error returns the error message
+func (e *ApplicationException) Error() string {
+	return e.message
 }
 
 // TypeID returns the exception type
-func (e *applicationException) TypeID() int32 {
+func (e *ApplicationException) TypeID() int32 {
 	return e.exceptionType
 }
 
 // Unwrap returns the original error that cause the application error. Returns nil if there was no wrapped error.
-func (e *applicationException) Unwrap() error {
+func (e *ApplicationException) Unwrap() error {
 	return e.cause
 }
 
 // Read reads an ApplicationException from the protocol
-func (e *applicationException) Read(prot Decoder) error {
+func (e *ApplicationException) Read(prot Decoder) error {
 	_, err := prot.ReadStructBegin()
 	if err != nil {
 		return err
@@ -124,7 +130,7 @@ func (e *applicationException) Read(prot Decoder) error {
 }
 
 // Write writes an exception to the protocol
-func (e *applicationException) Write(prot Encoder) error {
+func (e *ApplicationException) Write(prot Encoder) error {
 	err := prot.WriteStructBegin("TApplicationException")
 	if err != nil {
 		return err

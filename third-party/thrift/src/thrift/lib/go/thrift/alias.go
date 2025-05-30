@@ -40,6 +40,7 @@ type ReadableStruct = types.ReadableStruct
 type Encoder = types.Encoder
 
 type ApplicationExceptionIf = types.ApplicationExceptionIf
+type ApplicationException = types.ApplicationException
 
 type Type = types.Type
 

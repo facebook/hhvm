@@ -152,7 +152,7 @@ struct fmt::formatter<HPHP::Facts::Clock> {
   }
 
   template <typename FormatContext>
-  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx)
+  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return format_to(ctx.out(), "Clock({}, {})", c.m_clock, c.m_mergebase);
   }

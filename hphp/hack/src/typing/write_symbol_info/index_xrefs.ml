@@ -207,15 +207,34 @@ let process_attribute_xref ctx File_info.{ occ; _ } (xrefs, fa) =
         (Exn.to_string e);
       (xrefs, fa)
 
-let receiver_type occ =
+let receiver_type ctx occ =
   let open SymbolOccurrence in
   match occ.type_ with
   | Method (ClassName receiver, _) ->
-    Some
-      (Declaration.Container
-         (ContainerDeclaration.Class_
-            (ClassDeclaration.Key
-               { ClassDeclaration.name = Util.make_qname receiver })))
+    let qname = Util.make_qname receiver in
+    (match Sym_def.get_kind ctx receiver with
+    | None -> None
+    | Some Ast_defs.Cenum
+    | Some (Ast_defs.Cenum_class _) ->
+      Some
+        (Declaration.Container
+           (ContainerDeclaration.Enum_
+              (EnumDeclaration.Key { EnumDeclaration.name = qname })))
+    | Some Ast_defs.Cinterface ->
+      Some
+        (Declaration.Container
+           (ContainerDeclaration.Interface_
+              (InterfaceDeclaration.Key { InterfaceDeclaration.name = qname })))
+    | Some Ast_defs.Ctrait ->
+      Some
+        (Declaration.Container
+           (ContainerDeclaration.Trait
+              (TraitDeclaration.Key { TraitDeclaration.name = qname })))
+    | Some (Ast_defs.Cclass _) ->
+      Some
+        (Declaration.Container
+           (ContainerDeclaration.Class_
+              (ClassDeclaration.Key { ClassDeclaration.name = qname }))))
   | _ -> None
 
 (* given symbols occurring in a file, compute the maps of xrefs *)
@@ -240,7 +259,7 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
               let (target_id, fa) =
                 Add_fact.method_occ receiver_class name fa
               in
-              let receiver_type = receiver_type occ in
+              let receiver_type = receiver_type ctx occ in
               let target =
                 XRefTarget.Occurrence
                   (Occurrence.Method (MethodOccurrence.Id target_id))
@@ -286,7 +305,7 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
                 pos
                 Add_fact.method_decl
                 ref_fun (* TODO just pass the occurrence here *)
-                ?receiver_type:(receiver_type occ)
+                ?receiver_type:(receiver_type ctx occ)
                 ~class_const:false
                 (xrefs, fa)
             | Property { class_name; name } ->

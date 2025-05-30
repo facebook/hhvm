@@ -96,10 +96,13 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
 
   // apply compression if client has specified compression codec
   if (compressionConfig_) {
+    // There is a case when first response fails and final response callback is
+    // triggered with nullptr payload which crashes the server. See S523649
     CompressionManager().setCompressionCodec(
         *compressionConfig_,
         finalResponse.metadata,
-        finalResponse.payload->computeChainDataLength());
+        finalResponse.payload ? finalResponse.payload->computeChainDataLength()
+                              : 0);
   }
 
   connection_.sendPayload(

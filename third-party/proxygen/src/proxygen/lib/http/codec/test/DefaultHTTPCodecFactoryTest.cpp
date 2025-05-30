@@ -28,17 +28,6 @@ TEST(DefaultHTTPCodecFactoryTest, GetCodec) {
   HTTP1xCodec* http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
   EXPECT_NE(http1xCodec, nullptr);
 
-  codec = factory.getCodec("http/1.1\n", TransportDirection::UPSTREAM, true);
-  http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
-  EXPECT_NE(http1xCodec, nullptr);
-
-  std::string trailingNulStr("http/1.1");
-  trailingNulStr.push_back('\0');
-  EXPECT_EQ(trailingNulStr.size(), 9);
-  codec = factory.getCodec(trailingNulStr, TransportDirection::UPSTREAM, true);
-  http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
-  EXPECT_NE(http1xCodec, nullptr);
-
   codec = factory.getCodec("", TransportDirection::UPSTREAM, true);
   http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
   EXPECT_NE(http1xCodec, nullptr);

@@ -1359,7 +1359,7 @@ public final class TBaseHelper {
         sb.append(obj.toString());
       }
     } catch (RuntimeException re) {
-      sb.append("Exception occured :" + re.getClass() + re.getMessage());
+      sb.append("Exception occurred :" + re.getClass() + re.getMessage());
     }
     return sb.toString();
   }
@@ -1411,7 +1411,7 @@ public final class TBaseHelper {
       sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
       sb.append(")");
     } catch (Exception e) {
-      sb.append("Exception occured :" + e.getClass() + " " + e.getMessage());
+      sb.append("Exception occurred :" + e.getClass() + " " + e.getMessage());
     }
 
     return sb.toString();

@@ -250,7 +250,7 @@ cdef class Struct:
         for name, value in self.__iter__():
             if value != getattr(other, name):
                 return False
-        # in case of no fields, only True when identity equal (begining).
+        # in case of no fields, only True when identity equal (beginning).
         return name is not None
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:

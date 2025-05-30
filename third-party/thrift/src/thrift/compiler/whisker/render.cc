@@ -202,7 +202,7 @@ class partial_definition final {
  *   - macro
  *
  * Each previous item in the stack stores the source location from which a jump
- * occured to the current item. This allows backtraces to be generated at any
+ * occurred to the current item. This allows backtraces to be generated at any
  * point during rendering.
  *
  * This is also aids with pragmas and debugging.

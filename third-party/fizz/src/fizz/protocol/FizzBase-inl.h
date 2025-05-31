@@ -91,6 +91,8 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::moveToErrorState(
       case detail::PendingEvent::Type::WriteNewSessionTicket_E:
       case detail::PendingEvent::Type::KeyUpdateInitiation_E:
         break;
+      default:
+        break;
     }
   }
 }
@@ -194,6 +196,8 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::
         case detail::PendingEvent::Type::KeyUpdateInitiation_E:
           actions.emplace(machine_.processKeyUpdateInitiation(
               state_, std::move(*event.asKeyUpdateInitiation())));
+          break;
+        default:
           break;
       }
     } else {

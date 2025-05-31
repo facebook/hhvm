@@ -60,8 +60,9 @@ inline folly::StringPiece toString(HashFunction hash) {
       return "Sha384";
     case HashFunction::Sha512:
       return "Sha512";
+    default:
+      return "Invalid HashFunction";
   }
-  return "Invalid HashFunction";
 }
 
 // Hashing Algorithms
@@ -99,8 +100,9 @@ inline folly::ByteRange getBlankHash(HashFunction hash) {
       return Sha384::BlankHash;
     case HashFunction::Sha512:
       return Sha512::BlankHash;
+    default:
+      throw std::runtime_error("invalid hash");
   }
-  throw std::runtime_error("invalid hash");
 }
 
 constexpr size_t kHashMaxBlockSize =

@@ -87,8 +87,9 @@ inline std::unique_ptr<folly::IOBuf> OpenSSLSignature<Type>::sign(
       return detail::ecSign(data, pkey_, SigAlg<Scheme>::HashNid);
     case KeyType::RSA:
       return detail::rsaPssSign(data, pkey_, SigAlg<Scheme>::HashNid);
+    default:
+      folly::assume_unreachable();
   }
-  folly::assume_unreachable();
 }
 
 // Use template specialization for Ed25519 because the algorithm doesn't have a
@@ -115,8 +116,9 @@ inline void OpenSSLSignature<Type>::verify(
     case KeyType::RSA:
       return detail::rsaPssVerify(
           data, signature, pkey_, SigAlg<Scheme>::HashNid);
+    default:
+      folly::assume_unreachable();
   }
-  folly::assume_unreachable();
 }
 
 // Use template specialization for Ed25519 because the algorithm doesn't have a

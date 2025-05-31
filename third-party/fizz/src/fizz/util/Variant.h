@@ -90,137 +90,173 @@ namespace fizz {
   case Type::X##_E:                         \
     return X##_ == *other.as##X();
 
-#define FIZZ_DECLARE_VARIANT_TYPE(NAME, X)                     \
-  struct NAME {                                                \
-    enum class Type { X(FIZZ_ENUM_TYPES) };                    \
-                                                               \
-    X(FIZZ_UNION_CTORS, NAME)                                  \
-                                                               \
-    NAME(NAME&& other) {                                       \
-      switch (other.type_) { X(FIZZ_UNION_MOVE_CASES, other) } \
-      type_ = other.type_;                                     \
-    }                                                          \
-                                                               \
-    NAME& operator=(NAME&& other) {                            \
-      destroyVariant();                                        \
-      switch (other.type_) { X(FIZZ_UNION_MOVE_CASES, other) } \
-      type_ = other.type_;                                     \
-      return *this;                                            \
-    }                                                          \
-                                                               \
-    ~NAME() {                                                  \
-      destroyVariant();                                        \
-    }                                                          \
-                                                               \
-    Type type() const {                                        \
-      return type_;                                            \
-    }                                                          \
-                                                               \
-    X(FIZZ_UNION_ACCESSOR)                                     \
-                                                               \
-    X(FIZZ_CONST_UNION_ACCESSOR)                               \
-                                                               \
-    template <class T, class E>                                \
-    struct TypedGet {};                                        \
-    X(FIZZ_UNION_TYPED_GET)                                    \
-                                                               \
-    /* Do not use in non-test code */                          \
-    template <class T>                                         \
-    T* getType() {                                             \
-      return TypedGet<T, int>::get(*this);                     \
-    }                                                          \
-    template <class T>                                         \
-    const T* getType() const {                                 \
-      return TypedGet<T, int>::getConst(*this);                \
-    }                                                          \
-                                                               \
-   private:                                                    \
-    union {                                                    \
-      X(FIZZ_UNION_TYPE)                                       \
-    };                                                         \
-                                                               \
-    void destroyVariant() {                                    \
-      switch (type_) { X(FIZZ_DESTRUCTOR_CASES) }              \
-    }                                                          \
-                                                               \
-    Type type_;                                                \
+#define FIZZ_DECLARE_VARIANT_TYPE(NAME, X)      \
+  struct NAME {                                 \
+    enum class Type { X(FIZZ_ENUM_TYPES) };     \
+                                                \
+    X(FIZZ_UNION_CTORS, NAME)                   \
+                                                \
+    NAME(NAME&& other) {                        \
+      switch (other.type_) {                    \
+        X(FIZZ_UNION_MOVE_CASES, other)         \
+        default:                                \
+          break;                                \
+      }                                         \
+      type_ = other.type_;                      \
+    }                                           \
+                                                \
+    NAME& operator=(NAME&& other) {             \
+      destroyVariant();                         \
+      switch (other.type_) {                    \
+        X(FIZZ_UNION_MOVE_CASES, other)         \
+        default:                                \
+          break;                                \
+      }                                         \
+      type_ = other.type_;                      \
+      return *this;                             \
+    }                                           \
+                                                \
+    ~NAME() {                                   \
+      destroyVariant();                         \
+    }                                           \
+                                                \
+    Type type() const {                         \
+      return type_;                             \
+    }                                           \
+                                                \
+    X(FIZZ_UNION_ACCESSOR)                      \
+                                                \
+    X(FIZZ_CONST_UNION_ACCESSOR)                \
+                                                \
+    template <class T, class E>                 \
+    struct TypedGet {};                         \
+    X(FIZZ_UNION_TYPED_GET)                     \
+                                                \
+    /* Do not use in non-test code */           \
+    template <class T>                          \
+    T* getType() {                              \
+      return TypedGet<T, int>::get(*this);      \
+    }                                           \
+    template <class T>                          \
+    const T* getType() const {                  \
+      return TypedGet<T, int>::getConst(*this); \
+    }                                           \
+                                                \
+   private:                                     \
+    union {                                     \
+      X(FIZZ_UNION_TYPE)                        \
+    };                                          \
+                                                \
+    void destroyVariant() {                     \
+      switch (type_) {                          \
+        X(FIZZ_DESTRUCTOR_CASES)                \
+        default:                                \
+          break;                                \
+      }                                         \
+    }                                           \
+                                                \
+    Type type_;                                 \
   };
 
-#define FIZZ_DECLARE_COPYABLE_VARIANT_TYPE(NAME, X)                \
-  struct NAME {                                                    \
-    enum class Type { X(FIZZ_ENUM_TYPES) };                        \
-                                                                   \
-    X(FIZZ_UNION_CTORS, NAME)                                      \
-                                                                   \
-    X(FIZZ_UNION_COPY_CTORS, NAME)                                 \
-                                                                   \
-    NAME(NAME&& other) {                                           \
-      switch (other.type_) { X(FIZZ_UNION_MOVE_CASES, other) }     \
-      type_ = other.type_;                                         \
-    }                                                              \
-                                                                   \
-    NAME& operator=(NAME&& other) {                                \
-      destroyVariant();                                            \
-      switch (other.type_) { X(FIZZ_UNION_MOVE_CASES, other) }     \
-      type_ = other.type_;                                         \
-      return *this;                                                \
-    }                                                              \
-                                                                   \
-    NAME(const NAME& other) {                                      \
-      switch (other.type_) { X(FIZZ_UNION_COPY_CASES, other) }     \
-      type_ = other.type_;                                         \
-    }                                                              \
-                                                                   \
-    NAME& operator=(const NAME& other) {                           \
-      destroyVariant();                                            \
-      switch (other.type_) { X(FIZZ_UNION_COPY_CASES, other) }     \
-      type_ = other.type_;                                         \
-      return *this;                                                \
-    }                                                              \
-                                                                   \
-    bool operator==(const NAME& other) const {                     \
-      if (other.type() != type_) {                                 \
-        return false;                                              \
-      }                                                            \
-      switch (other.type_) { X(FIZZ_UNION_EQUALITY_CASES, other) } \
-      return false;                                                \
-    }                                                              \
-                                                                   \
-    ~NAME() {                                                      \
-      destroyVariant();                                            \
-    }                                                              \
-                                                                   \
-    Type type() const {                                            \
-      return type_;                                                \
-    }                                                              \
-                                                                   \
-    X(FIZZ_UNION_ACCESSOR)                                         \
-                                                                   \
-    X(FIZZ_CONST_UNION_ACCESSOR)                                   \
-                                                                   \
-    template <class T, class E>                                    \
-    struct TypedGet {};                                            \
-    X(FIZZ_UNION_TYPED_GET)                                        \
-                                                                   \
-    /* Do not use in non-test code */                              \
-    template <class T>                                             \
-    T* getType() {                                                 \
-      return TypedGet<T, int>::get(*this);                         \
-    }                                                              \
-    template <class T>                                             \
-    const T* getType() const {                                     \
-      return TypedGet<T, int>::getConst(*this);                    \
-    }                                                              \
-                                                                   \
-   private:                                                        \
-    union {                                                        \
-      X(FIZZ_UNION_TYPE)                                           \
-    };                                                             \
-                                                                   \
-    void destroyVariant() {                                        \
-      switch (type_) { X(FIZZ_DESTRUCTOR_CASES) }                  \
-    }                                                              \
-                                                                   \
-    Type type_;                                                    \
+#define FIZZ_DECLARE_COPYABLE_VARIANT_TYPE(NAME, X) \
+  struct NAME {                                     \
+    enum class Type { X(FIZZ_ENUM_TYPES) };         \
+                                                    \
+    X(FIZZ_UNION_CTORS, NAME)                       \
+                                                    \
+    X(FIZZ_UNION_COPY_CTORS, NAME)                  \
+                                                    \
+    NAME(NAME&& other) {                            \
+      switch (other.type_) {                        \
+        X(FIZZ_UNION_MOVE_CASES, other)             \
+        default:                                    \
+          break;                                    \
+      }                                             \
+      type_ = other.type_;                          \
+    }                                               \
+                                                    \
+    NAME& operator=(NAME&& other) {                 \
+      destroyVariant();                             \
+      switch (other.type_) {                        \
+        X(FIZZ_UNION_MOVE_CASES, other)             \
+        default:                                    \
+          break;                                    \
+      }                                             \
+      type_ = other.type_;                          \
+      return *this;                                 \
+    }                                               \
+                                                    \
+    NAME(const NAME& other) {                       \
+      switch (other.type_) {                        \
+        X(FIZZ_UNION_COPY_CASES, other)             \
+        default:                                    \
+          break;                                    \
+      }                                             \
+      type_ = other.type_;                          \
+    }                                               \
+                                                    \
+    NAME& operator=(const NAME& other) {            \
+      destroyVariant();                             \
+      switch (other.type_) {                        \
+        X(FIZZ_UNION_COPY_CASES, other)             \
+        default:                                    \
+          break;                                    \
+      }                                             \
+      type_ = other.type_;                          \
+      return *this;                                 \
+    }                                               \
+                                                    \
+    bool operator==(const NAME& other) const {      \
+      if (other.type() != type_) {                  \
+        return false;                               \
+      }                                             \
+      switch (other.type_) {                        \
+        X(FIZZ_UNION_EQUALITY_CASES, other)         \
+        default:                                    \
+          break;                                    \
+      }                                             \
+      return false;                                 \
+    }                                               \
+                                                    \
+    ~NAME() {                                       \
+      destroyVariant();                             \
+    }                                               \
+                                                    \
+    Type type() const {                             \
+      return type_;                                 \
+    }                                               \
+                                                    \
+    X(FIZZ_UNION_ACCESSOR)                          \
+                                                    \
+    X(FIZZ_CONST_UNION_ACCESSOR)                    \
+                                                    \
+    template <class T, class E>                     \
+    struct TypedGet {};                             \
+    X(FIZZ_UNION_TYPED_GET)                         \
+                                                    \
+    /* Do not use in non-test code */               \
+    template <class T>                              \
+    T* getType() {                                  \
+      return TypedGet<T, int>::get(*this);          \
+    }                                               \
+    template <class T>                              \
+    const T* getType() const {                      \
+      return TypedGet<T, int>::getConst(*this);     \
+    }                                               \
+                                                    \
+   private:                                         \
+    union {                                         \
+      X(FIZZ_UNION_TYPE)                            \
+    };                                              \
+                                                    \
+    void destroyVariant() {                         \
+      switch (type_) {                              \
+        X(FIZZ_DESTRUCTOR_CASES)                    \
+        default:                                    \
+          break;                                    \
+      }                                             \
+    }                                               \
+                                                    \
+    Type type_;                                     \
   };
 } // namespace fizz

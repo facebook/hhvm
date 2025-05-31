@@ -11,6 +11,7 @@
 #include <fizz/crypto/Crypto.h>
 #include <fizz/record/Types.h>
 #include <folly/Range.h>
+#include <folly/lang/Assume.h>
 
 namespace fizz {
 enum class PskType {
@@ -34,6 +35,8 @@ inline bool isPskAccepted(PskType t) {
     case PskType::External:
     case PskType::Resumption:
       return true;
+    default:
+      folly::assume_unreachable();
   }
 }
 

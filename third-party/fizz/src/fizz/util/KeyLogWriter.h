@@ -83,7 +83,10 @@ class KeyLogWriter {
             return folly::none;
           case EarlySecrets::HRRECHAcceptConfirmation:
             return folly::none;
+          default:
+            break;
         }
+        break;
       case SecretType::Type::HandshakeSecrets_E:
         switch (secretType.tryAsHandshakeSecrets()) {
           case HandshakeSecrets::ClientHandshakeTraffic:
@@ -92,21 +95,32 @@ class KeyLogWriter {
             return Label::SERVER_HANDSHAKE_TRAFFIC_SECRET;
           case HandshakeSecrets::ECHAcceptConfirmation:
             return folly::none;
+          default:
+            break;
         }
+        break;
       case SecretType::Type::MasterSecrets_E:
         switch (secretType.tryAsMasterSecrets()) {
           case MasterSecrets::ExporterMaster:
             return Label::EXPORTER_SECRET;
           case MasterSecrets::ResumptionMaster:
             return folly::none;
+          default:
+            break;
         }
+        break;
       case SecretType::Type::AppTrafficSecrets_E:
         switch (secretType.tryAsAppTrafficSecrets()) {
           case AppTrafficSecrets::ClientAppTraffic:
             return Label::CLIENT_TRAFFIC_SECRET_0;
           case AppTrafficSecrets::ServerAppTraffic:
             return Label::SERVER_TRAFFIC_SECRET_0;
+          default:
+            break;
         }
+        break;
+      default:
+        break;
     }
     return folly::none;
   }

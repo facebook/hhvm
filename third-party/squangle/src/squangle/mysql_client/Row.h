@@ -552,6 +552,9 @@ class EphemeralRow {
         return folly::to<DataType>(getDouble(colIndex));
       case common::mysql_client::InternalRow::Type::String:
         return folly::to<DataType>(getString(colIndex));
+      default:
+        throw std::logic_error{
+            fmt::format("Received unknown type {}", colIndex)};
     }
   }
 

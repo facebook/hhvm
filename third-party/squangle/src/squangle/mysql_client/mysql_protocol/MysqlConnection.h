@@ -327,6 +327,8 @@ struct fmt::formatter<enum net_async_status> {
       case NET_ASYNC_COMPLETE_NO_MORE_RESULTS:
         name = "NET_ASYNC_COMPLETE_NO_MORE_RESULTS";
         break;
+      default:
+        break;
     }
     return fmt::format_to(ctx.out(), "{}", name);
   }
@@ -383,6 +385,8 @@ struct fmt::formatter<enum connect_stage> {
         break;
       case CONNECT_STAGE_COMPLETE:
         name = "CONNECT_STAGE_COMPLETE";
+        break;
+      default:
         break;
     }
     return fmt::format_to(ctx.out(), "{}", name);

@@ -55,8 +55,9 @@ class EnumHelper {
         return "DatabaseError";
       case FailureReason::DISCOVERY_ERROR:
         return "DiscoveryError";
+      default:
+        return "(should not happen)";
     }
-    return "(should not happen)";
   }
 
   static constexpr folly::StringPiece operationTypeToString(
@@ -84,8 +85,9 @@ class EnumHelper {
         return "ChangeUser";
       case OperationType::ThriftQuery:
         return "ThriftQuery";
+      default:
+        return "(should not happen)";
     }
-    return "(should not happen)";
   }
 };
 

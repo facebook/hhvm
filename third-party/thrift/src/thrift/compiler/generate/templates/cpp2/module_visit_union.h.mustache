@@ -44,6 +44,7 @@ struct VisitUnion<{{struct:cpp_fullname}}> {
       {{/first?}}{{/struct:fields}}
       {{^struct:fields}}
       (void)0;
+      break;
       {{/struct:fields}}
     default:
       throw std::runtime_error{folly::to<std::string>(

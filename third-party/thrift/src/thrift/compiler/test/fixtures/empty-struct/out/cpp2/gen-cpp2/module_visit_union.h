@@ -22,6 +22,7 @@ struct VisitUnion<::cpp2::Nada> {
     switch (t.getType()) {
     case Union::Type::__EMPTY__:
       (void)0;
+      break;
     default:
       throw std::runtime_error{folly::to<std::string>(
           "Enum got invalid value ",

@@ -230,6 +230,8 @@ inline uint32_t JSONProtocolWriterCommon::beginContext(ContextType type) {
     case ContextType::ARRAY:
       out_.write(apache::thrift::detail::json::kJSONArrayStart);
       return 1;
+    default:
+      CHECK(false);
   }
   CHECK(false);
   return 0;
@@ -243,6 +245,8 @@ inline uint32_t JSONProtocolWriterCommon::endContext() {
       break;
     case ContextType::ARRAY:
       out_.write(apache::thrift::detail::json::kJSONArrayEnd);
+      break;
+    default:
       break;
   }
   context.pop_back();
@@ -271,6 +275,8 @@ inline uint32_t JSONProtocolWriterCommon::writeContext() {
         return 1;
       }
       return 0;
+    default:
+      break;
   }
   CHECK(false);
   return 0;
@@ -584,6 +590,8 @@ inline void JSONProtocolReaderCommon::ensureAndSkipContext() {
               ensureChar(apache::thrift::detail::json::kJSONElemSeparator);
         }
         break;
+      default:
+        break;
     }
   }
 }
@@ -612,6 +620,8 @@ inline void JSONProtocolReaderCommon::beginContext(ContextType type) {
     case ContextType::ARRAY:
       ensureChar(apache::thrift::detail::json::kJSONArrayStart);
       return;
+    default:
+      break;
   }
   CHECK(false);
 }
@@ -628,6 +638,8 @@ inline void JSONProtocolReaderCommon::endContext() {
     case ContextType::ARRAY:
       ensureChar(apache::thrift::detail::json::kJSONArrayEnd);
       return;
+    default:
+      break;
   }
   CHECK(false);
 }

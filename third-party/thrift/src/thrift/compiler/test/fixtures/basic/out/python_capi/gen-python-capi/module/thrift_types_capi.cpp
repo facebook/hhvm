@@ -440,6 +440,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<set<float>>{}.extractInto(
           cpp.floatSet_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -507,6 +509,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<set<float>>{}
           .constructFrom(val.floatSet_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {
@@ -868,6 +872,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<int32_t>{}.extractInto(
           cpp.reserved_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -920,6 +926,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<int32_t>{}
           .constructFrom(val.reserved_field_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {

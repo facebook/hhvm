@@ -69,6 +69,12 @@ static folly::StringPiece getTypeNameForTypeID(TType typeID) {
       return kTypeNameSet;
     case TType::T_LIST:
       return kTypeNameList;
+    case TType::T_STOP:
+    case TType::T_VOID:
+    case TType::T_U64:
+    case TType::T_UTF8:
+    case TType::T_UTF16:
+    case TType::T_STREAM:
     default:
       throwUnrecognizedType();
   }

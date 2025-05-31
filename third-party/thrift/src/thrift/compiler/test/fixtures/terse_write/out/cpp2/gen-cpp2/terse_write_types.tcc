@@ -422,7 +422,10 @@ uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::MyStruct>::serializedSize<false>(*prot_, value_.struct_field);
       break;
     }
-    case MyUnion::Type::__EMPTY__:;
+    case MyUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -518,6 +521,9 @@ uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -641,6 +647,9 @@ uint32_t MyUnion::write(Protocol_* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

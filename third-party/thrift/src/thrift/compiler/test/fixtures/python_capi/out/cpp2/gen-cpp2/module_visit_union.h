@@ -36,6 +36,11 @@ struct VisitUnion<::test::fixtures::python_capi::Shallot> {
       return f(6, *static_cast<T&&>(t).adapted_int_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).myEnum_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -54,6 +59,11 @@ struct VisitUnion<::test::fixtures::python_capi::SomeBinary> {
       return f(2, *static_cast<T&&>(t).iobufRef_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).iobuf_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

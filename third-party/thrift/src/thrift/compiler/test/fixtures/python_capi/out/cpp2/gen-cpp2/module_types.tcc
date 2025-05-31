@@ -3928,7 +3928,10 @@ uint32_t Shallot::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adapted_int);
       break;
     }
-    case Shallot::Type::__EMPTY__:;
+    case Shallot::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3997,6 +4000,9 @@ uint32_t Shallot::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case Shallot::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4079,6 +4085,9 @@ uint32_t Shallot::write(Protocol_* prot_) const {
       break;
     }
     case Shallot::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4182,7 +4191,10 @@ uint32_t SomeBinary::serializedSize(Protocol_ const* prot_) const {
       }
       break;
     }
-    case SomeBinary::Type::__EMPTY__:;
+    case SomeBinary::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4214,6 +4226,9 @@ uint32_t SomeBinary::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case SomeBinary::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4251,6 +4266,9 @@ uint32_t SomeBinary::write(Protocol_* prot_) const {
       break;
     }
     case SomeBinary::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

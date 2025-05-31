@@ -187,7 +187,10 @@ uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("MyUnion");
   switch(this->getType()) {
-    case MyUnion::Type::__EMPTY__:;
+    case MyUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -199,6 +202,9 @@ uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("MyUnion");
   switch(this->getType()) {
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -210,6 +216,9 @@ uint32_t MyUnion::write(Protocol_* prot_) const {
   xfer += prot_->writeStructBegin("MyUnion");
   switch(this->getType()) {
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

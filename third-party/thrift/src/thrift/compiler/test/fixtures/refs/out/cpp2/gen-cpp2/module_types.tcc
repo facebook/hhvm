@@ -237,7 +237,10 @@ uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
       }
       break;
     }
-    case MyUnion::Type::__EMPTY__:;
+    case MyUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -265,6 +268,9 @@ uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -296,6 +302,9 @@ uint32_t MyUnion::write(Protocol_* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -367,7 +376,10 @@ uint32_t NonTriviallyDestructibleUnion::serializedSize(Protocol_ const* prot_) c
       }
       break;
     }
-    case NonTriviallyDestructibleUnion::Type::__EMPTY__:;
+    case NonTriviallyDestructibleUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -387,6 +399,9 @@ uint32_t NonTriviallyDestructibleUnion::serializedSizeZC(Protocol_ const* prot_)
       break;
     }
     case NonTriviallyDestructibleUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -408,6 +423,9 @@ uint32_t NonTriviallyDestructibleUnion::write(Protocol_* prot_) const {
       break;
     }
     case NonTriviallyDestructibleUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

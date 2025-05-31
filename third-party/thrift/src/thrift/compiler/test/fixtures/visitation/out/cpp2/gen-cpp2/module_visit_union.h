@@ -30,6 +30,11 @@ struct VisitUnion<::test_cpp2::cpp_reflection::union1> {
       return f(3, *static_cast<T&&>(t).ue_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).ui_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -50,6 +55,11 @@ struct VisitUnion<::test_cpp2::cpp_reflection::union2> {
       return f(3, *static_cast<T&&>(t).ue_2_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).ui_2_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -70,6 +80,11 @@ struct VisitUnion<::test_cpp2::cpp_reflection::union3> {
       return f(3, *static_cast<T&&>(t).ue_3_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).ui_3_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -92,6 +107,11 @@ struct VisitUnion<::test_cpp2::cpp_reflection::unionA> {
       return f(4, *static_cast<T&&>(t).a_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).i_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -160,6 +180,11 @@ struct VisitUnion<::test_cpp2::cpp_reflection::union_with_special_names> {
       return f(27, *static_cast<T&&>(t).fields_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).get_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

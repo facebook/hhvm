@@ -22,7 +22,10 @@ uint32_t {{struct:cpp_underlying_name}}::serializedSize(Protocol_ const* prot_) 
   {{#struct:fields}}
   {{> module_types_tcc/serialize_field_size}}
   {{/struct:fields}}
-    case {{struct:cpp_underlying_name}}::Type::__EMPTY__:;
+    case {{struct:cpp_underlying_name}}::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -37,6 +40,9 @@ uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC(Protocol_ const* prot_
   {{> module_types_tcc/serialize_field_size_zc}}
   {{/struct:fields}}
     case {{struct:cpp_underlying_name}}::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -52,6 +58,9 @@ uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* prot_) const {
   {{> module_types_tcc/serialize_field}}
   {{/struct:fields}}
     case {{struct:cpp_underlying_name}}::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

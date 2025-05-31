@@ -945,6 +945,12 @@ class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
       case Kind::UNION:
       case Kind::EXCEPTION:
         return true;
+      case Kind::PRIMITIVE:
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::LIST:
+      case Kind::SET:
+      case Kind::MAP:
       default:
         return false;
     }
@@ -964,6 +970,12 @@ class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
         return asUnion();
       case Kind::EXCEPTION:
         return asException();
+      case Kind::PRIMITIVE:
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::LIST:
+      case Kind::SET:
+      case Kind::MAP:
       default:
         break;
     }
@@ -976,6 +988,12 @@ class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
       case Kind::SET:
       case Kind::MAP:
         return true;
+      case Kind::PRIMITIVE:
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::STRUCT:
+      case Kind::UNION:
+      case Kind::EXCEPTION:
       default:
         return false;
     }
@@ -994,12 +1012,11 @@ class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
    *   - kind() != Kind::TYPEDEF
    */
   const TypeRef& trueType() const {
-    switch (kind()) {
-      case Kind::TYPEDEF:
-        return asTypedef().targetType().trueType();
-      default:
-        return *this;
+    if (kind() == Kind::TYPEDEF) {
+      return asTypedef().targetType().trueType();
     }
+
+    return *this;
   }
 
   /**
@@ -1350,6 +1367,11 @@ class DefinitionNode final : folly::MoveOnly,
       case Kind::UNION:
       case Kind::EXCEPTION:
         return true;
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::CONSTANT:
+      case Kind::SERVICE:
+      case Kind::INTERACTION:
       default:
         return false;
     }
@@ -1370,6 +1392,11 @@ class DefinitionNode final : folly::MoveOnly,
         return asUnion();
       case Kind::EXCEPTION:
         return asException();
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::CONSTANT:
+      case Kind::SERVICE:
+      case Kind::INTERACTION:
       default:
         break;
     }
@@ -1381,6 +1408,12 @@ class DefinitionNode final : folly::MoveOnly,
       case Kind::SERVICE:
       case Kind::INTERACTION:
         return true;
+      case Kind::STRUCT:
+      case Kind::UNION:
+      case Kind::EXCEPTION:
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::CONSTANT:
       default:
         return false;
     }
@@ -1399,6 +1432,12 @@ class DefinitionNode final : folly::MoveOnly,
         return asService();
       case Kind::INTERACTION:
         return asInteraction();
+      case Kind::STRUCT:
+      case Kind::UNION:
+      case Kind::EXCEPTION:
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+      case Kind::CONSTANT:
       default:
         break;
     }

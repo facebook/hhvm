@@ -32,6 +32,11 @@ struct VisitUnion<::facebook::thrift::test::Baz> {
       return f(4, *static_cast<T&&>(t).longField_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).intField_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -48,6 +53,11 @@ struct VisitUnion<::facebook::thrift::test::ThriftAdaptTestUnion> {
       return f(1, *static_cast<T&&>(t).custom_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).delay_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

@@ -22,6 +22,11 @@ struct VisitUnion<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
     switch (t.getType()) {
     case Union::Type::__EMPTY__:
       (void)0;
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

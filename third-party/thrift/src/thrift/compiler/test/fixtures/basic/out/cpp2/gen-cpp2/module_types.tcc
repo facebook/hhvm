@@ -877,7 +877,10 @@ uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::floating_point>, ::std::set<float>>::serializedSize<false>(*prot_, value_.floatSet);
       break;
     }
-    case MyUnion::Type::__EMPTY__:;
+    case MyUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -913,6 +916,9 @@ uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -956,6 +962,9 @@ uint32_t MyUnion::write(Protocol_* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -1604,7 +1613,10 @@ uint32_t UnionToBeRenamed::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, value_.reserved_field);
       break;
     }
-    case UnionToBeRenamed::Type::__EMPTY__:;
+    case UnionToBeRenamed::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1622,6 +1634,9 @@ uint32_t UnionToBeRenamed::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case UnionToBeRenamed::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1641,6 +1656,9 @@ uint32_t UnionToBeRenamed::write(Protocol_* prot_) const {
       break;
     }
     case UnionToBeRenamed::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

@@ -122,6 +122,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.{{field:cpp_name}}_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
   {{/struct:fields}}
+    default:
+      break;
   }
   {{/struct:union?}}
   if (error) {
@@ -250,6 +252,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           .constructFrom(val.{{field:cpp_name}}_ref()));
       break;
   {{/struct:fields}}
+    default:
+      break;
   }
   if (!py_val) {
     return nullptr;

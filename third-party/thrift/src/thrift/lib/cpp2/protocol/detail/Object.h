@@ -544,6 +544,12 @@ void parseValueInplace(
       prot.readListEnd();
       break;
     }
+    case T_STOP:
+    case T_VOID:
+    case T_U64:
+    case T_UTF8:
+    case T_UTF16:
+    case T_STREAM:
     default: {
       TProtocolException::throwInvalidSkipType(arg_type);
     }
@@ -647,6 +653,7 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
     case Value::Type::objectValue: {
       return serializeObject(prot, value.as_object());
     }
+    case Value::Type::__EMPTY__:
     default: {
       TProtocolException::throwInvalidFieldData();
     }
@@ -762,76 +769,74 @@ void serializeValue(
     const Value& value,
     const MaskedProtocolData& protocolData,
     const MaskedData& maskedData) {
-  switch (value.getType()) {
-    case Value::Type::objectValue: {
-      return serializeObject(prot, value.as_object(), protocolData, maskedData);
-    }
-    case Value::Type::mapValue: {
-      if (!maskedData.values_ref()) {
-        throw std::runtime_error("incompatible value and maskedData");
-      }
-      TType keyType = protocol::T_STRING;
-      TType valueType = protocol::T_I64;
-
-      // compute size, keyType, and valueType
-      const auto& mapVal = value.as_map();
-      auto size = mapVal.size();
-      if (size > 0) {
-        keyType = getTType(mapVal.begin()->first);
-        valueType = getTType(mapVal.begin()->second);
-      }
-      for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
-        const Value& key = getByValueId(*protocolData.keys(), keyValueId);
-        if (size == 0) { // need to set keyType and valueType
-          keyType = getTType(key);
-          type::ValueId valueId = nestedMaskedData.full_ref().value();
-          valueType = toTType(
-              *getByValueId(*protocolData.values(), valueId).wireType());
-        }
-        if (folly::get_ptr(mapVal, key) == nullptr) {
-          ++size;
-        }
-      }
-
-      // Remember which keys are in the maskedData. Note that the ownership of
-      // keys are managed by the maskedData.
-      std::unordered_set<
-          std::reference_wrapper<const Value>,
-          std::hash<Value>,
-          std::equal_to<Value>>
-          keys;
-      prot.writeMapBegin(keyType, valueType, size);
-      for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
-        const Value& key = getByValueId(*protocolData.keys(), keyValueId);
-        keys.insert(key);
-        ensureSameType(key, keyType);
-        serializeValue(prot, key);
-        // no need to serialize the value
-        if (folly::get_ptr(mapVal, key) == nullptr) {
-          writeRawMapValue(prot, valueType, protocolData, nestedMaskedData);
-          continue;
-        }
-        // recursively serialize value with maskedData
-        const Value& val = mapVal.at(key);
-        ensureSameType(val, valueType);
-        serializeValue(prot, val, protocolData, nestedMaskedData);
-      }
-      for (const auto& [key, val] : mapVal) {
-        if (keys.find(key) != keys.end()) { // already serailized
-          continue;
-        }
-        ensureSameType(key, keyType);
-        ensureSameType(val, valueType);
-        serializeValue(prot, key);
-        serializeValue(prot, val);
-      }
-      prot.writeMapEnd();
-      return;
-    }
-    default: {
-      serializeValue(prot, value);
-    }
+  if (value.getType() == Value::Type::objectValue) {
+    return serializeObject(prot, value.as_object(), protocolData, maskedData);
   }
+
+  if (value.getType() == Value::Type::mapValue) {
+    if (!maskedData.values_ref()) {
+      throw std::runtime_error("incompatible value and maskedData");
+    }
+    TType keyType = protocol::T_STRING;
+    TType valueType = protocol::T_I64;
+
+    // compute size, keyType, and valueType
+    const auto& mapVal = value.as_map();
+    auto size = mapVal.size();
+    if (size > 0) {
+      keyType = getTType(mapVal.begin()->first);
+      valueType = getTType(mapVal.begin()->second);
+    }
+    for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
+      const Value& key = getByValueId(*protocolData.keys(), keyValueId);
+      if (size == 0) { // need to set keyType and valueType
+        keyType = getTType(key);
+        type::ValueId valueId = nestedMaskedData.full_ref().value();
+        valueType =
+            toTType(*getByValueId(*protocolData.values(), valueId).wireType());
+      }
+      if (folly::get_ptr(mapVal, key) == nullptr) {
+        ++size;
+      }
+    }
+
+    // Remember which keys are in the maskedData. Note that the ownership of
+    // keys are managed by the maskedData.
+    std::unordered_set<
+        std::reference_wrapper<const Value>,
+        std::hash<Value>,
+        std::equal_to<Value>>
+        keys;
+    prot.writeMapBegin(keyType, valueType, size);
+    for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
+      const Value& key = getByValueId(*protocolData.keys(), keyValueId);
+      keys.insert(key);
+      ensureSameType(key, keyType);
+      serializeValue(prot, key);
+      // no need to serialize the value
+      if (folly::get_ptr(mapVal, key) == nullptr) {
+        writeRawMapValue(prot, valueType, protocolData, nestedMaskedData);
+        continue;
+      }
+      // recursively serialize value with maskedData
+      const Value& val = mapVal.at(key);
+      ensureSameType(val, valueType);
+      serializeValue(prot, val, protocolData, nestedMaskedData);
+    }
+    for (const auto& [key, val] : mapVal) {
+      if (keys.find(key) != keys.end()) { // already serailized
+        continue;
+      }
+      ensureSameType(key, keyType);
+      ensureSameType(val, valueType);
+      serializeValue(prot, key);
+      serializeValue(prot, val);
+    }
+    prot.writeMapEnd();
+    return;
+  }
+
+  serializeValue(prot, value);
 }
 
 template <class Protocol>

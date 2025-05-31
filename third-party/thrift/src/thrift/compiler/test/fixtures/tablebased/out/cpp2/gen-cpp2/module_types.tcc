@@ -247,7 +247,10 @@ uint32_t ExampleUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::tablebased::TrivialTypesStruct>::serializedSize<false>(*prot_, value_.fieldB);
       break;
     }
-    case ExampleUnion::Type::__EMPTY__:;
+    case ExampleUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -271,6 +274,9 @@ uint32_t ExampleUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case ExampleUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

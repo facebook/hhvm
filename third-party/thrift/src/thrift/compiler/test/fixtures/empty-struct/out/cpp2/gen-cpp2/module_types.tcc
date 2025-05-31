@@ -152,7 +152,10 @@ uint32_t Nada::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Nada");
   switch(this->getType()) {
-    case Nada::Type::__EMPTY__:;
+    case Nada::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -164,6 +167,9 @@ uint32_t Nada::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("Nada");
   switch(this->getType()) {
     case Nada::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -175,6 +181,9 @@ uint32_t Nada::write(Protocol_* prot_) const {
   xfer += prot_->writeStructBegin("Nada");
   switch(this->getType()) {
     case Nada::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

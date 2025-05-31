@@ -45,6 +45,11 @@ struct VisitUnion<{{struct:cpp_fullname}}> {
       {{^struct:fields}}
       (void)0;
       {{/struct:fields}}
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

@@ -30,6 +30,11 @@ struct VisitUnion<::test::fixtures::basic::MyUnion> {
       return f(3, *static_cast<T&&>(t).floatSet_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).myEnum_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -44,6 +49,11 @@ struct VisitUnion<::test::fixtures::basic::UnionToBeRenamed> {
       return f(0, *static_cast<T&&>(t).reserved_field_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).reserved_field_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

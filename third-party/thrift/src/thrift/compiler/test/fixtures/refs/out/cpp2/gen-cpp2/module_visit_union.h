@@ -26,6 +26,11 @@ struct VisitUnion<::cpp2::MyUnion> {
       return f(1, *static_cast<T&&>(t).aString_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).anInteger_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -40,6 +45,11 @@ struct VisitUnion<::cpp2::NonTriviallyDestructibleUnion> {
       return f(0, *static_cast<T&&>(t).int_field_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).int_field_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

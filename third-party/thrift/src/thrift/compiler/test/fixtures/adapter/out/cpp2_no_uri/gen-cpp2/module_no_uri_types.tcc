@@ -84,7 +84,10 @@ uint32_t RefUnion::serializedSize(Protocol_ const* prot_) const {
       }
       break;
     }
-    case RefUnion::Type::__EMPTY__:;
+    case RefUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -104,6 +107,9 @@ uint32_t RefUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case RefUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -125,6 +131,9 @@ uint32_t RefUnion::write(Protocol_* prot_) const {
       break;
     }
     case RefUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

@@ -1919,6 +1919,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<::apache::thrift::python::capi::AdaptedThrift<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, int64_t>>{}.extractInto(
           cpp.adapted_int_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -2002,6 +2004,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           Constructor<::apache::thrift::python::capi::AdaptedThrift<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, int64_t>>{}
           .constructFrom(val.adapted_int_ref()));
       break;
+    default:
+      break;
   }
   if (!py_val) {
     return nullptr;
@@ -2048,6 +2052,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 3:
       Extractor<folly::IOBuf>{}.extractInto(
           cpp.iobufRef_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    default:
       break;
   }
   if (error) {
@@ -2111,6 +2117,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<folly::IOBuf>{}
           .constructFrom(val.iobufRef_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {

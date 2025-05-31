@@ -1037,7 +1037,10 @@ uint32_t SimpleUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, value_.stringValue);
       break;
     }
-    case SimpleUnion::Type::__EMPTY__:;
+    case SimpleUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1061,6 +1064,9 @@ uint32_t SimpleUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case SimpleUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1088,6 +1094,9 @@ uint32_t SimpleUnion::write(Protocol_* prot_) const {
       break;
     }
     case SimpleUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -1647,7 +1656,10 @@ uint32_t ComplexUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, value_.MyCustomField);
       break;
     }
-    case ComplexUnion::Type::__EMPTY__:;
+    case ComplexUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1837,6 +1849,9 @@ uint32_t ComplexUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case ComplexUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2084,6 +2099,9 @@ uint32_t ComplexUnion::write(Protocol_* prot_) const {
       break;
     }
     case ComplexUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -7278,7 +7296,10 @@ uint32_t FloatUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double>::serializedSize<false>(*prot_, value_.doubleSide);
       break;
     }
-    case FloatUnion::Type::__EMPTY__:;
+    case FloatUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -7302,6 +7323,9 @@ uint32_t FloatUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case FloatUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -7329,6 +7353,9 @@ uint32_t FloatUnion::write(Protocol_* prot_) const {
       break;
     }
     case FloatUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

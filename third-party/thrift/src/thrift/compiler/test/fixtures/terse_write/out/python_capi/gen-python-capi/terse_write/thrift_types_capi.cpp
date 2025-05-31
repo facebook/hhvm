@@ -179,6 +179,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
           cpp.struct_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -296,6 +298,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
           .constructFrom(val.struct_field_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {

@@ -1183,7 +1183,10 @@ uint32_t Baz::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>(*prot_, value_.longField);
       break;
     }
-    case Baz::Type::__EMPTY__:;
+    case Baz::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1225,6 +1228,9 @@ uint32_t Baz::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case Baz::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1276,6 +1282,9 @@ uint32_t Baz::write(Protocol_* prot_) const {
       break;
     }
     case Baz::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4321,7 +4330,10 @@ uint32_t ThriftAdaptTestUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::test::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, value_.custom);
       break;
     }
-    case ThriftAdaptTestUnion::Type::__EMPTY__:;
+    case ThriftAdaptTestUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4345,6 +4357,9 @@ uint32_t ThriftAdaptTestUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case ThriftAdaptTestUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4372,6 +4387,9 @@ uint32_t ThriftAdaptTestUnion::write(Protocol_* prot_) const {
       break;
     }
     case ThriftAdaptTestUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

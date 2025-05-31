@@ -34,6 +34,11 @@ struct VisitUnion<::cpp2::ComplexUnion> {
       return f(5, *static_cast<T&&>(t).stringRef_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).intValue_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -50,6 +55,11 @@ struct VisitUnion<::cpp2::ListUnion> {
       return f(1, *static_cast<T&&>(t).stringListValue_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).intListValue_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -66,6 +76,11 @@ struct VisitUnion<::cpp2::DataUnion> {
       return f(1, *static_cast<T&&>(t).stringData_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).binaryData_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -82,6 +97,11 @@ struct VisitUnion<::cpp2::ValUnion> {
       return f(1, *static_cast<T&&>(t).v2_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).v1_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -98,6 +118,11 @@ struct VisitUnion<::cpp2::VirtualComplexUnion> {
       return f(1, *static_cast<T&&>(t).thingTwo_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).thingOne_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -112,6 +137,11 @@ struct VisitUnion<::cpp2::NonCopyableUnion> {
       return f(0, *static_cast<T&&>(t).s_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).s_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

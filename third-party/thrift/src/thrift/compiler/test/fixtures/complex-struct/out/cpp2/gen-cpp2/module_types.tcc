@@ -3370,7 +3370,10 @@ uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, value_.intValue);
       break;
     }
-    case MyUnion::Type::__EMPTY__:;
+    case MyUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3418,6 +3421,9 @@ uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3477,6 +3483,9 @@ uint32_t MyUnion::write(Protocol_* prot_) const {
       break;
     }
     case MyUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -3599,7 +3608,10 @@ uint32_t MyUnionFloatFieldThrowExp::serializedSize(Protocol_ const* prot_) const
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::ComplexNestedStruct>::serializedSize<false>(*prot_, value_.complexNestedStruct);
       break;
     }
-    case MyUnionFloatFieldThrowExp::Type::__EMPTY__:;
+    case MyUnionFloatFieldThrowExp::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3635,6 +3647,9 @@ uint32_t MyUnionFloatFieldThrowExp::serializedSizeZC(Protocol_ const* prot_) con
       break;
     }
     case MyUnionFloatFieldThrowExp::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3678,6 +3693,9 @@ uint32_t MyUnionFloatFieldThrowExp::write(Protocol_* prot_) const {
       break;
     }
     case MyUnionFloatFieldThrowExp::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

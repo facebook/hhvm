@@ -222,7 +222,10 @@ uint32_t ComplexUnion::serializedSize(Protocol_ const* prot_) const {
       }
       break;
     }
-    case ComplexUnion::Type::__EMPTY__:;
+    case ComplexUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -272,6 +275,9 @@ uint32_t ComplexUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case ComplexUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -333,6 +339,9 @@ uint32_t ComplexUnion::write(Protocol_* prot_) const {
       break;
     }
     case ComplexUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -422,7 +431,10 @@ uint32_t ListUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::serializedSize<false>(*prot_, value_.stringListValue);
       break;
     }
-    case ListUnion::Type::__EMPTY__:;
+    case ListUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -446,6 +458,9 @@ uint32_t ListUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case ListUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -473,6 +488,9 @@ uint32_t ListUnion::write(Protocol_* prot_) const {
       break;
     }
     case ListUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -556,7 +574,10 @@ uint32_t DataUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, value_.stringData);
       break;
     }
-    case DataUnion::Type::__EMPTY__:;
+    case DataUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -580,6 +601,9 @@ uint32_t DataUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case DataUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -607,6 +631,9 @@ uint32_t DataUnion::write(Protocol_* prot_) const {
       break;
     }
     case DataUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -888,7 +915,10 @@ uint32_t ValUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Val>::serializedSize<false>(*prot_, value_.v2);
       break;
     }
-    case ValUnion::Type::__EMPTY__:;
+    case ValUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -912,6 +942,9 @@ uint32_t ValUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case ValUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -939,6 +972,9 @@ uint32_t ValUnion::write(Protocol_* prot_) const {
       break;
     }
     case ValUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -1022,7 +1058,10 @@ uint32_t VirtualComplexUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, value_.thingTwo);
       break;
     }
-    case VirtualComplexUnion::Type::__EMPTY__:;
+    case VirtualComplexUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1046,6 +1085,9 @@ uint32_t VirtualComplexUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case VirtualComplexUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1073,6 +1115,9 @@ uint32_t VirtualComplexUnion::write(Protocol_* prot_) const {
       break;
     }
     case VirtualComplexUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -1261,7 +1306,10 @@ uint32_t NonCopyableUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::NonCopyableStruct>::serializedSize<false>(*prot_, value_.s);
       break;
     }
-    case NonCopyableUnion::Type::__EMPTY__:;
+    case NonCopyableUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1279,6 +1327,9 @@ uint32_t NonCopyableUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case NonCopyableUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1298,6 +1349,9 @@ uint32_t NonCopyableUnion::write(Protocol_* prot_) const {
       break;
     }
     case NonCopyableUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

@@ -436,6 +436,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<int32_t>{}.extractInto(
           cpp.i_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -493,6 +495,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<int32_t>{}
           .constructFrom(val.i_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {

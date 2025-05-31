@@ -24,6 +24,11 @@ struct VisitUnion<::py3::simple::detail::AdaptedUnion> {
       return f(0, *static_cast<T&&>(t).best_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).best_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };
@@ -38,6 +43,11 @@ struct VisitUnion<::py3::simple::BinaryUnion> {
       return f(0, *static_cast<T&&>(t).iobuf_val_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).iobuf_val_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

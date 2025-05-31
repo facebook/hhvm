@@ -81,6 +81,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<Bytes>{}.extractInto(
           cpp.stringRef_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -159,6 +161,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           Constructor<Bytes>{}
           .constructFrom(val.stringRef_ref()));
       break;
+    default:
+      break;
   }
   if (!py_val) {
     return nullptr;
@@ -201,6 +205,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 3:
       Extractor<list<Bytes>>{}.extractInto(
           cpp.stringListValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    default:
       break;
   }
   if (error) {
@@ -260,6 +266,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           Constructor<list<Bytes>>{}
           .constructFrom(val.stringListValue_ref()));
       break;
+    default:
+      break;
   }
   if (!py_val) {
     return nullptr;
@@ -302,6 +310,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 2:
       Extractor<Bytes>{}.extractInto(
           cpp.stringData_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    default:
       break;
   }
   if (error) {
@@ -360,6 +370,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<Bytes>{}
           .constructFrom(val.stringData_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {
@@ -511,6 +523,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val, ::module::NamespaceTag>>{}.extractInto(
           cpp.v2_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -569,6 +583,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val, ::module::NamespaceTag>>{}
           .constructFrom(val.v2_ref()));
       break;
+    default:
+      break;
   }
   if (!py_val) {
     return nullptr;
@@ -611,6 +627,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 2:
       Extractor<Bytes>{}.extractInto(
           cpp.thingTwo_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    default:
       break;
   }
   if (error) {
@@ -669,6 +687,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<Bytes>{}
           .constructFrom(val.thingTwo_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {
@@ -788,6 +808,8 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>{}.extractInto(
           cpp.s_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
+    default:
+      break;
   }
   if (error) {
     return folly::makeUnexpected(*error);
@@ -840,6 +862,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(
           Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>{}
           .constructFrom(val.s_ref()));
+      break;
+    default:
       break;
   }
   if (!py_val) {

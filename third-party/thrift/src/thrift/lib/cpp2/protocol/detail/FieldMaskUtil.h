@@ -415,6 +415,10 @@ inline MaskRef getKeyMaskRefByValue(MaskRef maskRef, const Value& value) {
     case Value::Type::mapValue:
     case Value::Type::__EMPTY__:
       folly::throw_exception<std::runtime_error>("Value is empty");
+    default:
+      folly::throw_exception<std::runtime_error>(folly::to<std::string>(
+          "Unrecognized value type ",
+          static_cast<std::int64_t>(value.getType())));
   }
 }
 
@@ -458,88 +462,79 @@ MaskedDecodeResultValue parseValueWithMask(
     }
     // Need to recursively store the result not in writeMaskRef.
   }
-  switch (arg_type) {
-    case protocol::T_STRUCT: {
-      auto& object = result.included.ensure_object();
-      std::string name;
-      int16_t fid;
-      TType ftype;
-      prot.readStructBegin(name);
-      while (true) {
-        prot.readFieldBegin(name, ftype, fid);
-        if (ftype == protocol::T_STOP) {
-          break;
-        }
-        MaskRef nextRead = readMaskRef.get(FieldId{fid});
-        MaskRef nextWrite = writeMaskRef.get(FieldId{fid});
-        MaskedDecodeResultValue nestedResult =
-            parseValueWithMask<KeepExcludedData>(
-                prot,
-                ftype,
-                nextRead,
-                nextWrite,
-                protocolData,
-                string_to_binary);
-        // Set nested MaskedDecodeResult if not empty.
-        if (!apache::thrift::empty(nestedResult.included.toThrift())) {
-          object[FieldId{fid}] = std::move(nestedResult.included);
-        }
-        if constexpr (KeepExcludedData) {
-          if (!apache::thrift::empty(nestedResult.excluded)) {
-            result.excluded.fields_ref().ensure()[FieldId{fid}] =
-                std::move(nestedResult.excluded);
-          }
-        }
-        prot.readFieldEnd();
+  if (arg_type == protocol::T_STRUCT) {
+    auto& object = result.included.ensure_object();
+    std::string name;
+    int16_t fid;
+    TType ftype;
+    prot.readStructBegin(name);
+    while (true) {
+      prot.readFieldBegin(name, ftype, fid);
+      if (ftype == protocol::T_STOP) {
+        break;
       }
-      prot.readStructEnd();
-      return result;
+      MaskRef nextRead = readMaskRef.get(FieldId{fid});
+      MaskRef nextWrite = writeMaskRef.get(FieldId{fid});
+      MaskedDecodeResultValue nestedResult =
+          parseValueWithMask<KeepExcludedData>(
+              prot, ftype, nextRead, nextWrite, protocolData, string_to_binary);
+      // Set nested MaskedDecodeResult if not empty.
+      if (!apache::thrift::empty(nestedResult.included.toThrift())) {
+        object[FieldId{fid}] = std::move(nestedResult.included);
+      }
+      if constexpr (KeepExcludedData) {
+        if (!apache::thrift::empty(nestedResult.excluded)) {
+          result.excluded.fields_ref().ensure()[FieldId{fid}] =
+              std::move(nestedResult.excluded);
+        }
+      }
+      prot.readFieldEnd();
     }
-    case protocol::T_MAP: {
-      auto& map = result.included.ensure_map();
-      TType keyType;
-      TType valType;
-      uint32_t size;
-      prot.readMapBegin(keyType, valType, size);
-      if (!size) {
-        prot.readMapEnd();
-        return result;
-      }
-      for (uint32_t i = 0; i < size; i++) {
-        auto keyValue = parseValue(prot, keyType, string_to_binary);
-        MaskRef nextRead = getKeyMaskRefByValue(readMaskRef, keyValue);
-        MaskRef nextWrite = getKeyMaskRefByValue(writeMaskRef, keyValue);
-        MaskedDecodeResultValue nestedResult =
-            parseValueWithMask<KeepExcludedData>(
-                prot,
-                valType,
-                nextRead,
-                nextWrite,
-                protocolData,
-                string_to_binary);
-        // Set nested MaskedDecodeResult if not empty.
-        if (!apache::thrift::empty(nestedResult.included.toThrift())) {
-          map[keyValue] = std::move(nestedResult.included);
-        }
-        if constexpr (KeepExcludedData) {
-          if (!apache::thrift::empty(nestedResult.excluded)) {
-            auto& keys = protocolData.keys().ensure();
-            keys.push_back(keyValue);
-            const auto pos = folly::to<int32_t>(keys.size() - 1);
-            type::ValueId id =
-                type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
-            result.excluded.values_ref().ensure()[id] =
-                std::move(nestedResult.excluded);
-          }
-        }
-      }
+    prot.readStructEnd();
+    return result;
+  } else if (arg_type == protocol::T_MAP) {
+    auto& map = result.included.ensure_map();
+    TType keyType;
+    TType valType;
+    uint32_t size;
+    prot.readMapBegin(keyType, valType, size);
+    if (!size) {
       prot.readMapEnd();
       return result;
     }
-    default: {
-      parseValueInplace(prot, arg_type, result.included, string_to_binary);
-      return result;
+    for (uint32_t i = 0; i < size; i++) {
+      auto keyValue = parseValue(prot, keyType, string_to_binary);
+      MaskRef nextRead = getKeyMaskRefByValue(readMaskRef, keyValue);
+      MaskRef nextWrite = getKeyMaskRefByValue(writeMaskRef, keyValue);
+      MaskedDecodeResultValue nestedResult =
+          parseValueWithMask<KeepExcludedData>(
+              prot,
+              valType,
+              nextRead,
+              nextWrite,
+              protocolData,
+              string_to_binary);
+      // Set nested MaskedDecodeResult if not empty.
+      if (!apache::thrift::empty(nestedResult.included.toThrift())) {
+        map[keyValue] = std::move(nestedResult.included);
+      }
+      if constexpr (KeepExcludedData) {
+        if (!apache::thrift::empty(nestedResult.excluded)) {
+          auto& keys = protocolData.keys().ensure();
+          keys.push_back(keyValue);
+          const auto pos = folly::to<int32_t>(keys.size() - 1);
+          type::ValueId id =
+              type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
+          result.excluded.values_ref().ensure()[id] =
+              std::move(nestedResult.excluded);
+        }
+      }
     }
+    prot.readMapEnd();
+    return result;
+  } else {
+    parseValueInplace(prot, arg_type, result.included, string_to_binary);
+    return result;
   }
 }
 

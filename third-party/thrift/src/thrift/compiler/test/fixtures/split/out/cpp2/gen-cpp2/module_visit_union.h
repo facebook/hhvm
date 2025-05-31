@@ -28,6 +28,11 @@ struct VisitUnion<::cpp2::MyUnion> {
       return f(2, *static_cast<T&&>(t).myDataItem_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).myEnum_ref()))();
+    default:
+      throw std::runtime_error{folly::to<std::string>(
+          "Enum got invalid value ",
+          static_cast<std::underlying_type_t<decltype(t.getType())>>(
+              t.getType()))};
     }
   }
 };

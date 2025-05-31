@@ -909,6 +909,20 @@ constexpr std::size_t CompactProtocolReader::fixedSizeInContainer(TType type) {
       return 4;
     case TType::T_DOUBLE:
       return 8;
+    case TType::T_STOP:
+    case TType::T_VOID:
+    case TType::T_I16:
+    case TType::T_I32:
+    case TType::T_U64:
+    case TType::T_I64:
+    case TType::T_STRING:
+    case TType::T_STRUCT:
+    case TType::T_MAP:
+    case TType::T_SET:
+    case TType::T_LIST:
+    case TType::T_UTF8:
+    case TType::T_UTF16:
+    case TType::T_STREAM:
     default:
       return 0;
   }

@@ -49,6 +49,8 @@ inline std::string_view qualifierToString(FunctionQualifier fq) {
       return "Idempotent";
     case FunctionQualifier::ReadOnly:
       return "ReadOnly";
+    default:
+      break;
   }
   folly::assume_unreachable();
 }

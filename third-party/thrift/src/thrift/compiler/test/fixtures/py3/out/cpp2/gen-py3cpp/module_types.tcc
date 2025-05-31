@@ -1119,7 +1119,10 @@ uint32_t AdaptedUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, value_.best);
       break;
     }
-    case AdaptedUnion::Type::__EMPTY__:;
+    case AdaptedUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1137,6 +1140,9 @@ uint32_t AdaptedUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case AdaptedUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1156,6 +1162,9 @@ uint32_t AdaptedUnion::write(Protocol_* prot_) const {
       break;
     }
     case AdaptedUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -1754,7 +1763,10 @@ uint32_t BinaryUnion::serializedSize(Protocol_ const* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBuf>::serializedSize<false>(*prot_, value_.iobuf_val);
       break;
     }
-    case BinaryUnion::Type::__EMPTY__:;
+    case BinaryUnion::Type::__EMPTY__:
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1772,6 +1784,9 @@ uint32_t BinaryUnion::serializedSizeZC(Protocol_ const* prot_) const {
       break;
     }
     case BinaryUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1791,6 +1806,9 @@ uint32_t BinaryUnion::write(Protocol_* prot_) const {
       break;
     }
     case BinaryUnion::Type::__EMPTY__:;
+      break;
+    default:
+      break;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

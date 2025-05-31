@@ -15,6 +15,6 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 depgraph_reader = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_reader" }
-env_logger = "0.10"
+env_logger = { version = "0.11.8", features = ["color"] }
 log = { version = "0.4.22", features = ["kv_unstable"] }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

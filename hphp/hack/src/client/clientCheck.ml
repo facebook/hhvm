@@ -663,7 +663,7 @@ let main_internal
       | exn ->
         let e = Exception.wrap exn in
         Printf.eprintf
-          "An unexpected error occured: %s"
+          "An unexpected error occurred: %s"
           (Exception.get_ctor_string e);
         Exception.reraise e
     in

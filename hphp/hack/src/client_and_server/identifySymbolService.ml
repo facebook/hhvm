@@ -88,7 +88,7 @@ let process_member ?is_declaration recv_class id ~kind =
       | UnknownClass -> None)
     | `Property ->
       (*
-        Per comment in symbolOcurrence.mli, XhpLiteralAttr
+        Per comment in symbolOccurrence.mli, XhpLiteralAttr
         is only used for attributes in XHP literals. Since
         process_member is not being used to handle XML attributes
         it is fine to define every symbol as Property.

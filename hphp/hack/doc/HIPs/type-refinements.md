@@ -146,7 +146,7 @@ shielding them from unsound code.  Using type refinements we write
 function setBox<T1>(Box with { type T = T1; } $b, T1 $v): void
 ```
 
-And the function `setBox` can no longer recieve as first argument a
+And the function `setBox` can no longer receive as first argument a
 value of a type for which we do not precisely know what the associated
 type constant is.
 

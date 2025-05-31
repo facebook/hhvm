@@ -33,7 +33,7 @@ class type forget_tyvar_mapper_type =
       env -> internal_type -> internal_type option
   end
 
-(** Type mapper which forgets a type variable, i.e. removes all occurences of a type variable *)
+(** Type mapper which forgets a type variable, i.e. removes all occurrences of a type variable *)
 class forget_tyvar_mapper : forget_tyvar_mapper_type =
   object (this)
     inherit [env] Map.deep_type_mapper

@@ -70,7 +70,7 @@ If a locale is specified without an encoding (e.g. `en_US`, compared to `en_US.U
 
 # The `Locale\bytes()` locale
 
-This locale is similar to the constant `"C"` or `"en_US_POSIX"` locale in other libraries and environments; we refer to it as the `bytes` locale to more clearly distinguish between this constant locale and the variable "active libc locale", and because the behavior is slightly different than libc both for performance, and to accomodate arbitrary byte sequences; for example, `Str\length("a\0b")` is 3, however, the libc `strlen` function returns 1 for the same input.
+This locale is similar to the constant `"C"` or `"en_US_POSIX"` locale in other libraries and environments; we refer to it as the `bytes` locale to more clearly distinguish between this constant locale and the variable "active libc locale", and because the behavior is slightly different than libc both for performance, and to accommodate arbitrary byte sequences; for example, `Str\length("a\0b")` is 3, however, the libc `strlen` function returns 1 for the same input.
 
 While operations such as string formatting, uppercase, and lowercase are defined for this locale, they should
 only be used when localization is not a concern, for example when the output is intended to be machine-readable

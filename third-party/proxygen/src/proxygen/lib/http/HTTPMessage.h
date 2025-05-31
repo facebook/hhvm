@@ -693,6 +693,8 @@ class HTTPMessage {
         return headers::kHttps;
       case HTTPMessage::Scheme::MASQUE:
         return headers::kMasque;
+      default:
+        break;
     }
     return headers::kHttp;
   }
@@ -1011,6 +1013,8 @@ class HTTPMessage {
           break;
         case MessageType::NONE:
           break;
+        default:
+          break;
       }
       which_ = MessageType::NONE;
     }
@@ -1025,6 +1029,8 @@ class HTTPMessage {
           new (&data_.response) Response(other.data_.response);
           break;
         case MessageType::NONE:
+          break;
+        default:
           break;
       }
     }
@@ -1049,6 +1055,8 @@ class HTTPMessage {
           new (&data_.response) Response(std::move(other.data_.response));
           break;
         case MessageType::NONE:
+          break;
+        default:
           break;
       }
     }

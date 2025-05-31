@@ -173,6 +173,8 @@ class CodecUtil {
             p--;
           }
           break;
+        default:
+          break;
       }
     }
     // Unterminated quotes are OK, since the value can be* TEXT which treats

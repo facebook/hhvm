@@ -229,8 +229,10 @@ inline void attrSetter(Attr& attrs, bool set, Attr what) {
 constexpr Attr VisibilityAttrs = AttrPublic|AttrProtected|AttrPrivate;
 
 inline const char* attrToVisibilityStr(Attr attr) {
-  return (attr & AttrPrivate)   ? "private"   :
-         (attr & AttrProtected) ? "protected" : "public";
+  return (attr & AttrPrivate) ? "private" :
+         (attr & AttrProtected) && (attr & AttrInternal) ? "protected internal" :
+         (attr & AttrProtected) ? "protected" :
+         (attr & AttrInternal) ? "internal" : "public";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

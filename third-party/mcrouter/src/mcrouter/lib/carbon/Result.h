@@ -87,8 +87,9 @@ inline const char* resultToString(const Result result) {
       return "mc_res_hot_key";
     case Result::NUM_RESULTS:
       return "mc_res_unknown";
+    default:
+      return "mc_res_unknown";
   }
-  return "mc_res_unknown";
 }
 
 Result resultFromString(const char* result);

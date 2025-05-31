@@ -134,7 +134,6 @@ endif()
 
 add_subdirectory(tools/hfsort)
 add_subdirectory(tools/version)
-add_subdirectory(tools/tc-print)
 
 add_subdirectory(compiler)
 add_subdirectory(hack)
@@ -143,6 +142,10 @@ add_subdirectory(neo)
 
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)
+
+# Note: tc-print depends on EXTENSION_SYSTEMLIB_SOURCES being already set
+# and therefore should be added after extensions.
+add_subdirectory(tools/tc-print)
 
 # The runtime/test binary require GTest and GMock to be installed globally
 option(RUNTIME_TEST_BIN "Create the HHVM runtime/test binary" OFF)

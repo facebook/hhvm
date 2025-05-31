@@ -15,7 +15,7 @@
 */
 
 #include "hphp/hack/src/hackc/ffi_bridge/decl_provider.h"
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/static-string-table.h"

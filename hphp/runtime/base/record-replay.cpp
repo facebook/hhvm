@@ -190,6 +190,11 @@ String serialize(const std::exception_ptr& value) {
 }
 
 template<>
+String serialize(long long value) {
+  return serialize(Variant{value});
+}
+
+template<>
 String serialize(std::int64_t value) {
   return serialize(Variant{value});
 }

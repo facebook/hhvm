@@ -223,8 +223,11 @@ template <class AsyncClientT>
 std::unique_ptr<AsyncClientT> ScopedServerInterfaceThread::newStickyClient(
     folly::Executor* callbackExecutor,
     ScopedServerInterfaceThread::MakeChannelFunc makeChannel) const {
-  return std::make_unique<AsyncClientT>(
-      newChannel(callbackExecutor, std::move(makeChannel), 1));
+  return std::make_unique<AsyncClientT>(newChannel(
+      callbackExecutor,
+      std::move(makeChannel),
+      1,
+      protocol::T_BINARY_PROTOCOL));
 }
 
 template <class AsyncClientT>
@@ -249,7 +252,11 @@ ScopedServerInterfaceThread::newClientWithFaultInjection(
     const {
   return std::make_unique<AsyncClientT>(
       std::make_shared<apache::thrift::detail::FaultInjectionChannel>(
-          newChannel(callbackExecutor, std::move(makeChannel)),
+          newChannel(
+              callbackExecutor,
+              std::move(makeChannel),
+              folly::hardware_concurrency(),
+              protocol::T_BINARY_PROTOCOL),
           std::move(injectFault),
           std::move(streamInjectFault)));
 }
@@ -262,7 +269,11 @@ ScopedServerInterfaceThread::newClientWithInterceptors(
     protocol::PROTOCOL_TYPES prot,
     InterceptorList interceptors) const {
   return std::make_unique<AsyncClientT>(
-      newChannel(callbackExecutor, std::move(makeChannel), prot),
+      newChannel(
+          callbackExecutor,
+          std::move(makeChannel),
+          folly::hardware_concurrency(),
+          prot),
       std::move(interceptors));
 }
 

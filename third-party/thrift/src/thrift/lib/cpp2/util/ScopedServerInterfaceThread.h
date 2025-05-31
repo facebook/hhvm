@@ -133,8 +133,8 @@ class ScopedServerInterfaceThread {
   RequestChannel::Ptr newChannel(
       folly::Executor* callbackExecutor,
       MakeChannelFunc channelFunc,
-      size_t numThreads = folly::hardware_concurrency(),
-      protocol::PROTOCOL_TYPES prot = protocol::T_BINARY_PROTOCOL) const;
+      size_t numThreads,
+      protocol::PROTOCOL_TYPES prot) const;
 };
 
 namespace detail {

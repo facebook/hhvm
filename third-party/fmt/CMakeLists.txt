@@ -14,9 +14,9 @@ else()
   SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
     FMT_SOURCE_ARGS
     SOURCE_URL
-    "https://github.com/fmtlib/fmt/releases/download/11.1.1/fmt-11.1.1.zip"
+    "https://github.com/fmtlib/fmt/releases/download/11.2.0/fmt-11.2.0.zip"
     SOURCE_HASH
-    "SHA512=6321f29b4ddabfcd92362883ca54039f5f2f90d85d95af1410ba98607acdde02c8c02b61c4fad212337aa2938681e038cd4533013b4e1f500c6839f77a74aeca"
+    "SHA512=8b2a6793ab252bb31a63e54f808d6c48e2c6346ab5deaee7a1c4b5dc9ebc3faf493d31e5e1958e8fa0a6f9c6c0a7ec63ed778bd8d29f9e533bf8ffed281c1397"
   )
 
   set(INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt-prefix")

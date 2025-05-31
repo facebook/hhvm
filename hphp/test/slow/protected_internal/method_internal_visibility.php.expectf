@@ -1,0 +1,1 @@
+ Warning: Accessing internal method A::foo in module M1 from module M2 is not allowed in %s on line 8

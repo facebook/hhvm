@@ -1,0 +1,1 @@
+Fatal error: Call to protected method A::foo() from context 'B' in %s on line 8

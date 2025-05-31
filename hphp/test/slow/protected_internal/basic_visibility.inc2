@@ -1,0 +1,9 @@
+<?hh
+
+module M1;
+
+class B extends A {
+  public function foobar(): string {
+    return (new A())->foo().'bar'; // pass
+  }
+}

@@ -1,0 +1,11 @@
+<?hh
+<<file: __EnableUnstableFeatures("protected_internal")>>
+
+module M1;
+
+class A {
+  protected internal function foo(): string {
+    echo 'in foo';
+    return "foo";
+  }
+}

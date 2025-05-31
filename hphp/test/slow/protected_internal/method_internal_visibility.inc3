@@ -1,0 +1,10 @@
+<?hh
+
+module M2;
+
+class B extends A {
+  public function foobar(): string {
+    // Not OK since foo is internal
+    return (new A())->foo().'bar';
+  }
+}

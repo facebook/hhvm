@@ -6,9 +6,7 @@
  */
 
 #include "watchman/fs/FileDescriptor.h"
-#include <folly/ScopeGuard.h>
 #include <folly/String.h>
-#include <folly/Try.h>
 #include <folly/system/Pid.h>
 #include <system_error>
 #include "watchman/fs/FSDetect.h"

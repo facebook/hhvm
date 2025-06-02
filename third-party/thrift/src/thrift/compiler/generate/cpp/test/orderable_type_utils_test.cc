@@ -223,12 +223,17 @@ void checkCustomSetOrderabilityWithoutUri(const t_program& program) {
   EXPECT_TRUE(OrderableTypeUtils::is_orderable(
       get_structured_named(program, "Baz4"), true));
 }
+
 TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithoutUri) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr, kHeaderNoUri + kOrderabilityTestProgram, {}, {});
+      source_mgr,
+      kHeaderNoUri + kOrderabilityTestProgram,
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = false});
   checkCustomSetOrderabilityWithoutUri(*program);
 }
+
 TEST(
     OrderableTypeUtilsTest,
     CustomSetOrderabilityWithoutUriSkipLoweringCppTypeAnnotations) {
@@ -236,8 +241,8 @@ TEST(
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kHeaderNoUri + kOrderabilityTestProgram,
-      {},
-      {.skip_lowering_cpp_type_annotations = true});
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithoutUri(*program);
 }
 
@@ -449,41 +454,6 @@ void checkGetOrderableCondition(const t_program& program) {
 
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructCustomTypeNoOrdering"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructCustomTypeOrderingExplicitlyEnabled"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByExplicitAnnotation);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByLegacyImplicitLogicEnabledByUri);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
-          false /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
           get_structured_named(program, "TestStructTypedefNonCustomSet"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
@@ -500,15 +470,6 @@ void checkGetOrderableCondition(const t_program& program) {
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
           get_structured_named(program, "TestStructTypedefAliasToCustomSet"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructTypedefNonCustomSetWithCppType"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
       OrderableTypeUtils::StructuredOrderableCondition::
@@ -539,11 +500,63 @@ void checkGetOrderableCondition(const t_program& program) {
       OrderableTypeUtils::StructuredOrderableCondition::
           OrderableByExplicitAnnotation);
 }
+
 TEST(OrderableTypeUtilsTest, GetOrderableCondition) {
   source_manager source_mgr;
   std::shared_ptr<const t_program> program = dedent_and_parse_to_program(
-      source_mgr, kOrderabilityTestProgram2, {}, {});
+      source_mgr,
+      kOrderabilityTestProgram2,
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = false});
+  checkGetOrderableCondition(*program);
+
+  // DO_BEFORE(aristidis,20250615): All expectations below should also pass for
+  // GetOrderableConditionSkipLoweringCppTypeAnnotations below. That is
+  // currently not the case, but the failure was hidden by the fact that we
+  // accidentaly ommited to call the `check...` method in these test cases.
+  // Temporarily moving the checks in this method, until the underlying bug is
+  // fixed.
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructCustomTypeNoOrdering"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructCustomTypeOrderingExplicitlyEnabled"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByExplicitAnnotation);
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByLegacyImplicitLogicEnabledByUri);
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
+          false /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructTypedefNonCustomSetWithCppType"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
 }
+
 TEST(
     OrderableTypeUtilsTest,
     GetOrderableConditionSkipLoweringCppTypeAnnotations) {
@@ -551,8 +564,9 @@ TEST(
   std::shared_ptr<const t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kOrderabilityTestProgram2,
-      {},
-      {.skip_lowering_cpp_type_annotations = true});
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = true});
+  checkGetOrderableCondition(*program);
 }
 
 } // namespace apache::thrift::compiler::cpp2

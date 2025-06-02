@@ -73,7 +73,7 @@ let test () =
       [bar_path]
       ~root:None
       ~longlived_workers:false
-      ~hh_distc_fanout_threshold:None
+      ~hh_distc_fanout_config:None
       ~check_info
       ~warnings_saved_state:None
   in
@@ -86,7 +86,7 @@ let test () =
       [bar_path]
       ~root:None
       ~longlived_workers:false
-      ~hh_distc_fanout_threshold:None
+      ~hh_distc_fanout_config:None
       ~check_info
       ~warnings_saved_state:None
   in
@@ -100,7 +100,7 @@ let test () =
       [foo_path]
       ~root:None
       ~longlived_workers:false
-      ~hh_distc_fanout_threshold:None
+      ~hh_distc_fanout_config:None
       ~check_info
       ~warnings_saved_state:None
   in
@@ -113,7 +113,7 @@ let test () =
       [foo_path]
       ~root:None
       ~longlived_workers:false
-      ~hh_distc_fanout_threshold:None
+      ~hh_distc_fanout_config:None
       ~check_info
       ~warnings_saved_state:None
   in

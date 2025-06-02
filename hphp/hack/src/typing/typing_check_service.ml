@@ -980,6 +980,7 @@ let rec event_loop
 *)
 let process_with_hh_distc
     ~(root : Path.t option)
+    ~(fanout : Typing_service_types.workitem BigList.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(check_info : check_info)
     ~(tcopt : TypecheckerOptions.t)
@@ -991,11 +992,22 @@ let process_with_hh_distc
   let hhdg_path =
     Path.(to_string @@ concat ss_dir "hh_mini_saved_state.hhdg")
   in
+  let fanout =
+    match fanout with
+    | None -> None
+    | Some fanout ->
+      Some
+        (List.filter_map (BigList.as_list fanout) ~f:(fun wi ->
+             match wi with
+             | Check { path; _ } -> Some (Relative_path.suffix path)
+             | _ -> None))
+  in
   let hh_distc_handle =
     Hh_distc_ffi.spawn
       ~root:(Path.to_string root)
       ~ss_dir:(Path.to_string ss_dir)
       ~hhdg_path
+      ~fanout
       tcopt
     |> Result.ok_or_failwith
   in
@@ -1187,7 +1199,7 @@ let go_with_interrupt
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(longlived_workers : bool)
-    ~(hh_distc_fanout_threshold : int option)
+    ~(hh_distc_fanout_config : (int * int) option)
     ~(check_info : check_info)
     ~warnings_saved_state : (_ * result) job_result =
   let typecheck_info =
@@ -1244,15 +1256,38 @@ let go_with_interrupt
         env,
         cancelled_fnl_and_reason,
         time_first_error ) =
-    let will_use_distc =
-      match hh_distc_fanout_threshold with
-      | Some fanout_threshold -> BigList.length fnl > fanout_threshold
-      | None -> false
+    let fanout_size = BigList.length fnl in
+    let (will_use_distc, fanout_aware_distc) =
+      match hh_distc_fanout_config with
+      | Some (fanout_aware_threshold, fanout_threshold) ->
+        assert (fanout_threshold >= fanout_aware_threshold);
+        let fanout_aware_distc =
+          fanout_size > fanout_aware_threshold && fanout_size < fanout_threshold
+        in
+        (fanout_size > fanout_aware_threshold, fanout_aware_distc)
+      | None -> (false, false)
+    in
+    let fanout =
+      if fanout_aware_distc then (
+        Hh_logger.log
+          "hh_distc performing fanout-aware typechecking. Fanout of size: %d"
+          fanout_size;
+        Some fnl
+      ) else
+        None
     in
     if check_info.log_errors then
       Server_progress.ErrorsWrite.telemetry
         (Telemetry.create ()
-        |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
+        |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc
+        |>
+        if fanout_aware_distc then
+          Telemetry.int_
+            ~key:"fanout_aware_distc_fanout_size"
+            ~value:fanout_size
+        else
+          fun t ->
+        t);
     if will_use_distc then (
       (* TODO(ljw): time_first_error isn't properly calculated in this path *)
       (* distc doesn't yet give any profiling_info about how its workers fared *)
@@ -1260,6 +1295,7 @@ let go_with_interrupt
       match
         process_with_hh_distc
           ~root
+          ~fanout
           ~interrupt
           ~check_info
           ~tcopt
@@ -1330,7 +1366,7 @@ let go
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
     ~(longlived_workers : bool)
-    ~(hh_distc_fanout_threshold : int option)
+    ~(hh_distc_fanout_config : (int * int) option)
     ~(check_info : check_info)
     ~warnings_saved_state : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
@@ -1343,7 +1379,7 @@ let go
       ~root
       ~interrupt
       ~longlived_workers
-      ~hh_distc_fanout_threshold
+      ~hh_distc_fanout_config
       ~check_info
       ~warnings_saved_state
   in

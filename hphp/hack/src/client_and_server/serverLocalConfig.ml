@@ -259,7 +259,9 @@ type t = {
   use_distc: bool;
       (** use remote type-checking (hh_distc) rather than only local type-checking*)
   hh_distc_fanout_threshold: int;
-      (** POC: @bobren - fanout threshold where we trigger hh_distc *)
+      (** fanout threshold where we trigger hh_distc without fanout information: hh_distc performs a full init *)
+  hh_distc_fanout_aware_threshold: int;
+      (** fanout threshold where we trigger hh_distc with fanout information *)
   hh_distc_exponential_backoff_num_retries: int;
   ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)

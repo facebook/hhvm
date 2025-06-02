@@ -40,8 +40,11 @@ val go :
   Relative_path.t list ->
   root:Path.t option ->
   longlived_workers:bool ->
-  hh_distc_fanout_threshold:int option
-    (* Will use hh_distc at the given threshold if provided, otherwise will not use hh_distc.
+  hh_distc_fanout_config:(int * int) option
+    (* Config specifies thresholds to invoke hh_distc: 
+     * - the first int specifies the threshold to invoke fanout-aware hh_distc 
+     * - the second int specifies the threshold to perform a full init with hh_distc (must be >= than first)
+     * If fanout is smaller than thresholds, incremental typechecking is performed.
      * Can be `None` in dev,testing, and non-fb workflows *) ->
   check_info:Typing_service_types.check_info ->
   warnings_saved_state:Warnings_saved_state.t option ->
@@ -57,9 +60,12 @@ val go_with_interrupt :
   root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
   longlived_workers:bool ->
-  hh_distc_fanout_threshold:int option
-    (* Will use hh_distc at the given threshold if provided, otherwise will not use hh_distc
-     *  Can be `None` in dev,testing, and non-fb workflows *) ->
+  hh_distc_fanout_config:(int * int) option
+    (* Config specifies thresholds to invoke hh_distc: 
+     * - the first int specifies the threshold to invoke fanout-aware hh_distc 
+     * - the second int specifies the threshold to perform a full init with hh_distc (must be >= than first)
+     * If fanout is smaller than thresholds, incremental typechecking is performed.
+     * Can be `None` in dev,testing, and non-fb workflows *) ->
   check_info:Typing_service_types.check_info ->
   warnings_saved_state:Warnings_saved_state.t option ->
   ('env * result) job_result

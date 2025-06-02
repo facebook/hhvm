@@ -96,6 +96,7 @@ let default =
     use_distc = true;
     use_compressed_dep_graph = true;
     hh_distc_fanout_threshold = 250_000;
+    hh_distc_fanout_aware_threshold = 250_000;
     hh_distc_exponential_backoff_num_retries = 10;
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
@@ -770,6 +771,12 @@ let load_
       ~default:default.hh_distc_fanout_threshold
       config
   in
+  let hh_distc_fanout_aware_threshold =
+    int_
+      "hh_distc_fanout_aware_threshold"
+      ~default:default.hh_distc_fanout_aware_threshold
+      config
+  in
   let hh_distc_exponential_backoff_num_retries =
     int_
       "hh_distc_exponential_backoff_num_retries"
@@ -928,6 +935,7 @@ let load_
     use_distc;
     use_compressed_dep_graph;
     hh_distc_fanout_threshold;
+    hh_distc_fanout_aware_threshold;
     hh_distc_exponential_backoff_num_retries;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;

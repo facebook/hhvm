@@ -113,7 +113,7 @@ pub fn run(opts: &mut Opts) -> Result<()> {
 /// process_single_file().
 ///
 /// If an error occurs then continue to process as much as possible,
-/// returning the first error that occured.
+/// returning the first error that occurred.
 fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     let content = std::fs::read(f)?;
     let files = multifile::to_files(f, content)?;

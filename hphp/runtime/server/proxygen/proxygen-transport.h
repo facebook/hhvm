@@ -160,7 +160,7 @@ struct ProxygenTransport final
   /**
    * Get http request size.
    * For non-buffering requests, this method returns
-   * the size of request data recieved so far.
+   * the size of request data received so far.
    */
   size_t getRequestSize() const override;
 

@@ -3,12 +3,13 @@
 [package]
 name = "elab"
 version = "0.0.0"
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/facebook/hhvm"
 license = "MIT"
 
 [lib]
 path = "elab.rs"
+edition = "2021"
 
 [dependencies]
 bitflags = { version = "2.6", features = ["serde", "std"], default-features = false }

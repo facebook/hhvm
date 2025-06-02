@@ -3,7 +3,7 @@
 [package]
 name = "full_fidelity_schema_version_number"
 version = "0.0.0"
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/facebook/hhvm"
 license = "MIT"
 

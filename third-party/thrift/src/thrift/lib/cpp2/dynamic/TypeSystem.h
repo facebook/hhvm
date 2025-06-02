@@ -116,13 +116,29 @@ class TypeSystem {
    * Resolves the definition of a user-defined type, and implicitly, all
    * transitively referenced types.
    *
+   * Returns an empty optional if the requested type does not exist in the type
+   * system.
+   *
    * NOTE: non-const, which means the caller must synchronize calls to this
    * method.
+   */
+  virtual std::optional<DefinitionRef> getUserDefinedType(UriView) = 0;
+  /**
+   * Same as getUserDefinedType except throws an exception if the type is not
+   * found.
    *
    * Throws:
    *   - InvalidTypeError if the type is not defined in the type system.
    */
-  virtual DefinitionRef getUserDefinedType(UriView) = 0;
+  DefinitionRef getUserDefinedTypeOrThrow(UriView);
+  /**
+   * Resolves an arbitrary TypeId ito a TypeRef.
+   *
+   * Throws:
+   *   - InvalidTypeError if the TypeId references user-defined tyeps that are
+   *     not defined in the type system.
+   */
+  TypeRef resolveTypeId(const TypeId& typeId);
 
   /**
    * Generates a set of all user-defined type URIs currently known to the type
@@ -137,13 +153,6 @@ class TypeSystem {
    * guarantee because it allows the caller to traverse the full `TypeSystem`.
    */
   virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
-
-  /**
-   * Resolves an arbitrary type-id ito a TypeRef. Resolution will fail if TypeId
-   * references user-defined-types not contained within this TypeSystem
-   * instance.
-   */
-  TypeRef resolveTypeId(const TypeId& typeId);
 };
 
 /**

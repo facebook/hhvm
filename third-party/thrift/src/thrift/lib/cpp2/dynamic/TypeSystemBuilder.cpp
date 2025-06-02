@@ -44,13 +44,12 @@ class TypeSystemImpl final : public TypeSystem {
       std::equal_to<>>;
   DefinitionsMap definitions;
 
-  DefinitionRef getUserDefinedType(UriView uri) final {
+  std::optional<DefinitionRef> getUserDefinedType(UriView uri) final {
     if (auto def = definitions.find(uri); def != definitions.end()) {
       return folly::variant_match(
           def->second, [](auto& d) { return DefinitionRef(&d); });
     }
-    throw InvalidTypeError(
-        fmt::format("Definition for uri '{}' was not found", uri));
+    return std::nullopt;
   }
 
   folly::F14FastSet<Uri> getKnownUris() const final {

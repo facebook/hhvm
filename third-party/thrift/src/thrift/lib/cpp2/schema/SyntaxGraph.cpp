@@ -688,12 +688,11 @@ class TypeSystemFacade final : public type_system::TypeSystem {
   explicit TypeSystemFacade(const detail::SchemaBackedResolver& graph)
       : resolver_(graph) {}
 
-  type_system::DefinitionRef getUserDefinedType(
+  std::optional<type_system::DefinitionRef> getUserDefinedType(
       type_system::UriView uri) override {
     const DefinitionNode* def = resolver_.getDefinitionNodeByUri(uri);
     if (!def) {
-      folly::throw_exception<type_system::InvalidTypeError>(
-          fmt::format("Definition for uri '{}' was not found", uri));
+      return std::nullopt;
     }
 
     if (auto it = cache_.find(def); it != cache_.end()) {

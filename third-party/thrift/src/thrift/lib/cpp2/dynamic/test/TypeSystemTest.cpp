@@ -144,8 +144,8 @@ TEST(TypeSystemTest, EmptyStruct) {
   auto typeSystem = std::move(builder).build();
 
   // Check the empty struct
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyStruct"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/EmptyStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/EmptyStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 0);
 
@@ -161,8 +161,8 @@ TEST(TypeSystemTest, EmptyUnion) {
   auto typeSystem = std::move(builder).build();
 
   // Check the empty union
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyUnion"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/EmptyUnion"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/EmptyUnion");
   EXPECT_EQ(def.asUnion().fields().size(), 0);
 
@@ -194,7 +194,8 @@ TEST(TypeSystemTest, NestedStructs) {
   auto typeSystem = std::move(builder).build();
 
   // Check the outer struct
-  DefinitionRef outerDef = typeSystem->getUserDefinedType(outerStructUri);
+  DefinitionRef outerDef =
+      typeSystem->getUserDefinedTypeOrThrow(outerStructUri);
   EXPECT_EQ(outerDef.uri(), outerStructUri);
   EXPECT_EQ(outerDef.asStruct().fields().size(), 1);
   const FieldNode& innerField = outerDef.asStruct().fields()[0];
@@ -234,7 +235,8 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
   auto typeSystem = std::move(builder).build();
 
   // Check the recursive struct
-  DefinitionRef structDef = typeSystem->getUserDefinedType(recursiveStructUri);
+  DefinitionRef structDef =
+      typeSystem->getUserDefinedTypeOrThrow(recursiveStructUri);
   EXPECT_EQ(structDef.uri(), recursiveStructUri);
   EXPECT_EQ(structDef.asStruct().fields().size(), 1);
   const FieldNode& structField = structDef.asStruct().fields()[0];
@@ -245,7 +247,8 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
       std::addressof(structDef.asStruct()));
 
   // Check the recursive union
-  DefinitionRef unionDef = typeSystem->getUserDefinedType(recursiveUnionUri);
+  DefinitionRef unionDef =
+      typeSystem->getUserDefinedTypeOrThrow(recursiveUnionUri);
   EXPECT_EQ(unionDef.uri(), recursiveUnionUri);
   EXPECT_EQ(unionDef.asUnion().fields().size(), 1);
   const FieldNode& unionField = unionDef.asUnion().fields()[0];
@@ -298,8 +301,8 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
 
   auto typeSystem = std::move(builder).build();
 
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyStruct"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/MyStruct"));
 
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/MyStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 2);
@@ -358,7 +361,7 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   auto typeSystem = std::move(builder).build();
 
   // Check the struct with the custom default field value
-  DefinitionRef def = typeSystem->getUserDefinedType(
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
       Uri("meta.com/thrift/test/StructWithDefaults"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/StructWithDefaults");
   EXPECT_EQ(def.asStruct().fields().size(), 2);
@@ -445,24 +448,31 @@ TEST(TypeSystemTest, Annotations) {
   };
 
   checkAnnot(
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyStruct"))
+      typeSystem
+          ->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyStruct"))
           .asStruct());
   checkAnnot(
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyStruct"))
+      typeSystem
+          ->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyStruct"))
           .asStruct()
           .at(FieldId{1}));
-  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyUnion"))
-                 .asUnion());
-  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyUnion"))
-                 .asUnion()
-                 .at(FieldId{1}));
-  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyI32"))
-                 .asOpaqueAlias());
-  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyEnum"))
-                 .asEnum());
-  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyEnum"))
-                 .asEnum()
-                 .values()[0]);
+  checkAnnot(
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyUnion"))
+          .asUnion());
+  checkAnnot(
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyUnion"))
+          .asUnion()
+          .at(FieldId{1}));
+  checkAnnot(
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyI32"))
+          .asOpaqueAlias());
+  checkAnnot(
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyEnum"))
+          .asEnum());
+  checkAnnot(
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyEnum"))
+          .asEnum()
+          .values()[0]);
 }
 
 TEST(TypeSystemTest, WrongAnnotationTypeUri) {
@@ -633,8 +643,8 @@ TEST(TypeSystemTest, ListTypeRef) {
   auto typeSystem = std::move(builder).build();
 
   // Check the struct with the list field
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/ListStruct"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/ListStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/ListStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
   const FieldNode& listField = def.asStruct().fields()[0];
@@ -659,8 +669,8 @@ TEST(TypeSystemTest, SetTypeRef) {
   auto typeSystem = std::move(builder).build();
 
   // Check the struct with the set field
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/SetStruct"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/SetStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/SetStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
   const FieldNode& setField = def.asStruct().fields()[0];
@@ -687,8 +697,8 @@ TEST(TypeSystemTest, MapTypeRef) {
   auto typeSystem = std::move(builder).build();
 
   // Check the struct with the map field
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MapStruct"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/MapStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/MapStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
   const FieldNode& mapField = def.asStruct().fields()[0];
@@ -713,8 +723,8 @@ TEST(TypeSystemTest, OpaqueAliasTypeRef) {
   auto typeSystem = std::move(builder).build();
 
   // Check the opaque alias
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/OpaqueAlias"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/OpaqueAlias"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/OpaqueAlias");
   EXPECT_TRUE(def.isOpaqueAlias());
   EXPECT_EQ(def.asOpaqueAlias().targetType().id(), TypeIds::I32);
@@ -731,8 +741,8 @@ TEST(TypeSystemTest, EnumTypeRef) {
   auto typeSystem = std::move(builder).build();
 
   // Check the enum
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/SimpleEnum"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/SimpleEnum"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/SimpleEnum");
   EXPECT_TRUE(def.isEnum());
   EXPECT_EQ(def.asEnum().values().size(), 2);
@@ -774,8 +784,8 @@ TEST(TypeSystemTest, ComplexTypeReferences) {
   auto typeSystem = std::move(builder).build();
 
   // Check the complex struct
-  DefinitionRef complexDef =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/ComplexStruct"));
+  DefinitionRef complexDef = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/ComplexStruct"));
   EXPECT_EQ(complexDef.uri(), "meta.com/thrift/test/ComplexStruct");
   EXPECT_EQ(complexDef.asStruct().fields().size(), 2);
 
@@ -814,7 +824,7 @@ TEST(TypeSystemTest, NestedContainers) {
   auto typeSystem = std::move(builder).build();
 
   // Check the struct with nested containers
-  DefinitionRef def = typeSystem->getUserDefinedType(
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
       Uri("meta.com/thrift/test/NestedContainerStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/NestedContainerStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 2);
@@ -854,7 +864,7 @@ TEST(TypeSystemTest, StructWithNegativeFieldId) {
   auto typeSystem = std::move(builder).build();
 
   // Check the struct with the maximum field id
-  DefinitionRef def = typeSystem->getUserDefinedType(
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
       Uri("meta.com/thrift/test/NegativeFieldId"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/NegativeFieldId");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
@@ -876,8 +886,8 @@ TEST(TypeSystemTest, EnumWithNegativeValues) {
   auto typeSystem = std::move(builder).build();
 
   // Check the enum with negative values
-  DefinitionRef def =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/NegativeEnum"));
+  DefinitionRef def = typeSystem->getUserDefinedTypeOrThrow(
+      Uri("meta.com/thrift/test/NegativeEnum"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/NegativeEnum");
   EXPECT_EQ(def.asEnum().values().size(), 2);
   EXPECT_EQ(def.asEnum().values()[0].name, "NEGATIVE_ONE");
@@ -916,9 +926,9 @@ TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
 
   {
     auto lhs = TypeRef::fromDefinition(
-        ts1->getUserDefinedType("meta.com/thrift/test/Alias"));
+        ts1->getUserDefinedTypeOrThrow("meta.com/thrift/test/Alias"));
     auto rhs = TypeRef::fromDefinition(
-        ts2->getUserDefinedType("meta.com/thrift/test/Alias"));
+        ts2->getUserDefinedTypeOrThrow("meta.com/thrift/test/Alias"));
 
     EXPECT_TRUE(lhs.isEqualIdentityTo(lhs));
     EXPECT_TRUE(lhs.isEqualIdentityTo(rhs));
@@ -926,9 +936,9 @@ TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
 
   {
     auto lhs = TypeRef::fromDefinition(
-        ts1->getUserDefinedType("meta.com/thrift/test/OuterStruct"));
+        ts1->getUserDefinedTypeOrThrow("meta.com/thrift/test/OuterStruct"));
     auto rhs = TypeRef::fromDefinition(
-        ts2->getUserDefinedType("meta.com/thrift/test/OuterStruct"));
+        ts2->getUserDefinedTypeOrThrow("meta.com/thrift/test/OuterStruct"));
 
     EXPECT_TRUE(lhs.isEqualIdentityTo(lhs));
     EXPECT_TRUE(lhs.isEqualIdentityTo(rhs));
@@ -936,9 +946,9 @@ TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
 
   {
     auto lhs = TypeRef::fromDefinition(
-        ts1->getUserDefinedType("meta.com/thrift/test/OuterStruct"));
+        ts1->getUserDefinedTypeOrThrow("meta.com/thrift/test/OuterStruct"));
     auto rhs = TypeRef::fromDefinition(
-        ts1->getUserDefinedType("meta.com/thrift/test/Alias"));
+        ts1->getUserDefinedTypeOrThrow("meta.com/thrift/test/Alias"));
 
     EXPECT_FALSE(lhs.isEqualIdentityTo(rhs));
     EXPECT_FALSE(lhs.isEqualIdentityTo(rhs));
@@ -972,19 +982,21 @@ TEST(TypeSystemTest, ToTType) {
   auto typeSystem = typeSystemWithEmpties();
 
   EXPECT_EQ(
+      ToTTypeFn{}(typeSystem
+                      ->getUserDefinedTypeOrThrow(
+                          Uri("meta.com/thrift/test/EmptyStruct"))
+                      .asStruct()),
+      TType::T_STRUCT);
+  EXPECT_EQ(
+      ToTTypeFn{}(typeSystem
+                      ->getUserDefinedTypeOrThrow(
+                          Uri("meta.com/thrift/test/EmptyUnion"))
+                      .asUnion()),
+      TType::T_STRUCT);
+  EXPECT_EQ(
       ToTTypeFn{}(
           typeSystem
-              ->getUserDefinedType(Uri("meta.com/thrift/test/EmptyStruct"))
-              .asStruct()),
-      TType::T_STRUCT);
-  EXPECT_EQ(
-      ToTTypeFn{}(
-          typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyUnion"))
-              .asUnion()),
-      TType::T_STRUCT);
-  EXPECT_EQ(
-      ToTTypeFn{}(
-          typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyEnum"))
+              ->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/EmptyEnum"))
               .asEnum()),
       TType::T_I32);
 }

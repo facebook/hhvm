@@ -704,7 +704,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   auto& typeSystem = syntaxGraph.asTypeSystem();
 
   const type_system::StructNode& structNode =
-      typeSystem.getUserDefinedType(uri).asStruct();
+      typeSystem.getUserDefinedTypeOrThrow(uri).asStruct();
   EXPECT_EQ(structNode.uri(), uri);
   EXPECT_EQ(structNode.fields().size(), 1);
   EXPECT_EQ(structNode.fields()[0].identity().name(), "myself");
@@ -715,7 +715,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
 
   uri = "meta.com/thrift_test/TestEnum";
   const type_system::EnumNode& enumNode =
-      typeSystem.getUserDefinedType(uri).asEnum();
+      typeSystem.getUserDefinedTypeOrThrow(uri).asEnum();
   EXPECT_EQ(enumNode.uri(), uri);
   EXPECT_EQ(enumNode.values().size(), 3);
   EXPECT_EQ(enumNode.values()[0].name, "UNSET");

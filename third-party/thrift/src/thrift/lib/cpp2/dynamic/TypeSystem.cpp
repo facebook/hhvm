@@ -355,6 +355,14 @@ std::string_view kindToString(DefinitionRef::Kind k) noexcept {
       kindToString(kind())));
 }
 
+DefinitionRef TypeSystem::getUserDefinedTypeOrThrow(UriView uri) {
+  if (std::optional<DefinitionRef> def = this->getUserDefinedType(uri)) {
+    return *def;
+  }
+  folly::throw_exception<InvalidTypeError>(fmt::format(
+      "Type with URI '{}' is not defined in this TypeSystem.", uri));
+}
+
 namespace {
 struct TypeIdResolver {
   TypeSystem& typeSystem_;
@@ -401,7 +409,7 @@ struct TypeIdResolver {
   }
 
   TypeRef operator()(const TypeId::Uri& uriId) const {
-    auto defn = typeSystem_.getUserDefinedType(uriId);
+    auto defn = typeSystem_.getUserDefinedTypeOrThrow(uriId);
     return TypeRef::fromDefinition(std::move(defn));
   }
 

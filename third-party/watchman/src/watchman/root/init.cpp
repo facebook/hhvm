@@ -140,7 +140,8 @@ json_ref getIgnoreVcs(const Configuration& config) {
     return json_array(
         {typed_string_to_json(".git"),
          typed_string_to_json(".svn"),
-         typed_string_to_json(".hg")});
+         typed_string_to_json(".hg"),
+         typed_string_to_json(".jj")});
   }
 
   if (!ignores->isArray()) {

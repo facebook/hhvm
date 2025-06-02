@@ -45,7 +45,7 @@ const char* ignore_dirs[] = {
     "baz/bar/bar/foo/foo",
     "baz/bar/bar/foo/foo"};
 
-const char* ignore_vcs[] = {".hg", ".svn", ".git"};
+const char* ignore_vcs[] = {".hg", ".svn", ".git", ".jj"};
 
 struct test_case {
   const char* path;
@@ -100,6 +100,7 @@ TEST(Ignore, correctness) {
       {"buildfile", false},
       {"build/lower/baz", true},
       {"builda/hello", false},
+      {".jj/repo/store/foo", true},
   };
 
   init_state(&state);

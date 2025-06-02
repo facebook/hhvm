@@ -163,8 +163,8 @@ use a default suggestion to relocate the directory to local disk.
 ### ignore_vcs
 
 Apply special VCS ignore logic to the set of named dirs. This option has a
-default value of `[".git", ".hg", ".svn"]`. Dirs that match this option are
-observed and watched using special shallow logic. The shallow watch allows
+default value of `[".git", ".hg", ".svn", ".jj"]`. Dirs that match this option
+are observed and watched using special shallow logic. The shallow watch allows
 watchman to mildly abuse the version control directories to store its query
 cookie files and to observe VCS locking activity without having to watch the
 entire set of VCS data for large trees.

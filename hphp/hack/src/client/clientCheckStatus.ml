@@ -408,13 +408,15 @@ let go_streaming_on_fd
 let watchman_get_raw_updates_since
     ~(root : Path.t)
     ~(clock : Watchman.clock)
+    ~(watchman_sockname : string option)
     ~(fail_on_new_instance : bool)
     ~(fail_during_state : bool) : (string list, string) result Lwt.t =
   let open Lwt_result in
   if fail_on_new_instance then
     failwith "Not yet implemented: fail_on_new_instance";
   if fail_during_state then failwith "Not yet implemented: fail_during_state";
-  Watchman_lwt.watch_project ~root ~sockname:None
+  let sockname = Option.map watchman_sockname ~f:Path.make in
+  Watchman_lwt.watch_project ~root ~sockname
   |> Lwt_result.map_error Watchman_lwt.error_to_string
   >>= fun { Watchman_sig.Types.watch; relative_path } ->
   let query =
@@ -438,9 +440,14 @@ let watchman_get_raw_updates_since
         ])
     |> Hh_json.json_to_string
   in
+  let args =
+    match watchman_sockname with
+    | None -> [| "-j" |]
+    | Some sockname -> [| "--sockname"; sockname; "-j" |]
+  in
   Hh_logger.log "watchman query: %s" query;
   let%lwt result =
-    Lwt_utils.exec_checked Exec_command.Watchman ~input:query [| "-j" |]
+    Lwt_utils.exec_checked Exec_command.Watchman ~input:query args
   in
   match result with
   | Error e ->
@@ -582,6 +589,7 @@ let show_progress_and_sleep progress_callback =
   * But it leaves the spinner at "watchman sync" in case of success, in the expectation
   that subsequent code will update the spinner. *)
 let rec keep_trying_to_open
+    ~(local_config : ServerLocalConfig.t)
     ~(has_already_attempted_connect : bool)
     ~(connect_then_close : unit -> unit Lwt.t)
     ~(already_checked_file : FileId.t option)
@@ -628,6 +636,7 @@ let rec keep_trying_to_open
       ~progress_callback
       ~deadline
       ~root
+      ~local_config
   | Some fd -> begin
     let file_id = FileId.of_fd fd in
     if Option.equal FileId.equal (Some file_id) already_checked_file then
@@ -640,6 +649,7 @@ let rec keep_trying_to_open
         ~progress_callback
         ~deadline
         ~root
+        ~local_config
     else
       let already_checked_file = Some file_id in
       match Server_progress.ErrorsRead.openfile fd with
@@ -665,6 +675,7 @@ let rec keep_trying_to_open
           ~progress_callback
           ~deadline
           ~root
+          ~local_config
       | Error (open_error, log_message) -> begin
         (* But if there was an existing file that's still bad even after our connection
            attempt, there's not much we can do *)
@@ -705,9 +716,11 @@ let rec keep_trying_to_open
         (* TODO frankemrich: This must become eden-aware *)
         let clock = ServerNotifier.watchman_clock_of_clock clock in
         let%lwt since_result =
+          let watchman_sockname = local_config.watchman.sockname in
           watchman_get_raw_updates_since
             ~root
             ~clock
+            ~watchman_sockname
             ~fail_on_new_instance:false
             ~fail_during_state:false
         in
@@ -761,6 +774,7 @@ let rec keep_trying_to_open
               ~progress_callback
               ~deadline
               ~root
+              ~local_config
           end
       end
   end
@@ -769,6 +783,7 @@ let rec keep_trying_to_open
     Errors are printed soon after they are known instead of all at once at the end. *)
 let go_streaming
     (args : ClientEnv.client_check_env)
+    (local_config : ServerLocalConfig.t)
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
@@ -790,6 +805,7 @@ let go_streaming
       ~progress_callback
       ~deadline
       ~root
+      ~local_config
   in
   go_streaming_on_fd
     ~pid

@@ -280,6 +280,7 @@ let main_internal
     if use_streaming then
       ClientCheckStatus.go_streaming
         args
+        local_config
         error_filter
         ~partial_telemetry_ref
         ~connect_then_close:(fun () -> connect_then_close args)

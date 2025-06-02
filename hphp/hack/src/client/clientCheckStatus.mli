@@ -8,6 +8,7 @@
 
 val go_streaming :
   ClientEnv.client_check_env ->
+  ServerLocalConfig.t ->
   Filter_errors.Filter.t ->
   partial_telemetry_ref:Telemetry.t option ref ->
   connect_then_close:(unit -> unit Lwt.t) ->

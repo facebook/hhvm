@@ -995,6 +995,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.EnableCallBuiltin = true, UNKNOWN, unitcacheflag
 
+- bool Eval.EnableNuca = true, UNKNOWN
+
 - bool Eval.EnableNuma, UNKNOWN, postprocess
 
 - bool Eval.EnableReusableTC, UNKNOWN

@@ -106,11 +106,11 @@ bool EvalLoader::VerifyDefault() {
 }
 
 bool EvalLoader::EnableNumaDefault() {
-  return (numa_num_nodes > 1) && Cfg::Server::Mode;
+  return (numa_num_nodes > 1 || Cfg::Eval::EnableNuca) && Cfg::Server::Mode;
 }
 
 void EvalLoader::EnableNumaPostProcess(bool& val) {
-  if (numa_num_nodes <= 1) val = false;
+  if (numa_num_nodes <= 1 && !Cfg::Eval::EnableNuca) val = false;
 }
 
 void EvalLoader::ReusableTCPaddingPostProcess(uint32_t& val) {

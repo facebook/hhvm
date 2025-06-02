@@ -30,6 +30,7 @@
 #include "hphp/util/embedded-vfs.h"
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/stack-trace.h"
@@ -39,6 +40,7 @@
 #include <folly/Format.h>
 
 #include <dlfcn.h>
+#include <pthread.h>
 #include <spawn.h>
 
 int main(int argc, char** argv) {
@@ -245,6 +247,23 @@ extern "C" {
     }
     errno = ENOSYS;
     return errno;
+  }
+
+  int pthread_setname_np(pthread_t thread, const char* name) {
+    static decltype(&pthread_setname_np) orig = nullptr;
+    if (!orig) {
+      orig = (decltype(&pthread_setname_np))dlsym(RTLD_NEXT,
+                                                  "pthread_setname_np");
+    }
+    if (HPHP::use_nuca && strncmp(name, "hhvmworker", 10)) {
+      cpu_set_t all_cpus;
+      CPU_ZERO(&all_cpus);
+      for (int i = 0; i < CPU_SETSIZE; i++) {
+        CPU_SET(i, &all_cpus);
+      }
+      sched_setaffinity(0, sizeof(cpu_set_t), &all_cpus);
+    }
+    return orig(thread, name);
   }
 }
 

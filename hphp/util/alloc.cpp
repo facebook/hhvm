@@ -165,6 +165,9 @@ static unsigned base_arena;
 #ifdef HAVE_NUMA
 
 void set_numa_binding(int node) {
+  if (use_nuca && s_hugeRange.ptr) {
+    return nuca_bind_thread();
+  }
   if (node < 0) return;                 // thread not created from JobQueue
   s_numaNode = node;
   unsigned arena = base_arena + node;
@@ -777,7 +780,7 @@ SwappableReadonlyArena* get_swappable_readonly_arena() {
 }
 
 extern "C" {
-  const char* malloc_conf = "narenas:1,lg_tcache_max:16"
+  const char* malloc_conf = "narenas:8,lg_tcache_max:16"
 #if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 3) || \
     (JEMALLOC_VERSION_MAJOR > 5) // requires jemalloc >= 5.3
 #if (JEMALLOC_VERSION_NREV >= 211)

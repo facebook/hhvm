@@ -4,7 +4,7 @@
 name = "watchmanctl"
 version = "0.1.0"
 authors = ["Source Control Oncall oncall+source_control@xmail.facebook.com"]
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/facebook/watchman"
 license = "MIT"
 

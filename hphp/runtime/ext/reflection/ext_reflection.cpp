@@ -556,13 +556,15 @@ namespace {
 
 const StaticString s_classname("classname");
 
-Array implTypeStructure(const Variant& cls_or_obj,
+Array implTypeStructure(TypedValue cls_or_obj,
                         const Variant& cns_name,
                         bool no_throw) {
-  SuppressClassConversionNotice suppressor;
   auto const cns_sd = cns_name.getStringDataOrNull();
+
+  // type alias path
   if (!cns_sd) {
-    auto name = cls_or_obj.toString();
+    SuppressClassConversionNotice suppressor;
+    auto name = tvCastToString(cls_or_obj);
 
     auto const typeAlias = TypeAlias::load(name.get());
 
@@ -594,11 +596,47 @@ Array implTypeStructure(const Variant& cls_or_obj,
     return resolved;
   }
 
-  auto const cls = get_cls(cls_or_obj);
-
-  if (!cls) {
-    raise_error("Class undefined: %s", cls_or_obj.toString().get()->data());
-  }
+  // type constant path
+  auto const cls = [&] () {
+    switch (cls_or_obj.m_type) {
+      case KindOfString:
+      case KindOfPersistentString:
+      {
+        auto const n = val(cls_or_obj).pstr;
+        auto const c = Class::load(n);
+        if (c) {
+          raise_str_to_class_notice(n);
+        } else {
+          raise_error("Class undefined: %s", n->data());
+        }
+        return c;
+      }
+      case KindOfLazyClass:
+      {
+        auto const n = val(cls_or_obj).plazyclass.name();
+        auto const c = Class::load(n);
+        if (UNLIKELY(!c)) {
+          raise_error("Class undefined: %s", n->data());
+        }
+        return c;
+      }
+      case KindOfClass:
+        return val(cls_or_obj).pclass;
+      case KindOfObject:
+        return val(cls_or_obj).pobj->getVMClass();
+      default:
+      {
+        // extremely sketchy, this leads to behavior like "Class undefined: 3"
+        // TODO(vmladenov) log+remove this case instead of raising str notice
+        auto const ns = tvCastToString(cls_or_obj);
+        auto const c = Class::load(ns.get());
+        if (!c) {
+          raise_error("Class undefined: %s", ns.get()->data());
+        }
+        return c;
+      }
+    }
+  }();
 
   auto const cls_sd = cls->name();
 
@@ -624,17 +662,17 @@ struct ReflectionException : SystemLib::ClassLoader<"ReflectionException"> {};
  * constant.
  */
 Array HHVM_FUNCTION(type_structure,
-                    const Variant& cls_or_obj, const Variant& cns_name) {
+                    TypedValue cls_or_obj, const Variant& cns_name) {
   return implTypeStructure(cls_or_obj, cns_name, false);
 }
 
 Array HHVM_FUNCTION(type_structure_no_throw,
-                    const Variant& cls_or_obj, const Variant& cns_name) {
+                    TypedValue cls_or_obj, const Variant& cns_name) {
   return implTypeStructure(cls_or_obj, cns_name, true);
 }
 
 String HHVM_FUNCTION(type_structure_classname,
-                     const Variant& cls_or_obj, const Variant& cns_name) {
+                     TypedValue cls_or_obj, const Variant& cns_name) {
   auto const ts = implTypeStructure(cls_or_obj, cns_name, false);
   auto const classname = ts->get(s_classname.get(), true);
   assertx(isStringType(type(classname)));

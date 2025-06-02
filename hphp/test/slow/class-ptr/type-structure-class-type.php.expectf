@@ -1,3 +1,8 @@
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/type-structure-class-type.php on line 19
+
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/type-structure-class-type.php on line 20
+
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/type-structure-class-type.php on line 21
 dict(2) {
   ["kind"]=>
   int(33)

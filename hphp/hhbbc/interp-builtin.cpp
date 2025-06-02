@@ -477,12 +477,6 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     auto const t = getArg(env, func, fca, 0);
     if (t.subtypeOf(BCls)) return t;
     if (t.subtypeOf(BObj)) return objcls(t);
-    if (t.subtypeOf(BStr) && is_specialized_string(t)) {
-      auto const str = sval_of(t);
-      auto const rcls = env.index.resolve_class(str);
-      if (!rcls) return TBottom;
-      return clsExact(*rcls, true);
-    }
     if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
       auto const str = lazyclsval_of(t);
       auto const rcls = env.index.resolve_class(str);

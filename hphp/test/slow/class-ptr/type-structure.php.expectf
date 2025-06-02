@@ -1,0 +1,11 @@
+
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/type-structure.php on line 18
+string(1) "X"
+
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/type-structure.php on line 19
+string(1) "X"
+string(1) "X"
+string(1) "X"
+string(1) "X"
+
+Fatal error: Class undefined: 4 in %s/class-ptr/type-structure.php on line 25

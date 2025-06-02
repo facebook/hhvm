@@ -739,6 +739,11 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
     cls->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true);
   if (cnsSlot == kInvalidSlot) return nullptr;
 
+  // If we do this earlier, we might raise multiple notices
+  if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0 && clsNameTmp->isA(TStr)) {
+    gen(env, RaiseStrToClassNotice, clsNameTmp);
+  }
+
   if (!getName) {
     return cond(
       env,

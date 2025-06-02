@@ -1,36 +1,26 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('class_type')>>
+class X {}
 
-type T = class<C>;
-type U = classname<C>;
-type V = class_or_classname<C>;
 class C {
-  const type T = class<C>;
-  const type U = classname<C>;
-  const type V = class_or_classname<C>;
+  const type T = X;
 }
 
 <<__EntryPoint>>
 function main(): void {
-  $t = type_structure('T');
-  $u = type_structure('U');
-  $v = type_structure('V');
-  $ct = type_structure('C', 'T');
-  $cu = type_structure('C', 'U');
-  $cv = type_structure('C', 'V');
+  $ss = nameof C;
+  $s = __hhvm_intrinsics\launder_value($ss)."";
+  $lc = C::class;
+  $c = HH\classname_to_class($lc);
+  $o = new C();
+  $i = 4;
 
-  invariant($t['kind'] === TypeStructureKind::OF_CLASS_PTR, 'kind mismatch');
-  invariant($u['kind'] === TypeStructureKind::OF_STRING, 'kind mismatch');
-  invariant($v['kind'] === TypeStructureKind::OF_CLASS_OR_CLASSNAME, 'kind mismatch');
-  invariant($ct['kind'] === TypeStructureKind::OF_CLASS_PTR, 'kind mismatch');
-  invariant($cu['kind'] === TypeStructureKind::OF_STRING, 'kind mismatch');
-  invariant($cv['kind'] === TypeStructureKind::OF_CLASS_OR_CLASSNAME, 'kind mismatch');
+  var_dump(type_structure($ss, 'T')['classname']); // log
+  var_dump(type_structure($s, 'T')['classname']); // log
+  var_dump(type_structure($lc, 'T')['classname']);
+  var_dump(type_structure($c, 'T')['classname']);
+  var_dump(type_structure($o, 'T')['classname']);
 
-  var_dump($t);
-  var_dump($u);
-  var_dump($v);
-  var_dump($ct);
-  var_dump($cu);
-  var_dump($cv);
+  // document strange fatal behavior
+  type_structure($i, 'T');
 }

@@ -45,6 +45,13 @@ TEST_P(EnableResourcePoolsForPythonFlagTest, AreResourcePoolsEnabledForPython) {
 INSTANTIATE_TEST_CASE_P(
     EnableResourcePoolsForPythonTests,
     EnableResourcePoolsForPythonFlagTest,
-    testing::Values(true, false));
+    // The resource pool rollout to set enable_resource_pools_for_python
+    // is now at 100%. This implies that the flag should be true everwhere.
+    // To prepare for the complete removal of flag, and eventually
+    // the pre-resource-pool (thread-manager) code, mark resource pools
+    // as always true, irrespective of the value of the flag.
+    // Even though much of this code now appears dead, leave it as it is
+    // for an easy rollback if needed.
+    testing::Values(true));
 
 } // namespace apache::thrift::python::detail::test

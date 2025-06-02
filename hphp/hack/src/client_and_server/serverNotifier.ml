@@ -66,6 +66,7 @@ let rec indexer (t : t) (filter : string -> bool) : unit -> string list =
     let files = Watchman.get_all_files wenv in
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
   | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
+    (* TODO(T225695144) Implement this in Edenfs_watcher *)
     indexer tmp_watchman_instance filter
 
 let init
@@ -147,6 +148,11 @@ let init
       Hh_logger.log
         "Failed to initialize EdenFS watcher, www repo %s is not on Eden"
         (Path.to_string root);
+      None
+    | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
+      Hh_logger.log
+        "Failed to initialize EdenFS watcher with lost changes message, reason %s"
+        reason;
       None
     | Result.Ok instance -> begin
       (* TODO(frankemrich): Add use_edenfs_file_watcher to hh_server_events
@@ -240,76 +246,164 @@ let convert_watchman_changes
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
     changes
 
-let rec get_changes_sync (t : t) : SSet.t * clock option =
-  match t with
-  | IndexOnly _ -> (SSet.empty, None)
-  | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
-  | Dfind { dfind; _ } ->
-    let set =
-      try
-        Timeout.with_timeout
-          ~timeout:120
-          ~on_timeout:(fun (_ : Timeout.timings) ->
-            Exit.exit Exit_status.Dfind_unresponsive)
-          ~do_:(fun _timeout -> DfindLib.get_changes dfind)
-      with
-      | _ -> Exit.exit Exit_status.Dfind_died
-    in
-    (set, None)
-  | Watchman { local_config; watchman; root; _ } ->
-    let (watchman', changes) =
-      Watchman.get_changes_synchronously
-        ~timeout:
-          local_config.ServerLocalConfig.watchman
-            .ServerLocalConfig.Watchman.synchronous_timeout
-        !watchman
-    in
-    watchman := watchman';
-    let changes =
-      List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-          SSet.union acc (convert_watchman_changes ~root ~local_config c))
-    in
-    let clock = Watchman.get_clock !watchman in
-    (changes, Some (Watchman clock))
-  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
-    (* Actually use Watchman for now to allow some basic testing *)
-    get_changes_sync tmp_watchman_instance
+let convert_edenfs_watcher_changes (eden_changes : Edenfs_watcher_types.changes)
+    : SSet.t =
+  match eden_changes with
+  | Edenfs_watcher_types.CommitTransition { file_changes; _ } ->
+    (* TODO(T224461521) Need to inform ServerRevisionTracker about commit
+       transition, similarly to what convert_watchman_changes does *)
+    SSet.of_list file_changes
+  | Edenfs_watcher_types.FileChanges file_changes ->
+    (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
+       similarly to what convert_watchman_changes does *)
+    SSet.of_list file_changes
 
-let rec get_changes_async (t : t) : changes * clock option =
-  match t with
-  | IndexOnly _ -> (SyncChanges SSet.empty, None)
-  | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
-  | Dfind _ ->
-    let (changes, _) = get_changes_sync t in
-    (SyncChanges changes, None)
-  | Watchman { watchman; root; local_config; _ } ->
-    let (watchman', changes) = Watchman.get_changes !watchman in
-    watchman := watchman';
-    let changes =
+let handle_edenfs_watcher_result
+    (result :
+      ( Edenfs_watcher_types.changes list * Edenfs_watcher.clock,
+        Edenfs_watcher_types.edenfs_watcher_error )
+      result) : SSet.t =
+  match result with
+  | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
+    Hh_logger.log "Edenfs_watcher failed with message: %s" msg;
+    raise Exit_status.(Exit_with Edenfs_watcher_failed)
+  | Result.Error Edenfs_watcher_types.NonEdenWWW ->
+    Hh_logger.log "Edenfs_watcher failed, www repo is not on Eden";
+    raise Exit_status.(Exit_with Edenfs_watcher_failed)
+  | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
+    Hh_logger.log "Edenfs_watcher has lost track of changes, reason: %s" reason;
+    raise Exit_status.(Exit_with Edenfs_watcher_lost_changes)
+  | Result.Ok (changes, _clock) ->
+    List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+        SSet.union acc (convert_edenfs_watcher_changes c))
+
+let get_changes_sync (t : t) : SSet.t * clock option =
+  let (changes, new_clock) =
+    match t with
+    | IndexOnly _ -> (SSet.empty, None)
+    | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
+    | Dfind { dfind; _ } ->
+      let set =
+        try
+          Timeout.with_timeout
+            ~timeout:120
+            ~on_timeout:(fun (_ : Timeout.timings) ->
+              Exit.exit Exit_status.Dfind_unresponsive)
+            ~do_:(fun _timeout -> DfindLib.get_changes dfind)
+        with
+        | _ -> Exit.exit Exit_status.Dfind_died
+      in
+      (set, None)
+    | Watchman { local_config; watchman; root; _ } ->
+      let (watchman', changes) =
+        Watchman.get_changes_synchronously
+          ~timeout:
+            local_config.ServerLocalConfig.watchman
+              .ServerLocalConfig.Watchman.synchronous_timeout
+          !watchman
+      in
+      watchman := watchman';
+      let changes =
+        List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+            SSet.union acc (convert_watchman_changes ~root ~local_config c))
+      in
+      let clock = Watchman.get_clock !watchman in
+      (changes, Some (ServerNotifierTypes.Watchman clock))
+    | EdenfsFileWatcher { instance; _ } ->
+      (* Note that this will handle all errors by raising Exit_status *)
+      let changes =
+        handle_edenfs_watcher_result (Edenfs_watcher.get_changes_sync instance)
+      in
+      (* TODO(T215219438) We need to return a proper clock value here *)
+      let new_clock = None in
+      (changes, new_clock)
+  in
+
+  if
+    Hh_logger.Level.passes_min_level Hh_logger.Level.Debug
+    && not (SSet.is_empty changes)
+  then begin
+    Hh_logger.log
+      ~lvl:Hh_logger.Level.Debug
+      "ServerNotifier.get_changes_sync got %d changes"
+      (SSet.cardinal changes);
+    SSet.iter
+      (fun file ->
+        Hh_logger.log
+          ~lvl:Hh_logger.Level.Debug
+          "ServerNotifier.get_changes_sync: changed file %s"
+          file)
+      changes
+  end;
+  (changes, new_clock)
+
+let get_changes_async (t : t) : changes * clock option =
+  let (changes, new_clock) =
+    match t with
+    | IndexOnly _ -> (SyncChanges SSet.empty, None)
+    | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
+    | Dfind _ ->
+      let (changes, _) = get_changes_sync t in
+      (SyncChanges changes, None)
+    | Watchman { watchman; root; local_config; _ } ->
+      let (watchman', changes) = Watchman.get_changes !watchman in
+      watchman := watchman';
+      let changes =
+        match changes with
+        | Watchman.Watchman_unavailable -> Unavailable
+        | Watchman.Watchman_pushed changes ->
+          AsyncChanges (convert_watchman_changes ~root ~local_config changes)
+        | Watchman.Watchman_synchronous changes ->
+          let accumulated_changes =
+            List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+                SSet.union acc (convert_watchman_changes ~root ~local_config c))
+          in
+          SyncChanges accumulated_changes
+      in
+      let clock = Watchman.get_clock !watchman in
+
+      (changes, Some (ServerNotifierTypes.Watchman clock))
+    | EdenfsFileWatcher { instance; _ } ->
+      (* Note that this will handle all errors by raising Exit_status *)
+      let changes =
+        handle_edenfs_watcher_result (Edenfs_watcher.get_changes_async instance)
+      in
+      (* TODO(T215219438) We need to return a proper clock value here *)
+      let new_clock = None in
+      (AsyncChanges changes, new_clock)
+  in
+
+  if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then begin
+    let change_set =
       match changes with
-      | Watchman.Watchman_unavailable -> Unavailable
-      | Watchman.Watchman_pushed changes ->
-        AsyncChanges (convert_watchman_changes ~root ~local_config changes)
-      | Watchman.Watchman_synchronous changes ->
-        let accumulated_changes =
-          List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-              SSet.union acc (convert_watchman_changes ~root ~local_config c))
-        in
-        SyncChanges accumulated_changes
+      | Unavailable -> SSet.empty
+      | AsyncChanges set
+      | SyncChanges set ->
+        set
     in
-    let clock = Watchman.get_clock !watchman in
-    (changes, Some (Watchman clock))
-  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
-    (* Actually use Watchman for now to allow some basic testing *)
-    get_changes_async tmp_watchman_instance
+    if not (SSet.is_empty change_set) then begin
+      Hh_logger.log
+        ~lvl:Hh_logger.Level.Debug
+        "ServerNotifier.get_changes_async got %d changes"
+        (SSet.cardinal change_set);
+      SSet.iter
+        (fun file ->
+          Hh_logger.log
+            ~lvl:Hh_logger.Level.Debug
+            "ServerNotifier.get_changes_async: changed file %s"
+            file)
+        change_set
+    end
+  end;
+  (changes, new_clock)
 
-let rec async_reader_opt (t : t) : Buffered_line_reader.t option =
+let async_reader_opt (t : t) : Buffered_line_reader.t option =
   match t with
   | Dfind _
   | IndexOnly _ ->
     None
   | MockChanges _ -> None
   | Watchman { watchman; _ } -> Watchman.get_reader !watchman
-  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
-    (* Actually use Watchman for now to allow some basic testing *)
-    async_reader_opt tmp_watchman_instance
+  | EdenfsFileWatcher _ ->
+    (* TODO(T224461142) Edenfs_watcher doesn't implement this, yet *)
+    None

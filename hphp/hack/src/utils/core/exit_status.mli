@@ -45,6 +45,8 @@ type t =
   | Watchman_failed
   | Watchman_fresh_instance
   | Watchman_invalid_result
+  | Edenfs_watcher_failed
+  | Edenfs_watcher_lost_changes
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed

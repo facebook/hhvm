@@ -199,6 +199,16 @@ class CommonTestsOnEden(common_tests.CommonTests):
     # Nothing else to see here: We inherit all tests from CommonTests, but run
     # them using CommonTestsOnEden._Driver
 
+    def test_interrupt(self) -> None:
+        # TODO(T224461142) Disabling CommonTests.test_interrupt for now.
+        # This test is unsupported until Edenfs_watcher provides a
+        # file descriptor that can be used to interrupt type checking.
+
+        # Still need to start a server so that assertEdenFsWatcherInitialized
+        # in tearDown succeeds.
+        # No need to do the shutdown ourselves, that's handled in tearDown.
+        self.test_driver.start_hh_server()
+
 
 class NonMountPointRepoTest(test_case.TestCase[common_tests.CommonTestDriver]):
     "Tests that we can run hh_server on a path that isn't the root of a hg repository/mount point of an Eden file system."

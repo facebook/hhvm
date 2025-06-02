@@ -7,7 +7,6 @@
  *)
 
 type changes =
-  | Lost
   | FileChanges of string list  (** List is not guaranteed to be deduplicated *)
   | CommitTransition of {
       from_commit: string;
@@ -19,5 +18,9 @@ type changes =
 
 type edenfs_watcher_error =
   | EdenfsWatcherError of string
-  | NonEdenWWW
+  | LostChanges of string
+      (** There may have been some changes that Eden has lost track of.
+        (e.g., due to Eden restarting).
+        The string is just a description of what happened. *)
+  | NonEdenWWW  (** The root directory is not inside an EdenFS mount. *)
 [@@deriving show]

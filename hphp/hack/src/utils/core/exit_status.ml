@@ -51,6 +51,12 @@ type t =
       the files that have been deleted and do an incremental check. *)
   | Watchman_fresh_instance
   | Watchman_invalid_result
+  | Edenfs_watcher_failed
+      (** The EdenFS watcher failed in a way that we cannot recover from *)
+  | Edenfs_watcher_lost_changes
+      (** Similar to Watchman_fresh_instance (and some instances of Watchman_failed):
+      Eden told us that it may have lost track of changes (e.g., due to an Eden restart),
+      so we cannot be sure what files need to be re-checked. *)
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
@@ -191,6 +197,10 @@ let exit_code = function
   | Server_non_opt_build_mode -> 222
   | Not_restarting_server_with_precomputed_saved_state -> 223
   | Config_error -> 224
+  | Edenfs_watcher_failed -> 225
+  | Edenfs_watcher_lost_changes ->
+    (* Zoncolan uses 226 and 227, skipping *)
+    228
 
 let exit_code_to_string (code : int) : string =
   (* We will return the string "See Exit_status.ml for meaning of this code".

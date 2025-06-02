@@ -40,6 +40,7 @@ pub mod ffi {
         AttrSealed = 0x800,
         AttrLateInit = 0x800,
         AttrNoExpandTrait = 0x1000,
+        AttrSplatParam = 0x1000,
         AttrNoOverride = 0x2000,
         AttrIsReadonly = 0x4000,
         AttrReadonlyThis = 0x4000,

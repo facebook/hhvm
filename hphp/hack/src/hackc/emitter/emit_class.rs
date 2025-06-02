@@ -423,6 +423,7 @@ fn emit_reified_init_method<'a, 'd>(
         let params = vec![Param {
             name: hhbc::intern(string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
+            is_splat: false,
             is_inout: false,
             is_readonly: false,
             is_optional: false,
@@ -664,6 +665,7 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
         let params = vec![Param {
             name: hhbc::intern("$constName"),
             is_variadic: false,
+            is_splat: false,
             is_inout: false,
             is_readonly: false,
             is_optional: false,

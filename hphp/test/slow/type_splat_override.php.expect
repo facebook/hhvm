@@ -1,0 +1,11 @@
+D::foo
+int(3)
+string(1) "A"
+D::bar
+int(4)
+string(1) "B"
+C::baz
+vec(2) {
+  int(5)
+  string(1) "C"
+}

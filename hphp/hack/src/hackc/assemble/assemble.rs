@@ -1177,6 +1177,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"readonly_return" => Attr::AttrReadonlyReturn,
         b"readonly_this" => Attr::AttrReadonlyThis,
         b"sealed" => Attr::AttrSealed,
+        b"splat_param" => Attr::AttrSplatParam,
         b"static" => Attr::AttrStatic,
         b"support_async_eager_return" => Attr::AttrSupportsAsyncEagerReturn,
         b"sys_initial_val" => Attr::AttrSystemInitialValue,
@@ -1324,6 +1325,7 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_optional = token_iter.next_is_str(Token::is_identifier, "optional");
+    let is_splat = token_iter.next_is_str(Token::is_identifier, "splat");
     let is_variadic = token_iter.next_is(Token::is_variadic);
     let type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name_tok = token_iter.expect_with(Token::into_variable)?;
@@ -1338,6 +1340,7 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     let param = hhbc::Param {
         name,
         is_variadic,
+        is_splat,
         is_optional,
         is_inout,
         is_readonly,

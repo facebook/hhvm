@@ -36,7 +36,14 @@ use crate::emit_attribute;
 use crate::emit_expression;
 
 pub fn has_variadic(params: &[ParamEntry]) -> bool {
-    params.iter().rev().any(|p| p.param.is_variadic)
+    params
+        .iter()
+        .rev()
+        .any(|p| p.param.is_variadic || p.param.is_splat)
+}
+
+pub fn has_splat(params: &[ParamEntry]) -> bool {
+    params.iter().rev().any(|p| p.param.is_splat)
 }
 
 pub fn from_asts<'a, 'd>(
@@ -178,7 +185,8 @@ fn from_ast<'a, 'd>(
     Ok(Some((
         Param {
             name: hhbc::intern(&param.name),
-            is_variadic: is_variadic || is_splat,
+            is_variadic,
+            is_splat,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
             is_optional,

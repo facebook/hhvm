@@ -1837,6 +1837,7 @@ pub(crate) fn print_param(
         is_inout,
         is_readonly,
         is_variadic,
+        is_splat,
         is_optional,
         type_info: _,
         name,
@@ -1851,6 +1852,9 @@ pub(crate) fn print_param(
     }
     if is_optional {
         write!(w, "optional ")?;
+    }
+    if is_splat {
+        write!(w, "splat ")?;
     }
 
     if !user_attributes.is_empty() {

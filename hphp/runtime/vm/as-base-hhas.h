@@ -82,7 +82,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrIsClosureClass,           C,       "is_closure_class");     \
   X(AttrEnumClass,                C,       "enum_class");           \
   X(AttrNoRecording,              F,       "no_recording");         \
-  X(AttrVariadicParam,            F,       "variadic_param");
+  X(AttrVariadicParam,            F,       "variadic_param");       \
+  X(AttrSplatParam,               F,       "splat_param");
   /* */
 
   #define HHAS_TYPE_FLAGS                                   \

@@ -352,6 +352,7 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
             Param {
                 name: a_name,
                 is_variadic: a_is_variadic,
+                is_splat: a_is_splat,
                 is_inout: a_is_inout,
                 is_readonly: a_is_readonly,
                 is_optional: a_is_optional,
@@ -365,6 +366,7 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
             Param {
                 name: b_name,
                 is_variadic: b_is_variadic,
+                is_splat: b_is_splat,
                 is_inout: b_is_inout,
                 is_readonly: b_is_readonly,
                 is_optional: b_is_optional,
@@ -376,6 +378,7 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_is_variadic, b_is_variadic).qualified("is_variadic")?;
+    cmp_eq(a_is_splat, b_is_splat).qualified("is_splat")?;
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
     cmp_eq(a_is_optional, b_is_optional).qualified("is_optional")?;

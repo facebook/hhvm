@@ -243,6 +243,7 @@ fn create_default_closure_constructor(class: &mut Class) {
             let param = Param {
                 name: prop.name.as_string_id(),
                 is_variadic: false,
+                is_splat: false,
                 is_inout: false,
                 is_readonly: false,
                 is_optional: false,

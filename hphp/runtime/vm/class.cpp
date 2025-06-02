@@ -2053,42 +2053,49 @@ void checkDeclarationCompat(const PreClass* preClass,
   const Func::ParamInfoVec& params = func->params();
   const Func::ParamInfoVec& iparams = imeth->params();
 
-  auto const ivariadic = imeth->hasVariadicCaptureParam();
-  auto const variadic = func->hasVariadicCaptureParam();
-  if (ivariadic && !variadic) {
-    raiseIncompat(preClass, imeth);
-  }
-
-  // Verify that func has at least as many parameters as imeth.
-  // If func is variadic, then the check isn't necessary because it can
-  // take an arbitrary number of parameters
-  if (!variadic && func->numParams() < imeth->numParams()) {
-    raiseIncompat(preClass, imeth);
-  }
-  // Verify that the typehints for meth's parameters are compatible with
-  // imeth's corresponding parameter typehints.
-  size_t firstOptional = 0;
-  {
-    size_t i = 0;
-    for (; i < imeth->numNonVariadicParams(); ++i) {
-      if (!iparams[i].hasDefaultValue() && !iparams[i].isOptional()) {
-        // The leftmost of imeth's contiguous trailing optional parameters
-        // must start somewhere to the right of this parameter (which may
-        // be the variadic param)
-        firstOptional = i + 1;
-      }
-    }
-    assertx(!ivariadic || iparams[iparams.size() - 1].isVariadic());
-    assertx(!ivariadic || params[params.size() - 1].isVariadic());
-  }
-
-  // Verify that meth provides defaults, starting with the parameter that
-  // corresponds to the leftmost of imeth's contiguous trailing optional
-  // parameters and *not* including any variadic last param (variadics
-  // don't have any default values).
-  for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
-    if (!params[i].hasDefaultValue() && !params[i].isOptional()) {
+  // If interface has splat parameter then we can't tell without instantiating
+  // generics whether the methods are compatible
+  // e.g. consider foo(...T) overridden by foo(int,string)
+  // hh will already have checked this anyhow
+  auto const isplat = imeth->hasSplatParam();
+  if (!isplat) {
+    auto const ivariadic = imeth->hasVariadicCaptureParam();
+    auto const variadic = func->hasVariadicCaptureParam();
+    if (ivariadic && !variadic) {
       raiseIncompat(preClass, imeth);
+    }
+
+    // Verify that func has at least as many parameters as imeth.
+    // If func is variadic, then the check isn't necessary because it can
+    // take an arbitrary number of parameters
+    if (!variadic && func->numParams() < imeth->numParams()) {
+      raiseIncompat(preClass, imeth);
+    }
+    // Verify that the typehints for meth's parameters are compatible with
+    // imeth's corresponding parameter typehints.
+    size_t firstOptional = 0;
+    {
+      size_t i = 0;
+      for (; i < imeth->numNonVariadicParams(); ++i) {
+        if (!iparams[i].hasDefaultValue() && !iparams[i].isOptional()) {
+          // The leftmost of imeth's contiguous trailing optional parameters
+          // must start somewhere to the right of this parameter (which may
+          // be the variadic param)
+          firstOptional = i + 1;
+        }
+      }
+      assertx(!ivariadic || iparams[iparams.size() - 1].isVariadic());
+      assertx(!ivariadic || params[params.size() - 1].isVariadic());
+    }
+
+    // Verify that meth provides defaults, starting with the parameter that
+    // corresponds to the leftmost of imeth's contiguous trailing optional
+    // parameters and *not* including any variadic last param (variadics
+    // don't have any default values).
+    for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
+      if (!params[i].hasDefaultValue() && !params[i].isOptional()) {
+        raiseIncompat(preClass, imeth);
+      }
     }
   }
 

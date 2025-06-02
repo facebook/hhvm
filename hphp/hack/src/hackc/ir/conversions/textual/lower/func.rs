@@ -101,6 +101,7 @@ fn add_reified_parameter(func: &mut Func) {
     let param = ir::Param {
         name: ir::intern(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
         is_variadic: false,
+        is_splat: false,
         is_inout: false,
         is_readonly: false,
         is_optional: false,
@@ -124,6 +125,7 @@ fn add_self_trait_parameter(func: &mut Func) {
         ir::Param {
             name: ir::string_id!("self"),
             is_variadic: false,
+            is_splat: false,
             is_inout: false,
             is_readonly: false,
             is_optional: false,

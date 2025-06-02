@@ -117,6 +117,7 @@ pub(crate) fn parse_attr(tokenizer: &mut Tokenizer<'_>) -> Result<Attr> {
             "readonly" => Attr::AttrIsReadonly,
             "readonly_return" => Attr::AttrReadonlyReturn,
             "sealed" => Attr::AttrSealed,
+            "splat_param" => Attr::AttrSplatParam,
             "static" => Attr::AttrStatic,
             "system_initial_value" => Attr::AttrSystemInitialValue,
             "trait" => Attr::AttrTrait,
@@ -520,7 +521,7 @@ where
 }
 
 pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<(Param, Option<DefaultValue>)> {
-    parse!(tokenizer, <inout:"inout"?> <readonly:"readonly"?> <optional:"optional"?><user_attributes:parse_attributes("[")> <ty:parse_type_info>);
+    parse!(tokenizer, <inout:"inout"?> <readonly:"readonly"?> <optional:"optional"?><is_splat:"splat"?><user_attributes:parse_attributes("[")> <ty:parse_type_info>);
 
     let is_variadic = tokenizer.next_is_identifier("...")?;
     parse!(tokenizer, <name:parse_var>);
@@ -541,6 +542,7 @@ pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<(Param, Optio
             Maybe::Just(ty)
         },
         is_variadic,
+        is_splat: is_splat.is_some(),
         is_inout: inout.is_some(),
         is_readonly: readonly.is_some(),
         is_optional: optional.is_some(),

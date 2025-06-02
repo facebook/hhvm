@@ -43,6 +43,7 @@ pub(crate) fn get_attrs_for_fun(
     user_attrs: &[Attribute],
     is_memoize_impl: bool,
     has_variadic: bool,
+    has_splat: bool,
 ) -> Attr {
     let f = &fd.fun;
     let is_systemlib = emitter.systemlib();
@@ -61,6 +62,7 @@ pub(crate) fn get_attrs_for_fun(
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
     attrs.set(Attr::AttrInternal, fd.internal);
     attrs.set(Attr::AttrVariadicParam, has_variadic);
+    attrs.set(Attr::AttrSplatParam, has_splat);
     attrs
 }
 
@@ -131,7 +133,15 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     let mut flags = FunctionFlags::empty();
     flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
     let has_variadic = emit_param::has_variadic(&body.repr.params);
-    body.attrs = get_attrs_for_fun(emitter, fd, &body.attributes, false, has_variadic);
+    let has_splat = emit_param::has_splat(&body.repr.params);
+    body.attrs = get_attrs_for_fun(
+        emitter,
+        fd,
+        &body.attributes,
+        false,
+        has_variadic,
+        has_splat,
+    );
     Ok(Function {
         name: original_id,
         body,

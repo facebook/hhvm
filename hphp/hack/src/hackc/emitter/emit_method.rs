@@ -52,6 +52,7 @@ pub fn get_attrs_for_method(
     class: &ast::Class_,
     is_memoize_impl: bool,
     has_variadic: bool,
+    has_splat: bool,
 ) -> Attr {
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
     let is_systemlib = emitter.systemlib();
@@ -73,6 +74,7 @@ pub fn get_attrs_for_method(
     attrs.set(Attr::AttrReadonlyThis, method.readonly_this);
     attrs.set(Attr::AttrStatic, method.static_);
     attrs.set(Attr::AttrVariadicParam, has_variadic);
+    attrs.set(Attr::AttrSplatParam, has_splat);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs
 }
@@ -295,6 +297,7 @@ pub fn from_ast<'a, 'd>(
     flags.set(MethodFlags::IS_CLOSURE_BODY, is_closure_body);
 
     let has_variadic = emit_param::has_variadic(&body.repr.params);
+    let has_splat = emit_param::has_splat(&body.repr.params);
     body.attrs = get_attrs_for_method(
         emitter,
         method,
@@ -303,6 +306,7 @@ pub fn from_ast<'a, 'd>(
         class,
         is_memoize,
         has_variadic,
+        has_splat,
     );
     Ok(Method {
         visibility: Visibility::from(visibility),

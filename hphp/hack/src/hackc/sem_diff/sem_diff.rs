@@ -246,6 +246,7 @@ fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result
             Param {
                 name: a_name,
                 is_variadic: a_is_variadic,
+                is_splat: a_is_splat,
                 is_inout: a_is_inout,
                 is_readonly: a_is_readonly,
                 is_optional: a_is_optional,
@@ -259,6 +260,7 @@ fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result
             Param {
                 name: b_name,
                 is_variadic: b_is_variadic,
+                is_splat: b_is_splat,
                 is_inout: b_is_inout,
                 is_readonly: b_is_readonly,
                 is_optional: b_is_optional,
@@ -270,6 +272,7 @@ fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_eq(&path.qualified("is_variadic"), a_is_variadic, b_is_variadic)?;
+    sem_diff_eq(&path.qualified("is_splat"), a_is_splat, b_is_splat)?;
     sem_diff_eq(&path.qualified("is_inout"), a_is_inout, b_is_inout)?;
     sem_diff_eq(&path.qualified("is_readonly"), a_is_readonly, b_is_readonly)?;
     sem_diff_eq(&path.qualified("is_optional"), a_is_optional, b_is_optional)?;

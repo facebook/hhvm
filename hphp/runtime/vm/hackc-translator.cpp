@@ -1040,7 +1040,7 @@ void translateParameter(TranslationState& ts,
   auto& p = e.param;
   Func::ParamInfo param;
   translateUserAttributes(p.user_attributes, param.userAttributes);
-  if (p.is_variadic) {
+  if (p.is_variadic || p.is_splat) {
     assertx(ts.fe->attrs & AttrVariadicParam);
     param.setFlag(Func::ParamInfo::Flags::Variadic);
   }
@@ -1053,6 +1053,7 @@ void translateParameter(TranslationState& ts,
   }
   if (p.is_readonly) param.setFlag(Func::ParamInfo::Flags::Readonly);
   if (p.is_optional) param.setFlag(Func::ParamInfo::Flags::Optional);
+  if (p.is_splat) param.setFlag(Func::ParamInfo::Flags::Splat);
 
   TypeConstraint tc;
   std::tie(param.userType, tc) =  maybeOrElse(p.type_info,

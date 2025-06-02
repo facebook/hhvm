@@ -108,6 +108,8 @@ namespace HPHP {
   /* Traits have been flattened on this class. */                              \
   ATTR(NoExpandTrait, 12)                /*    X  |          |         */      \
                                          /*       |          |         */      \
+  /* Is this a type-splat parameter? */                                        \
+  ATTR(SplatParam, 12)                   /*       |          |    X    */      \
   /* Indicates that the class is not extended, or on a method that no          \
      extending class defines the method. Implies                               \
      AttrNoOverrideOverride for classes. */                                    \

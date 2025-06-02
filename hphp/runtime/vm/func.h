@@ -137,8 +137,9 @@ struct Func final {
       InOut,      // Is this an `inout' parameter?
       OutOnly,    // Is this an <<__OutOnly>> parameter? Implies InOut.
       Readonly,   // Is this a `readonly` parameter?
-      Variadic,   // Is this a `...' parameter?
+      Variadic,   // Is this a `t...' parameter or a `...t` parameter?
       Optional,   // Marked as `optional` in an abstract method
+      Splat,      // Is this a `...t` parameter? (Not set for variadic)
     };
 
     enum class BuiltinAbi : uint8_t {
@@ -159,6 +160,7 @@ struct Func final {
     bool isOutOnly() const;
     bool isReadonly() const;
     bool isVariadic() const;
+    bool isSplat() const;
     bool isOptional() const;
     void setFlag(Flags flag);
 
@@ -537,11 +539,16 @@ public:
   uint32_t numRequiredParams() const;
 
   /*
-   * Whether the function is declared with a `...' parameter.
+   * Whether the function is declared with a `...' parameter (variadic, or splat).
    */
   bool hasVariadicCaptureParam() const;
 
   /*
+   * Whether the function is declared with a `...T' parameter (splat).
+   */
+   bool hasSplatParam() const;
+
+   /*
    * Whether the arg-th parameter was declared inout.
    */
   bool isInOut(int32_t arg) const;

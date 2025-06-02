@@ -18,6 +18,7 @@ use crate::TypeInfo;
 pub struct Param {
     pub name: StringId,
     pub is_variadic: bool,
+    pub is_splat: bool,
     pub is_inout: bool,
     pub is_readonly: bool,
     pub is_optional: bool,

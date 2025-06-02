@@ -99,6 +99,10 @@ inline bool Func::ParamInfo::isVariadic() const {
   return flags & (1 << static_cast<int32_t>(Flags::Variadic));
 }
 
+inline bool Func::ParamInfo::isSplat() const {
+  return flags & (1 << static_cast<int32_t>(Flags::Splat));
+}
+
 inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
   flags |= 1 << static_cast<int32_t>(flag);
 }
@@ -408,6 +412,10 @@ inline bool Func::hasVariadicCaptureParam() const {
          (numParams() && params()[numParams() - 1].isVariadic()));
 #endif
   return m_attrs & AttrVariadicParam;
+}
+
+inline bool Func::hasSplatParam() const {
+  return m_attrs & AttrSplatParam;
 }
 
 inline uint64_t Func::inOutBits() const {

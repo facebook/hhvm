@@ -18,7 +18,6 @@
 #include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Runtime.h>
-#include <thrift/lib/cpp2/type/TypeRegistry.h>
 #include <thrift/lib/rust/any/tests/if/gen-cpp2/test_structs_types.h>
 #include <thrift/lib/rust/any/tests/src/cpp.h>
 // #include "icsp/lib/Compression.h"
@@ -36,9 +35,7 @@ std::unique_ptr<std::string> to_any(const std::string& compact_serialized_t) {
   // convert Basic to Any
   //
   apache::thrift::type::AnyStruct any =
-      apache::thrift::type::TypeRegistry::generated()
-          .store<apache::thrift::type::StandardProtocol::Compact>(t_obj)
-          .toThrift();
+      apache::thrift::type::AnyData::toAny(t_obj).toThrift();
   //
   // serialize Any to compact
   //
@@ -61,7 +58,7 @@ std::unique_ptr<std::string> from_any(const std::string& any) {
   // convert Any to T
   //
   T t_obj;
-  apache::thrift::type::TypeRegistry::generated().load(anydata, t_obj);
+  anydata.get(t_obj);
   //
   // serialize T to compact
   //

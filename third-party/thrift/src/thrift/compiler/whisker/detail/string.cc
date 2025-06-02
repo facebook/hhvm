@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <thrift/common/detail/string.h>
 #include <thrift/compiler/whisker/detail/string.h>
 
 namespace whisker::detail {
@@ -33,10 +32,6 @@ bool is_letter(char c) {
 
 bool is_digit(char c) {
   return c >= '0' && c <= '9';
-}
-
-std::string escape(std::string_view str) {
-  return apache::thrift::detail::escape(str);
 }
 
 } // namespace whisker::detail

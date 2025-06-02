@@ -18,7 +18,7 @@
 
 #include <folly/Portability.h>
 
-#if __has_include(<thrift/lib/thrift/gen-cpp2/schema_types.h>) && !defined(_WIN32)
+#if __has_include(<thrift/lib/thrift/gen-cpp2/schema_types.h>)
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #define THRIFT_SCHEMA_AVAILABLE
 

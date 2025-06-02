@@ -150,7 +150,7 @@ auto getFieldType(const OptionalTypeRef& type, FieldId id) {
 }
 
 // Change unprintable char to \xhh where hh is the hex value of the char.
-std::string escape(std::string_view s) {
+std::string escape_unprintable(std::string_view s) {
   std::string ret;
   for (char c : s) {
     if (std::isprint(c)) {
@@ -229,7 +229,7 @@ scope DebugTree<std::string>::operator()(
   if (buf.empty()) {
     return scope::make_root("\"\"");
   }
-  return scope::make_root("{}", escape(buf));
+  return scope::make_root("{}", escape_unprintable(buf));
 }
 
 scope DebugTree<folly::IOBuf>::operator()(

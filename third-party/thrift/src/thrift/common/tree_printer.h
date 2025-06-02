@@ -128,10 +128,4 @@ class scope {
 
 std::string to_string(const scope&);
 
-/**
- * Escapes a string of common special characters, making the output suitable for
- * printing within a tree.
- */
-std::string escape(std::string_view str);
-
 } // namespace apache::thrift::tree_printer

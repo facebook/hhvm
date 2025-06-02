@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/common/detail/string.h>
 #include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/print_ast.h>
 #include <thrift/compiler/whisker/tree_printer.h>
@@ -25,6 +26,7 @@
 namespace whisker {
 
 namespace {
+using apache::thrift::detail::escape;
 
 std::string to_string(
     const source_range& loc, const source_manager& src_manager) {
@@ -52,16 +54,10 @@ struct ast_visitor {
     scope.print("identifier '{}'", id.name);
   }
   void visit(const ast::text& text, tree_printer::scope& scope) const {
-    scope.print(
-        "text {} '{}'",
-        location(text.loc),
-        tree_printer::escape(text.joined()));
+    scope.print("text {} '{}'", location(text.loc), escape(text.joined()));
   }
   void visit(const ast::newline& newline, tree_printer::scope& scope) const {
-    scope.print(
-        "newline {} '{}'",
-        location(newline.loc),
-        tree_printer::escape(newline.text));
+    scope.print("newline {} '{}'", location(newline.loc), escape(newline.text));
   }
   void visit(
       const ast::section_block& section, tree_printer::scope& scope) const {
@@ -119,15 +115,11 @@ struct ast_visitor {
     if (const auto& indentation = macro.standalone_indentation_within_line;
         indentation.has_value()) {
       scope.make_child().print(
-          "standalone-indentation '{}'",
-          tree_printer::escape(indentation->value));
+          "standalone-indentation '{}'", escape(indentation->value));
     }
   }
   void visit(const ast::comment& comment, tree_printer::scope& scope) const {
-    scope.print(
-        "comment {} '{}'",
-        location(comment.loc),
-        tree_printer::escape(comment.text));
+    scope.print("comment {} '{}'", location(comment.loc), escape(comment.text));
   }
   void visit(
       const ast::variable_lookup& variable, tree_printer::scope& scope) const {
@@ -194,8 +186,7 @@ struct ast_visitor {
             partial_statement.standalone_indentation_within_line;
         indentation.has_value()) {
       scope.make_child().print(
-          "standalone-indentation '{}'",
-          tree_printer::escape(indentation->value));
+          "standalone-indentation '{}'", escape(indentation->value));
     }
     for (const auto& [name, arg] : partial_statement.named_arguments) {
       scope.make_child().print("argument '{}={}'", name, arg.value.to_string());

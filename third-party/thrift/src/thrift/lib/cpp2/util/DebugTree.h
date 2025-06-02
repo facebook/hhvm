@@ -18,6 +18,7 @@
 
 #include <folly/ExceptionString.h>
 #include <folly/logging/xlog.h>
+#include <thrift/common/detail/string.h>
 #include <thrift/common/tree_printer.h>
 #include <thrift/lib/cpp2/op/PatchTraits.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
@@ -300,6 +301,6 @@ tree_printer::scope debugTree(Args&&... args) try {
   auto msg = folly::exceptionStr(e);
   XLOG(DFATAL) << msg;
   return tree_printer::scope::make_root(
-      "[Failed to print, error: {}]", tree_printer::escape(msg));
+      "[Failed to print, error: {}]", apache::thrift::detail::escape(msg));
 }
 } // namespace apache::thrift::util

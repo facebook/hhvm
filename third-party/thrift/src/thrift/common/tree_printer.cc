@@ -100,8 +100,4 @@ std::string to_string(const scope& self) {
   return std::move(out).str();
 }
 
-std::string escape(std::string_view str) {
-  return detail::escape(str);
-}
-
 } // namespace apache::thrift::tree_printer

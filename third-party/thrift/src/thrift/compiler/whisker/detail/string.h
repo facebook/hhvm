@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
+#include <thrift/common/detail/string.h>
 
 // This file contains string-related helper functions commonly used throughout
 // Whisker's different layers: lexing, parsing, and evaluator.
@@ -28,10 +27,6 @@ bool is_whitespace(char c);
 bool is_letter(char c);
 bool is_digit(char c);
 
-/**
- * Escapes special characters in the input string view for displaying.
- * This includes new lines and other whitespace characters.
- */
-std::string escape(std::string_view str);
+using apache::thrift::detail::escape;
 
 } // namespace whisker::detail

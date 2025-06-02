@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/whisker/object.h>
 
+#include <thrift/common/detail/string.h>
 #include <thrift/compiler/whisker/detail/overload.h>
 
 #include <cassert>
@@ -30,6 +31,7 @@
 namespace whisker {
 
 namespace {
+using apache::thrift::detail::escape;
 
 std::string demangle(const std::type_info& type) {
   return boost::core::demangle(type.name());
@@ -77,7 +79,7 @@ class to_string_visitor {
 
   void visit(const std::string& value, tree_printer::scope& scope) const {
     require_within_max_depth(scope);
-    scope.print("'{}'", tree_printer::escape(value));
+    scope.print("'{}'", escape(value));
   }
 
   void visit(bool value, tree_printer::scope& scope) const {

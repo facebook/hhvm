@@ -13,7 +13,6 @@
 #include "watchman/query/Query.h"
 #include "watchman/query/QueryExpr.h"
 #include "watchman/query/TermRegistry.h"
-#include "watchman/watchman_system.h"
 
 #ifdef HAVE_PCRE_H
 

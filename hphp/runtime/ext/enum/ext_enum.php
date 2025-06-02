@@ -117,7 +117,7 @@ abstract class BuiltinAbstractEnumClass {
     return HH\FIXME\UNSAFE_CAST<mixed, string>(
       \__SystemLib\unwrap_opaque_value(
         \__SystemLib\OpaqueValueId::EnumClassLabel,
-        HH\FIXME\UNSAFE_CAST<mixed, resource>($atom),
+        HH\FIXME\UNSAFE_CAST<mixed, dynamic>($atom),
       )
     );
   }
@@ -154,7 +154,7 @@ abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass
   )[write_props]: MemberOf<TEnum, TType> {
     $key = \__SystemLib\unwrap_opaque_value(
       \__SystemLib\OpaqueValueId::EnumClassLabel,
-      HH\FIXME\UNSAFE_CAST<mixed, resource>($atom),
+      HH\FIXME\UNSAFE_CAST<mixed, dynamic>($atom),
     );
     return \__SystemLib\get_enum_member_by_label($key);
   }

@@ -20,7 +20,6 @@
 #include <memory>
 #include <queue>
 #include <set>
-#include <string_view>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -342,6 +341,18 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
     def.property("cpp_type", [&](const t_type& type) {
       return cpp_context_->resolver().get_native_type(type);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_typedef>::ptr make_prototype_for_typedef(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_typedef(proto);
+    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
+
+    def.property("cpp_type", [&](const t_typedef& t) {
+      return cpp_context_->resolver().get_underlying_type_name(t);
     });
 
     return std::move(def).make();
@@ -1354,28 +1365,6 @@ class cpp_mstch_type : public mstch_type {
     return name;
   }
   mstch::node use_op_encode() { return needs_op_encode(*type_); }
-
- private:
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
-};
-
-class cpp_mstch_typedef : public mstch_typedef {
- public:
-  cpp_mstch_typedef(
-      const t_typedef* t,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_typedef(t, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
-        this,
-        {
-            {"typedef:cpp_type", &cpp_mstch_typedef::cpp_type},
-        });
-  }
-  mstch::node cpp_type() {
-    return cpp_context_->resolver().get_underlying_type_name(*typedef_);
-  }
 
  private:
   std::shared_ptr<cpp2_generator_context> cpp_context_;
@@ -2502,7 +2491,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_interaction>(std::ref(source_mgr_));
   mstch_context_.add<cpp_mstch_function>(cpp_context_);
   mstch_context_.add<cpp_mstch_type>(cpp_context_);
-  mstch_context_.add<cpp_mstch_typedef>(cpp_context_);
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
   mstch_context_.add<cpp_mstch_const>(cpp_context_);

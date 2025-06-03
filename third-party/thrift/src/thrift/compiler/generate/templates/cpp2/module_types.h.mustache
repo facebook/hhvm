@@ -103,7 +103,7 @@ using ::apache::thrift::detail::operator>=;
 {{#program:structs_and_typedefs}}
 {{^is_struct?}}
 {{> common/typedef_docblock }}
-using {{typedef:name}} = {{typedef:cpp_type}};
+using {{typedef:name}} = {{typedef:self.cpp_type}};
 {{/is_struct?}}
 {{#is_struct?}}
 

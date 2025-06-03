@@ -20,12 +20,10 @@ from unittest.mock import Mock, patch
 import thrift.py3  # @manual
 from testing.clients import TestingService
 from testing.types import ListNode
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.testing import mock_client
 
 
 class TestTesting(IsolatedAsyncioTestCase):
-    @brokenInAutoMigrate()
     @patch("thrift.py3.get_client")
     async def test_mock_client(self, mock_get_client: Mock) -> None:
         mock_get_client.return_value = mock_client(TestingService)

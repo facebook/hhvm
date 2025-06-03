@@ -1136,6 +1136,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     get_binary_union_struct = Async.get_binary_union_struct
     # pyre-ignore[4]: Missing annotation.
     get_struct_hidden = Async.get_struct_hidden
+    async def __aenter__(self) -> "SimpleService.Async":
+        raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
+    async def __aexit__(self) -> None:
+        raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -2160,6 +2164,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
     
     # pyre-ignore[4]: Missing annotation.
     get_six = Async.get_six
+    async def __aenter__(self) -> "DerivedService.Async":
+        raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
+    async def __aexit__(self) -> None:
+        raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
     
     class Sync(SimpleService.Sync):
         @staticmethod
@@ -2254,6 +2262,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
     
     # pyre-ignore[4]: Missing annotation.
     get_seven = Async.get_seven
+    async def __aenter__(self) -> "RederivedService.Async":
+        raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
+    async def __aexit__(self) -> None:
+        raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
     
     class Sync(DerivedService.Sync):
         @staticmethod

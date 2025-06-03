@@ -27,10 +27,7 @@ import unittest
 
 from testing.clients import TestingService
 from testing.types import easy, I32List
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
-    brokenInAutoMigrate,
-    is_auto_migrated,
-)
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
@@ -261,6 +258,11 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(cm.exception.args[0], "from postWrite")
 
         loop.run_until_complete(test())
+
+    def test_mockability(self) -> None:
+        self.assertTrue(hasattr(TestingService, "getName"))
+        self.assertTrue(hasattr(TestingService, "__aenter__"))
+        self.assertTrue(hasattr(TestingService, "__aexit__"))
 
 
 class RpcOptionsTests(unittest.TestCase):

@@ -71,8 +71,8 @@ use std::process::ExitCode;
 use clap::Parser;
 use clap::ValueEnum;
 use nom::Err;
-use nom::error::VerboseError;
-use nom::error::convert_error;
+use nom_language::error::VerboseError;
+use nom_language::error::convert_error;
 
 #[derive(Debug, Clone, ValueEnum)]
 enum OutputType {

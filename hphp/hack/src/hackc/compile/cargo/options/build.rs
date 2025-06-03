@@ -7,8 +7,8 @@ use std::process::Command;
 use std::process::ExitCode;
 
 use nom::Err;
-use nom::error::VerboseError;
-use nom::error::convert_error;
+use nom_language::error::VerboseError;
+use nom_language::error::convert_error;
 
 fn rerun_if_changed<P: AsRef<Path>>(f: P) {
     println!("cargo:rerun-if-changed={}", f.as_ref().to_str().unwrap());

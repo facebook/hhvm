@@ -19,4 +19,5 @@ oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 
 [build-dependencies]
-nom = "7.1"
+nom = "8"
+nom-language = "0.1"

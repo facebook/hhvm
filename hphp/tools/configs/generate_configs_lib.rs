@@ -72,6 +72,7 @@ use std::path::PathBuf;
 use convert_case::Case;
 use convert_case::Casing;
 use nom::IResult;
+use nom::Parser as _;
 use nom::branch::alt;
 use nom::bytes::complete::escaped;
 use nom::bytes::complete::tag;
@@ -101,7 +102,6 @@ use nom::multi::many1;
 use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::sequence::preceded;
-use nom::sequence::tuple;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ConfigValue {
@@ -420,7 +420,8 @@ fn parse_type<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Co
             ),
             value(ConfigType::HphpFastStringSet, tag("hphp_fast_string_set")),
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_name<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -428,11 +429,9 @@ fn parse_name<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, &'a str, E> {
     context(
         "parse name",
-        recognize(tuple((
-            alphanumeric1,
-            many0(tuple((tag("_"), alphanumeric1))),
-        ))),
-    )(input)
+        recognize((alphanumeric1, many0((tag("_"), alphanumeric1)))),
+    )
+    .parse(input)
 }
 
 fn parse_name_with_dot<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -442,9 +441,10 @@ fn parse_name_with_dot<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         "parse name with dot",
         preceded(
             space0,
-            recognize(tuple((parse_name, many1(preceded(tag("."), parse_name))))),
+            recognize((parse_name, many1(preceded(tag("."), parse_name)))),
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_name_with_optional_dot<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -454,9 +454,10 @@ fn parse_name_with_optional_dot<'a, E: ParseError<&'a str> + ContextError<&'a st
         "parse name with optional dot",
         preceded(
             space0,
-            recognize(tuple((parse_name, many0(preceded(tag("."), parse_name))))),
+            recognize((parse_name, many0(preceded(tag("."), parse_name)))),
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_partial_name<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -466,9 +467,10 @@ fn parse_partial_name<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         "parse partial name",
         preceded(
             space0,
-            recognize(tuple((parse_name, many0(alt((tag("."), parse_name)))))),
+            recognize((parse_name, many0(alt((tag("."), parse_name))))),
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_string<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
@@ -476,56 +478,59 @@ fn parse_string<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, 
         tag("\""),
         opt(escaped(none_of(r#"\""#), '\\', one_of(r#"\""#))),
         tag("\""),
-    ))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_num<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
     alt((
         recognize(delimited(
-            tuple((space0, tag("("))),
+            (space0, tag("(")),
             parse_num_expr,
-            tuple((space0, tag(")"))),
+            (space0, tag(")")),
         )),
-        recognize(tuple((
+        recognize((
             space0,
             opt(alt((tag("-"), tag("+")))),
             alt((
                 tag("INT_MAX"),
                 tag("INT64_MAX"),
                 tag("UINT64_MAX"),
-                recognize(tuple((
+                recognize((
                     alt((
-                        recognize(tuple((digit1, opt(preceded(tag("."), digit1))))),
+                        recognize((digit1, opt(preceded(tag("."), digit1)))),
                         recognize(preceded(tag("."), digit1)),
                     )),
                     opt(alt((tag("LL"), tag("ll"), tag("ULL"), tag("ull")))),
-                ))),
+                )),
             )),
-        ))),
-    ))(input)
+        )),
+    ))
+    .parse(input)
 }
 
 fn parse_num_expr<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
-    recognize(tuple((
+    recognize((
         parse_num,
         opt(many0(preceded(
-            tuple((
+            (
                 space0,
                 alt((tag("*"), tag("+"), tag("-"), tag("/"), tag("<<"), tag(">>"))),
-            )),
+            ),
             parse_num,
         ))),
-    )))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_bool<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
-    recognize(alt((tag("true"), tag("false"))))(input)
+    recognize(alt((tag("true"), tag("false")))).parse(input)
 }
 
 fn parse_constant_value<'a, E: ParseError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, &'a str, E> {
-    alt((tag("{}"), parse_string, parse_num_expr, parse_bool))(input)
+    alt((tag("{}"), parse_string, parse_num_expr, parse_bool)).parse(input)
 }
 
 fn parse_value<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -536,7 +541,8 @@ fn parse_value<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         map(parse_name_with_dot, |v: &str| {
             ConfigValue::Name(v.to_string())
         }),
-    ))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_default_value<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -544,23 +550,22 @@ fn parse_default_value<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, Option<ConfigValue>, E> {
     context(
         "default value",
-        opt(preceded(
-            tuple((space0, tag("="), space1)),
-            cut(parse_value),
-        )),
-    )(input)
+        opt(preceded((space0, tag("="), space1), cut(parse_value))),
+    )
+    .parse(input)
 }
 
 fn parse_owner<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Option<&'a str>, E> {
     map(
-        preceded(tuple((space0, tag(","), space0)), alphanumeric1),
+        preceded((space0, tag(","), space0), alphanumeric1),
         |s: &str| {
             if s == "UNKNOWN" {
                 return None;
             }
             Some(s)
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -568,13 +573,13 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, ConfigFeatures, E> {
     map(
         opt(preceded(
-            tuple((space0, tag(","), space0)),
+            (space0, tag(","), space0),
             separated_list1(
                 tag("|"),
                 alt((
                     value(ConfigFeature::Private, tag("private")),
                     map(
-                        tuple((
+                        (
                             tag("globaldata"),
                             opt(delimited(
                                 tag("("),
@@ -584,7 +589,7 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                                 )),
                                 tag(")"),
                             )),
-                        )),
+                        ),
                         |(_, load)| {
                             ConfigFeature::GlobalData(load.unwrap_or(GlobalDataLoad::Always))
                         },
@@ -593,13 +598,10 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     map(
                         delimited(
                             tag("repooptionsflag("),
-                            tuple((
+                            (
                                 parse_name_with_optional_dot,
-                                opt(preceded(
-                                    tuple((space0, tag(","), space0)),
-                                    parse_constant_value,
-                                )),
-                            )),
+                                opt(preceded((space0, tag(","), space0), parse_constant_value)),
+                            ),
                             tag(")"),
                         ),
                         |(name, default_value)| {
@@ -630,16 +632,13 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     map(
                         delimited(
                             tag("hackc("),
-                            tuple((
+                            (
                                 alt((
                                     value(HackcFlagType::HHBC, tag("hhbc")),
                                     value(HackcFlagType::Parser, tag("parser")),
                                 )),
-                                opt(preceded(
-                                    tuple((space0, tag(","), space0)),
-                                    parse_constant_value,
-                                )),
-                            )),
+                                opt(preceded((space0, tag(","), space0), parse_constant_value)),
+                            ),
                             tag(")"),
                         ),
                         |(hackc_type, default_value)| {
@@ -682,7 +681,8 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             }
             features
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_description<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -700,7 +700,8 @@ fn parse_description<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             ),
             value(None, many0(newline)),
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_config<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -710,15 +711,15 @@ fn parse_config<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         "config",
         map(
             preceded(
-                tuple((opt(newline), tag("-"), space1)),
-                tuple((
+                (opt(newline), tag("-"), space1),
+                (
                     parse_type,
                     parse_name_with_dot,
                     parse_default_value,
                     parse_owner,
                     parse_features,
                     parse_description,
-                )),
+                ),
             ),
             |(type_, name, default_value, owner, features, description)| Config {
                 type_,
@@ -729,7 +730,8 @@ fn parse_config<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                 description,
             },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_section<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -738,19 +740,15 @@ fn parse_section<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     context(
         "section",
         map(
-            tuple((
+            (
                 preceded(
-                    tuple((opt(newline), tag("#"), space1)),
+                    (opt(newline), tag("#"), space1),
                     parse_name_with_optional_dot,
                 ),
-                opt(delimited(
-                    tuple((space1, tag("("))),
-                    parse_partial_name,
-                    tag(")"),
-                )),
+                opt(delimited((space1, tag("(")), parse_partial_name, tag(")"))),
                 parse_description,
                 many1(parse_config),
-            )),
+            ),
             |(name, prefix, description, configs)| ConfigSection {
                 name: name.to_string(),
                 prefix: prefix.map(|s| s.to_string()),
@@ -758,7 +756,8 @@ fn parse_section<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                 configs,
             },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 pub fn parse_option_doc<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -767,7 +766,8 @@ pub fn parse_option_doc<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     all_consuming(preceded(
         take_until("#"),
         map(many_till(parse_section, eof), |(cs, _r)| cs),
-    ))(input)
+    ))
+    .parse(input)
 }
 
 pub fn generate_defs(sections: Vec<ConfigSection>, output_dir: PathBuf) {
@@ -1761,7 +1761,7 @@ void InitHackcParserFlags(const RepoOptionsFlags& repo_flags, hackc::ParserFlags
 
 #[cfg(test)]
 mod test {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use super::*;
 

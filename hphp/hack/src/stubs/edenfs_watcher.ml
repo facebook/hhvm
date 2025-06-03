@@ -30,3 +30,7 @@ let get_changes_sync (_instance : instance) :
 let get_changes_async (_instance : instance) :
     (changes list * clock, edenfs_watcher_error) result =
   failwith "not implemented"
+
+let get_notification_fd (_instance : instance) :
+    (Caml_unix.file_descr, edenfs_watcher_error) result =
+  failwith "not implemented"

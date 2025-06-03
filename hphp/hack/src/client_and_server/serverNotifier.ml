@@ -259,10 +259,7 @@ let convert_edenfs_watcher_changes (eden_changes : Edenfs_watcher_types.changes)
     SSet.of_list file_changes
 
 let handle_edenfs_watcher_result
-    (result :
-      ( Edenfs_watcher_types.changes list * Edenfs_watcher.clock,
-        Edenfs_watcher_types.edenfs_watcher_error )
-      result) : SSet.t =
+    (result : ('t, Edenfs_watcher_types.edenfs_watcher_error) result) : 't =
   match result with
   | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
     Hh_logger.log "Edenfs_watcher failed with message: %s" msg;
@@ -273,9 +270,7 @@ let handle_edenfs_watcher_result
   | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
     Hh_logger.log "Edenfs_watcher has lost track of changes, reason: %s" reason;
     raise Exit_status.(Exit_with Edenfs_watcher_lost_changes)
-  | Result.Ok (changes, _clock) ->
-    List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-        SSet.union acc (convert_edenfs_watcher_changes c))
+  | Result.Ok value -> value
 
 let get_changes_sync (t : t) : SSet.t * clock option =
   let (changes, new_clock) =
@@ -311,12 +306,16 @@ let get_changes_sync (t : t) : SSet.t * clock option =
       (changes, Some (ServerNotifierTypes.Watchman clock))
     | EdenfsFileWatcher { instance; _ } ->
       (* Note that this will handle all errors by raising Exit_status *)
-      let changes =
+      let (changes, _clock) =
         handle_edenfs_watcher_result (Edenfs_watcher.get_changes_sync instance)
+      in
+      let changes_set =
+        List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+            SSet.union acc (convert_edenfs_watcher_changes c))
       in
       (* TODO(T215219438) We need to return a proper clock value here *)
       let new_clock = None in
-      (changes, new_clock)
+      (changes_set, new_clock)
   in
 
   if
@@ -365,12 +364,16 @@ let get_changes_async (t : t) : changes * clock option =
       (changes, Some (ServerNotifierTypes.Watchman clock))
     | EdenfsFileWatcher { instance; _ } ->
       (* Note that this will handle all errors by raising Exit_status *)
-      let changes =
+      let (changes, _clock) =
         handle_edenfs_watcher_result (Edenfs_watcher.get_changes_async instance)
+      in
+      let changes_set =
+        List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+            SSet.union acc (convert_edenfs_watcher_changes c))
       in
       (* TODO(T215219438) We need to return a proper clock value here *)
       let new_clock = None in
-      (AsyncChanges changes, new_clock)
+      (AsyncChanges changes_set, new_clock)
   in
 
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then begin
@@ -397,13 +400,22 @@ let get_changes_async (t : t) : changes * clock option =
   end;
   (changes, new_clock)
 
-let async_reader_opt (t : t) : Buffered_line_reader.t option =
+let notification_fd (t : t) : Caml_unix.file_descr option =
   match t with
   | Dfind _
   | IndexOnly _ ->
     None
   | MockChanges _ -> None
-  | Watchman { watchman; _ } -> Watchman.get_reader !watchman
-  | EdenfsFileWatcher _ ->
-    (* TODO(T224461142) Edenfs_watcher doesn't implement this, yet *)
-    None
+  | Watchman { watchman; _ } ->
+    Option.map (Watchman.get_reader !watchman) ~f:Buffered_line_reader.get_fd
+  | EdenfsFileWatcher { instance; _ } ->
+    let fd_res = Edenfs_watcher.get_notification_fd instance in
+    (* Note that this will handle all errors by raising Exit_status *)
+    let fd = handle_edenfs_watcher_result fd_res in
+    Some fd
+
+let maybe_changes_available (t : t) : bool option =
+  let fd_opt = notification_fd t in
+  Option.map fd_opt ~f:(fun fd ->
+      let (readable, _, _) = Caml_unix.select [fd] [] [] 0.0 in
+      not (List.is_empty readable))

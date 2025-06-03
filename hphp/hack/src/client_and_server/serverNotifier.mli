@@ -43,4 +43,13 @@ of changed files. This will raise an exception if the file watching service
 is unavailable *)
 val get_changes_sync : t -> SSet.t * clock option
 
-val async_reader_opt : t -> Buffered_line_reader.t option
+(** If supported by the backend, returns a file descriptor that can be used to
+    be notified about file system changes. The FD being read-ready is a
+    necessary condition for a subsequent call to `get_changes_{sync,async}`
+    returning any changes. Note that this FD must only be used to
+    `poll`/`select` on, but never actually read from. *)
+val notification_fd : t -> Caml_unix.file_descr option
+
+(** If supported by the backend, returns a value acting as a necessary condition
+    for a subsequent call to `get_changes_{sync,async}` returning any changes. *)
+val maybe_changes_available : t -> bool option

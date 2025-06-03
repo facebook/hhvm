@@ -213,8 +213,8 @@ let query_notifier
   in
   let (updates_stale, raw_updates) = unpack_updates raw_updates in
   let rec pump_async_updates acc acc_clock =
-    match ServerNotifier.async_reader_opt genv.notifier with
-    | Some reader when Buffered_line_reader.is_readable reader ->
+    match ServerNotifier.maybe_changes_available genv.notifier with
+    | Some true ->
       let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
       let (_, raw_updates) = unpack_updates changes in
       pump_async_updates (SSet.union acc raw_updates) clock
@@ -864,10 +864,9 @@ let setup_interrupts env client_provider =
         in
         let handlers = [] in
         let handlers =
-          match ServerNotifier.async_reader_opt genv.notifier with
-          | Some reader when interrupt_on_watchman ->
-            (Buffered_line_reader.get_fd reader, watchman_interrupt_handler genv)
-            :: handlers
+          match ServerNotifier.notification_fd genv.notifier with
+          | Some fd when interrupt_on_watchman ->
+            (fd, watchman_interrupt_handler genv) :: handlers
           | _ -> handlers
         in
         let handlers =

@@ -446,6 +446,7 @@ void binary_deserialize_slow(const Object& zthis,
                              int16_t fieldno,
                              TType ttype,
                              PHPInputTransport& transport,
+                             StrictUnionChecker& strictUnionChecker,
                              int options) {
   INC_TPC(thrift_read_slow);
   while (ttype != T_STOP) {
@@ -461,6 +462,7 @@ void binary_deserialize_slow(const Object& zthis,
           zthis->o_set(StrNR(fieldspec->name), rv, zthis->getClassName());
         }
         if (fieldspec->isUnion) {
+          strictUnionChecker.markFieldFound();
           zthis->o_set(s__type, Variant(fieldno), zthis->getClassName());
         }
       } else {
@@ -483,9 +485,10 @@ Object binary_deserialize_struct(const String& clsName,
   if (cls == nullptr) raise_error(Strings::UNKNOWN_CLASS, clsName.data());
 
   SpecHolder specHolder;
-  auto const& spec = specHolder.getSpec(cls);
-  Object dest = spec.newObject(cls);
-  spec.clearTerseFields(cls, dest);
+  auto const& spec = specHolder.getSpec(*cls);
+  StrictUnionChecker strictUnionChecker{spec.isStrictUnion};
+  Object dest = spec.newObject(*cls);
+  spec.clearTerseFields(*cls, dest);
 
   auto const& fields = spec.fields;
   const size_t numFields = fields.size();
@@ -493,7 +496,7 @@ Object binary_deserialize_struct(const String& clsName,
     TType fieldType = static_cast<TType>(transport.readBE<int8_t>());
     int16_t fieldNum = transport.readBE<int16_t>();
     binary_deserialize_slow(
-      dest, spec, fieldNum, fieldType, transport, options);
+      dest, spec, fieldNum, fieldType, transport, strictUnionChecker, options);
     return dest;
   }
   auto objProps = dest->props();
@@ -511,16 +514,17 @@ Object binary_deserialize_struct(const String& clsName,
         !ttypes_are_compatible(fieldType, fields[i].type)) {
       // Verify everything we've set so far
       binary_deserialize_slow(
-        dest, spec, fieldNum, fieldType, transport, options);
+        dest, spec, fieldNum, fieldType, transport, strictUnionChecker, options);
       return dest;
     }
     if (fields[i].isUnion) {
       if (s__type.equal(prop[numFields].name)) {
+        strictUnionChecker.markFieldFound();
         auto index = cls->propSlotToIndex(numFields);
         tvSetInt(fieldNum, objProps->at(index));
       } else {
         binary_deserialize_slow(
-          dest, spec, fieldNum, fieldType, transport, options);
+          dest, spec, fieldNum, fieldType, transport, strictUnionChecker, options);
         return dest;
       }
     }
@@ -695,11 +699,11 @@ void binary_serialize_slow(const FieldSpec& field_spec,
 }
 
 void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
-  Class* cls = obj->getVMClass();
-  auto prop = cls->declProperties().begin();
+  Class& cls = *obj->getVMClass();
+  auto prop = cls.declProperties().begin();
   obj->deserializeAllLazyProps();
   auto objProps = obj->props();
-  const size_t numProps = cls->numDeclProperties();
+  const size_t numProps = cls.numDeclProperties();
 
   SpecHolder specHolder;
   auto const& fields = specHolder.getSpec(cls).fields;
@@ -707,7 +711,7 @@ void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
   // Write each member
   for (int slot = 0; slot < numFields; ++slot) {
     if (slot < numProps && fields[slot].name == prop[slot].name) {
-      auto index = cls->propSlotToIndex(slot);
+      auto index = cls.propSlotToIndex(slot);
       VarNR fieldWrapper(objProps->at(index).tv());
       Variant fieldVal;
       TType fieldType = fields[slot].type;

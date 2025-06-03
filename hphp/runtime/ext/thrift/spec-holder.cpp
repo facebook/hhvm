@@ -47,14 +47,15 @@ const StaticString
   s_SPEC("SPEC"),
   s_isWrapped("is_wrapped"),
   s_isTypeWrapped("is_type_wrapped"),
-  s_isTerse("is_terse");
+  s_isTerse("is_terse"),
+  s_IThriftStrictUnion("IThriftStrictUnion");
 
-Array get_tspec(const Class* cls) {
-  auto lookup = cls->clsCnsGet(s_SPEC.get());
+Array get_tspec(const Class& cls) {
+  auto lookup = cls.clsCnsGet(s_SPEC.get());
   if (lookup.m_type == KindOfUninit) {
     thrift_error(
       folly::sformat("Class {} does not have a property named {}",
-                     cls->name(), s_SPEC),
+                     cls.name(), s_SPEC),
       ERR_INVALID_DATA);
   }
   Variant structSpec = tvAsVariant(&lookup);
@@ -129,17 +130,17 @@ bool typeSatisfiesConstraint(const TypeIntersectionConstraint& tc,
 
 const StaticString s_withDefaultValues("withDefaultValues");
 
-const Func* lookupWithDefaultValuesFunc(const Class* cls) {
-  auto const func = cls->lookupMethod(s_withDefaultValues.get());
+const Func* lookupWithDefaultValuesFunc(const Class& cls) {
+  auto const func = cls.lookupMethod(s_withDefaultValues.get());
   if (func == nullptr) {
     thrift_error(
-      folly::sformat("Method {}::withDefaultValues() not found", cls->name()),
+      folly::sformat("Method {}::withDefaultValues() not found", cls.name()),
       ERR_INVALID_DATA
     );
   }
   if (!func->isStatic()) {
     thrift_error(
-      folly::sformat("Method {}::withDefaultValues() not static", cls->name()),
+      folly::sformat("Method {}::withDefaultValues() not static", cls.name()),
       ERR_INVALID_DATA
     );
   }
@@ -148,22 +149,22 @@ const Func* lookupWithDefaultValuesFunc(const Class* cls) {
 
 const StaticString s_clearTerseFields("clearTerseFields");
 
-const Func* lookupClearTerseFieldsFunc(const Class* cls) {
-  auto const func = cls->lookupMethod(s_clearTerseFields.get());
+const Func* lookupClearTerseFieldsFunc(const Class& cls) {
+  auto const func = cls.lookupMethod(s_clearTerseFields.get());
   // We only add the function if it actually do something
   if (func == nullptr) {
     return nullptr;
   }
   if (func->isStatic()) {
     thrift_error(
-      folly::sformat("Method {}::clearTerseFields() is static", cls->name()),
+      folly::sformat("Method {}::clearTerseFields() is static", cls.name()),
       ERR_INVALID_DATA
     );
   }
   return func;
 }
 
-StructSpec compileSpec(const Array& spec, const Class* cls) {
+StructSpec compileSpec(const Array& spec, const Class& cls) {
   // A union field also writes to a property named __type. If one exists, we
   // need to also verify that it accepts integer values. We only need to do
   // this once, so cache it in the optional.
@@ -184,15 +185,15 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
       if (Cfg::Eval::CheckPropTypeHints <= 0) return true;
       // If the class isn't persistent, we can't elide any type checks
       // anyways, so set it to false pessimistically.
-      if (!classHasPersistentRDS(cls)) return false;
-      auto const slot = cls->lookupDeclProp(field.name);
+      if (!cls.isPersistent()) return false;
+      auto const slot = cls.lookupDeclProp(field.name);
       if (slot == kInvalidSlot) return false;
 
       if (field.isUnion) {
         if (!endPropOk) {
           endPropOk = [&] {
-            if (cls->numDeclProperties() < spec.size()) return false;
-            auto const& prop = cls->declProperties()[spec.size()];
+            if (cls.numDeclProperties() < spec.size()) return false;
+            auto const& prop = cls.declProperties()[spec.size()];
             if (!s__type.equal(prop.name)) return false;
             return prop.typeConstraints.alwaysPasses(KindOfInt64);
           }();
@@ -201,7 +202,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
       }
 
       return typeSatisfiesConstraint(
-        cls->declPropTypeConstraint(slot), field.type, fieldSpec);
+        cls.declPropTypeConstraint(slot), field.type, fieldSpec);
     }();
 
     temp[i] = std::move(field);
@@ -213,15 +214,21 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
 
   // We can precompute the cls::withDefaultValues() func pointer only if the
   // underlying class cannot change.
-  auto const withDefaultValuesFunc = cls != nullptr && cls->isPersistent()
+  auto const withDefaultValuesFunc = cls.isPersistent()
     ? lookupWithDefaultValuesFunc(cls) : nullptr;
 
   Optional<const Func*> clearTerseFieldsFunc;
-  if (cls != nullptr && cls->isPersistent()) {
+  if (cls.isPersistent()) {
     clearTerseFieldsFunc = { lookupClearTerseFieldsFunc(cls) };
   }
 
-  return StructSpec{HPHP::FixedVector(std::move(temp)), withDefaultValuesFunc, clearTerseFieldsFunc};
+  bool isStrictUnion{false};
+  auto interface = Class::load(s_IThriftStrictUnion.get());
+  if (interface != nullptr && cls.classof(interface) ) {
+    isStrictUnion = true;
+  }
+
+  return StructSpec{HPHP::FixedVector(std::move(temp)), withDefaultValuesFunc, clearTerseFieldsFunc, isStrictUnion};
 }
 
 } // namespace
@@ -279,15 +286,15 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
 }
 
 // The returned reference is valid at least while this SpecHolder is alive.
-const StructSpec& SpecHolder::getSpec(const Class* cls) {
-  auto const cacheable = classHasPersistentRDS(cls);
+const StructSpec& SpecHolder::getSpec(const Class& cls) {
+  auto const cacheable = cls.isPersistent();
   if (!cacheable) {
     const auto spec = get_tspec(cls);
-    m_tempSpec = compileSpec(spec, nullptr);
+    m_tempSpec = compileSpec(spec, cls);
     return m_tempSpec;
   }
 
-  auto specSlot = cls->getThriftData();
+  auto specSlot = cls.getThriftData();
   if (specSlot != nullptr) {
     auto const spec = specSlot->load(std::memory_order_acquire);
     if (spec) return *static_cast<StructSpec*>(spec);
@@ -306,7 +313,7 @@ const StructSpec& SpecHolder::getSpec(const Class* cls) {
     }
     return *static_cast<StructSpec*>(expected);
   } else {
-    m_tempSpec = compileSpec(spec, nullptr);
+    m_tempSpec = compileSpec(spec, cls);
     return m_tempSpec;
   }
 }
@@ -320,12 +327,12 @@ const FieldSpec* getFieldSlow(const StructSpec& spec, int16_t fieldNum) {
   return nullptr;
 }
 
-Object StructSpec::newObject(Class* cls) const {
+Object StructSpec::newObject(Class& cls) const {
   auto const func = withDefaultValuesFunc != nullptr
     ? withDefaultValuesFunc : lookupWithDefaultValuesFunc(cls);
 
   auto obj = g_context->invokeFuncFew(
-    func, cls, 0, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
+    func, &cls, 0, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
   if (tvIsObject(obj)) {
     return Object::attach(obj.m_data.pobj);
   }
@@ -334,13 +341,13 @@ Object StructSpec::newObject(Class* cls) const {
   thrift_error(
     folly::sformat(
       "Method {}::withDefaultValues() returned a non-object.",
-      cls->name()
+      cls.name()
     ),
     ERR_INVALID_DATA
   );
 }
 
-void StructSpec::clearTerseFields(Class* cls, const Object& obj) const {
+void StructSpec::clearTerseFields(const Class& cls, const Object& obj) const {
   auto const func = [&]{
     if (clearTerseFieldsFunc) {
       return *clearTerseFieldsFunc;

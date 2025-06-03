@@ -63,15 +63,16 @@ struct StructSpec {
   FixedVector<FieldSpec> fields;
   const Func* withDefaultValuesFunc;
   Optional<const Func*> clearTerseFieldsFunc;
+  bool isStrictUnion{false};
 
-  Object newObject(Class* cls) const;
-  void clearTerseFields(Class* cls, const Object& obj) const;
+  Object newObject(Class& cls) const;
+  void clearTerseFields(const Class& cls, const Object& obj) const;
 };
 
 // Provides safe access to specifications.
 struct SpecHolder {
   // The returned reference is valid at least while this SpecHolder is alive.
-  const StructSpec& getSpec(const Class* cls);
+  const StructSpec& getSpec(const Class& cls);
 
 private:
   // Non-static spec, or empty if source spec is static.

@@ -355,18 +355,18 @@ struct CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      Class* cls = obj->getVMClass();
+      Class& cls = *obj->getVMClass();
       SpecHolder specHolder;
       auto const& fields = specHolder.getSpec(cls).fields;
-      auto prop = cls->declProperties().begin();
+      auto prop = cls.declProperties().begin();
       obj->deserializeAllLazyProps();
       auto objProps = obj->props();
-      const size_t numProps = cls->numDeclProperties();
+      const size_t numProps = cls.numDeclProperties();
       const size_t numFields = fields.size();
       // Write each member
       for (int slot = 0; slot < numFields; ++slot) {
         if (slot < numProps && fields[slot].name == prop[slot].name) {
-          auto index = cls->propSlotToIndex(slot);
+          auto index = cls.propSlotToIndex(slot);
           Variant fieldVal;
           if (fields[slot].isWrapped) {
             fieldVal = getThriftType(obj, StrNR(fields[slot].name));
@@ -386,7 +386,7 @@ struct CompactWriter {
             }
             writeFieldBegin(fields[slot].fieldNum, fieldType);
             auto fieldInfo = FieldInfo();
-            fieldInfo.cls = cls;
+            fieldInfo.cls = &cls;
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
             writeFieldInternal(fieldVal, fields[slot], fieldType, fieldInfo);
@@ -745,7 +745,9 @@ struct CompactReader {
     void readStructSlow(const Object& dest,
                         const StructSpec& spec,
                         int16_t fieldNum,
-                        TType fieldType) {
+                        TType fieldType,
+                        StrictUnionChecker& strictUnionChecker 
+                      ) {
       INC_TPC(thrift_read_slow);
       while (fieldType != T_STOP) {
         bool readComplete = false;
@@ -766,6 +768,7 @@ struct CompactReader {
                 StrNR(fieldSpec->name), fieldValue, dest->getClassName());
             }
             if (fieldSpec->isUnion) {
+              strictUnionChecker.markFieldFound();
               dest->o_set(s__type, Variant(fieldNum), dest->getClassName());
             }
           }
@@ -787,9 +790,10 @@ struct CompactReader {
       if (cls == nullptr) raise_error(Strings::UNKNOWN_CLASS, clsName.data());
 
       SpecHolder specHolder;
-      auto const& spec = specHolder.getSpec(cls);
-      Object dest = spec.newObject(cls);
-      spec.clearTerseFields(cls, dest);
+      auto const& spec = specHolder.getSpec(*cls);
+      StrictUnionChecker strictUnionChecker{spec.isStrictUnion};
+      Object dest = spec.newObject(*cls);
+      spec.clearTerseFields(*cls, dest);
 
       readStructBegin();
       int16_t fieldNum;
@@ -799,7 +803,7 @@ struct CompactReader {
       auto const& fields = spec.fields;
       const size_t numFields = fields.size();
       if (cls->numDeclProperties() < numFields) {
-        readStructSlow(dest, spec, fieldNum, fieldType);
+        readStructSlow(dest, spec, fieldNum, fieldType, strictUnionChecker);
         return dest;
       }
       auto objProp = dest->props();
@@ -812,15 +816,16 @@ struct CompactReader {
         if (slot == numFields ||
             prop[slot].name != fields[slot].name ||
             !typesAreCompatible(fieldType, fields[slot].type)) {
-          readStructSlow(dest, spec, fieldNum, fieldType);
+          readStructSlow(dest, spec, fieldNum, fieldType, strictUnionChecker);
           return dest;
         }
         if (fields[slot].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
+            strictUnionChecker.markFieldFound();
             auto index = cls->propSlotToIndex(numFields);
             tvSetInt(fieldNum, objProp->at(index));
           } else {
-            readStructSlow(dest, spec, fieldNum, fieldType);
+            readStructSlow(dest, spec, fieldNum, fieldType, strictUnionChecker);
             return dest;
           }
         }

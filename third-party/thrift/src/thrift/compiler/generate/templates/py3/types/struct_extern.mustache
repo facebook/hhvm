@@ -33,10 +33,10 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#struct:union?}}
-    cdef enum {{> types/c_struct }}__type "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
-        {{> types/c_struct }}__type___EMPTY__ "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::__EMPTY__",
+    cdef enum class {{> types/c_struct }}__type "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
+        __EMPTY__,
     {{#struct:py3_fields}}
-        {{> types/c_struct }}__type_{{field:py_name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::{{field:cppName}}",
+        {{field:py_name}},
     {{/struct:py3_fields}}
     {{/struct:union?}}
 

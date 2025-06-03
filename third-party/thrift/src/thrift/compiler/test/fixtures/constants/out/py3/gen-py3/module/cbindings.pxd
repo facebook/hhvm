@@ -143,10 +143,10 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types_
         __optional_field_ref[double] b_ref "b_ref" ()
         __optional_field_ref[cint8_t] c_ref "c_ref" ()
 
-    cdef enum cunion1__type "::cpp2::union1::Type":
-        cunion1__type___EMPTY__ "::cpp2::union1::Type::__EMPTY__",
-        cunion1__type_i "::cpp2::union1::Type::i",
-        cunion1__type_d "::cpp2::union1::Type::d",
+    cdef enum class cunion1__type "::cpp2::union1::Type":
+        __EMPTY__,
+        i,
+        d,
 
     cdef cppclass cunion1 "::cpp2::union1":
         cunion1() except +
@@ -163,12 +163,12 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types_
         const double& get_d "get_d" () const
         double& set_d "set_d" (const double&)
 
-    cdef enum cunion2__type "::cpp2::union2::Type":
-        cunion2__type___EMPTY__ "::cpp2::union2::Type::__EMPTY__",
-        cunion2__type_i "::cpp2::union2::Type::i",
-        cunion2__type_d "::cpp2::union2::Type::d",
-        cunion2__type_s "::cpp2::union2::Type::s",
-        cunion2__type_u "::cpp2::union2::Type::u",
+    cdef enum class cunion2__type "::cpp2::union2::Type":
+        __EMPTY__,
+        i,
+        d,
+        s,
+        u,
 
     cdef cppclass cunion2 "::cpp2::union2":
         cunion2() except +

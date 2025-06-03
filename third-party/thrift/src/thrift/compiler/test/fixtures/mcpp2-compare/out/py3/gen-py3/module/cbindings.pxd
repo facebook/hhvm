@@ -424,10 +424,10 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         __field_ref[_fbthrift_iobuf.cIOBuf] MyCustomField_ref "MyCustomField_ref" ()
         __optional_field_ref[_fbthrift_iobuf.cIOBuf] MyOptCustomField_ref "MyOptCustomField_ref" ()
 
-    cdef enum cSimpleUnion__type "::some::valid::ns::SimpleUnion::Type":
-        cSimpleUnion__type___EMPTY__ "::some::valid::ns::SimpleUnion::Type::__EMPTY__",
-        cSimpleUnion__type_intValue "::some::valid::ns::SimpleUnion::Type::intValue",
-        cSimpleUnion__type_stringValue "::some::valid::ns::SimpleUnion::Type::stringValue",
+    cdef enum class cSimpleUnion__type "::some::valid::ns::SimpleUnion::Type":
+        __EMPTY__,
+        intValue,
+        stringValue,
 
     cdef cppclass cSimpleUnion "::some::valid::ns::SimpleUnion":
         cSimpleUnion() except +
@@ -444,36 +444,36 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         const string& get_stringValue "get_stringValue" () const
         string& set_stringValue "set_stringValue" (const string&)
 
-    cdef enum cComplexUnion__type "::some::valid::ns::ComplexUnion::Type":
-        cComplexUnion__type___EMPTY__ "::some::valid::ns::ComplexUnion::Type::__EMPTY__",
-        cComplexUnion__type_intValue "::some::valid::ns::ComplexUnion::Type::intValue",
-        cComplexUnion__type_opt_intValue "::some::valid::ns::ComplexUnion::Type::opt_intValue",
-        cComplexUnion__type_stringValue "::some::valid::ns::ComplexUnion::Type::stringValue",
-        cComplexUnion__type_opt_stringValue "::some::valid::ns::ComplexUnion::Type::opt_stringValue",
-        cComplexUnion__type_intValue2 "::some::valid::ns::ComplexUnion::Type::intValue2",
-        cComplexUnion__type_intValue3 "::some::valid::ns::ComplexUnion::Type::intValue3",
-        cComplexUnion__type_doubelValue "::some::valid::ns::ComplexUnion::Type::doubelValue",
-        cComplexUnion__type_boolValue "::some::valid::ns::ComplexUnion::Type::boolValue",
-        cComplexUnion__type_union_list "::some::valid::ns::ComplexUnion::Type::union_list",
-        cComplexUnion__type_union_set "::some::valid::ns::ComplexUnion::Type::union_set",
-        cComplexUnion__type_union_map "::some::valid::ns::ComplexUnion::Type::union_map",
-        cComplexUnion__type_opt_union_map "::some::valid::ns::ComplexUnion::Type::opt_union_map",
-        cComplexUnion__type_enum_field "::some::valid::ns::ComplexUnion::Type::enum_field",
-        cComplexUnion__type_enum_container "::some::valid::ns::ComplexUnion::Type::enum_container",
-        cComplexUnion__type_a_struct "::some::valid::ns::ComplexUnion::Type::a_struct",
-        cComplexUnion__type_a_set_struct "::some::valid::ns::ComplexUnion::Type::a_set_struct",
-        cComplexUnion__type_a_union "::some::valid::ns::ComplexUnion::Type::a_union",
-        cComplexUnion__type_opt_a_union "::some::valid::ns::ComplexUnion::Type::opt_a_union",
-        cComplexUnion__type_a_union_list "::some::valid::ns::ComplexUnion::Type::a_union_list",
-        cComplexUnion__type_a_union_typedef "::some::valid::ns::ComplexUnion::Type::a_union_typedef",
-        cComplexUnion__type_a_union_typedef_list "::some::valid::ns::ComplexUnion::Type::a_union_typedef_list",
-        cComplexUnion__type_MyBinaryField "::some::valid::ns::ComplexUnion::Type::MyBinaryField",
-        cComplexUnion__type_MyBinaryField2 "::some::valid::ns::ComplexUnion::Type::MyBinaryField2",
-        cComplexUnion__type_MyBinaryListField4 "::some::valid::ns::ComplexUnion::Type::MyBinaryListField4",
-        cComplexUnion__type_ref_field "::some::valid::ns::ComplexUnion::Type::ref_field",
-        cComplexUnion__type_ref_field2 "::some::valid::ns::ComplexUnion::Type::ref_field2",
-        cComplexUnion__type_excp_field "::some::valid::ns::ComplexUnion::Type::excp_field",
-        cComplexUnion__type_MyCustomField "::some::valid::ns::ComplexUnion::Type::MyCustomField",
+    cdef enum class cComplexUnion__type "::some::valid::ns::ComplexUnion::Type":
+        __EMPTY__,
+        intValue,
+        opt_intValue,
+        stringValue,
+        opt_stringValue,
+        intValue2,
+        intValue3,
+        doubelValue,
+        boolValue,
+        union_list,
+        union_set,
+        union_map,
+        opt_union_map,
+        enum_field,
+        enum_container,
+        a_struct,
+        a_set_struct,
+        a_union,
+        opt_a_union,
+        a_union_list,
+        a_union_typedef,
+        a_union_typedef_list,
+        MyBinaryField,
+        MyBinaryField2,
+        MyBinaryListField4,
+        ref_field,
+        ref_field2,
+        excp_field,
+        MyCustomField,
 
     cdef cppclass cComplexUnion "::some::valid::ns::ComplexUnion":
         cComplexUnion() except +
@@ -731,10 +731,10 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         __field_ref[float] floatField_ref "floatField_ref" ()
         __field_ref[double] doubleField_ref "doubleField_ref" ()
 
-    cdef enum cFloatUnion__type "::some::valid::ns::FloatUnion::Type":
-        cFloatUnion__type___EMPTY__ "::some::valid::ns::FloatUnion::Type::__EMPTY__",
-        cFloatUnion__type_floatSide "::some::valid::ns::FloatUnion::Type::floatSide",
-        cFloatUnion__type_doubleSide "::some::valid::ns::FloatUnion::Type::doubleSide",
+    cdef enum class cFloatUnion__type "::some::valid::ns::FloatUnion::Type":
+        __EMPTY__,
+        floatSide,
+        doubleSide,
 
     cdef cppclass cFloatUnion "::some::valid::ns::FloatUnion":
         cFloatUnion() except +

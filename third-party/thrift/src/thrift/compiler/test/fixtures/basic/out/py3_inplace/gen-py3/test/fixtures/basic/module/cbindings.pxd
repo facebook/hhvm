@@ -100,12 +100,12 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_cust
         bint operator<=(cMyDataItem&)
         bint operator>=(cMyDataItem&)
 
-    cdef enum cMyUnion__type "::test::fixtures::basic::MyUnion::Type":
-        cMyUnion__type___EMPTY__ "::test::fixtures::basic::MyUnion::Type::__EMPTY__",
-        cMyUnion__type_myEnum "::test::fixtures::basic::MyUnion::Type::myEnum",
-        cMyUnion__type_myStruct "::test::fixtures::basic::MyUnion::Type::myStruct",
-        cMyUnion__type_myDataItem "::test::fixtures::basic::MyUnion::Type::myDataItem",
-        cMyUnion__type_floatSet "::test::fixtures::basic::MyUnion::Type::floatSet",
+    cdef enum class cMyUnion__type "::test::fixtures::basic::MyUnion::Type":
+        __EMPTY__,
+        myEnum,
+        myStruct,
+        myDataItem,
+        floatSet,
 
     cdef cppclass cMyUnion "::test::fixtures::basic::MyUnion":
         cMyUnion() except +
@@ -168,9 +168,9 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_cust
         bint operator>=(cReservedKeyword&)
         __field_ref[cint32_t] reserved_field_ref "reserved_field_ref" ()
 
-    cdef enum cUnionToBeRenamed__type "::test::fixtures::basic::UnionToBeRenamed::Type":
-        cUnionToBeRenamed__type___EMPTY__ "::test::fixtures::basic::UnionToBeRenamed::Type::__EMPTY__",
-        cUnionToBeRenamed__type_reserved_field "::test::fixtures::basic::UnionToBeRenamed::Type::reserved_field",
+    cdef enum class cUnionToBeRenamed__type "::test::fixtures::basic::UnionToBeRenamed::Type":
+        __EMPTY__,
+        reserved_field,
 
     cdef cppclass cUnionToBeRenamed "::test::fixtures::basic::UnionToBeRenamed":
         cUnionToBeRenamed() except +

@@ -44,14 +44,14 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_me
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-    cdef enum cComplexUnion__type "::cpp2::ComplexUnion::Type":
-        cComplexUnion__type___EMPTY__ "::cpp2::ComplexUnion::Type::__EMPTY__",
-        cComplexUnion__type_intValue "::cpp2::ComplexUnion::Type::intValue",
-        cComplexUnion__type_stringValue "::cpp2::ComplexUnion::Type::stringValue",
-        cComplexUnion__type_intListValue "::cpp2::ComplexUnion::Type::intListValue",
-        cComplexUnion__type_stringListValue "::cpp2::ComplexUnion::Type::stringListValue",
-        cComplexUnion__type_typedefValue "::cpp2::ComplexUnion::Type::typedefValue",
-        cComplexUnion__type_stringRef "::cpp2::ComplexUnion::Type::stringRef",
+    cdef enum class cComplexUnion__type "::cpp2::ComplexUnion::Type":
+        __EMPTY__,
+        intValue,
+        stringValue,
+        intListValue,
+        stringListValue,
+        typedefValue,
+        stringRef,
 
     cdef cppclass cComplexUnion "::cpp2::ComplexUnion":
         cComplexUnion() except +
@@ -76,10 +76,10 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_ty
         const unique_ptr[string]& get_stringRef "get_stringRef" () const
         unique_ptr[string]& set_stringRef "set_stringRef" (const string&)
 
-    cdef enum cListUnion__type "::cpp2::ListUnion::Type":
-        cListUnion__type___EMPTY__ "::cpp2::ListUnion::Type::__EMPTY__",
-        cListUnion__type_intListValue "::cpp2::ListUnion::Type::intListValue",
-        cListUnion__type_stringListValue "::cpp2::ListUnion::Type::stringListValue",
+    cdef enum class cListUnion__type "::cpp2::ListUnion::Type":
+        __EMPTY__,
+        intListValue,
+        stringListValue,
 
     cdef cppclass cListUnion "::cpp2::ListUnion":
         cListUnion() except +
@@ -96,10 +96,10 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_ty
         const vector[string]& get_stringListValue "get_stringListValue" () const
         vector[string]& set_stringListValue "set_stringListValue" (const vector[string]&)
 
-    cdef enum cDataUnion__type "::cpp2::DataUnion::Type":
-        cDataUnion__type___EMPTY__ "::cpp2::DataUnion::Type::__EMPTY__",
-        cDataUnion__type_binaryData "::cpp2::DataUnion::Type::binaryData",
-        cDataUnion__type_stringData "::cpp2::DataUnion::Type::stringData",
+    cdef enum class cDataUnion__type "::cpp2::DataUnion::Type":
+        __EMPTY__,
+        binaryData,
+        stringData,
 
     cdef cppclass cDataUnion "::cpp2::DataUnion":
         cDataUnion() except +
@@ -130,10 +130,10 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_ty
         __field_ref[cint32_t] intVal_ref "intVal_ref" ()
         __field_ref[cmap[cint16_t,string]] typedefValue_ref "typedefValue_ref" ()
 
-    cdef enum cValUnion__type "::cpp2::ValUnion::Type":
-        cValUnion__type___EMPTY__ "::cpp2::ValUnion::Type::__EMPTY__",
-        cValUnion__type_v1 "::cpp2::ValUnion::Type::v1",
-        cValUnion__type_v2 "::cpp2::ValUnion::Type::v2",
+    cdef enum class cValUnion__type "::cpp2::ValUnion::Type":
+        __EMPTY__,
+        v1,
+        v2,
 
     cdef cppclass cValUnion "::cpp2::ValUnion":
         cValUnion() except +
@@ -150,10 +150,10 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_ty
         const cVal& get_v2 "get_v2" () const
         cVal& set_v2 "set_v2" (const cVal&)
 
-    cdef enum cVirtualComplexUnion__type "::cpp2::VirtualComplexUnion::Type":
-        cVirtualComplexUnion__type___EMPTY__ "::cpp2::VirtualComplexUnion::Type::__EMPTY__",
-        cVirtualComplexUnion__type_thingOne "::cpp2::VirtualComplexUnion::Type::thingOne",
-        cVirtualComplexUnion__type_thingTwo "::cpp2::VirtualComplexUnion::Type::thingTwo",
+    cdef enum class cVirtualComplexUnion__type "::cpp2::VirtualComplexUnion::Type":
+        __EMPTY__,
+        thingOne,
+        thingTwo,
 
     cdef cppclass cVirtualComplexUnion "::cpp2::VirtualComplexUnion":
         cVirtualComplexUnion() except +
@@ -181,9 +181,9 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_ty
         bint operator>=(cNonCopyableStruct&)
         __field_ref[cint64_t] num_ref "num_ref" ()
 
-    cdef enum cNonCopyableUnion__type "::cpp2::NonCopyableUnion::Type":
-        cNonCopyableUnion__type___EMPTY__ "::cpp2::NonCopyableUnion::Type::__EMPTY__",
-        cNonCopyableUnion__type_s "::cpp2::NonCopyableUnion::Type::s",
+    cdef enum class cNonCopyableUnion__type "::cpp2::NonCopyableUnion::Type":
+        __EMPTY__,
+        s,
 
     cdef cppclass cNonCopyableUnion "::cpp2::NonCopyableUnion":
         cNonCopyableUnion() except +

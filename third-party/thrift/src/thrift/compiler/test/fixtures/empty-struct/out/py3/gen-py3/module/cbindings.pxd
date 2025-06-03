@@ -55,8 +55,8 @@ cdef extern from "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_typ
         bint operator<=(cEmpty&)
         bint operator>=(cEmpty&)
 
-    cdef enum cNada__type "::cpp2::Nada::Type":
-        cNada__type___EMPTY__ "::cpp2::Nada::Type::__EMPTY__",
+    cdef enum class cNada__type "::cpp2::Nada::Type":
+        __EMPTY__,
 
     cdef cppclass cNada "::cpp2::Nada":
         cNada() except +

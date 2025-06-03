@@ -407,9 +407,9 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_cust
         __field_ref[string] cdef__ref "cdef_ref" ()
         __field_ref[foo_Bar] bytes_with_cpp_type_ref "bytes_with_cpp_type_ref" ()
 
-    cdef enum cBinaryUnion__type "::py3::simple::BinaryUnion::Type":
-        cBinaryUnion__type___EMPTY__ "::py3::simple::BinaryUnion::Type::__EMPTY__",
-        cBinaryUnion__type_iobuf_val "::py3::simple::BinaryUnion::Type::iobuf_val",
+    cdef enum class cBinaryUnion__type "::py3::simple::BinaryUnion::Type":
+        __EMPTY__,
+        iobuf_val,
 
     cdef cppclass cBinaryUnion "::py3::simple::BinaryUnion":
         cBinaryUnion() except +

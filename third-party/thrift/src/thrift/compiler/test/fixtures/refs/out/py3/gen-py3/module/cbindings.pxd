@@ -55,10 +55,10 @@ cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h"
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-    cdef enum cMyUnion__type "::cpp2::MyUnion::Type":
-        cMyUnion__type___EMPTY__ "::cpp2::MyUnion::Type::__EMPTY__",
-        cMyUnion__type_anInteger "::cpp2::MyUnion::Type::anInteger",
-        cMyUnion__type_aString "::cpp2::MyUnion::Type::aString",
+    cdef enum class cMyUnion__type "::cpp2::MyUnion::Type":
+        __EMPTY__,
+        anInteger,
+        aString,
 
     cdef cppclass cMyUnion "::cpp2::MyUnion":
         cMyUnion() except +
@@ -75,9 +75,9 @@ cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custo
         const unique_ptr[string]& get_aString "get_aString" () const
         unique_ptr[string]& set_aString "set_aString" (const string&)
 
-    cdef enum cNonTriviallyDestructibleUnion__type "::cpp2::NonTriviallyDestructibleUnion::Type":
-        cNonTriviallyDestructibleUnion__type___EMPTY__ "::cpp2::NonTriviallyDestructibleUnion::Type::__EMPTY__",
-        cNonTriviallyDestructibleUnion__type_int_field "::cpp2::NonTriviallyDestructibleUnion::Type::int_field",
+    cdef enum class cNonTriviallyDestructibleUnion__type "::cpp2::NonTriviallyDestructibleUnion::Type":
+        __EMPTY__,
+        int_field,
 
     cdef cppclass cNonTriviallyDestructibleUnion "::cpp2::NonTriviallyDestructibleUnion":
         cNonTriviallyDestructibleUnion() except +

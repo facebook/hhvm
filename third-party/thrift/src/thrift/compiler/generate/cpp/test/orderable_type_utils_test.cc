@@ -365,9 +365,13 @@ TEST(
     CustomSetOrderabilityWithUriButPreservedOldBehavior) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr, kHeaderWithUri + kOrderabilityTestProgram, {}, {});
+      source_mgr,
+      kHeaderWithUri + kOrderabilityTestProgram,
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = false});
   checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
 }
+
 TEST(
     OrderableTypeUtilsTest,
     CustomSetOrderabilityWithUriButPreservedOldBehaviorSkipLoweringCppTypeAnnotations) {
@@ -375,8 +379,8 @@ TEST(
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kHeaderWithUri + kOrderabilityTestProgram,
-      {},
-      {.skip_lowering_cpp_type_annotations = true});
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
 }
 
@@ -442,7 +446,10 @@ void checkCustomSetOrderabilityWithUri(const t_program& program) {
 TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithUri) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr, kHeaderWithUri + kOrderabilityTestProgram, {}, {});
+      source_mgr,
+      kHeaderWithUri + kOrderabilityTestProgram,
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = false});
   checkCustomSetOrderabilityWithUri(*program);
 }
 TEST(
@@ -452,8 +459,8 @@ TEST(
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kHeaderWithUri + kOrderabilityTestProgram,
-      {},
-      {.skip_lowering_cpp_type_annotations = true});
+      parsing_params{},
+      sema_params{.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithUri(*program);
 }
 
@@ -461,65 +468,75 @@ namespace {
 const std::string kOrderabilityTestProgram2 = R"(
 include "thrift/annotation/cpp.thrift"
 
-struct TestStruct {
+struct TestStructAlwaysOrderable {
   1: i32 a;
   2: set<i32> b;
 }
 
-union TestUnion {
+union TestUnionAlwaysOrderable {
   1: i32 c;
   2: string d;
 }
 
+// This struct contains a field with a custom set, but has neither implicit nor
+// explicit ordering are enable, and therefore is not orderable.
 struct TestStructCustomTypeNoOrdering {
   @cpp.Type{template = "MyCustomType"}
   1: set<i32> e;
 }
 
+// This struct contains a field with a custom set, and
+// @cpp.EnableCustomTypeOrdering is explicitly enabled, so it is orderable.
 @cpp.EnableCustomTypeOrdering
 struct TestStructCustomTypeOrderingExplicitlyEnabled {
   @cpp.Type{template = "MyCustomType"}
   1: set<i32> e;
 }
 
+// This struct contains a field with a custom set, and a URI, so it is
+// orderable iff implicit orderability of types with URIs is enabled (this is
+// being deprecated).
 @thrift.Uri{value = "apache.org/thrift/TestStructCustomTypeOrderingImplicitlyEnabled"}
 struct TestStructCustomTypeOrderingImplicitlyEnabled {
   @cpp.Type{template = "MyCustomType"}
   1: set<i32> e;
 }
 
-typedef set<i32> NonCustomSet
+// ----------------------------------------------------------------------------
+// Same structs as above, but with typedef fields
+
+typedef set<i32> NonCustomSetTypedef
 
 @cpp.Type{template = "MyCustomType"}
-typedef NonCustomSet CustomSet
+typedef NonCustomSetTypedef CustomSetTypedef
 
-typedef CustomSet AliasToCustomSet
+typedef CustomSetTypedef AliasToCustomSetTypedef
 
 struct TestStructTypedefNonCustomSet {
-  1: NonCustomSet a;
+  1: NonCustomSetTypedef a;
 }
 
 struct TestStructTypedefCustomSet {
-  1: CustomSet a;
+  1: CustomSetTypedef a;
 }
 
 struct TestStructTypedefAliasToCustomSet {
-  1: AliasToCustomSet a;
+  1: AliasToCustomSetTypedef a;
 }
 
 struct TestStructTypedefNonCustomSetWithCppType {
   @cpp.Type{template = "MyCustomType"}
-  1: NonCustomSet a;
+  1: NonCustomSetTypedef a;
 }
 
 @thrift.Uri{value = "apache.org/thrift/TestStructTypedefCustomSetWithUri"}
 struct TestStructTypedefCustomSetWithUri {
-  1: CustomSet a;
+  1: CustomSetTypedef a;
 }
 
 @cpp.EnableCustomTypeOrdering
 struct TestStructTypedefCustomSetWithAnnotation {
-  1: CustomSet a;
+  1: CustomSetTypedef a;
 }
 )";
 } // namespace
@@ -527,14 +544,14 @@ struct TestStructTypedefCustomSetWithAnnotation {
 void checkGetOrderableCondition(const t_program& program) {
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStruct"),
+          get_structured_named(program, "TestStructAlwaysOrderable"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
       OrderableTypeUtils::StructuredOrderableCondition::Always);
 
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestUnion"),
+          get_structured_named(program, "TestUnionAlwaysOrderable"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
       OrderableTypeUtils::StructuredOrderableCondition::Always);

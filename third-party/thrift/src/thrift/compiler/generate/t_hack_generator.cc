@@ -204,7 +204,8 @@ class t_hack_generator : public t_concat_generator {
       bool immutable_collections,
       bool ignore_wrapper,
       bool structured_annotations,
-      bool force_arrays);
+      bool force_arrays,
+      bool exclude_from_fixtures = false);
   std::string render_default_value(const t_type* type);
 
   /**
@@ -1863,7 +1864,8 @@ void t_hack_generator::generate_const(const t_const* tconst) {
                     /*immutable_collections*/ true,
                     /*ignore_wrapper*/ false,
                     /*structured_annotations*/ false,
-                    /*force_arrays*/ false)
+                    /*force_arrays*/ false,
+                    /*exclude_from_fixtures*/ tconst->generated())
              << ";\n";
 
   f_consts_ << consts_temp_var_initializations_out.str();
@@ -1942,7 +1944,8 @@ std::string t_hack_generator::render_const_value_helper(
     bool immutable_collections,
     bool ignore_wrapper,
     bool structured_annotations,
-    bool force_arrays) {
+    bool force_arrays,
+    bool exclude_from_fixtures) {
   std::ostringstream out;
   if (const auto* ttypedef = dynamic_cast<const t_placeholder_typedef*>(type)) {
     type = ttypedef->get_type();
@@ -1973,6 +1976,9 @@ std::string t_hack_generator::render_const_value_helper(
   }
 
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
+    auto exclude_delimiter =
+        exclude_from_fixtures ? "/*@fbthrift_strip_from_fixtures*/" : "";
+    out << exclude_delimiter;
     switch (tbase_type->primitive_type()) {
       case t_primitive_type::TYPE_STRING:
       case t_primitive_type::TYPE_BINARY:
@@ -2004,6 +2010,7 @@ std::string t_hack_generator::render_const_value_helper(
             "compiler error: no const of base type " +
             t_primitive_type::t_primitive_name(tbase_type->primitive_type()));
     }
+    out << exclude_delimiter;
   } else if (const auto* tenum = dynamic_cast<const t_enum*>(type)) {
     const t_enum_value* val = tenum->find_value(value->get_integer());
     if (val != nullptr) {

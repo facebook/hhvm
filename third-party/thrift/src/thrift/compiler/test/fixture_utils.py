@@ -349,6 +349,8 @@ def apply_postprocessing(
     Args:
         fixture_output_root_dir_abspath: The root directory of the fixture outputs.
     """
+    DELIMITER = "@fbthrift_strip_from_fixtures"
+
     for root, _, files in os.walk(fixture_output_root_dir_abspath):
         for file in files:
             file_path = Path(root) / file
@@ -356,8 +358,11 @@ def apply_postprocessing(
                 changed = False
                 content = f.readlines()
                 for i, line in enumerate(content):
-                    if "@fbthrift_strip_from_fixtures" in line:
-                        parts = line.split("@fbthrift_strip_from_fixtures")
+                    if DELIMITER in line:
+                        while line.count(DELIMITER) < 2:
+                            line = line + content[i + 1]
+                            del content[i + 1]
+                        parts = line.split(DELIMITER)
                         content[i] = parts[0] + "<truncated>" + parts[2]
                         changed = True
                 if changed:

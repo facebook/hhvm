@@ -1344,6 +1344,7 @@ class mstch_const : public mstch_base {
             {"constant:value", &mstch_const::value},
             {"constant:program", &mstch_const::program},
             {"constant:field", &mstch_const::field},
+            {"constant:generated?", &mstch_const::generated},
         });
   }
 
@@ -1354,6 +1355,7 @@ class mstch_const : public mstch_base {
   mstch::node value();
   mstch::node program();
   mstch::node field();
+  mstch::node generated() { return const_->generated(); }
 
  protected:
   const t_const* const_;

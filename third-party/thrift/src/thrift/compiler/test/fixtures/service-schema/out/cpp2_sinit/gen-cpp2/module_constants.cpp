@@ -16,8 +16,7 @@ namespace module_constants {
 
 ::std::string_view _fbthrift_schema_af7deaffee96429a() {
   constexpr static ::std::string_view _fbthrift_schema_af7deaffee96429a_{
-    /*<truncated>*/,
-    528};
+    /*<truncated>*/};
   return _fbthrift_schema_af7deaffee96429a_;
 }
 

@@ -2332,7 +2332,6 @@ class cpp_mstch_const : public mstch_const {
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
             {"constant:outline_init?", &cpp_mstch_const::outline_init},
-            {"constant:generated?", &cpp_mstch_const::generated},
         });
   }
   mstch::node enum_value() {
@@ -2382,7 +2381,6 @@ class cpp_mstch_const : public mstch_const {
         cpp_context_->resolver().find_structured_adapter_annotation(*const_) ||
         cpp_context_->resolver().find_first_adapter(*const_->type());
   }
-  mstch::node generated() { return const_->generated(); }
 
  private:
   std::shared_ptr<cpp2_generator_context> cpp_context_;

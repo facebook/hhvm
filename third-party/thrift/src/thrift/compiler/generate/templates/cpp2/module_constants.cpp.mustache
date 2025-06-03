@@ -48,8 +48,8 @@ namespace {{program:name}}_constants {
 {{^constant:outline_init?}}{{#constant:generated?}}{{#type:binary?}}
 ::std::string_view {{constant:name}}() {
   constexpr static ::std::string_view {{constant:name}}_{
-    /*@fbthrift_strip_from_fixtures*/"{{value:string_value}}"/*@fbthrift_strip_from_fixtures*/,
-    {{value:string_length}}};
+    /*@fbthrift_strip_from_fixtures*/"{{value:string_value}}",
+    {{value:string_length}}/*@fbthrift_strip_from_fixtures*/};
   return {{constant:name}}_;
 }
 {{/type:binary?}}{{/constant:generated?}}{{/constant:outline_init?}}

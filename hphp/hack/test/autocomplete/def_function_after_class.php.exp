@@ -1,7 +1,3 @@
-fb_compact_unserialize
-  INSERT fb_compact_unserialize(${1:\$thing}, ${2:\$success}, ${3:\$errcode})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, inout ~?bool $success, inout ~?int $errcode): ~HH\FIXME\MISSING_RETURN_TYPE)
-SORT TEXT: none
 fb_disable_code_coverage
   INSERT fb_disable_code_coverage()
   (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
@@ -9,6 +5,10 @@ SORT TEXT: none
 fb_double_metaphone
   INSERT fb_double_metaphone(${1:\$word})
   (function(string $word): string)
+SORT TEXT: none
+fb_double_metaphone_with_vowel
+  INSERT fb_double_metaphone_with_vowel(${1:\$word}, ${2:\$include_vowels})
+  (function(string $word, bool $include_vowels): string)
 SORT TEXT: none
 fb_enable_code_coverage
   INSERT fb_enable_code_coverage()

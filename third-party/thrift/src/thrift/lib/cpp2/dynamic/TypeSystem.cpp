@@ -355,7 +355,7 @@ std::string_view kindToString(DefinitionRef::Kind k) noexcept {
       kindToString(kind())));
 }
 
-DefinitionRef TypeSystem::getUserDefinedTypeOrThrow(UriView uri) {
+DefinitionRef TypeSystem::getUserDefinedTypeOrThrow(UriView uri) const {
   if (std::optional<DefinitionRef> def = this->getUserDefinedType(uri)) {
     return *def;
   }
@@ -365,7 +365,7 @@ DefinitionRef TypeSystem::getUserDefinedTypeOrThrow(UriView uri) {
 
 namespace {
 struct TypeIdResolver {
-  TypeSystem& typeSystem_;
+  const TypeSystem& typeSystem_;
 
   TypeRef operator()(const TypeId& typeId) const { return typeId.visit(*this); }
 
@@ -432,7 +432,7 @@ struct TypeIdResolver {
 
 } // namespace
 
-TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) {
+TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) const {
   return TypeIdResolver{*this}(typeId);
 }
 

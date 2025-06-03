@@ -22,6 +22,7 @@
 
 #include <folly/CppAttributes.h>
 #include <folly/Overload.h>
+#include <folly/Synchronized.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/container/F14Map.h>
@@ -1604,12 +1605,10 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
    *
    * This object must be kept alive for the lifetime of the returned object.
    *
-   * NOTE: the returned object is NOT thread-safe.
-   *
    * Throws `std::runtime_error` if this instance does not support URI-based
    * lookup (which does not happen with any official Resolver implementations).
    */
-  type_system::TypeSystem& asTypeSystem();
+  const type_system::TypeSystem& asTypeSystem() const;
 
   /**
    * Allows converting a SyntaxGraph node into its corresponding TypeSystem
@@ -1617,10 +1616,12 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
    * more efficient and supports nodes without URIs.
    */
   type_system::DefinitionRef asTypeSystemDefinitionRef(
-      const DefinitionNode& node);
-  const type_system::StructNode& asTypeSystemStructNode(const StructNode& node);
-  const type_system::UnionNode& asTypeSystemUnionNode(const UnionNode& node);
-  const type_system::EnumNode& asTypeSystemEnumNode(const EnumNode& node);
+      const DefinitionNode& node) const;
+  const type_system::StructNode& asTypeSystemStructNode(
+      const StructNode& node) const;
+  const type_system::UnionNode& asTypeSystemUnionNode(
+      const UnionNode& node) const;
+  const type_system::EnumNode& asTypeSystemEnumNode(const EnumNode& node) const;
 
   explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 
@@ -1629,7 +1630,8 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
 
  private:
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
-  std::unique_ptr<type_system::TypeSystem> typeSystemFacade_;
+  mutable folly::Synchronized<std::unique_ptr<type_system::TypeSystem>>
+      typeSystemFacade_;
 
   friend const DefinitionNode& detail::lookUpDefinition(
       const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);

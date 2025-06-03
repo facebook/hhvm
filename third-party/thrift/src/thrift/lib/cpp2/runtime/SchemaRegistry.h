@@ -21,7 +21,6 @@
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
 #include <unordered_set>
-#include <folly/SharedMutex.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
@@ -122,7 +121,6 @@ class SchemaRegistry {
   template <typename T>
   type_system::DefinitionRef getTypeSystemDefinitionRef() const {
     const syntax_graph::DefinitionNode& sgNode = getDefinitionNode<T>();
-    std::lock_guard<folly::SharedMutex> wlock(typeSystemMutex_);
     return syntaxGraph_->asTypeSystemDefinitionRef(sgNode);
   }
 
@@ -160,9 +158,6 @@ class SchemaRegistry {
 
   std::unique_ptr<syntax_graph::SyntaxGraph> syntaxGraph_;
   syntax_graph::detail::IncrementalResolver* resolver_;
-  // Synchronizes access to syntaxGraph_->asTypeSystem* methods, which are not
-  // thread-safe.
-  mutable folly::SharedMutex typeSystemMutex_;
 
   friend struct test::SchemaTest;
 };

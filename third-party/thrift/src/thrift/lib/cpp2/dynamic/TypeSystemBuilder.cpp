@@ -44,7 +44,7 @@ class TypeSystemImpl final : public TypeSystem {
       std::equal_to<>>;
   DefinitionsMap definitions;
 
-  std::optional<DefinitionRef> getUserDefinedType(UriView uri) final {
+  std::optional<DefinitionRef> getUserDefinedType(UriView uri) const final {
     if (auto def = definitions.find(uri); def != definitions.end()) {
       return folly::variant_match(
           def->second, [](auto& d) { return DefinitionRef(&d); });

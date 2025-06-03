@@ -689,19 +689,30 @@ class TypeSystemFacade final : public type_system::TypeSystem {
       : resolver_(graph) {}
 
   std::optional<type_system::DefinitionRef> getUserDefinedType(
-      type_system::UriView uri) override {
+      type_system::UriView uri) const override {
     const DefinitionNode* def = resolver_.getDefinitionNodeByUri(uri);
     if (!def) {
       return std::nullopt;
     }
 
+    {
+      std::shared_lock rlock(cacheMutex_);
+      if (auto it = cache_.find(def); it != cache_.end()) {
+        return folly::variant_match(it->second, [](auto& def) {
+          return type_system::DefinitionRef{&def};
+        });
+      }
+    }
+
+    std::unique_lock wlock(cacheMutex_);
     if (auto it = cache_.find(def); it != cache_.end()) {
       return folly::variant_match(it->second, [](auto& def) {
         return type_system::DefinitionRef{&def};
       });
     }
 
-    return convertUserDefinedType(def);
+    // Holding the lock allows shedding the const qualifier
+    return const_cast<TypeSystemFacade&>(*this).convertUserDefinedType(def);
   }
 
   folly::F14FastSet<type_system::Uri> getKnownUris() const override {
@@ -712,6 +723,16 @@ class TypeSystemFacade final : public type_system::TypeSystem {
   }
 
   // Convert the definition to TypeSystem's representation.
+  type_system::DefinitionRef convertUserDefinedType(
+      const DefinitionNode* rootSgDef) const {
+    std::unique_lock wlock(cacheMutex_);
+    return const_cast<TypeSystemFacade*>(this)->convertUserDefinedType(
+        rootSgDef);
+  }
+
+ private:
+  // Convert the definition to TypeSystem's representation.
+  // Caller must hold the write lock.
   // The approach is:
   // 1. Traverse the root definition node's fields to gather the set of
   // definitions that need to be converted (as a structured definition node has
@@ -861,7 +882,6 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     });
   }
 
- private:
   type_system::TypeRef convertType(const TypeRef& type) {
     return type.trueType().visit(
         [](const Primitive& primitive) {
@@ -924,37 +944,41 @@ class TypeSystemFacade final : public type_system::TypeSystem {
 
   const detail::SchemaBackedResolver& resolver_;
   folly::F14NodeMap<const DefinitionNode*, TSDefinition> cache_;
+  mutable folly::SharedMutex cacheMutex_;
 };
 } // namespace
 
-type_system::TypeSystem& SyntaxGraph::asTypeSystem() {
-  if (typeSystemFacade_) {
-    return *typeSystemFacade_;
+const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {
+  if (auto facade = typeSystemFacade_.rlock(); *facade) {
+    return **facade;
   }
   if (auto* resolver = dynamic_cast<const detail::SchemaBackedResolver*>(
           resolver_.get().unwrap())) {
-    typeSystemFacade_ = std::make_unique<TypeSystemFacade>(*resolver);
-    return *typeSystemFacade_;
+    auto facade = typeSystemFacade_.wlock();
+    if (!*facade) {
+      *facade = std::make_unique<TypeSystemFacade>(*resolver);
+    }
+    return **facade;
   }
   folly::throw_exception<std::runtime_error>(
       "SyntaxGraph instance does not support URI-based lookup");
 }
 
 type_system::DefinitionRef SyntaxGraph::asTypeSystemDefinitionRef(
-    const DefinitionNode& node) {
-  auto& facade = static_cast<TypeSystemFacade&>(asTypeSystem());
+    const DefinitionNode& node) const {
+  auto& facade = static_cast<const TypeSystemFacade&>(asTypeSystem());
   return facade.convertUserDefinedType(&node);
 }
 const type_system::StructNode& SyntaxGraph::asTypeSystemStructNode(
-    const StructNode& node) {
+    const StructNode& node) const {
   return asTypeSystemDefinitionRef(node.definition()).asStruct();
 }
 const type_system::UnionNode& SyntaxGraph::asTypeSystemUnionNode(
-    const UnionNode& node) {
+    const UnionNode& node) const {
   return asTypeSystemDefinitionRef(node.definition()).asUnion();
 }
 const type_system::EnumNode& SyntaxGraph::asTypeSystemEnumNode(
-    const EnumNode& node) {
+    const EnumNode& node) const {
   return asTypeSystemDefinitionRef(node.definition()).asEnum();
 }
 

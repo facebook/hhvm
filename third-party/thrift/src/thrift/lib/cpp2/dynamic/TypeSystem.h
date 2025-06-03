@@ -118,11 +118,8 @@ class TypeSystem {
    *
    * Returns an empty optional if the requested type does not exist in the type
    * system.
-   *
-   * NOTE: non-const, which means the caller must synchronize calls to this
-   * method.
    */
-  virtual std::optional<DefinitionRef> getUserDefinedType(UriView) = 0;
+  virtual std::optional<DefinitionRef> getUserDefinedType(UriView) const = 0;
   /**
    * Same as getUserDefinedType except throws an exception if the type is not
    * found.
@@ -130,7 +127,7 @@ class TypeSystem {
    * Throws:
    *   - InvalidTypeError if the type is not defined in the type system.
    */
-  DefinitionRef getUserDefinedTypeOrThrow(UriView);
+  DefinitionRef getUserDefinedTypeOrThrow(UriView) const;
   /**
    * Resolves an arbitrary TypeId ito a TypeRef.
    *
@@ -138,7 +135,7 @@ class TypeSystem {
    *   - InvalidTypeError if the TypeId references user-defined tyeps that are
    *     not defined in the type system.
    */
-  TypeRef resolveTypeId(const TypeId& typeId);
+  TypeRef resolveTypeId(const TypeId& typeId) const;
 
   /**
    * Generates a set of all user-defined type URIs currently known to the type

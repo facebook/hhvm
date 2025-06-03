@@ -380,6 +380,10 @@ void PassThroughHTTPCodecFilter::enableDoubleGoawayDrain() {
   return call_->enableDoubleGoawayDrain();
 }
 
+void PassThroughHTTPCodecFilter::disableDoubleGoawayDrain() {
+  return call_->disableDoubleGoawayDrain();
+}
+
 void PassThroughHTTPCodecFilter::setHeaderCodecStats(
     HeaderCodec::Stats* stats) {
   call_->setHeaderCodecStats(stats);

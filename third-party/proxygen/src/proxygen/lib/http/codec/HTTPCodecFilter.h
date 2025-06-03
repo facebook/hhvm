@@ -251,6 +251,8 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
 
   void enableDoubleGoawayDrain() override;
 
+  void disableDoubleGoawayDrain() override;
+
   HTTPCodec::StreamID getLastIncomingStreamID() const override;
 
   uint32_t getDefaultWindowSize() const override;

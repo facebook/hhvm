@@ -116,6 +116,10 @@ class HQControlCodec
     doubleGoaway_ = true;
   }
 
+  void disableDoubleGoawayDrain() override {
+    doubleGoaway_ = false;
+  }
+
   uint32_t getDefaultWindowSize() const override {
     CHECK(false) << __func__ << " not supported";
     folly::assume_unreachable();

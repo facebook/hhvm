@@ -788,6 +788,9 @@ class HTTPCodec {
   virtual void enableDoubleGoawayDrain() {
   }
 
+  virtual void disableDoubleGoawayDrain() {
+  }
+
   /**
    * set stats for the header codec, if the protocol supports header compression
    */

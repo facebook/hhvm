@@ -57,6 +57,15 @@ void HTTPParallelCodec::enableDoubleGoawayDrain() {
   }
 }
 
+void HTTPParallelCodec::disableDoubleGoawayDrain() {
+  if (sessionClosing_ == ClosingState::OPEN_WITH_GRACEFUL_DRAIN_ENABLED) {
+    sessionClosing_ = ClosingState::OPEN;
+  } else {
+    VLOG(3) << "Cannot enable double goaway because the session is already "
+               "draining or closed, or never enabled GRACEFUL_DRAIN";
+  }
+}
+
 bool HTTPParallelCodec::onIngressUpgradeMessage(const HTTPMessage& /*msg*/) {
   if (transportDirection_ == TransportDirection::DOWNSTREAM) {
     lastStreamID_ = 1;

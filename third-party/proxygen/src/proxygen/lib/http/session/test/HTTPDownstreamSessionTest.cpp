@@ -3829,6 +3829,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
 #endif
 
 TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
+  httpSession_->enableDoubleGoawayDrain();
   httpSession_->setRateLimitParams(
       RateLimiter::Type::HEADERS, 100, std::chrono::seconds(0));
 
@@ -3843,13 +3844,15 @@ TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
     sendRequest();
   }
   // Straw that breaks the camel's back
-  sendRequest();
+  auto id = sendRequest();
   for (int i = 0; i < 100; i++) {
     handlers[i]->expectGoaway();
     handlers[i]->expectDetachTransaction();
   }
   expectDetachSession();
   flushRequestsAndLoopN(2);
+  EXPECT_CALL(callbacks_, onGoaway(id, ErrorCode::NO_ERROR, _));
+  parseOutput(*clientCodec_);
   httpSession_->timeoutExpired();
 }
 

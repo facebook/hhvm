@@ -129,6 +129,7 @@ class RateLimitFilter : public PassThroughHTTPCodecFilter {
     if (!rateLimiter || !rateLimiter->incrementNumEventsInCurrentInterval()) {
       callback_->onHeadersComplete(stream, std::move(msg));
     } else {
+      call_->disableDoubleGoawayDrain();
       callback_->onGoaway(http2::kMaxStreamID, ErrorCode::NO_ERROR);
     }
   }

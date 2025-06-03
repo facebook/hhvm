@@ -15,10 +15,10 @@
   limitations under the License.
 
 }}{{#function:cpp_void?}}{{!
-}}folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
+}}folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state) {
 {{/function:cpp_void?}}
 {{^function:cpp_void?}}
-folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state) {
 {{/function:cpp_void?}}
   if (state.isException()) {
     return std::move(state.exception());

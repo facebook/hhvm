@@ -15,28 +15,28 @@
   limitations under the License.
 
 }}{{^function:sync_returns_by_outparam?}}
-{{> types/return_type_client}} {{> service_common/client_class_name}}::recv_instance_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
+{{> types/return_type_client}} {{> service_common/client_class_name}}::recv_instance_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state) {
 {{#function:cpp_void?}}
-  recv_{{function:cpp_name}}(state);
+  recv_{{function:self.cpp_name}}(state);
 {{/function:cpp_void?}}
 {{^function:cpp_void?}}
-  return recv_{{function:cpp_name}}(state);
+  return recv_{{function:self.cpp_name}}(state);
 {{/function:cpp_void?}}
 }
 {{/function:sync_returns_by_outparam?}}
 {{#function:sync_returns_by_outparam?}}
-void {{> service_common/client_class_name}}::recv_instance_{{function:cpp_name}}({{function:cpp_return_type}}& _return, ::apache::thrift::ClientReceiveState& state) {
-  return recv_{{function:cpp_name}}(_return, state);
+void {{> service_common/client_class_name}}::recv_instance_{{function:self.cpp_name}}({{function:cpp_return_type}}& _return, ::apache::thrift::ClientReceiveState& state) {
+  return recv_{{function:self.cpp_name}}(_return, state);
 }
 {{/function:sync_returns_by_outparam?}}
 
 {{#function:cpp_void?}}
-folly::exception_wrapper {{> service_common/client_class_name}}::recv_instance_wrapped_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
-  return recv_wrapped_{{function:cpp_name}}(state);
+folly::exception_wrapper {{> service_common/client_class_name}}::recv_instance_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_{{function:self.cpp_name}}(state);
 }
 {{/function:cpp_void?}}
 {{^function:cpp_void?}}
-folly::exception_wrapper {{> service_common/client_class_name}}::recv_instance_wrapped_{{function:cpp_name}}({{> types/return_type_client}}& _return, ::apache::thrift::ClientReceiveState& state) {
-  return recv_wrapped_{{function:cpp_name}}(_return, state);
+folly::exception_wrapper {{> service_common/client_class_name}}::recv_instance_wrapped_{{function:self.cpp_name}}({{> types/return_type_client}}& _return, ::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_{{function:self.cpp_name}}(_return, state);
 }
 {{/function:cpp_void?}}

@@ -128,7 +128,7 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{/program:structs}}
 {{#program:services}}
 {{#service:functions}}{{^function:starts_interaction?}}
-void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}}([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:self.cpp_name}}([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "{{function:name}}";
 {{#function:return_type}}
@@ -177,7 +177,7 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
 {{#service:functions?}}
   static const ThriftFunctionGenerator functions[] = {
 {{#service:functions}}{{^function:starts_interaction?}}
-    ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}},
+    ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:self.cpp_name}},
 {{/function:starts_interaction?}}{{/service:functions}}
   };
   for (auto& function_gen : functions) {

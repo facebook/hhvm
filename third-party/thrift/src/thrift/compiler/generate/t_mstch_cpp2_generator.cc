@@ -436,10 +436,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
     auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
 
-    def.property("cpp_name", [](const t_function& function) {
-      return cpp2::get_name(&function);
-    });
-
     def.property("return_type", [&](const t_function& function) {
       const t_type* type = function.return_type().get_type();
       // Override the return type for compatibility with old codegen.
@@ -1104,7 +1100,6 @@ class cpp_mstch_function : public mstch_function {
         this,
         {
             {"function:eb", &cpp_mstch_function::event_based},
-            {"function:cpp_name", &cpp_mstch_function::cpp_name},
             {"function:cpp_return_type", &cpp_mstch_function::cpp_return_type},
             {"function:cpp_void?", &cpp_mstch_function::is_cpp_void},
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
@@ -1123,7 +1118,6 @@ class cpp_mstch_function : public mstch_function {
         interface_->has_unstructured_annotation("process_in_event_base") ||
         interface_->has_structured_annotation(kCppProcessInEbThreadUri);
   }
-  mstch::node cpp_name() { return cpp2::get_name(function_); }
   mstch::node cpp_return_type() {
     return cpp_context_->resolver().get_return_type(*function_);
   }
@@ -1143,10 +1137,10 @@ class cpp_mstch_function : public mstch_function {
   }
 
   mstch::node prefixed_name() {
+    const std::string& name = cpp2::get_name(function_);
     return interface_->is_interaction()
-        ? fmt::format(
-              "{}_{}", interface_->get_name(), cpp2::get_name(function_))
-        : cpp_name();
+        ? fmt::format("{}_{}", interface_->get_name(), name)
+        : name;
   }
 
   mstch::node has_deprecated_header_client_methods() {

@@ -45,7 +45,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}(apache::thrift::ServerRequest&& serverRequest) {
+void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:self.cpp_name}}(apache::thrift::ServerRequest&& serverRequest) {
 {{#function:in_or_creates_interaction?}}
   auto tile = serverRequest.requestContext()->releaseTile();
 {{/function:in_or_creates_interaction?}}
@@ -71,8 +71,8 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     {{/function:stack_arguments?}}
   {{/type:resolves_to_complex_return?}}
   {{/field:type}}{{/function:args}}
-    {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs pargs() {
-      {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
+    {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:self.cpp_name}}_pargs pargs() {
+      {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:self.cpp_name}}_pargs args;
       {{#function:args}}{{#field:type}}
       {{^type:resolves_to_complex_return?}}
       args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
@@ -161,7 +161,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     , "{{service:parent_service_name}}"
     , "{{> common/function_name}}"
     , return_{{function:prefixed_name}}<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}<ProtocolIn_, ProtocolOut_>
+    , throw_wrapped_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:self.cpp_name}}<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , {{^function:eb}}apache::thrift::detail::ServerRequestHelper::executor(serverRequest){{/function:eb}}{{#function:eb}}nullptr{{/function:eb}}
@@ -173,7 +173,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = {{^service:interaction?}}iface_{{/service:interaction?}}{{#service:interaction?}}&iface{{/service:interaction?}}](auto&& cb, ArgsState args) mutable {
       (void)args;
-      ifacePtr->{{#function:eb}}async_eb{{/function:eb}}{{^function:eb}}async_tm{{/function:eb}}_{{function:cpp_name}}(std::move(cb){{> service_tcc/get_args_ref}});
+      ifacePtr->{{#function:eb}}async_eb{{/function:eb}}{{^function:eb}}async_tm{{/function:eb}}_{{function:self.cpp_name}}(std::move(cb){{> service_tcc/get_args_ref}});
     };
   };
 #if FOLLY_HAS_COROUTINES

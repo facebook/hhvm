@@ -39,7 +39,7 @@
   static void throw_wrapped_{{function:prefixed_name}}(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
-  std::unique_ptr<apache::thrift::Tile> {{function:cpp_name}}() {
-    return iface_->{{function:cpp_name}}();
+  std::unique_ptr<apache::thrift::Tile> {{function:self.cpp_name}}() {
+    return iface_->{{function:self.cpp_name}}();
   }
 {{/function:starts_interaction?}}{{/function:return_type}}

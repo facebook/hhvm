@@ -1657,6 +1657,9 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_identifier_is_not_reserved);
   validator.add_program_visitor(&validate_filename_is_not_reserved);
   validator.add_program_visitor(&validate_python_namespaces);
+  validator.add_program_visitor(&detail::validate_annotation_scopes<>);
+
+  validator.add_root_definition_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);
@@ -1664,9 +1667,13 @@ ast_validator standard_validator() {
       &validate_extends_service_function_name_uniqueness);
   validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_interaction_visitor(&validate_interaction_annotations);
+
   validator.add_thrown_exception_visitor(&validate_throws_exceptions);
+  validator.add_thrown_exception_visitor(&detail::validate_annotation_scopes<>);
+
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
+  validator.add_function_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_structured_definition_visitor(&validate_field_names_uniqueness);
   validator.add_structured_definition_visitor(
@@ -1695,6 +1702,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
   validator.add_field_visitor(&validate_field_name);
   validator.add_field_visitor(ValidateAnnotationPositions{});
+  validator.add_field_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);
@@ -1702,7 +1710,6 @@ ast_validator standard_validator() {
   validator.add_enum_value_visitor(&validate_enum_value);
 
   validator.add_named_visitor(&validate_structured_annotation);
-  validator.add_named_visitor(&detail::validate_annotation_scopes);
   validator.add_named_visitor(&validate_cpp_adapter_annotation);
   validator.add_named_visitor(&validate_hack_adapter_annotation);
   validator.add_named_visitor(&validate_hack_wrapper_annotation);
@@ -1712,6 +1719,10 @@ ast_validator standard_validator() {
   validator.add_named_visitor(&validate_java_wrapper_and_adapter_annotation);
   validator.add_named_visitor(&validate_custom_cpp_type_annotations);
   validator.add_named_visitor(&deprecate_annotations);
+
+  validator.add_function_param_visitor(
+      &detail::validate_annotation_scopes<
+          detail::scope_check_type::function_parameter>);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);
@@ -1730,6 +1741,8 @@ ast_validator standard_validator() {
   validator.add_container_visitor(
       &validate_cursor_serialization_adapter_in_container);
   validator.add_function_visitor(&forbid_exception_as_method_type);
+
+  validator.add_enum_value_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_const_visitor(&forbid_exception_as_const_type);
 

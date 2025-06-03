@@ -737,6 +737,78 @@ func (x *Function) setDefaults() *Function {
     return x
 }
 
+type FunctionParameter struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*FunctionParameter)(nil)
+
+func NewFunctionParameter() *FunctionParameter {
+    return (&FunctionParameter{}).setDefaults()
+}
+
+
+
+func (x *FunctionParameter) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("FunctionParameter"); err != nil {
+        return thrift.PrependError("FunctionParameter write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("FunctionParameter write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("FunctionParameter write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *FunctionParameter) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("FunctionParameter read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("FunctionParameter field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("FunctionParameter read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *FunctionParameter) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *FunctionParameter) setDefaults() *FunctionParameter {
+    return x
+}
+
 type EnumValue struct {
 }
 // Compile time interface enforcer
@@ -1329,6 +1401,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/Service", func() any { return NewService() })
     registry.RegisterType("facebook.com/thrift/annotation/Interaction", func() any { return NewInteraction() })
     registry.RegisterType("facebook.com/thrift/annotation/Function", func() any { return NewFunction() })
+    registry.RegisterType("facebook.com/thrift/annotation/FunctionParameter", func() any { return NewFunctionParameter() })
     registry.RegisterType("facebook.com/thrift/annotation/EnumValue", func() any { return NewEnumValue() })
     registry.RegisterType("facebook.com/thrift/annotation/Const", func() any { return NewConst() })
     registry.RegisterType("facebook.com/thrift/annotation/Enum", func() any { return NewEnum() })

@@ -23,6 +23,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Service>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Interaction>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Function>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<FunctionParameter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<EnumValue>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Const>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Structured>::gen(metadata);

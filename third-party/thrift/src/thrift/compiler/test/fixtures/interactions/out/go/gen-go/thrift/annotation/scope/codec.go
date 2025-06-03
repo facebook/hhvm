@@ -105,6 +105,15 @@ var (
                 NewFunc:    func() thrift.Struct { return NewFunction() },
             },
     }
+    premadeCodecTypeSpec_scope_FunctionParameter = &thrift.TypeSpec{
+        FullName: "scope.FunctionParameter",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "scope.FunctionParameter",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFunctionParameter() },
+            },
+    }
     premadeCodecTypeSpec_scope_EnumValue = &thrift.TypeSpec{
         FullName: "scope.EnumValue",
         CodecStructSpec:
@@ -311,6 +320,19 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
+    premadeStructSpec_FunctionParameter =
+        &thrift.StructSpec{
+            Name:                 "FunctionParameter",
+            ScopedName:           "scope.FunctionParameter",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
     premadeStructSpec_EnumValue =
         &thrift.StructSpec{
             Name:                 "EnumValue",
@@ -429,6 +451,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Service.FullName] = premadeCodecTypeSpec_scope_Service
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interaction.FullName] = premadeCodecTypeSpec_scope_Interaction
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Function.FullName] = premadeCodecTypeSpec_scope_Function
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_FunctionParameter.FullName] = premadeCodecTypeSpec_scope_FunctionParameter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_EnumValue.FullName] = premadeCodecTypeSpec_scope_EnumValue
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Const.FullName] = premadeCodecTypeSpec_scope_Const
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Enum.FullName] = premadeCodecTypeSpec_scope_Enum

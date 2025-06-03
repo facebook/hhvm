@@ -820,6 +820,10 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
+          shape(
+          )
+        ),
         '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )

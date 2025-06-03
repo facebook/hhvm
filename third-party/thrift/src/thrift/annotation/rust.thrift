@@ -262,6 +262,7 @@ struct NewType {}
  * | `&'a T<K, V>`  | `IntoIterator<Item = (&'a K, &'a V)>`
  */
 @scope.Field
+@scope.FunctionParameter
 @scope.Typedef
 struct Type {
   1: string name;

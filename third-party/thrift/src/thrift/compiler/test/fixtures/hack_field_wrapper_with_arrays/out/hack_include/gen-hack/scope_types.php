@@ -474,7 +474,7 @@ class Exception implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
 }
 
 /**
- * Field declartaions, for example in `struct` or `function` declartions.
+ * Field declarations, for example in `struct` declaration.
  *
  * Original thrift struct:-
  * Field
@@ -872,6 +872,94 @@ class TFunction implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "scope.Function",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * The `function parameter` definition scope.
+ *
+ * Original thrift struct:-
+ * FunctionParameter
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/FunctionParameter'))>>
+class FunctionParameter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public static function fromMap_DEPRECATED(@KeyedContainer<string, mixed> $map)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FunctionParameter';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "scope.FunctionParameter",
         "is_union" => false,
       )
     );
@@ -1558,6 +1646,10 @@ class Definition implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
           )
         ),
         '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
           shape(
           )
         ),

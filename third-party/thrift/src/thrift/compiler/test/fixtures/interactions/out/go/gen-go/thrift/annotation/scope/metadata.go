@@ -89,6 +89,13 @@ var (
                     Name: "scope.Function",
                 },
         }
+    premadeThriftType_scope_FunctionParameter =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.FunctionParameter",
+                },
+        }
     premadeThriftType_scope_EnumValue =
         &metadata.ThriftType{
             TStruct:
@@ -159,6 +166,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["scope.Service"] = premadeThriftType_scope_Service
     fbthriftThriftTypesMap["scope.Interaction"] = premadeThriftType_scope_Interaction
     fbthriftThriftTypesMap["scope.Function"] = premadeThriftType_scope_Function
+    fbthriftThriftTypesMap["scope.FunctionParameter"] = premadeThriftType_scope_FunctionParameter
     fbthriftThriftTypesMap["scope.EnumValue"] = premadeThriftType_scope_EnumValue
     fbthriftThriftTypesMap["scope.Const"] = premadeThriftType_scope_Const
     fbthriftThriftTypesMap["scope.Enum"] = premadeThriftType_scope_Enum
@@ -266,6 +274,16 @@ var structMetadatas = func() []*metadata.ThriftStruct {
         fbthriftResults = append(fbthriftResults,
             &metadata.ThriftStruct{
                 Name:    "scope.Function",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.FunctionParameter",
                 IsUnion: false,
                 Fields:  []*metadata.ThriftField{
                 },

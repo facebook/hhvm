@@ -28,6 +28,7 @@ namespace py thrift.annotation.go
 // Annotation for overriding Go names (e.g. to avoid codegen name conflicts).
 @scope.Field
 @scope.Function
+@scope.FunctionParameter
 @scope.Typedef
 struct Name {
   1: string name;
@@ -35,6 +36,7 @@ struct Name {
 
 // Annotation for overriding Go struct field tags (e.g. json, yaml, serf tags).
 @scope.Field
+@scope.FunctionParameter
 struct Tag {
   1: string tag;
 }

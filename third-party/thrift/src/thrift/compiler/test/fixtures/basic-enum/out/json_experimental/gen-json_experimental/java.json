@@ -55,6 +55,14 @@
         },
             "value" : {}
           },
+          "scope.FunctionParameter" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "FunctionParameter",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Struct" : {
             "type" : {
           "type" : "struct",
@@ -84,7 +92,7 @@
           "java_annotation" : {
             "name" : "java_annotation",
             "key" : 1,
-            "lineno" : 40,
+            "lineno" : 41,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
@@ -107,7 +115,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 43
+        "lineno" : 44
       },
       "Adapter" : {
         "name" : "Adapter",
@@ -141,21 +149,21 @@
           "adapterClassName" : {
             "name" : "adapterClassName",
             "key" : 1,
-            "lineno" : 56,
+            "lineno" : 57,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 59,
+            "lineno" : 60,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 51
+        "lineno" : 52
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -173,21 +181,21 @@
           "wrapperClassName" : {
             "name" : "wrapperClassName",
             "key" : 1,
-            "lineno" : 65,
+            "lineno" : 66,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 68,
+            "lineno" : 69,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 62
+        "lineno" : 63
       },
       "Recursive" : {
         "name" : "Recursive",
@@ -203,7 +211,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 71
+        "lineno" : 72
       },
       "FieldUseUnmangledName" : {
         "name" : "FieldUseUnmangledName",
@@ -219,7 +227,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 79
+        "lineno" : 80
       },
       "UseIntrinsicDefault" : {
         "name" : "UseIntrinsicDefault",
@@ -235,7 +243,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 86
+        "lineno" : 87
       }
   },
   "source_path" : "thrift/annotation/java",

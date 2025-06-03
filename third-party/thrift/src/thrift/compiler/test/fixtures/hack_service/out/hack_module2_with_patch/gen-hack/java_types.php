@@ -150,6 +150,10 @@ class Annotation implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
+          shape(
+          )
+        ),
         '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
           shape(
           )

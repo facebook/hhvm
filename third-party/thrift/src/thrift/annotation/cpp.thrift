@@ -57,6 +57,7 @@ struct Name {
  */
 @scope.Typedef
 @scope.Field
+@scope.FunctionParameter
 struct Type {
   1: string name;
 

@@ -24,7 +24,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Field declartaions, for example in `struct` or `function` declartions.
+ * Field declarations, for example in `struct` declaration.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Field implements TBase, java.io.Serializable, Cloneable, Comparable<Field> {

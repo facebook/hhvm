@@ -54,7 +54,7 @@
       },
       "Field" : {
         "name" : "Field",
-        "docstring" : "Field declartaions, for example in `struct` or `function` declartions.\n",
+        "docstring" : "Field declarations, for example in `struct` declaration.\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 90
@@ -87,25 +87,32 @@
         "is_union" : false,
         "lineno" : 102
       },
+      "FunctionParameter" : {
+        "name" : "FunctionParameter",
+        "docstring" : "The `function parameter` definition scope.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 106
+      },
       "EnumValue" : {
         "name" : "EnumValue",
         "docstring" : "The Enum value definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 106
+        "lineno" : 109
       },
       "Const" : {
         "name" : "Const",
         "docstring" : "The `const` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 109
+        "lineno" : 112
       },
       "Enum" : {
         "name" : "Enum",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 114
+        "lineno" : 117
       },
       "Structured" : {
         "name" : "Structured",
@@ -142,7 +149,7 @@
         "docstring" : "A scope that includes all 'structured' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 118
+        "lineno" : 121
       },
       "Interface" : {
         "name" : "Interface",
@@ -172,7 +179,7 @@
         "docstring" : "A scope that includes all 'interface' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 125
+        "lineno" : 128
       },
       "RootDefinition" : {
         "name" : "RootDefinition",
@@ -223,7 +230,7 @@
         "docstring" : "A scope that includes all program-scoped definition.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 132
+        "lineno" : 135
       },
       "Definition" : {
         "name" : "Definition",
@@ -249,6 +256,13 @@
         },
             "value" : {}
           },
+          "scope.FunctionParameter" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "FunctionParameter"
+        },
+            "value" : {}
+          },
           "scope.EnumValue" : {
             "type" : {
           "type" : "struct",
@@ -267,7 +281,7 @@
         "docstring" : "A scope that includes all definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 141
+        "lineno" : 144
       },
       "DisableSchemaConst" : {
         "name" : "DisableSchemaConst",
@@ -283,7 +297,7 @@
         "docstring" : "Not a scope, just here for dependency cycle reasons.\nDisables schema const injection for the program.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 152
+        "lineno" : 156
       }
   },
   "source_path" : "thrift/annotation/scope",

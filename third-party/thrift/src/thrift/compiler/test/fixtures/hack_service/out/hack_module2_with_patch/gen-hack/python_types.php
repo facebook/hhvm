@@ -10,6 +10,8 @@ namespace facebook\thrift\annotation\python;
 
 /**
  * Hides in thrift-py3 only, not in thrift-python
+ * Allowed for all @scope.Definition, except for @scope.FunctionParameter as that would hide part of
+ * the RPC function parameters.
  *
  * Original thrift struct:-
  * Py3Hidden
@@ -56,7 +58,19 @@ class Py3Hidden implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
+        '\facebook\thrift\annotation\RootDefinition' => \facebook\thrift\annotation\RootDefinition::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),

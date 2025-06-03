@@ -71,6 +71,8 @@ inline constexpr auto kScopeInteractionUri =
     "facebook.com/thrift/annotation/Interaction";
 inline constexpr auto kScopeFunctionUri =
     "facebook.com/thrift/annotation/Function";
+inline constexpr auto kScopeFunctionParameterUri =
+    "facebook.com/thrift/annotation/FunctionParameter";
 inline constexpr auto kScopeEnumUri = "facebook.com/thrift/annotation/Enum";
 inline constexpr auto kScopeEnumValueUri =
     "facebook.com/thrift/annotation/EnumValue";

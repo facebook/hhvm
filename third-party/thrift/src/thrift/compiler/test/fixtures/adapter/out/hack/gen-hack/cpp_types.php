@@ -348,6 +348,10 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
           shape(
           )
         ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
         'template' => shape(

@@ -33,6 +33,7 @@ struct Mutable {}
 
 // When this annotation is applied, thrift compiler will annotate corresponding java entity the given java annotation.
 @scope.Field
+@scope.FunctionParameter
 @scope.Struct
 @scope.Union
 @scope.Exception

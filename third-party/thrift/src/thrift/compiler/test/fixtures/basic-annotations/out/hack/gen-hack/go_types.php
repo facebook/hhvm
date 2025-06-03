@@ -92,6 +92,10 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
           shape(
           )
         ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
+          shape(
+          )
+        ),
         '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
@@ -208,6 +212,10 @@ class Tag implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
           shape(
           )
         ),

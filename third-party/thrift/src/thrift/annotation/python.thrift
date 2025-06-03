@@ -27,7 +27,12 @@ namespace py thrift.annotation.python
 // start
 
 /// Hides in thrift-py3 only, not in thrift-python
-@scope.Definition
+/// Allowed for all @scope.Definition, except for @scope.FunctionParameter as that would hide part of
+/// the RPC function parameters.
+@scope.RootDefinition
+@scope.Field
+@scope.Function
+@scope.Transitive
 struct Py3Hidden {}
 
 /// Hides in thrift-py-deprecated only

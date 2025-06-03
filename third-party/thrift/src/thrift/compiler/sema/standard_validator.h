@@ -53,6 +53,12 @@ bool is_initializer_default_value(
 void check_duplicate_keys(diagnostics_engine& diags, const t_const& const_);
 void check_duplicate_keys(diagnostics_engine& diags, const t_field& field);
 
+enum scope_check_type {
+  default_scopes,
+  function_parameter,
+};
+
+template <scope_check_type check_type = scope_check_type::default_scopes>
 void validate_annotation_scopes(sema_context& ctx, const t_named& node);
 
 } // namespace detail

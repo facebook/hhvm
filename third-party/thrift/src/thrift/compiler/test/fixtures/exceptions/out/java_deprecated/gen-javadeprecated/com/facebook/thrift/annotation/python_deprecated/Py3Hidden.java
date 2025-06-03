@@ -25,6 +25,8 @@ import com.facebook.thrift.protocol.*;
 
 /**
  * Hides in thrift-py3 only, not in thrift-python
+ * Allowed for all @scope.Definition, except for @scope.FunctionParameter as that would hide part of
+ * the RPC function parameters.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Py3Hidden implements TBase, java.io.Serializable, Cloneable, Comparable<Py3Hidden> {

@@ -86,7 +86,7 @@ struct Union {}
 /** The `exception` definition scope. */
 struct Exception {}
 
-/** Field declartaions, for example in `struct` or `function` declartions. */
+/** Field declarations, for example in `struct` declaration. */
 struct Field {}
 
 /** The `typedef` definition scope. */
@@ -101,6 +101,9 @@ struct Interaction {}
 /** The `function` definition scope. */
 struct Function {}
 /* added by compiler: (hack.name = "TFunction", js.name = "TFunction") */
+
+/** The `function parameter` definition scope. */
+struct FunctionParameter {}
 
 /** The Enum value definition scope. */
 struct EnumValue {}
@@ -141,6 +144,7 @@ struct RootDefinition {}
 @RootDefinition
 @Field
 @Function
+@FunctionParameter
 @EnumValue
 @Transitive
 struct Definition {}

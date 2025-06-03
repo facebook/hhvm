@@ -24,7 +24,7 @@
 #include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/json/dynamic.h>
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 
 namespace HPHP {
 namespace Facts {

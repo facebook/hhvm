@@ -11,6 +11,6 @@
   (targets libocamlrep_marshal_ffi_bindings.a)
   (deps
    (source_tree %{workspace_root}/hack/src))
-  (locks cargo)
+  (locks /cargo)
   (action
    (run %{workspace_root}/hack/scripts/invoke_cargo.sh ocamlrep_marshal_ffi_bindings ocamlrep_marshal_ffi_bindings)))

@@ -1,6 +1,10 @@
 #!/usr/bin/make -f
 include /usr/share/dpkg/pkg-info.mk
 
+export DPKG_EXPORT_BUILDFLAGS=1
+export DEB_BUILD_MAINT_OPTIONS=optimize=-lto
+include /usr/share/dpkg/buildflags.mk
+
 %:
 	dh $@ --buildsystem=cmake --parallel
 
@@ -9,11 +13,20 @@ override_dh_auto_configure:
 	-Wno-dev \
 	-DCMAKE_INSTALL_PREFIX=/opt/hhvm/$(DEB_VERSION_UPSTREAM) \
 	-DMYSQL_UNIX_SOCK_ADDR=/var/run/mysqld/mysqld.sock \
-	-DCMAKE_BUILD_TYPE=RelWithDebInfo
+	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+	-DCLANG_FORCE_LIBCPP=On \
+	-DFORCE_BUNDLED_LZ4=Off \
+	-DENABLE_XED=On \
+	-DENABLE_EXTENSION_MCRYPT=Off \
+	-DENABLE_EXTENSION_ASYNC_MYSQL=Off \
+	-DENABLE_MCROUTER=Off \
+	-DENABLE_EXTENSION_MYSQL=Off \
+	-DENABLE_EXTENSION_IMAGICK=Off
 
 override_dh_auto_build:
-	dh_auto_build -- -j1 hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune
-	dh_auto_build -- -j8
+	dh_auto_build --parallel -- bundled_folly
+	dh_auto_build --no-parallel -- hack hack_rust_ffi_bridge hhbc_ast_cbindgen hack_dune || dh_auto_build --no-parallel -- hack hack_rust_ffi_bridge hhbc_ast_cbindgen hack_dune
+	dh_auto_build --parallel
 
 override_dh_strip:
 	dh_strip --dbg-package=hhvm-nightly-dbg

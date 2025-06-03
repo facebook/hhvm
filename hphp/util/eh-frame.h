@@ -30,6 +30,9 @@
 
 #include <dwarf.h>
 #include <libdwarf.h>
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+#include <libdwarfp.h>
+#endif
 
 namespace HPHP {
 

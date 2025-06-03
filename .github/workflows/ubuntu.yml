@@ -26,22 +26,16 @@ env:
 
 jobs:
   build_ubuntu_focal_nightly:
-    runs-on: 16-core
+    runs-on: 16-core-ubuntu
     container:
-      image: ubuntu:focal
+      image: ubuntu:noble
       env:
-        DISTRO: ubuntu-20.04-focal
+        DISTRO: ubuntu-24.04-noble
         IS_NIGHTLY: 1
-        CLANG_VERSION: 12
+        CLANG_VERSION: 18
     steps:
     - name: Installing dependencies to bootstrap env
-      run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg
-    - name: Installing llvm
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        # Note: Keep this version in sync with the one in the Debian control file.
-        ./llvm.sh ${CLANG_VERSION}
+      run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg clang clang-${CLANG_VERSION} libc++-${CLANG_VERSION}-dev libc++abi-${CLANG_VERSION}-dev
     - name: Making LLVM the default compiler
       run: |
         if [ -f /etc/alternatives/cc ]
@@ -53,19 +47,19 @@ jobs:
         then
           update-alternatives --remove-all c++
         fi
-        
+
         update-alternatives --install /usr/bin/cc cc /usr/bin/clang++-${CLANG_VERSION} 500
         update-alternatives --set cc /usr/bin/clang++-${CLANG_VERSION}
         update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${CLANG_VERSION} 500
         update-alternatives --set c++ /usr/bin/clang++-${CLANG_VERSION}
     - name: Fetching HHVM and its submodules
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Installing HHVM deps and building HHVM
       run: ci/bin/make-debianish-package
     - name: Uploading artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: out-directory
         path: ${{ env.OUT }}

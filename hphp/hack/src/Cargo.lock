@@ -629,6 +629,7 @@ checksum = "cf034765b7d19a011c6d619e880582bf95e8186b580e6fab56589872dd87dcf5"
 name = "cbindgen"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eadd868a2ce9ca38de7eeafdcec9c7065ef89b42b32f0839278d55f35c54d1ff"
 dependencies = [
  "clap 4.5.38",
  "heck 0.4.1",
@@ -1110,6 +1111,7 @@ dependencies = [
 name = "cxx"
 version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d1cf22155cf6a8e0b0536efc30c775eadd7a481c376d2d7e30daf0825a42ef9"
 dependencies = [
  "cc",
  "cxxbridge-cmd",
@@ -1123,6 +1125,7 @@ dependencies = [
 name = "cxx-build"
 version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db4e07e3a69db032f03450594e53785a5d6b1d787c2ad5b901d9347f0064af94"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -1136,6 +1139,7 @@ dependencies = [
 name = "cxxbridge-cmd"
 version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48e9ff9c627d3abe06190462f7db81fb6cc12f3424ea081c2a8c9ed7a8cc167a"
 dependencies = [
  "clap 4.5.38",
  "codespan-reporting",
@@ -1148,11 +1152,13 @@ dependencies = [
 name = "cxxbridge-flags"
 version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e6417f4e1518ded330e088d5a66f50fbae9bbc96840e147058ae44970a2b51a"
 
 [[package]]
 name = "cxxbridge-macro"
 version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "856ff0dba6e023dd78189c8f4667126842dfe88392b5d4e94118bd18b8f2afbf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2022,6 +2028,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cc",
+ "clap 4.5.38",
  "convert_case 0.4.0",
  "nom",
 ]
@@ -2560,6 +2567,18 @@ dependencies = [
  "anyhow",
  "hhvm_options",
  "options",
+]
+
+[[package]]
+name = "hhvm_ffi"
+version = "0.0.0"
+dependencies = [
+ "compiler_ffi",
+ "hdf",
+ "hhvm_hhbc_defs_ffi",
+ "hhvm_types_ffi",
+ "package_ffi",
+ "parser_ffi",
 ]
 
 [[package]]
@@ -3488,6 +3507,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#995f67e1be8acf74ba5ca657f8a1acfb80d0dacb"
 dependencies = [
  "bstr",
  "bumpalo",
@@ -3500,6 +3520,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_caml_builtins"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#995f67e1be8acf74ba5ca657f8a1acfb80d0dacb"
 dependencies = [
  "ocamlrep",
  "ocamlrep_custom",
@@ -3509,6 +3530,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_custom"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#995f67e1be8acf74ba5ca657f8a1acfb80d0dacb"
 dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
@@ -3517,6 +3539,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_derive"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#995f67e1be8acf74ba5ca657f8a1acfb80d0dacb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3527,6 +3550,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_marshal"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#995f67e1be8acf74ba5ca657f8a1acfb80d0dacb"
 dependencies = [
  "bitflags 2.9.0",
  "cc",
@@ -3545,6 +3569,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_ocamlpool"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#995f67e1be8acf74ba5ca657f8a1acfb80d0dacb"
 dependencies = [
  "bumpalo",
  "cc",
@@ -4111,6 +4136,7 @@ dependencies = [
 name = "quickcheck"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
 dependencies = [
  "env_logger 0.8.4",
  "log",

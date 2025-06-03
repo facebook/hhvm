@@ -63,7 +63,7 @@ if(NOT SKIP_CCACHE)
       message(STATUS "Found ccache: ${CCACHE_FOUND} - enabling ccache as compiler wrapper")
     else()
       message(STATUS "Found ccache - ccache already in use as C and/or CXX compiler wrapper")
-   endif()
+    endif()
   endif(CCACHE_FOUND)
 endif(NOT SKIP_CCACHE)
 

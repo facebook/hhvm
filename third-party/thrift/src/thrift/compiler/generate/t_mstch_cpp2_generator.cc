@@ -436,18 +436,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
     auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
 
-    def.property("return_type", [&](const t_function& function) {
-      const t_type* type = function.return_type().get_type();
-      // Override the return type for compatibility with old codegen.
-      if (function.is_interaction_constructor()) {
-        // The old syntax (performs) treats an interaction as a response.
-        type = function.interaction().get_type();
-      } else if (function.sink_or_stream()) {
-        type = &t_primitive_type::t_void();
-      }
-      return proto.create<t_type>(*type);
-    });
-
     return std::move(def).make();
   }
 

@@ -1199,7 +1199,7 @@ Despite this, it allows (with varying levels of target language support) using (
 
 <Operation>
 
-> **<code>embed<sub>S</sub></code>(T, r) → <code>Value(T, ?)</code>**
+> **<code>embed<sub>S</sub>(T, r)</code> → <code>Value(T, ?)</code>**
 >
 > Transforms a <KW>partial record</KW> into a Thrift <KW>value</KW>.
 

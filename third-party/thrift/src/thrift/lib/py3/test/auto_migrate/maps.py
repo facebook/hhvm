@@ -68,17 +68,25 @@ class MapTests(unittest.TestCase):
             StrStrIntListMapMap({"bar": {"foo": None}})
 
     def test_isinstance(self) -> None:
-        base_cls = PythonMap if is_auto_migrated() else Py3Map
         str_int_map = {"foo": 5, "bar": 4}
-        self.assertIsInstance(Map__string_i64(str_int_map), base_cls)
+        self.assertIsInstance(Map__string_i64(str_int_map), Py3Map)
+        self.assertTrue(issubclass(Map__string_i64, Py3Map))
         self.assertIsInstance(Map__string_i64(str_int_map), Map__string_i64)
         color_map = {Color.red: Color.blue, Color.green: Color.red}
-        self.assertIsInstance(ColorGroups(color_map=color_map).color_map, base_cls)
+        self.assertIsInstance(ColorGroups(color_map=color_map).color_map, Py3Map)
+        self.assertTrue(
+            issubclass(ColorGroups(color_map=color_map).color_map.__class__, Py3Map)
+        )
         self.assertIsInstance(
             ColorGroups(color_map=color_map).color_map, Map__Color_Color
         )
-        self.assertIsInstance(StrIntMap(str_int_map), base_cls)
+        self.assertIsInstance(StrIntMap(str_int_map), Py3Map)
         self.assertIsInstance(StrIntMap(str_int_map), Map__string_i64)
+
+        if is_auto_migrated():
+            self.assertIsInstance(Map__string_i64(str_int_map), PythonMap)
+            self.assertIsInstance(ColorGroups(color_map=color_map).color_map, PythonMap)
+            self.assertIsInstance(StrIntMap(str_int_map), PythonMap)
 
         self.assertNotIsInstance(StrIntMap(str_int_map), Map__Color_Color)
         self.assertNotIsInstance(StrIntMap(str_int_map), Map__string_List__i32)

@@ -68,13 +68,21 @@ class ListTests(unittest.TestCase):
         self.assertEqual(binary_list, [b"Saint Barth\xc3\xa9lemy"])
 
     def test_isinstance(self) -> None:
-        base_cls = PythonList if is_auto_migrated() else Py3List
-        self.assertIsInstance(List__i32(range(5)), base_cls)
+        self.assertIsInstance(List__i32(range(5)), Py3List)
+        self.assertTrue(issubclass(List__i32, Py3List))
         self.assertIsInstance(List__i32(range(5)), List__i32)
-        self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, base_cls)
+        self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, Py3List)
+        self.assertTrue(
+            issubclass(easy(val_list=[1, 2, 3]).val_list.__class__, Py3List)
+        )
         self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, List__i32)
-        self.assertIsInstance(I32List(range(5)), base_cls)
+        self.assertIsInstance(I32List(range(5)), Py3List)
         self.assertIsInstance(I32List(range(5)), List__i32)
+
+        if is_auto_migrated():
+            self.assertIsInstance(List__i32(range(5)), PythonList)
+            self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, PythonList)
+            self.assertIsInstance(I32List(range(5)), PythonList)
 
         self.assertNotIsInstance(List__i16(range(5)), List__i32)
         self.assertNotIsInstance(

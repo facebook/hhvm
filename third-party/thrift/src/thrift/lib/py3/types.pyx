@@ -32,10 +32,14 @@ from thrift.python.types cimport (
     BadEnum as _fbthrift_python_BadEnum,
     _fbthrift_struct_update_nested_field as _fbthrift_python_struct_update_nested_field,
 )
+from apache.thrift.metadata.types_auto_migrated import _fbthrift__is_py3_auto_migrated
 from thrift.python.types import (
     Enum as _fbthrift_python_Enum,
     EnumMeta as _fbthrift_python_EnumMeta,
     Flag as _fbthrift_python_Flag,
+    List as _fbthrift_python_List,
+    Map as _fbthrift_python_Map,
+    Set as _fbthrift_python_Set,
     Struct as _fbthrift_python_Struct,
     StructOrUnion as _fbthrift_python_StructOrUnion,
     isset as _fbthrift_python_isset,
@@ -493,6 +497,21 @@ cdef class List(Container):
         return index
 
 
+class ListMeta(type):
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_List):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_List):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__subclasscheck__(sub)
+
+
+SetMetaClass(<PyTypeObject*> List, <PyTypeObject*> ListMeta)
+
+
 cdef class _SetPrivateCtorToken:
     pass
 
@@ -632,6 +651,20 @@ cdef inline _fbthrift_set_to_py_set(Set self, other):
 cdef inline _py_set_to_fbthrift_set_unchecked(Set self, py_set):
     return self._child_cls(py_set, _fbthrift_set_private_ctor)
 
+class SetMeta(type):
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_Set):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_Set):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__subclasscheck__(sub)
+
+
+SetMetaClass(<PyTypeObject*> Set, <PyTypeObject*> SetMeta)
+
 cdef class _MapPrivateCtorToken:
     pass
 
@@ -732,6 +765,21 @@ cdef class Map(Container):
         return self._py_obj.values()
     def items(Map self):
         return self._py_obj.items()
+
+class MapMeta(type):
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_Map):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_Map):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__subclasscheck__(sub)
+
+
+SetMetaClass(<PyTypeObject*> Map, <PyTypeObject*> MapMeta)
+
 CompiledEnum = _fbthrift_python_Enum
 Enum = _fbthrift_python_Enum
 # I wanted to call the base class Enum, but there is a cython bug

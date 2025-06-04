@@ -25,8 +25,7 @@
 #include <memory>
 #include <utility>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 TEST(FatalVariant, variant_try_get) {
 #define TEST_IMPL2(TYPE, FIELD, OTHER1, OTHER2, OTHER3, VALUE, ...)           \
@@ -120,5 +119,4 @@ TEST(FatalVariant, variant_set) {
 #undef TEST_IMPL2
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

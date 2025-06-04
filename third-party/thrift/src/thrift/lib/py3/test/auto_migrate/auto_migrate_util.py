@@ -16,7 +16,9 @@
 
 import unittest
 
-from testing.thrift_types import Nested1 as NestedPython
+from apache.thrift.metadata.types_auto_migrated import (  # @manual=//thrift/lib/thrift:metadata-py3-is-auto-migrated
+    _fbthrift__is_py3_auto_migrated,
+)
 
 
 # By convention, srcs in `py3/test/auto_migrate/` are used by two different test targets:
@@ -24,8 +26,7 @@ from testing.thrift_types import Nested1 as NestedPython
 #   - another target in `py3/test/auto_migrate:` runs with auto-migrate enabled
 # This utility method helps writing test code that supports both setups.
 def is_auto_migrated() -> bool:
-    # pyre-ignore[16]: Undefined attribute; using non-public API
-    return NestedPython._fbthrift_auto_migrate_enabled()
+    return _fbthrift__is_py3_auto_migrated
 
 
 def brokenInAutoMigrate():  # pyre-ignore[3] unittest isn't very well typed

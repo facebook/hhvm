@@ -1688,6 +1688,7 @@ void t_mstch_py3_generator::generate_types() {
   std::vector<std::string> autoMigrateFilesWithTypeContext{
       "types.py",
       "types_auto_FBTHRIFT_ONLY_DO_NOT_USE.py",
+      "types_auto_migrated.py",
   };
 
   std::vector<std::string> autoMigrateFilesNoTypeContext{
@@ -1712,6 +1713,7 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.pxd",
       "metadata.pyi",
       "metadata.pyx",
+      "types_auto_migrated.py",
       "types_empty.pyx",
       "types_fields.pxd",
       "types_fields.pyx",

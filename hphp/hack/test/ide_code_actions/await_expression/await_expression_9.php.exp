@@ -2,8 +2,11 @@ Code actions available:
 ------------------------------------------
 await expression (CodeActionKind: "quickfix") SELECTED
 Devmate Quick Fix - Casting Awaitable<int> to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (CodeActionKind: "quickfix")
+Devmate Agent Fix - Casting Awaitable<int> to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (CodeActionKind: "quickfix")
 Devmate Quick Fix - This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (CodeActionKind: "quickfix")
+Devmate Agent Fix - This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (CodeActionKind: "quickfix")
 Devmate Quick Fix - Invalid return type (CodeActionKind: "quickfix")
+Devmate Agent Fix - Invalid return type (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

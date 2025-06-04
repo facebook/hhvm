@@ -2,7 +2,9 @@ Code actions available:
 ------------------------------------------
 Inline method (CodeActionKind: "refactor") SELECTED
 Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
 Devmate Quick Fix - Private members cannot be accessed with static:: since a child class may also have an identically named private member (CodeActionKind: "quickfix")
+Devmate Agent Fix - Private members cannot be accessed with static:: since a child class may also have an identically named private member (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

@@ -1,8 +1,11 @@
 Code actions available:
 ------------------------------------------
 Devmate Quick Fix - Invalid return type (CodeActionKind: "quickfix") SELECTED
+Devmate Agent Fix - Invalid return type (CodeActionKind: "quickfix")
 Devmate Quick Fix - Invalid return type (CodeActionKind: "quickfix") SELECTED
+Devmate Agent Fix - Invalid return type (CodeActionKind: "quickfix")
 Devmate Quick Fix - Invalid return type (CodeActionKind: "quickfix") SELECTED
+Devmate Agent Fix - Invalid return type (CodeActionKind: "quickfix")
 
 Multiple code action titles match prefix: 'Devmate Quick Fix'
 

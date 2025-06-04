@@ -2,6 +2,7 @@ Code actions available:
 ------------------------------------------
 Inline method (CodeActionKind: "refactor") SELECTED
 Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

@@ -1,6 +1,7 @@
 Code actions available:
 ------------------------------------------
 Devmate Quick Fix - Invalid argument (CodeActionKind: "quickfix") SELECTED
+Devmate Agent Fix - Invalid argument (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

@@ -118,9 +118,9 @@ let edit_to_code_action
     }
 
 let command_to_code_action Code_action_types.{ title; command_args } =
-  match command_args with
-  | Code_action_types.Show_inline_chat command_args ->
-    let command =
+  let command =
+    match command_args with
+    | Code_action_types.Show_inline_chat command_args ->
       Lsp.Command.
         {
           title;
@@ -131,23 +131,34 @@ let command_to_code_action Code_action_types.{ title; command_args } =
                 command_args;
             ];
         }
-    in
-    (* We include an empty map of edits so the client does not send us a follow-up
-       codeAction/resolve request to as for edits
-       https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeAction
-    *)
-    let edit = Lsp.(WorkspaceEdit.{ changes = DocumentUri.Map.empty }) in
-    let action =
-      Lsp.CodeAction.
+    | Code_action_types.Show_sidebar_chat command_args ->
+      Lsp.Command.
         {
           title;
-          kind = Lsp.CodeActionKind.quickfix;
-          diagnostics = [];
-          action = BothEditThenCommand (edit, command);
-          isAI = Some true;
+          command = "code-compose.chat.prompt";
+          arguments =
+            [
+              Code_action_types.Show_sidebar_chat_command_args.to_json
+                command_args;
+            ];
         }
-    in
-    Lsp.CodeAction.Action action
+  in
+  (* We include an empty map of edits so the client does not send us a follow-up
+     codeAction/resolve request to as for edits
+     https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeAction
+  *)
+  let edit = Lsp.(WorkspaceEdit.{ changes = DocumentUri.Map.empty }) in
+  let action =
+    Lsp.CodeAction.
+      {
+        title;
+        kind = Lsp.CodeActionKind.quickfix;
+        diagnostics = [];
+        action = BothEditThenCommand (edit, command);
+        isAI = Some true;
+      }
+  in
+  Lsp.CodeAction.Action action
 
 let to_action code_action =
   match code_action with

@@ -3,7 +3,9 @@ Code actions available:
 await expression (CodeActionKind: "refactor") SELECTED
 Extract into variable (CodeActionKind: "refactor")
 Devmate Quick Fix - `await` can only operate on an `Awaitable` (CodeActionKind: "quickfix")
+Devmate Agent Fix - `await` can only operate on an `Awaitable` (CodeActionKind: "quickfix")
 Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

@@ -4965,6 +4965,28 @@ function call_method(ClassWithFooBar $mc): void {
                         },
                         "data": {"isAI": True},
                     },
+                    {
+                        "title": "Devmate Agent Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                        "kind": "quickfix",
+                        "diagnostics": [],
+                        "edit": {"changes": {}},
+                        "command": {
+                            "title": "Devmate Agent Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                            "command": "code-compose.chat.prompt",
+                            "arguments": [
+                                {
+                                    "displayPrompt": "Devmate Agent Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                                    "modelPrompt": "You will be given a Hack code snippet and a detailed diagnostic explaining a problem with the code and all the names and locations of all related expressions, hints, statements and definitions.\n\n```hack\n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->[DIAGNOSTIC_START]foobar[DIAGNOSTIC_END]();\n 9 | }\nThe following diagnostic contains a detailed description of how the typechecker discovered the error.\nEach step describes how a type flowed from hints to expressions or how the subtype error was discovered when checking two types.\nThe contained code fragments highlight relevant hints, statements and expression using the characters '»' and '«' to indicate the code element .\nThe code fragments are given with line numbers to help you understand the context of the error. You should never use those line numbers in suggested edits.\n<DIAGNOSTIC>\n\n```hack\nerror: Typing[4053] No instance method foobaz in ClassWithFooBar\n\nFile code_action_missing_method.php, line 8, character 8 - line 8, character 13:\n\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->»foobar«();\n 9 | }\n\nDid you mean foobar instead?\n\nFile code_action_missing_method.php, line 4, character 19 - line 4, character 24:\n\n 1 | <?hh\n 2 | \n 3 | class ClassWithFooBar {\n 4 |   public function »foobar«(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\nThis is why I think it is an object of type ClassWithFooBar\n\nFile code_action_missing_method.php, line 7, character 22 - line 7, character 36:\n\n 5 | }\n 6 | \n 7 | function call_method(»ClassWithFooBar« $mc): void {\n 8 |   $mc->foobar();\n 9 | }\n\nDeclaration of ClassWithFooBar is here\n\nFile code_action_missing_method.php, line 3, character 7 - line 3, character 21:\n\n 1 | <?hh\n 2 | \n 3 | class »ClassWithFooBar« {\n 4 |   public function foobar(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\n\n```\n\n</DIAGNOSTIC>\n\nYour task is to help the user to understand and fix the error by using any tool you think is appropriate and following these steps:\n\n1. Read the diagnostic and understand how the type type error was discovered and the role of each type definition, hint, expression and statement; you may open and read any file mentioned in the diagnostic and search for the names of the definitions, hints, expressions and statements mentioned in the diagnostic. DO NOT focus solely on the position the error was found - the cause of the error may be several steps earlier in the diagnostic and occur in another part of the code mentioned in the diagnostic. The diagnostic will help you think about making changes to various parts of the code may affect the error.\n\n2. Explain the complete diagnostic to the user in your own words, using the names of the definitions, hints, expressions and statements mentioned in the diagnostic;\n\n3. Based on your explanation and the context of the problem, consider which declarations, hints, expressions and statements contained in the diagnostic could be changed to fix the problem.\n\n4. Create edits for the changes you wish to make in order to fix the problem and explain your reasoning; these changes may be in any file mentioned in the diagnostic;\n\n5. Ensure the proposed solution is syntactically correct and does not introduce new errors or warnings;\n\n6. Evaluate the proposed solution and explain why it is the best solution to the problem. Whilst evaluating, please consider the following:\n- Does the solution introduce type errors (BAD)\n- Does the solution reduce code quality by circumventing the typechecker (e.g. using `as` instead of `is`, using `UNSAFE_CAST` etc) (BAD)\n- Does the solution change the behavior of the program (BAD)\n\n7. If your proposed solution is good, generate an edit that will fix the problem and return it in the code section of the response. If your proposed solution is not good, go back to step 1 and try again.\n",
+                                    "model": "CLAUDE_37_SONNET",
+                                    "action": "DEVMATE",
+                                    "trigger": "FixLintErrorCodeAction",
+                                    "triggerType": "CodeAction",
+                                    "correlationId": "6c30c21bea1128b0",
+                                }
+                            ],
+                        },
+                        "data": {"isAI": True},
+                    },
                 ],
                 powered_by="serverless_ide",
             )

@@ -3,6 +3,7 @@ Code actions available:
 await expression (CodeActionKind: "refactor") SELECTED
 Extract into variable (CodeActionKind: "refactor")
 Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

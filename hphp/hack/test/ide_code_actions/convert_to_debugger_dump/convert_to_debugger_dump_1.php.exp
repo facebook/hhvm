@@ -2,8 +2,11 @@ Code actions available:
 ------------------------------------------
 convert to 'debugger_dump' (CodeActionKind: "quickfix") SELECTED
 Devmate Quick Fix - An expression cannot start with `=` (CodeActionKind: "quickfix")
+Devmate Agent Fix - An expression cannot start with `=` (CodeActionKind: "quickfix")
 Devmate Quick Fix - Unbound global constant (Typing) (CodeActionKind: "quickfix")
+Devmate Agent Fix - Unbound global constant (Typing) (CodeActionKind: "quickfix")
 Devmate Quick Fix - Unbound name: `=` (a global constant) (CodeActionKind: "quickfix")
+Devmate Agent Fix - Unbound name: `=` (a global constant) (CodeActionKind: "quickfix")
 
 JSON for selected code action:
 ------------------------------------------

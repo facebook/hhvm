@@ -7,6 +7,9 @@
  *)
 open Hh_prelude
 
+(* -- Context helpers ------------------------------------------------------- *)
+let is_subtyping_error code = code >= 4000 && code < 5000
+
 let max_file_content_lines = 400
 
 let cursor_l = "[DIAGNOSTIC_START]"
@@ -124,13 +127,6 @@ let extended_diagnostics buf user_error =
     List.iter msgs ~f:(fun str ->
         Buffer.add_string buf (Format.sprintf "<HINT>\n%s\n</HINT>\n" str))
 
-let create_user_prompt selection user_error =
-  let buf = Buffer.create 500 in
-  user_prompt_prefix buf selection user_error;
-  extended_diagnostics buf user_error;
-  user_prompt_suffix buf;
-  Buffer.contents buf
-
 let legacy_diagnostics buf user_error =
   Buffer.add_string buf "<DIAGNOSTIC>\n";
   Buffer.add_string buf (snd (User_error.claim_message user_error));
@@ -146,6 +142,15 @@ let legacy_diagnostics buf user_error =
              str
              (Pos.filename pos)))
 
+(** Generates the prompt used for inline fixes for subtyping errors  *)
+let create_user_prompt selection user_error =
+  let buf = Buffer.create 500 in
+  user_prompt_prefix buf selection user_error;
+  extended_diagnostics buf user_error;
+  user_prompt_suffix buf;
+  Buffer.contents buf
+
+(** Generates the prompt used for inline fixes for non-subtyping errors  *)
 let create_legacy_user_prompt selection user_error =
   let buf = Buffer.create 500 in
   user_prompt_prefix buf selection user_error;
@@ -153,7 +158,46 @@ let create_legacy_user_prompt selection user_error =
   user_prompt_suffix buf;
   Buffer.contents buf
 
-let is_subtyping_error code = code >= 4000 && code < 5000
+let agentic_prefix =
+  {|You will be given a Hack code snippet and a detailed diagnostic explaining a problem with the code and all the names and locations of all related expressions, hints, statements and definitions.|}
+
+let agentic_suffix =
+  {|Your task is to help the user to understand and fix the error by using any tool you think is appropriate and following these steps:
+
+1. Read the diagnostic and understand how the type type error was discovered and the role of each type definition, hint, expression and statement; you may open and read any file mentioned in the diagnostic and search for the names of the definitions, hints, expressions and statements mentioned in the diagnostic. DO NOT focus solely on the position the error was found - the cause of the error may be several steps earlier in the diagnostic and occur in another part of the code mentioned in the diagnostic. The diagnostic will help you think about making changes to various parts of the code may affect the error.
+
+2. Explain the complete diagnostic to the user in your own words, using the names of the definitions, hints, expressions and statements mentioned in the diagnostic;
+
+3. Based on your explanation and the context of the problem, consider which declarations, hints, expressions and statements contained in the diagnostic could be changed to fix the problem.
+
+4. Create edits for the changes you wish to make in order to fix the problem and explain your reasoning; these changes may be in any file mentioned in the diagnostic;
+
+5. Ensure the proposed solution is syntactically correct and does not introduce new errors or warnings;
+
+6. Evaluate the proposed solution and explain why it is the best solution to the problem. Whilst evaluating, please consider the following:
+- Does the solution introduce type errors (BAD)
+- Does the solution reduce code quality by circumventing the typechecker (e.g. using `as` instead of `is`, using `UNSAFE_CAST` etc) (BAD)
+- Does the solution change the behavior of the program (BAD)
+
+7. If your proposed solution is good, generate an edit that will fix the problem and return it in the code section of the response. If your proposed solution is not good, go back to step 1 and try again.
+|}
+
+let create_agentic_user_prompt ctxt_pos user_error =
+  let claim_pos =
+    Message.get_message_pos (User_error.claim_message user_error)
+  in
+  let buf = Buffer.create 5000 in
+  Buffer.add_string buf agentic_prefix;
+  Buffer.add_string buf "\n\n```hack\n";
+  extract_prompt_context buf ~ctxt_pos ~claim_pos;
+  if is_subtyping_error (User_error.get_code user_error) then
+    extended_diagnostics buf user_error
+  else
+    legacy_diagnostics buf user_error;
+  Buffer.add_string buf agentic_suffix;
+  Buffer.contents buf
+
+(* -- Generate code actions from errors ------------------------------------- *)
 
 let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let claim = User_error.claim_message user_error in
@@ -216,18 +260,58 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let title = Format.sprintf {|Devmate Quick Fix - %s|} (snd claim) in
   Code_action_types.{ title; command_args }
 
+let error_to_show_sidebar_chat_command user_error line_agnostic_hash =
+  let claim = User_error.claim_message user_error in
+  let override_selection =
+    let default = fst claim in
+    Option.value_map ~default ~f:(fun pos ->
+        let start_line = Pos.line pos and end_line = Pos.end_line pos in
+        (* If we aren't in a function the env contains Pos.none - use the diagnostic position in this case *)
+        if end_line = 0 then
+          default
+        (* If size of snippet is greater than our max just use the diagnostic position *)
+        else if end_line - start_line >= max_file_content_lines then
+          default
+        else
+          pos)
+    @@ User_error.function_pos user_error
+  in
+  let command_args =
+    Code_action_types.(
+      Show_sidebar_chat
+        Show_sidebar_chat_command_args.
+          {
+            display_prompt =
+              Format.sprintf {|Devmate Agent Fix - %s|} (snd claim);
+            model_prompt =
+              Some (create_agentic_user_prompt override_selection user_error);
+            llm_config = None;
+            model = Some CLAUDE_37_SONNET;
+            attachments = None;
+            action = DEVMATE;
+            trigger = Some "FixLintErrorCodeAction";
+            trigger_type = Some Code_action;
+            local_tool_results = None;
+            correlation_id = Some (Printf.sprintf "%x" line_agnostic_hash);
+          })
+  in
+  let title = Format.sprintf {|Devmate Agent Fix - %s|} (snd claim) in
+  Code_action_types.{ title; command_args }
+
 let errors_to_commands errors selection =
-  List.filter_map
+  List.concat_map
     (Errors.get_error_list ~drop_fixmed:false errors)
     ~f:(fun user_error ->
       if Pos.contains (User_error.get_pos user_error) selection then
         let line_agnostic_hash =
           User_error.hash_error_for_saved_state user_error
         and finalized_error = User_error.to_absolute user_error in
-        Some
-          (error_to_show_inline_chat_command finalized_error line_agnostic_hash)
+        [
+          error_to_show_inline_chat_command finalized_error line_agnostic_hash;
+          error_to_show_sidebar_chat_command finalized_error line_agnostic_hash;
+        ]
       else
-        None)
+        [])
 
 let generate_simplihack_commands ctx tast pos =
   let prompts =

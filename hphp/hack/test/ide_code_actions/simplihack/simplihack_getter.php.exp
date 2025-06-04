@@ -1,6 +1,7 @@
 Code actions available:
 ------------------------------------------
 Devmate Quick Fix - Run AI Code Action by clicking on this position in the file (CodeActionKind: "quickfix")
+Devmate Agent Fix - Run AI Code Action by clicking on this position in the file (CodeActionKind: "quickfix")
 Generate Code for SimpliHack (CodeActionKind: "quickfix") SELECTED
 
 JSON for selected code action:

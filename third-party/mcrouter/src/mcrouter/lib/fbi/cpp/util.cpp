@@ -12,8 +12,6 @@
 #include <pthread.h>
 #include <utime.h>
 
-#include <chrono>
-
 #include <boost/filesystem.hpp>
 
 #include <openssl/md5.h>

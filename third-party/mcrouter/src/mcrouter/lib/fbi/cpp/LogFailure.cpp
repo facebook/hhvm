@@ -16,7 +16,6 @@
 #include <vector>
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include <folly/Format.h>
 #include <folly/Singleton.h>

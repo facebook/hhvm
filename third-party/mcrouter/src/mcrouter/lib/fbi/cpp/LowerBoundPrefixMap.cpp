@@ -8,12 +8,7 @@
 #include "mcrouter/lib/fbi/cpp/LowerBoundPrefixMap.h"
 
 #include <cstring>
-#include <numeric>
 #include <ostream>
-#include <stdexcept>
-
-#include <folly/CPortability.h>
-#include <folly/Likely.h>
 
 namespace facebook::memcache::detail {
 namespace {

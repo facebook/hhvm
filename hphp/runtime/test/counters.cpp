@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 
 #include "hphp/util/alloc-defs.h"
-#include "hphp/util/jemalloc-util.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/service-data.h"
 

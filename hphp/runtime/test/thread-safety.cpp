@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ldap/ext_ldap.h"
 #include "hphp/util/process.h"
 

@@ -568,16 +568,14 @@ void checkGetOrderableCondition(const t_program& program) {
           get_structured_named(program, "TestStructTypedefCustomSet"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
+      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
 
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
           get_structured_named(program, "TestStructTypedefAliasToCustomSet"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
+      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
 
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
@@ -592,8 +590,7 @@ void checkGetOrderableCondition(const t_program& program) {
           get_structured_named(program, "TestStructTypedefCustomSetWithUri"),
           false /* enableCustomTypeOrderingIfStructureHasUri */
           ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
+      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
 
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
@@ -625,8 +622,7 @@ TEST(OrderableTypeUtilsTest, GetOrderableCondition) {
           get_structured_named(*program, "TestStructCustomTypeNoOrdering"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
+      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
           get_structured_named(
@@ -649,16 +645,14 @@ TEST(OrderableTypeUtilsTest, GetOrderableCondition) {
               *program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
           false /* enableCustomTypeOrderingIfStructureHasUri */
           ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
+      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
           get_structured_named(
               *program, "TestStructTypedefNonCustomSetWithCppType"),
           true /* enableCustomTypeOrderingIfStructureHasUri */
           ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled);
+      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
 }
 
 TEST(

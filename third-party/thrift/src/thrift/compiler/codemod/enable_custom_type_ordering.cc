@@ -50,20 +50,19 @@ void codemod_main(source_manager& sm, t_program_bundle& bundle) {
              !isAnnotated));
         return;
 
-      case OrderableTypeUtils::StructuredOrderableCondition::
-          NeedsCustomTypeOrderingEnabled:
+      case OrderableTypeUtils::StructuredOrderableCondition::NotOrderable:
         // structured_type could be orderable, if it was annotated or custom
         // type ordering was enable by the (legacy) URI logic.
         // If this codemod is running, both of these conditions should be
         // false:
         assert(
             (void("Logic error: if type is annotated, "
-                  "NeedsCustomTypeOrderingEnabled is impossible."),
+                  "NotOrderable is impossible."),
              !isAnnotated));
         assert(
             (void("Logic error: in this codemod, (legacy) implicit custom "
                   "type enabling via URI is assumed to be enabled, so "
-                  "NeedsCustomTypeOrderingEnabled implies there is no URI."),
+                  "NotOrderable implies there is no URI."),
              !hasUri));
         return;
 

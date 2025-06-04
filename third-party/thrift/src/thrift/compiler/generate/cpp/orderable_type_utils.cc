@@ -363,7 +363,7 @@ OrderableTypeUtils::get_orderable_condition(
         OrderableByLegacyImplicitLogicEnabledByUri;
   }
 
-  return StructuredOrderableCondition::NeedsCustomTypeOrderingEnabled;
+  return StructuredOrderableCondition::NotOrderable;
 }
 
 } // namespace apache::thrift::compiler::cpp2

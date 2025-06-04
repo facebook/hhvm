@@ -503,8 +503,7 @@ void validate_orderable_structured_types(
           node.name());
       return;
     }
-    case OrderableTypeUtils::StructuredOrderableCondition::
-        NeedsCustomTypeOrderingEnabled:
+    case OrderableTypeUtils::StructuredOrderableCondition::NotOrderable:
     case OrderableTypeUtils::StructuredOrderableCondition::
         OrderableByExplicitAnnotation:
       // Nothing to do

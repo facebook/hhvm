@@ -90,7 +90,7 @@ class OrderableTypeUtils final {
      * ordering is not enabled. Enabling custom type ordering (via explicit
      * annotation or implicit legacy URI-based logic) would make it orderable.
      */
-    NeedsCustomTypeOrderingEnabled,
+    NotOrderable,
 
     /**
      * The generated structured type has unordered container field(s) with
@@ -116,7 +116,7 @@ class OrderableTypeUtils final {
    * The `is_orderable()` methods above are semantically equivalent to
    * ```
    * get_orderable_condition(...) !=
-   * StructuredOrderableCondition::NeedsCustomTypeOrderingEnabled
+   * StructuredOrderableCondition::NotOrderable
    * ```
    * but may be faster.
    */

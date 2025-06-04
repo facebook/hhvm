@@ -207,7 +207,7 @@ void SerializedUnion::__fbthrift_destruct() {
 
 void SerializedUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   SerializedUnion::~SerializedUnion() {
@@ -218,7 +218,7 @@ bool SerializedUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   SerializedUnion::SerializedUnion(const SerializedUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -577,7 +577,7 @@ void MarshalUnion::__fbthrift_destruct() {
 
 void MarshalUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   MarshalUnion::~MarshalUnion() {
@@ -588,7 +588,7 @@ bool MarshalUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   MarshalUnion::MarshalUnion(const MarshalUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

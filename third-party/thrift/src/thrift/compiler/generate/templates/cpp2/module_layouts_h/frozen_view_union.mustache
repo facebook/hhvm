@@ -16,28 +16,28 @@
 
 }}
   struct View : public ViewBase<View, LayoutSelf, {{struct:cpp_fullname}}> {
-    {{struct:cpp_fullname}}::Type fbthrift_type_;
-    View() : fbthrift_type_({{struct:cpp_fullname}}::Type::__EMPTY__) {}
+    {{struct:cpp_fullname}}::Type type_;
+    View() : type_({{struct:cpp_fullname}}::Type::__EMPTY__) {}
     View(const LayoutSelf* layout, ViewPosition position)
         : ViewBase<View, LayoutSelf, {{struct:cpp_fullname}}>(layout, position) {
-      fbthrift_type_ = this->layout_->fbthrift_type_Field.layout.view(this->position_(this->layout_->fbthrift_type_Field.pos));
-      switch (fbthrift_type_) {
+      type_ = this->layout_->type_Field.layout.view(this->position_(this->layout_->type_Field.pos));
+      switch (type_) {
 {{#struct:fields}}
         case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {
           break;
         }
 {{/struct:fields}}
         default: {
-          fbthrift_type_ = {{struct:cpp_fullname}}::Type::__EMPTY__;
+          type_ = {{struct:cpp_fullname}}::Type::__EMPTY__;
         }
       }
     }
 
-    {{struct:cpp_fullname}}::Type getType() {return fbthrift_type_;}
+    {{struct:cpp_fullname}}::Type getType() {return type_;}
 
 {{#struct:fields}}{{#field:type}}
     auto get_{{field:cpp_name}}() const {
-      assert(fbthrift_type_ == {{struct:cpp_fullname}}::Type::{{field:cpp_name}});
+      assert(type_ == {{struct:cpp_fullname}}::Type::{{field:cpp_name}});
       return this->layout_->{{field:cpp_name}}Field.layout.view(
           this->position_(this->layout_->{{field:cpp_name}}Field.pos));
     }

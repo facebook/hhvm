@@ -579,10 +579,10 @@ class MyUnion final  {
   } ;
 
   MyUnion()
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {}
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
 
   MyUnion(MyUnion&& rhs) noexcept
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
@@ -791,7 +791,7 @@ class MyUnion final  {
     using T0 = bool;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::bool_field);
+    type_ = folly::to_underlying(Type::bool_field);
     ::new (std::addressof(value_.bool_field)) T(t);
     return value_.bool_field;
   }
@@ -803,7 +803,7 @@ class MyUnion final  {
     using T0 = ::std::int8_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::byte_field);
+    type_ = folly::to_underlying(Type::byte_field);
     ::new (std::addressof(value_.byte_field)) T(t);
     return value_.byte_field;
   }
@@ -815,7 +815,7 @@ class MyUnion final  {
     using T0 = ::std::int16_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::short_field);
+    type_ = folly::to_underlying(Type::short_field);
     ::new (std::addressof(value_.short_field)) T(t);
     return value_.short_field;
   }
@@ -827,7 +827,7 @@ class MyUnion final  {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::int_field);
+    type_ = folly::to_underlying(Type::int_field);
     ::new (std::addressof(value_.int_field)) T(t);
     return value_.int_field;
   }
@@ -839,7 +839,7 @@ class MyUnion final  {
     using T0 = ::std::int64_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::long_field);
+    type_ = folly::to_underlying(Type::long_field);
     ::new (std::addressof(value_.long_field)) T(t);
     return value_.long_field;
   }
@@ -851,7 +851,7 @@ class MyUnion final  {
     using T0 = float;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::float_field);
+    type_ = folly::to_underlying(Type::float_field);
     ::new (std::addressof(value_.float_field)) T(t);
     return value_.float_field;
   }
@@ -863,7 +863,7 @@ class MyUnion final  {
     using T0 = double;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::double_field);
+    type_ = folly::to_underlying(Type::double_field);
     ::new (std::addressof(value_.double_field)) T(t);
     return value_.double_field;
   }
@@ -875,7 +875,7 @@ class MyUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::string_field);
+    type_ = folly::to_underlying(Type::string_field);
     ::new (std::addressof(value_.string_field)) T(t);
     return value_.string_field;
   }
@@ -886,7 +886,7 @@ class MyUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::string_field);
+    type_ = folly::to_underlying(Type::string_field);
     ::new (std::addressof(value_.string_field)) T(std::move(t));
     return value_.string_field;
   }
@@ -894,7 +894,7 @@ class MyUnion final  {
   /** Glean { "field": "string_field" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_string_field(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::string_field);
+    type_ = folly::to_underlying(Type::string_field);
     ::new (std::addressof(value_.string_field)) ::std::string(std::forward<T>(t)...);
     return value_.string_field;
   }
@@ -906,7 +906,7 @@ class MyUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::binary_field);
+    type_ = folly::to_underlying(Type::binary_field);
     ::new (std::addressof(value_.binary_field)) T(t);
     return value_.binary_field;
   }
@@ -917,7 +917,7 @@ class MyUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::binary_field);
+    type_ = folly::to_underlying(Type::binary_field);
     ::new (std::addressof(value_.binary_field)) T(std::move(t));
     return value_.binary_field;
   }
@@ -925,7 +925,7 @@ class MyUnion final  {
   /** Glean { "field": "binary_field" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_binary_field(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::binary_field);
+    type_ = folly::to_underlying(Type::binary_field);
     ::new (std::addressof(value_.binary_field)) ::std::string(std::forward<T>(t)...);
     return value_.binary_field;
   }
@@ -937,7 +937,7 @@ class MyUnion final  {
     using T0 = ::facebook::thrift::test::terse_write::MyEnum;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::enum_field);
+    type_ = folly::to_underlying(Type::enum_field);
     ::new (std::addressof(value_.enum_field)) T(t);
     return value_.enum_field;
   }
@@ -949,7 +949,7 @@ class MyUnion final  {
     using T0 = ::std::vector<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::list_field);
+    type_ = folly::to_underlying(Type::list_field);
     ::new (std::addressof(value_.list_field)) T(t);
     return value_.list_field;
   }
@@ -960,7 +960,7 @@ class MyUnion final  {
     using T0 = ::std::vector<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::list_field);
+    type_ = folly::to_underlying(Type::list_field);
     ::new (std::addressof(value_.list_field)) T(std::move(t));
     return value_.list_field;
   }
@@ -968,7 +968,7 @@ class MyUnion final  {
   /** Glean { "field": "list_field" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::int16_t>, T...>> ::std::vector<::std::int16_t>& set_list_field(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::list_field);
+    type_ = folly::to_underlying(Type::list_field);
     ::new (std::addressof(value_.list_field)) ::std::vector<::std::int16_t>(std::forward<T>(t)...);
     return value_.list_field;
   }
@@ -979,7 +979,7 @@ class MyUnion final  {
     using T0 = ::std::set<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::set_field);
+    type_ = folly::to_underlying(Type::set_field);
     ::new (std::addressof(value_.set_field)) T(t);
     return value_.set_field;
   }
@@ -990,7 +990,7 @@ class MyUnion final  {
     using T0 = ::std::set<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::set_field);
+    type_ = folly::to_underlying(Type::set_field);
     ::new (std::addressof(value_.set_field)) T(std::move(t));
     return value_.set_field;
   }
@@ -998,7 +998,7 @@ class MyUnion final  {
   /** Glean { "field": "set_field" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::set<::std::int16_t>, T...>> ::std::set<::std::int16_t>& set_set_field(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::set_field);
+    type_ = folly::to_underlying(Type::set_field);
     ::new (std::addressof(value_.set_field)) ::std::set<::std::int16_t>(std::forward<T>(t)...);
     return value_.set_field;
   }
@@ -1009,7 +1009,7 @@ class MyUnion final  {
     using T0 = ::std::map<::std::int16_t, ::std::int16_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::map_field);
+    type_ = folly::to_underlying(Type::map_field);
     ::new (std::addressof(value_.map_field)) T(t);
     return value_.map_field;
   }
@@ -1020,7 +1020,7 @@ class MyUnion final  {
     using T0 = ::std::map<::std::int16_t, ::std::int16_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::map_field);
+    type_ = folly::to_underlying(Type::map_field);
     ::new (std::addressof(value_.map_field)) T(std::move(t));
     return value_.map_field;
   }
@@ -1028,7 +1028,7 @@ class MyUnion final  {
   /** Glean { "field": "map_field" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::map<::std::int16_t, ::std::int16_t>, T...>> ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::map_field);
+    type_ = folly::to_underlying(Type::map_field);
     ::new (std::addressof(value_.map_field)) ::std::map<::std::int16_t, ::std::int16_t>(std::forward<T>(t)...);
     return value_.map_field;
   }
@@ -1039,7 +1039,7 @@ class MyUnion final  {
     using T0 = ::facebook::thrift::test::terse_write::MyStruct;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::struct_field);
+    type_ = folly::to_underlying(Type::struct_field);
     ::new (std::addressof(value_.struct_field)) T(t);
     return value_.struct_field;
   }
@@ -1050,7 +1050,7 @@ class MyUnion final  {
     using T0 = ::facebook::thrift::test::terse_write::MyStruct;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::struct_field);
+    type_ = folly::to_underlying(Type::struct_field);
     ::new (std::addressof(value_.struct_field)) T(std::move(t));
     return value_.struct_field;
   }
@@ -1058,7 +1058,7 @@ class MyUnion final  {
   /** Glean { "field": "struct_field" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::facebook::thrift::test::terse_write::MyStruct, T...>> ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::struct_field);
+    type_ = folly::to_underlying(Type::struct_field);
     ::new (std::addressof(value_.struct_field)) ::facebook::thrift::test::terse_write::MyStruct(std::forward<T>(t)...);
     return value_.struct_field;
   }
@@ -1332,326 +1332,326 @@ class MyUnion final  {
   /** Glean { "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> bool_field_ref() const& {
-    return {value_.bool_field, fbthrift_type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.bool_field, type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> bool_field_ref() const&& {
-    return {std::move(value_.bool_field), fbthrift_type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.bool_field), type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> bool_field_ref() & {
-    return {value_.bool_field, fbthrift_type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.bool_field, type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> bool_field_ref() && {
-    return {std::move(value_.bool_field), fbthrift_type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.bool_field), type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> byte_field_ref() const& {
-    return {value_.byte_field, fbthrift_type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.byte_field, type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> byte_field_ref() const&& {
-    return {std::move(value_.byte_field), fbthrift_type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.byte_field), type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> byte_field_ref() & {
-    return {value_.byte_field, fbthrift_type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.byte_field, type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> byte_field_ref() && {
-    return {std::move(value_.byte_field), fbthrift_type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.byte_field), type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> short_field_ref() const& {
-    return {value_.short_field, fbthrift_type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.short_field, type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> short_field_ref() const&& {
-    return {std::move(value_.short_field), fbthrift_type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.short_field), type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> short_field_ref() & {
-    return {value_.short_field, fbthrift_type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.short_field, type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> short_field_ref() && {
-    return {std::move(value_.short_field), fbthrift_type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.short_field), type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> int_field_ref() const& {
-    return {value_.int_field, fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.int_field, type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> int_field_ref() const&& {
-    return {std::move(value_.int_field), fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.int_field), type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> int_field_ref() & {
-    return {value_.int_field, fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.int_field, type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> int_field_ref() && {
-    return {std::move(value_.int_field), fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.int_field), type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> long_field_ref() const& {
-    return {value_.long_field, fbthrift_type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.long_field, type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> long_field_ref() const&& {
-    return {std::move(value_.long_field), fbthrift_type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.long_field), type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> long_field_ref() & {
-    return {value_.long_field, fbthrift_type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.long_field, type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> long_field_ref() && {
-    return {std::move(value_.long_field), fbthrift_type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.long_field), type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> float_field_ref() const& {
-    return {value_.float_field, fbthrift_type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.float_field, type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> float_field_ref() const&& {
-    return {std::move(value_.float_field), fbthrift_type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.float_field), type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> float_field_ref() & {
-    return {value_.float_field, fbthrift_type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.float_field, type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> float_field_ref() && {
-    return {std::move(value_.float_field), fbthrift_type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.float_field), type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> double_field_ref() const& {
-    return {value_.double_field, fbthrift_type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.double_field, type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> double_field_ref() const&& {
-    return {std::move(value_.double_field), fbthrift_type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.double_field), type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> double_field_ref() & {
-    return {value_.double_field, fbthrift_type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.double_field, type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> double_field_ref() && {
-    return {std::move(value_.double_field), fbthrift_type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.double_field), type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> string_field_ref() const& {
-    return {value_.string_field, fbthrift_type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.string_field, type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> string_field_ref() const&& {
-    return {std::move(value_.string_field), fbthrift_type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.string_field), type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> string_field_ref() & {
-    return {value_.string_field, fbthrift_type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.string_field, type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> string_field_ref() && {
-    return {std::move(value_.string_field), fbthrift_type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.string_field), type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> binary_field_ref() const& {
-    return {value_.binary_field, fbthrift_type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.binary_field, type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> binary_field_ref() const&& {
-    return {std::move(value_.binary_field), fbthrift_type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.binary_field), type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> binary_field_ref() & {
-    return {value_.binary_field, fbthrift_type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.binary_field, type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> binary_field_ref() && {
-    return {std::move(value_.binary_field), fbthrift_type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.binary_field), type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> enum_field_ref() const& {
-    return {value_.enum_field, fbthrift_type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.enum_field, type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> enum_field_ref() const&& {
-    return {std::move(value_.enum_field), fbthrift_type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.enum_field), type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> enum_field_ref() & {
-    return {value_.enum_field, fbthrift_type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.enum_field, type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> enum_field_ref() && {
-    return {std::move(value_.enum_field), fbthrift_type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.enum_field), type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> list_field_ref() const& {
-    return {value_.list_field, fbthrift_type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.list_field, type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> list_field_ref() const&& {
-    return {std::move(value_.list_field), fbthrift_type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.list_field), type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> list_field_ref() & {
-    return {value_.list_field, fbthrift_type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.list_field, type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> list_field_ref() && {
-    return {std::move(value_.list_field), fbthrift_type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.list_field), type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> set_field_ref() const& {
-    return {value_.set_field, fbthrift_type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.set_field, type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> set_field_ref() const&& {
-    return {std::move(value_.set_field), fbthrift_type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.set_field), type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> set_field_ref() & {
-    return {value_.set_field, fbthrift_type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.set_field, type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> set_field_ref() && {
-    return {std::move(value_.set_field), fbthrift_type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.set_field), type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> map_field_ref() const& {
-    return {value_.map_field, fbthrift_type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.map_field, type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> map_field_ref() const&& {
-    return {std::move(value_.map_field), fbthrift_type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.map_field), type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> map_field_ref() & {
-    return {value_.map_field, fbthrift_type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.map_field, type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> map_field_ref() && {
-    return {std::move(value_.map_field), fbthrift_type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.map_field), type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> struct_field_ref() const& {
-    return {value_.struct_field, fbthrift_type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.struct_field, type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> struct_field_ref() const&& {
-    return {std::move(value_.struct_field), fbthrift_type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.struct_field), type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> struct_field_ref() & {
-    return {value_.struct_field, fbthrift_type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.struct_field, type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> struct_field_ref() && {
-    return {std::move(value_.struct_field), fbthrift_type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.struct_field), type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  Type getType() const { return static_cast<Type>(fbthrift_type_); }
+  Type getType() const { return static_cast<Type>(type_); }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1663,7 +1663,7 @@ class MyUnion final  {
   uint32_t write(Protocol_* prot_) const;
  protected:
   storage_type value_;
-  std::underlying_type_t<Type> fbthrift_type_;
+  std::underlying_type_t<Type> type_;
 
  private:
   template <class Protocol_>

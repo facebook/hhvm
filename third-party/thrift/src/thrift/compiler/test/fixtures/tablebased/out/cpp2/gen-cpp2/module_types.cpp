@@ -87,7 +87,7 @@ constexpr ptrdiff_t issetOffset<::test::fixtures::tablebased::ContainerStruct>(s
 
 template<>
 constexpr ptrdiff_t unionTypeOffset<::test::fixtures::tablebased::ExampleUnion>() {
-  return offsetof(::test::fixtures::tablebased::ExampleUnion, fbthrift_type_);
+  return offsetof(::test::fixtures::tablebased::ExampleUnion, type_);
 }
 FOLLY_POP_WARNING
 }}} // apache::thrift::detail
@@ -596,7 +596,7 @@ void ExampleUnion::__fbthrift_destruct() {
 
 void ExampleUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   ExampleUnion::~ExampleUnion() {
@@ -607,7 +607,7 @@ bool ExampleUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   ExampleUnion::ExampleUnion(const ExampleUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

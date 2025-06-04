@@ -84,7 +84,7 @@ constexpr ptrdiff_t issetOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex
 {{#struct:union?}}
 template<>
 constexpr ptrdiff_t unionTypeOffset<{{struct:cpp_fullname}}>() {
-  return offsetof({{struct:cpp_fullname}}, fbthrift_type_);
+  return offsetof({{struct:cpp_fullname}}, type_);
 }
 {{/struct:union?}}
 {{/program:split_structs}}

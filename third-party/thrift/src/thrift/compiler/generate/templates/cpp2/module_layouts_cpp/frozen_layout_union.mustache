@@ -19,7 +19,7 @@
       LayoutRoot& root, const T& x, LayoutPosition self) {
     auto type = x.getType();
     FieldPosition pos = startFieldPosition();
-    pos = root.layoutField(self, pos, this->fbthrift_type_Field, type);
+    pos = root.layoutField(self, pos, this->type_Field, type);
     switch (type) {
 {{#struct:fields}}
       case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {

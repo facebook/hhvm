@@ -1714,10 +1714,10 @@ class MyUnion final  {
   } ;
 
   MyUnion()
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {}
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
 
   MyUnion(MyUnion&& rhs) noexcept
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
@@ -1794,7 +1794,7 @@ class MyUnion final  {
     using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::first);
+    type_ = folly::to_underlying(Type::first);
     ::new (std::addressof(value_.first)) T(t);
     return value_.first;
   }
@@ -1805,7 +1805,7 @@ class MyUnion final  {
     using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::first);
+    type_ = folly::to_underlying(Type::first);
     ::new (std::addressof(value_.first)) T(std::move(t));
     return value_.first;
   }
@@ -1813,7 +1813,7 @@ class MyUnion final  {
   /** Glean { "field": "first" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic-structured-annotations::annotated_inline_string, T...>> ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(T&&... t) {
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::first);
+    type_ = folly::to_underlying(Type::first);
     ::new (std::addressof(value_.first)) ::test::fixtures::basic-structured-annotations::annotated_inline_string(std::forward<T>(t)...);
     return value_.first;
   }
@@ -1825,7 +1825,7 @@ class MyUnion final  {
     using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_i64;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    fbthrift_type_ = folly::to_underlying(Type::second);
+    type_ = folly::to_underlying(Type::second);
     ::new (std::addressof(value_.second)) T(t);
     return value_.second;
   }
@@ -1872,50 +1872,50 @@ class MyUnion final  {
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> first_ref() const& {
-    return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.first, type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> first_ref() const&& {
-    return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.first), type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> first_ref() & {
-    return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.first, type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> first_ref() && {
-    return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.first), type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> second_ref() const& {
-    return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.second, type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> second_ref() const&& {
-    return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.second), type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> second_ref() & {
-    return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.second, type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> second_ref() && {
-    return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.second), type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  Type getType() const { return static_cast<Type>(fbthrift_type_); }
+  Type getType() const { return static_cast<Type>(type_); }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1927,7 +1927,7 @@ class MyUnion final  {
   uint32_t write(Protocol_* prot_) const;
  protected:
   storage_type value_;
-  std::underlying_type_t<Type> fbthrift_type_;
+  std::underlying_type_t<Type> type_;
 
  private:
   template <class Protocol_>

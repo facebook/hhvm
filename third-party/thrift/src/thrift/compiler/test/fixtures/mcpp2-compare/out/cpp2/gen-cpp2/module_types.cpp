@@ -600,7 +600,7 @@ void SimpleUnion::__fbthrift_destruct() {
 
 void SimpleUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   SimpleUnion::~SimpleUnion() {
@@ -611,7 +611,7 @@ bool SimpleUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   SimpleUnion::SimpleUnion(const SimpleUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -808,7 +808,7 @@ void ComplexUnion::__fbthrift_destruct() {
 
 void ComplexUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   ComplexUnion::~ComplexUnion() {
@@ -819,7 +819,7 @@ bool ComplexUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   ComplexUnion::ComplexUnion(const ComplexUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -1022,7 +1022,7 @@ bool ComplexUnion::operator<([[maybe_unused]] const ComplexUnion& rhs) const {
 
 ::std::unique_ptr<::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field(::std::unique_ptr<::some::valid::ns::MyStruct> t) {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::ref_field);
+  type_ = folly::to_underlying(Type::ref_field);
   ::new (std::addressof(value_.ref_field)) ::std::unique_ptr<::some::valid::ns::MyStruct>(std::move(t));
   return value_.ref_field;
 }
@@ -1037,7 +1037,7 @@ bool ComplexUnion::operator<([[maybe_unused]] const ComplexUnion& rhs) const {
 
 ::std::shared_ptr<const ::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field2(::std::shared_ptr<const ::some::valid::ns::MyStruct> t) {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::ref_field2);
+  type_ = folly::to_underlying(Type::ref_field2);
   ::new (std::addressof(value_.ref_field2)) ::std::shared_ptr<const ::some::valid::ns::MyStruct>(std::move(t));
   return value_.ref_field2;
 }
@@ -3182,7 +3182,7 @@ void FloatUnion::__fbthrift_destruct() {
 
 void FloatUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
 
@@ -3190,7 +3190,7 @@ bool FloatUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   FloatUnion::FloatUnion(const FloatUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

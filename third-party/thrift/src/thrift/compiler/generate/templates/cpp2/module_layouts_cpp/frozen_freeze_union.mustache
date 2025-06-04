@@ -18,7 +18,7 @@
   void Layout<{{struct:cpp_fullname}}>::freeze(
       FreezeRoot& root, const T& x, FreezePosition self) const {
     auto type = x.getType();
-    root.freezeField(self, this->fbthrift_type_Field, type);
+    root.freezeField(self, this->type_Field, type);
     switch (type) {
 {{#struct:fields}}
       case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {

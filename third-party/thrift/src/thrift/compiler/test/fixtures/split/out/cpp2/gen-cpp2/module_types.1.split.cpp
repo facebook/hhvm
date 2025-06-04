@@ -78,7 +78,7 @@ void MyUnion::__fbthrift_destruct() {
 
 void MyUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   MyUnion::~MyUnion() {
@@ -89,7 +89,7 @@ bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   MyUnion::MyUnion(const MyUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

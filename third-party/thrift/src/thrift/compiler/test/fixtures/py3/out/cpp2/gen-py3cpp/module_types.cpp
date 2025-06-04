@@ -742,7 +742,7 @@ void AdaptedUnion::__fbthrift_destruct() {
 
 void AdaptedUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
 
@@ -750,7 +750,7 @@ bool AdaptedUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   AdaptedUnion::AdaptedUnion(const AdaptedUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -1137,7 +1137,7 @@ void BinaryUnion::__fbthrift_destruct() {
 
 void BinaryUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   BinaryUnion::~BinaryUnion() {
@@ -1148,7 +1148,7 @@ bool BinaryUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   BinaryUnion::BinaryUnion(const BinaryUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

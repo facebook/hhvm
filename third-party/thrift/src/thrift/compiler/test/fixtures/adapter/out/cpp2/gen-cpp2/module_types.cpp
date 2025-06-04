@@ -514,7 +514,7 @@ void Baz::__fbthrift_destruct() {
 
 void Baz::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   Baz::~Baz() {
@@ -525,7 +525,7 @@ bool Baz::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   Baz::Baz(const Baz& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -2360,7 +2360,7 @@ void ThriftAdaptTestUnion::__fbthrift_destruct() {
 
 void ThriftAdaptTestUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   ThriftAdaptTestUnion::~ThriftAdaptTestUnion() {
@@ -2371,7 +2371,7 @@ bool ThriftAdaptTestUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   ThriftAdaptTestUnion::ThriftAdaptTestUnion(const ThriftAdaptTestUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

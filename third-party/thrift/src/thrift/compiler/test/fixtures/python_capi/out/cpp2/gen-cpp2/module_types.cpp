@@ -2120,7 +2120,7 @@ void Shallot::__fbthrift_destruct() {
 
 void Shallot::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   Shallot::~Shallot() {
@@ -2131,7 +2131,7 @@ bool Shallot::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   Shallot::Shallot(const Shallot& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -2208,7 +2208,7 @@ bool Shallot::operator<([[maybe_unused]] const Shallot& rhs) const {
 
 ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& Shallot::set_intSet(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>> t) {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::intSet);
+  type_ = folly::to_underlying(Type::intSet);
   ::new (std::addressof(value_.intSet)) ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>(std::move(t));
   return value_.intSet;
 }
@@ -2223,7 +2223,7 @@ bool Shallot::operator<([[maybe_unused]] const Shallot& rhs) const {
 
 ::std::shared_ptr<const ::std::vector<double>>& Shallot::set_doubleList(::std::shared_ptr<const ::std::vector<double>> t) {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::doubleList);
+  type_ = folly::to_underlying(Type::doubleList);
   ::new (std::addressof(value_.doubleList)) ::std::shared_ptr<const ::std::vector<double>>(std::move(t));
   return value_.doubleList;
 }
@@ -2238,7 +2238,7 @@ bool Shallot::operator<([[maybe_unused]] const Shallot& rhs) const {
 
 ::std::unique_ptr<::std::map<::std::string, ::std::string>>& Shallot::set_strMap(::std::unique_ptr<::std::map<::std::string, ::std::string>> t) {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::strMap);
+  type_ = folly::to_underlying(Type::strMap);
   ::new (std::addressof(value_.strMap)) ::std::unique_ptr<::std::map<::std::string, ::std::string>>(std::move(t));
   return value_.strMap;
 }
@@ -2336,7 +2336,7 @@ void SomeBinary::__fbthrift_destruct() {
 
 void SomeBinary::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   SomeBinary::~SomeBinary() {
@@ -2347,7 +2347,7 @@ bool SomeBinary::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   SomeBinary::SomeBinary(const SomeBinary& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

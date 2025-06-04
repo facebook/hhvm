@@ -87,7 +87,7 @@ void ComplexUnion::__fbthrift_destruct() {
 
 void ComplexUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   ComplexUnion::~ComplexUnion() {
@@ -98,7 +98,7 @@ bool ComplexUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   ComplexUnion::ComplexUnion(const ComplexUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -239,7 +239,7 @@ void ListUnion::__fbthrift_destruct() {
 
 void ListUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   ListUnion::~ListUnion() {
@@ -250,7 +250,7 @@ bool ListUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   ListUnion::ListUnion(const ListUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -365,7 +365,7 @@ void DataUnion::__fbthrift_destruct() {
 
 void DataUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   DataUnion::~DataUnion() {
@@ -376,7 +376,7 @@ bool DataUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   DataUnion::DataUnion(const DataUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -610,7 +610,7 @@ void ValUnion::__fbthrift_destruct() {
 
 void ValUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   ValUnion::~ValUnion() {
@@ -621,7 +621,7 @@ bool ValUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   ValUnion::ValUnion(const ValUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -748,7 +748,7 @@ void VirtualComplexUnion::__fbthrift_destruct() {
 
 void VirtualComplexUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   VirtualComplexUnion::~VirtualComplexUnion() {
@@ -759,7 +759,7 @@ bool VirtualComplexUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   VirtualComplexUnion::VirtualComplexUnion(const VirtualComplexUnion& rhs)
-      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
@@ -950,7 +950,7 @@ void NonCopyableUnion::__fbthrift_destruct() {
 
 void NonCopyableUnion::__fbthrift_clear() {
   __fbthrift_destruct();
-  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
+  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   NonCopyableUnion::~NonCopyableUnion() {

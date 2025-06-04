@@ -21,7 +21,6 @@
 
 #include <folly/Indestructible.h>
 #include <folly/Range.h>
-#include <folly/ScopeGuard.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/New.h>
 #include <folly/python/import.h>

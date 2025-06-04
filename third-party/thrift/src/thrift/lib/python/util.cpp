@@ -16,7 +16,6 @@
 
 #include <stdexcept>
 
-#include <folly/CppAttributes.h>
 #include <folly/Portability.h>
 #include <thrift/lib/python/util.h>
 #include <thrift/lib/python/util_api.h> // @manual

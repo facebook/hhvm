@@ -103,6 +103,54 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
   else
     Abstract abstr
 
+(** In the case of an abstract type constant with a bound which refines the
+    constant to be equal to a constant in the class from which we are projecting,
+    localization will proceed and determine that we have a cycle:
+
+    interface I {
+      abstract const type T as I with { type T = I::T; };
+                                                 ^^^^
+      public function next(): this::T;
+    }
+
+    In this example if we were to recursively localize `I::T` we would encounter
+    a cycle. To avoid this, we have to make a substitution for the result of
+    localization.
+
+    Since any type constant triggering this case is abstract, we know that the
+    receiver (`this`) will be an 'expression dependent' type and we only need
+    to rewrite in this case.
+
+    We therefore know that resulting type is the mangled generic we use to
+    represent accesses on expression dependent types.
+
+    This function transforms a decl_ty looking for occurrences of an access
+    of the [type_const_name] on [TThis] and replaces them with a mangled generic
+    obtained by appending the [type_const_name] to the string representation of
+    the expression dependent type we are accessing through. *)
+let eliminate_recursive_access ty type_const_name this_ty =
+  match get_node this_ty with
+  | Tdependent (DTexpr expr_id, _) ->
+    let this_name = Expression_id.display expr_id in
+    let f ty ~ctx =
+      match deref ty with
+      | (reason, Taccess (root_ty, (_, name)))
+        when String.equal name type_const_name -> begin
+        match get_node root_ty with
+        | Tthis ->
+          let ty =
+            mk
+              ( reason,
+                Tgeneric (Format.sprintf "%s::%s" this_name type_const_name) )
+          in
+          (ctx, `Stop ty)
+        | _ -> (ctx, `Continue ty)
+      end
+      | _ -> (ctx, `Continue ty)
+    in
+    Typing_defs_core.transform_top_down_decl_ty ty ~f ~ctx:()
+  | _ -> ty
+
 (** [create_root_from_type_constant ctx env root class_name class_]
   looks up a type constant in a class and returns a `result`. More precisely, it looks up
   [ctx.id] in [class_]. [class_name] is the class name for [class_] and [root]
@@ -202,6 +250,13 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       (* Abstract type constants *)
       | TCAbstract
           { atc_as_constraint = upper; atc_super_constraint = lower; _ } ->
+        let upper =
+          Option.map upper ~f:(fun ty ->
+              eliminate_recursive_access ty type_const_name ctx.ety_env.this_ty)
+        and lower =
+          Option.map lower ~f:(fun ty ->
+              eliminate_recursive_access ty type_const_name ctx.ety_env.this_ty)
+        in
         let to_tys env : decl_ty option -> _ * TySet.t = function
           | Some ty ->
             let ((env, err, cycles), ty) = Phase.localize_rec ~ety_env env ty in

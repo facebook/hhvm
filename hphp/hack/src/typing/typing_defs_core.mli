@@ -793,3 +793,13 @@ end
 
 (** Find the first element of a [locl_ty] satisfying the predicate [p] *)
 val find_locl_ty : locl_ty -> p:(locl_ty -> bool) -> locl_ty option
+
+(** Transform a decl ty top down *)
+val transform_top_down_decl_ty :
+  decl_ty ->
+  f:
+    (decl_ty ->
+    ctx:'a ->
+    'a * [< `Continue of decl_ty | `Stop of decl_ty | `Restart of decl_ty ]) ->
+  ctx:'a ->
+  decl_ty

@@ -558,6 +558,18 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
     route = createAsynclogRoute(std::move(route), asynclogName.toString());
   }
 
+  bool dlLoadTestEnable = false;
+  if (auto* jDlLoadTestEnable = json.get_ptr("dl_load_test_enable")) {
+    dlLoadTestEnable = parseBool(*jDlLoadTestEnable, "dl_load_test_enable");
+  }
+  if (dlLoadTestEnable) {
+    auto it = routeMapForWrapper_.find("DistributionLoadTestRoute");
+    checkLogic(
+        it != routeMapForWrapper_.end(),
+        "DistributionLoadTestRoute is not implemented for this router");
+    route = it->second(std::move(route), proxy_, json, factory);
+  }
+
   route = wrapAxonLogRoute(std::move(route), proxy_, json, factory);
 
   if (json.count("shadows")) {
@@ -589,7 +601,7 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
       checkLogic(
           it != routeMapForWrapper_.end(),
           "McRefillRoute is not implemented for this router");
-      route = it->second(route, proxy_, refillJson, factory);
+      route = it->second(std::move(route), proxy_, refillJson, factory);
     }
   }
 

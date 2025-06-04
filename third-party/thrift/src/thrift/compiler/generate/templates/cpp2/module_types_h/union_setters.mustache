@@ -30,7 +30,7 @@
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
 {{#field:cpp_ref?}}
     ::new (std::addressof(value_.{{field:cpp_name}})) T({{^field:boxed_ref?}}new {{/field:boxed_ref?}}typename T::element_type(t));
 {{/field:cpp_ref?}}
@@ -47,7 +47,7 @@
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
 {{#field:cpp_ref?}}
     ::new (std::addressof(value_.{{field:cpp_name}})) T({{^field:boxed_ref?}}new {{/field:boxed_ref?}}typename T::element_type(t));
 {{/field:cpp_ref?}}
@@ -63,7 +63,7 @@
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
 {{#field:cpp_ref?}}
     ::new (std::addressof(value_.{{field:cpp_name}})) T({{^field:boxed_ref?}}new {{/field:boxed_ref?}}typename T::element_type(std::move(t)));
 {{/field:cpp_ref?}}
@@ -77,7 +77,7 @@
   {{> common/field_docblock}}
   template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
 {{#field:cpp_ref?}}
     ::new (std::addressof(value_.{{field:cpp_name}})) {{field:cpp_storage_type}}({{^field:boxed_ref?}}new {{/field:boxed_ref?}}{{field:cpp_storage_type}}::element_type(std::forward<T>(t)...));
 {{/field:cpp_ref?}}
@@ -92,7 +92,7 @@
   {{> common/field_docblock}}
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_storage_type}} t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) {{field:cpp_storage_type}}(std::move(t));
     return value_.{{field:cpp_name}};
   }
@@ -109,7 +109,7 @@
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) T(t);
     return value_.{{field:cpp_name}};
   }
@@ -121,7 +121,7 @@
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) T(std::move(t));
     return value_.{{field:cpp_name}};
   }
@@ -130,7 +130,7 @@
   {{> common/field_docblock}}
   template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) {{field:cpp_type}}(std::forward<T>(t)...);
     return value_.{{field:cpp_name}};
   }
@@ -145,7 +145,7 @@
     // defer resolution of ref_ in case ref_::element_type would here be incomplete
     using ref_ = folly::conditional_t<(sizeof...(T) < size_t(-1)), {{field:cpp_storage_type}}, void>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::{{field:cpp_name}});
+    fbthrift_type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) ref_({{^field:boxed_ref?}}new {{/field:boxed_ref?}}typename ref_::element_type(std::forward<T>(t)...));
     return value_.{{field:cpp_name}};
   }

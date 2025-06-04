@@ -496,10 +496,10 @@ class SerializedUnion final  {
   } ;
 
   SerializedUnion()
-      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {}
 
   SerializedUnion(SerializedUnion&& rhs) noexcept
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
@@ -576,7 +576,7 @@ class SerializedUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::s);
+    fbthrift_type_ = folly::to_underlying(Type::s);
     ::new (std::addressof(value_.s)) T(t);
     return value_.s;
   }
@@ -587,7 +587,7 @@ class SerializedUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::s);
+    fbthrift_type_ = folly::to_underlying(Type::s);
     ::new (std::addressof(value_.s)) T(std::move(t));
     return value_.s;
   }
@@ -595,7 +595,7 @@ class SerializedUnion final  {
   /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_s(T&&... t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::s);
+    fbthrift_type_ = folly::to_underlying(Type::s);
     ::new (std::addressof(value_.s)) ::std::string(std::forward<T>(t)...);
     return value_.s;
   }
@@ -607,7 +607,7 @@ class SerializedUnion final  {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::i);
+    fbthrift_type_ = folly::to_underlying(Type::i);
     ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
@@ -654,50 +654,50 @@ class SerializedUnion final  {
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> s_ref() const& {
-    return {value_.s, type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.s, fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> s_ref() const&& {
-    return {std::move(value_.s), type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.s), fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> s_ref() & {
-    return {value_.s, type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.s, fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> s_ref() && {
-    return {std::move(value_.s), type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.s), fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> i_ref() const& {
-    return {value_.i, type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.i, fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> i_ref() const&& {
-    return {std::move(value_.i), type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.i), fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> i_ref() & {
-    return {value_.i, type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.i, fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> i_ref() && {
-    return {std::move(value_.i), type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.i), fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  Type getType() const { return static_cast<Type>(type_); }
+  Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -709,7 +709,7 @@ class SerializedUnion final  {
   uint32_t write(Protocol_* prot_) const;
  protected:
   storage_type value_;
-  std::underlying_type_t<Type> type_;
+  std::underlying_type_t<Type> fbthrift_type_;
 
  private:
   template <class Protocol_>
@@ -1366,10 +1366,10 @@ class MarshalUnion final  {
   } ;
 
   MarshalUnion()
-      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {}
 
   MarshalUnion(MarshalUnion&& rhs) noexcept
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
@@ -1446,7 +1446,7 @@ class MarshalUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::s);
+    fbthrift_type_ = folly::to_underlying(Type::s);
     ::new (std::addressof(value_.s)) T(t);
     return value_.s;
   }
@@ -1457,7 +1457,7 @@ class MarshalUnion final  {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::s);
+    fbthrift_type_ = folly::to_underlying(Type::s);
     ::new (std::addressof(value_.s)) T(std::move(t));
     return value_.s;
   }
@@ -1465,7 +1465,7 @@ class MarshalUnion final  {
   /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_s(T&&... t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::s);
+    fbthrift_type_ = folly::to_underlying(Type::s);
     ::new (std::addressof(value_.s)) ::std::string(std::forward<T>(t)...);
     return value_.s;
   }
@@ -1477,7 +1477,7 @@ class MarshalUnion final  {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::i);
+    fbthrift_type_ = folly::to_underlying(Type::i);
     ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
@@ -1524,50 +1524,50 @@ class MarshalUnion final  {
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> s_ref() const& {
-    return {value_.s, type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.s, fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> s_ref() const&& {
-    return {std::move(value_.s), type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.s), fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> s_ref() & {
-    return {value_.s, type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.s, fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> s_ref() && {
-    return {std::move(value_.s), type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.s), fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> i_ref() const& {
-    return {value_.i, type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.i, fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> i_ref() const&& {
-    return {std::move(value_.i), type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.i), fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> i_ref() & {
-    return {value_.i, type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.i, fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> i_ref() && {
-    return {std::move(value_.i), type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.i), fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  Type getType() const { return static_cast<Type>(type_); }
+  Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1579,7 +1579,7 @@ class MarshalUnion final  {
   uint32_t write(Protocol_* prot_) const;
  protected:
   storage_type value_;
-  std::underlying_type_t<Type> type_;
+  std::underlying_type_t<Type> fbthrift_type_;
 
  private:
   template <class Protocol_>

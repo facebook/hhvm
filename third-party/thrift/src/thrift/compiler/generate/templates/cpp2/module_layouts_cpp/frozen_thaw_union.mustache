@@ -17,7 +17,7 @@
 }}
   void Layout<{{struct:cpp_fullname}}>::thaw(
       ViewPosition self, T& out) const {
-    auto type = this->type_Field.layout.view(self(this->type_Field.pos));
+    auto type = this->fbthrift_type_Field.layout.view(self(this->fbthrift_type_Field.pos));
     switch (type) {
 {{#struct:fields}}{{#field:type}}
       case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {
@@ -27,7 +27,7 @@
         the "mutable_field() = smart_pointer" style setter instead, which will
         only do a pointer copy}}
 
-        {{! Use an empty value to set "type_" via the set_field() setter}}
+        {{! Use an empty value to set "fbthrift_type_" via the set_field() setter}}
         {{field:cpp_type}} emptyValue;
         out.set_{{field:cpp_name}}(std::move(emptyValue));
 
@@ -46,7 +46,7 @@
       }
 {{/field:type}}{{/struct:fields}}
       default: {
-        {{! The field has been removed during schema evolution, set the "type_"
+        {{! The field has been removed during schema evolution, set the "fbthrift_type_"
          to __EMPTY__ }}
         apache::thrift::clear(out);
         break;

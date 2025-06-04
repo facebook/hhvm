@@ -56,14 +56,14 @@ FROZEN_CLEAR({{struct:cpp_fullname}},{{!
 {{#struct:union?}}
 FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}
-  FROZEN_CTOR_FIELD(type_, 0){{!
+  FROZEN_CTOR_FIELD(fbthrift_type_, 0){{!
 }}{{#struct:fields}}
   FROZEN_CTOR_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
 }}{{/struct:fields}})
 
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 }}
-  FROZEN_MAXIMIZE_FIELD(type_);{{!
+  FROZEN_MAXIMIZE_FIELD(fbthrift_type_);{{!
 }}{{#struct:fields}}
   FROZEN_MAXIMIZE_FIELD({{field:cpp_name}});{{/struct:fields}}
 )
@@ -77,13 +77,13 @@ FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 
 FROZEN_DEBUG({{struct:cpp_fullname}},{{!
 }}
-  FROZEN_DEBUG_FIELD(type_){{!
+  FROZEN_DEBUG_FIELD(fbthrift_type_){{!
 }}{{#struct:fields}}
   FROZEN_DEBUG_FIELD({{field:cpp_name}}){{!
 }}{{/struct:fields}})
 FROZEN_CLEAR({{struct:cpp_fullname}},{{!
 }}
-  FROZEN_CLEAR_FIELD(type_){{!
+  FROZEN_CLEAR_FIELD(fbthrift_type_){{!
 }}{{#struct:fields}}
   FROZEN_CLEAR_FIELD({{field:cpp_name}}){{!
 }}{{/struct:fields}})

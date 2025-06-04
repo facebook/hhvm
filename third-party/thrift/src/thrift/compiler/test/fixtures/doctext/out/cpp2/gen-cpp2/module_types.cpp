@@ -171,7 +171,7 @@ void U::__fbthrift_destruct() {
 
 void U::__fbthrift_clear() {
   __fbthrift_destruct();
-  type_ = folly::to_underlying(Type::__EMPTY__);
+  fbthrift_type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
   U::~U() {
@@ -182,7 +182,7 @@ bool U::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
   U::U(const U& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;

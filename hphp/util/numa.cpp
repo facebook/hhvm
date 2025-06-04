@@ -216,7 +216,7 @@ inline void sched_on_nodes(unsigned n1, unsigned n2) {
 void nuca_bind_thread() {
   static std::atomic_uint32_t s_total = 0;
   auto const index = s_total.fetch_add(1, std::memory_order_acq_rel);
-  if (index > nuca_node_seq.size()) return;
+  if (index >= nuca_node_seq.size()) return;
   auto const nodes = nuca_node_seq[index];
   sched_on_nodes(nodes.first, nodes.second);
 }

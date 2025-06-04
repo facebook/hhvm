@@ -16,7 +16,6 @@
 
 #include <stdexcept>
 
-#include <folly/CppAttributes.h>
 #include <folly/Portability.h>
 #include <thrift/lib/py3/stream.h>
 

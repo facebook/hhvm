@@ -196,8 +196,70 @@ class CommonTestsOnEden(common_tests.CommonTests):
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
         return CommonTestsOnEden._Driver()
 
-    # Nothing else to see here: We inherit all tests from CommonTests, but run
-    # them using CommonTestsOnEden._Driver
+    def test_sync_queries(self) -> None:
+        iterations = 50
+
+        self.test_driver.start_hh_server()
+
+        # We make some changes, followed by a type-at-pos query (which is sync, in
+        # contrast to ordinary check queries). Note that we always make two changes, to
+        # make sure that we would catch the following, bad scenario: The type-checker
+        # may pick up the first change and perform a re-check (independent from the
+        # following query sent by the client) If the query from the client then comes in
+        # before the file watching service picks up the second change, we may answer the
+        # client's query without having processed the second change at all.
+        # This should not happen with a sync query.
+        for _ in range(iterations):
+            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_g(): int {
+                $res = sync_f();
+                return $res;
+            }
+            """
+                )
+            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_f(): int {
+                return 3;
+            }
+            """
+                )
+
+            self.test_driver.check_cmd(
+                ["int"], options=["--type-at-pos", "{root}sync_1.php:5:24"]
+            )
+            print("finished iteration")
+
+            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_g(): string {
+                $res = sync_f();
+                return $res;
+            }
+            """
+                )
+            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_f(): string {
+                return "123";
+            }
+            """
+                )
+            self.test_driver.check_cmd(
+                ["string"], options=["--type-at-pos", "{root}sync_1.php:5:24"]
+            )
+
+    # Note that we inherit all tests from CommonTests and run them,
+    # but using CommonTestsOnEden._Driver
 
 
 class NonMountPointRepoTest(test_case.TestCase[common_tests.CommonTestDriver]):

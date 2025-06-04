@@ -1205,10 +1205,10 @@ class AdaptedUnion final  {
   } ;
 
   AdaptedUnion()
-      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {}
 
   AdaptedUnion(AdaptedUnion&& rhs) noexcept
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
@@ -1271,7 +1271,7 @@ class AdaptedUnion final  {
     using T0 = ::std::int16_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::best);
+    fbthrift_type_ = folly::to_underlying(Type::best);
     ::new (std::addressof(value_.best)) T(t);
     return value_.best;
   }
@@ -1299,27 +1299,27 @@ class AdaptedUnion final  {
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> best_ref() const& {
-    return {value_.best, type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.best, fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> best_ref() const&& {
-    return {std::move(value_.best), type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.best), fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> best_ref() & {
-    return {value_.best, type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.best, fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> best_ref() && {
-    return {std::move(value_.best), type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.best), fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  Type getType() const { return static_cast<Type>(type_); }
+  Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1331,7 +1331,7 @@ class AdaptedUnion final  {
   uint32_t write(Protocol_* prot_) const;
  protected:
   storage_type value_;
-  std::underlying_type_t<Type> type_;
+  std::underlying_type_t<Type> fbthrift_type_;
 
  private:
   template <class Protocol_>
@@ -2704,10 +2704,10 @@ class BinaryUnion final  {
   } ;
 
   BinaryUnion()
-      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {}
 
   BinaryUnion(BinaryUnion&& rhs) noexcept
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
+      : fbthrift_type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
@@ -2770,7 +2770,7 @@ class BinaryUnion final  {
     using T0 = ::py3::simple::IOBuf;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::iobuf_val);
+    fbthrift_type_ = folly::to_underlying(Type::iobuf_val);
     ::new (std::addressof(value_.iobuf_val)) T(t);
     return value_.iobuf_val;
   }
@@ -2781,7 +2781,7 @@ class BinaryUnion final  {
     using T0 = ::py3::simple::IOBuf;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::iobuf_val);
+    fbthrift_type_ = folly::to_underlying(Type::iobuf_val);
     ::new (std::addressof(value_.iobuf_val)) T(std::move(t));
     return value_.iobuf_val;
   }
@@ -2789,7 +2789,7 @@ class BinaryUnion final  {
   /** Glean { "field": "iobuf_val" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::py3::simple::IOBuf, T...>> ::py3::simple::IOBuf& set_iobuf_val(T&&... t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::iobuf_val);
+    fbthrift_type_ = folly::to_underlying(Type::iobuf_val);
     ::new (std::addressof(value_.iobuf_val)) ::py3::simple::IOBuf(std::forward<T>(t)...);
     return value_.iobuf_val;
   }
@@ -2817,27 +2817,27 @@ class BinaryUnion final  {
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> iobuf_val_ref() const& {
-    return {value_.iobuf_val, type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.iobuf_val, fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> iobuf_val_ref() const&& {
-    return {std::move(value_.iobuf_val), type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.iobuf_val), fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> iobuf_val_ref() & {
-    return {value_.iobuf_val, type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {value_.iobuf_val, fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> iobuf_val_ref() && {
-    return {std::move(value_.iobuf_val), type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+    return {std::move(value_.iobuf_val), fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  Type getType() const { return static_cast<Type>(type_); }
+  Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2849,7 +2849,7 @@ class BinaryUnion final  {
   uint32_t write(Protocol_* prot_) const;
  protected:
   storage_type value_;
-  std::underlying_type_t<Type> type_;
+  std::underlying_type_t<Type> fbthrift_type_;
 
  private:
   template <class Protocol_>

@@ -58,6 +58,7 @@ struct FizzClientConfig {
   std::vector<fizz::CipherSuite> supportedCiphers;
   std::vector<fizz::SignatureScheme> supportedSigSchemes;
   std::vector<fizz::NamedGroup> supportedGroups;
+  std::vector<fizz::NamedGroup> defaultShares;
   std::vector<fizz::PskKeyExchangeMode> supportedPskModes;
   bool sendEarlyData{false};
 };

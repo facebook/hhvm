@@ -15,20 +15,14 @@
 */
 
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 
-#include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/current-executable.h"
-#include "hphp/util/portability.h"
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <cxxabi.h>
 
 #if defined USE_FOLLY_SYMBOLIZER
 

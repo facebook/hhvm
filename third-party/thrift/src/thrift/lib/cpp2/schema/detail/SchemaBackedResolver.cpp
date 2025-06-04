@@ -140,12 +140,16 @@ class SchemaIndex {
       const type::DefinitionAttrs&,
       DefinitionNode::Alternative&&,
       const type::Schema&);
-  StructNode createStruct(const type::DefinitionKey&, const type::Struct&);
-  UnionNode createUnion(const type::DefinitionKey&, const type::Union&);
+  StructNode createStruct(
+      const type::DefinitionKey&, const type::Struct&, const type::Schema&);
+  UnionNode createUnion(
+      const type::DefinitionKey&, const type::Union&, const type::Schema&);
   ExceptionNode createException(
-      const type::DefinitionKey&, const type::Exception&);
+      const type::DefinitionKey&, const type::Exception&, const type::Schema&);
   FieldNode createField(
-      const type::DefinitionKey& parentDefinitionKey, const type::Field&);
+      const type::DefinitionKey& parentDefinitionKey,
+      const type::Field&,
+      const type::Schema&);
 
   EnumNode createEnum(const type::DefinitionKey&, const type::Enum&);
   TypedefNode createTypedef(const type::DefinitionKey&, const type::Typedef&);
@@ -494,14 +498,14 @@ void SchemaIndex::updateDefinitionsByKey(
     auto alternative = visitDefinition(
         definition,
         [&](const type::Struct& structDef) -> DefinitionNode::Alternative {
-          return createStruct(definitionKey, structDef);
+          return createStruct(definitionKey, structDef, schema);
         },
         [&](const type::Union& unionDef) -> DefinitionNode::Alternative {
-          return createUnion(definitionKey, unionDef);
+          return createUnion(definitionKey, unionDef, schema);
         },
         [&](const type::Exception& exceptionDef)
             -> DefinitionNode::Alternative {
-          return createException(definitionKey, exceptionDef);
+          return createException(definitionKey, exceptionDef, schema);
         },
         [&](const type::Enum& enumDef) -> DefinitionNode::Alternative {
           return createEnum(definitionKey, enumDef);
@@ -570,20 +574,24 @@ DefinitionNode SchemaIndex::createDefinition(
 }
 
 StructNode SchemaIndex::createStruct(
-    const type::DefinitionKey& definitionKey, const type::Struct& structDef) {
+    const type::DefinitionKey& definitionKey,
+    const type::Struct& structDef,
+    const type::Schema& schema) {
   std::vector<FieldNode> fields;
   for (const type::Field& field : *structDef.fields()) {
-    fields.emplace_back(createField(definitionKey, field));
+    fields.emplace_back(createField(definitionKey, field, schema));
   }
   return StructNode(
       resolver_, definitionKey, *structDef.uri(), std::move(fields));
 }
 
 UnionNode SchemaIndex::createUnion(
-    const type::DefinitionKey& definitionKey, const type::Union& unionDef) {
+    const type::DefinitionKey& definitionKey,
+    const type::Union& unionDef,
+    const type::Schema& schema) {
   std::vector<FieldNode> fields;
   for (const type::Field& field : *unionDef.fields()) {
-    fields.emplace_back(createField(definitionKey, field));
+    fields.emplace_back(createField(definitionKey, field, schema));
   }
   return UnionNode(
       resolver_, definitionKey, *unionDef.uri(), std::move(fields));
@@ -591,20 +599,24 @@ UnionNode SchemaIndex::createUnion(
 
 ExceptionNode SchemaIndex::createException(
     const type::DefinitionKey& definitionKey,
-    const type::Exception& exceptionDef) {
+    const type::Exception& exceptionDef,
+    const type::Schema& schema) {
   std::vector<FieldNode> fields;
   for (const type::Field& field : *exceptionDef.fields()) {
-    fields.emplace_back(createField(definitionKey, field));
+    fields.emplace_back(createField(definitionKey, field, schema));
   }
   return ExceptionNode(
       resolver_, definitionKey, *exceptionDef.uri(), std::move(fields));
 }
 
 FieldNode SchemaIndex::createField(
-    const type::DefinitionKey& parentDefinitionKey, const type::Field& field) {
+    const type::DefinitionKey& parentDefinitionKey,
+    const type::Field& field,
+    const type::Schema& schema) {
   return FieldNode(
       resolver_,
       parentDefinitionKey,
+      createAnnotations(*field.annotationsByKey(), schema),
       *field.id(),
       presenceOf(*field.qualifier()),
       *field.name(),

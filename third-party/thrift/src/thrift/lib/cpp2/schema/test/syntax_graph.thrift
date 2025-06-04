@@ -39,6 +39,7 @@ struct TestRecursiveStruct {
 
 @thrift.Uri{value = "meta.com/thrift_test/TestStructuredAnnotation"}
 @scope.Definition
+@scope.Field
 struct TestStructuredAnnotation {
   1: i64 field1;
 }
@@ -62,6 +63,7 @@ struct TestStructuredAnnotationWithoutUri {
 
 @TestStructuredAnnotationWithoutUri{field1 = 3}
 exception TestException {
+  @TestStructuredAnnotation
   1: binary blob;
 }
 

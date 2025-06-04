@@ -451,6 +451,10 @@ class WithAnnotations {
   folly::span<const Annotation> annotations() const;
 
   explicit WithAnnotations(std::vector<Annotation>&& annotations);
+  ~WithAnnotations() noexcept;
+
+  WithAnnotations(WithAnnotations&&) noexcept;
+  WithAnnotations& operator=(WithAnnotations&&) noexcept;
 
  private:
   std::vector<Annotation> annotations_;
@@ -561,6 +565,7 @@ class WithDebugPrinting {
 class FieldNode final : folly::MoveOnly,
                         detail::WithResolver,
                         detail::WithName,
+                        detail::WithAnnotations,
                         public detail::WithDebugPrinting<FieldNode> {
  public:
   /**
@@ -574,6 +579,7 @@ class FieldNode final : folly::MoveOnly,
    */
   using PresenceQualifier = syntax_graph::FieldPresenceQualifier;
 
+  using detail::WithAnnotations::annotations;
   using detail::WithName::name;
   FieldId id() const { return id_; }
   TypeRef type() const;
@@ -587,6 +593,7 @@ class FieldNode final : folly::MoveOnly,
   FieldNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& parent,
+      std::vector<Annotation>&& annotations,
       FieldId id,
       PresenceQualifier presence,
       std::string_view name,
@@ -594,11 +601,16 @@ class FieldNode final : folly::MoveOnly,
       std::optional<apache::thrift::type::ValueId> customDefaultId)
       : detail::WithResolver(resolver),
         detail::WithName(name),
+        detail::WithAnnotations(std::move(annotations)),
         parent_(parent),
         id_(id),
         presence_(presence),
         type_(std::move(type)),
         customDefaultId_(std::move(customDefaultId)) {}
+  ~FieldNode() noexcept;
+
+  FieldNode(FieldNode&&) noexcept;
+  FieldNode& operator=(FieldNode&&) noexcept;
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -1650,7 +1662,17 @@ inline RpcInterfaceNode::RpcInterfaceNode(
 
 inline RpcInterfaceNode::~RpcInterfaceNode() = default;
 
+inline FieldNode::~FieldNode() noexcept = default;
+inline FieldNode::FieldNode(FieldNode&&) noexcept = default;
+inline FieldNode& FieldNode::operator=(FieldNode&&) noexcept = default;
+
 namespace detail {
+
+inline WithAnnotations::~WithAnnotations() noexcept = default;
+inline WithAnnotations::WithAnnotations(WithAnnotations&&) noexcept = default;
+inline WithAnnotations& WithAnnotations::operator=(WithAnnotations&&) noexcept =
+    default;
+
 template <typename T>
 const T& Lazy<T>::operator*() const {
   return folly::variant_match(
@@ -1666,6 +1688,7 @@ const T& Lazy<T>::operator*() const {
       },
       [](const Resolved& resolved) -> const T& { return *resolved.value; });
 }
+
 } // namespace detail
 
 } // namespace apache::thrift::syntax_graph

@@ -592,6 +592,21 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {
       &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
 }
 
+TEST_F(ServiceSchemaTest, StructuredAnnotationOnField) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+
+  const ExceptionNode& testException =
+      program->definitionsByName().at("TestException")->asException();
+  folly::span<const Annotation> annotations =
+      testException.fields()[0].annotations();
+  EXPECT_EQ(annotations.size(), 1);
+
+  EXPECT_EQ(
+      &annotations[0].type().asStruct(),
+      &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
+}
+
 TEST_F(ServiceSchemaTest, RecursiveStruct) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
   auto program = findProgramByName(syntaxGraph, "syntax_graph");

@@ -19,7 +19,6 @@
 #include <atomic>
 
 #include <folly/Conv.h>
-#include <folly/Memory.h>
 #include <folly/Singleton.h>
 #include <sys/stat.h>
 

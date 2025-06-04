@@ -935,7 +935,11 @@ export const RecordOfNotationAnyRecordDescription = () => {
 
 #### Operation: `createStandardDefault`
 
-Creates the “standard” default <KW>value</KW> for a given <KW>type</KW>, with the “intrinsic” default value or the user-provided defaults where applicable.
+<Operation>
+
+> **<code>createStandardDefault<sub>S</sub>(T)</code> → <code>Value(T, ?)</code>**
+>
+> Creates the “standard” default <KW>value</KW> for a given <KW>type</KW>, with the “intrinsic” default value or the user-provided defaults where applicable.
 
 **Environment**:
 * `S` — a <KW>type system</KW>
@@ -1010,6 +1014,8 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 | `any` | `Any()` — *empty* |
 
 </CenterHorizontally>
+
+</Operation>
 
 ### Comparison
 
@@ -1301,7 +1307,7 @@ The <KW>cipher</KW> produced by a <KW>protocol</KW> `P` is called a <KW>`P`-ciph
 
 <Operation>
 
-> **<code>serialize<sub>S</sub>(P, v) → cipher<sub>P</sub></code>**
+> **<code>serialize<sub>S</sub>(P, v)</code> → <code>cipher<sub>P</sub></code>**
 >
 > Transforms a Thrift <KW>value</KW> to a <KW>`P`-cipher</KW>.
 
@@ -1321,7 +1327,7 @@ The <KW>cipher</KW> produced by a <KW>protocol</KW> `P` is called a <KW>`P`-ciph
 
 <Operation>
 
-> **<code>deserialize<sub>S</sub>(P, T, cipher<sub>P</sub>) → v</code>**
+> **<code>deserialize<sub>S</sub>(P, T, cipher<sub>P</sub>)</code> → <code>v</code>**
 >
 > Transforms a <KW>`P`-cipher</KW> into a Thrift <KW>value</KW>.
 
@@ -1508,7 +1514,7 @@ Note that the <KW>protocol-IR</KW> does not necessarily represent a Thrift <KW>v
 
 <Operation>
 
-> **<code>encode<sub>P</sub>(r) → Value(binary, ByteArray(<<i>P-cipher</i>>))</code>**
+> **<code>encode<sub>P</sub>(r)</code> → <code>Value(binary, ByteArray(<<i>P-cipher</i>>))</code>**
 >
 > Transforms a [<KW>partial record</KW>](#partial-record) to its corresponding <KW>`P`-cipher</KW>.
 
@@ -1534,7 +1540,7 @@ Note that the <KW>protocol-IR</KW> does not necessarily represent a Thrift <KW>v
 
 <Operation>
 
-> **<code>decipher<sub>P</sub>(cipher<sub>P</sub>) → <i>protocol-IR</i></code>**
+> **<code>decipher<sub>P</sub>(cipher<sub>P</sub>)</code> → <code><i>protocol-IR</i></code>**
 >
 > Transforms (without access to a Thrift <KW>type system</KW>) a <KW>`P`-cipher</KW> into an abstract, <KW>protocol</KW>-specific intermediate representation suitable as an input for the [`materialize`](#operation-materialize) operation.
 

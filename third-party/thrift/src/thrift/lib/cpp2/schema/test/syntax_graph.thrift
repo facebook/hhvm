@@ -50,6 +50,7 @@ typedef ListOfTestStruct TypedefToListOfTestStruct
 typedef TestStructuredAnnotation TypedefToTestStructuredAnnotation
 
 @TestStructuredAnnotation{field1 = 3}
+@thrift.Uri{value = "meta.com/thrift_test/TestUnion"}
 union TestUnion {
   1: TestStruct s;
   2: TestEnum e;

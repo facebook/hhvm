@@ -724,9 +724,23 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(structNode.fields().size(), 1);
   EXPECT_EQ(structNode.fields()[0].identity().name(), "myself");
   EXPECT_EQ(structNode.fields()[0].identity().id(), FieldId{1});
+  EXPECT_EQ(
+      structNode.fields()[0].presence(),
+      type_system::PresenceQualifier::OPTIONAL_);
   EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
   EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
   EXPECT_EQ(&syntaxGraph.asTypeSystemStructNode(def->asStruct()), &structNode);
+
+  uri = "meta.com/thrift_test/TestUnion";
+  const type_system::UnionNode& unionNode =
+      typeSystem.getUserDefinedTypeOrThrow(uri).asUnion();
+  EXPECT_EQ(unionNode.uri(), uri);
+  EXPECT_EQ(unionNode.fields().size(), 2);
+  EXPECT_EQ(unionNode.fields()[0].identity().name(), "s");
+  EXPECT_EQ(unionNode.fields()[0].identity().id(), FieldId{1});
+  EXPECT_EQ(
+      unionNode.fields()[0].presence(),
+      type_system::PresenceQualifier::OPTIONAL_);
 
   uri = "meta.com/thrift_test/TestEnum";
   const type_system::EnumNode& enumNode =

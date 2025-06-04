@@ -836,7 +836,8 @@ class TypeSystemFacade final : public type_system::TypeSystem {
       const DefinitionNode* sgDef = populationQueue.front();
       populationQueue.pop();
       TSDefinition& tsDef = cache_.at(sgDef);
-      auto makeFields = [&](const StructuredNode& s) {
+      auto makeFields = [&](const auto& s) {
+        bool isUnion = std::is_same_v<decltype(s), UnionNode const&>;
         std::vector<type_system::FieldNode> fields;
         fields.reserve(s.fields().size());
         for (const auto& field : s.fields()) {
@@ -844,7 +845,9 @@ class TypeSystemFacade final : public type_system::TypeSystem {
               type_system::FieldIdentity{field.id(), std::string(field.name())},
               // TODO: SyntaxGraph doesn't ever set this to terse but TypeSystem
               // does.
-              static_cast<type_system::PresenceQualifier>(field.presence()),
+              isUnion ? type_system::PresenceQualifier::OPTIONAL_
+                      : static_cast<type_system::PresenceQualifier>(
+                            field.presence()),
               convertType(field.type()),
               // TODO: default value
               std::nullopt,

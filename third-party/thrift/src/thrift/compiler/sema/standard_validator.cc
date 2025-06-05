@@ -477,7 +477,9 @@ void validate_orderable_structured_types(
     sema_context& ctx, const t_structured& node) {
   switch (OrderableTypeUtils::get_orderable_condition(
       node, true /* enableCustomTypeOrderingIfStructureHasUri */)) {
-    case OrderableTypeUtils::StructuredOrderableCondition::Always: {
+    case OrderableTypeUtils::StructuredOrderableCondition::Always:
+    case OrderableTypeUtils::StructuredOrderableCondition::
+        OrderableByNestedLegacyImplicitLogicEnabledByUri: {
       const t_const* annotation = ctx.program().inherit_annotation_or_null(
           node, kCppEnableCustomTypeOrdering);
       if (annotation == nullptr) {
@@ -486,8 +488,8 @@ void validate_orderable_structured_types(
 
       ctx.error(
           *annotation,
-          "Type `{}` is always orderable in C++: remove redundant "
-          "`@cpp.EnableCustomTypeOrdering` annotation.",
+          "Type `{}` does not need `@cpp.EnableCustomTypeOrdering` to be "
+          "orderable in C++: remove the annotation.",
           node.name());
       return;
     }
@@ -506,6 +508,8 @@ void validate_orderable_structured_types(
     case OrderableTypeUtils::StructuredOrderableCondition::NotOrderable:
     case OrderableTypeUtils::StructuredOrderableCondition::
         OrderableByExplicitAnnotation:
+    case OrderableTypeUtils::StructuredOrderableCondition::
+        OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic:
       // Nothing to do
       return;
   }

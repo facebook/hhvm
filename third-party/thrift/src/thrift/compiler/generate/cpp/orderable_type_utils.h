@@ -106,7 +106,11 @@ class OrderableTypeUtils final {
      * (legacy) logic that implicitly treats custom types as orderable when the
      * structured type has a URI is enabled.
      */
-    OrderableByLegacyImplicitLogicEnabledByUri
+    OrderableByLegacyImplicitLogicEnabledByUri,
+
+    OrderableByNestedLegacyImplicitLogicEnabledByUri,
+
+    OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic
   };
 
   /**

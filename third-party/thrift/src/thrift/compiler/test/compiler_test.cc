@@ -2434,7 +2434,7 @@ struct AlwaysOrderable {
 }
 
 @cpp.EnableCustomTypeOrdering
-# expected-error@-1: Type `UnnecessaryAnnotation` is always orderable in C++: remove redundant `@cpp.EnableCustomTypeOrdering` annotation.
+# expected-error@-1: Type `UnnecessaryAnnotation` does not need `@cpp.EnableCustomTypeOrdering` to be orderable in C++: remove the annotation.
 struct UnnecessaryAnnotation {
   1: set<i32> a;
 }

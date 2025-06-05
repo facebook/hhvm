@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <glog/logging.h>
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_struct.h>
@@ -32,48 +33,36 @@ void codemod_main(source_manager& sm, t_program_bundle& bundle) {
   const_ast_visitor visitor;
   visitor.add_structured_definition_visitor([&](const t_structured&
                                                     structured_type) {
-    [[maybe_unused]] const bool hasUri = !structured_type.uri().empty();
-    [[maybe_unused]] const bool isAnnotated =
-        structured_type.find_structured_annotation_or_null(
-            kCppEnableCustomTypeOrdering);
+    const bool hasUri = !structured_type.uri().empty();
+    const bool isAnnotated = structured_type.find_structured_annotation_or_null(
+        kCppEnableCustomTypeOrdering);
 
     switch (OrderableTypeUtils::get_orderable_condition(
         structured_type,
         true /* enableCustomTypeOrderingIfStructureHasUri */)) {
       case OrderableTypeUtils::StructuredOrderableCondition::Always:
-        // structured_type is always orderable, i.e. does not need any
-        // annotation. Nothing to do (besides, optionally, checking that no
-        // unnecessary annotation exists).
-        assert(
-            (void("Unnecessary @cpp.EnableCustomTypeOrdering: type does not "
-                  "contain custom types."),
-             !isAnnotated));
+      case OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByNestedLegacyImplicitLogicEnabledByUri:
+        CHECK(!isAnnotated)
+            << "Unnecessary @cpp.EnableCustomTypeOrdering: type does not "
+            << "contain custom types: " << structured_type.name();
         return;
 
       case OrderableTypeUtils::StructuredOrderableCondition::NotOrderable:
-        // structured_type could be orderable, if it was annotated or custom
-        // type ordering was enable by the (legacy) URI logic.
-        // If this codemod is running, both of these conditions should be
-        // false:
-        assert(
-            (void("Logic error: if type is annotated, "
-                  "NotOrderable is impossible."),
-             !isAnnotated));
-        assert(
-            (void("Logic error: in this codemod, (legacy) implicit custom "
-                  "type enabling via URI is assumed to be enabled, so "
-                  "NotOrderable implies there is no URI."),
-             !hasUri));
+        CHECK(!isAnnotated)
+            << "Misleading @cpp.EnableCustomTypeOrdering: type is not "
+            << "orderable: " << structured_type.name();
         return;
 
       case OrderableTypeUtils::StructuredOrderableCondition::
           OrderableByExplicitAnnotation:
+      case OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic:
         // structured_type is already made orderable by explicit annotation
         // (@cpp.EnableCustomTypeOrdering). Nothing to do here.
-        assert(
-            (void("Logic error: OrderableByExplicitAnnotation implies the type "
-                  "is annotated."),
-             isAnnotated));
+        CHECK(isAnnotated)
+            << "Logic error: OrderableByExplicitAnnotation implies the type "
+            << "is annotated: " << structured_type.name();
         return;
 
       case OrderableTypeUtils::StructuredOrderableCondition::
@@ -81,15 +70,13 @@ void codemod_main(source_manager& sm, t_program_bundle& bundle) {
         // structured_type currently relies on legacy (URI-enabled) logic to
         // be orderable. The goal of this codemod is to make this explicit
         // by adding an annotation
-        assert((
-            void(
-                "Logic error: if type is orderable due to the legacy "
-                "(URI-enabled) logic, it cannot have the explicit annotation!"),
-            !isAnnotated));
-        assert(
-            (void("Logic error: if type is orderable due to the legacy "
-                  "(URI-enabled) logic, it must have a URI!"),
-             hasUri));
+        CHECK(!isAnnotated)
+            << "Logic error: if type is orderable due to the legacy "
+            << "(URI-enabled) logic, it cannot have the explicit annotation: "
+            << structured_type.name();
+        CHECK(hasUri) << "Logic error: if type is orderable due to the legacy "
+                      << "(URI-enabled) logic, it must have a URI: "
+                      << structured_type.name();
 
         fm.add_include("thrift/annotation/cpp.thrift");
         size_t offset = fm.to_offset(structured_type.src_range().begin);

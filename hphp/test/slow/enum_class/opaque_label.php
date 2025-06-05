@@ -12,7 +12,7 @@ function main(): void {
   echo E#A; echo "\n";
 
   echo "\nUNWRAPPED\n";
-  $unwrapped = __SystemLib\unwrap_opaque_value(0, E#A);
+  $unwrapped = __SystemLib\unwrap_enum_class_label(E#A);
   var_dump($unwrapped);
   echo "$unwrapped\n";
 

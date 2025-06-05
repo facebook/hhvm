@@ -9,5 +9,6 @@
 // Used as part of typechecking `hphp/runtime/ext/` without builtins.
 
 namespace __SystemLib {
-  function get_enum_member_by_label(mixed $_)[write_props]: nothing;
+  function get_enum_member_by_label(mixed $_)[write_props]: dynamic;
+  function unwrap_enum_class_label(mixed $_)[]: string;
 }

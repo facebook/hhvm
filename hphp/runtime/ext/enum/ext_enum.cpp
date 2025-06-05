@@ -143,26 +143,6 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   return res;
 }
 
-OptResource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
-                          const Variant& val) {
-  return OptResource(req::make<OpaqueResource>(id, val));
-}
-
-Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
-                      const OptResource& res) {
-  if (!res->instanceof<OpaqueResource>()) {
-    SystemLib::throwInvalidArgumentExceptionObject("Invalid OpaqueValue");
-  }
-  auto const ov = cast<OpaqueResource>(res);
-  if (ov->opaqueId() != id) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Could not unwrap OpaqueValue: id does not match"
-    );
-  }
-  return ov->opaqueValue();
-}
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 struct enumExtension final : Extension {
@@ -173,10 +153,6 @@ struct enumExtension final : Extension {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnumClass, getValues, BuiltinEnum, getValues);
-#define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
-    X(create_opaque_value_internal);
-    X(unwrap_opaque_value);
-#undef X
   }
 } s_enum_extension;
 

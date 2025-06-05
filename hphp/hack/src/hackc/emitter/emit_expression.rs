@@ -2812,24 +2812,20 @@ fn emit_special_function<'a, 'd>(
                 instr::cls_cns_l(local),
             ])))
         }
-        ("__SystemLib\\unwrap_opaque_value", _)
-            if e.options().hhbc.emit_native_enum_class_labels =>
-        {
-            match *args {
-                [_, ref val] => Ok(Some(InstrSeq::gather(vec![
-                    emit_expr(e, env, error::expect_normal_paramkind(val)?)?,
-                    emit_pos(pos),
-                    instr::enum_class_label_name(),
-                ]))),
-                _ => Err(Error::fatal_runtime(
-                    pos,
-                    format!(
-                        "__SystemLib\\unwrap_opaque_value() expects exactly 2 parameters, {} given",
-                        nargs
-                    ),
-                )),
-            }
-        }
+        ("__SystemLib\\unwrap_enum_class_label", _) => match *args {
+            [ref val] => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, error::expect_normal_paramkind(val)?)?,
+                emit_pos(pos),
+                instr::enum_class_label_name(),
+            ]))),
+            _ => Err(Error::fatal_runtime(
+                pos,
+                format!(
+                    "__SystemLib\\unwrap_enum_class_label() expects exactly 1 parameter, {} given",
+                    nargs
+                ),
+            )),
+        },
         ("HH\\classname_to_class", _) => match *args {
             [ref cname] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(cname)?)?,
@@ -3453,42 +3449,15 @@ fn emit_obj_get_expr<'a, 'd>(
 }
 
 fn emit_label<'a, 'd>(
-    emitter: &mut Emitter<'d>,
-    env: &Env<'a>,
+    _emitter: &mut Emitter<'d>,
+    _env: &Env<'a>,
     pos: &Pos,
     label: &(Option<aast_defs::ClassName>, String),
 ) -> Result<InstrSeq> {
-    if emitter.options().hhbc.emit_native_enum_class_labels {
-        Ok(InstrSeq::gather(vec![
-            emit_pos(pos),
-            instr::enum_class_label(hhbc::intern_bytes(label.1.as_bytes())),
-        ]))
-    } else {
-        use ast::Expr_;
-
-        // emitting E#A as __SystemLib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
-        let create_opaque_value = "__SystemLib\\create_opaque_value".to_string();
-        let create_opaque_value = ast_defs::Id(pos.clone(), create_opaque_value);
-        let create_opaque_value = Expr_::Id(Box::new(create_opaque_value));
-        let create_opaque_value = ast::Expr((), pos.clone(), create_opaque_value);
-        // OpaqueValue::EnumClassLabel = 0 defined in
-        // hphp/runtime/ext/hh/ext_hh.php
-        let enum_class_label_index = Expr_::Int("0".to_string());
-        let enum_class_label_index = ast::Expr((), pos.clone(), enum_class_label_index);
-        let label_string = label.1.to_string();
-        let label = Expr_::String(bstr::BString::from(label_string));
-        let label = ast::Expr((), pos.clone(), label);
-        let call_expr = ast::CallExpr {
-            func: create_opaque_value,
-            targs: vec![],
-            args: vec![
-                (ast::Argument::Anormal(enum_class_label_index)),
-                (ast::Argument::Anormal(label)),
-            ],
-            unpacked_arg: None,
-        };
-        emit_call_expr(emitter, env, pos, None, false, &call_expr)
-    }
+    Ok(InstrSeq::gather(vec![
+        emit_pos(pos),
+        instr::enum_class_label(hhbc::intern_bytes(label.1.as_bytes())),
+    ]))
 }
 
 fn emit_call_expr(

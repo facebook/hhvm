@@ -985,7 +985,6 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
 const StaticString
   s_Memoize("__Memoize"),
   s_MemoizeLSB("__MemoizeLSB"),
-  s_systemlib_create_opaque_value("__SystemLib\\create_opaque_value"),
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
   s_NotKeyedByICAndLeakIC("NotKeyedByICAndLeakIC__DO_NOT_USE");
@@ -1012,20 +1011,7 @@ static Array get_function_user_attributes(const Func* func) {
           if (sd->same(s_KeyedByIC.get()) ||
               sd->same(s_MakeICInaccessible.get()) ||
               sd->same(s_NotKeyedByICAndLeakIC.get())) {
-            if (Cfg::Eval::EmitNativeEnumClassLabels) {
               args.append(make_tv<KindOfEnumClassLabel>(sd));
-            } else {
-              auto const func = Func::load(s_systemlib_create_opaque_value.get());
-              assertx(func);
-              VecInit v(2);
-              // From ext_hh.php: __SystemLib\OpaqueValueId::EnumClassLabel
-              v.append(make_tv<KindOfInt64>(0));
-              v.append(tv);
-              args.append(g_context->invokeFunc(
-                func, v.toArray(), nullptr, nullptr,
-                RuntimeCoeffects::pure(), false /* dynamic */
-              ));
-            }
           }
         }
       });

@@ -114,12 +114,7 @@ interface GenericEnumClass<+Tclass, +T> {
  */
 abstract class BuiltinAbstractEnumClass {
   final public static function nameOf(EnumClass\Label<this, mixed> $atom)[]: string {
-    return HH\FIXME\UNSAFE_CAST<mixed, string>(
-      \__SystemLib\unwrap_opaque_value(
-        \__SystemLib\OpaqueValueId::EnumClassLabel,
-        HH\FIXME\UNSAFE_CAST<mixed, dynamic>($atom),
-      )
-    );
+      return \__SystemLib\unwrap_enum_class_label($atom);
   }
 }
 
@@ -152,49 +147,10 @@ abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass
   final public static function valueOf<TEnum super this, TType>(
     EnumClass\Label<TEnum, TType> $atom,
   )[write_props]: MemberOf<TEnum, TType> {
-    $key = \__SystemLib\unwrap_opaque_value(
-      \__SystemLib\OpaqueValueId::EnumClassLabel,
-      HH\FIXME\UNSAFE_CAST<mixed, dynamic>($atom),
-    );
+    $key = \__SystemLib\unwrap_enum_class_label($atom);
     return \__SystemLib\get_enum_member_by_label($key);
   }
 }
 
-
-}
-
-namespace __SystemLib {
-
-/**
- * List of ids declared for create_opaque_value.
- * Please do not reuse an existing or deprecated id for your new
- * feature.
- */
-enum OpaqueValueId : int as int {
-  EnumClassLabel = 0;
-}
-
-<<__Native("NoRecording")>>
-function create_opaque_value_internal(int $id, mixed $val)[]: resource;
-
-/**
- * Create an OpaqueValue resource wrapping $val with $id.
- *
- * The value must be memoizable to ensure that equivalent values are only
- * allocated once and will always compare as equal.
- */
-<<__Memoize>>
-/* HH_FIXME[4447] TODO(T122706905) */
-function create_opaque_value(int $id, mixed $val)[]: mixed {
-  return create_opaque_value_internal($id, $val);
-}
-
-/**
- * Returns the value used to construct $res in a call to create_opaque_value,
- * if $res is not an opaque value resource or $id does not match the id used
- * to construct it throw an exception.
- */
-<<__Native("NoRecording")>>
-function unwrap_opaque_value(int $id, resource $res)[]: mixed;
 
 }

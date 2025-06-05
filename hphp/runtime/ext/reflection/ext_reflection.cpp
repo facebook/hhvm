@@ -1990,11 +1990,10 @@ static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
   return String(ret);
 }
 
-// private helper for getClass
-static String HHVM_METHOD(ReflectionTypeConstant, getClassname) {
+// private helper for getClass and getTypeStructure
+static TypedValue HHVM_METHOD(ReflectionTypeConstant, getClassPtr) {
   auto const cls = ReflectionConstHandle::GetClassFor(this_);
-  auto ret = const_cast<StringData*>(cls->name());
-  return String(ret);
+  return make_tv<KindOfClass>(const_cast<Class*>(cls));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2428,7 +2427,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionTypeConstant, isAbstract);
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
-    HHVM_ME(ReflectionTypeConstant, getClassname);
+    HHVM_ME(ReflectionTypeConstant, getClassPtr);
 
     HHVM_ME(ReflectionProperty, __construct);
     HHVM_ME(ReflectionProperty, isPublic);

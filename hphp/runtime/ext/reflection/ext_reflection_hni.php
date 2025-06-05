@@ -2343,7 +2343,7 @@ class ReflectionTypeConstant implements Reflector {
    *                           reflected type constant is part of.
    */
   public function getClass()[] {
-    return new ReflectionClass($this->getClassname());
+    return new ReflectionClass($this->getClassPtr());
   }
 
   public function __toString()[] {
@@ -2381,14 +2381,14 @@ class ReflectionTypeConstant implements Reflector {
   private function getDeclaringClassname()[]: string;
 
   <<__Native>>
-  private function getClassname()[]: string;
+  private function getClassPtr()[]: class<mixed>;
 
   /* returns the shape containing the full type information for this
    * type constant. The structure of this shape is specified in
    * reflection.hhi. */
   public function getTypeStructure()[] {
     return HH\type_structure(
-      $this->getClassname(),
+      $this->getClassPtr(),
       $this->getName()
     );
   }

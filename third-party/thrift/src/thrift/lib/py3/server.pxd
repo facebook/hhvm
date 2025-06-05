@@ -21,7 +21,7 @@ from folly.iobuf cimport cIOBuf
 from folly cimport cFollyExecutor
 from thrift.py3.std_libcpp cimport milliseconds, seconds
 from thrift.python.server_impl.event_handler cimport (
-    Py3ServerEventHandler,
+    PythonServerEventHandler,
     cBaseThriftServerMetadata,
     cIsOverloadedFunc,
     cSSLPolicy,
@@ -58,7 +58,7 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void stopListening() nogil except +
         cSSLPolicy getSSLPolicy() nogil
         void setSSLPolicy(cSSLPolicy policy) nogil
-        void setServerEventHandler(shared_ptr[Py3ServerEventHandler] handler) nogil
+        void setServerEventHandler(shared_ptr[PythonServerEventHandler] handler) nogil
         int32_t getActiveRequests()
         uint32_t getMaxRequests()
         void setMaxRequests(uint32_t maxRequests)

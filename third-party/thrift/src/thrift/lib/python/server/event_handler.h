@@ -20,12 +20,11 @@
 #include <folly/Executor.h>
 #include <folly/Function.h>
 #include <folly/ScopeGuard.h>
-#include <folly/io/async/Request.h>
+#include <folly/SocketAddress.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
-#include <thrift/lib/cpp2/server/RequestsRegistry.h>
 
-namespace thrift::py3 {
-using AddressHandler = folly::Function<void(folly::SocketAddress)>;
+namespace apache::thrift::python {
+using AddressHandler = ::folly::Function<void(::folly::SocketAddress)>;
 
 template <class Ret, class... Args>
 folly::Function<Ret(Args...)> object_partial(
@@ -37,32 +36,19 @@ folly::Function<Ret(Args...)> object_partial(
   };
 }
 
-class Py3ServerEventHandler
+class PythonServerEventHandler
     : public apache::thrift::server::TServerEventHandler {
  public:
-  explicit Py3ServerEventHandler(
-      folly::Executor* executor, AddressHandler address_handler)
-      : executor_(executor), address_handler_(std::move(address_handler)) {}
+  explicit PythonServerEventHandler(
+      folly::Executor* executor, AddressHandler address_handler);
 
-  void preServe(const folly::SocketAddress* address) override {
-    executor_->add([addr = *address, this]() mutable {
-      address_handler_(std::move(addr));
-    });
-  }
+  void preServe(const folly::SocketAddress* address) override;
 
  private:
   folly::Executor* executor_;
   AddressHandler address_handler_;
 };
 
-inline std::string getRequestId() {
-  if (auto rctx = folly::RequestContext::get()) {
-    if (auto rootId = rctx->getRootId();
-        apache::thrift::RequestsRegistry::isThriftRootId(rootId)) {
-      return apache::thrift::RequestsRegistry::getRequestId(rootId);
-    }
-  }
-  return {};
-}
+std::string getRequestId();
 
-} // namespace thrift::py3
+} // namespace apache::thrift::python

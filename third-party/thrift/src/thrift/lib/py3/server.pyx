@@ -131,7 +131,7 @@ cdef class ThriftServer:
             self.server.get().setPort(port)
         self.address_future = self.loop.create_future()
         self.server.get().setServerEventHandler(
-            make_shared[Py3ServerEventHandler](
+            make_shared[PythonServerEventHandler](
                 get_executor(),
                 object_partial(handleAddressCallback, <PyObject*> self.address_future)
             )

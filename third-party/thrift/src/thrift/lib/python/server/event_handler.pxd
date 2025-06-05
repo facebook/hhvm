@@ -18,7 +18,7 @@ from libcpp.string cimport string
 from folly cimport cFollyExecutor
 from folly.range cimport StringPiece
 
-cdef extern from "thrift/lib/python/server/event_handler.h" namespace "::thrift::py3":
+cdef extern from "thrift/lib/python/server/event_handler.h" namespace "::apache::thrift::python":
     cdef cppclass cfollySocketAddress "folly::SocketAddress":
         uint16_t getPort()
         bint isFamilyInet()
@@ -33,8 +33,8 @@ cdef extern from "thrift/lib/python/server/event_handler.h" namespace "::thrift:
 
     AddressHandler object_partial(void(*)(PyObject*, cfollySocketAddress), PyObject*)
 
-    cdef cppclass Py3ServerEventHandler:
-        Py3ServerEventHandler(cFollyExecutor*, AddressHandler) nogil
+    cdef cppclass PythonServerEventHandler:
+        PythonServerEventHandler(cFollyExecutor*, AddressHandler) nogil
 
     cdef cppclass cIsOverloadedFunc "apache::thrift::IsOverloadedFunc":
         pass

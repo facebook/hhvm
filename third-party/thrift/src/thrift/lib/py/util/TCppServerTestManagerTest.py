@@ -58,7 +58,7 @@ class TestTCppServerTestManager(BaseTest):
             return self.__data[id]
 
         def throwUserException(self):
-            raise UserException2("Some message")
+            raise UserException2(message="Some message")
 
         def throwUncaughtException(self, msg):
             raise AssertionError(msg)

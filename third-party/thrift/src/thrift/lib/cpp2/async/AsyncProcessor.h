@@ -216,12 +216,12 @@ class ServerRequest {
   // This short-cut could make the callback run on different threads
   // e.g. on IO thread pool, which is ok.
   ~ServerRequest() {
-    if (notifyRequestPile_) {
-      notifyRequestPile_->onRequestFinished(requestData_);
+    if (callbacks_.notifyRequestPile_) {
+      callbacks_.notifyRequestPile_->onRequestFinished(requestData_);
     }
 
-    if (notifyConcurrencyController_) {
-      notifyConcurrencyController_->onRequestFinished(requestData_);
+    if (callbacks_.notifyConcurrencyController_) {
+      callbacks_.notifyConcurrencyController_->onRequestFinished(requestData_);
     }
   }
 
@@ -254,8 +254,8 @@ class ServerRequest {
   // Set this if the request pile should be notified (via
   // RequestPileInterfaceo::onRequestFinished) when the request is completed.
   void setRequestPileNotification(RequestCompletionCallback* requestPile) {
-    DCHECK(notifyRequestPile_ == nullptr);
-    notifyRequestPile_ = requestPile;
+    DCHECK(callbacks_.notifyRequestPile_ == nullptr);
+    callbacks_.notifyRequestPile_ = requestPile;
   }
 
   // Set this if the concurrency controller should be notified (via
@@ -263,8 +263,8 @@ class ServerRequest {
   // completed.
   void setConcurrencyControllerNotification(
       RequestCompletionCallback* concurrencyController) {
-    DCHECK(notifyConcurrencyController_ == nullptr);
-    notifyConcurrencyController_ = concurrencyController;
+    DCHECK(callbacks_.notifyConcurrencyController_ == nullptr);
+    callbacks_.notifyConcurrencyController_ = concurrencyController;
   }
 
  protected:
@@ -334,12 +334,12 @@ class ServerRequest {
 
   static RequestCompletionCallback* moveRequestPileNotification(
       ServerRequest& sr) {
-    return std::exchange(sr.notifyRequestPile_, nullptr);
+    return std::exchange(sr.callbacks_.notifyRequestPile_, nullptr);
   }
 
   static RequestCompletionCallback* moveConcurrencyControllerNotification(
       ServerRequest& sr) {
-    return std::exchange(sr.notifyConcurrencyController_, nullptr);
+    return std::exchange(sr.callbacks_.notifyConcurrencyController_, nullptr);
   }
 
   static intptr_t& queueObserverPayload(ServerRequest& sr) {
@@ -355,12 +355,40 @@ class ServerRequest {
   std::shared_ptr<folly::RequestContext> follyRequestContext_;
   AsyncProcessor* asyncProcessor_;
   const AsyncProcessor::MethodMetadata* methodMetadata_;
-  RequestCompletionCallback* notifyRequestPile_{nullptr};
-  RequestCompletionCallback* notifyConcurrencyController_{nullptr};
   ServerRequestData requestData_;
   intptr_t queueObserverPayload_;
   IResourcePoolAcceptor* resourcePool_{nullptr};
   InternalPriority priority_{folly::Executor::LO_PRI};
+  /**
+   * Small struct to hold callback pointers that need to be handled specially.
+   * These callbacks are invoked during ServerRequest destruction. We only want
+   * them invoked once, when the last "moved-to" object is destroyed. In the
+   * move constructor and operator, swap and clear them from the "moved-from"
+   * object.
+   */
+  struct SwapAndNullOnMove {
+    SwapAndNullOnMove() = default;
+    SwapAndNullOnMove(SwapAndNullOnMove&& other) noexcept {
+      notifyRequestPile_ = std::exchange(other.notifyRequestPile_, nullptr);
+      notifyConcurrencyController_ =
+          std::exchange(other.notifyConcurrencyController_, nullptr);
+    }
+
+    SwapAndNullOnMove& operator=(SwapAndNullOnMove&& other) noexcept {
+      notifyRequestPile_ = std::exchange(other.notifyRequestPile_, nullptr);
+      notifyConcurrencyController_ =
+          std::exchange(other.notifyConcurrencyController_, nullptr);
+
+      return *this;
+    }
+
+    SwapAndNullOnMove(const SwapAndNullOnMove&) = delete;
+    SwapAndNullOnMove& operator=(const SwapAndNullOnMove&) = delete;
+    ~SwapAndNullOnMove() = default;
+
+    RequestCompletionCallback* notifyRequestPile_{nullptr};
+    RequestCompletionCallback* notifyConcurrencyController_{nullptr};
+  } callbacks_;
 };
 
 namespace detail {

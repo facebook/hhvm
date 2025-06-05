@@ -33,6 +33,7 @@
 #endif
 #include <stdio.h>
 #include <algorithm>
+#include <chrono>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
@@ -832,6 +833,56 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
   return programs;
 }
 
+void record_invocation_params(
+    const parsing_params& pparams,
+    const gen_params& gparams,
+    const sema_params& sparams,
+    const std::string& input_filename,
+    detail::metrics& metrics) {
+  metrics.get(detail::metrics::StringValue::HOSTNAME)
+      .set(std::getenv("HOSTNAME") ? std::getenv("HOSTNAME") : "");
+  auto& parse_params_metric =
+      metrics.get(detail::metrics::EventString::PARSING_PARAMS);
+  parse_params_metric.add("strict=" + std::to_string(pparams.strict));
+  parse_params_metric.add(
+      "allow_64bit_consts=" + std::to_string(pparams.allow_64bit_consts));
+  parse_params_metric.add(
+      "allow_missing_includes=" +
+      std::to_string(pparams.allow_missing_includes));
+  parse_params_metric.add(
+      "use_legacy_type_ref_resolution=" +
+      std::to_string(pparams.use_legacy_type_ref_resolution));
+  parse_params_metric.add(
+      "use_global_resolution=" + std::to_string(pparams.use_global_resolution));
+  auto& gen_params_metric =
+      metrics.get(detail::metrics::EventString::GEN_PARAMS);
+  gen_params_metric.add("gen_recurse=" + std::to_string(gparams.gen_recurse));
+  gen_params_metric.add("genfile=" + gparams.genfile);
+  gen_params_metric.add("out_path=" + gparams.out_path);
+  gen_params_metric.add("add_gen_dir=" + std::to_string(gparams.add_gen_dir));
+  gen_params_metric.add("skip_gen=" + std::to_string(gparams.skip_gen));
+  gen_params_metric.add(
+      "inject_schema_const=" + std::to_string(gparams.inject_schema_const));
+  for (const auto& target : gparams.targets) {
+    gen_params_metric.add("target=" + target);
+  }
+  auto& sema_params_metric =
+      metrics.get(detail::metrics::EventString::SEMA_PARAMS);
+  sema_params_metric.add(
+      "skip_lowering_annotations=" +
+      std::to_string(sparams.skip_lowering_annotations));
+  sema_params_metric.add(
+      "skip_lowering_cpp_type_annotations=" +
+      std::to_string(sparams.skip_lowering_cpp_type_annotations));
+  sema_params_metric.add(
+      "warn_on_redundant_custom_default_values=" +
+      std::to_string(sparams.warn_on_redundant_custom_default_values));
+  sema_params_metric.add(
+      "forbid_unstructured_annotations=" +
+      std::to_string(sparams.forbid_unstructured_annotations));
+  metrics.get(detail::metrics::StringValue::INPUT_FILENAME).set(input_filename);
+}
+
 compile_result compile_with_options(
     parsing_params pparams,
     gen_params gparams,
@@ -839,12 +890,15 @@ compile_result compile_with_options(
     sema_params sparams,
     const std::string& input_filename,
     source_manager& source_mgr) {
+  auto start = std::chrono::high_resolution_clock::now();
   compile_result result;
   if (input_filename.empty()) {
     return result;
   }
   sema_context ctx(source_mgr, result.detail, std::move(dparams));
   ctx.sema_parameters() = std::move(sparams);
+  record_invocation_params(
+      pparams, gparams, ctx.sema_parameters(), input_filename, ctx.metrics());
 
   std::unique_ptr<t_program_bundle> program_bundle =
       parse_and_mutate(source_mgr, ctx, input_filename, pparams, gparams);
@@ -856,9 +910,16 @@ compile_result compile_with_options(
     result.retcode = compile_retcode::success;
     return result;
   }
-
   result.retcode =
       generate_code_for_program_bundle(*program_bundle, gparams, ctx);
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+          .count();
+  ctx.metrics().get(detail::metrics::IntValue::RUNTIME).set(duration);
+
+  detail::pluggable_functions().call<log_metrics_tag>(
+      ctx.metrics(), ctx.params());
   return result;
 }
 

@@ -20,12 +20,16 @@
 #include <array>
 #include <functional>
 #include <iosfwd>
+#include <iostream>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 #include <fmt/core.h>
+#include <fmt/ranges.h>
+#include <thrift/compiler/detail/pluggable_functions.h>
+#include <thrift/compiler/metrics/metrics.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
@@ -365,6 +369,8 @@ class diagnostics_engine {
     return condition;
   }
 
+  detail::metrics& metrics() { return metrics_; }
+
  private:
   void do_report(
       source_location loc,
@@ -377,6 +383,7 @@ class diagnostics_engine {
   std::function<void(diagnostic)> report_cb_;
   diagnostic_params params_;
   bool has_errors_ = false;
+  detail::metrics metrics_;
 };
 
 // Makes a diagnostics engine that prints errors to stderr and ignores other
@@ -384,6 +391,45 @@ class diagnostics_engine {
 diagnostics_engine make_diagnostics_printer(source_manager& sm);
 
 std::ostream& operator<<(std::ostream& out, const diagnostic&);
+
+struct log_metrics_tag {
+  static void default_impl(
+      detail::metrics& metrics, const diagnostic_params& d_params) {
+    if (!d_params.should_report(diagnostic_level::debug)) {
+      return;
+    }
+    for (int metric = 0;
+         metric <= static_cast<int>(detail::metrics::StringValue::LAST);
+         ++metric) {
+      auto stringValue = static_cast<detail::metrics::StringValue>(metric);
+      fmt::print(
+          stdout,
+          "{}={}\n",
+          detail::metrics::to_string(stringValue),
+          metrics.get(stringValue).get());
+    }
+    for (int metric = 0;
+         metric <= static_cast<int>(detail::metrics::IntValue::LAST);
+         ++metric) {
+      auto intValue = static_cast<detail::metrics::IntValue>(metric);
+      fmt::print(
+          stdout,
+          "{}={}\n",
+          detail::metrics::to_string(intValue),
+          metrics.get(intValue).get());
+    }
+    for (int metric = 0;
+         metric <= static_cast<int>(detail::metrics::EventString::LAST);
+         ++metric) {
+      auto event = static_cast<detail::metrics::EventString>(metric);
+      fmt::print(
+          stdout,
+          "{}={}\n",
+          detail::metrics::to_string(event),
+          fmt::join(metrics.get(event).get(), ","));
+    }
+  }
+};
 
 } // namespace apache::thrift::compiler
 

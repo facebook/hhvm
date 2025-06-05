@@ -19,15 +19,6 @@ cross_package_access_with_crosspackage_attr_complex_inheritance.php--a.php:18:15
     19 |   }
     20 | }
 
-error: Parsing[1002] A semicolon ; is expected here. [1]
-
-cross_package_access_with_crosspackage_attr_complex_inheritance.php--b.php:2:12
-    1 | <?hh
-[1] 2 | module b.b1_
-    3 | class B extends A { // ok because pkg2 includes pkg1
-    4 |   <<__CrossPackage("pkg1")>> // this will unnecessarily error, but it's also redundant: pkg1 is always included
-    5 |   public function foo(): void {} // TODO: give a better error message instead of erroring
-
 error: Typing[4341] The method foo is not compatible with the overridden method [1]
 -> Method foo has type (function(): void) in B [1]
 -> But it has type (function(): void) in parent A [2]
@@ -49,4 +40,4 @@ cross_package_access_with_crosspackage_attr_complex_inheritance.php--a.php:6:19
     7 | }
     8 | <<__CrossPackage("pkg2")>>
 
-3 errors found
+2 errors found

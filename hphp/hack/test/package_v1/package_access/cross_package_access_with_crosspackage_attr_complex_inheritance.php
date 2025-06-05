@@ -30,7 +30,7 @@ function test(): void {
 
 //// b.php
 <?hh
-module b.b1
+module b.b1;
 class B extends A { // ok because pkg2 includes pkg1
   <<__CrossPackage("pkg1")>> // this will unnecessarily error, but it's also redundant: pkg1 is always included
   public function foo(): void {} // TODO: give a better error message instead of erroring

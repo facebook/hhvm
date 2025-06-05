@@ -12,9 +12,6 @@
 #include <utility>
 
 #include <folly/Format.h>
-#include <folly/ThreadLocal.h>
-#include <folly/io/Cursor.h>
-#include <folly/lang/Bits.h>
 #include <folly/memory/JemallocNodumpAllocator.h>
 #include <glog/logging.h>
 

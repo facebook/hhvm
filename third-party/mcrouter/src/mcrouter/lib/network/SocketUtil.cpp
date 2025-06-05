@@ -17,9 +17,6 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 
-#include <folly/io/async/AsyncSSLSocket.h>
-#include <folly/io/async/AsyncSocket.h>
-
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"
 #include "mcrouter/lib/network/AsyncTlsToPlaintextSocket.h"
 #include "mcrouter/lib/network/ConnectionOptions.h"

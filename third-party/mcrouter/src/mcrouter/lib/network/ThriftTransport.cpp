@@ -7,11 +7,9 @@
 
 #include "mcrouter/lib/network/ThriftTransport.h"
 
-#include <folly/fibers/FiberManager.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
-#include <thrift/lib/cpp2/async/RequestChannel.h>
 
 #ifndef LIBMC_FBTRACE_DISABLE
 #include <contextprop/cpp/serde/SerDeHelper.h>

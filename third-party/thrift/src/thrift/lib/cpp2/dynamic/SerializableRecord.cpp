@@ -415,6 +415,13 @@ void ensureUTF8OrThrow(std::string_view string) {
 
 } // namespace detail
 
+// This code produces a link error on Windows:
+//     lld-link: error: undefined symbol: class std::basic_string<char, struct
+//     std::char_traits<char>, class std::allocator<char>> __cdecl
+//     apache::thrift::detail::escape(class std::basic_string_view<char, struct
+//     std::char_traits<char>>)
+//       >>> referenced by .\xplat\thrift\common\tree_printer.cc:104
+#ifndef _WIN32
 namespace {
 
 void printTo(tree_printer::scope& scope, const SerializableRecord& record) {
@@ -483,5 +490,6 @@ std::ostream& operator<<(std::ostream& out, const SerializableRecord& record) {
   printTo(scope, record);
   return out << scope;
 }
+#endif
 
 } // namespace apache::thrift::type_system

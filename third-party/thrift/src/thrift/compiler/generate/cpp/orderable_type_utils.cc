@@ -17,7 +17,6 @@
 #include <unordered_set>
 
 #include <fmt/core.h>
-#include <glog/logging.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/uri.h>
@@ -353,10 +352,9 @@ OrderableTypeUtils::get_orderable_condition(
 
   if (isOrderedWithoutImplicitCustomTypeOrdering) {
     if (hasCustomSetOrMapField) {
-      DCHECK(hasEnableCustomTypeOrderingAnnotation)
-          << "Assumption violation: orderable type has custom set/map, but no "
-          << "@cpp.EnableCustomTypeOrdering annotation: "
-          << structured_type.name();
+      // Assumption violation: orderable type has custom set/map, but no
+      // @cpp.EnableCustomTypeOrdering annotation
+      assert(hasEnableCustomTypeOrderingAnnotation);
       return StructuredOrderableCondition::OrderableByExplicitAnnotation;
     } else {
       return StructuredOrderableCondition::Always;
@@ -394,18 +392,18 @@ OrderableTypeUtils::get_orderable_condition(
   //      => OrderableByLegacyImplicitLogicEnabledByUri
 
   if (!hasCustomSetOrMapField) {
-    DCHECK(!hasEnableCustomTypeOrderingAnnotation)
-        << "Assumption violation: type is orderable implicitly due to URI, "
-        << "and does not have custom set/map, so should not be annotated: "
-        << structured_type.name();
+    // Assumption violation: type is orderable implicitly due to URI, and does
+    // not have custom set/map, so should not be annotated:
+    assert(!hasEnableCustomTypeOrderingAnnotation);
     return StructuredOrderableCondition::
         OrderableByNestedLegacyImplicitLogicEnabledByUri;
   }
 
   // hasCustomSetOrMapField == true
-  DCHECK(!structured_type.uri().empty())
-      << "Assumption violation: type is orderable implicitly due to URI, but "
-      << "URI is empty: " << structured_type.name();
+
+  // Assumption violation: type is orderable implicitly due to URI, but URI is
+  // empty.
+  assert(!structured_type.uri().empty());
 
   return hasEnableCustomTypeOrderingAnnotation
       ? StructuredOrderableCondition::

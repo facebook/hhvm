@@ -129,12 +129,13 @@ let hack_of_ipynb_exn
     cells
     |> chunks_of_cells_exn
     |> List.partition_map ~f:(fun (anno, chunk) ->
-           let hack = Notebook_chunk.to_hack chunk in
            match anno with
-           | Anno_non_hack
+           | Anno_non_hack ->
+             First (Notebook_chunk.to_hack ~is_top_level_statements:false chunk)
            | Anno_hack_top_level ->
-             Either.First hack
-           | Anno_hack_stmt -> Either.Second hack)
+             First (Notebook_chunk.to_hack ~is_top_level_statements:false chunk)
+           | Anno_hack_stmt ->
+             Second (Notebook_chunk.to_hack ~is_top_level_statements:true chunk))
   in
   let non_stmts_code = String.concat non_stmts ~sep:"\n" in
   let main_fn_code =

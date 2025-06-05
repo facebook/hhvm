@@ -71,10 +71,47 @@ let strip_non_hack_comment (code : string) =
 
 let wrap_in_comment : string -> string = Printf.sprintf "/*@non_hack:\n%s\n*/"
 
-let to_hack { chunk_kind; id; contents; cell_bento_metadata } : string =
+module Fix_semicolon : sig
+  (* Add a semicolon at the end if that brings syntax error count from 1 to 0.
+   * We do this because omitting the final semicolon is common and allowed by HHVM in debugger mode.
+   * For predictability, reliability, and maintainability we avoid doing anything fancier here.
+   *)
+  val rewrite : top_level_statements:string -> string
+end = struct
+  let prefix = "<?hh\nfunction f(): void {\n"
+
+  let suffix = "\n}\n"
+
+  (* Get the number of parse errors after wrapping in `prefix` and `suffix` *)
+  let count_errors (code : string) : int =
+    let adapted_code = Printf.sprintf "%s%s%s" prefix code suffix in
+    let errors = adapted_code |> Notebook_convert_util.parse |> snd in
+    List.length errors
+
+  let rewrite ~top_level_statements:(code : string) : string =
+    if count_errors code = 1 then
+      let code_with_semicolon = code ^ ";" in
+      if count_errors code_with_semicolon = 0 then
+        code_with_semicolon
+      else
+        code
+    else
+      code
+end
+
+let to_hack
+    ~is_top_level_statements { chunk_kind; id; contents; cell_bento_metadata } :
+    string =
   let (cell_type, body) =
     match chunk_kind with
-    | Hack -> ("code", contents)
+    | Hack ->
+      let contents =
+        if is_top_level_statements then
+          Fix_semicolon.rewrite ~top_level_statements:contents
+        else
+          contents
+      in
+      ("code", contents)
     | Non_hack { cell_type } -> (cell_type, wrap_in_comment contents)
   in
   let cell_bento_metadata_list =

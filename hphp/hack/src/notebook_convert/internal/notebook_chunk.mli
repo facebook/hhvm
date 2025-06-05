@@ -33,9 +33,13 @@ val is_chunk_start_comment : string -> bool
 
 val is_chunk_end_comment : string -> bool
 
-(** Prepend a magic comment that preserves information about cells. This will enable us to
+(**
+   - Prepend a magic comment that preserves information about cells. This will enable us to
 reconstruct the notebook from the generated Hack (with some loss of position information).
+   - Fix up code that conssists of top-level statements:
+       - Add a semicolon at the end if that brings syntax error count from 1 to 0.
+       We do this because omitting the final semicolon is common and allowed by HHVM in debugger mode.
 *)
-val to_hack : t -> string
+val to_hack : is_top_level_statements:bool -> t -> string
 
 val of_hack : comment:string -> string -> (t, Notebook_convert_error.t) result

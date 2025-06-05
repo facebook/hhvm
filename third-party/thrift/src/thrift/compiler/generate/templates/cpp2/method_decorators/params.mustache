@@ -54,7 +54,7 @@
 }}
 {{#let export partial before_declaration_params |function| captures |maybe_prefix_comma param_type param_name_declaration|}}
 {{#pragma ignore-newlines}}
-{{#each function.params.fields as |param index|}}
+{{#each (array.enumerate function.params.fields) as |index param|}}
 {{#partial maybe_prefix_comma index=index}} {{#partial param_type param=param}} {{#partial param_name_declaration param=param}}
 {{/each}}
 {{/let partial}}

@@ -97,11 +97,8 @@ struct ast_visitor {
       const ast::each_block& each_block, tree_printer::scope& scope) const {
     scope.print("each-block {}", location(each_block.loc));
     visit(each_block.iterable, scope.make_child());
-    if (const auto& captured = each_block.captured) {
-      scope.make_child().print("element-capture '{}'", captured->element.name);
-      if (const auto& index = captured->index) {
-        scope.make_child().print("index-capture '{}'", index->name);
-      }
+    for (const ast::identifier& captured : each_block.captured) {
+      scope.make_child().print("element-capture '{}'", captured.name);
     }
     visit(each_block.body_elements, scope);
     if (const auto& else_clause = each_block.else_clause) {

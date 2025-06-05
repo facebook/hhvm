@@ -505,18 +505,12 @@ struct each_block {
   source_range loc;
 
   expression iterable;
-  struct captures {
-    /**
-     * The name of the variable to assign to each element of the iterable.
-     */
-    identifier element;
-    /**
-     * The name of the variable to assign to the index of each element of the
-     * iterable.
-     */
-    std::optional<identifier> index;
-  };
-  std::optional<captures> captured;
+  /**
+   * The name of the variable to assign to each element of the iterable.
+   * If there are multiple captures, then each element of the iterable must be
+   * an array with the same number of elements as the number of captures.
+   */
+  std::vector<identifier> captured;
 
   bodies body_elements;
   std::optional<else_block> else_clause;

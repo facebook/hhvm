@@ -144,6 +144,32 @@ TEST_F(StandardLibraryTest, array_at) {
   }
 }
 
+TEST_F(StandardLibraryTest, array_enumerate) {
+  {
+    auto result = render(
+        "{{#each (array.enumerate (array.of 1 \"foo\" 2)) as |tuple|}}\n"
+        "{{(array.at tuple 0)}}: {{(array.at tuple 1)}}\n"
+        "{{/each}}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "0: 1\n"
+        "1: foo\n"
+        "2: 2\n");
+  }
+
+  {
+    auto result = render(
+        "{{#each (array.enumerate (array.of)) as |tuple|}}\n"
+        "{{(array.at tuple 0)}}: {{(array.at tuple 1)}}\n"
+        "{{/each}}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "");
+  }
+}
+
 TEST_F(StandardLibraryTest, map_items) {
   {
     auto result = render(

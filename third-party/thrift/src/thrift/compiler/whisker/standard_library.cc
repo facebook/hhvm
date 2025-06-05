@@ -118,6 +118,50 @@ map::raw::value_type create_array_functions() {
         return a->at(index);
       });
 
+  /**
+   * Returns a view of the provided array's items paired with their index. The
+   * output is an array where each element is a tuple of `(index, item)`.
+   *
+   * The order of items produced in the output array matches the input array.
+   *
+   * Name: array.enumerate
+   *
+   * Arguments:
+   *   - [array] — The array to enumerate
+   *
+   * Returns:
+   *   [array] enumerated pairs `(index, item)` of the provided array.
+   */
+  array_functions["enumerate"] = dsl::make_function(
+      "array.enumerate", [](dsl::function::context ctx) -> object {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(1);
+
+        auto arr = ctx.argument<array>(0);
+
+        class enumerate_view : public array {
+         public:
+          explicit enumerate_view(array::ptr&& a) : array_(std::move(a)) {}
+
+          std::size_t size() const final { return array_->size(); }
+          object at(std::size_t index) const final {
+            return w::array(
+                {w::i64(static_cast<i64>(index)), array_->at(index)});
+          }
+
+          void print_to(
+              tree_printer::scope& scope,
+              const object_print_options& options) const final {
+            default_print_to("<array.enumerate view>", scope, options);
+          }
+
+         private:
+          array::ptr array_;
+        };
+
+        return w::make_array<enumerate_view>(std::move(arr));
+      });
+
   return map::raw::value_type{"array", w::map(std::move(array_functions))};
 }
 

@@ -1225,23 +1225,44 @@ class render_engine {
     const ast::expression& expr = each_block.iterable;
     object result = vm_.evaluate(expr);
 
-    const auto do_visit = [this, &each_block](i64 index, object scope) {
-      if (const auto& captured = each_block.captured) {
-        eval_ctx().push_scope(whisker::make::null);
-        vm_.bind_local(
-            captured->element.loc.begin,
-            captured->element.name,
-            std::move(scope));
-        if (captured->index.has_value()) {
-          vm_.bind_local(
-              captured->index->loc.begin,
-              captured->index->name,
-              whisker::make::i64(index));
-        }
-      } else {
+    const auto do_visit = [this, &each_block, &expr](i64 index, object scope) {
+      const std::vector<ast::identifier>& captured = each_block.captured;
+      if (captured.empty()) {
         // When captures are not present, each element becomes the implicit
         // context object (`{{.}}`).
         eval_ctx().push_scope(std::move(scope));
+      } else if (captured.size() == 1) {
+        // When there is only one capture, then we assign the name directly to
+        // the element. There is no need to destructure the element.
+        eval_ctx().push_scope(whisker::make::null);
+        const auto& capture = captured.front();
+        vm_.bind_local(capture.loc.begin, capture.name, std::move(scope));
+      } else {
+        // If there are multiple captures, then we need to destructure the
+        // element. The element must be an array (representing a tuple).
+        if (!scope.is_array()) {
+          vm_.diags().report_fatal_error(
+              expr.loc.begin,
+              "Item at index {} does not evaluate to an array. "
+              "Each blocks with multiple captures require each item to be an array. "
+              "The encountered value is:\n{}",
+              index,
+              to_string(scope));
+        }
+        eval_ctx().push_scope(whisker::make::null);
+        const array::ptr& tuple = scope.as_array();
+        if (tuple->size() != captured.size()) {
+          vm_.diags().report_fatal_error(
+              expr.loc.begin,
+              "Item at index {} does not evaluate to an array with {} elements (to capture). "
+              "The encountered value is:\n{}",
+              index,
+              captured.size(),
+              to_string(scope));
+        }
+        for (std::size_t i = 0; i < captured.size(); ++i) {
+          vm_.bind_local(captured[i].loc.begin, captured[i].name, tuple->at(i));
+        }
       }
       visit(each_block.body_elements);
       eval_ctx().pop_scope();

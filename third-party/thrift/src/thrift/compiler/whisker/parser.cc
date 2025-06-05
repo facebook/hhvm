@@ -26,7 +26,7 @@
 #include <iterator>
 #include <map>
 #include <optional>
-
+#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -1593,7 +1593,7 @@ class parser {
   // each-block-open →
   //   { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ "}}" }
   // each-block-capture →
-  //   { "as" ~ "|" ~ identifier ~ identifier? ~ "|" }
+  //   { "as" ~ "|" ~ identifier+ ~ "|" }
   // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
   // each-block-close → { "{{" ~ "/" ~ "each" ~ "}}"  }
   parse_result<ast::each_block> parse_each_block(parser_scan_window scan) {
@@ -1612,34 +1612,41 @@ class parser {
     ast::expression iterable =
         std::move(parsed_iterable).consume_and_advance(&scan);
 
-    auto captured =
-        std::invoke([&]() -> std::optional<ast::each_block::captures> {
-          if (!try_consume_token(&scan, tok::kw_as)) {
-            return std::nullopt;
-          }
-          std::optional<ast::identifier> element_capture;
-          std::optional<ast::identifier> index_capture;
-          if (!try_consume_token(&scan, tok::pipe)) {
-            report_fatal_expected(
-                scan, "{} to open each-block capture", tok::pipe);
-          };
-          if (const token* element =
-                  try_consume_token(&scan, tok::identifier)) {
-            element_capture = make_identifier(*element);
-          } else {
-            report_fatal_expected(
-                scan, "element-capture identifier in each-block capture");
-          }
-          if (const token* index = try_consume_token(&scan, tok::identifier)) {
-            index_capture = make_identifier(*index);
-          }
-          if (!try_consume_token(&scan, tok::pipe)) {
-            report_fatal_expected(
-                scan, "{} to close each-block capture", tok::pipe);
-          };
-          return ast::each_block::captures{
-              std::move(*element_capture), std::move(index_capture)};
-        });
+    auto captured = std::invoke([&]() -> std::vector<ast::identifier> {
+      if (!try_consume_token(&scan, tok::kw_as)) {
+        return {};
+      }
+      if (!try_consume_token(&scan, tok::pipe)) {
+        report_fatal_expected(scan, "{} to open each-block capture", tok::pipe);
+      };
+
+      std::vector<ast::identifier> captures;
+      std::unordered_set<std::string_view> seen;
+
+      const token* first_capture = try_consume_token(&scan, tok::identifier);
+      if (first_capture == nullptr) {
+        report_fatal_error(scan, "expected at least one capture in each-block");
+      }
+      seen.insert(first_capture->string_value());
+      captures.emplace_back(make_identifier(*first_capture));
+
+      while (const token* capture = try_consume_token(&scan, tok::identifier)) {
+        if (seen.find(capture->string_value()) != seen.end()) {
+          report_fatal_error(
+              scan,
+              "duplicate capture '{}' in each-block",
+              capture->string_value());
+        }
+        seen.insert(capture->string_value());
+        captures.emplace_back(make_identifier(*capture));
+      }
+
+      if (!try_consume_token(&scan, tok::pipe)) {
+        report_fatal_expected(
+            scan, "{} to close each-block capture", tok::pipe);
+      };
+      return captures;
+    });
 
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to open each-block", tok::close);

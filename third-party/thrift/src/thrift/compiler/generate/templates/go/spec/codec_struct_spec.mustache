@@ -25,21 +25,21 @@
     IsUnion:              {{struct:union?}},
     IsException:          {{struct:exception?}},
     FieldSpecs:           []thrift.FieldSpec{
-        {{#each struct:fields_sorted as |field index|}}
+        {{#each (array.enumerate struct:fields_sorted) as |index field|}}
         {{#with field}}
         {{> spec/codec_field_spec}}
         {{/with}}
         {{/each}}
     },
     FieldSpecIDToIndex:   map[int16]int{
-        {{#each struct:fields_sorted as |field index|}}
+        {{#each (array.enumerate struct:fields_sorted) as |index field|}}
         {{#with field}}
         {{field:key}}: {{index}},
         {{/with}}
         {{/each}}
     },
     FieldSpecNameToIndex: map[string]int{
-        {{#each struct:fields_sorted as |field index|}}
+        {{#each (array.enumerate struct:fields_sorted) as |index field|}}
         {{#with field}}
         "{{field:name}}": {{index}},
         {{/with}}

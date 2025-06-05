@@ -609,7 +609,7 @@ TEST_F(ParserTest, each_with_element_capture) {
       "   ╰─ newline <line:2:13, line:3:1> '\\n'\n");
 }
 
-TEST_F(ParserTest, each_with_element_and_index_captures) {
+TEST_F(ParserTest, each_with_two_captures) {
   auto ast = parse_ast(
       "{{#each news.updates as |update index|}}\n"
       "  {{index}}. {{update}}\n"
@@ -620,12 +620,26 @@ TEST_F(ParserTest, each_with_element_and_index_captures) {
       "╰─ each-block <line:1:1, line:3:10>\n"
       "   ├─ expression <line:1:9, col:21> 'news.updates'\n"
       "   ├─ element-capture 'update'\n"
-      "   ├─ index-capture 'index'\n"
+      "   ├─ element-capture 'index'\n"
       "   ├─ text <line:2:1, col:3> '  '\n"
       "   ├─ interpolation <line:2:3, col:12> 'index'\n"
       "   ├─ text <line:2:12, col:14> '. '\n"
       "   ├─ interpolation <line:2:14, col:24> 'update'\n"
       "   ╰─ newline <line:2:24, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, each_with_many_captures) {
+  auto ast = parse_ast(
+      "{{#each (foo 1 2 3) as |c1 c2 c3|}}\n"
+      "{{/each}}\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block <line:1:1, line:2:10>\n"
+      "   ├─ expression <line:1:9, col:20> '(foo 1 2 3)'\n"
+      "   ├─ element-capture 'c1'\n"
+      "   ├─ element-capture 'c2'\n"
+      "   ╰─ element-capture 'c3'\n");
 }
 
 TEST_F(ParserTest, each_block_nested) {
@@ -648,7 +662,7 @@ TEST_F(ParserTest, each_block_nested) {
       "   ├─ each-block <line:2:3, line:6:12>\n"
       "   │  ├─ expression <line:2:11, col:27> 'update.headlines'\n"
       "   │  ├─ element-capture 'headline'\n"
-      "   │  ├─ index-capture 'index'\n"
+      "   │  ├─ element-capture 'index'\n"
       "   │  ├─ text <line:3:1, col:5> '    '\n"
       "   │  ├─ interpolation <line:3:5, col:14> 'index'\n"
       "   │  ├─ text <line:3:14, col:16> '. '\n"
@@ -716,20 +730,20 @@ TEST_F(ParserTest, each_empty_captures) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected element-capture identifier in each-block capture but found `|`",
+          "expected at least one capture in each-block",
           path_to_file(1),
           1)));
 }
 
-TEST_F(ParserTest, each_too_many_captures) {
+TEST_F(ParserTest, each_duplicate_captures) {
   parse_ast_should_fail(
-      "{{#each (foo 1 2 3) as |c1 c2 c3|}}\n"
+      "{{#each (foo 1 2 3) as |cap foo cap|}}\n"
       "{{/each}}\n");
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected `|` to close each-block capture but found identifier",
+          "duplicate capture 'cap' in each-block",
           path_to_file(1),
           1)));
 }

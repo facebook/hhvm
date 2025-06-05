@@ -1438,10 +1438,12 @@ TEST_F(RenderTest, each_block_array_with_capture) {
       "120\n");
 }
 
-TEST_F(RenderTest, each_block_array_with_capture_and_index) {
+TEST_F(RenderTest, each_block_array_with_capture_destructuring) {
+  use_library(load_standard_library);
+
   auto result = render(
       "The factorial function looks like:\n"
-      "{{#each factorials as |value index|}}\n"
+      "{{#each (array.enumerate factorials) as |index value|}}\n"
       "{{index}}. {{value}}\n"
       "{{/each}}",
       w::map(
@@ -1458,7 +1460,30 @@ TEST_F(RenderTest, each_block_array_with_capture_and_index) {
       "4. 120\n");
 }
 
+TEST_F(RenderTest, each_block_array_without_capture_destructuring) {
+  // Since there is one capture only, the item should not be destructured.
+  auto result = render(
+      "The factorial function looks like:\n"
+      "{{#each . as |factorials|}}\n"
+      "{{#each factorials as |value|}}\n"
+      "{{value}}\n"
+      "{{/each}}\n"
+      "{{/each}}",
+      w::array({w::array(
+          {w::i64(1), w::i64(2), w::i64(6), w::i64(24), w::i64(120)})}));
+  EXPECT_EQ(
+      *result,
+      "The factorial function looks like:\n"
+      "1\n"
+      "2\n"
+      "6\n"
+      "24\n"
+      "120\n");
+}
+
 TEST_F(RenderTest, each_block_array_iterable_custom_array) {
+  use_library(load_standard_library);
+
   auto factorials = w::map(
       {{"factorials",
         custom_array::make(
@@ -1469,7 +1494,7 @@ TEST_F(RenderTest, each_block_array_iterable_custom_array) {
              w::map({{"value", w::i64(120)}})})}});
   auto result = render(
       "The factorial function looks like:\n"
-      "{{#each factorials as |entry index|}}\n"
+      "{{#each (array.enumerate factorials) as |index entry|}}\n"
       "{{index}}. {{entry.value}}\n"
       "{{/each}}",
       factorials);
@@ -1499,9 +1524,11 @@ TEST_F(RenderTest, each_block_array_else) {
 }
 
 TEST_F(RenderTest, each_block_array_nested) {
+  use_library(load_standard_library);
+
   auto result = render(
-      "{{#each . as |e i|}}\n"
-      "{{i}}({{#each e.b as |e j|}} {{i}}-{{j}}({{e.c}}) {{/each}})\n"
+      "{{#each (array.enumerate this) as |i e|}}\n"
+      "{{i}}({{#each (array.enumerate e.b) as |j e|}} {{i}}-{{j}}({{e.c}}) {{/each}})\n"
       "{{/each}}",
       w::array(
           {w::map(
@@ -1519,6 +1546,7 @@ TEST_F(RenderTest, each_block_array_nested) {
                  w::array(
                      {w::map({{"c", w::i64(5)}}),
                       w::map({{"c", w::i64(6)}})})}})}));
+
   EXPECT_EQ(
       *result,
       "0( 0-0(1)  0-1(2) )\n"
@@ -1541,6 +1569,47 @@ TEST_F(RenderTest, each_block_non_array) {
           diagnostic_level::error,
           "Expression 'number' does not evaluate to an array. The encountered value is:\n"
           "i64(2)\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, each_block_too_many_captures) {
+  auto result = render(
+      "{{#each . as |value extra_capture|}}\n"
+      "{{value}} {{extra_capture}}\n"
+      "{{/each}}",
+      w::array({w::array({w::string("foo")})}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Item at index 0 does not evaluate to an array with 2 elements (to capture). "
+          "The encountered value is:\n"
+          "array (size=1)\n"
+          "╰─ [0] 'foo'\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, each_block_not_enough_captures) {
+  auto result = render(
+      "{{#each . as |cap1 cap2|}}\n"
+      "{{value}}\n"
+      "{{/each}}",
+      w::array(
+          {w::array({w::string("foo"), w::string("bar"), w::string("baz")})}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Item at index 0 does not evaluate to an array with 2 elements (to capture). "
+          "The encountered value is:\n"
+          "array (size=3)\n"
+          "├─ [0] 'foo'\n"
+          "├─ [1] 'bar'\n"
+          "╰─ [2] 'baz'\n",
           path_to_file,
           1)));
 }

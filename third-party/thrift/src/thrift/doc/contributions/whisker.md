@@ -359,12 +359,12 @@ Whisker supports a block type for repeated rendering: `{{#each}}`. A typical rep
 
 ```whisker
 Rankings are:
-{{#each winners as |winner index|}}
-{{(add index 1)}}. {{winner}}
+{{#each winners as |winner|}}
+{{winner}}
 {{/each}}
 ```
 
-The `expression` being iterated (`winners`) **must** evaluate to an `array`, or a `native_object` that supports `array`-like iteration. The body will be rendered once for each element of the `array`.
+The `expression` being iterated (`winners`) **must** evaluate to an `array`. The body will be rendered once for each element of the `array`.
 
 The first capture name (`winner`) will be [locally bound](#scopes) to the current element in the `array`. The second capture name (`index`) will be [locally bound](#scopes) to the zero-based index (as an `i64`).
 
@@ -389,37 +389,43 @@ Rankings are:
 
 </Example>
 
-The `index` capture is **optional**.
+`{{#each}}` blocks may have multiple captures.
+If there is more than one capture, then each element of the expression being iterated **must** itself be an `array` with size equal to the number of captures.
+Each element will be *destructured* into the corresponding capture names.
 
-<Example title="Example without index">
+<Example title="Example with destructuring">
 
 ```whisker title=example.whisker
 Rankings are:
-{{#each winners as |winner|}}
-{{winner}}
+{{#each winners as |position winner|}}
+{{position}} - {{winner}}
 {{/each}}
 ```
 
 ```json title=Context
 {
   "winners": [
-    "Alice",
-    "Bob",
-    "Carol"
+    ["1st", "Alice"],
+    ["2nd", "Bob"],
+    ["3rd", "Carol"]
   ]
 }
 ```
 
 ```text title=Output
 Rankings are:
-Alice
-Bob
-Carol
+1st - Alice
+2nd - Bob
+3rd - Carol
 ```
+
+:::note
+Whisker's standard library includes a function, `array.enumerate`, which can be used to associate array elements with their indices (similar to [Python's `enumerate`](https://docs.python.org/3/library/functions.html#enumerate)).
+:::
 
 </Example>
 
-Both captures are **optional**, in which case, the *implicit context* (`{{ . }}`) can be used.
+Captures are **optional**, in which case, the *implicit context* (`{{ . }}`) can be used.
 
 <Example title="Example with implicit context">
 
@@ -478,7 +484,7 @@ There are no people.
 ```
 each-block         → { each-block-open ~ body* ~ else-block ~ each-block-close }
 each-block-open    → { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ "}}" }
-each-block-capture → { "as" ~ "|" ~ identifier ~ identifier? ~ "|" }
+each-block-capture → { "as" ~ "|" ~ identifier+ ~ "|" }
 else-block         → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
 each-block-close   → { "{{" ~ "/" ~ "each" ~ "}}"  }
 ```

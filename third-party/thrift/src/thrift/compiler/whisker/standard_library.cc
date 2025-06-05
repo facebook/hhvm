@@ -129,24 +129,52 @@ map::raw::value_type create_array_functions() {
    * Arguments:
    *   - [array] — The array to enumerate
    *
+   * Named arguments:
+   *   - [with_first: boolean] — If true, the 3rd element of each tuple is set
+   *     to the value of `index == 0`.
+   *   - [with_last: boolean] — If true, the last element of each tuple is set
+   *     to the value of `index == <size of array> - 1`. If `with_first` is
+   *     true, then this is the 4th element. Otherwise, it is the 3rd element.
+   *
    * Returns:
    *   [array] enumerated pairs `(index, item)` of the provided array.
    */
   array_functions["enumerate"] = dsl::make_function(
       "array.enumerate", [](dsl::function::context ctx) -> object {
-        ctx.declare_named_arguments({});
+        ctx.declare_named_arguments({"with_first", "with_last"});
         ctx.declare_arity(1);
 
         auto arr = ctx.argument<array>(0);
+        boolean with_first =
+            ctx.named_argument<boolean>(
+                   "with_first", dsl::function::context::optional)
+                .value_or(false);
+        boolean with_last =
+            ctx.named_argument<boolean>(
+                   "with_last", dsl::function::context::optional)
+                .value_or(false);
 
         class enumerate_view : public array {
          public:
-          explicit enumerate_view(array::ptr&& a) : array_(std::move(a)) {}
+          explicit enumerate_view(
+              array::ptr&& a, bool with_first, bool with_last)
+              : array_(std::move(a)),
+                with_first_(with_first),
+                with_last_(with_last) {}
 
           std::size_t size() const final { return array_->size(); }
           object at(std::size_t index) const final {
-            return w::array(
-                {w::i64(static_cast<i64>(index)), array_->at(index)});
+            array::raw result{
+                w::i64(static_cast<i64>(index)),
+                array_->at(index),
+            };
+            if (with_first_) {
+              result.emplace_back(w::boolean(index == 0));
+            }
+            if (with_last_) {
+              result.emplace_back(w::boolean(index == array_->size() - 1));
+            }
+            return w::array(std::move(result));
           }
 
           void print_to(
@@ -157,9 +185,12 @@ map::raw::value_type create_array_functions() {
 
          private:
           array::ptr array_;
+          bool with_first_;
+          bool with_last_;
         };
 
-        return w::make_array<enumerate_view>(std::move(arr));
+        return w::make_array<enumerate_view>(
+            std::move(arr), with_first, with_last);
       });
 
   return map::raw::value_type{"array", w::map(std::move(array_functions))};

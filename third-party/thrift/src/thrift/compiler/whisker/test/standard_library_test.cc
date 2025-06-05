@@ -168,6 +168,48 @@ TEST_F(StandardLibraryTest, array_enumerate) {
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "");
   }
+
+  {
+    auto result = render(
+        "{{#each (array.enumerate (array.of 1 \"foo\" 2) with_first=true) as |index item first?|}}\n"
+        "{{index}}: {{item}}{{#if first?}} (first){{/if first?}}\n"
+        "{{/each}}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "0: 1 (first)\n"
+        "1: foo\n"
+        "2: 2\n");
+  }
+
+  {
+    auto result = render(
+        "{{#each (array.enumerate (array.of 1 \"foo\" 2) with_last=true) as |index item last?|}}\n"
+        "{{index}}: {{item}}{{#if last?}} (last){{/if last?}}\n"
+        "{{/each}}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "0: 1\n"
+        "1: foo\n"
+        "2: 2 (last)\n");
+  }
+
+  {
+    auto result = render(
+        "{{#each (array.enumerate (array.of 1 \"foo\" 2) with_first=true with_last=true) as |index item first? last?|}}\n"
+        "{{index}}: {{item}}{{#if first?}} (first){{/if first?}}{{#if last?}} (last){{/if last?}}\n"
+        "{{/each}}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "0: 1 (first)\n"
+        "1: foo\n"
+        "2: 2 (last)\n");
+  }
 }
 
 TEST_F(StandardLibraryTest, map_items) {

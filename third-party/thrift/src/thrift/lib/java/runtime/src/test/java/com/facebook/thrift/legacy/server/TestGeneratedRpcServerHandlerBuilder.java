@@ -54,7 +54,7 @@ public class TestGeneratedRpcServerHandlerBuilder {
     PingService mock = Mockito.mock(ExtendedPing.class);
     Set<Class<?>> thriftInterfaces =
         GeneratedRpcServerHandlerBuilder.getAllThriftInterfaces(mock.getClass());
-    Assert.assertEquals(1, thriftInterfaces.size());
+    Assert.assertEquals(2, thriftInterfaces.size());
     Assert.assertTrue(thriftInterfaces.contains(ExtendedPing.class));
   }
 
@@ -90,6 +90,8 @@ public class TestGeneratedRpcServerHandlerBuilder {
         Collections.singletonList(new BlockingPingService()), Collections.emptyList());
     GeneratedRpcServerHandlerBuilder.generatedRpcServerHandler(
         Collections.singletonList(Mockito.mock(PingService.class)), Collections.emptyList());
+    GeneratedRpcServerHandlerBuilder.generatedRpcServerHandler(
+        Collections.singletonList(Mockito.mock(PingAB.class)), Collections.emptyList());
   }
 
   private static class PingAB implements PingA, PingB {

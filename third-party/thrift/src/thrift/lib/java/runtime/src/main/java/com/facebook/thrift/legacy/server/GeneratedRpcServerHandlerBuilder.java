@@ -28,9 +28,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 
 public class GeneratedRpcServerHandlerBuilder {
+  private static final Logger logger =
+      LoggerFactory.getLogger(GeneratedRpcServerHandlerBuilder.class);
+  private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
   public static RpcServerHandler generatedRpcServerHandler(
       List<Object> sources, List<ThriftEventHandler> eventHandlers) {
     List<RpcServerHandler> serverHandlers = new ArrayList<>();
@@ -63,9 +71,8 @@ public class GeneratedRpcServerHandlerBuilder {
   }
 
   private static MethodHandle serverHandlerBuilderMethodHandle(Class<?> serverInterface) {
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
-      return lookup.findStatic(
+      return LOOKUP.findStatic(
           serverInterface,
           "serverHandlerBuilder",
           MethodType.methodType(RpcServerHandlerBuilder.class, serverInterface));
@@ -85,10 +92,28 @@ public class GeneratedRpcServerHandlerBuilder {
     if (clz.getSuperclass() != null) {
       getAllThriftInterfaces(clz.getSuperclass(), visited);
     }
-    for (Class<?> c : clz.getInterfaces()) {
-      if (com.facebook.thrift.util.ThriftService.class.isAssignableFrom(c)) {
-        visited.add(c);
-      }
+    for (Class<?> iface : findInterfacesWithServerHandlerBuilder(clz)) {
+      visited.add(iface);
+    }
+  }
+
+  private static Set<Class<?>> findInterfacesWithServerHandlerBuilder(Class<?> clazz) {
+    List<Class<?>> interfaces = ClassUtils.getAllInterfaces(clazz);
+    return interfaces.stream()
+        .filter(iface -> hasServerHandlerBuilderMethod(iface))
+        .collect(Collectors.toSet());
+  }
+
+  private static boolean hasServerHandlerBuilderMethod(Class<?> iface) {
+    try {
+      MethodHandle methodHandle =
+          LOOKUP.findStatic(
+              iface,
+              "serverHandlerBuilder",
+              MethodType.methodType(RpcServerHandlerBuilder.class, iface));
+      return true;
+    } catch (NoSuchMethodException | IllegalAccessException e) {
+      return false;
     }
   }
 }

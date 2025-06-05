@@ -43,4 +43,4 @@ class AsyncSleepHandler(AsyncSleep.Iface):
 
     async def overflow(self, value):
         # simply return the value in OverflowResult
-        return OverflowResult(value)
+        return OverflowResult(value=value)

@@ -29,7 +29,7 @@ from thrift.util.TCppServerTestManager import TCppServerTestManager
 class SlotsServiceThrowsTest(unittest.TestCase):
     class Handler(SlotsThrowingService.Iface):
         def throwUserException(self):
-            raise UserException2("Some message")
+            raise UserException2(message="Some message")
 
         def throwUncaughtException(self, msg):
             raise AssertionError(msg)

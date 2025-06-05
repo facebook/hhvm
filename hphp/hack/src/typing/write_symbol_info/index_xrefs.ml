@@ -10,33 +10,87 @@ open Hh_prelude
 open Hack
 module Fact_acc = Predicate.Fact_acc
 
+let process_arg pos_map (exp, arg_pos) =
+  let arg =
+    match exp with
+    | Aast.String s when String.for_all ~f:(fun c -> Stdlib.Char.code c < 127) s
+      ->
+      (* TODO make this more general *)
+      Some Argument.(Lit (StringLiteral.Key s))
+    | Aast.Id (id_pos, _)
+    | Aast.Class_const (_, (id_pos, _)) ->
+      (match Xrefs.PosMap.find_opt id_pos pos_map with
+      | Some (Xrefs.{ target; _ } :: _) ->
+        (* there shouldn't be more than one target for a symbol in that
+           position *)
+        Some (Argument.Xref target)
+      | _ -> None)
+    | _ -> None
+  in
+  (arg, arg_pos)
+
+let process_call
+    ~path
+    ~pos_map
+    ~fa_ref
+    ~callee_pos
+    ~id_pos
+    ~receiver_span
+    ~args
+    ~arg_processor =
+  let call_args = Build_fact.call_arguments (List.map args ~f:arg_processor) in
+  let dispatch_arg =
+    Option.(
+      receiver_span >>= fun pos ->
+      match Build_fact.call_arguments [(None, pos)] with
+      | [arg] -> Some arg
+      | _ -> None)
+  in
+  let callee_infos =
+    match id_pos with
+    | None -> []
+    | Some pos ->
+      (match Xrefs.PosMap.find_opt pos pos_map with
+      | Some l -> l
+      | None -> [])
+  in
+  fa_ref :=
+    Add_fact.file_call
+      ~path
+      callee_pos
+      ~callee_infos
+      ~call_args
+      ~dispatch_arg
+      !fa_ref
+    |> snd
+
 let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
   object (_self)
     inherit Tast_visitor.handler_base
 
+    method! at_expr _env expr =
+      match expr with
+      | (_, _, Aast.New ((_, callee_pos, _), _, args, _, _)) ->
+        let arg_processor (_, arg_pos, exp) =
+          process_arg pos_map (exp, arg_pos)
+        in
+        process_call
+          ~path
+          ~pos_map
+          ~fa_ref
+          ~callee_pos
+          ~id_pos:(Some callee_pos)
+          ~receiver_span:None
+          ~args
+          ~arg_processor
+      | _ -> ()
+
     method! at_Call _env call =
       let Aast.{ func = (_, callee_pos, callee_exp); args; _ } = call in
-      let f arg =
+      let arg_processor arg =
         let (_, arg_pos, exp) = Aast_utils.arg_to_expr arg in
-        let arg =
-          match exp with
-          | Aast.String s
-            when String.for_all ~f:(fun c -> Stdlib.Char.code c < 127) s ->
-            (* TODO make this more general *)
-            Some Argument.(Lit (StringLiteral.Key s))
-          | Aast.Id (id_pos, _)
-          | Aast.Class_const (_, (id_pos, _)) ->
-            (match Xrefs.PosMap.find_opt id_pos pos_map with
-            | Some (Xrefs.{ target; _ } :: _) ->
-              (* there shouldn't be more than one target for a symbol in that
-                 position *)
-              Some (Argument.Xref target)
-            | _ -> None)
-          | _ -> None
-        in
-        (arg, arg_pos)
+        process_arg pos_map (exp, arg_pos)
       in
-      let call_args = Build_fact.call_arguments (List.map args ~f) in
       let (id_pos, receiver_span) =
         match callee_exp with
         | Aast.Id (id_pos, _) -> (Some id_pos, None)
@@ -46,30 +100,15 @@ let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
           (Some id_pos, Some receiver_span)
         | _ -> (None, None)
       in
-      let dispatch_arg =
-        Option.(
-          receiver_span >>= fun pos ->
-          match Build_fact.call_arguments [(None, pos)] with
-          | [arg] -> Some arg
-          | _ -> None)
-      in
-      let callee_infos =
-        match id_pos with
-        | None -> []
-        | Some pos ->
-          (match Xrefs.PosMap.find_opt pos pos_map with
-          | Some l -> l
-          | None -> [])
-      in
-      fa_ref :=
-        Add_fact.file_call
-          ~path
-          callee_pos
-          ~callee_infos
-          ~call_args
-          ~dispatch_arg
-          !fa_ref
-        |> snd
+      process_call
+        ~path
+        ~pos_map
+        ~fa_ref
+        ~callee_pos
+        ~id_pos
+        ~receiver_span
+        ~args
+        ~arg_processor
   end
 
 let process_calls ctx path tast map_pos_decl fa =

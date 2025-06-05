@@ -338,7 +338,11 @@ class StructureAnnotations(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
-                struct S {}
+                struct S {
+                    1: i32 field1 (swift.recursive_reference = "true");
+
+                    2: i32 field2 (swift.recursive_reference = "false");
+                }
                 (
                     java.swift.annotations = "@com.facebook.Foo
                         @com.facebook.Bar",
@@ -360,7 +364,12 @@ class StructureAnnotations(unittest.TestCase):
                 @java.Annotation{java_annotation = "@com.facebook.Foo
                     @com.facebook.Bar"}
                 @java.Mutable
-                struct S {}
+                struct S {
+                    @java.Recursive
+                    1: i32 field1 ;
+
+                    2: i32 field2 ;
+                }
                 """
             ),
         )

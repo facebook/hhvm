@@ -404,6 +404,12 @@ class structure_annotations {
         to_add.insert(fmt::format(
             "@java.Annotation{{java_annotation = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/java.thrift");
+      } else if (name == "swift.recursive_reference") {
+        to_remove.emplace_back(name, data);
+        if (data.value == "true" && dynamic_cast<const t_field*>(&node)) {
+          to_add.insert("@java.Recursive");
+          fm_.add_include("thrift/annotation/java.thrift");
+        }
       }
 
       // go

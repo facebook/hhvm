@@ -147,4 +147,8 @@ std::string EvalLoader::PackagesTomlFileNameDefault() {
   return "PACKAGES.toml";
 }
 
+void EvalLoader::EnforceDeploymentPostProcess(bool& val) {
+  // PackageV2 does not support runtime enforcement
+  if (Eval::PackageV2) val = false;
+}
 }

@@ -1193,7 +1193,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   1 - Warn
   2 - Throw exception
 
-- bool Eval.EnforceDeployment = false, UNKNOWN
+- bool Eval.EnforceDeployment = false, UNKNOWN, postprocess
 
   Enforce deployment boundaries.
 

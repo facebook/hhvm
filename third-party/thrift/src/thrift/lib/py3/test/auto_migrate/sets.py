@@ -251,7 +251,6 @@ class SetTests(unittest.TestCase):
         self.assertIsInstance(x.__rxor__(y), expected_type)
         self.assertIsInstance(x.__rsub__(y), expected_type)
 
-    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(SetI32Lists(), Container)
         self.assertIsInstance(SetSetI32Lists(), Container)

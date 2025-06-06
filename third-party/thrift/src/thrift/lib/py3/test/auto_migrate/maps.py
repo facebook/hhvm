@@ -182,7 +182,6 @@ class MapTests(unittest.TestCase):
         self.assertEqual(x, x)
         self.assertEqual(y, y)
 
-    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(LocationMap, Container)
         self.assertIsInstance(StrI32ListMap(), Container)

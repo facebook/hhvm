@@ -224,7 +224,6 @@ class ListTests(unittest.TestCase):
             [Color.red, Color.blue, Color.green],
         )
 
-    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(int_list, Container)
         self.assertIsInstance(I32List([1, 2, 3]), Container)

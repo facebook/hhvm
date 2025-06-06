@@ -34,6 +34,7 @@ from thrift.python.types cimport (
 )
 from apache.thrift.metadata.types_auto_migrated import _fbthrift__is_py3_auto_migrated
 from thrift.python.types import (
+    Container as _fbthrift_python_Container,
     Enum as _fbthrift_python_Enum,
     EnumMeta as _fbthrift_python_EnumMeta,
     Flag as _fbthrift_python_Flag,
@@ -391,6 +392,19 @@ cdef class Container:
 
     def __len__(self):
         raise NotImplementedError()
+
+class ContainerMeta(type):
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_Container):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_Container):
+            return _fbthrift__is_py3_auto_migrated
+        return super().__subclasscheck__(sub)
+
+SetMetaClass(<PyTypeObject*> Container, <PyTypeObject*> ContainerMeta)
 
 cdef class _ListPrivateCtorToken:
     pass

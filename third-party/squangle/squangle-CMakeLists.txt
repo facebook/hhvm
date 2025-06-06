@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # - use CONFIGURE_DEPENDS in these globs
 
 file(GLOB_RECURSE SOURCES "squangle/*.cpp")
+list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/squangle/util/tests/StorageRowTest.cpp")
 
 add_library(squangle STATIC ${SOURCES})
 target_include_directories(squangle PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -82,13 +82,16 @@ cdef class ThriftServer:
     def __init__(self, handler, int port=0, ip=None, path=None, socket_fd=None):
         # thrift-python path
         if isinstance(handler, PythonServiceInterface):
+            thrift_version = b"python"
             self.handler = handler
             self.factory = PythonAsyncProcessorFactory.create(handler)
         # thrift-py3 path
         elif isinstance(handler, Py3AsyncProcessorFactory):
+            thrift_version = b"py3"
             self.handler = None
             self.factory = handler
         elif handler is None:
+            thrift_version = b"unknown"
             self.handler = None
             self.factory = None
         else:
@@ -136,7 +139,7 @@ cdef class ThriftServer:
                 object_partial(handleAddressCallback, <PyObject*> self.address_future)
             )
         )
-        self.server.get().metadata().wrapper = b"ThriftServer-py3"
+        self.server.get().metadata().wrapper = b"ThriftServer-" + thrift_version
 
     async def serve(self):
         # This check is only useful for C++-based Thrift servers.

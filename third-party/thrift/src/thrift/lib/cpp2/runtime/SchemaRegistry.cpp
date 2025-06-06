@@ -22,6 +22,14 @@
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
 
+#if __has_include(<thrift/facebook/schema/omnibus_schema_header.h>)
+#include <thrift/facebook/schema/omnibus_schema_header.h>
+#else
+namespace {
+constexpr std::string_view __fbthrift_omnibus_schema;
+}
+#endif
+
 namespace apache::thrift {
 
 SchemaRegistry::SchemaRegistry(BaseSchemaRegistry& base) : base_(base) {
@@ -34,6 +42,17 @@ SchemaRegistry::~SchemaRegistry() = default;
 
 SchemaRegistry& SchemaRegistry::get() {
   static folly::Indestructible<SchemaRegistry> self(BaseSchemaRegistry::get());
+  static bool addOmnibusSchema = [&] {
+    // This loads the omnibus schema bundle. The URI we pass in is only used to
+    // check that some definition from the bundle loaded successfully via the
+    // return value of this call.
+    return self->resolver_->getDefinitionNodeByUri(
+        "facebook.com/thrift/type/Any",
+        type::ProgramId{},
+        {{__fbthrift_omnibus_schema}});
+  }();
+  assert(addOmnibusSchema == !__fbthrift_omnibus_schema.empty());
+  (void)addOmnibusSchema;
   return *self;
 }
 

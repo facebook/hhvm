@@ -683,10 +683,6 @@ TEST(SyntaxGraphTest, getDefinitionNode) {
   const ServiceNode& serv = testService.asService();
   EXPECT_EQ(serv.definition().name(), "TestService");
 
-  EXPECT_THROW(
-      registry.getDefinitionNode<facebook::thrift::annotation::Experimental>(),
-      std::out_of_range);
-
   // Adding to the SyntaxGraph should not invalidate old nodes
   registry.getDefinitionNode<test::OtherTestStruct>();
   EXPECT_EQ(serv.definition().name(), "TestService");
@@ -704,9 +700,9 @@ TEST(SyntaxGraphTest, getNode) {
   const ServiceNode& serv = registry.getNode<test::TestService>();
   EXPECT_EQ(serv.definition().name(), "TestService");
 
-  EXPECT_THROW(
-      registry.getNode<facebook::thrift::annotation::Experimental>(),
-      std::out_of_range);
+  const StructNode& annot =
+      registry.getNode<facebook::thrift::annotation::Experimental>();
+  EXPECT_EQ(annot.definition().name(), "Experimental");
 }
 
 TEST_F(ServiceSchemaTest, asTypeSystem) {

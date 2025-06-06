@@ -312,10 +312,14 @@ fn test_deprecated_null_stuff_deser() -> Result<()> {
 
     let sub = test_deprecated_optional_with_default_is_some_if::Struct {
         optDef: None,
+        marker: true,
         ..Default::default()
     };
 
-    let inputs = &["{}", r#"{ "optDef": null}"#];
+    let inputs = &[
+        r#"{                 "marker": true }"#,
+        r#"{ "optDef": null, "marker": true }"#,
+    ];
     for input in inputs {
         // Make sure everything is skipped properly
         let res = deserialize(*input);

@@ -19,6 +19,7 @@ namespace cpp2 facebook
 struct Struct {
   // @lint-ignore THRIFTCHECKS
   1: optional string optDef = "IAMOPTWITHDEF";
+  2: bool marker;
 }
 
 const Struct DEFAULT_STRUCT = {};

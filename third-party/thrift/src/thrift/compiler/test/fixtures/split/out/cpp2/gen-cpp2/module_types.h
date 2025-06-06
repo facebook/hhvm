@@ -948,6 +948,21 @@ class MyUnion final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && {
     return {std::move(value_.myEnum), fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+
+  /** Glean { "field": "myEnum" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyEnum&> myEnum() const& {
+    return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myEnum" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&> myEnum() & {
+    return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myEnum" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&&> myEnum() && {
+    return {std::move(value_.myEnum), fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
   /** Glean { "field": "myStruct" } */
   template <typename..., typename T = ::cpp2::MyStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myStruct_ref() const& {
@@ -971,6 +986,21 @@ class MyUnion final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myStruct_ref() && {
     return {std::move(value_.myStruct), fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+
+  /** Glean { "field": "myStruct" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyStruct&> myStruct() const& {
+    return {value_.myStruct, fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myStruct" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyStruct&> myStruct() & {
+    return {value_.myStruct, fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myStruct" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyStruct&&> myStruct() && {
+    return {std::move(value_.myStruct), fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myDataItem_ref() const& {
@@ -992,6 +1022,21 @@ class MyUnion final  {
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myDataItem_ref() && {
+    return {std::move(value_.myDataItem), fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myDataItem" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyDataItem&> myDataItem() const& {
+    return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myDataItem" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&> myDataItem() & {
+    return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "myDataItem" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&&> myDataItem() && {
     return {std::move(value_.myDataItem), fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

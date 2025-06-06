@@ -38,4 +38,19 @@
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> {{field:cpp_name}}_ref() && {
     return {std::move(value_.{{field:cpp_name}}), fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+
+  {{> common/field_docblock}}
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const {{field:cpp_storage_type}}&> {{field:cpp_name}}() const& {
+    return {value_.{{field:cpp_name}}, fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  {{> common/field_docblock}}
+  FOLLY_ERASE ::apache::thrift::union_field_ref<{{field:cpp_storage_type}}&> {{field:cpp_name}}() & {
+    return {value_.{{field:cpp_name}}, fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  {{> common/field_docblock}}
+  FOLLY_ERASE ::apache::thrift::union_field_ref<{{field:cpp_storage_type}}&&> {{field:cpp_name}}() && {
+    return {std::move(value_.{{field:cpp_name}}), fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
 {{/field:type}}{{/struct:fields}}

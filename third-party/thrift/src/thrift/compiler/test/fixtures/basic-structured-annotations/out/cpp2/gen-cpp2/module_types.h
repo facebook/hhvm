@@ -1892,6 +1892,21 @@ class MyUnion final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> first_ref() && {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+
+  /** Glean { "field": "first" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic-structured-annotations::annotated_inline_string&> first() const& {
+    return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "first" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_string&> first() & {
+    return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "first" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_string&&> first() && {
+    return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> second_ref() const& {
@@ -1913,6 +1928,21 @@ class MyUnion final  {
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> second_ref() && {
+    return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "second" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic-structured-annotations::annotated_inline_i64&> second() const& {
+    return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "second" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_i64&> second() & {
+    return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "second" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_i64&&> second() && {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

@@ -1305,6 +1305,21 @@ class ExampleUnion final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> fieldA_ref() && {
     return {std::move(value_.fieldA), fbthrift_type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+
+  /** Glean { "field": "fieldA" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::tablebased::ContainerStruct&> fieldA() const& {
+    return {value_.fieldA, fbthrift_type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "fieldA" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::tablebased::ContainerStruct&> fieldA() & {
+    return {value_.fieldA, fbthrift_type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "fieldA" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::tablebased::ContainerStruct&&> fieldA() && {
+    return {std::move(value_.fieldA), fbthrift_type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
   /** Glean { "field": "fieldB" } */
   template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> fieldB_ref() const& {
@@ -1326,6 +1341,21 @@ class ExampleUnion final  {
   /** Glean { "field": "fieldB" } */
   template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> fieldB_ref() && {
+    return {std::move(value_.fieldB), fbthrift_type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "fieldB" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::tablebased::TrivialTypesStruct&> fieldB() const& {
+    return {value_.fieldB, fbthrift_type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "fieldB" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::tablebased::TrivialTypesStruct&> fieldB() & {
+    return {value_.fieldB, fbthrift_type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "fieldB" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::tablebased::TrivialTypesStruct&&> fieldB() && {
     return {std::move(value_.fieldB), fbthrift_type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

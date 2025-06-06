@@ -1319,6 +1319,21 @@ class AdaptedUnion final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> best_ref() && {
     return {std::move(value_.best), fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+
+  /** Glean { "field": "best" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::int16_t&> best() const& {
+    return {value_.best, fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "best" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int16_t&> best() & {
+    return {value_.best, fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "best" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int16_t&&> best() && {
+    return {std::move(value_.best), fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
   template <class Protocol_>
@@ -2835,6 +2850,21 @@ class BinaryUnion final  {
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> iobuf_val_ref() && {
+    return {std::move(value_.iobuf_val), fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf_val" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::py3::simple::IOBuf&> iobuf_val() const& {
+    return {value_.iobuf_val, fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf_val" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::py3::simple::IOBuf&> iobuf_val() & {
+    return {value_.iobuf_val, fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf_val" } */
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::py3::simple::IOBuf&&> iobuf_val() && {
     return {std::move(value_.iobuf_val), fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

@@ -19,11 +19,9 @@
 #include <folly/Hash.h>
 #include <folly/Indestructible.h>
 #include <folly/io/IOBuf.h>
-#include <thrift/conformance/cpp2/AnyRegistry.h>
-#include <thrift/conformance/cpp2/ThriftTypeInfo.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_detail_types.h>
 
-#include <xxhash.h> // @manual
+#include <xxhash.h>
 
 namespace apache::thrift::protocol::detail {
 

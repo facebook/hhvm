@@ -23,26 +23,32 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 
 exception CarbonResultBusy {
+  @thrift.ExceptionMessage
   1: string message
 }
 
 exception CarbonResultRemoteError {
+  @thrift.ExceptionMessage
   1: string message
 }
 
 exception CarbonResultDeadlineExceeded {
+  @thrift.ExceptionMessage
   1: string message
 }
 
 exception CarbonResultShutdown {
+  @thrift.ExceptionMessage
   1: string message
 }
 
 exception CarbonResultTryAgain {
+  @thrift.ExceptionMessage
   1: string message
 }
 
 exception CarbonResultInvalidRequest {
+  @thrift.ExceptionMessage
   1: string message
 }
 

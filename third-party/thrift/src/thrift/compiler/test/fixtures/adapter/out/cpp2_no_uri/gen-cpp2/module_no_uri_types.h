@@ -83,7 +83,7 @@ class RefUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     field1 = 1,
   } ;

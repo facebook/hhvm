@@ -1103,7 +1103,7 @@ class ExampleUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     fieldA = 1,
     fieldB = 2,

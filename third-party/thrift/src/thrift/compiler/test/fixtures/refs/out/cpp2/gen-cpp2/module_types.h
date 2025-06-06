@@ -495,7 +495,7 @@ class MyUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     anInteger = 1,
     aString = 2,
@@ -786,7 +786,7 @@ class NonTriviallyDestructibleUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     int_field = 1,
   } ;

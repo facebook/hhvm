@@ -489,7 +489,7 @@ class SerializedUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     s = 1,
     i = 2,
@@ -1359,7 +1359,7 @@ class MarshalUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     s = 1,
     i = 2,

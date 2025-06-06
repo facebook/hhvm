@@ -1199,7 +1199,7 @@ class AdaptedUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     best = 1,
   } ;
@@ -2698,7 +2698,7 @@ class BinaryUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     iobuf_val = 1,
   } ;

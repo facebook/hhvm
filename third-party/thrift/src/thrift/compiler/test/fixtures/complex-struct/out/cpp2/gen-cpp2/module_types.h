@@ -4357,7 +4357,7 @@ class MyUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     myEnum = 1,
     myStruct = 2,
@@ -6777,7 +6777,7 @@ class MyUnionFloatFieldThrowExp final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     myEnum = 1,
     setFloat = 2,

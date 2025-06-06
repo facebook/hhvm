@@ -282,7 +282,7 @@ class U final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     i = 1,
     s = 2,

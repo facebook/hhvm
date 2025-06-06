@@ -1874,7 +1874,7 @@ class union1 final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     i = 1,
     d = 2,
@@ -2135,7 +2135,7 @@ class union2 final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     i = 1,
     d = 2,

@@ -5336,7 +5336,7 @@ class Shallot final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     myEnum = 1,
     myStruct = 2,
@@ -5968,7 +5968,7 @@ class SomeBinary final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     iobuf = 1,
     iobuf_ptr = 2,

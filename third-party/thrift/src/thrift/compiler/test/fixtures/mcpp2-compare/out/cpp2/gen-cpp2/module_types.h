@@ -2207,7 +2207,7 @@ class SimpleUnion  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     intValue = 7,
     stringValue = 2,
@@ -3539,7 +3539,7 @@ class ComplexUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     intValue = 1,
     opt_intValue = 201,
@@ -9793,7 +9793,7 @@ class FloatUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     floatSide = 1,
     doubleSide = 2,

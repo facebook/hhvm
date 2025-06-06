@@ -191,7 +191,7 @@ class ComplexUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     intValue = 1,
     stringValue = 5,
@@ -814,7 +814,7 @@ class ListUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     intListValue = 2,
     stringListValue = 3,
@@ -1110,7 +1110,7 @@ class DataUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     binaryData = 1,
     stringData = 2,
@@ -1659,7 +1659,7 @@ class ValUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     v1 = 1,
     v2 = 2,
@@ -1955,7 +1955,7 @@ class VirtualComplexUnion  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     thingOne = 1,
     thingTwo = 2,
@@ -2381,7 +2381,7 @@ class NonCopyableUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     s = 1,
   } ;

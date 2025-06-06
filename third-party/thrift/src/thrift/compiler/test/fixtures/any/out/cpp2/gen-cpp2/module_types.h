@@ -249,7 +249,7 @@ class MyUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     myString = 1,
   } ;

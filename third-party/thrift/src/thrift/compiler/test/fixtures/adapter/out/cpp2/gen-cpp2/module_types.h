@@ -1476,7 +1476,7 @@ class Baz final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     intField = 1,
     setField = 4,
@@ -5810,7 +5810,7 @@ class ThriftAdaptTestUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     delay = 1,
     custom = 2,

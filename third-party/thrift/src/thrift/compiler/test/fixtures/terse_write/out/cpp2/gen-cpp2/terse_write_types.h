@@ -560,7 +560,7 @@ class MyUnion final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     bool_field = 1,
     byte_field = 2,

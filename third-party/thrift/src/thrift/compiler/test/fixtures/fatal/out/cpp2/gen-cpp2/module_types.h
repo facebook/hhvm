@@ -1489,7 +1489,7 @@ class union2 final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     ui_2 = 1,
     ud_2 = 2,
@@ -1904,7 +1904,7 @@ class union3 final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     ui_3 = 1,
     ud_3 = 2,
@@ -2516,7 +2516,7 @@ class unionA final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     i = 1,
     d = 2,
@@ -8323,7 +8323,7 @@ class union_with_special_names final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     get = 1,
     getter = 2,
@@ -11876,7 +11876,7 @@ class UnionWithTypedefFieldAdapter final  {
 
 
  public:
-  enum Type : int {
+  enum class Type : int {
     __EMPTY__ = 0,
     field = 1,
   } ;

@@ -8,7 +8,7 @@
  *
  */
 
-use namespace HH\Lib\Async;
+use namespace HH\Lib\{Async, C, Vec};
 
 use function HH\__Private\MiniTest\expect;
 use type HH\__Private\MiniTest\HackTest;
@@ -56,5 +56,32 @@ final class LowPriTest extends HackTest {
     expect(async () ==> {
       await $lowpri->run(async () ==> 999);
     })->toThrow(\HH\InvariantException::class, 'Unable to run LowPri twice');
+  }
+
+  public async function testLowPriWithPollRefcounting(): Awaitable<void> {
+    $payloads = vec[
+      dict['id' => 1],
+      dict['id' => 2],
+    ];
+
+    $poll = Async\Poll::from(Vec\map(
+      $payloads,
+      async $payload ==> {
+        $work = async () ==> {
+          await SleepWaitHandle::create(10 * 1000);
+          return vec[dict['id' => $payload['id']]];
+        };
+
+        $low_pri = new Async\LowPri<vec<dict<string, mixed>>>();
+        return await $low_pri->run($work);
+      },
+    ));
+
+    $responses = vec[];
+    foreach ($poll await as $response) {
+      $responses = Vec\concat($responses, $response);
+    }
+
+    expect(C\count($responses))->toEqual(C\count($payloads));
   }
 }

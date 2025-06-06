@@ -75,7 +75,6 @@ void c_PriorityBridgeWaitHandle::initialize(c_WaitableWaitHandle* child) {
       m_blockable, AsioBlockable::Kind::PriorityBridgeWaitHandle);
   incRefCount();
 
-
   if (UNLIKELY(session->hasOnPriorityBridgeCreate())) {
     session->onPriorityBridgeCreate(this, child);
   }
@@ -87,7 +86,7 @@ void c_PriorityBridgeWaitHandle::onUnblocked() {
   // Propagate the child's result.
   setState(m_child->getState());
   assertx(isFinished());
-  tvCopy(m_child->m_resultOrException, m_resultOrException);
+  tvDup(m_child->m_resultOrException, m_resultOrException);
   decRefObj(m_child);
   m_child = nullptr;
 

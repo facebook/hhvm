@@ -230,7 +230,7 @@ trait BaseException {
 
   private function __clone(): void {
     \trigger_error(
-      "Trying to clone an uncloneable object of class " . static::class,
+      "Trying to clone an uncloneable object of class " . nameof static,
       \E_USER_ERROR,
     );
   }

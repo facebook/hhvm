@@ -8,91 +8,91 @@
 function spl_classes(): darray<classname<mixed>, classname<mixed>> {
   return dict[
     /* HH_FIXME[2049] */
-    ArrayIterator::class => ArrayIterator::class,
+    nameof ArrayIterator => ArrayIterator::class,
     /* HH_FIXME[2049] */
-    BadFunctionCallException::class => BadFunctionCallException::class,
+    nameof BadFunctionCallException => BadFunctionCallException::class,
     /* HH_FIXME[2049] */
-    BadMethodCallException::class => BadMethodCallException::class,
+    nameof BadMethodCallException => BadMethodCallException::class,
     /* HH_FIXME[2049] */
-    Countable::class => Countable::class,
+    nameof Countable => Countable::class,
     /* HH_FIXME[2049] */
-    DirectoryIterator::class => DirectoryIterator::class,
+    nameof DirectoryIterator => DirectoryIterator::class,
     /* HH_FIXME[2049] */
-    DomainException::class => DomainException::class,
+    nameof DomainException => DomainException::class,
     /* HH_FIXME[2049] */
-    EmptyIterator::class => EmptyIterator::class,
+    nameof EmptyIterator => EmptyIterator::class,
     /* HH_FIXME[2049] */
-    FilesystemIterator::class => FilesystemIterator::class,
+    nameof FilesystemIterator => FilesystemIterator::class,
     /* HH_FIXME[2049] */
-    FilterIterator::class => FilterIterator::class,
+    nameof FilterIterator => FilterIterator::class,
     /* HH_FIXME[2049] */
-    GlobIterator::class => GlobIterator::class,
+    nameof GlobIterator => GlobIterator::class,
     /* HH_FIXME[2049] */
-    InfiniteIterator::class => InfiniteIterator::class,
+    nameof InfiniteIterator => InfiniteIterator::class,
     /* HH_FIXME[2049] */
-    InvalidArgumentException::class => InvalidArgumentException::class,
+    nameof InvalidArgumentException => InvalidArgumentException::class,
     /* HH_FIXME[2049] */
-    IteratorIterator::class => IteratorIterator::class,
+    nameof IteratorIterator => IteratorIterator::class,
     /* HH_FIXME[2049] */
-    LengthException::class => LengthException::class,
+    nameof LengthException => LengthException::class,
     /* HH_FIXME[2049] */
-    LogicException::class => LogicException::class,
+    nameof LogicException => LogicException::class,
     /* HH_FIXME[2049] */
-    NoRewindIterator::class => NoRewindIterator::class,
+    nameof NoRewindIterator => NoRewindIterator::class,
     /* HH_FIXME[2049] */
-    OuterIterator::class => OuterIterator::class,
+    nameof OuterIterator => OuterIterator::class,
     /* HH_FIXME[2049] */
-    OutOfBoundsException::class => OutOfBoundsException::class,
+    nameof OutOfBoundsException => OutOfBoundsException::class,
     /* HH_FIXME[2049] */
-    OutOfRangeException::class => OutOfRangeException::class,
+    nameof OutOfRangeException => OutOfRangeException::class,
     /* HH_FIXME[2049] */
-    OverflowException::class => OverflowException::class,
+    nameof OverflowException => OverflowException::class,
     /* HH_FIXME[2049] */
-    RangeException::class => RangeException::class,
+    nameof RangeException => RangeException::class,
     /* HH_FIXME[2049] */
-    RecursiveDirectoryIterator::class => RecursiveDirectoryIterator::class,
+    nameof RecursiveDirectoryIterator => RecursiveDirectoryIterator::class,
     /* HH_FIXME[2049] */
-    RecursiveFilterIterator::class => RecursiveFilterIterator::class,
+    nameof RecursiveFilterIterator => RecursiveFilterIterator::class,
     /* HH_FIXME[2049] */
-    RecursiveIterator::class => RecursiveIterator::class,
+    nameof RecursiveIterator => RecursiveIterator::class,
     /* HH_FIXME[2049] */
-    RecursiveIteratorIterator::class => RecursiveIteratorIterator::class,
+    nameof RecursiveIteratorIterator => RecursiveIteratorIterator::class,
     /* HH_FIXME[2049] */
-    RecursiveRegexIterator::class => RecursiveRegexIterator::class,
+    nameof RecursiveRegexIterator => RecursiveRegexIterator::class,
     /* HH_FIXME[2049] */
-    RegexIterator::class => RegexIterator::class,
+    nameof RegexIterator => RegexIterator::class,
     /* HH_FIXME[2049] */
-    RuntimeException::class => RuntimeException::class,
+    nameof RuntimeException => RuntimeException::class,
     /* HH_FIXME[2049] */
-    SeekableIterator::class => SeekableIterator::class,
+    nameof SeekableIterator => SeekableIterator::class,
     /* HH_FIXME[2049] */
-    SplDoublyLinkedList::class => SplDoublyLinkedList::class,
+    nameof SplDoublyLinkedList => SplDoublyLinkedList::class,
     /* HH_FIXME[2049] */
-    SplFileInfo::class => SplFileInfo::class,
+    nameof SplFileInfo => SplFileInfo::class,
     /* HH_FIXME[2049] */
-    SplFileObject::class => SplFileObject::class,
+    nameof SplFileObject => SplFileObject::class,
     /* HH_FIXME[2049] */
-    SplHeap::class => SplHeap::class,
+    nameof SplHeap => SplHeap::class,
     /* HH_FIXME[2049] */
-    SplMinHeap::class => SplMinHeap::class,
+    nameof SplMinHeap => SplMinHeap::class,
     /* HH_FIXME[2049] */
-    SplMaxHeap::class => SplMaxHeap::class,
+    nameof SplMaxHeap => SplMaxHeap::class,
     /* HH_FIXME[2049] */
-    SplObserver::class => SplObserver::class,
+    nameof SplObserver => SplObserver::class,
     /* HH_FIXME[2049] */
-    SplPriorityQueue::class => SplPriorityQueue::class,
+    nameof SplPriorityQueue => SplPriorityQueue::class,
     /* HH_FIXME[2049] */
-    SplQueue::class => SplQueue::class,
+    nameof SplQueue => SplQueue::class,
     /* HH_FIXME[2049] */
-    SplStack::class => SplStack::class,
+    nameof SplStack => SplStack::class,
     /* HH_FIXME[2049] */
-    SplSubject::class => SplSubject::class,
+    nameof SplSubject => SplSubject::class,
     /* HH_FIXME[2049] */
-    SplTempFileObject::class => SplTempFileObject::class,
+    nameof SplTempFileObject => SplTempFileObject::class,
     /* HH_FIXME[2049] */
-    UnderflowException::class => UnderflowException::class,
+    nameof UnderflowException => UnderflowException::class,
     /* HH_FIXME[2049] */
-    UnexpectedValueException::class => UnexpectedValueException::class,
+    nameof UnexpectedValueException => UnexpectedValueException::class,
   ];
 }
 

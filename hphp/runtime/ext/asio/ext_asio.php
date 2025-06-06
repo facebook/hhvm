@@ -9,7 +9,7 @@ abstract class Awaitable<+T> {
 
   private function __construct() {
     throw new \InvalidOperationException(
-      static::class . "s cannot be constructed directly"
+      nameof static . "s cannot be constructed directly"
     );
   }
 

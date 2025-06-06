@@ -23,11 +23,11 @@ async function main(): Awaitable<void> {
     exit(1);
   }
 
-  if (!\class_exists(HackTest::class)) {
+  if (!\class_exists(nameof HackTest)) {
     \fprintf(
       \HH\stderr(),
       "Native autoloader must be configured; couldn't find %s\n",
-      HackTest::class,
+      nameof HackTest,
     );
     exit(1);
   }

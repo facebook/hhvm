@@ -80,7 +80,7 @@ class Exception implements Throwable {
         } else {
           return 'Message ommitted because ' .
             HH\FIXME\UNSAFE_CAST<mixed, string>(get_class($throwable)) .
-            ' does not implement ' . IExceptionWithPureGetMessage::class;
+            ' does not implement ' . nameof IExceptionWithPureGetMessage;
         }
       },
     );

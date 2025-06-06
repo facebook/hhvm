@@ -151,7 +151,7 @@ final class MemoryHandle implements CloseableSeekableReadWriteHandle {
       _OS\throw_errno(
         OS\Errno::EBADF,
         "%s::close() was already called",
-        self::class,
+        nameof self,
       );
     }
   }

@@ -22,6 +22,7 @@ use std::fmt::Debug;
 use std::io::Cursor;
 
 use bytes::Bytes;
+use fbthrift::BinaryProtocol;
 use fbthrift::CompactProtocol;
 use fbthrift::Deserialize;
 use fbthrift::Protocol;
@@ -33,12 +34,17 @@ use indexmap::IndexSet;
 use interface::TestBytesShared;
 use interface::TestEnum;
 use interface::TestEnumEmpty;
+use interface::TestSkipMinimal;
 use interface::TestSkipV1;
 use interface::TestSkipV2;
 use interface::TypedefNondefaultTypes;
 use interface::WrapBinary;
 use interface::WrapString;
 use smallvec::SmallVec;
+
+use crate::test_helper::serialize_test_skip_full;
+
+mod test_helper;
 
 #[test]
 fn test_typedef_nondefault_types_1() {
@@ -152,6 +158,14 @@ fn test_deserialize_skip_seq() {
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(bytes));
     let v1: TestSkipV1 = Deserialize::rs_thrift_read(&mut deserializer).unwrap();
     assert_eq!(v1, TestSkipV1::default());
+}
+
+#[test]
+fn test_binary_fast_skip() {
+    let bytes = serialize_test_skip_full();
+    let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(bytes));
+    let minimal: TestSkipMinimal = Deserialize::rs_thrift_read(&mut deserializer).unwrap();
+    assert_eq!(minimal.b, 123);
 }
 
 #[test]

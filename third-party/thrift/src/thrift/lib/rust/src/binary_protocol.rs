@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::cell::RefCell;
 use std::io::Cursor;
 
 use anyhow::Result;
@@ -24,12 +25,14 @@ use bytes::BytesMut;
 use ghost::phantom;
 
 use crate::binary_type::CopyFromBuf;
+use crate::binary_type::Discard;
 use crate::bufext::BufExt;
 use crate::bufext::BufMutExt;
 use crate::bufext::DeserializeSource;
 use crate::deserialize::Deserialize;
 use crate::errors::ProtocolError;
 use crate::framing::Framing;
+use crate::protocol::DEFAULT_RECURSION_DEPTH;
 use crate::protocol::Field;
 use crate::protocol::Protocol;
 use crate::protocol::ProtocolReader;
@@ -149,6 +152,163 @@ impl<B: BufExt> BinaryProtocolDeserializer<B> {
 
         Ok(self.buffer.get_u32())
     }
+
+    fn skip_fast(&mut self, field_type: TType, stack: &mut [SkipData]) -> Result<()> {
+        const TYPE_FIXED_SIZE: [usize; 20] = [
+            0, // TType::Stop
+            0, // TType::Void
+            1, // TType::Bool
+            1, // TType::Byte
+            8, // TType::Double
+            0, // NAN
+            2, // TType::I16
+            0, // NAN
+            4, // TType::I32
+            0, // NAN
+            8, // TType::I64
+            0, // TType::String
+            0, // TType::Struct
+            0, // TType::Map
+            0, // TType::Set
+            0, // TType::List
+            0, // TType::UTF8
+            0, // TType::UTF16
+            0, // TType::Stream
+            4, // TType::Float
+        ];
+        let mut stack_len: usize = 0;
+        macro_rules! pop {
+            () => {
+                match stack_len.checked_sub(1) {
+                    Some(last) => {
+                        stack_len = last;
+                        stack[last]
+                    }
+                    None => break,
+                }
+            };
+        }
+        macro_rules! push {
+            ($elem: expr) => {
+                if stack_len >= stack.len() {
+                    bail_err!(ProtocolError::SkipDepthExceeded);
+                }
+                stack[stack_len] = $elem;
+                stack_len += 1;
+            };
+        }
+        macro_rules! advance {
+            ($n: expr) => {
+                ensure_err!(self.can_advance($n), ProtocolError::EOF);
+                self.buffer.advance($n);
+            };
+        }
+
+        let mut current = SkipData::Next(field_type);
+        loop {
+            match current {
+                SkipData::Next(ttype) => {
+                    let to_skip = *TYPE_FIXED_SIZE.get(ttype as usize).expect("unexpect ttype");
+                    if to_skip > 0 {
+                        advance!(to_skip);
+                        current = pop!();
+                        continue;
+                    }
+                    match ttype {
+                        TType::Struct => {
+                            let (_, field_type, _) = self.read_field_begin(|_| (), &[])?;
+                            let size = *TYPE_FIXED_SIZE
+                                .get(field_type as usize)
+                                .expect("unexpect ttype");
+                            if size != 0 {
+                                advance!(size);
+                                continue;
+                            }
+
+                            match field_type {
+                                TType::Stop => {
+                                    current = pop!();
+                                }
+                                _ => {
+                                    push!(current);
+                                    current = SkipData::Next(field_type);
+                                }
+                            }
+                        }
+                        TType::List | TType::Set => {
+                            let elem_type = TType::try_from(self.read_byte()?)?;
+                            let elem_len = self
+                                .read_i32()?
+                                .try_into()
+                                .map_err(|_| ProtocolError::InvalidDataLength)?;
+                            let per_elem_size = *TYPE_FIXED_SIZE
+                                .get(elem_type as usize)
+                                .expect("unexpect ttype");
+                            if per_elem_size != 0 {
+                                let skip = (elem_len as usize)
+                                    .checked_mul(per_elem_size)
+                                    .ok_or(ProtocolError::InvalidDataLength)?;
+                                advance!(skip);
+                                current = pop!();
+                            } else {
+                                current = SkipData::Collection(elem_len, [elem_type, elem_type]);
+                            }
+                        }
+                        TType::Map => {
+                            let key_type = TType::try_from(self.read_byte()?)?;
+                            let val_type = TType::try_from(self.read_byte()?)?;
+                            let elem_len: u32 = self
+                                .read_i32()?
+                                .try_into()
+                                .map_err(|_| ProtocolError::InvalidDataLength)?;
+
+                            let per_key_size = *TYPE_FIXED_SIZE
+                                .get(key_type as usize)
+                                .expect("unexpect ttype");
+                            let per_val_size = *TYPE_FIXED_SIZE
+                                .get(val_type as usize)
+                                .expect("unexpect ttype");
+
+                            if per_key_size != 0 && per_val_size != 0 {
+                                let skip = (elem_len as usize)
+                                    .checked_mul(per_key_size + per_val_size)
+                                    .ok_or(ProtocolError::InvalidDataLength)?;
+                                advance!(skip);
+                                current = pop!();
+                            } else {
+                                current = SkipData::Collection(elem_len * 2, [key_type, val_type]);
+                            }
+                        }
+                        TType::String | TType::UTF8 | TType::UTF16 => {
+                            self.read_binary::<Discard>()?;
+                            current = pop!();
+                        }
+                        TType::Stop => bail_err!(ProtocolError::UnexpectedStopInSkip),
+                        TType::Stream => bail_err!(ProtocolError::StreamUnsupported),
+                        _ => {
+                            unreachable!("unexpect ttype: {:?}", ttype)
+                        }
+                    }
+                }
+                SkipData::Collection(len, ttypes) => {
+                    if len == 0 {
+                        current = pop!();
+                        continue;
+                    }
+                    current = SkipData::Next(ttypes[(len & 1) as usize]);
+                    push!(SkipData::Collection(len - 1, ttypes));
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+enum SkipData {
+    Collection(u32, [TType; 2]),
+    Next(TType),
 }
 
 impl<B: BufMutExt> ProtocolWriter for BinaryProtocolSerializer<B> {
@@ -485,6 +645,14 @@ impl<B: BufExt> ProtocolReader for BinaryProtocolDeserializer<B> {
 
     fn can_advance(&self, bytes: usize) -> bool {
         self.buffer.can_advance(bytes)
+    }
+
+    #[inline]
+    fn skip(&mut self, field_type: TType) -> Result<()> {
+        thread_local! {
+            static STACK: RefCell<[SkipData; DEFAULT_RECURSION_DEPTH as usize]> = const {RefCell::new([SkipData::Next(TType::Void); DEFAULT_RECURSION_DEPTH as usize])};
+        }
+        STACK.with_borrow_mut(|stack| self.skip_fast(field_type, stack))
     }
 }
 

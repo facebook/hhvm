@@ -65,6 +65,37 @@ struct TestSkipV2 {
   3: map<string, string> m;
 }
 
+struct TestSkipMinimal {
+  20: byte b;
+}
+
+struct TestSkipNested {
+  1: list<i32> l;
+  2: set<byte> s;
+  3: map<string, string> m;
+}
+
+struct TestSkipNestedDeep {
+  1: TestSkipNested nested;
+  2: list<TestSkipNested> nested_list;
+}
+
+struct TestSkipFull {
+  1: list<i32> l;
+  2: set<byte> s;
+  3: map<string, string> m_str;
+  4: TestSkipNested nested;
+  5: list<TestSkipNested> nested_list;
+  6: bool bl;
+  7: map<i16, i64> m_int;
+  8: map<i32, TestSkipNested> m_nested;
+  9: list<TestSkipNestedDeep> l_nested2;
+  10: list<double> l_double;
+  11: list<float> l_float;
+
+  20: byte b;
+}
+
 struct TestBytesShared {
   1: binary_1562 b;
 }

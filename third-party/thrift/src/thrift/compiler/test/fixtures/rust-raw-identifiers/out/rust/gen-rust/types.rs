@@ -89,25 +89,23 @@ where
             ::fbthrift::Field::new("return", ::fbthrift::TType::Bool, 1),
             ::fbthrift::Field::new("super", ::fbthrift::TType::Bool, 2),
         ];
-        let mut field_return = ::std::option::Option::None;
-        let mut field_super = ::std::option::Option::None;
+
+
+        let mut output = ThereAreNoPascalCaseKeywords::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ThereAreNoPascalCaseKeywords")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_return = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "return", strct: "ThereAreNoPascalCaseKeywords"})?),
-                (::fbthrift::TType::Bool, 2) => field_super = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "super", strct: "ThereAreNoPascalCaseKeywords"})?),
+                (::fbthrift::TType::Bool, 1) => output.r#return = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "return", strct: "ThereAreNoPascalCaseKeywords"})?,
+                (::fbthrift::TType::Bool, 2) => output.super_ = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "super", strct: "ThereAreNoPascalCaseKeywords"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            r#return: field_return.unwrap_or_default(),
-            super_: field_super.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

@@ -209,40 +209,28 @@ where
             ::fbthrift::Field::new("the_bytes", ::fbthrift::TType::String, 4),
             ::fbthrift::Field::new("the_map", ::fbthrift::TType::Map, 1),
         ];
-        let mut field_the_map = ::std::option::Option::None;
-        let mut field_the_bin = ::std::option::Option::None;
-        let mut field_inline_bin = ::std::option::Option::None;
-        let mut field_the_bytes = ::std::option::Option::None;
-        let mut field_inline_bytes = ::std::option::Option::None;
-        let mut field_floaty = ::std::option::Option::None;
-        let mut field_doublefloaty = ::std::option::Option::None;
+
+
+        let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => field_the_map = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_map", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 2) => field_the_bin = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bin", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bin", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bytes", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bytes", strct: "MyStruct"})?),
-                (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "floaty", strct: "MyStruct"})?),
-                (::fbthrift::TType::Double, 7) => field_doublefloaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "doublefloaty", strct: "MyStruct"})?),
+                (::fbthrift::TType::Map, 1) => output.the_map = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_map", strct: "MyStruct"})?,
+                (::fbthrift::TType::String, 2) => output.the_bin = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bin", strct: "MyStruct"})?,
+                (::fbthrift::TType::String, 3) => output.inline_bin = ::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bin", strct: "MyStruct"})?,
+                (::fbthrift::TType::String, 4) => output.the_bytes = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bytes", strct: "MyStruct"})?,
+                (::fbthrift::TType::String, 5) => output.inline_bytes = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bytes", strct: "MyStruct"})?,
+                (::fbthrift::TType::Double, 6) => output.floaty = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "floaty", strct: "MyStruct"})?,
+                (::fbthrift::TType::Double, 7) => output.doublefloaty = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "doublefloaty", strct: "MyStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            the_map: field_the_map.unwrap_or_default(),
-            the_bin: field_the_bin.unwrap_or_default(),
-            inline_bin: field_inline_bin.unwrap_or_default(),
-            the_bytes: field_the_bytes.unwrap_or_default(),
-            inline_bytes: field_inline_bytes.unwrap_or_default(),
-            floaty: field_floaty.unwrap_or_default(),
-            doublefloaty: field_doublefloaty.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

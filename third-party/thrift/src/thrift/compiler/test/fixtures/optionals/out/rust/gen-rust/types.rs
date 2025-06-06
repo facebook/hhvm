@@ -258,31 +258,25 @@ where
             ::fbthrift::Field::new("green", ::fbthrift::TType::Double, 2),
             ::fbthrift::Field::new("red", ::fbthrift::TType::Double, 1),
         ];
-        let mut field_red = ::std::option::Option::None;
-        let mut field_green = ::std::option::Option::None;
-        let mut field_blue = ::std::option::Option::None;
-        let mut field_alpha = ::std::option::Option::None;
+
+
+        let mut output = Color::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Color")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Double, 1) => field_red = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "red", strct: "Color"})?),
-                (::fbthrift::TType::Double, 2) => field_green = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "green", strct: "Color"})?),
-                (::fbthrift::TType::Double, 3) => field_blue = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "blue", strct: "Color"})?),
-                (::fbthrift::TType::Double, 4) => field_alpha = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "alpha", strct: "Color"})?),
+                (::fbthrift::TType::Double, 1) => output.red = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "red", strct: "Color"})?,
+                (::fbthrift::TType::Double, 2) => output.green = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "green", strct: "Color"})?,
+                (::fbthrift::TType::Double, 3) => output.blue = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "blue", strct: "Color"})?,
+                (::fbthrift::TType::Double, 4) => output.alpha = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "alpha", strct: "Color"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            red: field_red.unwrap_or_default(),
-            green: field_green.unwrap_or_default(),
-            blue: field_blue.unwrap_or_default(),
-            alpha: field_alpha.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -408,34 +402,26 @@ where
             ::fbthrift::Field::new("licensePlate", ::fbthrift::TType::String, 2),
             ::fbthrift::Field::new("name", ::fbthrift::TType::String, 4),
         ];
-        let mut field_color = ::std::option::Option::None;
-        let mut field_licensePlate = ::std::option::Option::None;
-        let mut field_description = ::std::option::Option::None;
-        let mut field_name = ::std::option::Option::None;
-        let mut field_hasAC = ::std::option::Option::None;
+
+
+        let mut output = Vehicle::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Vehicle")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_color = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "color", strct: "Vehicle"})?),
-                (::fbthrift::TType::String, 2) => field_licensePlate = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "licensePlate", strct: "Vehicle"})?),
-                (::fbthrift::TType::String, 3) => field_description = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "description", strct: "Vehicle"})?),
-                (::fbthrift::TType::String, 4) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Vehicle"})?),
-                (::fbthrift::TType::Bool, 5) => field_hasAC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "hasAC", strct: "Vehicle"})?),
+                (::fbthrift::TType::Struct, 1) => output.color = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "color", strct: "Vehicle"})?,
+                (::fbthrift::TType::String, 2) => output.licensePlate = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "licensePlate", strct: "Vehicle"})?),
+                (::fbthrift::TType::String, 3) => output.description = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "description", strct: "Vehicle"})?),
+                (::fbthrift::TType::String, 4) => output.name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Vehicle"})?),
+                (::fbthrift::TType::Bool, 5) => output.hasAC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "hasAC", strct: "Vehicle"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            color: field_color.unwrap_or_default(),
-            licensePlate: field_licensePlate,
-            description: field_description,
-            name: field_name,
-            hasAC: field_hasAC,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -601,49 +587,31 @@ where
             ::fbthrift::Field::new("petNames", ::fbthrift::TType::Map, 8),
             ::fbthrift::Field::new("vehicles", ::fbthrift::TType::List, 10),
         ];
-        let mut field_id = ::std::option::Option::None;
-        let mut field_name = ::std::option::Option::None;
-        let mut field_age = ::std::option::Option::None;
-        let mut field_address = ::std::option::Option::None;
-        let mut field_favoriteColor = ::std::option::Option::None;
-        let mut field_friends = ::std::option::Option::None;
-        let mut field_bestFriend = ::std::option::Option::None;
-        let mut field_petNames = ::std::option::Option::None;
-        let mut field_afraidOfAnimal = ::std::option::Option::None;
-        let mut field_vehicles = ::std::option::Option::None;
+
+
+        let mut output = Person::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Person")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "id", strct: "Person"})?),
-                (::fbthrift::TType::String, 2) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Person"})?),
-                (::fbthrift::TType::I16, 3) => field_age = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "age", strct: "Person"})?),
-                (::fbthrift::TType::String, 4) => field_address = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "address", strct: "Person"})?),
-                (::fbthrift::TType::Struct, 5) => field_favoriteColor = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "favoriteColor", strct: "Person"})?),
-                (::fbthrift::TType::Set, 6) => field_friends = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "friends", strct: "Person"})?),
-                (::fbthrift::TType::I64, 7) => field_bestFriend = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bestFriend", strct: "Person"})?),
-                (::fbthrift::TType::Map, 8) => field_petNames = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "petNames", strct: "Person"})?),
-                (::fbthrift::TType::I32, 9) => field_afraidOfAnimal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "afraidOfAnimal", strct: "Person"})?),
-                (::fbthrift::TType::List, 10) => field_vehicles = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "vehicles", strct: "Person"})?),
+                (::fbthrift::TType::I64, 1) => output.id = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "id", strct: "Person"})?,
+                (::fbthrift::TType::String, 2) => output.name = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Person"})?,
+                (::fbthrift::TType::I16, 3) => output.age = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "age", strct: "Person"})?),
+                (::fbthrift::TType::String, 4) => output.address = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "address", strct: "Person"})?),
+                (::fbthrift::TType::Struct, 5) => output.favoriteColor = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "favoriteColor", strct: "Person"})?),
+                (::fbthrift::TType::Set, 6) => output.friends = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "friends", strct: "Person"})?),
+                (::fbthrift::TType::I64, 7) => output.bestFriend = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bestFriend", strct: "Person"})?),
+                (::fbthrift::TType::Map, 8) => output.petNames = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "petNames", strct: "Person"})?),
+                (::fbthrift::TType::I32, 9) => output.afraidOfAnimal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "afraidOfAnimal", strct: "Person"})?),
+                (::fbthrift::TType::List, 10) => output.vehicles = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "vehicles", strct: "Person"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            id: field_id.unwrap_or_default(),
-            name: field_name.unwrap_or_default(),
-            age: field_age,
-            address: field_address,
-            favoriteColor: field_favoriteColor,
-            friends: field_friends,
-            bestFriend: field_bestFriend,
-            petNames: field_petNames,
-            afraidOfAnimal: field_afraidOfAnimal,
-            vehicles: field_vehicles,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

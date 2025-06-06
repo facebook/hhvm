@@ -565,28 +565,24 @@ where
             ::fbthrift::Field::new("strVal", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("typedefValue", ::fbthrift::TType::Map, 9),
         ];
-        let mut field_strVal = ::std::option::Option::None;
-        let mut field_intVal = ::std::option::Option::None;
-        let mut field_typedefValue = ::std::option::Option::None;
+
+
+        let mut output = Val::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Val")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_strVal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "strVal", strct: "Val"})?),
-                (::fbthrift::TType::I32, 2) => field_intVal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "intVal", strct: "Val"})?),
-                (::fbthrift::TType::Map, 9) => field_typedefValue = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "typedefValue", strct: "Val"})?),
+                (::fbthrift::TType::String, 1) => output.strVal = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "strVal", strct: "Val"})?,
+                (::fbthrift::TType::I32, 2) => output.intVal = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "intVal", strct: "Val"})?,
+                (::fbthrift::TType::Map, 9) => output.typedefValue = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "typedefValue", strct: "Val"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            strVal: field_strVal.unwrap_or_default(),
-            intVal: field_intVal.unwrap_or_default(),
-            typedefValue: field_typedefValue.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -912,22 +908,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("num", ::fbthrift::TType::I64, 1),
         ];
-        let mut field_num = ::std::option::Option::None;
+
+
+        let mut output = NonCopyableStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a NonCopyableStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_num = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "num", strct: "NonCopyableStruct"})?),
+                (::fbthrift::TType::I64, 1) => output.num = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "num", strct: "NonCopyableStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            num: field_num.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

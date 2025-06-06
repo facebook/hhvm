@@ -97,10 +97,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a EmptyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -111,7 +113,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -255,45 +258,29 @@ where
             ::fbthrift::Field::new("unqualified_list_field", ::fbthrift::TType::List, 3),
             ::fbthrift::Field::new("unqualified_struct_field", ::fbthrift::TType::Struct, 4),
         ];
-        let mut field_unqualified_int_field = ::std::option::Option::None;
-        let mut field_unqualified_bool_field = ::std::option::Option::None;
-        let mut field_unqualified_list_field = ::std::option::Option::None;
-        let mut field_unqualified_struct_field = ::std::option::Option::None;
-        let mut field_optional_int_field = ::std::option::Option::None;
-        let mut field_optional_bool_field = ::std::option::Option::None;
-        let mut field_optional_list_field = ::std::option::Option::None;
-        let mut field_optional_struct_field = ::std::option::Option::None;
+
+
+        let mut output = TestStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TestStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_unqualified_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_int_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::Bool, 2) => field_unqualified_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_bool_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::List, 3) => field_unqualified_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_list_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::Struct, 4) => field_unqualified_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_struct_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::I32, 5) => field_optional_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_int_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::Bool, 6) => field_optional_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_bool_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::List, 7) => field_optional_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_list_field", strct: "TestStruct"})?),
-                (::fbthrift::TType::Struct, 8) => field_optional_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_struct_field", strct: "TestStruct"})?),
+                (::fbthrift::TType::I32, 1) => output.unqualified_int_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_int_field", strct: "TestStruct"})?,
+                (::fbthrift::TType::Bool, 2) => output.unqualified_bool_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_bool_field", strct: "TestStruct"})?,
+                (::fbthrift::TType::List, 3) => output.unqualified_list_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_list_field", strct: "TestStruct"})?,
+                (::fbthrift::TType::Struct, 4) => output.unqualified_struct_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unqualified_struct_field", strct: "TestStruct"})?,
+                (::fbthrift::TType::I32, 5) => output.optional_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_int_field", strct: "TestStruct"})?),
+                (::fbthrift::TType::Bool, 6) => output.optional_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_bool_field", strct: "TestStruct"})?),
+                (::fbthrift::TType::List, 7) => output.optional_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_list_field", strct: "TestStruct"})?),
+                (::fbthrift::TType::Struct, 8) => output.optional_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optional_struct_field", strct: "TestStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            unqualified_int_field: field_unqualified_int_field.unwrap_or(0),
-            unqualified_bool_field: field_unqualified_bool_field.unwrap_or(false),
-            unqualified_list_field: field_unqualified_list_field.unwrap_or_else(|| ::std::vec::Vec::new()),
-            unqualified_struct_field: field_unqualified_struct_field.unwrap_or_else(|| crate::types::EmptyStruct {
-                    ..::std::default::Default::default()
-                }),
-            optional_int_field: field_optional_int_field,
-            optional_bool_field: field_optional_bool_field,
-            optional_list_field: field_optional_list_field,
-            optional_struct_field: field_optional_struct_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

@@ -262,31 +262,25 @@ where
             ::fbthrift::Field::new("MyStringField", ::fbthrift::TType::String, 2),
             ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 4),
         ];
-        let mut field_MyIntField = ::std::option::Option::None;
-        let mut field_MyStringField = ::std::option::Option::None;
-        let mut field_MyDataField = ::std::option::Option::None;
-        let mut field_myEnum = ::std::option::Option::None;
+
+
+        let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyStringField", strct: "MyStruct"})?),
-                (::fbthrift::TType::Struct, 3) => field_MyDataField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyDataField", strct: "MyStruct"})?),
-                (::fbthrift::TType::I32, 4) => field_myEnum = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myEnum", strct: "MyStruct"})?),
+                (::fbthrift::TType::I64, 1) => output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?,
+                (::fbthrift::TType::String, 2) => output.MyStringField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyStringField", strct: "MyStruct"})?,
+                (::fbthrift::TType::Struct, 3) => output.MyDataField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyDataField", strct: "MyStruct"})?,
+                (::fbthrift::TType::I32, 4) => output.myEnum = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myEnum", strct: "MyStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            MyIntField: field_MyIntField.unwrap_or_default(),
-            MyStringField: field_MyStringField.unwrap_or_default(),
-            MyDataField: field_MyDataField.unwrap_or_default(),
-            myEnum: field_myEnum.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -374,10 +368,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataItem")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -388,7 +384,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -598,10 +595,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyException")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -612,7 +611,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 

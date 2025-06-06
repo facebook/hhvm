@@ -886,10 +886,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a empty_struct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -900,7 +902,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -992,22 +995,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::String, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+
+
+        let mut output = decorated_struct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a decorated_struct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "decorated_struct"})?),
+                (::fbthrift::TType::String, 1) => output.field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "decorated_struct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1143,43 +1146,29 @@ where
             ::fbthrift::Field::new("fieldG", ::fbthrift::TType::Map, 7),
             ::fbthrift::Field::new("fieldH", ::fbthrift::TType::Map, 8),
         ];
-        let mut field_fieldA = ::std::option::Option::None;
-        let mut field_fieldB = ::std::option::Option::None;
-        let mut field_fieldC = ::std::option::Option::None;
-        let mut field_fieldD = ::std::option::Option::None;
-        let mut field_fieldE = ::std::option::Option::None;
-        let mut field_fieldF = ::std::option::Option::None;
-        let mut field_fieldG = ::std::option::Option::None;
-        let mut field_fieldH = ::std::option::Option::None;
+
+
+        let mut output = ContainerStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ContainerStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 12) => field_fieldA = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldA", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::List, 2) => field_fieldB = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldB", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::List, 3) => field_fieldC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldC", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::List, 4) => field_fieldD = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldD", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::List, 5) => field_fieldE = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldE", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::Set, 6) => field_fieldF = ::std::option::Option::Some(::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldF", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?),
-                (::fbthrift::TType::Map, 8) => field_fieldH = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldH", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::List, 12) => output.fieldA = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldA", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::List, 2) => output.fieldB = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldB", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::List, 3) => output.fieldC = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldC", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::List, 4) => output.fieldD = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldD", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::List, 5) => output.fieldE = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldE", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::Set, 6) => output.fieldF = ::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldF", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::Map, 7) => output.fieldG = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?,
+                (::fbthrift::TType::Map, 8) => output.fieldH = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldH", strct: "ContainerStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            fieldA: field_fieldA.unwrap_or_default(),
-            fieldB: field_fieldB.unwrap_or_default(),
-            fieldC: field_fieldC.unwrap_or_default(),
-            fieldD: field_fieldD.unwrap_or_default(),
-            fieldE: field_fieldE.unwrap_or_default(),
-            fieldF: field_fieldF.unwrap_or_default(),
-            fieldG: field_fieldG.unwrap_or_default(),
-            fieldH: field_fieldH.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1355,22 +1344,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("fieldA", ::fbthrift::TType::List, 1),
         ];
-        let mut field_fieldA = ::std::option::Option::None;
+
+
+        let mut output = CppTypeStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CppTypeStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_fieldA = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldA", strct: "CppTypeStruct"})?),
+                (::fbthrift::TType::List, 1) => output.fieldA = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldA", strct: "CppTypeStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            fieldA: field_fieldA.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1475,22 +1464,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
         ];
-        let mut field_MyIntField = ::std::option::Option::None;
+
+
+        let mut output = VirtualStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a VirtualStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "VirtualStruct"})?),
+                (::fbthrift::TType::I64, 1) => output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "VirtualStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            MyIntField: field_MyIntField.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1590,25 +1579,23 @@ where
             ::fbthrift::Field::new("a", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("b", ::fbthrift::TType::I32, 2),
         ];
-        let mut field_a = ::std::option::Option::None;
-        let mut field_b = ::std::option::Option::None;
+
+
+        let mut output = MyStructWithForwardRefEnum::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStructWithForwardRefEnum")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "MyStructWithForwardRefEnum"})?),
-                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "MyStructWithForwardRefEnum"})?),
+                (::fbthrift::TType::I32, 1) => output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "MyStructWithForwardRefEnum"})?,
+                (::fbthrift::TType::I32, 2) => output.b = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "MyStructWithForwardRefEnum"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            a: field_a.unwrap_or(crate::types::MyForwardRefEnum::NONZERO),
-            b: field_b.unwrap_or(crate::types::MyForwardRefEnum::NONZERO),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1710,25 +1697,23 @@ where
             ::fbthrift::Field::new("a", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("b", ::fbthrift::TType::Bool, 2),
         ];
-        let mut field_a = ::std::option::Option::None;
-        let mut field_b = ::std::option::Option::None;
+
+
+        let mut output = TrivialNumeric::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TrivialNumeric")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "TrivialNumeric"})?),
-                (::fbthrift::TType::Bool, 2) => field_b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "TrivialNumeric"})?),
+                (::fbthrift::TType::I32, 1) => output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "TrivialNumeric"})?,
+                (::fbthrift::TType::Bool, 2) => output.b = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "TrivialNumeric"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            a: field_a.unwrap_or_default(),
-            b: field_b.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1834,29 +1819,23 @@ where
             ::fbthrift::Field::new("n", ::fbthrift::TType::Struct, 2),
             ::fbthrift::Field::new("z", ::fbthrift::TType::I32, 1),
         ];
-        let mut field_z = ::std::option::Option::None;
-        let mut field_n = ::std::option::Option::None;
+
+
+        let mut output = TrivialNestedWithDefault::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TrivialNestedWithDefault")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_z = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "z", strct: "TrivialNestedWithDefault"})?),
-                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "n", strct: "TrivialNestedWithDefault"})?),
+                (::fbthrift::TType::I32, 1) => output.z = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "z", strct: "TrivialNestedWithDefault"})?,
+                (::fbthrift::TType::Struct, 2) => output.n = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "n", strct: "TrivialNestedWithDefault"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            z: field_z.unwrap_or(4),
-            n: field_n.unwrap_or_else(|| crate::types::TrivialNumeric {
-                    a: 3,
-                    b: true,
-                    ..::std::default::Default::default()
-                }),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1958,25 +1937,23 @@ where
             ::fbthrift::Field::new("a", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("b", ::fbthrift::TType::Map, 2),
         ];
-        let mut field_a = ::std::option::Option::None;
-        let mut field_b = ::std::option::Option::None;
+
+
+        let mut output = ComplexString::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ComplexString")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "ComplexString"})?),
-                (::fbthrift::TType::Map, 2) => field_b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "ComplexString"})?),
+                (::fbthrift::TType::String, 1) => output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "ComplexString"})?,
+                (::fbthrift::TType::Map, 2) => output.b = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "ComplexString"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            a: field_a.unwrap_or_default(),
-            b: field_b.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2092,39 +2069,23 @@ where
             ::fbthrift::Field::new("n", ::fbthrift::TType::Struct, 2),
             ::fbthrift::Field::new("z", ::fbthrift::TType::String, 1),
         ];
-        let mut field_z = ::std::option::Option::None;
-        let mut field_n = ::std::option::Option::None;
+
+
+        let mut output = ComplexNestedWithDefault::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ComplexNestedWithDefault")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_z = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "z", strct: "ComplexNestedWithDefault"})?),
-                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "n", strct: "ComplexNestedWithDefault"})?),
+                (::fbthrift::TType::String, 1) => output.z = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "z", strct: "ComplexNestedWithDefault"})?,
+                (::fbthrift::TType::Struct, 2) => output.n = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "n", strct: "ComplexNestedWithDefault"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            z: field_z.unwrap_or_else(|| "4".to_owned()),
-            n: field_n.unwrap_or_else(|| crate::types::ComplexString {
-                    a: "3".to_owned(),
-                    b: {
-                        let mut map = ::std::collections::BTreeMap::new();
-                        {
-                            #[inline(never)]
-                            fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>) {
-                                map.insert("a".to_owned(), 3);
-                            }
-                            __do_insert(&mut map);
-                        }
-                        map
-                    },
-                    ..::std::default::Default::default()
-                }),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2244,34 +2205,26 @@ where
             ::fbthrift::Field::new("small", ::fbthrift::TType::Byte, 1),
             ::fbthrift::Field::new("tiny", ::fbthrift::TType::Byte, 5),
         ];
-        let mut field_small = ::std::option::Option::None;
-        let mut field_big = ::std::option::Option::None;
-        let mut field_medium = ::std::option::Option::None;
-        let mut field_biggish = ::std::option::Option::None;
-        let mut field_tiny = ::std::option::Option::None;
+
+
+        let mut output = MinPadding::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MinPadding")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "small", strct: "MinPadding"})?),
-                (::fbthrift::TType::I64, 2) => field_big = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "big", strct: "MinPadding"})?),
-                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "medium", strct: "MinPadding"})?),
-                (::fbthrift::TType::I32, 4) => field_biggish = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "biggish", strct: "MinPadding"})?),
-                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tiny", strct: "MinPadding"})?),
+                (::fbthrift::TType::Byte, 1) => output.small = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "small", strct: "MinPadding"})?,
+                (::fbthrift::TType::I64, 2) => output.big = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "big", strct: "MinPadding"})?,
+                (::fbthrift::TType::I16, 3) => output.medium = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "medium", strct: "MinPadding"})?,
+                (::fbthrift::TType::I32, 4) => output.biggish = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "biggish", strct: "MinPadding"})?,
+                (::fbthrift::TType::Byte, 5) => output.tiny = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tiny", strct: "MinPadding"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            small: field_small.unwrap_or_default(),
-            big: field_big.unwrap_or_default(),
-            medium: field_medium.unwrap_or_default(),
-            biggish: field_biggish.unwrap_or_default(),
-            tiny: field_tiny.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2406,34 +2359,26 @@ where
             ::fbthrift::Field::new("small", ::fbthrift::TType::Byte, 1),
             ::fbthrift::Field::new("tiny", ::fbthrift::TType::Byte, 5),
         ];
-        let mut field_small = ::std::option::Option::None;
-        let mut field_biggish = ::std::option::Option::None;
-        let mut field_medium = ::std::option::Option::None;
-        let mut field_big = ::std::option::Option::None;
-        let mut field_tiny = ::std::option::Option::None;
+
+
+        let mut output = MinPaddingWithCustomType::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MinPaddingWithCustomType")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "small", strct: "MinPaddingWithCustomType"})?),
-                (::fbthrift::TType::I32, 2) => field_biggish = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "biggish", strct: "MinPaddingWithCustomType"})?),
-                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "medium", strct: "MinPaddingWithCustomType"})?),
-                (::fbthrift::TType::I64, 4) => field_big = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "big", strct: "MinPaddingWithCustomType"})?),
-                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tiny", strct: "MinPaddingWithCustomType"})?),
+                (::fbthrift::TType::Byte, 1) => output.small = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "small", strct: "MinPaddingWithCustomType"})?,
+                (::fbthrift::TType::I32, 2) => output.biggish = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "biggish", strct: "MinPaddingWithCustomType"})?,
+                (::fbthrift::TType::I16, 3) => output.medium = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "medium", strct: "MinPaddingWithCustomType"})?,
+                (::fbthrift::TType::I64, 4) => output.big = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "big", strct: "MinPaddingWithCustomType"})?,
+                (::fbthrift::TType::Byte, 5) => output.tiny = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tiny", strct: "MinPaddingWithCustomType"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            small: field_small.unwrap_or_default(),
-            biggish: field_biggish.unwrap_or_default(),
-            medium: field_medium.unwrap_or_default(),
-            big: field_big.unwrap_or_default(),
-            tiny: field_tiny.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2602,31 +2547,25 @@ where
             ::fbthrift::Field::new("data", ::fbthrift::TType::Struct, 4),
             ::fbthrift::Field::new("majorVer", ::fbthrift::TType::I64, 3),
         ];
-        let mut field_MyIntField = ::std::option::Option::None;
-        let mut field_MyStringField = ::std::option::Option::None;
-        let mut field_majorVer = ::std::option::Option::None;
-        let mut field_data = ::std::option::Option::None;
+
+
+        let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyStringField", strct: "MyStruct"})?),
-                (::fbthrift::TType::I64, 3) => field_majorVer = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "majorVer", strct: "MyStruct"})?),
-                (::fbthrift::TType::Struct, 4) => field_data = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "data", strct: "MyStruct"})?),
+                (::fbthrift::TType::I64, 1) => output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?,
+                (::fbthrift::TType::String, 2) => output.MyStringField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyStringField", strct: "MyStruct"})?,
+                (::fbthrift::TType::I64, 3) => output.majorVer = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "majorVer", strct: "MyStruct"})?,
+                (::fbthrift::TType::Struct, 4) => output.data = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "data", strct: "MyStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            MyIntField: field_MyIntField.unwrap_or_default(),
-            MyStringField: field_MyStringField.unwrap_or_default(),
-            majorVer: field_majorVer.unwrap_or_default(),
-            data: field_data.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2720,10 +2659,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataItem")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -2734,7 +2675,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2826,22 +2768,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::I64, 1),
         ];
-        let mut field_foo = ::std::option::Option::None;
+
+
+        let mut output = Renaming::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Renaming")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "Renaming"})?),
+                (::fbthrift::TType::I64, 1) => output.foo = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "Renaming"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            foo: field_foo.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -2969,25 +2911,23 @@ where
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("list_field", ::fbthrift::TType::List, 2),
         ];
-        let mut field_binary_field = ::std::option::Option::None;
-        let mut field_list_field = ::std::option::Option::None;
+
+
+        let mut output = AnnotatedTypes::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AnnotatedTypes")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "AnnotatedTypes"})?),
-                (::fbthrift::TType::List, 2) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "AnnotatedTypes"})?),
+                (::fbthrift::TType::String, 1) => output.binary_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "AnnotatedTypes"})?,
+                (::fbthrift::TType::List, 2) => output.list_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "AnnotatedTypes"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            binary_field: field_binary_field.unwrap_or_default(),
-            list_field: field_list_field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3106,25 +3046,28 @@ where
             ::fbthrift::Field::new("ForwardUsageByRef", ::fbthrift::TType::Struct, 2),
             ::fbthrift::Field::new("ForwardUsageStruct", ::fbthrift::TType::Struct, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             ForwardUsageStruct: ::std::option::Option::None,
             ForwardUsageByRef: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ForwardUsageRoot")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.ForwardUsageStruct = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ForwardUsageStruct", strct: "ForwardUsageRoot"})?),
-                (::fbthrift::TType::Struct, 2) => fields.ForwardUsageByRef = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ForwardUsageByRef", strct: "ForwardUsageRoot"})?),
+                (::fbthrift::TType::Struct, 1) => output.ForwardUsageStruct = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ForwardUsageStruct", strct: "ForwardUsageRoot"})?),
+                (::fbthrift::TType::Struct, 2) => output.ForwardUsageByRef = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ForwardUsageByRef", strct: "ForwardUsageRoot"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3232,23 +3175,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::Struct, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             foo: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ForwardUsageStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "ForwardUsageStruct"})?),
+                (::fbthrift::TType::Struct, 1) => output.foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "ForwardUsageStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3354,23 +3300,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::Struct, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             foo: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ForwardUsageByRef")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "ForwardUsageByRef"})?),
+                (::fbthrift::TType::Struct, 1) => output.foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "ForwardUsageByRef"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3476,23 +3425,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Map, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteMap")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "IncompleteMap"})?),
+                (::fbthrift::TType::Map, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "IncompleteMap"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3580,10 +3532,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteMapDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -3594,7 +3548,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3688,23 +3643,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Map, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteMap")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "CompleteMap"})?),
+                (::fbthrift::TType::Map, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "CompleteMap"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3816,10 +3774,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteMapDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -3830,7 +3790,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -3924,23 +3885,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "IncompleteList"})?),
+                (::fbthrift::TType::List, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "IncompleteList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4039,10 +4003,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -4053,7 +4019,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4147,23 +4114,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "CompleteList"})?),
+                (::fbthrift::TType::List, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "CompleteList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4262,10 +4232,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -4276,7 +4248,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4370,23 +4343,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "AdaptedList"})?),
+                (::fbthrift::TType::List, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "AdaptedList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4480,22 +4456,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Struct, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+
+
+        let mut output = AdaptedListDep::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "AdaptedListDep"})?),
+                (::fbthrift::TType::Struct, 1) => output.field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "AdaptedListDep"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4609,23 +4585,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a DependentAdaptedList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "DependentAdaptedList"})?),
+                (::fbthrift::TType::List, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "DependentAdaptedList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4721,23 +4700,26 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::I16, 1),
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a DependentAdaptedListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I16, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "DependentAdaptedListDep"})?),
+                (::fbthrift::TType::I16, 1) => output.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "DependentAdaptedListDep"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -4894,40 +4876,28 @@ where
             ::fbthrift::Field::new("aa_unique", ::fbthrift::TType::I32, 6),
             ::fbthrift::Field::new("not_a_container", ::fbthrift::TType::I32, 5),
         ];
-        let mut field_aa_list = ::std::option::Option::None;
-        let mut field_aa_set = ::std::option::Option::None;
-        let mut field_aa_map = ::std::option::Option::None;
-        let mut field_aa_string = ::std::option::Option::None;
-        let mut field_not_a_container = ::std::option::Option::None;
-        let mut field_aa_unique = ::std::option::Option::None;
-        let mut field_aa_shared = ::std::option::Option::None;
+
+
+        let mut output = AllocatorAware::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AllocatorAware")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_aa_list = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_list", strct: "AllocatorAware"})?),
-                (::fbthrift::TType::Set, 2) => field_aa_set = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_set", strct: "AllocatorAware"})?),
-                (::fbthrift::TType::Map, 3) => field_aa_map = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_map", strct: "AllocatorAware"})?),
-                (::fbthrift::TType::String, 4) => field_aa_string = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_string", strct: "AllocatorAware"})?),
-                (::fbthrift::TType::I32, 5) => field_not_a_container = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "not_a_container", strct: "AllocatorAware"})?),
-                (::fbthrift::TType::I32, 6) => field_aa_unique = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_unique", strct: "AllocatorAware"})?),
-                (::fbthrift::TType::I32, 7) => field_aa_shared = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_shared", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::List, 1) => output.aa_list = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_list", strct: "AllocatorAware"})?,
+                (::fbthrift::TType::Set, 2) => output.aa_set = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_set", strct: "AllocatorAware"})?,
+                (::fbthrift::TType::Map, 3) => output.aa_map = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_map", strct: "AllocatorAware"})?,
+                (::fbthrift::TType::String, 4) => output.aa_string = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_string", strct: "AllocatorAware"})?,
+                (::fbthrift::TType::I32, 5) => output.not_a_container = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "not_a_container", strct: "AllocatorAware"})?,
+                (::fbthrift::TType::I32, 6) => output.aa_unique = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_unique", strct: "AllocatorAware"})?,
+                (::fbthrift::TType::I32, 7) => output.aa_shared = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_shared", strct: "AllocatorAware"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            aa_list: field_aa_list.unwrap_or_default(),
-            aa_set: field_aa_set.unwrap_or_default(),
-            aa_map: field_aa_map.unwrap_or_default(),
-            aa_string: field_aa_string.unwrap_or_default(),
-            not_a_container: field_not_a_container.unwrap_or_default(),
-            aa_unique: field_aa_unique.unwrap_or_default(),
-            aa_shared: field_aa_shared.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -5079,25 +5049,23 @@ where
             ::fbthrift::Field::new("box_field", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("not_a_container", ::fbthrift::TType::I32, 1),
         ];
-        let mut field_not_a_container = ::std::option::Option::None;
-        let mut field_box_field = ::std::option::Option::None;
+
+
+        let mut output = AllocatorAware2::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AllocatorAware2")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_not_a_container = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "not_a_container", strct: "AllocatorAware2"})?),
-                (::fbthrift::TType::I32, 2) => field_box_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "box_field", strct: "AllocatorAware2"})?),
+                (::fbthrift::TType::I32, 1) => output.not_a_container = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "not_a_container", strct: "AllocatorAware2"})?,
+                (::fbthrift::TType::I32, 2) => output.box_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "box_field", strct: "AllocatorAware2"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            not_a_container: field_not_a_container.unwrap_or_default(),
-            box_field: field_box_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -5214,28 +5182,24 @@ where
             ::fbthrift::Field::new("UintTypedef_field", ::fbthrift::TType::I32, 3),
             ::fbthrift::Field::new("i32_field", ::fbthrift::TType::I32, 1),
         ];
-        let mut field_i32_field = ::std::option::Option::None;
-        let mut field_IntTypedef_field = ::std::option::Option::None;
-        let mut field_UintTypedef_field = ::std::option::Option::None;
+
+
+        let mut output = TypedefStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TypedefStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_i32_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "i32_field", strct: "TypedefStruct"})?),
-                (::fbthrift::TType::I32, 2) => field_IntTypedef_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "IntTypedef_field", strct: "TypedefStruct"})?),
-                (::fbthrift::TType::I32, 3) => field_UintTypedef_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "UintTypedef_field", strct: "TypedefStruct"})?),
+                (::fbthrift::TType::I32, 1) => output.i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "i32_field", strct: "TypedefStruct"})?,
+                (::fbthrift::TType::I32, 2) => output.IntTypedef_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "IntTypedef_field", strct: "TypedefStruct"})?,
+                (::fbthrift::TType::I32, 3) => output.UintTypedef_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "UintTypedef_field", strct: "TypedefStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            i32_field: field_i32_field.unwrap_or_default(),
-            IntTypedef_field: field_IntTypedef_field.unwrap_or_default(),
-            UintTypedef_field: field_UintTypedef_field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -5333,22 +5297,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("__field", ::fbthrift::TType::I32, 1),
         ];
-        let mut field___field = ::std::option::Option::None;
+
+
+        let mut output = StructWithDoubleUnderscores::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithDoubleUnderscores")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field___field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "__field", strct: "StructWithDoubleUnderscores"})?),
+                (::fbthrift::TType::I32, 1) => output.__field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "__field", strct: "StructWithDoubleUnderscores"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            __field: field___field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

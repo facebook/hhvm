@@ -337,10 +337,12 @@ where
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+
         #[allow(unused_mut)]
-        let mut fields = Self {
+        let mut output = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
+
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -351,7 +353,8 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(fields)
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -722,22 +725,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I64, 1),
         ];
-        let mut field_field1 = ::std::option::Option::None;
+
+
+        let mut output = MyStructWithCustomDefault::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStructWithCustomDefault")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_field1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "MyStructWithCustomDefault"})?),
+                (::fbthrift::TType::I64, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "MyStructWithCustomDefault"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field1: field_field1.unwrap_or(1),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -915,64 +918,36 @@ where
             ::fbthrift::Field::new("struct_field", ::fbthrift::TType::Struct, 14),
             ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 15),
         ];
-        let mut field_bool_field = ::std::option::Option::None;
-        let mut field_byte_field = ::std::option::Option::None;
-        let mut field_short_field = ::std::option::Option::None;
-        let mut field_int_field = ::std::option::Option::None;
-        let mut field_long_field = ::std::option::Option::None;
-        let mut field_float_field = ::std::option::Option::None;
-        let mut field_double_field = ::std::option::Option::None;
-        let mut field_string_field = ::std::option::Option::None;
-        let mut field_binary_field = ::std::option::Option::None;
-        let mut field_enum_field = ::std::option::Option::None;
-        let mut field_list_field = ::std::option::Option::None;
-        let mut field_set_field = ::std::option::Option::None;
-        let mut field_map_field = ::std::option::Option::None;
-        let mut field_struct_field = ::std::option::Option::None;
-        let mut field_union_field = ::std::option::Option::None;
+
+
+        let mut output = StructLevelTerseStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructLevelTerseStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Byte, 2) => field_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I16, 3) => field_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 4) => field_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I64, 5) => field_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Float, 6) => field_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Double, 7) => field_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 8) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 9) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 10) => field_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::List, 11) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Set, 12) => field_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Map, 13) => field_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 14) => field_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 15) => field_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Bool, 1) => output.bool_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Byte, 2) => output.byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::I16, 3) => output.short_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::I32, 4) => output.int_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::I64, 5) => output.long_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Float, 6) => output.float_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Double, 7) => output.double_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::String, 8) => output.string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::String, 9) => output.binary_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::I32, 10) => output.enum_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::List, 11) => output.list_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Set, 12) => output.set_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Map, 13) => output.map_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Struct, 14) => output.struct_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "StructLevelTerseStruct"})?,
+                (::fbthrift::TType::Struct, 15) => output.union_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "StructLevelTerseStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            bool_field: field_bool_field.unwrap_or_default(),
-            byte_field: field_byte_field.unwrap_or_default(),
-            short_field: field_short_field.unwrap_or_default(),
-            int_field: field_int_field.unwrap_or_default(),
-            long_field: field_long_field.unwrap_or_default(),
-            float_field: field_float_field.unwrap_or_default(),
-            double_field: field_double_field.unwrap_or_default(),
-            string_field: field_string_field.unwrap_or_default(),
-            binary_field: field_binary_field.unwrap_or_default(),
-            enum_field: field_enum_field.unwrap_or_default(),
-            list_field: field_list_field.unwrap_or_default(),
-            set_field: field_set_field.unwrap_or_default(),
-            map_field: field_map_field.unwrap_or_default(),
-            struct_field: field_struct_field.unwrap_or_default(),
-            union_field: field_union_field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1277,109 +1252,51 @@ where
             ::fbthrift::Field::new("terse_union_field", ::fbthrift::TType::Struct, 29),
             ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 30),
         ];
-        let mut field_terse_bool_field = ::std::option::Option::None;
-        let mut field_terse_byte_field = ::std::option::Option::None;
-        let mut field_terse_short_field = ::std::option::Option::None;
-        let mut field_terse_int_field = ::std::option::Option::None;
-        let mut field_terse_long_field = ::std::option::Option::None;
-        let mut field_terse_float_field = ::std::option::Option::None;
-        let mut field_terse_double_field = ::std::option::Option::None;
-        let mut field_terse_string_field = ::std::option::Option::None;
-        let mut field_terse_binary_field = ::std::option::Option::None;
-        let mut field_terse_enum_field = ::std::option::Option::None;
-        let mut field_terse_list_field = ::std::option::Option::None;
-        let mut field_terse_set_field = ::std::option::Option::None;
-        let mut field_terse_map_field = ::std::option::Option::None;
-        let mut field_terse_struct_field = ::std::option::Option::None;
-        let mut field_terse_union_field = ::std::option::Option::None;
-        let mut field_bool_field = ::std::option::Option::None;
-        let mut field_byte_field = ::std::option::Option::None;
-        let mut field_short_field = ::std::option::Option::None;
-        let mut field_int_field = ::std::option::Option::None;
-        let mut field_long_field = ::std::option::Option::None;
-        let mut field_float_field = ::std::option::Option::None;
-        let mut field_double_field = ::std::option::Option::None;
-        let mut field_string_field = ::std::option::Option::None;
-        let mut field_binary_field = ::std::option::Option::None;
-        let mut field_enum_field = ::std::option::Option::None;
-        let mut field_list_field = ::std::option::Option::None;
-        let mut field_set_field = ::std::option::Option::None;
-        let mut field_map_field = ::std::option::Option::None;
-        let mut field_struct_field = ::std::option::Option::None;
-        let mut field_union_field = ::std::option::Option::None;
+
+
+        let mut output = FieldLevelTerseStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldLevelTerseStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_terse_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_bool_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Byte, 2) => field_terse_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_byte_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I16, 3) => field_terse_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_short_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 4) => field_terse_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_int_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I64, 5) => field_terse_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_long_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Float, 6) => field_terse_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_float_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Double, 7) => field_terse_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_double_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 8) => field_terse_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_string_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 9) => field_terse_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_binary_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 10) => field_terse_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_enum_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::List, 11) => field_terse_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_list_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Set, 12) => field_terse_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_set_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Map, 13) => field_terse_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_map_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 14) => field_terse_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_struct_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 29) => field_terse_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_union_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Bool, 15) => field_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Byte, 16) => field_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I16, 17) => field_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 18) => field_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I64, 19) => field_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Float, 20) => field_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Double, 21) => field_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 22) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 23) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 24) => field_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::List, 25) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Set, 26) => field_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Map, 27) => field_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 28) => field_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 30) => field_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Bool, 1) => output.terse_bool_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_bool_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Byte, 2) => output.terse_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_byte_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I16, 3) => output.terse_short_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_short_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I32, 4) => output.terse_int_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_int_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I64, 5) => output.terse_long_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_long_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Float, 6) => output.terse_float_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_float_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Double, 7) => output.terse_double_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_double_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::String, 8) => output.terse_string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_string_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::String, 9) => output.terse_binary_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_binary_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I32, 10) => output.terse_enum_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_enum_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::List, 11) => output.terse_list_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_list_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Set, 12) => output.terse_set_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_set_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Map, 13) => output.terse_map_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_map_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Struct, 14) => output.terse_struct_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_struct_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Struct, 29) => output.terse_union_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_union_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Bool, 15) => output.bool_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Byte, 16) => output.byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I16, 17) => output.short_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I32, 18) => output.int_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I64, 19) => output.long_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Float, 20) => output.float_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Double, 21) => output.double_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::String, 22) => output.string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::String, 23) => output.binary_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::I32, 24) => output.enum_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::List, 25) => output.list_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Set, 26) => output.set_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Map, 27) => output.map_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Struct, 28) => output.struct_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "FieldLevelTerseStruct"})?,
+                (::fbthrift::TType::Struct, 30) => output.union_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "FieldLevelTerseStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            terse_bool_field: field_terse_bool_field.unwrap_or_default(),
-            terse_byte_field: field_terse_byte_field.unwrap_or_default(),
-            terse_short_field: field_terse_short_field.unwrap_or_default(),
-            terse_int_field: field_terse_int_field.unwrap_or_default(),
-            terse_long_field: field_terse_long_field.unwrap_or_default(),
-            terse_float_field: field_terse_float_field.unwrap_or_default(),
-            terse_double_field: field_terse_double_field.unwrap_or_default(),
-            terse_string_field: field_terse_string_field.unwrap_or_default(),
-            terse_binary_field: field_terse_binary_field.unwrap_or_default(),
-            terse_enum_field: field_terse_enum_field.unwrap_or_default(),
-            terse_list_field: field_terse_list_field.unwrap_or_default(),
-            terse_set_field: field_terse_set_field.unwrap_or_default(),
-            terse_map_field: field_terse_map_field.unwrap_or_default(),
-            terse_struct_field: field_terse_struct_field.unwrap_or_default(),
-            terse_union_field: field_terse_union_field.unwrap_or_default(),
-            bool_field: field_bool_field.unwrap_or_default(),
-            byte_field: field_byte_field.unwrap_or_default(),
-            short_field: field_short_field.unwrap_or_default(),
-            int_field: field_int_field.unwrap_or_default(),
-            long_field: field_long_field.unwrap_or_default(),
-            float_field: field_float_field.unwrap_or_default(),
-            double_field: field_double_field.unwrap_or_default(),
-            string_field: field_string_field.unwrap_or_default(),
-            binary_field: field_binary_field.unwrap_or_default(),
-            enum_field: field_enum_field.unwrap_or_default(),
-            list_field: field_list_field.unwrap_or_default(),
-            set_field: field_set_field.unwrap_or_default(),
-            map_field: field_map_field.unwrap_or_default(),
-            struct_field: field_struct_field.unwrap_or_default(),
-            union_field: field_union_field.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1678,28 +1595,24 @@ where
             ::fbthrift::Field::new("field2", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("field3", ::fbthrift::TType::I32, 3),
         ];
-        let mut field_field1 = ::std::option::Option::None;
-        let mut field_field2 = ::std::option::Option::None;
-        let mut field_field3 = ::std::option::Option::None;
+
+
+        let mut output = AdaptedFields::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedFields")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_field1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedFields"})?),
-                (::fbthrift::TType::I32, 2) => field_field2 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedFields"})?),
-                (::fbthrift::TType::I32, 3) => field_field3 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field3", strct: "AdaptedFields"})?),
+                (::fbthrift::TType::I32, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedFields"})?,
+                (::fbthrift::TType::I32, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedFields"})?,
+                (::fbthrift::TType::I32, 3) => output.field3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field3", strct: "AdaptedFields"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field1: field_field1.unwrap_or_default(),
-            field2: field_field2.unwrap_or_default(),
-            field3: field_field3.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 
@@ -1852,22 +1765,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("msg", ::fbthrift::TType::String, 1),
         ];
-        let mut field_msg = ::std::option::Option::None;
+
+
+        let mut output = TerseException::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TerseException")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_msg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "msg", strct: "TerseException"})?),
+                (::fbthrift::TType::String, 1) => output.msg = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "msg", strct: "TerseException"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            msg: field_msg.unwrap_or_default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

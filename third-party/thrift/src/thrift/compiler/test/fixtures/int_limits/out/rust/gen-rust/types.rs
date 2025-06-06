@@ -132,43 +132,29 @@ where
             ::fbthrift::Field::new("min_i32_field", ::fbthrift::TType::I32, 4),
             ::fbthrift::Field::new("min_i64_field", ::fbthrift::TType::I64, 2),
         ];
-        let mut field_max_i64_field = ::std::option::Option::None;
-        let mut field_min_i64_field = ::std::option::Option::None;
-        let mut field_max_i32_field = ::std::option::Option::None;
-        let mut field_min_i32_field = ::std::option::Option::None;
-        let mut field_max_i16_field = ::std::option::Option::None;
-        let mut field_min_i16_field = ::std::option::Option::None;
-        let mut field_max_byte_field = ::std::option::Option::None;
-        let mut field_min_byte_field = ::std::option::Option::None;
+
+
+        let mut output = Limits::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Limits")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_max_i64_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?),
-                (::fbthrift::TType::I64, 2) => field_min_i64_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?),
-                (::fbthrift::TType::I32, 3) => field_max_i32_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?),
-                (::fbthrift::TType::I32, 4) => field_min_i32_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?),
-                (::fbthrift::TType::I16, 5) => field_max_i16_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?),
-                (::fbthrift::TType::I16, 6) => field_min_i16_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?),
-                (::fbthrift::TType::Byte, 7) => field_max_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?),
-                (::fbthrift::TType::Byte, 8) => field_min_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?),
+                (::fbthrift::TType::I64, 1) => output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?,
+                (::fbthrift::TType::I64, 2) => output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?,
+                (::fbthrift::TType::I32, 3) => output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?,
+                (::fbthrift::TType::I32, 4) => output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?,
+                (::fbthrift::TType::I16, 5) => output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?,
+                (::fbthrift::TType::I16, 6) => output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?,
+                (::fbthrift::TType::Byte, 7) => output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?,
+                (::fbthrift::TType::Byte, 8) => output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            max_i64_field: field_max_i64_field.unwrap_or(9223372036854775807),
-            min_i64_field: field_min_i64_field.unwrap_or(-9223372036854775808),
-            max_i32_field: field_max_i32_field.unwrap_or(2147483647),
-            min_i32_field: field_min_i32_field.unwrap_or(-2147483648),
-            max_i16_field: field_max_i16_field.unwrap_or(32767),
-            min_i16_field: field_min_i16_field.unwrap_or(-32768),
-            max_byte_field: field_max_byte_field.unwrap_or(127),
-            min_byte_field: field_min_byte_field.unwrap_or(-128),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

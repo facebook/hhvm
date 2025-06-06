@@ -648,25 +648,23 @@ where
             ::fbthrift::Field::new("myBigEnum", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 1),
         ];
-        let mut field_myEnum = ::std::option::Option::None;
-        let mut field_myBigEnum = ::std::option::Option::None;
+
+
+        let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_myEnum = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myEnum", strct: "MyStruct"})?),
-                (::fbthrift::TType::I32, 2) => field_myBigEnum = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myBigEnum", strct: "MyStruct"})?),
+                (::fbthrift::TType::I32, 1) => output.myEnum = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myEnum", strct: "MyStruct"})?,
+                (::fbthrift::TType::I32, 2) => output.myBigEnum = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myBigEnum", strct: "MyStruct"})?,
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            myEnum: field_myEnum.unwrap_or_default(),
-            myBigEnum: field_myBigEnum.unwrap_or(crate::types::MyBigEnum::ONE),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(output)
+
     }
 }
 

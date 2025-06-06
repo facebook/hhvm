@@ -299,7 +299,7 @@ MCROUTER_OPTION_INTEGER(
     0,
     "core-multiplier-threshold",
     no_short,
-    "core-mutiplier logic is applied if the number of cores  >= core_multiplier_threshold")
+    "core-mutiplier logic is applied if std::hardware_concurrency >= core_multiplier_threshold.")
 
 // ONLY ENABLED FOR SHADOW TESTING WHEN USING PROXY
 MCROUTER_OPTION_TOGGLE(

@@ -42,7 +42,7 @@ abstract final class ThriftFrameworkMetadataUtils {
     return Str\join($experiment_ids, ',');
   }
 
-  <<__Memoize>>
+  <<__Memoize(#MakeICInaccessible)>>
   public static function decodeFrameworkMetadataOnResponse(
     string $encoded_response_tfm,
   ): ThriftFrameworkMetadataOnResponse {

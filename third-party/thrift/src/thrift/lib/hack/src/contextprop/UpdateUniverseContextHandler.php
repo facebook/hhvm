@@ -180,13 +180,13 @@ final class UpdateUniverseContextHandler implements IContextHandler {
     }
   }
 
-  <<__Memoize>>
+  <<__Memoize(#MakeICInaccessible)>>
   private static function isSignalDynamicLoggerKilled(): bool {
     return PrivacyLibKS::isKilled(PLKS::SIGNAL_DYNAMIC_LOGGER);
   }
 
   // Temporary hardcoded function to get the Async Thrift service that we want to filter to
-  <<__Memoize>>
+  <<__Memoize(#MakeICInaccessible)>>
   private static function getAsyncSubmitterThriftService(
   ): ThriftServiceMethodNameAssetXID {
     return ThriftServiceMethodNameAssetXID::unsafeGet(

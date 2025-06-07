@@ -589,3 +589,99 @@ class StructureAnnotations(unittest.TestCase):
                 """
             ),
         )
+
+    def test_deprecated_unvalidated_to_structured(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/thrift.thrift"
+                include "thrift/annotation/rust.thrift"
+
+                @thrift.DeprecatedUnvalidatedAnnotations{
+                    items = {
+                        "java.swift.annotations": "@com.facebook.Foo
+                            @com.facebook.Bar",
+                        "java.swift.mutable": "true"
+                    }
+                }
+                struct S {
+                    @thrift.DeprecatedUnvalidatedAnnotations{
+                        items = {"swift.recursive_reference": "true"}
+                    }
+                    1: i32 field1;
+
+                    @rust.Name{name = "Field2RustName"}
+                    @thrift.DeprecatedUnvalidatedAnnotations{
+                        items = {
+                            "swift.recursive_reference": "false",
+                            "cpp.name": "Field2CppName"
+                        }
+                    }
+                    2: i32 field2;
+
+                    @thrift.DeprecatedUnvalidatedAnnotations{
+                        items = {
+                            "swift.recursive_reference": "true",
+                            "some.other": "true"
+                        }
+                    }
+                    3: i32 field3;
+
+                    @thrift.DeprecatedUnvalidatedAnnotations{ items = { "some.other": "true" } }
+                    4: i32 field4 (another.unvalidated = "true");
+
+                    // This should not be modified at all, as initial and target state are the same
+                    @thrift.DeprecatedUnvalidatedAnnotations {
+                        items = { "some.other": "true" }
+                    }
+                    5: i32 field5;
+                } (rust.arc)
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/thrift.thrift"
+                include "thrift/annotation/rust.thrift"
+                include "thrift/annotation/cpp.thrift"
+                include "thrift/annotation/java.thrift"
+
+                @java.Annotation{java_annotation = "@com.facebook.Foo
+                    @com.facebook.Bar"}
+                @java.Mutable
+                @rust.Arc
+
+                struct S {
+                    @java.Recursive
+
+                    1: i32 field1;
+
+                    @cpp.Name{value = "Field2CppName"}
+                    @rust.Name{name = "Field2RustName"}
+
+                    2: i32 field2;
+
+                    @java.Recursive
+                    @thrift.DeprecatedUnvalidatedAnnotations{items = {"some.other": "true"}}
+
+                    3: i32 field3;
+
+                    @thrift.DeprecatedUnvalidatedAnnotations{items = {"another.unvalidated": "true", "some.other": "true"}}
+
+                    4: i32 field4 ;
+
+                    // This should not be modified at all, as initial and target state are the same
+                    @thrift.DeprecatedUnvalidatedAnnotations {
+                        items = { "some.other": "true" }
+                    }
+                    5: i32 field5;
+                }"""
+            ),
+        )

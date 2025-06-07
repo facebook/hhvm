@@ -79,16 +79,29 @@ let validator =
       super#on_taccess acc r (root, ids)
 
     method! on_tthis acc r =
-      let is_known_to_be_final =
-        match acc.class_from_taccess_lhs with
-        | Some class_ -> Folded_class.final class_
-        | None -> false
-      in
-      if is_known_to_be_final then
-        (* In a final class, `this` is known statically and so is safe here *)
-        acc
-      else
-        this#invalid acc r "the late static bound `this` type"
+      match acc.class_from_taccess_lhs with
+      | Some final_class when Folded_class.final final_class ->
+        (* in a final class, `this` is the lexical class, since there are no subclasses *)
+        let has_tparams =
+          not @@ List.is_empty @@ Folded_class.tparams final_class
+        in
+        if has_tparams then
+          (* Ban because:
+           *  `final class C<T> { type Tc = this }` is a way of expressing the same thing as
+           *  `class C<T> { type Tc = C<T> }` which is banned (probably due to type constants being reified)
+           *)
+          this#invalid
+            acc
+            r
+            "the late static bound `this` type of a class with type parameters"
+        else
+          acc
+      | Some _non_final_class ->
+        this#invalid
+          acc
+          r
+          "the late static bound `this` type of a non-final class"
+      | None -> this#invalid acc r "the late static bound `this` type"
 
     method! on_trefinement acc r _ty _ = this#invalid acc r "type refinement"
   end

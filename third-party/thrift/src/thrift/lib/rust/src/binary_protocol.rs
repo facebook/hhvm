@@ -283,6 +283,9 @@ impl<B: BufExt> BinaryProtocolDeserializer<B> {
                             self.read_binary::<Discard>()?;
                             current = pop!();
                         }
+                        TType::Void => {
+                            current = pop!();
+                        }
                         TType::Stop => bail_err!(ProtocolError::UnexpectedStopInSkip),
                         TType::Stream => bail_err!(ProtocolError::StreamUnsupported),
                         _ => {

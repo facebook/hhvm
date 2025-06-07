@@ -126,9 +126,6 @@ class HTTP1xCodec : public HTTPCodec {
     return 0;
   }
 
-  void setAllowedUpgradeProtocols(std::list<std::string> protocols);
-  const std::string& getAllowedUpgradeProtocols();
-
   void setStrictValidation(bool strict) {
     strictValidation_ = strict;
   }
@@ -222,7 +219,6 @@ class HTTP1xCodec : public HTTPCodec {
   std::string userAgent_;
   std::string reason_;
   std::string upgradeHeader_; // last sent/received client upgrade header
-  std::string allowedNativeUpgrades_; // DOWNSTREAM only
   HTTPHeaderSize headerSize_;
   HeaderParseState headerParseState_;
   TransportDirection transportDirection_;

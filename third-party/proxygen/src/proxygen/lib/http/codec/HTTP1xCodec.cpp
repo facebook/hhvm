@@ -852,20 +852,6 @@ size_t HTTP1xCodec::generateGoaway(IOBufQueue&,
   return 0;
 }
 
-void HTTP1xCodec::setAllowedUpgradeProtocols(std::list<std::string> protocols) {
-  CHECK(transportDirection_ == TransportDirection::DOWNSTREAM);
-  for (const auto& proto : protocols) {
-    allowedNativeUpgrades_ += folly::to<string>(proto, ",");
-  }
-  if (!allowedNativeUpgrades_.empty()) {
-    allowedNativeUpgrades_.erase(allowedNativeUpgrades_.size() - 1);
-  }
-}
-
-const std::string& HTTP1xCodec::getAllowedUpgradeProtocols() {
-  return allowedNativeUpgrades_;
-}
-
 int HTTP1xCodec::onMessageBegin() {
   headersComplete_ = false;
   headerSize_.uncompressed = 0;
@@ -1132,19 +1118,6 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
       // we will start forwarding data to the proxy without waiting for
       // the response from the proxy server.
       ingressUpgrade_ = true;
-    } else if (!allowedNativeUpgrades_.empty() && ingressTxnID_ == 1) {
-      upgradeHeader_ = msg_->getHeaders().getSingleOrEmpty(HTTP_HEADER_UPGRADE);
-      if (!upgradeHeader_.empty() && !allowedNativeUpgrades_.empty()) {
-        auto result = checkForProtocolUpgrade(
-            upgradeHeader_, allowedNativeUpgrades_, true /* server mode */);
-        if (result && result->first != CodecProtocol::HTTP_1_1) {
-          nativeUpgrade_ = true;
-          upgradeResult_ = *result;
-          // unfortunately have to copy because msg_ is passed to
-          // onHeadersComplete
-          upgradeRequest_ = std::make_unique<HTTPMessage>(*msg_);
-        }
-      }
     }
   }
   msg_->setIsUpgraded(ingressUpgrade_);

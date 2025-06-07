@@ -4469,6 +4469,7 @@ dependencies = [
 name = "rust_decl_ffi"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
  "crossbeam",
  "direct_decl_parser",
  "hh_hash",

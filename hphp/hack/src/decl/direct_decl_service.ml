@@ -28,7 +28,7 @@ let parse
       match decl_mode with
       | Normal -> Direct_decl_utils.direct_decl_parse ctx fn
       | Cached -> Direct_decl_utils.direct_decl_parse_and_cache ctx fn
-      | Zoncolan -> Direct_decl_utils.direct_decl_parse_and_cache ctx fn
+      | Zoncolan -> Direct_decl_utils.direct_decl_parse_zoncolan ctx fn
     in
     match parsed_file_opt with
     | None -> acc

@@ -873,7 +873,12 @@ let initialize_naming_table
       ?count
       t
       ~trace
-      ~cache_decls
+      ~decl_mode:
+        Direct_decl_service.(
+          if cache_decls then
+            Cached
+          else
+            Normal)
       ~telemetry_label:"lazy.nt.parsing"
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper
@@ -1090,7 +1095,8 @@ let update_naming_table
       ~count:file_count
       t
       ~trace
-      ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
+      ~decl_mode:Direct_decl_service.Normal
+        (* Don't overwrite old decls loaded from saved state *)
       ~telemetry_label:"post_ss1.parsing"
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper

@@ -122,15 +122,16 @@ let indexing genv env to_check cgroup_steps :
   let ctx = Provider_utils.ctx_from_server_env env in
   let defs_per_file =
     CgroupProfiler.step_start_end cgroup_steps "parsing" @@ fun _cgroup_step ->
-    Direct_decl_service.go
-      ctx
-      genv.workers
-      ~get_next
-      ~trace:true
-      ~cache_decls:
-        (* Not caching here, otherwise oldification done in redo_type_decl will
-           oldify the new version (and override the real old versions. *)
-        false
+    Direct_decl_service.(
+      go
+        ctx
+        genv.workers
+        ~get_next
+        ~trace:true
+        ~decl_mode:
+          (* Not caching here, otherwise oldification done in redo_type_decl will
+             oldify the new version (and override the real old versions. *)
+          Normal)
   in
   (env, defs_per_file)
 

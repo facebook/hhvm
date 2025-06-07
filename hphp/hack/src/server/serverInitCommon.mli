@@ -24,7 +24,7 @@ val parse_files_and_update_forward_naming_table :
   ?count:int ->
   float ->
   trace:bool ->
-  cache_decls:bool ->
+  decl_mode:Direct_decl_service.direct_decl_mode ->
   telemetry_label:string ->
   cgroup_steps:CgroupProfiler.step_group ->
   worker_call:MultiWorker.call_wrapper ->

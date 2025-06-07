@@ -35,7 +35,7 @@ let parse_files_and_update_forward_naming_table
     ?(count : int option)
     (t : float)
     ~(trace : bool)
-    ~(cache_decls : bool)
+    ~(decl_mode : Direct_decl_service.direct_decl_mode)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group)
     ~(worker_call : MultiWorker.call_wrapper) : ServerEnv.env * float =
@@ -54,7 +54,7 @@ let parse_files_and_update_forward_naming_table
       genv.workers
       ~get_next
       ~trace
-      ~cache_decls
+      ~decl_mode
   in
   let naming_table = Naming_table.update_many env.naming_table defs_per_file in
   let hs = SharedMem.SMTelemetry.heap_size () in

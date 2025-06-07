@@ -46,21 +46,22 @@ let parse_defs (ctx : Provider_context.t) (files : Relative_path.Set.t) :
     FileInfo.t Relative_path.Map.t =
   let workers = None in
   let done_ = ref false in
-  Direct_decl_service.go
-    ctx
-    ~trace:false
-    ~cache_decls:
-      (* Not caching here, otherwise oldification done in redo_type_decl will
-       * oldify the new version (and override the real old versions *)
-      false
-    workers
-    ~get_next:(fun () ->
-      if !done_ then
-        Bucket.Done
-      else (
-        done_ := true;
-        Bucket.Job (Relative_path.Set.elements files)
-      ))
+  Direct_decl_service.(
+    go
+      ctx
+      ~trace:false
+      ~decl_mode:
+        (* Not caching here, otherwise oldification done in redo_type_decl will
+         * oldify the new version (and override the real old versions *)
+        Normal
+      workers
+      ~get_next:(fun () ->
+        if !done_ then
+          Bucket.Done
+        else (
+          done_ := true;
+          Bucket.Job (Relative_path.Set.elements files)
+        )))
 
 let update_reverse_naming_table
     ctx (defs_per_file : FileInfo.t Relative_path.Map.t) symbols_to_files :

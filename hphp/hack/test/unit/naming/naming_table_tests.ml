@@ -77,7 +77,7 @@ let write_and_parse_test_files ctx =
       Disk.write_file ~file:(Path.to_string fn) ~contents);
   let get_next = MultiWorker.next None (List.map files ~f:fst) in
   let file_infos =
-    Direct_decl_service.go ctx None ~get_next ~trace:true ~cache_decls:false
+    Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal)
   in
   Naming_table.create file_infos
 

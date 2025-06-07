@@ -9,22 +9,28 @@
 
 open Hh_prelude
 
+type direct_decl_mode =
+  | Normal
+  | Cached
+  | Zoncolan
+
 let parse
     (ctx : Provider_context.t)
     ~(trace : bool)
-    ~(cache_decls : bool)
+    ~(decl_mode : direct_decl_mode)
     (acc : FileInfo.t Relative_path.Map.t)
     (fn : Relative_path.t) : FileInfo.t Relative_path.Map.t =
   if not (FindUtils.path_filter fn) then
     acc
   else
     let start_parse_time = Unix.gettimeofday () in
-    match
-      if cache_decls then
-        Direct_decl_utils.direct_decl_parse_and_cache ctx fn
-      else
-        Direct_decl_utils.direct_decl_parse ctx fn
-    with
+    let parsed_file_opt =
+      match decl_mode with
+      | Normal -> Direct_decl_utils.direct_decl_parse ctx fn
+      | Cached -> Direct_decl_utils.direct_decl_parse_and_cache ctx fn
+      | Zoncolan -> Direct_decl_utils.direct_decl_parse_and_cache ctx fn
+    in
+    match parsed_file_opt with
     | None -> acc
     | Some parsed_file ->
       let end_parse_time = Unix.gettimeofday () in
@@ -40,14 +46,14 @@ let parse
 let go
     (ctx : Provider_context.t)
     ~(trace : bool)
-    ~(cache_decls : bool)
+    ~(decl_mode : direct_decl_mode)
     ?(worker_call : MultiWorker.call_wrapper = MultiWorker.wrapper)
     (workers : MultiWorker.worker list option)
     ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
   worker_call.MultiWorker.f
     workers
-    ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
+    ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~decl_mode))
     ~neutral:Relative_path.Map.empty
     ~merge:Relative_path.Map.union
     ~next:get_next

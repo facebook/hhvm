@@ -54,7 +54,7 @@ HTTP2Codec::~HTTP2Codec() {
 
 // HTTPCodec API
 
-size_t HTTP2Codec::onIngress(const folly::IOBuf& buf) {
+size_t HTTP2Codec::onIngress(const folly::IOBuf& buf) noexcept {
   // TODO: ensure only 1 parse at a time on stack.
   FOLLY_SCOPED_TRACE_SECTION("HTTP2Codec - onIngress");
 

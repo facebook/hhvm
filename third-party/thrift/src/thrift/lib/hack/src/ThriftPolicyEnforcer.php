@@ -100,23 +100,10 @@ final class ThriftPolicyEnforcer
     string $asset_type, // This is actually the service name in this context
     ?int $caller,
   )[]: ?string {
-    switch ($asset_type) {
-      case 'CachiusService':
-        $caller_enum = CachiusCaller::class;
-        break;
-      case 'LaserLeaf':
-        $caller_enum = LaserCaller::class;
-        break;
-      case 'TitanMessagingService':
-        $caller_enum = CallistoCaller::class;
-        break;
-      case 'AdalService':
-        $caller_enum = AdalMySQLThriftCaller::class;
-        break;
-      default:
-        return null;
-    }
-    return idx($caller_enum::getNames(), $caller_enum::coerce($caller));
+    return ThriftServiceMethodNameVirtualPolicyEnforcer::getCallerName(
+      $asset_type,
+      $caller,
+    );
   }
 
   <<__Override>>

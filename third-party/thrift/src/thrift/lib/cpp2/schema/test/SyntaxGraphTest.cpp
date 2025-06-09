@@ -765,4 +765,12 @@ TEST(SyntaxGraphTest, getSchemaMerge) {
   EXPECT_EQ(other.definition().name(), "OtherTestStruct");
 }
 
+TEST(SyntaxGraphTest, anyField) {
+  auto& registry = SchemaRegistry::get();
+  const auto& s = registry.getNode<test::StructWithAny>();
+  const auto& f = s.fields()[0];
+  const auto& anyStruct = f.type().trueType();
+  EXPECT_EQ(anyStruct.asStruct().uri(), "facebook.com/thrift/type/Any");
+}
+
 } // namespace apache::thrift::syntax_graph

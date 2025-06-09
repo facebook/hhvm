@@ -51,6 +51,8 @@ void populate_one_file(
   while (std::getline(file, line)) {
     lines.push_back(line);
   }
+  // .thrift files should always end with a trailing newline.
+  lines.emplace_back();
 
   std::string key = fmt::format(
       "{}/{}", root.generic_string(), path.lexically_normal().generic_string());

@@ -16,4 +16,10 @@
 
 namespace cpp2 apache.thrift.syntax_graph.test
 
+include "thrift/lib/thrift/any.thrift"
+
 struct OtherTestStruct {}
+
+struct StructWithAny {
+  1: any.Any anyField;
+}

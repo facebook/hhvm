@@ -29,6 +29,7 @@ struct ChecksumPayloadSerializerStrategyOptions {
   folly::Function<void()> recordChecksumFailure;
   folly::Function<void()> recordChecksumSuccess;
   folly::Function<void()> recordChecksumCalculated;
+  folly::Function<void()> recordChecksumSkipped;
 };
 
 /**
@@ -53,8 +54,8 @@ class ChecksumPayloadSerializerStrategy final
         delegate_(DelegateStrategy()),
         recordChecksumFailure_(std::move(options.recordChecksumFailure)),
         recordChecksumSuccess_(std::move(options.recordChecksumSuccess)),
-        recordChecksumCalculated_(std::move(options.recordChecksumCalculated)) {
-  }
+        recordChecksumCalculated_(std::move(options.recordChecksumCalculated)),
+        recordChecksumSkipped_(std::move(options.recordChecksumSkipped)) {}
 
   bool supportsChecksum() { return true; }
 
@@ -232,6 +233,7 @@ class ChecksumPayloadSerializerStrategy final
         return validateChecksumImpl<XXH3_64>(buf, *checksumOpt);
 
       case apache::thrift::ChecksumAlgorithm::NONE:
+        tryRecordChecksumSkipped();
         return true;
 
       default: {
@@ -247,6 +249,7 @@ class ChecksumPayloadSerializerStrategy final
   folly::Function<void()> recordChecksumFailure_;
   folly::Function<void()> recordChecksumSuccess_;
   folly::Function<void()> recordChecksumCalculated_;
+  folly::Function<void()> recordChecksumSkipped_;
 
   /**
    * Helper function that makes checks to make sure that the checksum wasn't
@@ -301,6 +304,12 @@ class ChecksumPayloadSerializerStrategy final
   FOLLY_ERASE void tryRecordChecksumCalculated() {
     if (recordChecksumCalculated_ != nullptr) {
       recordChecksumCalculated_();
+    }
+  }
+
+  FOLLY_ERASE void tryRecordChecksumSkipped() {
+    if (recordChecksumSkipped_ != nullptr) {
+      recordChecksumSkipped_();
     }
   }
 };

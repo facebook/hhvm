@@ -68,6 +68,10 @@ folly::coro::Task<std::string> ThriftStressTestClient::co_echo(
                     .recordChecksumCalculated =
                         [] {
                           LOG_EVERY_N(INFO, 1'000) << "Checksum calculated";
+                        },
+                    .recordChecksumSkipped =
+                        [] {
+                          LOG_EVERY_N(INFO, 1'000) << "Checksum skipped";
                         }}));
       });
 

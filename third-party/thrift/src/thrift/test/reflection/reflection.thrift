@@ -70,7 +70,6 @@ enum enum_with_renamed_value {
   fancy.idl.name = 7,
 }
 
-@cpp.ScopedEnumAsUnionType
 union union1 {
   1: i32 ui;
   2: double ud;

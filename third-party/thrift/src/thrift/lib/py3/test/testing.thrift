@@ -194,7 +194,6 @@ struct Digits {
   1: optional list<Integers> data;
 }
 
-@cpp.ScopedEnumAsUnionType
 union Integers {
   1: byte tiny;
   2: i16 small;

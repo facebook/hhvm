@@ -104,7 +104,6 @@ typedef list<TypeAndMaskEntry> MapTypeToMask
  */
 // Inclusive fields should always be an even number.
 @cpp.EnableCustomTypeOrdering
-@cpp.ScopedEnumAsUnionType
 union Mask {
   @cpp.Ref{type = cpp.RefType.Unique}
   1: FieldIdToMask excludes; // Fields that will be excluded.

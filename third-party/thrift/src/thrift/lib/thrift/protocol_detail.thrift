@@ -75,7 +75,6 @@ typedef double Double
   name = "::apache::thrift::InlineAdapter<::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::detail::Value>>",
   adaptedType = "::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::detail::Value>",
 }
-@cpp.ScopedEnumAsUnionType
 @cpp.UseOpEncode
 union Value {
   // Integers.

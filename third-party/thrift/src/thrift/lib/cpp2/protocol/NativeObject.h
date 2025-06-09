@@ -29,6 +29,46 @@
 #include <thrift/lib/cpp2/op/Hash.h>
 #include <thrift/lib/cpp2/type/Type.h>
 
+/**
+ * DISCLAIMER: This is an experimental library for Thrift. The API and
+ * functionality are subject to change and may not be stable. Use at your
+ * own risk and discretion.
+ */
+
+/**
+ * This library provides a high-performance alternative to protocol::Value and
+ * protocol::Object, utilizing std::variant to enable inline specializations
+ * for container types. Unlike protocol::Value, containers in this library
+ * do not contain protocol::Value elements. Instead, they can have a specialized
+ * representation for their internal element types. For example, a list<i32>
+ * would be specialized as std::vector<std::int32_t>, and a map<i16, String>
+ * would be represented as folly::F14FastMap<std::int16_t, ValueHolder>.
+ *
+ * Despite these optimizations, the library can still represent arbitrary
+ * Thrift hierarchies by falling back to a generic representation of `Value`
+ * elements when necessary.
+ *
+ * Usage Examples:
+ *
+ * // Example of traversing and reading values from a NativeList
+ * auto intList = make_list_of<std::int32_t>({1, 2, 3, 4, 5});
+ * intList.visit([](const auto& list) {
+ *   for (const auto& value : list) {
+ *     std::cout << value << std::endl;
+ *   }
+ * });
+
+ * // Example of traversing and reading values from a NativeObject
+ * NativeObject obj;
+ * obj.emplace(1, "hello");
+ * obj.emplace(2, "example");
+ * for (const auto& [fieldId, value] : obj) {
+ *     std::cout << "Field ID: " << fieldId
+ *      << ", Value: " << value.as<std::string>()
+ *      << std::endl;
+ * }
+ */
+
 namespace apache::thrift::protocol::experimental {
 class NativeObject;
 class NativeValue;

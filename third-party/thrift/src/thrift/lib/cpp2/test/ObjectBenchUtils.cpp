@@ -18,9 +18,15 @@
 
 #include <folly/Benchmark.h>
 
+#include <thrift/lib/cpp2/protocol/NativeObject.h>
 #include <thrift/lib/cpp2/test/ObjectBenchUtils.h>
 
 namespace apache::thrift::test::utils {
+
+namespace experimental = apache::thrift::protocol::experimental;
+
+using NativeValue = experimental::NativeValue;
+using NativeObject = experimental::NativeObject;
 
 template <typename T>
 constexpr bool is_pod_v = std::is_same_v<T, bool> ||
@@ -31,18 +37,18 @@ constexpr bool is_pod_v = std::is_same_v<T, bool> ||
 std::size_t read_all(const bool& b) {
   return b ? 1 : 0;
 }
-std::size_t read_all(const int8_t& i) {
+std::size_t read_all(const std::int8_t& i) {
   return static_cast<std::size_t>(i);
 }
-std::size_t read_all(const int16_t& i) {
-  return static_cast<std::size_t>(i);
-}
-
-std::size_t read_all(const int32_t& i) {
+std::size_t read_all(const std::int16_t& i) {
   return static_cast<std::size_t>(i);
 }
 
-std::size_t read_all(const int64_t& i) {
+std::size_t read_all(const std::int32_t& i) {
+  return static_cast<std::size_t>(i);
+}
+
+std::size_t read_all(const std::int64_t& i) {
   return static_cast<std::size_t>(i);
 }
 
@@ -54,12 +60,83 @@ size_t read_all(const double& d) {
   return static_cast<std::size_t>(d);
 }
 
+std::size_t read_all(const experimental::Bytes& s) {
+  return s.size() == 0 ? 0 : static_cast<std::size_t>(s.data()[0]);
+}
+
 std::size_t read_all(const std::string& s) {
   return s.size() == 0 ? 0 : static_cast<std::size_t>(s[0]);
 }
 
 std::size_t read_all(const folly::IOBuf& b) {
   return b.length() == 0 ? 0 : static_cast<std::size_t>(b.data()[0]);
+}
+
+std::size_t read_all(const std::monostate&) {
+  return 0;
+}
+
+std::size_t read_all(const NativeObject& obj);
+std::size_t read_all(const experimental::NativeList& l);
+std::size_t read_all(const experimental::NativeMap& m);
+std::size_t read_all(const experimental::NativeSet& s);
+std::size_t read_all(const NativeValue& s);
+std::size_t read_all(const experimental::ValueHolder& s);
+
+std::size_t read_all(const NativeObject& s) {
+  std::size_t res = 0;
+  for (const auto& [id, field] : s) {
+    res += read_all(field);
+  }
+  return res;
+}
+
+template <typename... Args>
+std::size_t read_all(const experimental::ListOf<Args...>& l) {
+  std::size_t res = 0;
+  for (const auto& elem : l) {
+    res += read_all(elem);
+  }
+  return res;
+}
+
+template <typename... Args>
+std::size_t read_all(const experimental::SetOf<Args...>& s) {
+  std::size_t res = 0;
+  for (const auto& elem : s) {
+    res += read_all(elem);
+  }
+  return res;
+}
+
+std::size_t read_all(const experimental::NativeSet& s) {
+  return folly::variant_match(
+      s.inner(), [](const auto& v) -> std::size_t { return read_all(v); });
+}
+
+template <typename... Args>
+std::size_t read_all(const experimental::MapOf<Args...>& m) {
+  std::size_t res = 0;
+  for (const auto& [key, val] : m) {
+    res += read_all(key);
+    res += read_all(val);
+  }
+  return res;
+}
+
+std::size_t read_all(const experimental::NativeMap& m) {
+  return folly::variant_match(
+      m.inner(), [&](auto& v) -> std::size_t { return read_all(v); });
+}
+
+std::size_t read_all(const experimental::NativeList& l) {
+  return folly::variant_match(
+      l.inner(), [&](auto& v) -> std::size_t { return read_all(v); });
+}
+
+std::size_t read_all(const NativeValue& val) {
+  return folly::variant_match(
+      val.inner(), [](const auto& s) { return read_all(s); });
 }
 
 std::size_t read_all(
@@ -139,6 +216,10 @@ std::size_t read_all(const protocol::Object& obj) {
     res += read_all(field);
   }
   return res;
+}
+
+std::size_t read_all(const experimental::ValueHolder& val) {
+  return read_all(static_cast<const NativeValue&>(val));
 }
 
 } // namespace apache::thrift::test::utils

@@ -29,14 +29,18 @@ using namespace folly;
 using namespace apache::thrift;
 using namespace thrift::benchmark;
 using namespace apache::thrift::test::utils;
+namespace experimental = apache::thrift::protocol::experimental;
 
 constexpr std::size_t QUEUE_ALLOC_SIZE = 16 * 1024 * 1024;
 
 FBTHRIFT_GEN_SERDE()
 
-#define BENCH_OP(PROT_NAME, OP, WRITER, READER, T)      \
-  BENCHMARK(PROT_NAME##_protocol_##T##_##OP) {          \
-    OP<WRITER, READER>(get_serde<T, WRITER, READER>()); \
+#define BENCH_OP(PROT_NAME, OP, WRITER, READER, T)               \
+  BENCHMARK(PROT_NAME##_protocol_##T##_##OP) {                   \
+    OP<WRITER, READER>(get_serde<T, WRITER, READER>());          \
+  }                                                              \
+  BENCHMARK_RELATIVE(PROT_NAME##_native_##T##_##OP) {            \
+    OP##_native<WRITER, READER>(get_serde<T, WRITER, READER>()); \
   }
 
 FBTHRIFT_GEN_PROTOCOL_BENCHMARKS(BENCH_OP)

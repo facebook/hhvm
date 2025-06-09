@@ -45,9 +45,7 @@ constexpr auto PROTOCOL_OPTIONS = {
     FBTHRIFT_FOR_EACH_UNIQUE_PROTOCOL(FBTHRIFT_DEFINE_STR) "Unknown"};
 
 constexpr auto IMPLEMENTATION_OPTIONS = {
-    "Protocol",
-    "protocol",
-};
+    "Protocol", "protocol", "Native", "native"};
 
 std::string join_options_as_csv(const auto& list) {
   return folly::join(", ", list);
@@ -70,7 +68,6 @@ void call(F&& f) {
   const TestingObject& input = get_serde<T, ProtocolWriter, ProtocolReader>();
   while (true) {
     f(input);
-    get_queue().clearAndTryReuseLargestBuffer();
   }
 }
 
@@ -112,13 +109,18 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-#define FBTHRIFT_REGISTER_OP(PROT_NAME, OP, WRITER, READER, T)   \
-  if (op == #OP && protocol == #PROT_NAME && type == #T) {       \
-    if (impl == "protocol" || impl == "Protocol") {              \
-      call<T, WRITER, READER>(                                   \
-          [](const auto& input) { OP<WRITER, READER>(input); }); \
-      return 0;                                                  \
-    }                                                            \
+#define FBTHRIFT_REGISTER_OP(PROT_NAME, OP, WRITER, READER, T)            \
+  if (op == #OP && protocol == #PROT_NAME && type == #T) {                \
+    if (impl == "protocol" || impl == "Protocol") {                       \
+      call<T, WRITER, READER>(                                            \
+          [](const auto& input) { OP<WRITER, READER>(input); });          \
+      return 0;                                                           \
+    }                                                                     \
+    if (impl == "native" || impl == "Native") {                           \
+      call<T, WRITER, READER>(                                            \
+          [](const auto& input) { OP##_native<WRITER, READER>(input); }); \
+      return 0;                                                           \
+    }                                                                     \
   }
 
   FBTHRIFT_GEN_PROTOCOL_BENCHMARKS(FBTHRIFT_REGISTER_OP)

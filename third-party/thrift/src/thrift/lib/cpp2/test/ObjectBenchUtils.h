@@ -21,10 +21,15 @@
 #include <folly/Benchmark.h>
 #include <folly/BenchmarkUtil.h>
 
+#include <thrift/lib/cpp2/protocol/NativeObject.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/test/Structs.h>
 
 namespace apache::thrift::test::utils {
+
+namespace experimental = ::apache::thrift::protocol::experimental;
+
+using NativeObject = ::apache::thrift::protocol::experimental::NativeObject;
 
 template <typename ProtocolWriter, typename T>
 std::unique_ptr<folly::IOBuf> serialize(T& s) {
@@ -40,6 +45,7 @@ std::unique_ptr<folly::IOBuf> serialize(T& s) {
 struct TestingObject {
   std::unique_ptr<folly::IOBuf> buf;
   protocol::Object obj;
+  experimental::NativeObject native_obj;
 
   template <typename T, typename ProtocolWriter, typename ProtocolReader>
   static TestingObject make() {
@@ -47,12 +53,19 @@ struct TestingObject {
     T value = create<T>();
     std::unique_ptr<folly::IOBuf> buf = serialize<ProtocolWriter>(value);
     protocol::Object obj = protocol::parseObject<ProtocolReader>(*buf);
-    return TestingObject{std::move(buf), std::move(obj)};
+    experimental::NativeObject native_obj =
+        experimental::parseObject<ProtocolReader>(*buf);
+    return TestingObject{std::move(buf), std::move(obj), std::move(native_obj)};
   }
 
  private:
-  TestingObject(std::unique_ptr<folly::IOBuf>&& buf, protocol::Object&& obj)
-      : buf{std::move(buf)}, obj{std::move(obj)} {}
+  TestingObject(
+      std::unique_ptr<folly::IOBuf>&& buf,
+      protocol::Object&& obj,
+      NativeObject&& native_obj)
+      : buf{std::move(buf)},
+        obj{std::move(obj)},
+        native_obj{std::move(native_obj)} {}
 };
 
 // Constructs a serialized buffer for the given type encoded with a given
@@ -78,6 +91,15 @@ std::size_t read_all(
         m);
 std::size_t read_all(const ::apache::thrift::protocol::Object& obj);
 std::size_t read_all(const ::apache::thrift::protocol::detail::Value& val);
+
+std::size_t read_all(const experimental::Bytes& s);
+std::size_t read_all(const std::monostate&);
+std::size_t read_all(const NativeObject& obj);
+std::size_t read_all(const experimental::NativeList& l);
+std::size_t read_all(const experimental::NativeMap& m);
+std::size_t read_all(const experimental::NativeSet& s);
+std::size_t read_all(const experimental::NativeObject& s);
+std::size_t read_all(const experimental::ValueHolder& s);
 
 // ----- Benchmark operations ----- //
 
@@ -118,6 +140,42 @@ template <typename ProtocolWriter, typename ProtocolReader>
 inline void read_all(const TestingObject& input) {
   const auto val = read_all(input.obj);
   folly::doNotOptimizeAway(val);
+}
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void decode_native(const TestingObject& input) {
+  auto obj = experimental::parseObject<ProtocolReader>(*input.buf);
+  folly::doNotOptimizeAway(obj);
+  BENCHMARK_SUSPEND {
+    std::destroy_at(&obj);
+  }
+}
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void read_all_native(const TestingObject& input) {
+  const auto res = read_all(input.native_obj);
+  folly::doNotOptimizeAway(res);
+}
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void encode_native(const TestingObject& input) {
+  auto& queue = get_queue();
+  experimental::serializeObject<ProtocolWriter>(input.native_obj, queue);
+  BENCHMARK_SUSPEND {
+    queue.clearAndTryReuseLargestBuffer();
+  }
+}
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void roundtrip_native(const TestingObject& input) {
+  auto& queue = get_queue();
+  auto obj = protocol::parseObject<ProtocolReader>(*input.buf);
+  folly::doNotOptimizeAway(obj);
+  experimental::serializeObject<ProtocolWriter>(input.native_obj, queue);
+  BENCHMARK_SUSPEND {
+    queue.clearAndTryReuseLargestBuffer();
+  }
+  // Include Object dtor in timing
 }
 
 } // namespace apache::thrift::test::utils

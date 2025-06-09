@@ -97,8 +97,6 @@ inline constexpr auto kCppMinimizePaddingUri =
 inline constexpr auto kCppPackIssetUri =
     "facebook.com/thrift/annotation/cpp/PackIsset";
 inline constexpr auto kCppRefUri = "facebook.com/thrift/annotation/cpp/Ref";
-inline constexpr auto kCppScopedEnumAsUnionTypeUri =
-    "facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType";
 inline constexpr auto kCppUseOpEncodeUri =
     "facebook.com/thrift/annotation/cpp/UseOpEncode";
 inline constexpr auto kCppFrozen2ExcludeUri =

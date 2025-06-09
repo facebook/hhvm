@@ -1424,8 +1424,6 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:has_field_with_runtime_annotation?",
              &cpp_mstch_struct::has_field_with_runtime_annotation},
             {"struct:any?", &cpp_mstch_struct::any},
-            {"struct:scoped_enum_as_union_type?",
-             &cpp_mstch_struct::scoped_enum_as_union_type},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
             {"struct:use_op_encode?", &cpp_mstch_struct::use_op_encode},
@@ -1732,11 +1730,6 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node has_field_with_runtime_annotation() {
     const auto& fields = struct_->fields();
     return std::any_of(fields.begin(), fields.end(), has_runtime_annotation);
-  }
-
-  mstch::node scoped_enum_as_union_type() {
-    return struct_->has_structured_annotation(kCppScopedEnumAsUnionTypeUri) ||
-        has_option("fbthrift_internal_scoped_enum_as_union_type");
   }
 
   mstch::node extra_namespace() {

@@ -50,6 +50,22 @@ final class ThriftPolicyEnforcer
   ];
 
   <<__Override>>
+  protected static function getEnforceModulesForExecution(
+  ): vec<?classname<PolicyEnforcerModule>> {
+    if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
+      return vec[
+        static::TAE_MODULE,
+        static::POLICY_ZONE_MODULE,
+      ];
+    }
+    return vec[
+      static::TAE_MODULE,
+      static::POLICY_ZONE_MODULE,
+      static::PRIVACY_PROBES_MODULE,
+    ];
+  }
+
+  <<__Override>>
   public static function getNotConfigured(
     ?string $asset_type = null,
   )[leak_safe]: privacy_enforcer_ApiEnforcementConfig::TShape {

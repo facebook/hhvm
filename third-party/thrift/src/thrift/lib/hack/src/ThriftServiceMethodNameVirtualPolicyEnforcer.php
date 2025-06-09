@@ -72,12 +72,24 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     PolicyEnforcerContext $context,
   )[zoned_local]: Awaitable<TPolicyEnforcerResult> {
     // This may throw exceptions
-    return await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
+    $result = await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
       $asset_type,
       $policy_enforcer_api,
       $caller,
       $context,
     );
+
+    // Pending Probes PrivacyLib post-rpc Integration
+    if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
+      await self::genExecuteStandaloneProbes(
+        $asset_type,
+        $policy_enforcer_api,
+        $caller,
+        $context,
+      );
+    }
+
+    return $result;
   }
 
   public static async function genProcessResponse(
@@ -87,10 +99,39 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     PolicyEnforcerContext $context,
   ): Awaitable<void> {
     // Pending Probes PrivacyLib post-read Integration
-    await ThriftPolicyEnforcer::genProcessResponse(
-      $asset_type,
-      $policy_enforcer_api,
-      $caller,
+    if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
+      await self::genExecuteStandaloneProbes(
+        $asset_type,
+        $policy_enforcer_api,
+        $caller,
+        $context,
+      );
+    } else {
+      await ThriftPolicyEnforcer::genProcessResponse(
+        $asset_type,
+        $policy_enforcer_api,
+        $caller,
+        $context,
+      );
+    }
+  }
+
+  private static async function genExecuteStandaloneProbes(
+    string $asset_type,
+    string $policy_enforcer_api,
+    PolicyEnforcerCallerIdentity $caller,
+    PolicyEnforcerContext $context,
+  )[zoned_local]: Awaitable<void> {
+    await PrivacyProbesThriftModule::genExecuteStandaloneProbes(
+      shape(
+        'asset_class' => static::ASSET_CLASS,
+        'asset_type_config' => shape(
+          'asset_type' => $asset_type,
+          'config' => null, // does not matter for probes
+        ),
+        'api' => $policy_enforcer_api, // does not matter for probes
+        'caller' => $caller, // does not matter for probes
+      ),
       $context,
     );
   }

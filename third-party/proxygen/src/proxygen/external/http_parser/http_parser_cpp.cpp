@@ -444,7 +444,14 @@ enum http_host_state
 
 #define start_state (parser->type == HTTP_REQUEST ? s_pre_start_req : s_pre_start_res)
 
-#define STRICT_CHECK(cond)
+#define NOOP_CHECK(cond)
+#define STRICT_CHECK(cond)                                          \
+do {                                                                 \
+  if (cond) {                                                        \
+    SET_ERRNO(HPE_STRICT);                                           \
+    goto error;                                                      \
+  }                                                                  \
+} while (0)
 #define NEW_MESSAGE() start_state
 
 /* Map errno values to strings for human-readable output */
@@ -785,22 +792,22 @@ size_t http_parser_execute_options (http_parser *parser,
       }
 
       case s_res_H:
-        STRICT_CHECK(ch != 'T');
+        NOOP_CHECK(ch != 'T');
         state = s_res_HT;
         break;
 
       case s_res_HT:
-        STRICT_CHECK(ch != 'T');
+        NOOP_CHECK(ch != 'T');
         state = s_res_HTT;
         break;
 
       case s_res_HTT:
-        STRICT_CHECK(ch != 'P');
+        NOOP_CHECK(ch != 'P');
         state = s_res_HTTP;
         break;
 
       case s_res_HTTP:
-        STRICT_CHECK(ch != '/');
+        NOOP_CHECK(ch != '/');
         state = s_res_first_http_major;
         break;
 
@@ -936,7 +943,7 @@ size_t http_parser_execute_options (http_parser *parser,
         break;
 
       case s_res_line_almost_done:
-        STRICT_CHECK(ch != LF);
+        NOOP_CHECK(ch != LF);
         state = s_header_field_start;
         break;
 
@@ -1084,12 +1091,12 @@ size_t http_parser_execute_options (http_parser *parser,
       }
 
       case s_req_schema_slash:
-        STRICT_CHECK(ch != '/');
+        NOOP_CHECK(ch != '/');
         state = s_req_schema_slash_slash;
         break;
 
       case s_req_schema_slash_slash:
-        STRICT_CHECK(ch != '/');
+        NOOP_CHECK(ch != '/');
         state = s_req_host_start;
         break;
 
@@ -1361,22 +1368,22 @@ size_t http_parser_execute_options (http_parser *parser,
         break;
 
       case s_req_http_H:
-        STRICT_CHECK(ch != 'T');
+        NOOP_CHECK(ch != 'T');
         state = s_req_http_HT;
         break;
 
       case s_req_http_HT:
-        STRICT_CHECK(ch != 'T');
+        NOOP_CHECK(ch != 'T');
         state = s_req_http_HTT;
         break;
 
       case s_req_http_HTT:
-        STRICT_CHECK(ch != 'P');
+        NOOP_CHECK(ch != 'P');
         state = s_req_http_HTTP;
         break;
 
       case s_req_http_HTTP:
-        STRICT_CHECK(ch != '/');
+        NOOP_CHECK(ch != '/');
         state = s_req_first_http_major;
         break;
 
@@ -1655,7 +1662,7 @@ size_t http_parser_execute_options (http_parser *parser,
         }
 
         if (ch == CR) {
-          STRICT_CHECK(parser->quote != 0);
+          NOOP_CHECK(parser->quote != 0);
           parser->header_state = h_general;
           state = s_header_almost_done;
           CALLBACK_DATA(header_value);
@@ -1663,7 +1670,7 @@ size_t http_parser_execute_options (http_parser *parser,
         }
 
         if (ch == LF) {
-          STRICT_CHECK(parser->quote != 0);
+          NOOP_CHECK(parser->quote != 0);
           state = s_header_field_start;
           CALLBACK_DATA(header_value);
           break;
@@ -1864,7 +1871,7 @@ size_t http_parser_execute_options (http_parser *parser,
 
       case s_headers_almost_done:
       {
-        STRICT_CHECK(ch != LF);
+        NOOP_CHECK(ch != LF);
 
         if (ch != LF) {
           SET_ERRNO(HPE_STRICT);
@@ -1916,7 +1923,7 @@ size_t http_parser_execute_options (http_parser *parser,
 
       case s_headers_done:
       {
-        STRICT_CHECK(ch != LF);
+        NOOP_CHECK(ch != LF);
 
         // we're done parsing headers, reset overflow counters
         parser->nread = 0;
@@ -2116,14 +2123,14 @@ size_t http_parser_execute_options (http_parser *parser,
       case s_chunk_data_almost_done:
         assert(parser->flags & F_CHUNKED);
         assert(parser->content_length == 0);
-        STRICT_CHECK(ch != CR);
+        NOOP_CHECK(ch != CR);
         state = s_chunk_data_done;
         CALLBACK_DATA(body);
         break;
 
       case s_chunk_data_done:
         assert(parser->flags & F_CHUNKED);
-        STRICT_CHECK(ch != LF);
+        NOOP_CHECK(ch != LF);
         state = s_chunk_size_start;
         parser->nread = 0;
         data_or_header_data_start = p;

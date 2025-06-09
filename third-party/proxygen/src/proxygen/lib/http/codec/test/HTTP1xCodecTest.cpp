@@ -635,6 +635,41 @@ TEST(HTTP1xCodecTest, TestBadTransferEncodingHeader) {
   EXPECT_EQ(callbacks.lastParseError->getHttpStatusCode(), 400);
 }
 
+TEST(HTTP1xCodecTest, TestMalformedChunkDelimiter) {
+  HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
+  MockHTTPCodecCallback callbacks;
+  codec.setCallback(&callbacks);
+
+  auto buf = folly::IOBuf::copyBuffer(
+      "GET /hello HTTP/1.1\r\n"
+      "Host: localhost:8080\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "47;"
+      "\rX" // after a carriage return, "X" isn't a line feed character
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      "AA\r\n"
+      "0\r\n"
+      "\r\n"
+      "GET /admin HTTP/1.1\r\n"
+      "Host: localhost\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "0\r\n"
+      "\r\n");
+
+  EXPECT_CALL(callbacks, onMessageBegin(1, _));
+  EXPECT_CALL(callbacks, onHeadersComplete(1, _));
+  EXPECT_CALL(callbacks, onError(1, _, _))
+      .WillOnce(Invoke(
+          [&](HTTPCodec::StreamID, std::shared_ptr<HTTPException> error, bool) {
+            EXPECT_EQ(error->getHttpStatusCode(), 400);
+            EXPECT_EQ(error->getProxygenError(), kErrorUnknown);
+          }));
+
+  codec.onIngress(*buf);
+}
+
 TEST(HTTP1xCodecTest, Test1xxConnectionHeader) {
   HTTP1xCodec upstream(TransportDirection::UPSTREAM);
   HTTP1xCodec downstream(TransportDirection::DOWNSTREAM);

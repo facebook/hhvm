@@ -615,6 +615,7 @@ class NativeSet {
   const Kind& inner() const;
   std::size_t size() const noexcept;
   bool empty() const noexcept;
+  bool contains(const NativeValue& value) const noexcept;
 
   template <typename... Fs>
   decltype(auto) visit(Fs&&... fs) {

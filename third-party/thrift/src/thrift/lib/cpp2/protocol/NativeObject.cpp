@@ -173,6 +173,27 @@ bool NativeSet::empty() const noexcept {
       [](const std::monostate&) -> bool { return true; },
       [](const auto& set) { return set.empty(); });
 }
+bool NativeSet::contains(const NativeValue& value) const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> bool { return false; },
+      [&](const SetOf<ValueHolder>& set) { return set.contains(value); },
+      [&](const SetOf<NativeObject>& set) {
+        if (const NativeObject* val_ptr = value.if_type<NativeObject>()) {
+          return set.contains(*val_ptr);
+        } else {
+          return false;
+        }
+      },
+      [&](const auto& set) {
+        using SetElemTy = typename std::remove_cvref_t<decltype(set)>::key_type;
+        if (auto* val_ptr = value.if_type<SetElemTy>()) {
+          return set.contains(*val_ptr);
+        } else {
+          return false;
+        }
+      });
+}
 bool NativeSet::operator==(const NativeSet& other) const {
   return kind_ == other.kind_;
 }

@@ -878,3 +878,36 @@ TEST(NativeObjectAsValueStructTest, set_of_bytes) {
   }
   ASSERT_EQ(val.as_set().as_set_of_bytes(), set_of_bytes);
 }
+
+// ---- NativeSet utilities ---- //
+
+TEST(NativeSetTest, contains) {
+  NativeSet set{experimental::SetOf<std::int32_t>{1, 2, 3}};
+
+  // Visitor
+  set.visit(
+      [](experimental::SetOf<std::int32_t>& set) {
+        ASSERT_TRUE(set.contains(1));
+        ASSERT_TRUE(set.contains(2));
+        ASSERT_TRUE(set.contains(3));
+        ASSERT_FALSE(set.contains(4));
+      },
+      [](auto&&) { FAIL() << "Unexpected set type"; });
+
+  // As
+  {
+    const auto& setI32 = set.as_set_of_i32();
+    ASSERT_TRUE(setI32.contains(1));
+    ASSERT_TRUE(setI32.contains(2));
+    ASSERT_TRUE(setI32.contains(3));
+    ASSERT_FALSE(setI32.contains(4));
+  }
+
+  // By NativeValue
+  ASSERT_TRUE(set.contains(NativeValue{static_cast<std::int32_t>(1)}));
+  ASSERT_TRUE(set.contains(NativeValue{static_cast<std::int32_t>(2)}));
+  ASSERT_TRUE(set.contains(NativeValue{static_cast<std::int32_t>(3)}));
+  ASSERT_FALSE(set.contains(NativeValue{static_cast<std::int32_t>(4)}));
+  ASSERT_FALSE(set.contains(NativeValue{static_cast<std::int64_t>(1)}));
+  ASSERT_FALSE(set.contains(NativeValue{static_cast<double>(1.0)}));
+}

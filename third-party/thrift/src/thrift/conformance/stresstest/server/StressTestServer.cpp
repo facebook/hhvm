@@ -183,7 +183,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (FLAGS_enable_checksum) {
     LOG(INFO) << "Checksum support enabled";
     PayloadSerializer::initialize(
-        ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
+        ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>(
             ChecksumPayloadSerializerStrategyOptions{
                 .recordChecksumFailure =
                     [] { LOG(FATAL) << "Checksum failure detected"; },

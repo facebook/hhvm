@@ -56,7 +56,7 @@ folly::coro::Task<std::string> ThriftStressTestClient::co_echo(
         LOG(INFO) << "Initializing checksum payload serializer" << std::endl;
         rocket::PayloadSerializer::initialize(
             rocket::ChecksumPayloadSerializerStrategy<
-                rocket::LegacyPayloadSerializerStrategy>(
+                rocket::DefaultPayloadSerializerStrategy>(
                 rocket::ChecksumPayloadSerializerStrategyOptions{
                     .recordChecksumFailure =
                         [] { LOG(FATAL) << "Checksum failure detected"; },
@@ -94,7 +94,7 @@ folly::coro::Task<std::string> ThriftStressTestClient::co_echoEb(
         LOG(INFO) << "Initializing checksum payload serializer" << std::endl;
         rocket::PayloadSerializer::initialize(
             rocket::ChecksumPayloadSerializerStrategy<
-                rocket::LegacyPayloadSerializerStrategy>(
+                rocket::DefaultPayloadSerializerStrategy>(
                 rocket::ChecksumPayloadSerializerStrategyOptions{
                     .recordChecksumFailure =
                         [] { LOG(FATAL) << "Checksum failure detected"; },

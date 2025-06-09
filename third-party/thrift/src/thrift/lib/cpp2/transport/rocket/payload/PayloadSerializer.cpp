@@ -28,7 +28,7 @@ PayloadSerializer::Ptr PayloadSerializer::PayloadSerializerHolder::get() {
   PayloadSerializer::Ptr ptr(serializer_);
   if (FOLLY_UNLIKELY(ptr == nullptr)) {
     auto* newSerializer =
-        new PayloadSerializer(LegacyPayloadSerializerStrategy());
+        new PayloadSerializer(DefaultPayloadSerializerStrategy());
 
     // Try to initialize the serializer
     if (!serializer_.compare_exchange_strong(

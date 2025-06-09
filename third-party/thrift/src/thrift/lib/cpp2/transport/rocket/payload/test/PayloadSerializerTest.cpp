@@ -16,8 +16,9 @@
 
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/transport/rocket/RequestPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/CustomCompressionPayloadSerializerStrategy.h>
-#include <thrift/lib/cpp2/transport/rocket/payload/LegacyPayloadSerializerStrategy.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/DefaultPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -33,13 +34,6 @@ void testPackAndUnpackWithCompactProtocol(PayloadSerializer& serializer) {
   serializer.unpack<RequestRpcMetadata>(other, payload.get(), false);
   EXPECT_EQ(other, metadata);
   EXPECT_EQ(other.protocol(), ProtocolId::COMPACT);
-}
-
-TEST(PayloadSerializerTest, TestPackWithLegacyStrategy) {
-  PayloadSerializer::reset();
-  PayloadSerializer::initialize(LegacyPayloadSerializerStrategy());
-  auto& serializer = *PayloadSerializer::getInstance().get();
-  testPackAndUnpackWithCompactProtocol(serializer);
 }
 
 TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy) {
@@ -136,15 +130,8 @@ TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
       std::make_unique<PayloadSerializer>(DefaultPayloadSerializerStrategy()),
       false);
   payloadSerializers.emplace_back(
-      std::make_unique<PayloadSerializer>(LegacyPayloadSerializerStrategy()),
-      false);
-  payloadSerializers.emplace_back(
       std::make_unique<PayloadSerializer>(ChecksumPayloadSerializerStrategy<
                                           DefaultPayloadSerializerStrategy>()),
-      false);
-  payloadSerializers.emplace_back(
-      std::make_unique<PayloadSerializer>(
-          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>()),
       false);
 
   CustomCompressionPayloadSerializerStrategyOptions options;

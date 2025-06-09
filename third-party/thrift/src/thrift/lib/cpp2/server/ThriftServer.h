@@ -90,6 +90,7 @@
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 #include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/RequestPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>

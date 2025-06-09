@@ -772,6 +772,12 @@ namespace detail {
 // - structs will be specialized as `Object`
 
 template <>
+struct native_value_type<std::monostate> {
+  using type = std::monostate;
+  using tag = ::apache::thrift::type::void_t;
+};
+
+template <>
 struct native_value_type<PrimitiveTypes::Bool> {
   using type = PrimitiveTypes::Bool;
   using tag = ::apache::thrift::type::bool_t;

@@ -40,9 +40,10 @@ void StaticContentCache::load() {
 
     if (StructuredLog::enabled() &&
         StructuredLog::coinflip(Cfg::Eval::StaticContentsLogRate)) {
-      TheFileCache->setLogger([](const std::string& path) {
+      TheFileCache->setLogger([](const std::string& path, bool read) {
         auto record = StructuredLogEntry{};
         record.setStr("file", path);
+        record.setInt("read", read);
         bool needsCppStack = true;
         if (!g_context.isNull()) {
           VMRegAnchor _;

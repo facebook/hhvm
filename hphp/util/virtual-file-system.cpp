@@ -312,6 +312,9 @@ Optional<VirtualFileSystem::Content> VirtualFileSystem::content(
   if (content == nullptr) {
     FTRACE(1, "Fetch content {} {} {}\n", path.c_str(), entry->location.offset,
            size);
+    if (m_logger) {
+      m_logger(path, true);
+    }
     auto arena = get_swappable_readonly_arena();
     content = static_cast<char*>(arena ? arena->allocate(size) : malloc(size));
     s_contentSize->addValue(size);
@@ -401,7 +404,7 @@ const VirtualFileSystem::Entry* VirtualFileSystem::get(const std::string& path) 
   }
 
   if (m_logger) {
-    m_logger(relPath);
+    m_logger(relPath, false);
   }
 
   auto insertRes = data.pathToEntryCache.insert(relPath, std::move(*entry));

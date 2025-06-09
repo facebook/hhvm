@@ -140,7 +140,7 @@ struct VirtualFileSystem {
 
   std::vector<std::string> listDirectory(const std::string& path) const;
 
-  void setLogger(std::function<void(const std::string&)>&& logger) {
+  void setLogger(std::function<void(const std::string&, bool)>&& logger) {
     m_logger = logger;
   }
 
@@ -152,7 +152,7 @@ struct VirtualFileSystem {
   struct Data;
   std::unique_ptr<Data> m_data;
   std::string m_root;
-  std::function<void(const std::string&)> m_logger;
+  std::function<void(const std::string&, bool)> m_logger;
 };
 
 }

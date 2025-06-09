@@ -147,7 +147,7 @@ This makes it valuable not only to the Thrift team but also to maintainers of co
 
 The *Thrift Object Model* is the most foundational specification in the Thrift ecosystem, but does not capture its entirety.
 There are several other specifications that are fundamental to Thrift, which build on top of the *Thrift Object Model*:
-* The [Interface Definition Language](../idl/index.md) (IDL) — governs the syntax and semantics of `.thrift` files.
+* The [Interface Definition Language](/idl/index.md) (IDL) — governs the syntax and semantics of `.thrift` files.
 * Various Serialization protocols (e.g. [Compact](https://github.com/apache/thrift/blob/master/doc/specs/thrift-compact-protocol.md) & [Binary](https://github.com/apache/thrift/blob/master/doc/specs/thrift-binary-protocol.md)).
 * The APIs of generated code in each supported target language.
 
@@ -262,7 +262,7 @@ When there is no ambiguity, the specification henceforth uses these terms interc
       * A descriptor of a [<KW>protocol</KW>](#serialization-protocols) `P` — describes how to obtain the <KW>value</KW> from the aforementioned <KW>cipher<sub>P</sub></KW>.
 
 :::info Primitive <KW>typeid names</KW>
-*Primitive types* shall henceforth be referred to by their [<KW>typeid names</KW>](#typeid-names) (which match the [Thrift IDL](../idl/index.md) where applicable):
+*Primitive types* shall henceforth be referred to by their [<KW>typeid names</KW>](#typeid-names) (which match the [Thrift IDL](/idl/index.md) where applicable):
 * **Boolean**: `bool`
 * **Fixed-width signed integers**: `byte`, `i16`, `i32`, `i64`
 * **Floating point numbers**: `float`, `double`
@@ -407,7 +407,7 @@ The main purpose of <KW>typeids</KW> is to associate <KW>types</KW> across two d
 The <KW>type identifier</KW> of any [<KW>user-defined type</KW>](#user-defined-types) is Uniform Resource Identifier (URI) that conforms to [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) and must be unique within a <KW>type system</KW>.
 
 * The <KW>path</KW> component of the URI must not be empty.
-* If the <KW>scheme</KW> component of the URI is absent, then `fbthrift` is [implied](../features/universal-name.md).
+* If the <KW>scheme</KW> component of the URI is absent, then `fbthrift` is [implied](/features/universal-name.md).
 
 An example of a <KW>Thrift URI</KW> is `meta.com/search/NewSearchRequest`.
 
@@ -1499,7 +1499,7 @@ In practice, <KW>protocols</KW> may or may not implement (partially or completel
 :::
 
 :::note **Implementation Detail** — <KW>protocol-IR</KW>
-Binary & Compact <KW>protocols</KW> expose an API in C++ called [<KW>Protocol Object</KW>](../fb/languages/cpp/protocol-object.md) to interact with its <KW>protocol-IR</KW>.
+Binary & Compact <KW>protocols</KW> expose an API in C++ called [<KW>Protocol Object</KW>](/fb/languages/cpp/protocol-object.md) to interact with its <KW>protocol-IR</KW>.
 
 Note that the <KW>protocol-IR</KW> does not necessarily represent a Thrift <KW>value</KW>.
 :::

@@ -289,21 +289,21 @@ struct ValueHelper<TT> {
   template <typename T>
   static NativeValue into(T&& value) {
     if constexpr (std::is_same_v<TT, type::bool_t>) {
-      return NativeValue(PrimitiveTypes::Bool{value});
+      return NativeValue(static_cast<PrimitiveTypes::Bool>(value));
     } else if constexpr (std::is_same_v<TT, type::byte_t>) {
-      return NativeValue(PrimitiveTypes::I8{value});
+      return NativeValue(static_cast<PrimitiveTypes::I8>(value));
     } else if constexpr (std::is_same_v<TT, type::i16_t>) {
-      return NativeValue(PrimitiveTypes::I16{value});
-    } else if constexpr (std::is_same_v<TT, type::i32_t>) {
-      return NativeValue(PrimitiveTypes::I32{value});
+      return NativeValue(static_cast<PrimitiveTypes::I16>(value));
+    } else if constexpr (
+        std::is_same_v<TT, type::i32_t> ||
+        type::base_type_v<TT> == type::BaseType::Enum) {
+      return NativeValue(static_cast<PrimitiveTypes::I32>(value));
     } else if constexpr (std::is_same_v<TT, type::i64_t>) {
-      return NativeValue(PrimitiveTypes::I64{value});
-    } else if constexpr (type::base_type_v<TT> == type::BaseType::Enum) {
-      return NativeValue(static_cast<int32_t>(value));
+      return NativeValue(static_cast<PrimitiveTypes::I64>(value));
     } else if constexpr (std::is_same_v<TT, type::float_t>) {
-      return NativeValue(PrimitiveTypes::Float{value});
+      return NativeValue(static_cast<PrimitiveTypes::Float>(value));
     } else if constexpr (std::is_same_v<TT, type::double_t>) {
-      return NativeValue(PrimitiveTypes::Double{value});
+      return NativeValue(static_cast<PrimitiveTypes::Double>(value));
     } else if constexpr (
         std::is_same_v<TT, type::string_t> ||
         std::is_same_v<TT, type::binary_t>) {

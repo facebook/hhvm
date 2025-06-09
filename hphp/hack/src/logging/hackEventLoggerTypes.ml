@@ -102,6 +102,8 @@ type rollout_flags = {
       (** POC: @ljw, hh_client should read errors from errors.bin *)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
+  hh_distc_fanout_aware_threshold: int;
+      (** POC: @fzn - fanout threshold where we trigger fanout-aware hh_distc *)
   rust_elab: bool;
       (** POC: @mjt, use unified-elaboration rather than hh naming/nast checks *)
   ide_load_naming_table_on_disk: bool;

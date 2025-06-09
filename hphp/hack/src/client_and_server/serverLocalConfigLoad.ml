@@ -981,6 +981,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_compressed_dep_graph = options.use_compressed_dep_graph;
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
+      hh_distc_fanout_aware_threshold = options.hh_distc_fanout_aware_threshold;
       rust_elab = options.rust_elab;
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
       ide_naming_table_update_threshold =

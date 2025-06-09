@@ -1077,17 +1077,13 @@ NativeValue asValueStruct(T&& value) {
 // make_list_of<NativeSet>(...) => ListOf<ValueHolder>
 template <typename T>
 NativeList make_list_of(T&& t) {
-  if constexpr (std::is_same_v<NativeValue, std::remove_cvref_t<T>>) {
-    return t.visit([](auto&& v) {
-      using V = std::remove_cvref_t<decltype(v)>;
-      if constexpr (std::is_same_v<V, std::monostate>) {
-        return NativeList{};
-      } else {
-        return make_list<V>(std::forward<V>(v));
-      }
-    });
+  using V = std::remove_cvref_t<T>;
+  if constexpr (std::is_same_v<V, NativeValue>) {
+    return t.visit(
+        [](std::monostate&) { return NativeList{}; },
+        [](const std::monostate&) { return NativeList{}; },
+        [](auto&& v) { return make_list_of(std::forward<decltype(v)>(v)); });
   } else {
-    using V = std::remove_cvref_t<T>;
     using ListTy = detail::list_t<V>;
     using ListElemTy = typename ListTy::value_type;
 
@@ -1103,7 +1099,9 @@ NativeList make_list_of(T&& t) {
         return NativeList{ListTy{std::forward<T>(t)}};
       }
     } else {
-      static_assert(false, "Unsupported specialization for make_list");
+      throw std::runtime_error(fmt::format(
+          "Unsupported specialization for make_list_of<{}>",
+          folly::pretty_name<V>()));
     }
   }
 }

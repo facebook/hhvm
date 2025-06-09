@@ -733,6 +733,13 @@ TEST(NativeObjectTest, make_list_of_of_maps) {
   ASSERT_TRUE(list.as_list_of_value()[0].is_map());
 }
 
+TEST(NativeObjectTest, make_list_of_native_value_i32) {
+  NativeValue nativeValue = NativeValue{I32{42}};
+  const auto list = experimental::make_list_of(nativeValue);
+  ASSERT_TRUE(list.is_list_of_i32());
+  ASSERT_EQ(list.as_list_of_i32()[0], 42);
+}
+
 // ---- asValueStruct testcases ---- //
 
 TEST(NativeObjectAsValueStructTest, bool) {

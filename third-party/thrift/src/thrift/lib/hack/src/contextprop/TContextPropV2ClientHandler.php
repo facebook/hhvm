@@ -72,8 +72,22 @@ final class TContextPropV2ClientHandler extends TClientEventHandler {
         );
       }
 
-      $v =
-        ThriftFrameworkMetadataUtils::encodeThriftFrameworkMetadata($tfm_copy);
+      if (
+        IsItFaster::shouldExperiment(
+          'optimize_thrift_metadata',
+          OncallShortName\dpa,
+        )
+      ) {
+        $v =
+          ThriftFrameworkMetadataUtils::encodeThriftFrameworkMetadataWithoutMemo(
+            $tfm_copy,
+          );
+      } else {
+        $v = ThriftFrameworkMetadataUtils::encodeThriftFrameworkMetadata(
+          $tfm_copy,
+        );
+      }
+
       $headers_transport->setWriteHeader(
         ThriftFrameworkMetadata_CONSTANTS::ThriftFrameworkMetadataHeaderKey,
         $v,

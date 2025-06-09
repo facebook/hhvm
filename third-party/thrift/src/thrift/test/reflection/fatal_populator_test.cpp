@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <iomanip>
 #include <folly/Memory.h>
 
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>

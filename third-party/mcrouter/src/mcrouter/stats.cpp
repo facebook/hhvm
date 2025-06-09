@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <filesystem>
 
 #include <limits>
 
@@ -168,6 +169,7 @@ struct proc_stat_data_t {
   double system_time_sec;
   unsigned long vsize;
   unsigned long rss;
+  unsigned long openfd;
 };
 
 double stats_aggregate_rate_value(
@@ -282,6 +284,16 @@ void init_stats(stat_t* stats) {
 #undef EXTERNAL_STAT
 }
 
+static unsigned long get_fd_count(pid_t pid) {
+  try {
+    std::string fd_path = "/proc/" + std::to_string(pid) + "/fd";
+    auto dir_iter = std::filesystem::directory_iterator(fd_path);
+    return std::distance(dir_iter, std::filesystem::end(dir_iter));
+  } catch (const std::exception& /* unused */) {
+    return 0;
+  }
+}
+
 // Returns 0 on success, -1 on failure.  In either case, all fields of
 // *data will be initialized to something.
 static int get_proc_stat(pid_t pid, proc_stat_data_t* data) {
@@ -291,6 +303,7 @@ static int get_proc_stat(pid_t pid, proc_stat_data_t* data) {
   data->system_time_sec = 0.0;
   data->vsize = 0;
   data->rss = 0;
+  data->openfd = 0;
 
   char stat_path[32];
   snprintf(stat_path, sizeof(stat_path), "/proc/%d/stat", pid);
@@ -340,7 +353,7 @@ static int get_proc_stat(pid_t pid, proc_stat_data_t* data) {
 
   data->rss =
       rss_pages < 0 ? 0ul : (unsigned long)(rss_pages * sysconf(_SC_PAGESIZE));
-
+  data->openfd = get_fd_count(pid);
   return 0;
 }
 
@@ -594,6 +607,7 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
       ps_data.system_time_sec);
   stat_set(stats, router.statsApi(), ps_rss_stat, ps_data.rss);
   stat_set(stats, router.statsApi(), ps_vsize_stat, ps_data.vsize);
+  stat_set(stats, router.statsApi(), ps_openfd_stat, ps_data.openfd);
 
   stat_set(stats, router.statsApi(), fibers_allocated_stat, UINT64_C(0));
   stat_set(stats, router.statsApi(), fibers_pool_size_stat, UINT64_C(0));

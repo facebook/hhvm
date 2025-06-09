@@ -262,6 +262,11 @@ template <typename T>
 using native_value_type_t = typename detail::native_value_type<T>::type;
 
 template <typename T>
+constexpr bool is_numeric_v = ::apache::thrift::type::is_a_v<
+    typename native_value_type<T>::tag,
+    ::apache::thrift::type::number_c>;
+
+template <typename T>
 constexpr bool is_primitive_v = ::apache::thrift::type::is_a_v<
     typename native_value_type<T>::tag,
     ::apache::thrift::type::primitive_c>;

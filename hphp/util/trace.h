@@ -530,10 +530,10 @@ template<typename Val>
 class FormatValue<Val,
                    std::enable_if_t<
                      std::is_invocable_v<HPHP::invoke_toString, Val const> &&
-                     // This is here because MSVC decides that StringPiece matches
-                     // both this overload as well as the FormatValue overload for
-                     // string-y types in folly itself.
-                     !std::is_same<Val, StringPiece>::value
+                     // This is here because StringPiece and its subclasses
+                     // match both this overload as well as the FormatValue
+                     // overload for string-y types in folly itself.
+                     !std::is_convertible<Val, StringPiece>::value
                    >> {
  public:
   explicit FormatValue(const Val& val) : m_val(val) {}

@@ -1,0 +1,5 @@
+string(11) "123 on base"
+string(74) "Argument 1 passed to Child::foo() must be an instance of string, int given"
+string(79) "Argument 1 passed to Grandchild::foo() must be an instance of string, int given"
+string(12) "456 on child"
+string(17) "456 on grandchild"

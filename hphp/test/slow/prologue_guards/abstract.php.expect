@@ -1,0 +1,2 @@
+string(23) "123 on consistent child"
+string(86) "Argument 1 passed to InconsistentChild::foo() must be an instance of string, int given"

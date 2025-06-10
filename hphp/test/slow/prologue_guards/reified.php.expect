@@ -1,0 +1,8 @@
+string(4) "base"
+string(8) "override"
+string(17) "inconsistent base"
+string(5) "param"
+string(91) "Argument 1 passed to BaseWithReifiedGeneric::foo() must be an instance of string, int given"
+string(95) "Argument 1 passed to OverrideWithReifiedGeneric::foo() must be an instance of string, int given"
+string(103) "Argument 1 passed to InconsistentBaseWithReifiedGeneric::foo() must be an instance of string, int given"
+string(105) "Argument 1 passed to InconsistentOverrideNoReifiedGeneric::foo() must be an instance of string, int given"

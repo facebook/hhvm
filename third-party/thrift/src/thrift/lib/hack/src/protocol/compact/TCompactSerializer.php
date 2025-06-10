@@ -25,34 +25,15 @@
 <<Oncalls('thrift')>> // @oss-disable
 final class TCompactSerializer extends TProtocolWritePropsSerializer {
 
-  private static function useCompactStruct()[write_props]: bool {
-    return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
-      ()[defaults] ==> JustKnobs::eval('thrift/hack:compact_struct'),
-      'Need to gate the change',
-    );
-  }
-
   <<__Override>>
   public static function serialize(
     IThriftStruct $object,
     ?int $override_version = null,
     bool $disable_hphp_extension = false,
   )[write_props]: string {
-    $override_version ??= TCompactProtocolBase::VERSION;
-
-    if (self::useCompactStruct() && !$disable_hphp_extension) {
-      return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
-        ()[defaults] ==> thrift_protocol_write_compact_struct_to_string(
-          $object,
-          $override_version,
-        ),
-        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
-        'have a way to express this atm.',
-      );
-    }
-
     $transport = new TMemoryBuffer();
     $protocol = new TCompactProtocolAccelerated($transport);
+    $override_version ??= TCompactProtocolBase::VERSION;
 
     if ($override_version !== null) {
       $protocol->setWriteVersion($override_version);
@@ -117,18 +98,6 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
     bool $should_leave_extra = false,
     int $options = 0,
   )[write_props]: T {
-    if (self::useCompactStruct() && !$disable_hphp_extension) {
-      return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
-        ()[defaults] ==> thrift_protocol_read_compact_struct_from_string(
-          $str,
-          get_class($object),
-          $options,
-        ),
-        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
-        'have a way to express this atm.',
-      );
-    }
-
     $transport = new TMemoryBuffer();
     $protocol = (new TCompactProtocolAccelerated($transport))
       ->setOptions($options);

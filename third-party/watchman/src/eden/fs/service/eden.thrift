@@ -789,6 +789,7 @@ struct CheckoutConflict {
   1: PathString path;
   2: ConflictType type;
   3: string message;
+  4: Dtype dtype;
 }
 
 struct ScmBlobMetadata {

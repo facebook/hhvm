@@ -10564,6 +10564,8 @@ private:
       string_data_lt{}
     );
 
+    SStringSet copied;
+
     for (auto const name : sortedClsConstants) {
       auto& cnsIdx = cinfo.clsConstants.find(name)->second;
       if (cnsIdx.idx.cls->tsame(cls.name)) continue;
@@ -10609,13 +10611,25 @@ private:
       copy.cls = cls.name;
       copy.isAbstract = false;
       state.m_cnsFromTrait.erase(copy.name);
+      copied.emplace(copy.name);
 
       cnsIdx.idx.cls = cls.name;
       cnsIdx.idx.idx = cls.constants.size();
       cnsIdx.kind = copy.kind;
       cls.constants.emplace_back(std::move(copy));
     }
-
+    // If we've copied a constant into this class, remove it from
+    // the m_traitCns list, or we might try to import an identical
+    // copy again when we flatten traits.
+    if (!copied.empty()) {
+      state.m_traitCns.erase(
+        std::remove_if(
+          begin(state.m_traitCns), end(state.m_traitCns),
+          [&] (const php::Const& cns) { return copied.contains(cns.name); }
+        ),
+        end(state.m_traitCns)
+      );
+    }
     return true;
   }
 
@@ -11381,6 +11395,22 @@ private:
     }
     cinfo.traitProps.clear();
 
+    // Type and context constants are explicitly allowed to be overridden,
+    // see the logic in `add_constant`. We build a set of existing cns indexes
+    // here to check non-value constants against and override in the case
+    // of conflicts. Only populate this map if there may be conflicts to resolve.
+    SStringToOneT<size_t> existingCnsIndexes;
+    if (state.m_traitCns.size()) {
+      for (size_t i = 0, size = cls.constants.size(); i < size; ++i) {
+        auto const& cns = cls.constants[i];
+        if (!cns.val) {
+          // Only add non-value constants.
+          auto DEBUG_ONLY succeeded = existingCnsIndexes.emplace(cns.name, i).second;
+          assertx(succeeded);
+        }
+      }
+    }
+
     for (auto& c : state.m_traitCns) {
       ITRACE(4, "- const {}\n", c.name);
 
@@ -11391,8 +11421,22 @@ private:
       c.cls = cls.name;
       state.m_cnsFromTrait.erase(c.name);
       cnsIdx.idx.cls = cls.name;
-      cnsIdx.idx.idx = cls.constants.size();
-      cls.constants.emplace_back(std::move(c));
+      bool replacedExisting = false;
+      if (!c.val) {
+        auto it = existingCnsIndexes.find(c.name);
+        if (it != existingCnsIndexes.end()) {
+          size_t i = it->second;
+          auto const& DEBUG_ONLY existingCns = cls.constants[i];
+          assertx(existingCns.kind == c.kind);
+          replacedExisting = true;
+          cnsIdx.idx.idx = i;
+          cls.constants[i] = std::move(c);
+        }
+      }
+      if (!replacedExisting) {
+        cnsIdx.idx.idx = cls.constants.size();
+        cls.constants.emplace_back(std::move(c));
+      }
     }
     state.m_traitCns.clear();
 

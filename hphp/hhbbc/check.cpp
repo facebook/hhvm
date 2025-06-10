@@ -195,6 +195,14 @@ bool check(const php::Class& c, bool checkMeths) {
     }
   }
 
+  // All regular constants on the class should have unique names.
+  SStringSet constants;
+  for (auto const& cns : c.constants) {
+    always_assert_flog(constants.emplace(cns.name).second,
+                       "Non-unique constant {}::{}",
+                       c.name, cns.name);
+  }
+
   return true;
 }
 

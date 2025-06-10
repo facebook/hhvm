@@ -1,2 +1,4 @@
 ERROR: File "class_class_bad_syntax.php", line 16, characters 10-18:
 Dynamic class names are not allowed in compile-time `::class` fetch (Parsing[1002])
+ERROR: File "class_class_bad_syntax.php", line 16, characters 10-18:
+Using `::class` in this position will trigger an implicit runtime conversion to string, please use `nameof ` (Typing[4482])

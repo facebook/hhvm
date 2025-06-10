@@ -1,1 +1,2 @@
-No errors
+ERROR: File "classname.php", line 7, characters 9-18:
+Using `Foo::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Foo` (Typing[4482])

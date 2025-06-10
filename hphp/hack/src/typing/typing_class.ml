@@ -1189,7 +1189,7 @@ let class_const_def ~in_enum_class c cls env cc =
     (env, te, ty')
   in
   let check_class env e ty =
-    Typing_class_pointers.check_string_coercion_point env ~flag:"const" e ty
+    Typing_class_pointers.check_string_coercion_point env e ty
   in
   let ((env, ty_err_opt), kind, ty) =
     match k with

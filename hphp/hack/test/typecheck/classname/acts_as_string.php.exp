@@ -1,5 +1,17 @@
 File "acts_as_string.php", line 11, characters 3-13:
   class<Tr>
+ERROR: File "acts_as_string.php", line 17, characters 16-24:
+Using `Tr::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Tr` (Typing[4482])
+ERROR: File "acts_as_string.php", line 18, characters 16-23:
+Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
+ERROR: File "acts_as_string.php", line 19, characters 16-23:
+Using `I::class` in this position will trigger an implicit runtime conversion to string, please use `nameof I` (Typing[4482])
+ERROR: File "acts_as_string.php", line 20, characters 16-26:
+Using `Tdef::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Tdef` (Typing[4482])
+ERROR: File "acts_as_string.php", line 21, characters 16-27:
+Using `NTdef::class` in this position will trigger an implicit runtime conversion to string, please use `nameof NTdef` (Typing[4482])
+ERROR: File "acts_as_string.php", line 22, characters 10-17:
+Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
 ERROR: File "acts_as_string.php", line 30, characters 8-9:
 Invalid argument (Typing[4110])
   File "pseudofunctions.hhi", line 44, characters 29-33:

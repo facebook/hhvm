@@ -459,10 +459,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_typecheck_if_name_matches_regexp:
       (string_opt "typecheck_if_name_matches_regexp" config)
     ?log_levels:(prepare_log_levels config)
-    ?class_pointer_levels:
-      (Option.map
-         (Config_file.Getters.string_opt "class_pointer_levels" config)
-         ~f:convert_log_levels_to_map)
     ?tco_allowed_files_for_module_declarations:
       (string_list_opt "allowed_files_for_module_declarations" config)
     ?tco_allow_all_files_for_module_declarations:
@@ -509,6 +505,18 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?safe_abstract:(bool_opt "safe_abstract" config)
     ?needs_concrete:(bool_opt "needs_concrete" config)
     ?allow_class_string_cast:(bool_opt "allow_class_string_cast" config)
+    ?class_pointer_ban_classname_new:
+      (bool_opt "class_pointer_ban_classname_new" config)
+    ?class_pointer_ban_classname_type_structure:
+      (bool_opt "class_pointer_ban_classname_type_structure" config)
+    ?class_pointer_ban_classname_static_prop:
+      (bool_opt "class_pointer_ban_classname_static_prop" config)
+    ?class_pointer_ban_classname_static_meth:
+      (bool_opt "class_pointer_ban_classname_static_meth" config)
+    ?class_pointer_ban_classname_class_const:
+      (bool_opt "class_pointer_ban_classname_class_const" config)
+    ?class_pointer_ban_class_array_key:
+      (bool_opt "class_pointer_ban_class_array_key" config)
     options
 
 (** Load local config from the following sources:

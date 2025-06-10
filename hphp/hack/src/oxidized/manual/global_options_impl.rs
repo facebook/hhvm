@@ -57,7 +57,6 @@ impl Default for GlobalOptions {
             code_agnostic_fixme: false,
             allowed_fixme_codes_strict: i_set::ISet::new(),
             log_levels: s_map::SMap::new(),
-            class_pointer_levels: s_map::SMap::new(),
             tco_remote_old_decls_no_limit: false,
             tco_fetch_remote_old_decls: true,
             tco_populate_member_heaps: true,
@@ -151,6 +150,12 @@ impl Default for GlobalOptions {
             safe_abstract: false,
             needs_concrete: false,
             allow_class_string_cast: true,
+            class_pointer_ban_classname_new: false,
+            class_pointer_ban_classname_type_structure: false,
+            class_pointer_ban_classname_static_prop: false,
+            class_pointer_ban_classname_static_meth: false,
+            class_pointer_ban_classname_class_const: false,
+            class_pointer_ban_class_array_key: false,
         }
     }
 }

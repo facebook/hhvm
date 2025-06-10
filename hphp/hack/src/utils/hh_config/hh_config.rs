@@ -361,9 +361,6 @@ impl HhConfig {
             log_levels: hhconfig
                 .get_str("log_levels")
                 .map_or(Ok(default.log_levels), parse_json)?,
-            class_pointer_levels: hhconfig
-                .get_str("class_pointer_levels")
-                .map_or(Ok(default.class_pointer_levels), parse_json)?,
             tco_remote_old_decls_no_limit: default.tco_remote_old_decls_no_limit,
             tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
             tco_populate_member_heaps: default.tco_populate_member_heaps,
@@ -580,6 +577,30 @@ impl HhConfig {
             needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
+            class_pointer_ban_classname_new: hhconfig.get_bool_or(
+                "class_pointer_ban_classname_new",
+                default.class_pointer_ban_classname_new,
+            )?,
+            class_pointer_ban_classname_type_structure: hhconfig.get_bool_or(
+                "class_pointer_ban_classname_type_structure",
+                default.class_pointer_ban_classname_type_structure,
+            )?,
+            class_pointer_ban_classname_static_prop: hhconfig.get_bool_or(
+                "class_pointer_ban_classname_static_prop",
+                default.class_pointer_ban_classname_static_prop,
+            )?,
+            class_pointer_ban_classname_static_meth: hhconfig.get_bool_or(
+                "class_pointer_ban_classname_static_meth",
+                default.class_pointer_ban_classname_static_meth,
+            )?,
+            class_pointer_ban_classname_class_const: hhconfig.get_bool_or(
+                "class_pointer_ban_classname_class_const",
+                default.class_pointer_ban_classname_class_const,
+            )?,
+            class_pointer_ban_class_array_key: hhconfig.get_bool_or(
+                "class_pointer_ban_class_array_key",
+                default.class_pointer_ban_class_array_key,
+            )?,
         };
         let mut c = Self {
             opts,

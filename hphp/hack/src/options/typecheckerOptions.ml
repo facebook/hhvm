@@ -93,10 +93,6 @@ let disallow_invalid_arraykey t = t.GlobalOptions.tco_disallow_invalid_arraykey
 
 let log_levels t = t.GlobalOptions.log_levels
 
-let class_pointer_level t flag =
-  SMap.find_opt flag t.GlobalOptions.class_pointer_levels
-  |> Option.value ~default:0
-
 let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
@@ -340,3 +336,21 @@ let safe_abstract t = t.GlobalOptions.safe_abstract
 let needs_concrete t = t.GlobalOptions.needs_concrete
 
 let allow_class_string_cast t = t.GlobalOptions.allow_class_string_cast
+
+let class_pointer_ban_classname_new t =
+  t.GlobalOptions.class_pointer_ban_classname_new
+
+let class_pointer_ban_classname_type_structure t =
+  t.GlobalOptions.class_pointer_ban_classname_type_structure
+
+let class_pointer_ban_classname_static_prop t =
+  t.GlobalOptions.class_pointer_ban_classname_static_prop
+
+let class_pointer_ban_classname_static_meth t =
+  t.GlobalOptions.class_pointer_ban_classname_static_meth
+
+let class_pointer_ban_classname_class_const t =
+  t.GlobalOptions.class_pointer_ban_classname_class_const
+
+let class_pointer_ban_class_array_key t =
+  t.GlobalOptions.class_pointer_ban_class_array_key

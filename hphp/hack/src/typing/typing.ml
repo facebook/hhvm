@@ -4192,6 +4192,9 @@ end = struct
       class_const
         env
         p
+        ~require_class_ptr:
+          (TypecheckerOptions.class_pointer_ban_classname_class_const
+             env.genv.tcopt)
         ~is_attribute_param:ctxt.Context.is_attribute_param
         (cid, mid)
     | Class_get (((_, _, cid_) as cid), CGstring mid, Is_prop)
@@ -4221,7 +4224,15 @@ end = struct
       make_result env p (Aast.Class_get (te, Aast.CGstring mid, Is_prop)) ty
     (* Statically-known static property access e.g. Foo::$x *)
     | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
-      let (env, _tal, te, cty) = Class_id.class_expr env [] cid in
+      let (env, _tal, te, cty) =
+        Class_id.class_expr
+          ~require_class_ptr:
+            (TypecheckerOptions.class_pointer_ban_classname_static_prop
+               env.genv.tcopt)
+          env
+          []
+          cid
+      in
       let env = might_throw ~join_pos:p env in
       let (env, (ty, _tal)) =
         Class_get_expr.class_get
@@ -5029,9 +5040,20 @@ end = struct
         (MakeType.classname (Reason.witness p) [cty])
 
   and class_const
-      ?(is_attribute_param = false) ?(incl_tc = false) env p (cid, mid) =
+      ?(is_attribute_param = false)
+      ?(incl_tc = false)
+      ?(require_class_ptr = false)
+      env
+      p
+      (cid, mid) =
     let (env, _tal, ce, cty) =
-      Class_id.class_expr ~is_attribute_param ~is_const:true env [] cid
+      Class_id.class_expr
+        ~is_attribute_param
+        ~is_const:true
+        ~require_class_ptr
+        env
+        []
+        cid
     in
     let env =
       match get_node cty with
@@ -5765,7 +5787,15 @@ end = struct
      * and Shapes::idx
      *)
     let dispatch_class_const ?transform_fty env ((_, pos, e1_) as e1) m =
-      let (env, _tal, tcid, ty1) = Class_id.class_expr env [] e1 in
+      let (env, _tal, tcid, ty1) =
+        Class_id.class_expr
+          ~require_class_ptr:
+            (TypecheckerOptions.class_pointer_ban_classname_static_meth
+               env.genv.tcopt)
+          env
+          []
+          e1
+      in
       let this_ty = MakeType.this (Reason.witness fpos) in
       (* In static context, you can only call parent::foo() on static methods.
        * In instance context, you can call parent:foo() on static
@@ -6013,7 +6043,16 @@ end = struct
                 let ((_, p1, _) as e1_) = e1 in
                 ((), p1, CIexpr e1_)
             in
-            let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
+            let result =
+              class_const
+                ~incl_tc:true
+                ~require_class_ptr:
+                  (TypecheckerOptions.class_pointer_ban_classname_type_structure
+                     env.genv.tcopt)
+                env
+                p
+                (cid, (p, cst))
+            in
             let () =
               match result with
               | (_, (ty, _, _), _)
@@ -6893,11 +6932,7 @@ end = struct
               let ety = param.fp_type in
               let (env, ety) = Env.expand_type env ety in
               let () =
-                Typing_class_pointers.check_string_coercion_point
-                  env
-                  ~flag:"param"
-                  e
-                  ety
+                Typing_class_pointers.check_string_coercion_point env e ety
               in
               let (env, te, ty) =
                 (* Expected type has a like type for checking arguments
@@ -8364,11 +8399,7 @@ end = struct
       let return_type =
         Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type
       in
-      Typing_class_pointers.check_string_coercion_point
-        env
-        ~flag:"return"
-        e
-        return_type;
+      Typing_class_pointers.check_string_coercion_point env e return_type;
       let expected =
         Some
           (ExpectedTy.make_and_allow_coercion
@@ -10313,6 +10344,7 @@ and Class_id : sig
     ?is_attribute:bool ->
     ?is_catch:bool ->
     ?is_function_pointer:bool ->
+    ?require_class_ptr:bool ->
     env ->
     Nast.targ list ->
     Nast.class_id ->
@@ -10391,6 +10423,7 @@ end = struct
       ?(is_attribute = false)
       ?(is_catch = false)
       ?(is_function_pointer = false)
+      ?(require_class_ptr = false)
       (env : env)
       (tal : Nast.targ list)
       ((_, p, cid_) : Nast.class_id) :
@@ -10610,21 +10643,19 @@ end = struct
         | (_, Tnewtype (classname, [the_cls], as_ty))
           when String.equal classname SN.Classes.cClassname ->
           let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
-          let ((env, ty_err), (ty, err_res)) =
+          let ((env, ty_err), (cls_ty, err_res)) =
             resolve_class_pointer env wrap the_cls
           in
           let cls_name =
-            Typing_print.full_strip_ns ~hide_internals:true env ty
+            Typing_print.full_strip_ns ~hide_internals:true env cls_ty
           in
-          Typing_class_pointers.error_at_classname_type
-            env
-            (TypecheckerOptions.class_pointer_level
-               (Env.get_tcopt env)
-               "classname_class")
-            p
-            cls_name
-            (get_pos base_ty);
-          ((env, ty_err), (ty, err_res))
+          if require_class_ptr then
+            Typing_class_pointers.error_at_classname_type
+              env
+              p
+              cls_name
+              (get_pos ty);
+          ((env, ty_err), (cls_ty, err_res))
         | (_, Tclass_ptr the_cls) ->
           let wrap ty = mk (Reason.none, Tclass_ptr ty) in
           resolve_class_pointer env wrap the_cls
@@ -10746,6 +10777,8 @@ end = struct
         ~exact
         ~is_attribute
         ~is_catch
+        ~require_class_ptr:
+          (TypecheckerOptions.class_pointer_ban_classname_new env.genv.tcopt)
         env
         explicit_targs
         ((), p, cid)
@@ -11118,14 +11151,12 @@ end = struct
       | Ast_defs.Dot ->
         Typing_class_pointers.check_string_coercion_point
           env
-          ~flag:"concat"
           e1
           (MakeType.string Reason.none);
         (match e2 with
         | Either.First e2 ->
           Typing_class_pointers.check_string_coercion_point
             env
-            ~flag:"concat"
             e2
             (MakeType.string Reason.none)
         | Either.Second _ -> ())
@@ -11689,11 +11720,7 @@ end = struct
         Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         Option.iter
           ~f:(fun e ->
-            Typing_class_pointers.check_string_coercion_point
-              env
-              ~flag:"prop"
-              e
-              declared_ty)
+            Typing_class_pointers.check_string_coercion_point env e declared_ty)
           expr_for_string_check;
         let (env, inner_te) =
           Typing_helpers.make_simplify_typed_expr env pm declared_ty (Aast.Id m)

@@ -1,1 +1,4 @@
-No errors
+ERROR: File "fc_enum_classname.php", line 10, characters 9-18:
+Using `Foo::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Foo` (Typing[4482])
+ERROR: File "fc_enum_classname.php", line 11, characters 9-18:
+Using `Bar::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Bar` (Typing[4482])

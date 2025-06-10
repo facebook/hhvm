@@ -106,7 +106,6 @@ type t = {
   code_agnostic_fixme: bool;
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
-  class_pointer_levels: int SMap.t;
   tco_remote_old_decls_no_limit: bool;
   tco_fetch_remote_old_decls: bool;
   tco_populate_member_heaps: bool;
@@ -200,6 +199,12 @@ type t = {
   safe_abstract: bool;
   needs_concrete: bool;
   allow_class_string_cast: bool;
+  class_pointer_ban_classname_new: bool;
+  class_pointer_ban_classname_type_structure: bool;
+  class_pointer_ban_classname_static_prop: bool;
+  class_pointer_ban_classname_static_meth: bool;
+  class_pointer_ban_classname_class_const: bool;
+  class_pointer_ban_class_array_key: bool;
 }
 [@@deriving eq, show]
 
@@ -223,7 +228,6 @@ let default =
     code_agnostic_fixme = false;
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
-    class_pointer_levels = SMap.empty;
     tco_remote_old_decls_no_limit = false;
     tco_fetch_remote_old_decls = true;
     tco_populate_member_heaps = true;
@@ -318,6 +322,12 @@ let default =
     safe_abstract = false;
     needs_concrete = false;
     allow_class_string_cast = true;
+    class_pointer_ban_classname_new = false;
+    class_pointer_ban_classname_type_structure = false;
+    class_pointer_ban_classname_static_prop = false;
+    class_pointer_ban_classname_static_meth = false;
+    class_pointer_ban_classname_class_const = false;
+    class_pointer_ban_class_array_key = false;
   }
 
 let set
@@ -339,7 +349,6 @@ let set
     ?code_agnostic_fixme
     ?allowed_fixme_codes_strict
     ?log_levels
-    ?class_pointer_levels
     ?tco_remote_old_decls_no_limit
     ?tco_fetch_remote_old_decls
     ?tco_populate_member_heaps
@@ -433,6 +442,12 @@ let set
     ?safe_abstract
     ?needs_concrete
     ?allow_class_string_cast
+    ?class_pointer_ban_classname_new
+    ?class_pointer_ban_classname_type_structure
+    ?class_pointer_ban_classname_static_prop
+    ?class_pointer_ban_classname_static_meth
+    ?class_pointer_ban_classname_class_const
+    ?class_pointer_ban_class_array_key
     options =
   let setting setting option =
     match setting with
@@ -489,8 +504,6 @@ let set
         tco_disallow_invalid_arraykey
         options.tco_disallow_invalid_arraykey;
     log_levels = setting log_levels options.log_levels;
-    class_pointer_levels =
-      setting class_pointer_levels options.class_pointer_levels;
     tco_remote_old_decls_no_limit =
       setting
         tco_remote_old_decls_no_limit
@@ -742,6 +755,30 @@ let set
     needs_concrete = setting needs_concrete options.needs_concrete;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;
+    class_pointer_ban_classname_new =
+      setting
+        class_pointer_ban_classname_new
+        options.class_pointer_ban_classname_new;
+    class_pointer_ban_classname_type_structure =
+      setting
+        class_pointer_ban_classname_type_structure
+        options.class_pointer_ban_classname_type_structure;
+    class_pointer_ban_classname_static_prop =
+      setting
+        class_pointer_ban_classname_static_prop
+        options.class_pointer_ban_classname_static_prop;
+    class_pointer_ban_classname_static_meth =
+      setting
+        class_pointer_ban_classname_static_meth
+        options.class_pointer_ban_classname_static_meth;
+    class_pointer_ban_classname_class_const =
+      setting
+        class_pointer_ban_classname_class_const
+        options.class_pointer_ban_classname_class_const;
+    class_pointer_ban_class_array_key =
+      setting
+        class_pointer_ban_class_array_key
+        options.class_pointer_ban_class_array_key;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

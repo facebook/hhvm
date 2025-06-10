@@ -1,3 +1,5 @@
+ERROR: File "exact.php", line 5, characters 15-22:
+Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
 ERROR: File "exact.php", line 6, characters 3-14:
 Invalid index type for this keyset (Typing[4449])
   File "exact.php", line 5, characters 8-23:

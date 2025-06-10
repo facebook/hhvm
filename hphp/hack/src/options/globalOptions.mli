@@ -102,8 +102,6 @@ type t = {
   allowed_fixme_codes_strict: ISet.t;
       (** Error codes for which we allow HH_FIXMEs in strict mode *)
   log_levels: int SMap.t;  (** Initial hh_log_level settings *)
-  class_pointer_levels: int SMap.t;
-      (** Map of restriction levels for class pointer migration *)
   tco_remote_old_decls_no_limit: bool;
       (** Flag to fetch old decls from remote decl store *)
   tco_fetch_remote_old_decls: bool;
@@ -297,6 +295,18 @@ type t = {
   needs_concrete: bool;
       (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
+  class_pointer_ban_classname_new: bool;
+      (** Error on new $c() when $c: classname<T>  *)
+  class_pointer_ban_classname_type_structure: bool;
+      (** Error on type_structure($c, 'T') when $c: classname<T>  *)
+  class_pointer_ban_classname_static_prop: bool;
+      (** Error on $c::$foo when $c: classname<T>  *)
+  class_pointer_ban_classname_static_meth: bool;
+      (** Error on $c::foo() when $c: classname<T>  *)
+  class_pointer_ban_classname_class_const: bool;
+      (** Error on $c::FOO when $c: classname<T>  *)
+  class_pointer_ban_class_array_key: bool;
+      (** Error on dict[$c => 1] when $c: class<T>  *)
 }
 [@@deriving eq, show]
 
@@ -319,7 +329,6 @@ val set :
   ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->
-  ?class_pointer_levels:int SMap.t ->
   ?tco_remote_old_decls_no_limit:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_populate_member_heaps:bool ->
@@ -413,6 +422,12 @@ val set :
   ?safe_abstract:bool ->
   ?needs_concrete:bool ->
   ?allow_class_string_cast:bool ->
+  ?class_pointer_ban_classname_new:bool ->
+  ?class_pointer_ban_classname_type_structure:bool ->
+  ?class_pointer_ban_classname_static_prop:bool ->
+  ?class_pointer_ban_classname_static_meth:bool ->
+  ?class_pointer_ban_classname_class_const:bool ->
+  ?class_pointer_ban_class_array_key:bool ->
   t ->
   t
 

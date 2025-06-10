@@ -1,2 +1,7 @@
---config 'class_pointer_levels={"param": 2, "return": 2, "prop": 2, "concat": 2, "const": 2, "enum": 2, "arraykey": 3, "classname_class": 2}'
 --config 'allow_class_string_cast=false'
+--config 'class_pointer_ban_classname_new=true'
+--config 'class_pointer_ban_classname_type_structure=true'
+--config 'class_pointer_ban_classname_static_prop=true'
+--config 'class_pointer_ban_classname_static_meth=true'
+--config 'class_pointer_ban_classname_class_const=true'
+--config 'class_pointer_ban_class_array_key=true'

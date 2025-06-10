@@ -83,12 +83,12 @@ let trait_requires_class_that_overrides_method
     Lint_warning
     pos
     (Printf.sprintf
-       "Method %s in trait %s is overriden in class %s and trait %s has `require class %s`. This method is never used."
+       "Method %s in trait %s is overridden in class %s and trait %s has `require class %s`. This method is never used."
        (Utils.strip_ns method_name |> Markdown_lite.md_codify)
        (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
        (Utils.strip_ns class_name |> Markdown_lite.md_codify)
        (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
-       (Utils.strip_ns class_name |> Markdown_lite.md_codify))
+       (Utils.strip_ns class_name))
 
 let invalid_switch_case_value_type
     (case_value_p : Ast_defs.pos) case_value_ty scrutinee_ty =

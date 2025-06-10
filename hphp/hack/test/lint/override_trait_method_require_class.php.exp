@@ -1,8 +1,8 @@
 File "override_trait_method_require_class.php", line 12, characters 19-28:
-Method `overridden` in trait `T` is overriden in class `C` and trait `T` has `require class `C``. This method is never used. (Lint[5642])
+Method `overridden` in trait `T` is overridden in class `C` and trait `T` has `require class C`. This method is never used. (Lint[5642])
 File "override_trait_method_require_class.php", line 15, characters 19-31:
-Method `hasAttribute1` in trait `T` is overriden in class `C` and trait `T` has `require class `C``. This method is never used. (Lint[5642])
+Method `hasAttribute1` in trait `T` is overridden in class `C` and trait `T` has `require class C`. This method is never used. (Lint[5642])
 File "override_trait_method_require_class.php", line 17, characters 19-31:
-Method `hasAttribute2` in trait `T` is overriden in class `C` and trait `T` has `require class `C``. This method is never used. (Lint[5642])
+Method `hasAttribute2` in trait `T` is overridden in class `C` and trait `T` has `require class C`. This method is never used. (Lint[5642])
 File "override_trait_method_require_class.php", line 23, characters 19-37:
-Method `hasBuiltInAttribute` in trait `T` is overriden in class `C` and trait `T` has `require class `C``. This method is never used. (Lint[5642])
+Method `hasBuiltInAttribute` in trait `T` is overridden in class `C` and trait `T` has `require class C`. This method is never used. (Lint[5642])

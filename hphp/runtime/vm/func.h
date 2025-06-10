@@ -1537,7 +1537,7 @@ private:
   Func(const Func&) = default;  // used for clone()
   Func& operator=(const Func&) = delete;
   void init(int numParams);
-  void initPrologues(int numParams);
+  void initProloguesAndFuncEntry(int numParams);
   void setFullName(int numParams);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
   void setNamedFunc(const NamedFunc*);

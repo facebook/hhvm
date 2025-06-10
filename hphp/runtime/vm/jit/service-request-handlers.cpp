@@ -185,62 +185,6 @@ TranslationResult getTranslation(SrcKey sk) {
 
 }
 
-JitResumeAddr getFuncEntry(const Func* func) {
-  if (!RID().getJit()) {
-    return JitResumeAddr::helper(
-      tc::ustubs().resumeHelperNoTranslateFuncEntryFromInterp);
-  }
-
-  if (auto const addr = func->getFuncEntry()) {
-    return JitResumeAddr::transFuncEntry(addr);
-  }
-
-  auto const kind = tc::profileFunc(func) ?
-    TransKind::Profile : TransKind::Live;
-  if (mcgen::isAsyncJitEnabled(kind)) {
-    assertx(isLive(kind));
-    // JIT will be enqueued in handleResume
-    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
-  }
-
-  LeaseHolder writer(func, TransKind::Profile);
-  if (!writer) {
-    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
-  }
-
-  if (auto const addr = func->getFuncEntry()) {
-    return JitResumeAddr::transFuncEntry(addr);
-  }
-
-  auto const numParams = func->numNonVariadicParams();
-  if (func->numRequiredParams() != numParams) {
-    const_cast<Func*>(func)
-      ->setFuncEntry(tc::ustubs().resumeHelperFuncEntryFromTC);
-    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
-  }
-
-  SrcKey sk{func, numParams, SrcKey::FuncEntryTag{}};
-  auto const trans = getTranslation(sk);
-
-  if (auto const addr = trans.addr()) {
-    const_cast<Func*>(func)->setFuncEntry(addr);
-    return JitResumeAddr::transFuncEntry(addr);
-  }
-
-  if (trans.isProcessPersistentFailure()) {
-    const_cast<Func*>(func)
-      ->setFuncEntry(tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
-    // implies request persistent failure below
-  }
-
-  if (trans.isRequestPersistentFailure()) {
-    return JitResumeAddr::helper(
-      tc::ustubs().interpHelperNoTranslateFuncEntryFromInterp);
-  }
-
-  return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
-}
-
 namespace {
 
 TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
@@ -305,6 +249,15 @@ TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
 
   auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   return resume(sk, getTranslation(sk));
+}
+
+TCA handleTranslateMainFuncEntry() noexcept {
+    syncRegs(SBInvOffset{0});
+    FTRACE(1, "handleTranslateMainFuncEntry {}\n",
+           vmfp()->func()->fullName()->data());
+    auto const numArgs = liveFunc()->numNonVariadicParams();
+    auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+    return resume(sk, getTranslation(sk));
 }
 
 TranslationResult::Scope shouldEnqueueForRetranslate(

@@ -432,6 +432,13 @@ struct UniqueStubs {
    */
   TCA handleTranslate;
   TCA handleTranslateFuncEntry;
+  /*
+   * Same as `handleTranslateFuncEntry`, but serves as the entry stub for
+   * func entries, and assumes that the caller knows that it's calling the
+   * main func entry, i.e. that numArgs == numNonVariadicParams. Responsible
+   * for creating a translation and setting the funcEntry appropriately.
+   */
+   TCA handleTranslateMainFuncEntry;
 
   /*
    * Handle a request to retranslate the code at the given current location.

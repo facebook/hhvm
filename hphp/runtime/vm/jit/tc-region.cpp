@@ -778,6 +778,11 @@ void RegionTranslator::publishCodeImpl() {
         entry(), showShort(sk).c_str());
 
   srcRec->newTranslation(loc, tailBranches);
+  auto const func = sk.func();
+  auto const numParams = func->numNonVariadicParams();
+  if (sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}}) {
+    const_cast<Func*>(func)->setFuncEntry(entry());
+  }
 
   TRACE(1, "mcg: %u-byte translation (%u main, %u cold, %u frozen)\n",
         loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize(),
@@ -792,6 +797,12 @@ void RegionTranslator::setCachedForProcessFail() {
   auto const srcRec = srcDB().find(sk);
   always_assert(srcRec);
 
+  auto const func = sk.func();
+  auto const numParams = func->numNonVariadicParams();
+  if (sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}}) {
+    const_cast<Func*>(func)->setFuncEntry(
+      tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
+  }
   auto const stub = svcreq::emit_interp_no_translate_stub(spOff, sk);
   TRACE(1, "setCachedForProcessFail: stub: %p  sk: %s\n",
         stub, showShort(sk).c_str());

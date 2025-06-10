@@ -847,7 +847,19 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
 
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
   assertx(vmfp()->func()->contains(vmpc()));
-  jit::enterTC(jit::svcreq::getFuncEntry(enterFnAr->func()));
+  auto const& stubs = jit::tc::ustubs();
+  JitResumeAddr resumeAddr;
+  // We use `>=` instead of `==` as the caller may supply unpack args, in which case
+  // numArgsInclUnpack would be enterFnAr->func()->numNonVariadicParams() + 1, and calling
+  // into the main func entry is safe.
+  if (!RID().getJit()) {
+    resumeAddr = JitResumeAddr::helper(stubs.resumeHelperNoTranslateFuncEntryFromInterp);
+  } else if (numArgsInclUnpack >= enterFnAr->func()->numNonVariadicParams()) {
+    resumeAddr = JitResumeAddr::transFuncEntry(enterFnAr->func()->getFuncEntry());
+  } else {
+    resumeAddr = JitResumeAddr::helper(stubs.resumeHelperFuncEntryFromInterp);
+  }
+  jit::enterTC(resumeAddr);
 }
 
 void enterVMAtCurPC() {

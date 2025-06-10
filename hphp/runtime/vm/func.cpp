@@ -227,8 +227,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
     : const_cast<Func*>(this);
 
   f->m_cloned.flag.test_and_set();
-  f->initPrologues(numParams);
-  f->m_funcEntry = nullptr;
+  f->initProloguesAndFuncEntry(numParams);
   if (name) f->m_name = name;
   f->m_u.setCls(cls);
   f->setFullName(numParams);
@@ -273,10 +272,10 @@ void Func::init(int numParams) {
     m_attrs = m_attrs | AttrNoInjection;
   }
   assertx(m_name);
-  initPrologues(numParams);
+  initProloguesAndFuncEntry(numParams);
 }
 
-void Func::initPrologues(int numParams) {
+void Func::initProloguesAndFuncEntry(int numParams) {
   int numPrologues = numProloguesForNumParams(numParams);
 
   if (!jit::mcgen::initialized()) {
@@ -288,10 +287,11 @@ void Func::initPrologues(int numParams) {
 
   auto const& stubs = jit::tc::ustubs();
 
-  TRACE(4, "initPrologues func %p %d\n", this, numPrologues);
+  TRACE(4, "initProloguesAndFuncEntry func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
     m_prologueTable[i] = stubs.fcallHelperThunk;
   }
+  m_funcEntry = stubs.handleTranslateMainFuncEntry;
 }
 
 void Func::setFullName(int /*numParams*/) {
@@ -561,7 +561,7 @@ void Func::resetPrologue(int numParams) {
 }
 
 void Func::resetFuncEntry() {
-  m_funcEntry = nullptr;
+  m_funcEntry = jit::tc::ustubs().handleTranslateMainFuncEntry;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -746,6 +746,30 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler, co
   }, name);
 }
 
+TCA emitHandleServiceRequestMainFE(CodeBlock& cb, DataBlock& data,
+                                   const char* name) {
+    alignCacheLine(cb);
+    return vwrap(cb, data, [&] (Vout& v) {
+      pushFrameFromFuncEntryRegs(v);
+      storeVmfp(v);
+
+      auto const ret = v.makeReg();
+      v << vcall{
+        CallSpec::direct(svcreq::handleTranslateMainFuncEntry),
+        v.makeVcallArgs({{}}),
+        v.makeTuple({ret}),
+        Fixup::none(),
+        DestType::SSA
+      };
+
+      // We are going to jump either to a translation, or to a resume helper
+      // operating in a TC context. Both expect the callee frame in func entry
+      // regs, so move it there from the VM stack.
+      popFrameToFuncEntryRegs(v);
+      v << jmpr{ret, func_entry_regs(true /* withCtx */)};
+    }, name);
+}
+
 template<class Handler>
 TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
                                Handler handler, bool pushFrame,
@@ -789,6 +813,9 @@ TCA emitHandleRetranslate(CodeBlock& cb, DataBlock& data, const char* name) {
 TCA emitHandleRetranslateFE(CodeBlock& cb, DataBlock& data, const char* name) {
   return emitHandleServiceRequestFE(
     cb, data, svcreq::handleRetranslateFuncEntry, true, name);
+}
+TCA emitHandleTranslateMainFE(CodeBlock& cb, DataBlock& data, const char* name) {
+  return emitHandleServiceRequestMainFE(cb, data, name);
 }
 TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data, const char* name) {
   return emitHandleServiceRequestFE(
@@ -1387,6 +1414,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(handleTranslate, view, emitHandleTranslate, cold, data);
   ADD(handleTranslateFuncEntry, view, emitHandleTranslateFE, cold, data);
+  ADD(handleTranslateMainFuncEntry, view, emitHandleTranslateMainFE, cold, data);
   ADD(handleRetranslate, view, emitHandleRetranslate, cold, data);
   ADD(handleRetranslateFuncEntry, view, emitHandleRetranslateFE, cold, data);
   ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt, cold, data);

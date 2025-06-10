@@ -43,6 +43,11 @@ void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
  */
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept;
 TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept;
+/*
+ * Handle a request to translate the main func entry invoked dynamically.
+ * Translates assuming that `numNonVariadicParams' are passed.
+ */
+ TCA handleTranslateMainFuncEntry() noexcept;
 
 /*
  * Handle a request to retranslate the code at the given current location.
@@ -145,10 +150,5 @@ static_assert(sizeof(ResumeFlags) == 1, "ustubs pass m_asByte to handleResume");
  * until we find one, possibly throwing exceptions or reentering the VM.
  */
 JitResumeAddr handleResume(ResumeFlags flags);
-
-/*
- * Look up (or create) the translation for the body of func.
- */
-JitResumeAddr getFuncEntry(const Func* func);
 
 }}

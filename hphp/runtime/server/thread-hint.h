@@ -35,6 +35,7 @@ namespace HPHP {
 struct ThreadHint {
   enum class Priority {
     Idling = 0,
+    FirstFlush,
     Processing,
     PostProcessing
   };

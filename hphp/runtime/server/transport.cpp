@@ -30,6 +30,7 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/compression.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
@@ -814,6 +815,7 @@ void Transport::sendRawInternal(const char *data, int size,
   }
 
   // HTTP header handling
+  auto const firstFlush = !m_headerSent;
   if (!m_headerSent) {
     prepareHeaders(precompressed, chunked, response,
                    StringHolder(data, size, FreeType::NoFree));
@@ -824,6 +826,11 @@ void Transport::sendRawInternal(const char *data, int size,
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Writing);
   sendImpl(response.data(), response.size(), m_responseCode, chunked, false);
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Processing);
+
+  if (firstFlush) {
+    ThreadHint::getInstance().updateThreadHint(
+      ThreadHint::Priority::Processing);
+  }
 
   ServerStats::LogBytes(size);
   if (Cfg::Stats::Enable && Cfg::Stats::Web) {

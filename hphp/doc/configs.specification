@@ -293,6 +293,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   the thread hint map.
 
 - std::string Server.ScxThreadHintUdsPath = "", jtwarren
+- uint16_t Server.ScxThreadHintFirstFlush = 1024, jtwarren
 - uint16_t Server.ScxThreadHintIdle = 1024, jtwarren
 - uint16_t Server.ScxThreadHintProcessing = 1024, jtwarren
 - uint16_t Server.ScxThreadHintPostProcessing = 1024, jtwarren

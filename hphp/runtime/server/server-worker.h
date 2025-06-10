@@ -80,7 +80,7 @@ protected:
 
   virtual void doJobImpl(JobPtr job, bool abort) {
     ThreadHint::getInstance().updateThreadHint(
-      ThreadHint::Priority::Processing);
+      ThreadHint::Priority::FirstFlush);
     SCOPE_EXIT {
       ThreadHint::getInstance().updateThreadHint(
           ThreadHint::Priority::Idling);

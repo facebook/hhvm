@@ -117,6 +117,8 @@ static constexpr uint16_t getHint(ThreadHint::Priority priority) {
   switch (priority) {
   case ThreadHint::Priority::Idling:
     return Cfg::Server::ScxThreadHintIdle;
+  case ThreadHint::Priority::FirstFlush:
+    return Cfg::Server::ScxThreadHintFirstFlush;
   case ThreadHint::Priority::Processing:
     return Cfg::Server::ScxThreadHintProcessing;
   case ThreadHint::Priority::PostProcessing:
@@ -129,6 +131,8 @@ const char* priorityToString(ThreadHint::Priority priority) {
   switch (priority) {
     case ThreadHint::Priority::Idling:
       return "Idling";
+    case ThreadHint::Priority::FirstFlush:
+      return "FirstFlush";
     case ThreadHint::Priority::Processing:
       return "Processing";
     case ThreadHint::Priority::PostProcessing:

@@ -46,7 +46,10 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["heck it out\n","I am a *markdown* **cell** using the new non-hack cell form"]
+      "source":[
+        "# Check it out\n",
+        "I am a *markdown* **cell** using the new non-hack cell format"
+      ]
     }
   ],
   "metadata":{

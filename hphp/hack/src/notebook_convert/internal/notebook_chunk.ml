@@ -187,11 +187,16 @@ let metadata_of_comment (comment : string) :
 * We also handle the newer format of `/*@non_hack:\n` ... `\n*/`
 *)
 let strip_legacy_comment_wrapper (hack : string) : string =
-  let stripped = String.strip hack in
-  String.sub
-    stripped
-    ~pos:3 (* length of "\n/*" *)
-    ~len:(String.length stripped - 5 (* length of "\n/*" + length of "*/"  *))
+  let hack = String.strip hack in
+  let prefix = "/*\n" in
+  let suffix = "*/" in
+  if String.is_prefix ~prefix hack && String.is_suffix ~suffix hack then
+    String.sub
+      hack
+      ~pos:(String.length prefix)
+      ~len:(String.length hack - String.length prefix - String.length suffix)
+  else
+    hack
 
 let of_hack ~(comment : string) (hack : string) :
     (t, Notebook_convert_error.t) result =

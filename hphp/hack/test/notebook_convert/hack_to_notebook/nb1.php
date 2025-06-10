@@ -6,11 +6,19 @@
 /*
 # Check it out
 
-I am a *markdown* **cell**
+I am a *markdown* **cell** using the legacy non-hack cell format
 */
 //@bento-cell-end
 
-//@bento-cell:{"cell_bento_metadata":{"language":"python"},"cell_type":"code","id":4}
+//@bento-cell:{"id": 5, "cell_type": "markdown"}
+/*@non_hack:
+# Check it out
+
+I am a *markdown* **cell** using the new non-hack cell format
+*/
+//@bento-cell-end
+
+//@bento-cell:{"cell_bento_metadata":{"language":"python"},"cell_type":"code","id": 4}
 /*@non_hack:
 %%python
 

@@ -86,6 +86,10 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
+        '\facebook\thrift\annotation\ThrownException' => \facebook\thrift\annotation\ThrownException::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

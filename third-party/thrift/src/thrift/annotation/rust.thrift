@@ -28,6 +28,7 @@ namespace py thrift.annotation.rust
  * Override the Thrift identifier of the entity with the given name.
  */
 @scope.Definition
+@scope.ThrownException
 struct Name {
   1: string name;
 }

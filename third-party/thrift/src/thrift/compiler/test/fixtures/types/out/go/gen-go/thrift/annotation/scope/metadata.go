@@ -54,6 +54,13 @@ var (
                     Name: "scope.Exception",
                 },
         }
+    premadeThriftType_scope_ThrownException =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.ThrownException",
+                },
+        }
     premadeThriftType_scope_Field =
         &metadata.ThriftType{
             TStruct:
@@ -161,6 +168,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["scope.Struct"] = premadeThriftType_scope_Struct
     fbthriftThriftTypesMap["scope.Union"] = premadeThriftType_scope_Union
     fbthriftThriftTypesMap["scope.Exception"] = premadeThriftType_scope_Exception
+    fbthriftThriftTypesMap["scope.ThrownException"] = premadeThriftType_scope_ThrownException
     fbthriftThriftTypesMap["scope.Field"] = premadeThriftType_scope_Field
     fbthriftThriftTypesMap["scope.Typedef"] = premadeThriftType_scope_Typedef
     fbthriftThriftTypesMap["scope.Service"] = premadeThriftType_scope_Service
@@ -224,6 +232,16 @@ var structMetadatas = func() []*metadata.ThriftStruct {
         fbthriftResults = append(fbthriftResults,
             &metadata.ThriftStruct{
                 Name:    "scope.Exception",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.ThrownException",
                 IsUnion: false,
                 Fields:  []*metadata.ThriftField{
                 },

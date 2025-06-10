@@ -86,6 +86,9 @@ struct Union {}
 /** The `exception` definition scope. */
 struct Exception {}
 
+/** The RPC function `thrown exception` scope. */
+struct ThrownException {}
+
 /** Field declarations, for example in `struct` declaration. */
 struct Field {}
 

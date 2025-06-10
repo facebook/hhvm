@@ -60,6 +60,15 @@ var (
                 NewFunc:    func() thrift.Struct { return NewException() },
             },
     }
+    premadeCodecTypeSpec_scope_ThrownException = &thrift.TypeSpec{
+        FullName: "scope.ThrownException",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "scope.ThrownException",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewThrownException() },
+            },
+    }
     premadeCodecTypeSpec_scope_Field = &thrift.TypeSpec{
         FullName: "scope.Field",
         CodecStructSpec:
@@ -246,6 +255,19 @@ var (
         &thrift.StructSpec{
             Name:                 "Exception",
             ScopedName:           "scope.Exception",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_ThrownException =
+        &thrift.StructSpec{
+            Name:                 "ThrownException",
+            ScopedName:           "scope.ThrownException",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
@@ -446,6 +468,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Struct.FullName] = premadeCodecTypeSpec_scope_Struct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Union.FullName] = premadeCodecTypeSpec_scope_Union
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Exception.FullName] = premadeCodecTypeSpec_scope_Exception
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_ThrownException.FullName] = premadeCodecTypeSpec_scope_ThrownException
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Field.FullName] = premadeCodecTypeSpec_scope_Field
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Typedef.FullName] = premadeCodecTypeSpec_scope_Typedef
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Service.FullName] = premadeCodecTypeSpec_scope_Service

@@ -62,6 +62,8 @@ inline constexpr auto kScopeStructUri = "facebook.com/thrift/annotation/Struct";
 inline constexpr auto kScopeUnionUri = "facebook.com/thrift/annotation/Union";
 inline constexpr auto kScopeExceptionUri =
     "facebook.com/thrift/annotation/Exception";
+inline constexpr auto kScopeThrownExceptionUri =
+    "facebook.com/thrift/annotation/ThrownException";
 inline constexpr auto kScopeFieldUri = "facebook.com/thrift/annotation/Field";
 inline constexpr auto kScopeTypedefUri =
     "facebook.com/thrift/annotation/Typedef";

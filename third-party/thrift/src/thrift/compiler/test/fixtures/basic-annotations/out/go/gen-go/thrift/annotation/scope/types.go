@@ -377,6 +377,78 @@ func (x *Exception) setDefaults() *Exception {
     return x
 }
 
+type ThrownException struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*ThrownException)(nil)
+
+func NewThrownException() *ThrownException {
+    return (&ThrownException{}).setDefaults()
+}
+
+
+
+func (x *ThrownException) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("ThrownException"); err != nil {
+        return thrift.PrependError("ThrownException write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("ThrownException write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("ThrownException write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *ThrownException) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("ThrownException read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("ThrownException field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("ThrownException read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *ThrownException) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *ThrownException) setDefaults() *ThrownException {
+    return x
+}
+
 type Field struct {
 }
 // Compile time interface enforcer
@@ -1396,6 +1468,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/Struct", func() any { return NewStruct() })
     registry.RegisterType("facebook.com/thrift/annotation/Union", func() any { return NewUnion() })
     registry.RegisterType("facebook.com/thrift/annotation/Exception", func() any { return NewException() })
+    registry.RegisterType("facebook.com/thrift/annotation/ThrownException", func() any { return NewThrownException() })
     registry.RegisterType("facebook.com/thrift/annotation/Field", func() any { return NewField() })
     registry.RegisterType("facebook.com/thrift/annotation/Typedef", func() any { return NewTypedef() })
     registry.RegisterType("facebook.com/thrift/annotation/Service", func() any { return NewService() })

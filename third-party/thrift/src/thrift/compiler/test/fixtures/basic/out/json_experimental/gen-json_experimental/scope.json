@@ -52,67 +52,74 @@
         "is_union" : false,
         "lineno" : 87
       },
+      "ThrownException" : {
+        "name" : "ThrownException",
+        "docstring" : "The RPC function `thrown exception` scope.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 90
+      },
       "Field" : {
         "name" : "Field",
         "docstring" : "Field declarations, for example in `struct` declaration.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 90
+        "lineno" : 93
       },
       "Typedef" : {
         "name" : "Typedef",
         "docstring" : "The `typedef` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 93
+        "lineno" : 96
       },
       "Service" : {
         "name" : "Service",
         "docstring" : "The `service` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 96
+        "lineno" : 99
       },
       "Interaction" : {
         "name" : "Interaction",
         "docstring" : "The `interaction` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 99
+        "lineno" : 102
       },
       "Function" : {
         "name" : "Function",
         "docstring" : "The `function` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 102
+        "lineno" : 105
       },
       "FunctionParameter" : {
         "name" : "FunctionParameter",
         "docstring" : "The `function parameter` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 106
+        "lineno" : 109
       },
       "EnumValue" : {
         "name" : "EnumValue",
         "docstring" : "The Enum value definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 109
+        "lineno" : 112
       },
       "Const" : {
         "name" : "Const",
         "docstring" : "The `const` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 112
+        "lineno" : 115
       },
       "Enum" : {
         "name" : "Enum",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 117
+        "lineno" : 120
       },
       "Structured" : {
         "name" : "Structured",
@@ -149,7 +156,7 @@
         "docstring" : "A scope that includes all 'structured' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 121
+        "lineno" : 124
       },
       "Interface" : {
         "name" : "Interface",
@@ -179,7 +186,7 @@
         "docstring" : "A scope that includes all 'interface' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 128
+        "lineno" : 131
       },
       "RootDefinition" : {
         "name" : "RootDefinition",
@@ -230,7 +237,7 @@
         "docstring" : "A scope that includes all program-scoped definition.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 135
+        "lineno" : 138
       },
       "Definition" : {
         "name" : "Definition",
@@ -281,7 +288,7 @@
         "docstring" : "A scope that includes all definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 144
+        "lineno" : 147
       },
       "DisableSchemaConst" : {
         "name" : "DisableSchemaConst",
@@ -297,7 +304,7 @@
         "docstring" : "Not a scope, just here for dependency cycle reasons.\nDisables schema const injection for the program.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 156
+        "lineno" : 159
       }
   },
   "source_path" : "thrift/annotation/scope",

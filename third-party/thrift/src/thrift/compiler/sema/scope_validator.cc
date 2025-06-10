@@ -40,6 +40,7 @@ const std::unordered_set<std::string>& scope_annotation_uris_set() {
       kScopeStructUri,
       kScopeUnionUri,
       kScopeExceptionUri,
+      kScopeThrownExceptionUri,
       kScopeFieldUri,
       kScopeTypedefUri,
       kScopeServiceUri,

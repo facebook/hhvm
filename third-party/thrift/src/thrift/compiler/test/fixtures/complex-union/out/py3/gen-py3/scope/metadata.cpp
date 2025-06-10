@@ -18,6 +18,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Union>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Exception>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<ThrownException>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Field>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Typedef>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Service>::gen(metadata);

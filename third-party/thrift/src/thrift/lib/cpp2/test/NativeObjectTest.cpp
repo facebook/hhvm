@@ -911,3 +911,129 @@ TEST(NativeSetTest, contains) {
   ASSERT_FALSE(set.contains(NativeValue{static_cast<std::int64_t>(1)}));
   ASSERT_FALSE(set.contains(NativeValue{static_cast<double>(1.0)}));
 }
+
+// ---- NativeMap utilities ---- //
+
+TEST(NativeMapTest, make_map_of) {
+  {
+    auto map_i32_i64 =
+        experimental::make_map_of(std::int32_t{1}, std::int64_t{2});
+    EXPECT_EQ(map_i32_i64.size(), 1);
+    EXPECT_TRUE((map_i32_i64.is_type<experimental::MapOf<I32, I64>>()));
+    const auto& m = map_i32_i64.as_type<experimental::MapOf<I32, I64>>();
+    EXPECT_EQ(m.at(1).as_type<PT::I64>(), 2);
+  }
+
+  {
+    auto map_string_to_listI32 = experimental::make_map_of(
+        std::string{"foo"}, experimental::make_list_of(std::int32_t{1}));
+    EXPECT_EQ(map_string_to_listI32.size(), 1);
+    EXPECT_TRUE((map_string_to_listI32
+                     .is_type<experimental::MapOf<PT::Bytes, NativeList>>()));
+    const auto& m = map_string_to_listI32
+                        .as_type<experimental::MapOf<PT::Bytes, NativeList>>();
+    EXPECT_EQ(
+        m.at(PT::Bytes{std::string_view{"foo"}}).as_list().as_list_of_i32()[0],
+        1);
+  }
+}
+
+TEST(NativeMapTest, emplace) {
+  using M = experimental::detail::map_t<std::int32_t, std::int64_t>;
+
+  // Visitor specialized
+  {
+    NativeMap map{M{}};
+    map.visit(
+        [](M& map) {
+          map.emplace(1, 2);
+          map.emplace(3, 4);
+        },
+        [](auto&&) { FAIL() << "Unexpected map type"; });
+    ASSERT_EQ(map.size(), 2);
+  }
+
+  // By NativeValue specialized
+  {
+    NativeMap map{M{}};
+    map.emplace(
+        NativeValue{static_cast<std::int32_t>(1)},
+        NativeValue{static_cast<std::int64_t>(2)});
+    map.emplace(
+        NativeValue{static_cast<std::int32_t>(3)},
+        NativeValue{static_cast<std::int64_t>(4)});
+    ASSERT_EQ(map.size(), 2);
+  }
+
+  // emplace specialized
+  {
+    NativeMap map{};
+    map.emplace(static_cast<std::int32_t>(1), static_cast<std::int64_t>(2));
+    map.emplace(static_cast<std::int32_t>(3), static_cast<std::int64_t>(4));
+    ASSERT_EQ(map.size(), 2);
+    ASSERT_TRUE((map.is_type<experimental::MapOf<PT::I32, PT::I64>>()));
+  }
+
+  // Emplace generic
+  {
+    NativeMap map{};
+    map.emplace(
+        NativeValue{static_cast<std::int32_t>(1)},
+        NativeValue{static_cast<std::int64_t>(2)});
+    map.emplace(
+        NativeValue{static_cast<std::int32_t>(3)},
+        NativeValue{static_cast<std::int64_t>(4)});
+    ASSERT_EQ(map.size(), 2);
+    ASSERT_TRUE((map.is_type<experimental::MapOf<PT::I32, PT::I64>>()));
+  }
+}
+
+TEST(NativeMapTest, insert_or_assign) {
+  using M = experimental::detail::map_t<std::int32_t, std::int64_t>;
+
+  // Visitor specialized
+  {
+    NativeMap map{M{}};
+    map.visit(
+        [](M& map) {
+          map.insert_or_assign(1, NativeValue{static_cast<std::int64_t>(2)});
+          map.insert_or_assign(
+              1,
+              NativeValue{static_cast<std::int64_t>(
+                  3)}); // This should update the value for key 1
+        },
+        [](auto&&) { FAIL() << "Unexpected map type"; });
+    ASSERT_EQ(map.size(), 1);
+    ASSERT_EQ((map.as_type<M>().at(1).as_type<PT::I64>()), 3);
+  }
+
+  // By NativeValue specialized
+  {
+    NativeMap map{M{}};
+    map.insert_or_assign(
+        NativeValue{static_cast<std::int32_t>(1)},
+        NativeValue{static_cast<std::int64_t>(2)});
+    map.insert_or_assign(
+        NativeValue{static_cast<std::int32_t>(1)},
+        NativeValue{static_cast<std::int64_t>(3)}); // Update
+    ASSERT_EQ(map.size(), 1);
+    ASSERT_EQ((map.as_type<M>().at(1).as_type<PT::I64>()), 3);
+  }
+
+  // By NativeValue generic
+  {
+    NativeMap map{};
+    map.insert_or_assign(
+        static_cast<std::int32_t>(1), static_cast<std::int64_t>(2));
+    map.insert_or_assign(
+        static_cast<std::int32_t>(1),
+        static_cast<std::int64_t>(3)); // Update
+    ASSERT_EQ(map.size(), 1);
+    ASSERT_TRUE((map.is_type<experimental::MapOf<PT::I32, PT::I64>>()));
+    ASSERT_EQ(
+        (map.as_type<experimental::MapOf<PT::I32, PT::I64>>()
+             .at(1)
+             .as_type<PT::I64>()),
+        3);
+  }
+}

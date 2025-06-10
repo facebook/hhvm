@@ -230,6 +230,65 @@ NativeMap::NativeMap(Kind&& kind) noexcept : kind_(std::move(kind)) {}
 
 NativeMap::NativeMap(const Kind& kind) : kind_(kind) {}
 
+bool NativeMap::contains(const NativeValue& key) const noexcept {
+  return visit(
+      [](const std::monostate&) { return false; },
+      [&](const NativeMap::Generic& map) { return map.contains(key); },
+      [&]<typename K>(const MapOf<K, ValueHolder>& map) {
+        if (auto* key_ptr = key.if_type<K>()) {
+          return map.contains(*key_ptr);
+        } else {
+          return false;
+        }
+      });
+}
+
+bool detail::native_map_emplace(
+    NativeMap& map, NativeValue&& key, NativeValue&& val) {
+  if (auto* generic_map = map.template if_type<NativeMap::Generic>()) {
+    return generic_map->emplace(std::move(key), std::move(val)).second;
+  }
+
+  return key.visit(
+      [](std::monostate) -> bool {
+        throw std::runtime_error("Cannot insert an empty key into a map");
+      },
+      [&](auto&& k) {
+        return val.visit(
+            [](std::monostate) -> bool {
+              throw std::runtime_error(
+                  "Cannot insert an empty value into a map");
+            },
+            [&](auto&& v) {
+              return detail::native_map_emplace(
+                  map, std::move(k), std::move(v));
+            });
+      });
+}
+
+bool detail::native_map_insert_or_assign(
+    NativeMap& map, NativeValue&& key, NativeValue&& val) {
+  if (auto* generic_map = map.template if_type<NativeMap::Generic>()) {
+    return generic_map->insert_or_assign(std::move(key), std::move(val)).second;
+  }
+
+  return key.visit(
+      [](std::monostate) -> bool {
+        throw std::runtime_error("Cannot insert an empty key into a map");
+      },
+      [&](auto&& k) {
+        return val.visit(
+            [](std::monostate) -> bool {
+              throw std::runtime_error(
+                  "Cannot insert an empty value into a map");
+            },
+            [&](auto&& v) {
+              return detail::native_map_insert_or_assign(
+                  map, std::move(k), std::move(v));
+            });
+      });
+}
+
 // ------- parsing functions ------- //
 
 template <typename Protocol, typename T>

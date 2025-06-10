@@ -683,6 +683,17 @@ using map_t = std::conditional_t<
     map_with_primitive_key_t<K, V>,
     MapOf<ValueHolder, ValueHolder>>;
 
+template <typename K, typename V>
+bool native_map_emplace(NativeMap& map, K&& key, V&& val);
+
+bool native_map_emplace(NativeMap& map, NativeValue&& key, NativeValue&& val);
+
+template <typename K, typename V>
+bool native_map_insert_or_assign(NativeMap& map, K&& key, V&& val);
+
+bool native_map_insert_or_assign(
+    NativeMap& map, NativeValue&& key, NativeValue&& val);
+
 } // namespace detail
 
 class NativeMap {
@@ -708,6 +719,8 @@ class NativeMap {
       std::remove_cv_t<typename T::key_type>,
       std::remove_cv_t<typename T::mapped_type>>;
 
+  using Generic = MapOf<ValueHolder, ValueHolder>;
+
   const Kind& inner() const;
   std::size_t size() const noexcept;
   bool empty() const noexcept;
@@ -721,6 +734,22 @@ class NativeMap {
   decltype(auto) visit(Fs&&... fs) const {
     return folly::variant_match(kind_, std::forward<Fs>(fs)...);
   }
+
+  // Returns whether the value was inserted
+  template <typename K, typename V>
+  bool emplace(K&& key, V&& val) {
+    return detail::native_map_emplace(
+        *this, std::forward<K>(key), std::forward<V>(val));
+  }
+
+  // Returns whether the value was inserted
+  template <typename K, typename V>
+  bool insert_or_assign(K&& key, V&& val) {
+    return detail::native_map_insert_or_assign(
+        *this, std::forward<K>(key), std::forward<V>(val));
+  }
+
+  bool contains(const NativeValue& key) const noexcept;
 
   // Default ops
   NativeMap() = default;
@@ -1155,6 +1184,46 @@ NativeList make_list_of(T&& t) {
           "Unsupported specialization for make_list_of<{}>",
           folly::pretty_name<V>()));
     }
+  }
+}
+
+template <typename K, typename V>
+NativeMap make_map_of(K&& key, V&& val) {
+  if constexpr (
+      std::is_same_v<K, NativeValue> && std::is_same_v<V, NativeValue>) {
+    // Introspect the generic values to determine the correct specialization
+    if (key.is_empty() && val.is_empty()) {
+      return NativeMap{};
+    }
+
+    return key.visit(
+        [](std::monostate&) -> NativeMap {
+          throw std::runtime_error("Cannot create a map with null keys");
+        },
+        [&](auto&& k) -> NativeMap {
+          using KeyTy = std::remove_cvref_t<decltype(k)>;
+          if (val.is_empty()) {
+            throw std::runtime_error("Cannot create a map with null values");
+          }
+
+          return val.visit(
+              [](std::monostate&) -> NativeMap {
+
+              },
+              [&](auto&& v) -> NativeMap {
+                using ValTy = std::remove_cvref_t<decltype(v)>;
+                return make_map_of<KeyTy, ValTy>(
+                    std::forward<KeyTy>(k), std::forward<ValTy>(v));
+              });
+        });
+  } else {
+    using KeyTy = std::remove_cvref_t<K>;
+    using ValTy = std::remove_cvref_t<V>;
+    using MapTy = detail::map_t<KeyTy, ValTy>;
+
+    MapTy map{};
+    map.emplace(std::forward<K>(key), std::forward<V>(val));
+    return map;
   }
 }
 

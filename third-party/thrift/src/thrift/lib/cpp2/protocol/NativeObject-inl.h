@@ -161,6 +161,86 @@ NativeMap::Specialized<T>* NativeMap::if_type() noexcept {
   return std::get_if<Specialized<T>>(&kind_);
 }
 
+template <typename K, typename V>
+bool detail::native_map_emplace(NativeMap& map, K&& key, V&& val) {
+  return map.visit(
+      [&](std::monostate&) {
+        // Create a new map with the specialized type
+        static_assert(!std::is_same_v<std::remove_cvref_t<K>, NativeValue>);
+        static_assert(!std::is_same_v<std::remove_cvref_t<V>, NativeValue>);
+        map = make_map_of<K, V>(std::forward<K>(key), std::forward<V>(val));
+        return true;
+      },
+      [&](auto&& m) -> bool {
+        // If the map has a matching key/value, emplace it directly, otherwise
+        // it's an error
+        using MapTy = std::remove_cvref_t<decltype(m)>;
+        using MapKey = typename MapTy::key_type;
+
+        if constexpr (std::is_same_v<MapTy, NativeMap::Generic>) {
+          return m.emplace(std::forward<K>(key), std::forward<V>(val)).second;
+        } else if constexpr (std::is_same_v<std::remove_cvref_t<K>, MapKey>) {
+          if constexpr (
+              std::is_same_v<std::remove_cvref_t<V>, ValueHolder> ||
+              std::is_same_v<std::remove_cvref_t<V>, NativeValue>) {
+            return m.emplace(std::forward<K>(key), std::forward<V>(val)).second;
+          } else {
+            return m
+                .emplace(
+                    std::forward<K>(key), NativeValue{std::forward<V>(val)})
+                .second;
+          }
+        } else {
+          throw std::runtime_error(fmt::format(
+              "Cannot emplace key={} value={} pair into a map with a different type: {}",
+              folly::pretty_name<K>(),
+              folly::pretty_name<V>(),
+              folly::pretty_name<MapTy>()));
+        }
+      });
+}
+
+template <typename K, typename V>
+bool detail::native_map_insert_or_assign(NativeMap& map, K&& key, V&& val) {
+  return map.visit(
+      [&](std::monostate&) {
+        // Create a new map with the specialized type
+        static_assert(!std::is_same_v<std::remove_cvref_t<K>, NativeValue>);
+        static_assert(!std::is_same_v<std::remove_cvref_t<V>, NativeValue>);
+        map = make_map_of<K, V>(std::forward<K>(key), std::forward<V>(val));
+        return true;
+      },
+      [&](auto&& m) -> bool {
+        // If the map has a matching key/value, insert/assign it directly,
+        // otherwise it's an error
+        using MapTy = std::remove_cvref_t<decltype(m)>;
+        using MapKey = typename MapTy::key_type;
+
+        if constexpr (std::is_same_v<MapTy, NativeMap::Generic>) {
+          return m.emplace(std::forward<K>(key), std::forward<V>(val)).second;
+        } else if constexpr (std::is_same_v<std::remove_cvref_t<K>, MapKey>) {
+          if constexpr (
+              std::is_same_v<std::remove_cvref_t<V>, ValueHolder> ||
+              std::is_same_v<std::remove_cvref_t<V>, NativeValue>) {
+            return m
+                .insert_or_assign(std::forward<K>(key), std::forward<V>(val))
+                .second;
+          } else {
+            return m
+                .insert_or_assign(
+                    std::forward<K>(key), NativeValue{std::forward<V>(val)})
+                .second;
+          }
+        } else {
+          throw std::runtime_error(fmt::format(
+              "Cannot insert_or_assign key={} value={} pair into a map with a different type: {}",
+              folly::pretty_name<K>(),
+              folly::pretty_name<V>(),
+              folly::pretty_name<MapTy>()));
+        }
+      });
+}
+
 // ---- Object ---- //
 
 template <typename... Args>

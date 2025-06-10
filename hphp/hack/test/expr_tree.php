@@ -111,6 +111,9 @@ class ExampleDsl {
   public static function shapeType<T>(T $_): ExampleShape<T> {
     throw new Exception();
   }
+  public static function operationType<T>(T $_): T {
+    throw new Exception();
+  }
 
   // Desugared nodes. Calls to these are emitted by hackc, following the structure
   // of the expression in the expression tree. Here, they compute a string

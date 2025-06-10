@@ -108,9 +108,16 @@
                                                                     (Obj_get (
                                                                     ((), [5:18-22],
                                                                     (Call
+                                                                    { func = ((), [5:18-22], (Class_const (((), [5:18-22], (CI ([5:18-22], "\\ExampleDsl"))), ([5:18-22], "operationType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [5:18-22],
+                                                                    (Call
                                                                     { func = ((), [5:18-22], (Class_const (((), [5:18-22], (CI ([5:18-22], "\\ExampleDsl"))), ([5:18-22], "boolType")))); 
                                                                     targs = []; 
                                                                     args = []; 
+                                                                    unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })), (
                                                                     (), [5:18-22], (Id ([5:18-22], "__bool"))), OG_nullthrows, Is_method))); 
                                                                     targs = []; 
@@ -123,7 +130,14 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:29-35],
-                                                                    (Obj_get (((), [5:29-31], (Lvar ([5:29-31], $i))), ((), [5:29-35], (Id ([5:29-35], "__plus"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (
+                                                                    ((), [5:29-35],
+                                                                    (Call
+                                                                    { func = ((), [5:29-35], (Class_const (((), [5:29-35], (CI ([5:29-35], "\\ExampleDsl"))), ([5:29-35], "operationType"))));
+                                                                    targs = []; 
+                                                                    args = [(Anormal ((), [5:29-31], (Lvar ([5:29-31], $i))))]; 
+                                                                    unpacked_arg = None })), (
+                                                                    (), [5:29-35], (Id ([5:29-35], "__plus"))), OG_nullthrows, Is_method))); 
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal

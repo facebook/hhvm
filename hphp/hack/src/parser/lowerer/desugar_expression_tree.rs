@@ -730,9 +730,37 @@ fn shape_literal(pos: &Pos, fields: Vec<(&str, Expr)>) -> Expr {
     Expr::new((), pos.clone(), Expr_::Shape(shape_fields))
 }
 
-fn boolify(receiver: Expr) -> Expr {
+/// Converts an expression to a boolean by calling the visitor's operationType method
+/// followed by the __bool method. This is used for conditional expressions in
+/// expression trees to ensure proper type virtualization.
+fn boolify(receiver: Expr, visitor_name: &str) -> Expr {
     let pos = receiver.1.clone();
-    meth_call(receiver, "__bool", vec![], false, &pos)
+    let operation_type_expr =
+        static_meth_call(visitor_name, et::OPERATION_TYPE, vec![receiver], &pos);
+    meth_call(operation_type_expr, "__bool", vec![], false, &pos)
+}
+
+/// Virtualizes an operation by calling the visitor's operationType method on the operand
+/// and then calling the specified operation method. This is used for both binary and
+/// unary operations in expression trees to ensure proper type virtualization.
+/// The operand2 parameter is optional so this can be used for both unary and
+/// binary operations
+fn virtualize_operation(
+    operand1: Expr,
+    operation_method: &str,
+    operand2: Option<Expr>,
+    visitor_name: &str,
+    pos: &Pos,
+) -> Expr {
+    let operation_type_expr =
+        static_meth_call(visitor_name, et::OPERATION_TYPE, vec![operand1], pos);
+    meth_call(
+        operation_type_expr,
+        operation_method,
+        operand2.into_iter().collect_vec(),
+        false,
+        pos,
+    )
 }
 
 struct RewriteState {
@@ -761,6 +789,7 @@ impl RewriteState {
 
         let Expr(_, pos, expr_) = e;
         let pos_expr = exprpos(&pos);
+
         match expr_ {
             // Source: MyDsl`1`
             // Virtualized: MyDsl::intType()
@@ -850,7 +879,7 @@ impl RewriteState {
                 let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
 
                 // Source: MyDsl`... + ...`
-                // Virtualized: ...->__plus(...)
+                // Virtualized: MyDsl::operationType(...)->__plus(...)
                 // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
                 let binop_str = match bop {
                     Bop::Plus => "__plus",
@@ -907,11 +936,11 @@ impl RewriteState {
                         "__unsupported"
                     }
                 };
-                let virtual_expr = meth_call(
+                let virtual_expr = virtualize_operation(
                     rewritten_lhs.virtual_expr,
                     binop_str,
-                    vec![rewritten_rhs.virtual_expr],
-                    false,
+                    Some(rewritten_rhs.virtual_expr),
+                    visitor_name,
                     &pos,
                 );
                 let desugar_expr = v_meth_call(
@@ -960,7 +989,7 @@ impl RewriteState {
                 }
             }
             // Source: MyDsl`!...`
-            // Virtualized: ...->__exclamationMark(...)
+            // Virtualized: MyDSL::operationType(...)->__exclamationMark(...)
             // Desugared: $0v->visitUnop(new ExprPos(...), ..., '__exclamationMark')
             Unop(unop) => {
                 let (op, operand) = *unop;
@@ -1012,8 +1041,13 @@ impl RewriteState {
                         "__unsupported"
                     }
                 };
-                let virtual_expr =
-                    meth_call(rewritten_operand.virtual_expr, op_str, vec![], false, &pos);
+                let virtual_expr = virtualize_operation(
+                    rewritten_operand.virtual_expr,
+                    op_str,
+                    None,
+                    visitor_name,
+                    &pos,
+                );
                 let desugar_expr = v_meth_call(
                     et::VISIT_UNOP,
                     vec![
@@ -1029,7 +1063,7 @@ impl RewriteState {
                 }
             }
             // Source: MyDsl`... ? ... : ...`
-            // Virtualized: ...->__bool() ? ... : ...
+            // Virtualized: MyDsl::operationType(...)->__bool() ? ... : ...
             // Desugared: $0v->visitTernary(new ExprPos(...), ..., ..., ...)
             Eif(eif) => {
                 let (e1, e2o, e3) = *eif;
@@ -1060,7 +1094,7 @@ impl RewriteState {
                     (),
                     pos,
                     Expr_::mk_eif(
-                        boolify(rewritten_e1.virtual_expr),
+                        boolify(rewritten_e1.virtual_expr, visitor_name),
                         Some(rewritten_e2.virtual_expr),
                         rewritten_e3.virtual_expr,
                     ),
@@ -1803,7 +1837,7 @@ impl RewriteState {
                 }
             },
             // Source: MyDsl`if (...) {...} else {...}`
-            // Virtualized: if (...->__bool())) {...} else {...}
+            // Virtualized: if (MyDsl::operationType(...)->__bool())) {...} else {...}
             // Desugared: $0v->visitIf(new ExprPos(...), $0v->..., vec[...], vec[...])
             If(if_stmt) => {
                 let (cond_expr, then_block, else_block) = *if_stmt;
@@ -1827,7 +1861,7 @@ impl RewriteState {
                 let virtual_stmt = Stmt(
                     pos,
                     Stmt_::mk_if(
-                        boolify(rewritten_cond.virtual_expr),
+                        boolify(rewritten_cond.virtual_expr, visitor_name),
                         ast::Block(virtual_then_stmts),
                         ast::Block(virtual_else_stmts),
                     ),
@@ -1835,7 +1869,7 @@ impl RewriteState {
                 (virtual_stmt, Some(desugar_expr))
             }
             // Source: MyDsl`while (...) {...}`
-            // Virtualized: while (...->__bool()) {...}
+            // Virtualized: while (MyDsl::opertationType(...)->__bool()) {...}
             // Desugared: $0v->visitWhile(new ExprPos(...), $0v->..., vec[...])
             While(w) => {
                 let (cond, body) = *w;
@@ -1855,14 +1889,14 @@ impl RewriteState {
                 let virtual_stmt = Stmt(
                     pos,
                     Stmt_::mk_while(
-                        boolify(rewritten_cond.virtual_expr),
+                        boolify(rewritten_cond.virtual_expr, visitor_name),
                         ast::Block(virtual_body_stmts),
                     ),
                 );
                 (virtual_stmt, Some(desugar_expr))
             }
             // Source: MyDsl`for (...; ...; ...) {...}`
-            // Virtualized: for (...; ...->__bool(); ...) {...}
+            // Virtualized: for (...; MyDsl::operationType(...)->__bool(); ...) {...}
             // Desugared: $0v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])
             For(w) => {
                 let (init, cond, incr, body) = *w;
@@ -1874,7 +1908,7 @@ impl RewriteState {
                     Some(cond) => {
                         let rewritten_cond = self.rewrite_expr(cond, visitor_name);
                         (
-                            Some(boolify(rewritten_cond.virtual_expr)),
+                            Some(boolify(rewritten_cond.virtual_expr, visitor_name)),
                             rewritten_cond.desugar_expr,
                         )
                     }

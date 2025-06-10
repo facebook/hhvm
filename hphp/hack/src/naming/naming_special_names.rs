@@ -1176,6 +1176,7 @@ pub mod expression_trees {
     pub const SYMBOL_TYPE: &str = "symbolType";
     pub const LAMBDA_TYPE: &str = "lambdaType";
     pub const SHAPE_TYPE: &str = "shapeType";
+    pub const OPERATION_TYPE: &str = "operationType";
 
     pub const VISIT_INT: &str = "visitInt";
     pub const VISIT_FLOAT: &str = "visitFloat";

@@ -2,9 +2,11 @@ ERROR: File "boolean_operators.php", line 27, characters 7-33:
 You are trying to access the method `__barbar` but this object can be null. (Typing[4064])
   File "boolean_operators.php", line 7, characters 82-93:
   This can be null
+  File "expr_tree.php", line 114, characters 50-50:
+    via this generic `T`
 ERROR: File "boolean_operators.php", line 28, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 390, characters 28-38:
+  File "expr_tree.php", line 393, characters 28-38:
   Expected `ExampleBool`
   File "boolean_operators.php", line 7, characters 82-93:
   But got `?ExampleBool`
@@ -12,9 +14,11 @@ ERROR: File "boolean_operators.php", line 32, characters 7-33:
 You are trying to access the method `__ampamp` but this object can be null. (Typing[4064])
   File "boolean_operators.php", line 7, characters 82-93:
   This can be null
+  File "expr_tree.php", line 114, characters 50-50:
+    via this generic `T`
 ERROR: File "boolean_operators.php", line 33, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 389, characters 28-38:
+  File "expr_tree.php", line 392, characters 28-38:
   Expected `ExampleBool`
   File "boolean_operators.php", line 7, characters 82-93:
   But got `?ExampleBool`
@@ -22,3 +26,5 @@ ERROR: File "boolean_operators.php", line 37, characters 7-22:
 You are trying to access the method `__exclamationMark` but this object can be null. (Typing[4064])
   File "boolean_operators.php", line 7, characters 82-93:
   This can be null
+  File "expr_tree.php", line 114, characters 50-50:
+    via this generic `T`

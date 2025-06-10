@@ -53,11 +53,18 @@
                                                                 { func =
                                                                   ((), [5:14-20],
                                                                    (Obj_get (
+                                                                    ((), [5:14-20],
+                                                                    (Call
+                                                                    { func = ((), [5:14-20], (Class_const (((), [5:14-20], (CI ([5:14-20], "\\ExampleDsl"))), ([5:14-20], "operationType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
                                                                     ((), [5:14-15],
                                                                     (Call
                                                                     { func = ((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
+                                                                    unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })), (
                                                                     (), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method)));
                                                                   targs = [];

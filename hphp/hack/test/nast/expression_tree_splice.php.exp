@@ -93,16 +93,29 @@
                                                                     { func =
                                                                     ((), [4:14-32],
                                                                     (Obj_get (
+                                                                    ((), [4:14-32],
+                                                                    (Call
+                                                                    { func = ((), [4:14-32], (Class_const (((), [4:14-32], (CI ([4:14-32], "\\ExampleDsl"))), ([4:14-32], "operationType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
                                                                     ((), [4:14-20],
                                                                     (Call
                                                                     { func =
                                                                     ((), [4:14-20],
                                                                     (Obj_get (
+                                                                    ((), [4:14-20],
+                                                                    (Call
+                                                                    { func = ((), [4:14-20], (Class_const (((), [4:14-20], (CI ([4:14-20], "\\ExampleDsl"))), ([4:14-20], "operationType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
                                                                     ((), [4:14-15],
                                                                     (Call
                                                                     { func = ((), [4:14-15], (Class_const (((), [4:14-15], (CI ([4:14-15], "\\ExampleDsl"))), ([4:14-15], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
+                                                                    unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })), (
                                                                     (), [4:14-20], (Id ([4:14-20], "__plus"))), OG_nullthrows, Is_method))); 
                                                                     targs = [];
@@ -113,6 +126,7 @@
                                                                     { func = ((), [4:18-20], (Class_const (((), [4:18-20], (CI ([4:18-20], "\\ExampleDsl"))), ([4:18-20], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
+                                                                    unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })), (
                                                                     (), [4:14-32], (Id ([4:14-32], "__plus"))), OG_nullthrows, Is_method))); 

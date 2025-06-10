@@ -98,9 +98,16 @@
                                                                     (Obj_get (
                                                                     ((), [4:29-33],
                                                                     (Call
+                                                                    { func = ((), [4:29-33], (Class_const (((), [4:29-33], (CI ([4:29-33], "\\ExampleDsl"))), ([4:29-33], "operationType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [4:29-33],
+                                                                    (Call
                                                                     { func = ((), [4:29-33], (Class_const (((), [4:29-33], (CI ([4:29-33], "\\ExampleDsl"))), ([4:29-33], "boolType")))); 
                                                                     targs = []; 
                                                                     args = []; 
+                                                                    unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })), (
                                                                     (), [4:29-33], (Id ([4:29-33], "__bool"))), OG_nullthrows, Is_method))); 
                                                                     targs = []; 

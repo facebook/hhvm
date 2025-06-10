@@ -1320,12 +1320,12 @@ struct CallData : IRExtraData {
 };
 
 struct CallFuncEntryData : IRExtraData {
-  explicit CallFuncEntryData(const SrcKey& target,
+  explicit CallFuncEntryData(const Func* calleePrototype,
                              IRSPRelOffset spOffset,
                              uint32_t numInitArgs,
                              uint32_t arFlags,
                              bool formingRegion)
-    : target(target)
+    : calleePrototype(calleePrototype)
     , spOffset(spOffset)
     , numInitArgs(numInitArgs)
     , arFlags(arFlags)
@@ -1335,14 +1335,14 @@ struct CallFuncEntryData : IRExtraData {
   std::string show() const {
     return folly::sformat(
       "{}, IRSP {}, numInitArgs {}, arFlags {}{}",
-      showShort(target), spOffset.offset, numInitArgs, arFlags,
+      calleePrototype->fullName()->data(), spOffset.offset, numInitArgs, arFlags,
       formingRegion ? ",formingRegion" :""
     );
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
-      SrcKey::StableHasher()(target),
+      calleePrototype->stableHash(),
       std::hash<int32_t>()(spOffset.offset),
       std::hash<uint32_t>()(numInitArgs),
       std::hash<uint32_t>()(arFlags),
@@ -1351,7 +1351,7 @@ struct CallFuncEntryData : IRExtraData {
   }
 
   bool equals(const CallFuncEntryData& o) const {
-    return target == o.target &&
+    return calleePrototype == o.calleePrototype &&
            spOffset == o.spOffset &&
            numInitArgs == o.numInitArgs &&
            arFlags == o.arFlags &&
@@ -1366,7 +1366,7 @@ struct CallFuncEntryData : IRExtraData {
     spOffset.offset += delta;
   }
 
-  SrcKey target;
+  const Func* calleePrototype;
   IRSPRelOffset spOffset;
   uint32_t numInitArgs;
   uint32_t arFlags;

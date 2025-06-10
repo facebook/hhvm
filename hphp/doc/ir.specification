@@ -1687,13 +1687,15 @@ ReqBindJmp and CallFuncEntry.
 
 | CallFuncEntry<target,spOffset,arFlags>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Cls|Obj|Nullptr),
+|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
 |   CRc|PRc
 
-  Transfer control to the func entry at `target' SrcKey, based on the pre-live
+  Transfer control to the func entry of a callee S2, based on the pre-live
   activation record and set of args on the stack pointed to by S0 at `spOffset'.
-  S1 is the current caller frame pointer. S2 is the context (nullptr, $this or
-  static::class).
+  The callee's prologue must match the compile-time known calleePrototype's prologue.
+  S1 is the current caller frame pointer. S3 is the context (nullptr, $this or
+  static::class). If the callee is not statically known, the number of
+  required parameters must match the total number of parameters for correctness.
 
 | NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
 

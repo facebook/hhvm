@@ -198,39 +198,74 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
 void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
-  auto const ctx = srcLoc(env, inst, 2).reg();
+  auto const callee = srcLoc(env, inst, 2).reg();
+  auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<CallFuncEntry>();
-  auto const callee = extra->target.func();
-  assertx(extra->target.funcEntry());
+  auto const calleePrototype = extra->calleePrototype;
+  auto const func = inst->src(2)->hasConstVal(TFunc)
+    ? inst->src(2)->funcVal() : nullptr;
 
   auto& v = vmain(env);
 
   // Initialize func entry registers.
-  v << copy{v.cns(callee->getFuncId().toInt()), r_func_entry_callee_id()};
+  if (func != nullptr) {
+    // Avoid the load if we statically know the func id.
+    v << copy{v.cns(func->getFuncId().toInt()), r_func_entry_callee_id()};
+  } else {
+    // We have to use an ifdef instead of `if (use_lowptr)` here due to
+    // funcIdOffset only being defined in non-lowptr mode.
+#ifdef USE_LOWPTR
+  // TFuncs are identified with their func ids in lowptr mode.
+  v << copy{callee, r_func_entry_callee_id()};
+#else
+  v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
+#endif
+  }
   v << copy{v.cns(extra->arFlags), r_func_entry_ar_flags()};
   auto const withCtx =
-    setCtxReg(v, callee, inst->src(2), ctx, r_func_entry_ctx());
+    setCtxReg(v, calleePrototype, inst->src(3), ctx, r_func_entry_ctx());
 
   // Make vmsp() point to the future vmfp().
   auto const ssp = v.makeReg();
   v << lea{
-    sp[cellsToBytes(extra->spOffset.offset + callee->numFuncEntryInputs())],
+    sp[cellsToBytes(extra->spOffset.offset + calleePrototype->numFuncEntryInputs())],
     ssp
   };
   v << syncvmsp{ssp};
 
-  // Emit a smashable call that initially calls a recyclable service request
-  // stub.  The stub and the eventual targets take rvmfp() as an argument,
-  // pointing to the callee ActRec.
   auto const done = v.makeBlock();
-  v << callphpfe{extra->target, func_entry_regs(withCtx)};
+  auto const numArgs = std::min(extra->numInitArgs, calleePrototype->numNonVariadicParams());
+  if (func != nullptr) {
+    // When we statically know the callee, emit a smashable call that initially
+    // calls a recyclable service request stub. The stub and the eventual targets
+    // take rvmfp() as an argument, pointing to the callee ActRec.
+    auto entry = SrcKey{func, numArgs, SrcKey::FuncEntryTag {}};
+    v << callphpfe{entry, func_entry_regs(withCtx)};
+  } else {
+    // We're doing a virtual dispatch to the call func entry. Read the `m_funcEntry`
+    // field from the function and call it directly. The field will be initialized to
+    // a stub that assumes `nonNonVariadicParams` are passed in and translates the func entry
+    // with the appropriate SrcKey.
+    assertx(numArgs == calleePrototype->numNonVariadicParams());
+    // Load the FuncEntry address dynamically from the function.
+    auto dest = v.makeReg();
+    auto const funcEntryOff = safe_cast<int32_t>(Func::funcEntryOff());
+    emitLdLowPtr(
+      v,
+      callee[funcEntryOff],
+      dest,
+      sizeof(LowPtr<uint8_t>)
+    );
+    v << callphpr{dest, func_entry_regs(withCtx)};
+  }
 
   // The callee is responsible for unwinding the whole frame, which includes
   // all inputs, ActRec and empty space reserved for inouts.
   auto const marker = inst->marker();
   auto const fixupBcOff = marker.fixupBcOff();
   auto const fixupSpOff = marker.fixupBcSPOff()
-    - callee->numFuncEntryInputs() - kNumActRecCells - callee->numInOutParams();
+    - calleePrototype->numFuncEntryInputs() - kNumActRecCells
+    - calleePrototype->numInOutParams();
   v << syncpoint{Fixup::direct(fixupBcOff, fixupSpOff)};
   v << unwind{done, label(env, inst->taken())};
   v = done;

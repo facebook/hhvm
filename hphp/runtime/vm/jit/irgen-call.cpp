@@ -280,9 +280,9 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   );
 }
 
-SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
+SSATmp* callFuncEntry(IRGS& env, const Func* calleePrototype,
+                      SSATmp* callee, SSATmp* objOrClass,
                       uint32_t numArgsInclUnpack, bool asyncEagerReturn) {
-  assertx(entry.funcEntry());
   if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
   assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
 
@@ -299,13 +299,13 @@ SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
   );
 
   auto const data = CallFuncEntryData {
-    entry,
+    calleePrototype,
     spOffBCFromIRSP(env),
     numArgsInclUnpack,
     arFlags,
     env.formingRegion
   };
-  return gen(env, CallFuncEntry, data, sp(env), pubFP, objOrClass);
+  return gen(env, CallFuncEntry, data, sp(env), pubFP, callee, objOrClass);
 }
 
 void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
@@ -658,8 +658,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          auto const retVal = callFuncEntry(env, entry, objOrClass,
-                                            numArgsInclUnpack,
+          auto const retVal = callFuncEntry(env, callee, cns(env, callee),
+                                            objOrClass, numArgsInclUnpack,
                                             asyncEagerReturn);
           gen(env, StTVInRDS, data, retVal);
           gen(env, IncRef, retVal);
@@ -670,8 +670,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       handleCallReturn(env, callee, res, asyncEagerOffset,
                        false /* unlikely */);
     } else {
-      auto const retVal = callFuncEntry(env, entry, objOrClass,
-                                        numArgsInclUnpack, asyncEagerReturn);
+      auto const retVal = callFuncEntry(env, callee, cns(env, callee),
+                                        objOrClass, numArgsInclUnpack,
+                                        asyncEagerReturn);
       handleCallReturn(env, callee, retVal, asyncEagerOffset,
                        false /* unlikely */);
     }

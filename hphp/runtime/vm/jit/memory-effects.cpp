@@ -675,28 +675,28 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CallFuncEntry:
     {
       auto const extra = inst.extra<CallFuncEntry>();
-      auto const callee = extra->target.func();
-      auto const numParams = callee->numNonVariadicParams();
+      auto const calleePrototype = extra->calleePrototype;
+      auto const numParams = calleePrototype->numNonVariadicParams();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
         // Kill TUninit arguments.
         extra->numInitArgs >= numParams ? AEmpty : AStack::range(
-          extra->spOffset + callee->numFuncEntryInputs() - numParams,
-          extra->spOffset + callee->numFuncEntryInputs() - extra->numInitArgs
+          extra->spOffset + calleePrototype->numFuncEntryInputs() - numParams,
+          extra->spOffset + calleePrototype->numFuncEntryInputs() - extra->numInitArgs
         ),
         // Input arguments.
-        callee->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
+        calleePrototype->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
           extra->spOffset,
-          extra->spOffset + callee->numFuncEntryInputs()
+          extra->spOffset + calleePrototype->numFuncEntryInputs()
         ),
         // ActRec.
-        actrec(inst.src(0), extra->spOffset + callee->numFuncEntryInputs()),
+        actrec(inst.src(0), extra->spOffset + calleePrototype->numFuncEntryInputs()),
         // Inout outputs.
-        callee->numInOutParams() == 0 ? AEmpty : AStack::range(
-          extra->spOffset + callee->numFuncEntryInputs() + kNumActRecCells,
-          extra->spOffset + callee->numFuncEntryInputs() + kNumActRecCells +
-            callee->numInOutParams()
+        calleePrototype->numInOutParams() == 0 ? AEmpty : AStack::range(
+          extra->spOffset + calleePrototype->numFuncEntryInputs() + kNumActRecCells,
+          extra->spOffset + calleePrototype->numFuncEntryInputs() + kNumActRecCells +
+          calleePrototype->numInOutParams()
         ),
         // Backtrace locals.
         backtrace_locals(inst)

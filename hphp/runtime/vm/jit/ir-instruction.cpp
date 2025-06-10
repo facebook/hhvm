@@ -160,7 +160,7 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       return move != MustMove && srcNo == 3;
 
     case CallFuncEntry:
-      return move != MustMove && srcNo == 2;
+      return move != MustMove && srcNo == 3;
 
     case EndCatch:
       return srcNo == 2;
@@ -551,7 +551,11 @@ Type callReturn(const IRInstruction* inst) {
       auto const extra = inst->extra<CallFuncEntry>();
       if (extra->asyncEagerReturn()) return TInitCell;
       if (extra->formingRegion) return TInitCell;
-      return irgen::callReturnType(extra->target.func());
+      // In general, the callee prototype and actual called function may differ in
+      // cases where we call `CallFuncEntry` with an override, so we can't rely
+      // on the type in the compile-time data and must inspect the argument.
+      return inst->src(2)->hasConstVal(TFunc)
+        ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
     }
     case InlineSideExit: {
       auto const extra = inst->extra<InlineSideExit>();

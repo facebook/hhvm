@@ -129,11 +129,11 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
           return extra->numInputs() + kNumActRecCells + extra->numOut;
         }
         case CallFuncEntry: {
-          auto const callee = inst->extra<CallFuncEntry>()->target.func();
+          auto const calleePrototype = inst->extra<CallFuncEntry>()->calleePrototype;
           return
-            callee->numFuncEntryInputs() +
+            calleePrototype->numFuncEntryInputs() +
             kNumActRecCells +
-            callee->numInOutParams();
+            calleePrototype->numInOutParams();
         }
         case InlineSideExit: {
           auto const callee = inst->extra<InlineSideExit>()->callee;

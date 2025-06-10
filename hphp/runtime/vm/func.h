@@ -1271,6 +1271,7 @@ public:
   OFF(shared)
   OFF(unit)
   OFF(methCallerMethName)
+  OFF(funcEntry)
 #undef OFF
 
   static constexpr ptrdiff_t clsOff() {

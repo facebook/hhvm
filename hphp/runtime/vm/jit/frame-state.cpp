@@ -346,16 +346,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case CallFuncEntry: {
       assertx(cur().checkMInstrStateDead());
       auto const extra = inst->extra<CallFuncEntry>();
-      auto const callee = extra->target.func();
+      auto const calleePrototype = extra->calleePrototype;
       // Remove tracked state for the slots for argc and the actrec.
-      uint32_t numCells = kNumActRecCells + callee->numFuncEntryInputs();
+      uint32_t numCells = kNumActRecCells + calleePrototype->numFuncEntryInputs();
       for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
       // Set the type of out parameter locations.
       auto const base = extra->spOffset + numCells;
-      for (auto i = uint32_t{0}; i < callee->numInOutParams(); ++i) {
-        setType(stk(base + i), irgen::callOutType(callee, i));
+      for (auto i = uint32_t{0}; i < calleePrototype->numInOutParams(); ++i) {
+        setType(stk(base + i), irgen::callOutType(calleePrototype, i));
       }
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().bcSPOff());

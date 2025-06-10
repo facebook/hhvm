@@ -369,6 +369,32 @@ func ReadAdaptedA(p thrift.Decoder) (*AdaptedA, error) {
     return decodeResult, decodeErr
 }
 
+type StringWithCppAdapter = string
+
+func NewStringWithCppAdapter() StringWithCppAdapter {
+    return ""
+}
+
+func WriteStringWithCppAdapter(item StringWithCppAdapter, p thrift.Encoder) error {
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+    return nil
+}
+
+func ReadStringWithCppAdapter(p thrift.Decoder) (StringWithCppAdapter, error) {
+    var decodeResult StringWithCppAdapter
+    decodeErr := func() error {
+        result, err := p.ReadString()
+        if err != nil {
+            return err
+        }
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type DurationMs = int64
 
 func NewDurationMs() DurationMs {
@@ -9290,7 +9316,7 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) setDefaults() *RenamedSt
 // Service req/resp structs (below)
 type reqServiceFunc struct {
     Arg1 StringWithAdapter_7208 `thrift:"arg1,1" json:"arg1" db:"arg1"`
-    Arg2 string `thrift:"arg2,2" json:"arg2" db:"arg2"`
+    Arg2 StringWithCppAdapter `thrift:"arg2,2" json:"arg2" db:"arg2"`
     Arg3 *Foo `thrift:"arg3,3" json:"arg3" db:"arg3"`
 }
 // Compile time interface enforcer
@@ -9307,7 +9333,7 @@ func (x *reqServiceFunc) GetArg1() StringWithAdapter_7208 {
     return x.Arg1
 }
 
-func (x *reqServiceFunc) GetArg2() string {
+func (x *reqServiceFunc) GetArg2() StringWithCppAdapter {
     return x.Arg2
 }
 
@@ -9328,12 +9354,12 @@ func (x *reqServiceFunc) SetArg1(value StringWithAdapter_7208) *reqServiceFunc {
     return x
 }
 
-func (x *reqServiceFunc) SetArg2NonCompat(value string) *reqServiceFunc {
+func (x *reqServiceFunc) SetArg2NonCompat(value StringWithCppAdapter) *reqServiceFunc {
     x.Arg2 = value
     return x
 }
 
-func (x *reqServiceFunc) SetArg2(value string) *reqServiceFunc {
+func (x *reqServiceFunc) SetArg2(value StringWithCppAdapter) *reqServiceFunc {
     x.Arg2 = value
     return x
 }
@@ -9375,7 +9401,8 @@ func (x *reqServiceFunc) writeField2(p thrift.Encoder) error {  // Arg2
     }
 
     item := x.Arg2
-    if err := p.WriteString(item); err != nil {
+    err := WriteStringWithCppAdapter(item, p)
+    if err != nil {
         return err
     }
 
@@ -9416,7 +9443,7 @@ func (x *reqServiceFunc) readField1(p thrift.Decoder) error {  // Arg1
 }
 
 func (x *reqServiceFunc) readField2(p thrift.Decoder) error {  // Arg2
-    result, err := p.ReadString()
+    result, err := ReadStringWithCppAdapter(p)
     if err != nil {
         return err
     }
@@ -9514,7 +9541,7 @@ func (x *reqServiceFunc) String() string {
 func (x *reqServiceFunc) setDefaults() *reqServiceFunc {
     return x.
         SetArg1NonCompat(NewStringWithAdapter_7208()).
-        SetArg2NonCompat("").
+        SetArg2NonCompat(NewStringWithCppAdapter()).
         SetArg3NonCompat(NewFoo())
 }
 

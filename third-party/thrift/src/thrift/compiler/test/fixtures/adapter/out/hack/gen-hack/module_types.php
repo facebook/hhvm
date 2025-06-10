@@ -87,6 +87,7 @@ type FooWithAdapter = \Adapter1::THackType;
 type StructWithAdapter = \Adapter2::THackType;
 type UnionWithAdapter = \Adapter2::THackType;
 type AdaptedA = \facebook\thrift\test\A;
+type StringWithCppAdapter = string;
 type DurationMs = int;
 type AdaptedBool = bool;
 type AdaptedByte = int;

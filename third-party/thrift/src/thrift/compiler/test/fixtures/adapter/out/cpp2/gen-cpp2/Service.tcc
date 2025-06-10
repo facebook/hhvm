@@ -11,7 +11,7 @@
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
 namespace facebook::thrift::test {
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithAdapter_7208*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::std::string*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::Foo*>> Service_func_pargs;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithAdapter_7208*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithCppAdapter*, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::Foo*>> Service_func_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::facebook::thrift::test::MyI32_4873*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>> Service_func_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
 void ServiceAsyncProcessor::setUpAndProcess_func(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
@@ -30,7 +30,7 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter_7208>();
-    std::unique_ptr<::std::string> uarg_arg2 = std::make_unique<::std::string>();
+    std::unique_ptr<::facebook::thrift::test::StringWithCppAdapter> uarg_arg2 = std::make_unique<::facebook::thrift::test::StringWithCppAdapter>();
     std::unique_ptr<::facebook::thrift::test::Foo> uarg_arg3 = std::make_unique<::facebook::thrift::test::Foo>();
     Service_func_pargs pargs() {
       Service_func_pargs args;

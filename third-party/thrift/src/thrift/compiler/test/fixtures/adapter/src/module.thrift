@@ -220,11 +220,13 @@ struct B {
 typedef A AdaptedA
 struct A {}
 
+@cpp.Adapter{name = "::my::Adapter2"}
+typedef string StringWithCppAdapter
+
 service Service {
   MyI32_4873 func(
     1: StringWithAdapter_7208 arg1,
-    @cpp.Adapter{name = "::my::Adapter2"}
-    2: string arg2,
+    2: StringWithCppAdapter arg2,
     3: Foo arg3,
   );
 }

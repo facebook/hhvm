@@ -34,7 +34,7 @@ pub trait Service: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn func(
         &self,
         _arg1: crate::types::StringWithAdapter_7208,
-        _arg2: ::std::string::String,
+        _arg2: crate::types::StringWithCppAdapter,
         _arg3: crate::types::Foo,
     ) -> ::std::result::Result<crate::types::MyI32_4873, crate::services::service::FuncExn> {
         ::std::result::Result::Err(crate::services::service::FuncExn::ApplicationException(
@@ -54,7 +54,7 @@ where
     async fn func(
         &self,
         arg1: crate::types::StringWithAdapter_7208,
-        arg2: ::std::string::String,
+        arg2: crate::types::StringWithCppAdapter,
         arg3: crate::types::Foo,
     ) -> ::std::result::Result<crate::types::MyI32_4873, crate::services::service::FuncExn> {
         (**self).func(
@@ -73,7 +73,7 @@ where
     async fn func(
         &self,
         arg1: crate::types::StringWithAdapter_7208,
-        arg2: ::std::string::String,
+        arg2: crate::types::StringWithCppAdapter,
         arg3: crate::types::Foo,
     ) -> ::std::result::Result<crate::types::MyI32_4873, crate::services::service::FuncExn> {
         (**self).func(
@@ -94,7 +94,7 @@ pub struct ServiceProcessor<P, H, R, RS> {
 
 struct Args_Service_func {
     arg1: <crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    arg2: ::std::string::String,
+    arg2: crate::types::StringWithCppAdapter,
     arg3: crate::types::Foo,
 }
 

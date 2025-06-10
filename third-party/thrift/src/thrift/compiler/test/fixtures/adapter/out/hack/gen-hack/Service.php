@@ -18,10 +18,10 @@ interface ServiceAsyncIf extends \IThriftAsyncIf {
    * Original thrift definition:-
    * MyI32_4873
    *   func(1: StringWithAdapter_7208 arg1,
-   *        2: string arg2,
+   *        2: StringWithCppAdapter arg2,
    *        3: Foo arg3);
    */
-  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873>;
+  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, \facebook\thrift\test\StringWithCppAdapter $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873>;
 }
 
 /**
@@ -34,10 +34,10 @@ interface ServiceIf extends \IThriftSyncIf {
    * Original thrift definition:-
    * MyI32_4873
    *   func(1: StringWithAdapter_7208 arg1,
-   *        2: string arg2,
+   *        2: StringWithCppAdapter arg2,
    *        3: Foo arg3);
    */
-  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): \facebook\thrift\test\MyI32_4873;
+  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, \facebook\thrift\test\StringWithCppAdapter $arg2, ?\facebook\thrift\test\Foo $arg3): \facebook\thrift\test\MyI32_4873;
 }
 
 /**
@@ -58,10 +58,10 @@ interface ServiceClientIf extends \IThriftSyncIf {
    * Original thrift definition:-
    * MyI32_4873
    *   func(1: StringWithAdapter_7208 arg1,
-   *        2: string arg2,
+   *        2: StringWithCppAdapter arg2,
    *        3: Foo arg3);
    */
-  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873>;
+  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, \facebook\thrift\test\StringWithCppAdapter $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873>;
 }
 
 /**
@@ -75,10 +75,10 @@ trait ServiceClientBase {
    * Original thrift definition:-
    * MyI32_4873
    *   func(1: StringWithAdapter_7208 arg1,
-   *        2: string arg2,
+   *        2: StringWithCppAdapter arg2,
    *        3: Foo arg3);
    */
-  public async function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873> {
+  public async function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, \facebook\thrift\test\StringWithCppAdapter $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
       'arg1' => $arg1,
@@ -135,21 +135,21 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
 
   const type TConstructorShape = shape(
     ?'arg1' => ?\facebook\thrift\test\StringWithAdapter_7208,
-    ?'arg2' => ?string,
+    ?'arg2' => ?\facebook\thrift\test\StringWithCppAdapter,
     ?'arg3' => ?\facebook\thrift\test\Foo,
   );
 
   const type TShape = shape(
     'arg1' => \facebook\thrift\test\StringWithAdapter_7208,
-    'arg2' => string,
+    'arg2' => \facebook\thrift\test\StringWithCppAdapter,
     ?'arg3' => ?\facebook\thrift\test\Foo::TShape,
   );
-  const int STRUCTURAL_ID = 1456593986927498685;
+  const int STRUCTURAL_ID = 2523845110818656514;
   public \facebook\thrift\test\StringWithAdapter_7208 $arg1;
-  public string $arg2;
+  public \facebook\thrift\test\StringWithCppAdapter $arg2;
   public ?\facebook\thrift\test\Foo $arg3;
 
-  public function __construct(?\facebook\thrift\test\StringWithAdapter_7208 $arg1 = null, ?string $arg2 = null, ?\facebook\thrift\test\Foo $arg3 = null)[] {
+  public function __construct(?\facebook\thrift\test\StringWithAdapter_7208 $arg1 = null, ?\facebook\thrift\test\StringWithCppAdapter $arg2 = null, ?\facebook\thrift\test\Foo $arg3 = null)[] {
     $this->arg1 = $arg1 ?? \Adapter1::fromThrift('');
     $this->arg2 = $arg2 ?? '';
     $this->arg3 = $arg3;
@@ -219,7 +219,16 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
               "id" => 2,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.StringWithCppAdapter",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                    )
+                  ),
                 )
               ),
               "name" => "arg2",
@@ -251,14 +260,14 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
       'struct' => dict[],
       'fields' => dict[
         'arg2' => shape(
-          'field' => dict[
+          'field' => dict[],
+          'type' => dict[
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
               )
             ),
           ],
-          'type' => dict[],
         ),
         'arg3' => shape(
           'field' => dict[],
@@ -303,7 +312,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
       $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\StringWithAdapter_7208>($parsed['arg1']);
     }
     if (idx($parsed, 'arg2') !== null) {
-      $this->arg2 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['arg2']);
+      $this->arg2 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\StringWithCppAdapter>($parsed['arg2']);
     }
     if (idx($parsed, 'arg3') !== null) {
       $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\Foo>($parsed['arg3']));
@@ -531,7 +540,16 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                     "id" => 2,
                     "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          shape(
+                            "name" => "module.StringWithCppAdapter",
+                            "underlyingType" => \tmeta_ThriftType::fromShape(
+                              shape(
+                                "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                              )
+                            ),
+                          )
+                        ),
                       )
                     ),
                     "name" => "arg2",

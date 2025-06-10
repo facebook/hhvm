@@ -35,6 +35,8 @@ pub type UnionWithAdapter = crate::types::Baz;
 
 pub type AdaptedA = crate::types::A;
 
+pub type StringWithCppAdapter = ::std::string::String;
+
 pub type DurationMs = ::std::primitive::i64;
 
 pub type AdaptedBool = ::std::primitive::bool;

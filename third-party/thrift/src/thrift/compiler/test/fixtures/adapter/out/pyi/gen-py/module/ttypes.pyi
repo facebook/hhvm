@@ -1516,6 +1516,7 @@ FooWithAdapter = Foo
 StructWithAdapter = my.Adapter2.Type
 UnionWithAdapter = my.Adapter2.Type
 AdaptedA = A
+StringWithCppAdapter = str
 DurationMs = int
 AdaptedBool = bool
 AdaptedByte = int

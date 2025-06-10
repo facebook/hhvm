@@ -27,12 +27,12 @@ var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
 type Service interface {
-    Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
+    Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }
 
 type ServiceClientInterface interface {
     io.Closer
-    Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
+    Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }
 
 type ServiceClient struct {
@@ -51,7 +51,7 @@ func (c *ServiceClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *ServiceClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
+func (c *ServiceClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error) {
     fbthriftReq := &reqServiceFunc{
         Arg1: arg1,
         Arg2: arg2,

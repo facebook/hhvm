@@ -814,10 +814,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   module_Service_func_arg2_2.id() = 2;
   module_Service_func_arg2_2.name() = "arg2";
   module_Service_func_arg2_2.is_optional() = false;
-  module_Service_func_arg2_2.structured_annotations() = {
-      *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct_ref(),
-  };
-  auto module_Service_func_arg2_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
+  auto module_Service_func_arg2_2_type = std::make_unique<Typedef>("module.StringWithCppAdapter", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct_ref(),  });
   module_Service_func_arg2_2_type->writeAndGenType(*module_Service_func_arg2_2.type(), metadata);
   func.arguments()->push_back(std::move(module_Service_func_arg2_2));
   ::apache::thrift::metadata::ThriftField module_Service_func_arg3_3;

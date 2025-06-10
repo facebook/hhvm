@@ -59,9 +59,9 @@ namespace module_constants {
   /** Glean {"constant": "container_of_adapted"} */
   ::std::vector<::facebook::thrift::test::AdaptedByte> const& container_of_adapted();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_58e261f6cdf5c0a6();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_58e261f6cdf5c0a6_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_58e261f6cdf5c0a6_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_6d60dbfef064445d();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_6d60dbfef064445d_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_6d60dbfef064445d_uris();
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

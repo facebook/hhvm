@@ -791,6 +791,14 @@ var (
             	UnderlyingTypeSpec: premadeCodecTypeSpec_module_Baz,
             },
     }
+    premadeCodecTypeSpec_module_StringWithCppAdapter = &thrift.TypeSpec{
+        FullName: "module.StringWithCppAdapter",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.StringWithCppAdapter",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+            },
+    }
     premadeCodecTypeSpec_module_MyI32_4873 = &thrift.TypeSpec{
         FullName: "module.MyI32_4873",
         CodecTypedefSpec:
@@ -2331,7 +2339,7 @@ var (
                     Name:                 "arg2",
                     ReflectIndex:         1,
                     IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_StringWithCppAdapter,
                     MustBeSetToSerialize: false,
                 },
                 {
@@ -2548,6 +2556,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32.FullName] = premadeCodecTypeSpec_module_MyI32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithAdapter.FullName] = premadeCodecTypeSpec_module_StructWithAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UnionWithAdapter.FullName] = premadeCodecTypeSpec_module_UnionWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithCppAdapter.FullName] = premadeCodecTypeSpec_module_StringWithCppAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32_4873.FullName] = premadeCodecTypeSpec_module_MyI32_4873
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter_7208.FullName] = premadeCodecTypeSpec_module_StringWithAdapter_7208
     return fbthriftTypeSpecsMap

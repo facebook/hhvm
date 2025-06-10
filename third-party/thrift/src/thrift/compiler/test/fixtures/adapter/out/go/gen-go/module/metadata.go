@@ -694,6 +694,14 @@ var (
                     UnderlyingType: premadeThriftType_module_Baz,
                 },
         }
+    premadeThriftType_module_StringWithCppAdapter =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.StringWithCppAdapter",
+                    UnderlyingType: premadeThriftType_string,
+                },
+        }
     premadeThriftType_module_MyI32_4873 =
         &metadata.ThriftType{
             TTypedef:
@@ -794,6 +802,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.MyI32"] = premadeThriftType_module_MyI32
     fbthriftThriftTypesMap["module.StructWithAdapter"] = premadeThriftType_module_StructWithAdapter
     fbthriftThriftTypesMap["module.UnionWithAdapter"] = premadeThriftType_module_UnionWithAdapter
+    fbthriftThriftTypesMap["module.StringWithCppAdapter"] = premadeThriftType_module_StringWithCppAdapter
     fbthriftThriftTypesMap["module.MyI32_4873"] = premadeThriftType_module_MyI32_4873
     fbthriftThriftTypesMap["module.StringWithAdapter_7208"] = premadeThriftType_module_StringWithAdapter_7208
     return fbthriftThriftTypesMap
@@ -1771,7 +1780,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Id:         2,
                             Name:       "arg2",
                             IsOptional: false,
-                            Type:       premadeThriftType_string,
+                            Type:       premadeThriftType_module_StringWithCppAdapter,
                         },
                         &metadata.ThriftField{
                             Id:         3,

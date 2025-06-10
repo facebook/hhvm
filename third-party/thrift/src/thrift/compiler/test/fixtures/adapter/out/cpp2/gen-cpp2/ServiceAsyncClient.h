@@ -37,52 +37,52 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual void func(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual void func(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual void func(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual void func(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
  protected:
-  void fbthrift_serialize_and_send_func(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_func(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual ::facebook::thrift::test::MyI32_4873 sync_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual ::facebook::thrift::test::MyI32_4873 sync_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual ::facebook::thrift::test::MyI32_4873 sync_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual ::facebook::thrift::test::MyI32_4873 sync_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual folly::Future<::facebook::thrift::test::MyI32_4873> future_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual folly::Future<::facebook::thrift::test::MyI32_4873> future_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual folly::Future<::facebook::thrift::test::MyI32_4873> future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual folly::Future<::facebook::thrift::test::MyI32_4873> future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
   template <int = 0>
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
     return co_func<false>(nullptr, p_arg1, p_arg2, p_arg3);
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
   template <int = 0>
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
     return co_func<true>(&rpcOptions, p_arg1, p_arg2, p_arg3);
   }
 #else
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
     co_return co_await folly::coro::detachOnCancel(semifuture_func(p_arg1, p_arg2, p_arg3));
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
     co_return co_await folly::coro::detachOnCancel(semifuture_func(rpcOptions, p_arg1, p_arg2, p_arg3));
   }
 #endif
  private:
   template <bool hasRpcOptions>
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions* rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions* rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     const bool cancellable = cancelToken.canBeCancelled();
@@ -136,7 +136,7 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
 #endif // FOLLY_HAS_COROUTINES
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  virtual void func(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  virtual void func(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
@@ -149,12 +149,12 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
   virtual folly::exception_wrapper recv_instance_wrapped_func(::facebook::thrift::test::MyI32_4873& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_func(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  apache::thrift::SerializedRequest fbthrift_serialize_func(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   template <typename RpcOptions>
   void fbthrift_send_func(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> funcCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
-  folly::SemiFuture<::facebook::thrift::test::MyI32_4873> fbthrift_semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  folly::SemiFuture<::facebook::thrift::test::MyI32_4873> fbthrift_semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
  public:
 };
 

@@ -133,7 +133,7 @@ impl<'mock> ::::Service for Service<'mock> {
         arg_arg3: &crate::types::Foo,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::MyI32_4873, crate::errors::service::FuncError>> {
         let mut closure = self.func.closure.lock().unwrap();
-        let closure: &mut dyn ::std::ops::FnMut(crate::types::StringWithAdapter_7208, ::std::string::String, crate::types::Foo) -> _ = &mut **closure;
+        let closure: &mut dyn ::std::ops::FnMut(crate::types::StringWithAdapter_7208, crate::types::StringWithCppAdapter, crate::types::Foo) -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure(arg_arg1.to_owned(), arg_arg2.to_owned(), arg_arg3.clone())))
     }
 }
@@ -246,7 +246,7 @@ pub mod r#impl {
 
         pub struct func<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
-                dyn ::std::ops::FnMut(crate::types::StringWithAdapter_7208, ::std::string::String, crate::types::Foo) -> ::std::result::Result<
+                dyn ::std::ops::FnMut(crate::types::StringWithAdapter_7208, crate::types::StringWithCppAdapter, crate::types::Foo) -> ::std::result::Result<
                     crate::types::MyI32_4873,
                     ::::errors::service::FuncError,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
@@ -257,7 +257,7 @@ pub mod r#impl {
         impl<'mock> func<'mock> {
             pub(crate) fn unimplemented() -> Self {
                 Self {
-                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: crate::types::StringWithAdapter_7208, _: ::std::string::String, _: crate::types::Foo| panic!(
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: crate::types::StringWithAdapter_7208, _: crate::types::StringWithCppAdapter, _: crate::types::Foo| panic!(
                         "{}::{} is not mocked",
                         "Service",
                         "func",
@@ -266,15 +266,15 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, value: crate::types::MyI32_4873) {
-                self.mock(move |_: crate::types::StringWithAdapter_7208, _: ::std::string::String, _: crate::types::Foo| value.clone());
+                self.mock(move |_: crate::types::StringWithAdapter_7208, _: crate::types::StringWithCppAdapter, _: crate::types::Foo| value.clone());
             }
 
-            pub fn mock(&self, mut mock: impl ::std::ops::FnMut(crate::types::StringWithAdapter_7208, ::std::string::String, crate::types::Foo) -> crate::types::MyI32_4873 + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut(crate::types::StringWithAdapter_7208, crate::types::StringWithCppAdapter, crate::types::Foo) -> crate::types::MyI32_4873 + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |arg1, arg2, arg3| ::std::result::Result::Ok(mock(arg1, arg2, arg3)));
             }
 
-            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(crate::types::StringWithAdapter_7208, ::std::string::String, crate::types::Foo) -> ::std::result::Result<crate::types::MyI32_4873, ::::errors::service::FuncError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(crate::types::StringWithAdapter_7208, crate::types::StringWithCppAdapter, crate::types::Foo) -> ::std::result::Result<crate::types::MyI32_4873, ::::errors::service::FuncError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |arg1, arg2, arg3| mock(arg1, arg2, arg3));
             }
@@ -285,7 +285,7 @@ pub mod r#impl {
                 E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
             {
                 let mut closure = self.closure.lock().unwrap();
-                *closure = ::std::boxed::Box::new(move |_: crate::types::StringWithAdapter_7208, _: ::std::string::String, _: crate::types::Foo| ::std::result::Result::Err(exception.clone().into()));
+                *closure = ::std::boxed::Box::new(move |_: crate::types::StringWithAdapter_7208, _: crate::types::StringWithCppAdapter, _: crate::types::Foo| ::std::result::Result::Err(exception.clone().into()));
             }
         }
     }

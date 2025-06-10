@@ -1619,12 +1619,27 @@ end = struct
       in
       create ~code:Error_code.InvalidRecursiveType ~claim ()
 
+    let recursive_where_clause pos name mentions =
+      let reasons =
+        lazy
+          (List.map mentions ~f:(fun mention ->
+               ( mention,
+                 Printf.sprintf
+                   "%s appears here"
+                   (Markdown_lite.md_codify @@ Utils.strip_ns name) )))
+      and claim =
+        lazy (pos, "Recursion is not supported via case type where clauses.")
+      in
+      create ~code:Error_code.InvalidRecursiveType ~claim ~reasons ()
+
     let to_error t ~env:_ =
       let open Typing_error.Primary.CaseType in
       match t with
       | Overlapping_variant_types { pos; name; why } ->
         overlapping_variant_types pos name why
       | Invalid_recursive { pos; name } -> invalid_recursive pos name
+      | Recursive_where_clause { pos; name; mentions } ->
+        recursive_where_clause pos name mentions
   end
 
   module Eval_simplihack = struct

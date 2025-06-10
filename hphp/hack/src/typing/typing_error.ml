@@ -424,6 +424,11 @@ module Primary = struct
           pos: Pos.t;
           name: string;
         }
+      | Recursive_where_clause of {
+          pos: Pos.t;
+          name: string;
+          mentions: Pos_or_decl.t list;
+        }
     [@@deriving show]
   end
 

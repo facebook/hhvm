@@ -5256,6 +5256,17 @@ end = struct
             let ( ||| ) = ( ||| ) ~fail in
             let try_variant (hint, wcs) env =
               let (env, hint_ty) = localize td_tparams hint env in
+              let valid ty =
+                not
+                @@ Typing_case_types.decl_ty_mentions_name_via_typedef
+                     env
+                     name_super
+                     ty
+              in
+              let wcs =
+                List.filter wcs ~f:(fun (left, _ck, right) ->
+                    valid left && valid right)
+              in
               List.fold_left
                 wcs
                 ~init:(simplify_ ty_sub hint_ty env)

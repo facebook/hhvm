@@ -1,1 +1,8 @@
-No errors
+ERROR: File "mutually_recursive_where_clauses.php", line 3, characters 11-11:
+Recursion is not supported via case type where clauses. (Typing[4485])
+  File "mutually_recursive_where_clauses.php", line 4, characters 36-44:
+  `A` appears here
+ERROR: File "mutually_recursive_where_clauses.php", line 4, characters 11-11:
+Recursion is not supported via case type where clauses. (Typing[4485])
+  File "mutually_recursive_where_clauses.php", line 3, characters 33-38:
+  `B` appears here

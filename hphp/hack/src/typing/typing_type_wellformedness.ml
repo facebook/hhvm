@@ -604,7 +604,7 @@ let typedef tenv (t : (_, _) typedef) =
   let {
     t_tparams;
     t_annotation = _;
-    t_name = _;
+    t_name;
     t_as_constraint;
     t_super_constraint;
     t_assignment;
@@ -702,7 +702,10 @@ let typedef tenv (t : (_, _) typedef) =
           Phase.localize_and_add_where_constraints
             tenv
             ~ignore_errors:true
-            constraints
+            (Typing_case_types.filter_where_clauses_with_recursive_mentions
+               tenv
+               t_name
+               constraints)
         in
         let env = { typedef_tparams; tenv } in
         hint_no_kind_check env hint @ where_constrs env constraints)

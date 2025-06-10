@@ -125,3 +125,18 @@ module AtomicDataTypes : sig
       common, otherwise returns false *)
   val are_disjoint : env -> t -> t -> bool
 end
+
+val decl_ty_mentions_name_via_typedef :
+  Typing_env_types.env -> string -> Typing_defs.decl_ty -> bool
+
+val find_where_clause_recursive_mentions :
+  Typing_env_types.env ->
+  Aast.sid ->
+  Aast.where_constraint_hint list ->
+  (Aast.where_constraint_hint * Typing_defs.decl_ty list) list
+
+val filter_where_clauses_with_recursive_mentions :
+  Typing_env_types.env ->
+  Aast.sid ->
+  Aast.where_constraint_hint list ->
+  Aast.where_constraint_hint list

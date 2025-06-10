@@ -223,6 +223,28 @@ let check_cycles env (t_pos, t_name) hints =
   |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
   env
 
+let check_where_clauses_with_recursive_mentions env t_name where_constraints =
+  let (pos, name) = t_name in
+  let report (_wc, decl_tyl) =
+    if not @@ List.is_empty decl_tyl then
+      let mentions =
+        List.map decl_tyl ~f:(fun decl_ty ->
+            Reason.to_pos @@ Typing_defs_core.get_reason decl_ty)
+      in
+      Typing_error_utils.add_typing_error
+        ~env
+        (Typing_error.casetype
+           (Typing_error.Primary.CaseType.Recursive_where_clause
+              { pos; name; mentions }))
+  in
+  let pairs =
+    Typing_case_types.find_where_clause_recursive_mentions
+      env
+      t_name
+      where_constraints
+  in
+  List.iter ~f:report pairs
+
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let {
@@ -279,11 +301,12 @@ let typedef_def ctx typedef =
 
   let env =
     if do_report_cycles env then
-      (* TODO(T201569125) cycle checking for constraints? *)
       check_cycles env t_name (List.map ~f:fst hint_constraints_pairs)
     else
       env
   in
+  List.filter_map hint_constraints_pairs ~f:snd
+  |> List.iter ~f:(check_where_clauses_with_recursive_mentions env t_name);
   let check_variant env (hint, constraints_opt) =
     let ((env, localize_ty_err_opt), ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
@@ -299,7 +322,10 @@ let typedef_def ctx typedef =
           Phase.localize_and_add_where_constraints
             env
             ~ignore_errors:true
-            constraints
+            (Typing_case_types.filter_where_clauses_with_recursive_mentions
+               env
+               t_name
+               constraints)
         in
         env
     in

@@ -392,7 +392,7 @@ let parse_options () =
             | "plain" -> error_format := Some Errors.Plain
             | "extended" -> error_format := Some Errors.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted|plain|flow> Error formatting style; (default: highlighted)"
+        "<extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
       ("--lint-json", Arg.Unit (set_mode Lint_json), " Produce json lint output");

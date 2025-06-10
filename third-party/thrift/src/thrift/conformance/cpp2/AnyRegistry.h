@@ -272,6 +272,9 @@ template <typename T, StandardProtocol... Ps>
 void registerGeneratedStruct() {
   const ThriftTypeInfo& type = getGeneratedThriftTypeInfo<T>();
   if (!getGeneratedAnyRegistry().registerType<T, Ps...>(type)) {
+    LOG(ERROR) << "Could not register: " << type.uri().value()
+               << ". Registry state: "
+               << getGeneratedAnyRegistry().debugString();
     folly::throw_exception<std::runtime_error>(
         "Could not register: " + type.uri().value());
   }

@@ -58,8 +58,12 @@ class BigValueRoute {
   using RouteHandlePtr = typename RouterInfo::RouteHandlePtr;
 
  public:
-  static std::string routeName() {
-    return "big-value";
+  std::string routeName() const {
+    return fmt::format(
+        "big-value|split_threshold={}|batch_size={}|hide_reply_flag={}",
+        options_.threshold,
+        options_.batchSize,
+        options_.hideReplyFlags ? "true" : "false");
   }
 
   template <class Request>

@@ -606,6 +606,12 @@ detail::map_t<K, V> read_map_as(Protocol& prot, std::uint32_t size) {
       static_assert(std::is_same_v<MapValueTy, ValueHolder>);
       if constexpr (detail::is_primitive_v<V>) {
         return NativeValue{read_primitive_as<Protocol, V>(prot)};
+      } else if constexpr (detail::is_list_v<V>) {
+        return NativeValue{read_list<Protocol>(prot)};
+      } else if constexpr (detail::is_set_v<V>) {
+        return NativeValue{read_set<Protocol>(prot)};
+      } else if constexpr (detail::is_map_v<V>) {
+        return NativeValue{read_map<Protocol>(prot)};
       } else {
         return NativeValue{read_struct<Protocol>(prot)};
       }

@@ -659,6 +659,51 @@ static_assert(
     native_map_is_fallback_v<NativeObject, non_primitives_t>,
     "Fallback for Object -> T");
 
+// ---- Nested container serde ---- //
+
+TEST(NativeObjectTest, nested_map_list) {
+  NativeMap map{experimental::MapOf<PT::I32, ValueHolder>{}};
+  map.as_type<experimental::MapOf<PT::I32, ValueHolder>>().emplace(
+      42, ValueHolder{experimental::make_list_of<PT::Double>(12.0)});
+  NativeValue val{std::move(map)};
+
+  auto serialized =
+      experimental::serializeValue<apache::thrift::BinaryProtocolWriter>(val);
+  NativeValue decoded = experimental::parseValue<
+      apache::thrift::BinaryProtocolReader,
+      apache::thrift::type::map_c>(*serialized);
+  EXPECT_EQ(decoded, val);
+}
+
+TEST(NativeObjectTest, nested_map_map) {
+  NativeMap map{experimental::MapOf<PT::I32, ValueHolder>{}};
+  map.as_type<experimental::MapOf<PT::I32, ValueHolder>>().emplace(
+      42, experimental::make_map_of<PT::I32, PT::Double>(1, 2.0));
+  NativeValue val{std::move(map)};
+
+  auto serialized =
+      experimental::serializeValue<apache::thrift::BinaryProtocolWriter>(val);
+  NativeValue decoded = experimental::parseValue<
+      apache::thrift::BinaryProtocolReader,
+      apache::thrift::type::map_c>(*serialized);
+  EXPECT_EQ(decoded, val);
+}
+
+TEST(NativeObjectTest, nested_map_set) {
+  NativeMap map{experimental::MapOf<PT::I32, ValueHolder>{}};
+  // TODO(sadroeck) - Replace with make_set_of once it is implemented
+  map.as_type<experimental::MapOf<PT::I32, ValueHolder>>().emplace(
+      42, ValueHolder{NativeSet{experimental::SetOf<PT::Double>{12.0}}});
+  NativeValue val{std::move(map)};
+
+  auto serialized =
+      experimental::serializeValue<apache::thrift::BinaryProtocolWriter>(val);
+  NativeValue decoded = experimental::parseValue<
+      apache::thrift::BinaryProtocolReader,
+      apache::thrift::type::map_c>(*serialized);
+  EXPECT_EQ(decoded, val);
+}
+
 // ---- make_list_of tests ---- //
 
 TEST(NativeObjectTest, make_list_of_bool) {

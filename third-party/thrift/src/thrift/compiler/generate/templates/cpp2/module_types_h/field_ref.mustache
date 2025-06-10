@@ -137,9 +137,13 @@
 {{^struct:legacy_api?}}
  private:
 {{/struct:legacy_api?}}
+  [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
   FOLLY_ERASE auto {{mixin:field_name}}_ref() &       { return {{mixin:name}}_ref()->{{mixin:accessor}}(); }
+  [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
   FOLLY_ERASE auto {{mixin:field_name}}_ref() const&  { return {{mixin:name}}_ref()->{{mixin:accessor}}(); }
+  [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
   FOLLY_ERASE auto {{mixin:field_name}}_ref() &&      { return std::move(*{{mixin:name}}_ref()).{{mixin:accessor}}(); }
+  [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
   FOLLY_ERASE auto {{mixin:field_name}}_ref() const&& { return std::move(*{{mixin:name}}_ref()).{{mixin:accessor}}(); }
 {{^struct:legacy_api?}}
  public:

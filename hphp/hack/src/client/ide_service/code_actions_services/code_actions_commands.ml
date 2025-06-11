@@ -318,10 +318,10 @@ let generate_simplihack_commands ctx tast pos =
     Simplihack_prompt.find ctx tast.Tast_with_dynamic.under_normal_assumptions
   in
   let create_code_action
-      Simplihack_prompt.{ param_pos; derive_prompt; edit_span } =
+      Simplihack_prompt.{ param_pos; derive_prompt; _ (* edit_span *) } =
     let open Option.Let_syntax in
-    (* Convert the relative position to an absolute position *)
-    let param_pos = Pos.to_absolute param_pos in
+    (* Convert the relative position to an absolute position, but we don't use it for sidebar chat *)
+    let _param_pos = Pos.to_absolute param_pos in
     let* derived_prompt = derive_prompt () in
     let hash = Md5.digest_string derived_prompt |> Md5.to_hex in
     let user_prompt =
@@ -393,32 +393,21 @@ let generate_simplihack_commands ctx tast pos =
         hash
         derived_prompt
     in
-    let predefined_prompt =
-      Code_action_types.Show_inline_chat_command_args.
-        {
-          command = "SimpliHack";
-          description = Some "Handle __SimpliHack attribute";
-          display_prompt = derived_prompt;
-          user_prompt;
-          model = Some CODE_31;
-          rules = None;
-          task = None;
-          prompt_template = None;
-          add_diagnostics = None;
-        }
-    in
-    (* Calculate the webview start line (LSP uses 0-based line numbers) *)
-    let webview_start_line = Pos.line param_pos - 1 in
     let command_args =
       Code_action_types.(
-        Show_inline_chat
-          Show_inline_chat_command_args.
+        Show_sidebar_chat
+          Show_sidebar_chat_command_args.
             {
-              entrypoint = "HandleUserAttributeCodeAction";
-              predefined_prompt;
-              override_selection = Pos.to_absolute edit_span;
-              webview_start_line;
-              extras = Hh_json.JSON_Object [];
+              display_prompt = derived_prompt;
+              model_prompt = Some user_prompt;
+              llm_config = None;
+              model = Some CLAUDE_37_SONNET;
+              attachments = None;
+              action = DEVMATE;
+              trigger = Some "HandleUserAttributeCodeAction";
+              trigger_type = Some Code_action;
+              local_tool_results = None;
+              correlation_id = None;
             })
     in
     return

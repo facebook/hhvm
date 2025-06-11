@@ -155,6 +155,12 @@ void detail::validate_annotation_scopes(
         // Prevent duplicate error for field annotation on function parameter
         is_valid_scope = true;
       }
+    } else if constexpr (
+        check_type == detail::scope_check_type::thrown_exception) {
+      // Thrown exceptions are modelled in the AST as t_field in a struct for
+      // all exceptions a function might throw, but do not accept field-scoped
+      // annotations.
+      is_valid_scope = allowed.scope_uris.count(kScopeThrownExceptionUri) > 0;
     } else {
       // For non-function parameter nodes, we expect a one-to-one mapping of AST
       // node type to accepted annotation scope, so type_scope_uri_map can be
@@ -176,6 +182,9 @@ detail::validate_annotation_scopes<detail::scope_check_type::default_scopes>(
     sema_context& ctx, const t_named& node);
 template void detail::validate_annotation_scopes<
     detail::scope_check_type::function_parameter>(
+    sema_context& ctx, const t_named& node);
+template void
+detail::validate_annotation_scopes<detail::scope_check_type::thrown_exception>(
     sema_context& ctx, const t_named& node);
 
 } // namespace apache::thrift::compiler

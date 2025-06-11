@@ -1672,7 +1672,9 @@ ast_validator standard_validator() {
   validator.add_interaction_visitor(&validate_interaction_annotations);
 
   validator.add_thrown_exception_visitor(&validate_throws_exceptions);
-  validator.add_thrown_exception_visitor(&detail::validate_annotation_scopes<>);
+  validator.add_thrown_exception_visitor(
+      &detail::validate_annotation_scopes<
+          detail::scope_check_type::thrown_exception>);
 
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});

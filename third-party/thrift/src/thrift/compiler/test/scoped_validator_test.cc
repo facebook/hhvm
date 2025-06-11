@@ -38,6 +38,9 @@ std::string kAnnotations = R"(
   @scope.Exception
   struct ExceptionAnnotation {}
 
+  @scope.ThrownException
+  struct ThrownExceptionAnnotation {}
+
   @scope.Field
   struct FieldAnnotation {}
 
@@ -82,6 +85,7 @@ TEST(ScopedValidatorTest, InvalidProgramScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `invalid_program_scope`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `invalid_program_scope`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `invalid_program_scope`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `invalid_program_scope`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `invalid_program_scope`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `invalid_program_scope`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `invalid_program_scope`
@@ -110,6 +114,7 @@ TEST(ScopedValidatorTest, InvalidStructScopeTest) {
     @annotations.StructAnnotation
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyStruct`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyStruct`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyStruct`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyStruct`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyStruct`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyStruct`
@@ -138,6 +143,7 @@ TEST(ScopedValidatorTest, InvalidUnionScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyUnion`
     @annotations.UnionAnnotation
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyUnion`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyUnion`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyUnion`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyUnion`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyUnion`
@@ -166,6 +172,7 @@ TEST(ScopedValidatorTest, InvalidExceptionScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyException`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyException`
     @annotations.ExceptionAnnotation
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyException`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyException`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyException`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyException`
@@ -195,6 +202,7 @@ TEST(ScopedValidatorTest, InvalidFieldScopeTest) {
       @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `myField`
       @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `myField`
       @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `myField`
+      @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `myField`
       @annotations.FieldAnnotation
       @annotations.FieldOrParameterAnnotation
       @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `myField`
@@ -224,6 +232,7 @@ TEST(ScopedValidatorTest, InvalidTypedefScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyTypedef`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyTypedef`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyTypedef`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyTypedef`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyTypedef`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyTypedef`
     @annotations.TypedefAnnotation
@@ -252,6 +261,7 @@ TEST(ScopedValidatorTest, InvalidServiceScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyService`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyService`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyService`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyService`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyService`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyService`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyService`
@@ -280,6 +290,7 @@ TEST(ScopedValidatorTest, InvalidInteractionScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyInteraction`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyInteraction`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyInteraction`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyInteraction`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyInteraction`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyInteraction`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyInteraction`
@@ -309,6 +320,7 @@ TEST(ScopedValidatorTest, InvalidFunctionScopeTest) {
       @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `myFunction`
       @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `myFunction`
       @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `myFunction`
+      @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `myFunction`
       @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `myFunction`
       @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `myFunction`
       @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `myFunction`
@@ -340,6 +352,7 @@ TEST(ScopedValidatorTest, InvalidFunctionParameterScopeTest) {
         @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `param`
         @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `param`
         @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `param`
+        @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `param`
         @annotations.FieldAnnotation              # expected-warning: Using field-scoped annotation `FieldAnnotation` to annotate parameter `param` - add @scope.FunctionParameter for function parameters
         @annotations.FieldOrParameterAnnotation
         @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `param`
@@ -358,6 +371,41 @@ TEST(ScopedValidatorTest, InvalidFunctionParameterScopeTest) {
   check_compile(name_contents_map, "invalid_function_parameter_scope.thrift");
 }
 
+TEST(ScopedValidatorTest, InvalidThrownExceptionScopeTest) {
+  std::map<std::string, std::string> name_contents_map;
+
+  name_contents_map["annotations.thrift"] = kAnnotations;
+
+  name_contents_map["invalid_thrown_exception_scope.thrift"] = R"(
+    include "annotations.thrift"
+
+    exception MyException {}
+
+    service MyService {
+      void myFunction() throws (
+        @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `ex`
+        @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `ex`
+        @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `ex`
+        @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `ex`
+        @annotations.ThrownExceptionAnnotation
+        @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `ex`
+        @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `ex`
+        @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `ex`
+        @annotations.ServiceAnnotation            # expected-error: `ServiceAnnotation` cannot annotate `ex`
+        @annotations.InteractionAnnotation        # expected-error: `InteractionAnnotation` cannot annotate `ex`
+        @annotations.FunctionAnnotation           # expected-error: `FunctionAnnotation` cannot annotate `ex`
+        @annotations.FunctionParameterAnnotation  # expected-error: `FunctionParameterAnnotation` cannot annotate `ex`
+        @annotations.EnumAnnotation               # expected-error: `EnumAnnotation` cannot annotate `ex`
+        @annotations.EnumValueAnnotation          # expected-error: `EnumValueAnnotation` cannot annotate `ex`
+        @annotations.ConstAnnotation              # expected-error: `ConstAnnotation` cannot annotate `ex`
+        1: MyException ex
+      );
+    }
+  )";
+
+  check_compile(name_contents_map, "invalid_thrown_exception_scope.thrift");
+}
+
 TEST(ScopedValidatorTest, InvalidEnumScopeTest) {
   std::map<std::string, std::string> name_contents_map;
 
@@ -370,6 +418,7 @@ TEST(ScopedValidatorTest, InvalidEnumScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyEnum`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyEnum`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyEnum`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyEnum`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyEnum`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyEnum`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyEnum`
@@ -399,6 +448,7 @@ TEST(ScopedValidatorTest, InvalidEnumValueScopeTest) {
       @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MY_ENUM_VALUE`
       @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MY_ENUM_VALUE`
       @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MY_ENUM_VALUE`
+      @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MY_ENUM_VALUE`
       @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MY_ENUM_VALUE`
       @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MY_ENUM_VALUE`
       @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MY_ENUM_VALUE`
@@ -428,6 +478,7 @@ TEST(ScopedValidatorTest, InvalidConstScopeTest) {
     @annotations.StructAnnotation             # expected-error: `StructAnnotation` cannot annotate `MyConst`
     @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `MyConst`
     @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `MyConst`
+    @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `MyConst`
     @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `MyConst`
     @annotations.FieldOrParameterAnnotation   # expected-error: `FieldOrParameterAnnotation` cannot annotate `MyConst`
     @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `MyConst`

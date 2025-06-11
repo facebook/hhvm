@@ -54,8 +54,11 @@ void check_duplicate_keys(diagnostics_engine& diags, const t_const& const_);
 void check_duplicate_keys(diagnostics_engine& diags, const t_field& field);
 
 enum scope_check_type {
+  // Default scope check, based on one-to-one mapping between AST node type and
+  // scope URI
   default_scopes,
   function_parameter,
+  thrown_exception,
 };
 
 template <scope_check_type check_type = scope_check_type::default_scopes>

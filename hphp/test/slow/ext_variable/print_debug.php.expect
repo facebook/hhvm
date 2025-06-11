@@ -1,0 +1,27 @@
+Debugging Class ADebugging Class BVec
+(
+    [0] => Debugging Class A
+    [1] => Debugging Class B
+)
+Vec
+(
+    [0] => Dict
+        (
+            [a] => Debugging Class A
+            [b] => Debugging Class B
+        )
+
+)
+Vec
+(
+    [0] => Vec
+        (
+            [0] => Dict
+                (
+                    [a] => Debugging Class A
+                    [b] => Debugging Class B
+                )
+
+        )
+
+)

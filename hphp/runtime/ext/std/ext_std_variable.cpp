@@ -249,6 +249,11 @@ ALWAYS_INLINE Variant var_export_impl(const Variant& expression,
   return res;
 }
 
+Variant HHVM_FUNCTION(print_debug_display, const Variant& expression, bool ret) {
+  VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+  return vs.serialize(expression, ret);
+}
+
 Variant HHVM_FUNCTION(var_export, const Variant& expression,
                                   bool ret /* = false */) {
   return var_export_impl(expression, ret, false);
@@ -688,6 +693,7 @@ void StandardExtension::registerNativeVariable() {
   HHVM_FE(get_resource_type);
   HHVM_FE(print_r);
   HHVM_FE(print_r_pure);
+  HHVM_FE(print_debug_display);
   HHVM_FE(var_export);
   HHVM_FE(var_export_pure);
   HHVM_FE(debug_zval_dump);

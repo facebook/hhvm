@@ -46,6 +46,10 @@ namespace {
   function print_r_pure(
     HH\FIXME\MISSING_PARAM_TYPE $expression,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function print_debug_display(
+    HH\FIXME\MISSING_PARAM_TYPE $expression,
+    bool $ret = false,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function var_export(
     HH\FIXME\MISSING_PARAM_TYPE $expression,

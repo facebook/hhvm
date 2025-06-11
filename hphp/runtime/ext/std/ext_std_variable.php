@@ -129,6 +129,14 @@ function print_r(mixed $expression,
 <<__Native>>
 function print_r_pure(mixed $expression)[]: mixed;
 
+/* print_debug_display() displays information about a variable for debugging
+ * purposes. It will call __toDebugDisplay() on the object if it exists.
+ */
+<<__Native>>
+function print_debug_display(mixed $expression,
+                 bool $ret = false): mixed;
+
+
 <<__Native>>
 function var_export(mixed $expression,
                     bool $ret = false): mixed;

@@ -867,7 +867,12 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
 
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
-  if (isDownstream()) {
+  //
+  // TODO(T227264326) remove the `isRequest` check since it is strictly not
+  // needed. It was added as a work-around to ensure the `requestStarted`
+  // callback will never be invoked for a response, especially in certain
+  // scenario such as H2 pubsub. See D76341533 for details.
+  if (isDownstream() && msg->isRequest()) {
     if (msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
@@ -1614,7 +1619,12 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
 
   // If this is a client sending request headers to upstream
   // invoke requestStarted event for attached observers.
-  if (isUpstream()) {
+  //
+  // TODO(T227264326) remove the `isRequest` check since it is strictly not
+  // needed. It was added as a work-around to ensure the `requestStarted`
+  // callback will never be invoked for a response, especially in certain
+  // scenario such as H2 pubsub. See D76341533 for details.
+  if (isUpstream() && headers.isRequest()) {
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())

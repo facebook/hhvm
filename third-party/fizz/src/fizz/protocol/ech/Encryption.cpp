@@ -141,10 +141,8 @@ folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
     }
 
     // Check for an invalid public name and skip if found.
-    std::string publicName =
-        config.public_name->cloneCoalescedAsValue().to<std::string>();
-    if (!isValidPublicName(publicName)) {
-      VLOG(8) << publicName << " isn't a valid public name";
+    if (!isValidPublicName(config.public_name)) {
+      VLOG(8) << config.public_name << " isn't a valid public name";
       continue;
     }
 

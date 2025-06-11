@@ -37,7 +37,7 @@ ParsedECHConfig getParsedECHConfig() {
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
   parsedECHConfig.key_config.cipher_suites = {suite};
   parsedECHConfig.maximum_name_length = 50;
-  parsedECHConfig.public_name = folly::IOBuf::copyBuffer("public.dummy.com");
+  parsedECHConfig.public_name = "public.dummy.com";
   folly::StringPiece cookie{"002c00080006636f6f6b6965"};
   parsedECHConfig.extensions = getExtensions(cookie);
   return parsedECHConfig;

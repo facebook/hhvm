@@ -180,7 +180,7 @@ std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs(
     echConfig.version = ech::ECHVersion::Draft15;
     echConfig.ech_config_content = encode(config.echConfig);
     if (maybeSni.hasValue() &&
-        maybeSni.value() == config.echConfig.public_name->to<std::string>()) {
+        maybeSni.value() == config.echConfig.public_name) {
       retryConfigs.push_back(std::move(echConfig));
     } else {
       nonMatchingConfigs.push_back(std::move(echConfig));

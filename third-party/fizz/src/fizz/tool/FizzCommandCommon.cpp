@@ -241,8 +241,7 @@ folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigs(
     }
 
     ech::ParsedECHConfig echConfig;
-    echConfig.public_name =
-        folly::IOBuf::copyBuffer(config["public_name"].asString());
+    echConfig.public_name = config["public_name"].asString();
 
     echConfig.key_config.config_id =
         folly::to<uint8_t>(strToNum(config["config_id"].asString()));
@@ -288,7 +287,7 @@ std::vector<ech::ParsedECHConfig> getDefaultECHConfigs() {
 
   // Set the ECH config content.
   ech::ParsedECHConfig echConfigContent;
-  echConfigContent.public_name = folly::IOBuf::copyBuffer("publicname");
+  echConfigContent.public_name = "publicname";
 
   echConfigContent.key_config.cipher_suites = {ech::HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};

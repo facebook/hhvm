@@ -36,7 +36,7 @@ inline void detail::write<ech::ECHConfigContentDraft>(
     folly::io::Appender& out) {
   detail::write(echConfigContent.key_config, out);
   detail::write(echConfigContent.maximum_name_length, out);
-  detail::writeBuf<uint8_t>(echConfigContent.public_name, out);
+  detail::writeString<uint8_t>(echConfigContent.public_name, out);
   detail::writeVector<uint16_t>(echConfigContent.extensions, out);
 }
 
@@ -79,7 +79,7 @@ struct detail::Sizer<ech::ECHConfigContentDraft> {
   size_t getSize(const ech::ECHConfigContentDraft& echConfigContent) {
     auto sz = detail::getSize(echConfigContent.key_config) +
         sizeof(uint8_t) + // maximum_name_length
-        detail::getBufSize<uint8_t>(echConfigContent.public_name) +
+        detail::getStringSize<uint8_t>(echConfigContent.public_name) +
         sizeof(uint16_t); // len(extensions)
     // extensions
     for (const auto& ext : echConfigContent.extensions) {
@@ -142,8 +142,8 @@ struct detail::Reader<ech::ECHConfigContentDraft> {
     size_t len = 0;
     len += detail::read(echConfigContent.key_config, cursor);
     len += detail::read(echConfigContent.maximum_name_length, cursor);
-    len += detail::readBuf<uint8_t>(echConfigContent.public_name, cursor);
-    if (!echConfigContent.public_name) {
+    len += detail::readString<uint8_t>(echConfigContent.public_name, cursor);
+    if (echConfigContent.public_name.empty()) {
       throw std::runtime_error("Invalid public name length");
     }
     len += detail::readVector<uint16_t>(echConfigContent.extensions, cursor);

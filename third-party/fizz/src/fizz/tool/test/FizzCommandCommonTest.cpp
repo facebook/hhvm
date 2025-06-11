@@ -28,10 +28,8 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsBase64) {
   auto echConfigs = std::move(maybeParsedECHConfigs.value());
   ASSERT_EQ(echConfigs.size(), 1);
   auto firstConfig = echConfigs[0];
-  ASSERT_TRUE(folly::IOBufEqualTo()(
-      firstConfig.public_name,
-      folly::IOBuf::copyBuffer("ech-public.atmeta.com")));
   ASSERT_EQ(firstConfig.key_config.kem_id, hpke::KEMId::x25519);
+  ASSERT_EQ(firstConfig.public_name, "ech-public.atmeta.com");
   ASSERT_EQ(
       firstConfig.key_config.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
   ASSERT_EQ(
@@ -78,8 +76,7 @@ TEST(FizzCommandCommonTest, TestMissingPortHostPortFromString) {
 }
 
 void checkParsedECHConfig(const ech::ParsedECHConfig& echConfig) {
-  ASSERT_TRUE(folly::IOBufEqualTo()(
-      echConfig.public_name, folly::IOBuf::copyBuffer("publicname")));
+  ASSERT_EQ("publicname", echConfig.public_name);
   auto expectedPubKey =
       "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0";
   ASSERT_TRUE(folly::IOBufEqualTo()(

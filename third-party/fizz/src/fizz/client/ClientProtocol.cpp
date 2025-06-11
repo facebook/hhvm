@@ -683,7 +683,7 @@ namespace {
 struct ECHParams {
   hpke::SetupResult setupResult;
   ech::NegotiatedECHConfig negotiatedECHConfig;
-  Buf fakeSni;
+  std::string fakeSni;
 };
 } // namespace
 
@@ -698,7 +698,7 @@ static folly::Optional<ECHParams> setupECH(
   auto negotiatedECHConfig = getNegotiatedECHConfig(
       echConfigs.value(), supportedCiphers, supportedGroups);
 
-  auto fakeSni = negotiatedECHConfig.config.public_name->clone();
+  auto fakeSni = negotiatedECHConfig.config.public_name;
   auto kemId = negotiatedECHConfig.config.key_config.kem_id;
   auto kex =
       factory.makeKeyExchange(getKexGroup(kemId), KeyExchangeRole::Client);
@@ -742,7 +742,7 @@ static ClientHello constructEncryptedClientHello(
     const ech::NegotiatedECHConfig& negotiatedECHConfig,
     hpke::SetupResult& hpkeSetup,
     const Random& outerRandom,
-    Buf fakeSni,
+    const std::string& fakeSni,
     const folly::Optional<ClientPresharedKey>& greasePsk,
     const std::vector<ExtensionType>& outerExtensionTypes) {
   DCHECK(e == Event::ClientHello || e == Event::HelloRetryRequest);
@@ -760,7 +760,8 @@ static ClientHello constructEncryptedClientHello(
 
   // Put in the fake SNI
   replaceOrAddExtension(
-      chloOuter.extensions, ServerNameList(ServerName(std::move(fakeSni))));
+      chloOuter.extensions,
+      ServerNameList(ServerName(folly::IOBuf::copyBuffer(fakeSni))));
 
   // Substitute in outer random
   chloOuter.random = outerRandom;
@@ -960,13 +961,13 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
         echParams->negotiatedECHConfig,
         echParams->setupResult,
         random,
-        echParams->fakeSni->clone(),
+        echParams->fakeSni,
         greasePsk,
         context->getECHOuterExtensionTypes());
 
     // Update SNI now
     echSni = std::move(sni);
-    sni = echParams->fakeSni->to<std::string>();
+    sni = echParams->fakeSni;
 
     // Save client hello inner
     encodedECH = std::move(encodedClientHello);
@@ -1674,7 +1675,7 @@ Actions EventHandler<
         state.echState()->negotiatedECHConfig,
         state.echState()->hpkeSetup,
         *state.clientRandom(),
-        folly::IOBuf::copyBuffer(*state.sni()),
+        *state.sni(),
         greasePsk,
         state.context()->getECHOuterExtensionTypes());
 

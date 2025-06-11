@@ -108,7 +108,7 @@ ParsedECHConfig makeDummyConfig(
     const std::string& publicName) {
   auto config = ParsedECHConfig{};
   config.key_config.config_id = configId;
-  config.public_name = folly::IOBuf::copyBuffer(publicName);
+  config.public_name = publicName;
   config.key_config.public_key = folly::IOBuf::copyBuffer("public");
   return config;
 }
@@ -126,7 +126,7 @@ void checkRetryConfigExpectation(
     auto config = ParsedECHConfig::parseSupportedECHConfig(configs[i]);
     ASSERT_TRUE(config.hasValue());
     EXPECT_EQ(expectations[i].id, config->key_config.config_id);
-    EXPECT_EQ(expectations[i].name, config->public_name->to<std::string>());
+    EXPECT_EQ(expectations[i].name, config->public_name);
   }
 }
 

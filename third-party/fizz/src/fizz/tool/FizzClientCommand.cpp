@@ -423,8 +423,7 @@ class Connection : public AsyncSocket::ConnectCallback,
                 << toString(getCipherSuite(ciphersuite.aead_id));
       LOG(INFO) << "    Named Group: "
                 << toString(getKexGroup(echConfigContent.key_config.kem_id));
-      LOG(INFO) << "    Fake SNI Used: "
-                << echConfigContent.public_name->clone()->moveToFbString();
+      LOG(INFO) << "    Fake SNI Used: " << echConfigContent.public_name;
     }
   }
 

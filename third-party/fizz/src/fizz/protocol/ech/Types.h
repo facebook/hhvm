@@ -104,7 +104,7 @@ struct ECHConfigContentDraft {
   ECHConfigContentDraft(const ECHConfigContentDraft& other) {
     key_config = other.key_config;
     maximum_name_length = other.maximum_name_length;
-    public_name = other.public_name->clone();
+    public_name = other.public_name;
     extensions = std::vector<Extension>();
     for (const auto& extension : other.extensions) {
       extensions.push_back(extension.clone());
@@ -117,7 +117,7 @@ struct ECHConfigContentDraft {
     if (this != &other) {
       key_config = other.key_config;
       maximum_name_length = other.maximum_name_length;
-      public_name = other.public_name->clone();
+      public_name = other.public_name;
       extensions = std::vector<Extension>();
       for (const auto& extension : other.extensions) {
         extensions.push_back(extension.clone());
@@ -130,7 +130,7 @@ struct ECHConfigContentDraft {
 
   HpkeKeyConfig key_config;
   uint8_t maximum_name_length{};
-  Buf public_name;
+  std::string public_name;
   std::vector<Extension> extensions;
 };
 

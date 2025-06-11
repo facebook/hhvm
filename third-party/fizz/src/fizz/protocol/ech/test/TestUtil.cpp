@@ -27,26 +27,27 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
   return exts;
 }
 
-ParsedECHConfig getParsedECHConfig() {
-  HpkeSymmetricCipherSuite suite{
-      hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
+ParsedECHConfig getParsedECHConfig(ECHConfigParam param) {
   ParsedECHConfig parsedECHConfig;
-  parsedECHConfig.key_config.config_id = 0xFB;
+  parsedECHConfig.key_config.config_id = param.configId;
   parsedECHConfig.key_config.kem_id = hpke::KEMId::secp256r1;
   parsedECHConfig.key_config.public_key = openssl::detail::encodeECPublicKey(
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
-  parsedECHConfig.key_config.cipher_suites = {suite};
+  parsedECHConfig.key_config.cipher_suites.push_back(HpkeSymmetricCipherSuite{
+      hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256});
   parsedECHConfig.maximum_name_length = 50;
-  parsedECHConfig.public_name = "public.dummy.com";
-  folly::StringPiece cookie{"002c00080006636f6f6b6965"};
-  parsedECHConfig.extensions = getExtensions(cookie);
+  parsedECHConfig.public_name = std::move(param.publicName);
+  if (param.cookie.hasValue()) {
+    parsedECHConfig.extensions =
+        getExtensions(folly::StringPiece(param.cookie.value()));
+  }
   return parsedECHConfig;
 }
 
-ECHConfig getECHConfig() {
+ECHConfig getECHConfig(ECHConfigParam param) {
   ECHConfig config;
   config.version = ECHVersion::Draft15;
-  config.ech_config_content = encode(getParsedECHConfig());
+  config.ech_config_content = encode(getParsedECHConfig(std::move(param)));
   return config;
 }
 

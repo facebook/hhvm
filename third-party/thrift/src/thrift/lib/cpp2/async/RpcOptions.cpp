@@ -159,6 +159,15 @@ const std::string& RpcOptions::getShardId() const {
   return shardId_;
 }
 
+RpcOptions& RpcOptions::setOperationMask(int32_t operationMask) {
+  operationMask_ = operationMask;
+  return *this;
+}
+
+int32_t RpcOptions::getOperationMask() const {
+  return operationMask_;
+}
+
 void RpcOptions::setReadHeaders(
     transport::THeader::StringToStringMap&& readHeaders) {
   readHeaders_ = std::move(readHeaders);

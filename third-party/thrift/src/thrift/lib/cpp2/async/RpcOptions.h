@@ -132,6 +132,9 @@ class RpcOptions {
   RpcOptions& setShardId(std::string shardId);
   const std::string& getShardId() const;
 
+  RpcOptions& setOperationMask(int32_t operationMask);
+  int32_t getOperationMask() const;
+
   void setWriteHeader(std::string_view key, std::string value);
   const transport::THeader::StringToStringMap& getWriteHeaders() const;
   transport::THeader::StringToStringMap releaseWriteHeaders();
@@ -194,6 +197,7 @@ class RpcOptions {
   bool enableChecksum_{false};
   BufferOptions bufferOptions_;
   int64_t interactionId_{0};
+  int32_t operationMask_{0};
   uint8_t contextPropComponentEnabledMask_{0xff};
 
   std::string routingKey_;

@@ -260,7 +260,22 @@ final class ThriftContextPropState {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.fb_vc.'.$src);
 
-    $fb_user_id = self::coerceId($vc->getUserID());
+    if ($vc is FBFreeBasicServicesViewerContext) {
+      call_defaults_from_zoned_shallow(
+        ()[defaults] ==> {
+          FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
+            '%s called on %s, replacing with zero',
+            __FUNCTION__,
+            nameof FBFreeBasicServicesViewerContext,
+          );
+        },
+        'temporary debug logging with no user data to remove this hack',
+      );
+      $user_id = ZERO_FBID;
+    } else {
+      $user_id = $vc->getUserID();
+    }
+    $fb_user_id = self::coerceId($user_id);
     return self::updateFBUserId($fb_user_id, $src);
   }
 

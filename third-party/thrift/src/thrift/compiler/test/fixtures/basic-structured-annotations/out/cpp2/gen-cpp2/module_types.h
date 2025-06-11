@@ -1871,24 +1871,28 @@ class MyUnion final  {
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  [[deprecated("first_ref() is deprecated, use first() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> first_ref() const& {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  [[deprecated("first_ref() is deprecated, use first() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> first_ref() const&& {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  [[deprecated("first_ref() is deprecated, use first() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> first_ref() & {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  [[deprecated("first_ref() is deprecated, use first() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> first_ref() && {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1909,24 +1913,28 @@ class MyUnion final  {
   }
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  [[deprecated("second_ref() is deprecated, use second() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> second_ref() const& {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  [[deprecated("second_ref() is deprecated, use second() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> second_ref() const&& {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  [[deprecated("second_ref() is deprecated, use second() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> second_ref() & {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  [[deprecated("second_ref() is deprecated, use second() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> second_ref() && {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }

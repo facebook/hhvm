@@ -1310,24 +1310,28 @@ class union1 final  {
 
   /** Glean { "field": "ui" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_ref() is deprecated, use ui() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ui_ref() const& {
     return {value_.ui, fbthrift_type_, folly::to_underlying(Type::ui), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_ref() is deprecated, use ui() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ui_ref() const&& {
     return {std::move(value_.ui), fbthrift_type_, folly::to_underlying(Type::ui), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_ref() is deprecated, use ui() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ui_ref() & {
     return {value_.ui, fbthrift_type_, folly::to_underlying(Type::ui), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_ref() is deprecated, use ui() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ui_ref() && {
     return {std::move(value_.ui), fbthrift_type_, folly::to_underlying(Type::ui), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1348,24 +1352,28 @@ class union1 final  {
   }
   /** Glean { "field": "ud" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_ref() is deprecated, use ud() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ud_ref() const& {
     return {value_.ud, fbthrift_type_, folly::to_underlying(Type::ud), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_ref() is deprecated, use ud() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ud_ref() const&& {
     return {std::move(value_.ud), fbthrift_type_, folly::to_underlying(Type::ud), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_ref() is deprecated, use ud() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ud_ref() & {
     return {value_.ud, fbthrift_type_, folly::to_underlying(Type::ud), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_ref() is deprecated, use ud() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ud_ref() && {
     return {std::move(value_.ud), fbthrift_type_, folly::to_underlying(Type::ud), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1386,24 +1394,28 @@ class union1 final  {
   }
   /** Glean { "field": "us" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_ref() is deprecated, use us() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> us_ref() const& {
     return {value_.us, fbthrift_type_, folly::to_underlying(Type::us), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_ref() is deprecated, use us() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> us_ref() const&& {
     return {std::move(value_.us), fbthrift_type_, folly::to_underlying(Type::us), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_ref() is deprecated, use us() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> us_ref() & {
     return {value_.us, fbthrift_type_, folly::to_underlying(Type::us), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_ref() is deprecated, use us() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> us_ref() && {
     return {std::move(value_.us), fbthrift_type_, folly::to_underlying(Type::us), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1424,24 +1436,28 @@ class union1 final  {
   }
   /** Glean { "field": "ue" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_ref() is deprecated, use ue() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ue_ref() const& {
     return {value_.ue, fbthrift_type_, folly::to_underlying(Type::ue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_ref() is deprecated, use ue() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ue_ref() const&& {
     return {std::move(value_.ue), fbthrift_type_, folly::to_underlying(Type::ue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_ref() is deprecated, use ue() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ue_ref() & {
     return {value_.ue, fbthrift_type_, folly::to_underlying(Type::ue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_ref() is deprecated, use ue() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ue_ref() && {
     return {std::move(value_.ue), fbthrift_type_, folly::to_underlying(Type::ue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1785,24 +1801,28 @@ class union2 final  {
 
   /** Glean { "field": "ui_2" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_2_ref() is deprecated, use ui_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ui_2_ref() const& {
     return {value_.ui_2, fbthrift_type_, folly::to_underlying(Type::ui_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui_2" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_2_ref() is deprecated, use ui_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ui_2_ref() const&& {
     return {std::move(value_.ui_2), fbthrift_type_, folly::to_underlying(Type::ui_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui_2" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_2_ref() is deprecated, use ui_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ui_2_ref() & {
     return {value_.ui_2, fbthrift_type_, folly::to_underlying(Type::ui_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui_2" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_2_ref() is deprecated, use ui_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ui_2_ref() && {
     return {std::move(value_.ui_2), fbthrift_type_, folly::to_underlying(Type::ui_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1823,24 +1843,28 @@ class union2 final  {
   }
   /** Glean { "field": "ud_2" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_2_ref() is deprecated, use ud_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ud_2_ref() const& {
     return {value_.ud_2, fbthrift_type_, folly::to_underlying(Type::ud_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud_2" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_2_ref() is deprecated, use ud_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ud_2_ref() const&& {
     return {std::move(value_.ud_2), fbthrift_type_, folly::to_underlying(Type::ud_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud_2" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_2_ref() is deprecated, use ud_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ud_2_ref() & {
     return {value_.ud_2, fbthrift_type_, folly::to_underlying(Type::ud_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud_2" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_2_ref() is deprecated, use ud_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ud_2_ref() && {
     return {std::move(value_.ud_2), fbthrift_type_, folly::to_underlying(Type::ud_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1861,24 +1885,28 @@ class union2 final  {
   }
   /** Glean { "field": "us_2" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_2_ref() is deprecated, use us_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> us_2_ref() const& {
     return {value_.us_2, fbthrift_type_, folly::to_underlying(Type::us_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us_2" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_2_ref() is deprecated, use us_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> us_2_ref() const&& {
     return {std::move(value_.us_2), fbthrift_type_, folly::to_underlying(Type::us_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us_2" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_2_ref() is deprecated, use us_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> us_2_ref() & {
     return {value_.us_2, fbthrift_type_, folly::to_underlying(Type::us_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us_2" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_2_ref() is deprecated, use us_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> us_2_ref() && {
     return {std::move(value_.us_2), fbthrift_type_, folly::to_underlying(Type::us_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1899,24 +1927,28 @@ class union2 final  {
   }
   /** Glean { "field": "ue_2" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_2_ref() is deprecated, use ue_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ue_2_ref() const& {
     return {value_.ue_2, fbthrift_type_, folly::to_underlying(Type::ue_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue_2" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_2_ref() is deprecated, use ue_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ue_2_ref() const&& {
     return {std::move(value_.ue_2), fbthrift_type_, folly::to_underlying(Type::ue_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue_2" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_2_ref() is deprecated, use ue_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ue_2_ref() & {
     return {value_.ue_2, fbthrift_type_, folly::to_underlying(Type::ue_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue_2" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_2_ref() is deprecated, use ue_2() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ue_2_ref() && {
     return {std::move(value_.ue_2), fbthrift_type_, folly::to_underlying(Type::ue_2), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -2260,24 +2292,28 @@ class union3 final  {
 
   /** Glean { "field": "ui_3" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_3_ref() is deprecated, use ui_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ui_3_ref() const& {
     return {value_.ui_3, fbthrift_type_, folly::to_underlying(Type::ui_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui_3" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_3_ref() is deprecated, use ui_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ui_3_ref() const&& {
     return {std::move(value_.ui_3), fbthrift_type_, folly::to_underlying(Type::ui_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui_3" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_3_ref() is deprecated, use ui_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ui_3_ref() & {
     return {value_.ui_3, fbthrift_type_, folly::to_underlying(Type::ui_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ui_3" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ui_3_ref() is deprecated, use ui_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ui_3_ref() && {
     return {std::move(value_.ui_3), fbthrift_type_, folly::to_underlying(Type::ui_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -2298,24 +2334,28 @@ class union3 final  {
   }
   /** Glean { "field": "ud_3" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_3_ref() is deprecated, use ud_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ud_3_ref() const& {
     return {value_.ud_3, fbthrift_type_, folly::to_underlying(Type::ud_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud_3" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_3_ref() is deprecated, use ud_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ud_3_ref() const&& {
     return {std::move(value_.ud_3), fbthrift_type_, folly::to_underlying(Type::ud_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud_3" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_3_ref() is deprecated, use ud_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ud_3_ref() & {
     return {value_.ud_3, fbthrift_type_, folly::to_underlying(Type::ud_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ud_3" } */
   template <typename..., typename T = double>
+  [[deprecated("ud_3_ref() is deprecated, use ud_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ud_3_ref() && {
     return {std::move(value_.ud_3), fbthrift_type_, folly::to_underlying(Type::ud_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -2336,24 +2376,28 @@ class union3 final  {
   }
   /** Glean { "field": "us_3" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_3_ref() is deprecated, use us_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> us_3_ref() const& {
     return {value_.us_3, fbthrift_type_, folly::to_underlying(Type::us_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us_3" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_3_ref() is deprecated, use us_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> us_3_ref() const&& {
     return {std::move(value_.us_3), fbthrift_type_, folly::to_underlying(Type::us_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us_3" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_3_ref() is deprecated, use us_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> us_3_ref() & {
     return {value_.us_3, fbthrift_type_, folly::to_underlying(Type::us_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "us_3" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("us_3_ref() is deprecated, use us_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> us_3_ref() && {
     return {std::move(value_.us_3), fbthrift_type_, folly::to_underlying(Type::us_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -2374,24 +2418,28 @@ class union3 final  {
   }
   /** Glean { "field": "ue_3" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_3_ref() is deprecated, use ue_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ue_3_ref() const& {
     return {value_.ue_3, fbthrift_type_, folly::to_underlying(Type::ue_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue_3" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_3_ref() is deprecated, use ue_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ue_3_ref() const&& {
     return {std::move(value_.ue_3), fbthrift_type_, folly::to_underlying(Type::ue_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue_3" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_3_ref() is deprecated, use ue_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ue_3_ref() & {
     return {value_.ue_3, fbthrift_type_, folly::to_underlying(Type::ue_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ue_3" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("ue_3_ref() is deprecated, use ue_3() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ue_3_ref() && {
     return {std::move(value_.ue_3), fbthrift_type_, folly::to_underlying(Type::ue_3), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -2993,24 +3041,28 @@ class unionA final  {
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("i_ref() is deprecated, use i() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> i_ref() const& {
     return {value_.i, fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("i_ref() is deprecated, use i() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> i_ref() const&& {
     return {std::move(value_.i), fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("i_ref() is deprecated, use i() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> i_ref() & {
     return {value_.i, fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("i_ref() is deprecated, use i() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> i_ref() && {
     return {std::move(value_.i), fbthrift_type_, folly::to_underlying(Type::i), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -3031,24 +3083,28 @@ class unionA final  {
   }
   /** Glean { "field": "d" } */
   template <typename..., typename T = double>
+  [[deprecated("d_ref() is deprecated, use d() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> d_ref() const& {
     return {value_.d, fbthrift_type_, folly::to_underlying(Type::d), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "d" } */
   template <typename..., typename T = double>
+  [[deprecated("d_ref() is deprecated, use d() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> d_ref() const&& {
     return {std::move(value_.d), fbthrift_type_, folly::to_underlying(Type::d), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "d" } */
   template <typename..., typename T = double>
+  [[deprecated("d_ref() is deprecated, use d() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> d_ref() & {
     return {value_.d, fbthrift_type_, folly::to_underlying(Type::d), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "d" } */
   template <typename..., typename T = double>
+  [[deprecated("d_ref() is deprecated, use d() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> d_ref() && {
     return {std::move(value_.d), fbthrift_type_, folly::to_underlying(Type::d), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -3069,24 +3125,28 @@ class unionA final  {
   }
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("s_ref() is deprecated, use s() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> s_ref() const& {
     return {value_.s, fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("s_ref() is deprecated, use s() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> s_ref() const&& {
     return {std::move(value_.s), fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("s_ref() is deprecated, use s() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> s_ref() & {
     return {value_.s, fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "s" } */
   template <typename..., typename T = ::std::string>
+  [[deprecated("s_ref() is deprecated, use s() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> s_ref() && {
     return {std::move(value_.s), fbthrift_type_, folly::to_underlying(Type::s), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -3107,24 +3167,28 @@ class unionA final  {
   }
   /** Glean { "field": "e" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("e_ref() is deprecated, use e() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> e_ref() const& {
     return {value_.e, fbthrift_type_, folly::to_underlying(Type::e), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "e" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("e_ref() is deprecated, use e() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> e_ref() const&& {
     return {std::move(value_.e), fbthrift_type_, folly::to_underlying(Type::e), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "e" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("e_ref() is deprecated, use e() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> e_ref() & {
     return {value_.e, fbthrift_type_, folly::to_underlying(Type::e), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "e" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  [[deprecated("e_ref() is deprecated, use e() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> e_ref() && {
     return {std::move(value_.e), fbthrift_type_, folly::to_underlying(Type::e), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -3145,24 +3209,28 @@ class unionA final  {
   }
   /** Glean { "field": "a" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::structA>
+  [[deprecated("a_ref() is deprecated, use a() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> a_ref() const& {
     return {value_.a, fbthrift_type_, folly::to_underlying(Type::a), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "a" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::structA>
+  [[deprecated("a_ref() is deprecated, use a() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> a_ref() const&& {
     return {std::move(value_.a), fbthrift_type_, folly::to_underlying(Type::a), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "a" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::structA>
+  [[deprecated("a_ref() is deprecated, use a() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> a_ref() & {
     return {value_.a, fbthrift_type_, folly::to_underlying(Type::a), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "a" } */
   template <typename..., typename T = ::test_cpp2::cpp_reflection::structA>
+  [[deprecated("a_ref() is deprecated, use a() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> a_ref() && {
     return {std::move(value_.a), fbthrift_type_, folly::to_underlying(Type::a), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -9832,24 +9900,28 @@ class union_with_special_names final  {
 
   /** Glean { "field": "get" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("get_ref() is deprecated, use get() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> get_ref() const& {
     return {value_.get, fbthrift_type_, folly::to_underlying(Type::get), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "get" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("get_ref() is deprecated, use get() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> get_ref() const&& {
     return {std::move(value_.get), fbthrift_type_, folly::to_underlying(Type::get), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "get" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("get_ref() is deprecated, use get() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> get_ref() & {
     return {value_.get, fbthrift_type_, folly::to_underlying(Type::get), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "get" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("get_ref() is deprecated, use get() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> get_ref() && {
     return {std::move(value_.get), fbthrift_type_, folly::to_underlying(Type::get), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -9870,24 +9942,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "getter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("getter_ref() is deprecated, use getter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> getter_ref() const& {
     return {value_.getter, fbthrift_type_, folly::to_underlying(Type::getter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "getter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("getter_ref() is deprecated, use getter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> getter_ref() const&& {
     return {std::move(value_.getter), fbthrift_type_, folly::to_underlying(Type::getter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "getter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("getter_ref() is deprecated, use getter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> getter_ref() & {
     return {value_.getter, fbthrift_type_, folly::to_underlying(Type::getter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "getter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("getter_ref() is deprecated, use getter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> getter_ref() && {
     return {std::move(value_.getter), fbthrift_type_, folly::to_underlying(Type::getter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -9908,24 +9984,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "lists" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("lists_ref() is deprecated, use lists() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> lists_ref() const& {
     return {value_.lists, fbthrift_type_, folly::to_underlying(Type::lists), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "lists" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("lists_ref() is deprecated, use lists() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> lists_ref() const&& {
     return {std::move(value_.lists), fbthrift_type_, folly::to_underlying(Type::lists), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "lists" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("lists_ref() is deprecated, use lists() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> lists_ref() & {
     return {value_.lists, fbthrift_type_, folly::to_underlying(Type::lists), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "lists" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("lists_ref() is deprecated, use lists() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> lists_ref() && {
     return {std::move(value_.lists), fbthrift_type_, folly::to_underlying(Type::lists), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -9946,24 +10026,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "maps" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("maps_ref() is deprecated, use maps() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> maps_ref() const& {
     return {value_.maps, fbthrift_type_, folly::to_underlying(Type::maps), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "maps" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("maps_ref() is deprecated, use maps() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> maps_ref() const&& {
     return {std::move(value_.maps), fbthrift_type_, folly::to_underlying(Type::maps), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "maps" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("maps_ref() is deprecated, use maps() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> maps_ref() & {
     return {value_.maps, fbthrift_type_, folly::to_underlying(Type::maps), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "maps" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("maps_ref() is deprecated, use maps() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> maps_ref() && {
     return {std::move(value_.maps), fbthrift_type_, folly::to_underlying(Type::maps), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -9984,24 +10068,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_ref() is deprecated, use name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> name_ref() const& {
     return {value_.name, fbthrift_type_, folly::to_underlying(Type::name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_ref() is deprecated, use name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> name_ref() const&& {
     return {std::move(value_.name), fbthrift_type_, folly::to_underlying(Type::name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_ref() is deprecated, use name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> name_ref() & {
     return {value_.name, fbthrift_type_, folly::to_underlying(Type::name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_ref() is deprecated, use name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> name_ref() && {
     return {std::move(value_.name), fbthrift_type_, folly::to_underlying(Type::name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10022,24 +10110,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "name_to_value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_to_value_ref() is deprecated, use name_to_value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> name_to_value_ref() const& {
     return {value_.name_to_value, fbthrift_type_, folly::to_underlying(Type::name_to_value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "name_to_value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_to_value_ref() is deprecated, use name_to_value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> name_to_value_ref() const&& {
     return {std::move(value_.name_to_value), fbthrift_type_, folly::to_underlying(Type::name_to_value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "name_to_value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_to_value_ref() is deprecated, use name_to_value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> name_to_value_ref() & {
     return {value_.name_to_value, fbthrift_type_, folly::to_underlying(Type::name_to_value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "name_to_value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("name_to_value_ref() is deprecated, use name_to_value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> name_to_value_ref() && {
     return {std::move(value_.name_to_value), fbthrift_type_, folly::to_underlying(Type::name_to_value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10060,24 +10152,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "names" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("names_ref() is deprecated, use names() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> names_ref() const& {
     return {value_.names, fbthrift_type_, folly::to_underlying(Type::names), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "names" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("names_ref() is deprecated, use names() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> names_ref() const&& {
     return {std::move(value_.names), fbthrift_type_, folly::to_underlying(Type::names), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "names" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("names_ref() is deprecated, use names() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> names_ref() & {
     return {value_.names, fbthrift_type_, folly::to_underlying(Type::names), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "names" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("names_ref() is deprecated, use names() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> names_ref() && {
     return {std::move(value_.names), fbthrift_type_, folly::to_underlying(Type::names), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10098,24 +10194,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "prefix_tree" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("prefix_tree_ref() is deprecated, use prefix_tree() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> prefix_tree_ref() const& {
     return {value_.prefix_tree, fbthrift_type_, folly::to_underlying(Type::prefix_tree), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "prefix_tree" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("prefix_tree_ref() is deprecated, use prefix_tree() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> prefix_tree_ref() const&& {
     return {std::move(value_.prefix_tree), fbthrift_type_, folly::to_underlying(Type::prefix_tree), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "prefix_tree" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("prefix_tree_ref() is deprecated, use prefix_tree() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> prefix_tree_ref() & {
     return {value_.prefix_tree, fbthrift_type_, folly::to_underlying(Type::prefix_tree), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "prefix_tree" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("prefix_tree_ref() is deprecated, use prefix_tree() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> prefix_tree_ref() && {
     return {std::move(value_.prefix_tree), fbthrift_type_, folly::to_underlying(Type::prefix_tree), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10136,24 +10236,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "sets" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("sets_ref() is deprecated, use sets() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> sets_ref() const& {
     return {value_.sets, fbthrift_type_, folly::to_underlying(Type::sets), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "sets" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("sets_ref() is deprecated, use sets() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> sets_ref() const&& {
     return {std::move(value_.sets), fbthrift_type_, folly::to_underlying(Type::sets), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "sets" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("sets_ref() is deprecated, use sets() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> sets_ref() & {
     return {value_.sets, fbthrift_type_, folly::to_underlying(Type::sets), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "sets" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("sets_ref() is deprecated, use sets() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> sets_ref() && {
     return {std::move(value_.sets), fbthrift_type_, folly::to_underlying(Type::sets), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10174,24 +10278,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "setter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("setter_ref() is deprecated, use setter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> setter_ref() const& {
     return {value_.setter, fbthrift_type_, folly::to_underlying(Type::setter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("setter_ref() is deprecated, use setter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> setter_ref() const&& {
     return {std::move(value_.setter), fbthrift_type_, folly::to_underlying(Type::setter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("setter_ref() is deprecated, use setter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> setter_ref() & {
     return {value_.setter, fbthrift_type_, folly::to_underlying(Type::setter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setter" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("setter_ref() is deprecated, use setter() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> setter_ref() && {
     return {std::move(value_.setter), fbthrift_type_, folly::to_underlying(Type::setter), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10212,24 +10320,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "str" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("str_ref() is deprecated, use str() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> str_ref() const& {
     return {value_.str, fbthrift_type_, folly::to_underlying(Type::str), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "str" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("str_ref() is deprecated, use str() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> str_ref() const&& {
     return {std::move(value_.str), fbthrift_type_, folly::to_underlying(Type::str), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "str" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("str_ref() is deprecated, use str() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> str_ref() & {
     return {value_.str, fbthrift_type_, folly::to_underlying(Type::str), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "str" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("str_ref() is deprecated, use str() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> str_ref() && {
     return {std::move(value_.str), fbthrift_type_, folly::to_underlying(Type::str), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10250,24 +10362,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "strings" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("strings_ref() is deprecated, use strings() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> strings_ref() const& {
     return {value_.strings, fbthrift_type_, folly::to_underlying(Type::strings), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "strings" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("strings_ref() is deprecated, use strings() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> strings_ref() const&& {
     return {std::move(value_.strings), fbthrift_type_, folly::to_underlying(Type::strings), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "strings" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("strings_ref() is deprecated, use strings() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> strings_ref() & {
     return {value_.strings, fbthrift_type_, folly::to_underlying(Type::strings), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "strings" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("strings_ref() is deprecated, use strings() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> strings_ref() && {
     return {std::move(value_.strings), fbthrift_type_, folly::to_underlying(Type::strings), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10288,24 +10404,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "type" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("type_ref() is deprecated, use type() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> type_ref() const& {
     return {value_.type, fbthrift_type_, folly::to_underlying(Type::type), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "type" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("type_ref() is deprecated, use type() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> type_ref() const&& {
     return {std::move(value_.type), fbthrift_type_, folly::to_underlying(Type::type), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "type" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("type_ref() is deprecated, use type() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> type_ref() & {
     return {value_.type, fbthrift_type_, folly::to_underlying(Type::type), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "type" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("type_ref() is deprecated, use type() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> type_ref() && {
     return {std::move(value_.type), fbthrift_type_, folly::to_underlying(Type::type), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10326,24 +10446,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_ref() is deprecated, use value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> value_ref() const& {
     return {value_.value, fbthrift_type_, folly::to_underlying(Type::value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_ref() is deprecated, use value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> value_ref() const&& {
     return {std::move(value_.value), fbthrift_type_, folly::to_underlying(Type::value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_ref() is deprecated, use value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> value_ref() & {
     return {value_.value, fbthrift_type_, folly::to_underlying(Type::value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "value" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_ref() is deprecated, use value() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> value_ref() && {
     return {std::move(value_.value), fbthrift_type_, folly::to_underlying(Type::value), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10364,24 +10488,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "value_to_name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_to_name_ref() is deprecated, use value_to_name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> value_to_name_ref() const& {
     return {value_.value_to_name, fbthrift_type_, folly::to_underlying(Type::value_to_name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "value_to_name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_to_name_ref() is deprecated, use value_to_name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> value_to_name_ref() const&& {
     return {std::move(value_.value_to_name), fbthrift_type_, folly::to_underlying(Type::value_to_name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "value_to_name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_to_name_ref() is deprecated, use value_to_name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> value_to_name_ref() & {
     return {value_.value_to_name, fbthrift_type_, folly::to_underlying(Type::value_to_name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "value_to_name" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("value_to_name_ref() is deprecated, use value_to_name() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> value_to_name_ref() && {
     return {std::move(value_.value_to_name), fbthrift_type_, folly::to_underlying(Type::value_to_name), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10402,24 +10530,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "values" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("values_ref() is deprecated, use values() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> values_ref() const& {
     return {value_.values, fbthrift_type_, folly::to_underlying(Type::values), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "values" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("values_ref() is deprecated, use values() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> values_ref() const&& {
     return {std::move(value_.values), fbthrift_type_, folly::to_underlying(Type::values), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "values" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("values_ref() is deprecated, use values() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> values_ref() & {
     return {value_.values, fbthrift_type_, folly::to_underlying(Type::values), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "values" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("values_ref() is deprecated, use values() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> values_ref() && {
     return {std::move(value_.values), fbthrift_type_, folly::to_underlying(Type::values), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10440,24 +10572,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "id" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("id_ref() is deprecated, use id() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> id_ref() const& {
     return {value_.id, fbthrift_type_, folly::to_underlying(Type::id), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "id" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("id_ref() is deprecated, use id() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> id_ref() const&& {
     return {std::move(value_.id), fbthrift_type_, folly::to_underlying(Type::id), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "id" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("id_ref() is deprecated, use id() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> id_ref() & {
     return {value_.id, fbthrift_type_, folly::to_underlying(Type::id), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "id" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("id_ref() is deprecated, use id() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> id_ref() && {
     return {std::move(value_.id), fbthrift_type_, folly::to_underlying(Type::id), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10478,24 +10614,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "ids" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ids_ref() is deprecated, use ids() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> ids_ref() const& {
     return {value_.ids, fbthrift_type_, folly::to_underlying(Type::ids), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ids" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ids_ref() is deprecated, use ids() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> ids_ref() const&& {
     return {std::move(value_.ids), fbthrift_type_, folly::to_underlying(Type::ids), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ids" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ids_ref() is deprecated, use ids() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> ids_ref() & {
     return {value_.ids, fbthrift_type_, folly::to_underlying(Type::ids), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "ids" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("ids_ref() is deprecated, use ids() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> ids_ref() && {
     return {std::move(value_.ids), fbthrift_type_, folly::to_underlying(Type::ids), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10516,24 +10656,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "descriptor" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptor_ref() is deprecated, use descriptor() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> descriptor_ref() const& {
     return {value_.descriptor, fbthrift_type_, folly::to_underlying(Type::descriptor), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "descriptor" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptor_ref() is deprecated, use descriptor() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> descriptor_ref() const&& {
     return {std::move(value_.descriptor), fbthrift_type_, folly::to_underlying(Type::descriptor), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "descriptor" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptor_ref() is deprecated, use descriptor() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> descriptor_ref() & {
     return {value_.descriptor, fbthrift_type_, folly::to_underlying(Type::descriptor), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "descriptor" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptor_ref() is deprecated, use descriptor() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> descriptor_ref() && {
     return {std::move(value_.descriptor), fbthrift_type_, folly::to_underlying(Type::descriptor), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10554,24 +10698,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "descriptors" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptors_ref() is deprecated, use descriptors() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> descriptors_ref() const& {
     return {value_.descriptors, fbthrift_type_, folly::to_underlying(Type::descriptors), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "descriptors" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptors_ref() is deprecated, use descriptors() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> descriptors_ref() const&& {
     return {std::move(value_.descriptors), fbthrift_type_, folly::to_underlying(Type::descriptors), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "descriptors" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptors_ref() is deprecated, use descriptors() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> descriptors_ref() & {
     return {value_.descriptors, fbthrift_type_, folly::to_underlying(Type::descriptors), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "descriptors" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("descriptors_ref() is deprecated, use descriptors() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> descriptors_ref() && {
     return {std::move(value_.descriptors), fbthrift_type_, folly::to_underlying(Type::descriptors), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10592,24 +10740,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "key" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("key_ref() is deprecated, use key() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> key_ref() const& {
     return {value_.key, fbthrift_type_, folly::to_underlying(Type::key), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "key" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("key_ref() is deprecated, use key() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> key_ref() const&& {
     return {std::move(value_.key), fbthrift_type_, folly::to_underlying(Type::key), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "key" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("key_ref() is deprecated, use key() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> key_ref() & {
     return {value_.key, fbthrift_type_, folly::to_underlying(Type::key), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "key" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("key_ref() is deprecated, use key() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> key_ref() && {
     return {std::move(value_.key), fbthrift_type_, folly::to_underlying(Type::key), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10630,24 +10782,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "keys" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("keys_ref() is deprecated, use keys() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> keys_ref() const& {
     return {value_.keys, fbthrift_type_, folly::to_underlying(Type::keys), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "keys" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("keys_ref() is deprecated, use keys() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> keys_ref() const&& {
     return {std::move(value_.keys), fbthrift_type_, folly::to_underlying(Type::keys), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "keys" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("keys_ref() is deprecated, use keys() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> keys_ref() & {
     return {value_.keys, fbthrift_type_, folly::to_underlying(Type::keys), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "keys" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("keys_ref() is deprecated, use keys() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> keys_ref() && {
     return {std::move(value_.keys), fbthrift_type_, folly::to_underlying(Type::keys), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10668,24 +10824,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "annotation" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotation_ref() is deprecated, use annotation() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> annotation_ref() const& {
     return {value_.annotation, fbthrift_type_, folly::to_underlying(Type::annotation), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "annotation" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotation_ref() is deprecated, use annotation() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> annotation_ref() const&& {
     return {std::move(value_.annotation), fbthrift_type_, folly::to_underlying(Type::annotation), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "annotation" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotation_ref() is deprecated, use annotation() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> annotation_ref() & {
     return {value_.annotation, fbthrift_type_, folly::to_underlying(Type::annotation), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "annotation" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotation_ref() is deprecated, use annotation() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> annotation_ref() && {
     return {std::move(value_.annotation), fbthrift_type_, folly::to_underlying(Type::annotation), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10706,24 +10866,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "annotations" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotations_ref() is deprecated, use annotations() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> annotations_ref() const& {
     return {value_.annotations, fbthrift_type_, folly::to_underlying(Type::annotations), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "annotations" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotations_ref() is deprecated, use annotations() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> annotations_ref() const&& {
     return {std::move(value_.annotations), fbthrift_type_, folly::to_underlying(Type::annotations), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "annotations" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotations_ref() is deprecated, use annotations() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> annotations_ref() & {
     return {value_.annotations, fbthrift_type_, folly::to_underlying(Type::annotations), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "annotations" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("annotations_ref() is deprecated, use annotations() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> annotations_ref() && {
     return {std::move(value_.annotations), fbthrift_type_, folly::to_underlying(Type::annotations), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10744,24 +10908,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "member" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("member_ref() is deprecated, use member() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> member_ref() const& {
     return {value_.member, fbthrift_type_, folly::to_underlying(Type::member), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "member" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("member_ref() is deprecated, use member() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> member_ref() const&& {
     return {std::move(value_.member), fbthrift_type_, folly::to_underlying(Type::member), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "member" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("member_ref() is deprecated, use member() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> member_ref() & {
     return {value_.member, fbthrift_type_, folly::to_underlying(Type::member), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "member" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("member_ref() is deprecated, use member() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> member_ref() && {
     return {std::move(value_.member), fbthrift_type_, folly::to_underlying(Type::member), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10782,24 +10950,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "members" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("members_ref() is deprecated, use members() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> members_ref() const& {
     return {value_.members, fbthrift_type_, folly::to_underlying(Type::members), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "members" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("members_ref() is deprecated, use members() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> members_ref() const&& {
     return {std::move(value_.members), fbthrift_type_, folly::to_underlying(Type::members), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "members" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("members_ref() is deprecated, use members() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> members_ref() & {
     return {value_.members, fbthrift_type_, folly::to_underlying(Type::members), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "members" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("members_ref() is deprecated, use members() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> members_ref() && {
     return {std::move(value_.members), fbthrift_type_, folly::to_underlying(Type::members), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10820,24 +10992,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("field_ref() is deprecated, use field() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> field_ref() const& {
     return {value_.field, fbthrift_type_, folly::to_underlying(Type::field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("field_ref() is deprecated, use field() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> field_ref() const&& {
     return {std::move(value_.field), fbthrift_type_, folly::to_underlying(Type::field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("field_ref() is deprecated, use field() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> field_ref() & {
     return {value_.field, fbthrift_type_, folly::to_underlying(Type::field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("field_ref() is deprecated, use field() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> field_ref() && {
     return {std::move(value_.field), fbthrift_type_, folly::to_underlying(Type::field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -10858,24 +11034,28 @@ class union_with_special_names final  {
   }
   /** Glean { "field": "fields" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("fields_ref() is deprecated, use fields() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> fields_ref() const& {
     return {value_.fields, fbthrift_type_, folly::to_underlying(Type::fields), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "fields" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("fields_ref() is deprecated, use fields() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> fields_ref() const&& {
     return {std::move(value_.fields), fbthrift_type_, folly::to_underlying(Type::fields), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "fields" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("fields_ref() is deprecated, use fields() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> fields_ref() & {
     return {value_.fields, fbthrift_type_, folly::to_underlying(Type::fields), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "fields" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("fields_ref() is deprecated, use fields() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> fields_ref() && {
     return {std::move(value_.fields), fbthrift_type_, folly::to_underlying(Type::fields), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }

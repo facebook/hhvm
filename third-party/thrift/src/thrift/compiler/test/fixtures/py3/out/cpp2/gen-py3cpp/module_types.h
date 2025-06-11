@@ -1298,24 +1298,28 @@ class AdaptedUnion final  {
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
+  [[deprecated("best_ref() is deprecated, use best() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> best_ref() const& {
     return {value_.best, fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
+  [[deprecated("best_ref() is deprecated, use best() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> best_ref() const&& {
     return {std::move(value_.best), fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
+  [[deprecated("best_ref() is deprecated, use best() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> best_ref() & {
     return {value_.best, fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "best" } */
   template <typename..., typename T = ::std::int16_t>
+  [[deprecated("best_ref() is deprecated, use best() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> best_ref() && {
     return {std::move(value_.best), fbthrift_type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -2831,24 +2835,28 @@ class BinaryUnion final  {
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
+  [[deprecated("iobuf_val_ref() is deprecated, use iobuf_val() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> iobuf_val_ref() const& {
     return {value_.iobuf_val, fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
+  [[deprecated("iobuf_val_ref() is deprecated, use iobuf_val() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> iobuf_val_ref() const&& {
     return {std::move(value_.iobuf_val), fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
+  [[deprecated("iobuf_val_ref() is deprecated, use iobuf_val() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> iobuf_val_ref() & {
     return {value_.iobuf_val, fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "iobuf_val" } */
   template <typename..., typename T = ::py3::simple::IOBuf>
+  [[deprecated("iobuf_val_ref() is deprecated, use iobuf_val() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> iobuf_val_ref() && {
     return {std::move(value_.iobuf_val), fbthrift_type_, folly::to_underlying(Type::iobuf_val), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }

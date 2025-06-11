@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_map.h"
+#include <thrift/compiler/ast/t_map.h>
 
 namespace apache::thrift::compiler {
 

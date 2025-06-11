@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_container.h"
+#include <thrift/compiler/ast/t_container.h>
 
 namespace apache::thrift::compiler {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_set.h"
+#include <thrift/compiler/ast/t_set.h>
 
 namespace apache::thrift::compiler {
 

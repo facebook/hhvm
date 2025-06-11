@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_union.h"
+#include <thrift/compiler/ast/t_union.h>
 
 namespace apache::thrift::compiler {
 

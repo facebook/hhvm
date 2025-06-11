@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_list.h"
+#include <thrift/compiler/ast/t_list.h>
 
 namespace apache::thrift::compiler {
 

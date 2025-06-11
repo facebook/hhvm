@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_exception.h"
+#include <thrift/compiler/ast/t_exception.h>
 
 namespace apache::thrift::compiler {
 

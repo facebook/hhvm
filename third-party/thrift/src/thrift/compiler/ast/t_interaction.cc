@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_interaction.h"
+#include <thrift/compiler/ast/t_interaction.h>
 
 namespace apache::thrift::compiler {
 

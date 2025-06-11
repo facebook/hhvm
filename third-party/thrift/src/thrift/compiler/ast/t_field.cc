@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "t_field.h"
+#include <thrift/compiler/ast/t_field.h>
 
 namespace apache::thrift::compiler {
 

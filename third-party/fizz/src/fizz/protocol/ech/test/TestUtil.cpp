@@ -27,26 +27,26 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
   return exts;
 }
 
-ECHConfigContentDraft getECHConfigContent() {
+ParsedECHConfig getParsedECHConfig() {
   HpkeSymmetricCipherSuite suite{
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  ECHConfigContentDraft echConfigContent;
-  echConfigContent.key_config.config_id = 0xFB;
-  echConfigContent.key_config.kem_id = hpke::KEMId::secp256r1;
-  echConfigContent.key_config.public_key = openssl::detail::encodeECPublicKey(
+  ParsedECHConfig parsedECHConfig;
+  parsedECHConfig.key_config.config_id = 0xFB;
+  parsedECHConfig.key_config.kem_id = hpke::KEMId::secp256r1;
+  parsedECHConfig.key_config.public_key = openssl::detail::encodeECPublicKey(
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
-  echConfigContent.key_config.cipher_suites = {suite};
-  echConfigContent.maximum_name_length = 100;
-  echConfigContent.public_name = folly::IOBuf::copyBuffer("public.dummy.com");
+  parsedECHConfig.key_config.cipher_suites = {suite};
+  parsedECHConfig.maximum_name_length = 50;
+  parsedECHConfig.public_name = folly::IOBuf::copyBuffer("public.dummy.com");
   folly::StringPiece cookie{"002c00080006636f6f6b6965"};
-  echConfigContent.extensions = getExtensions(cookie);
-  return echConfigContent;
+  parsedECHConfig.extensions = getExtensions(cookie);
+  return parsedECHConfig;
 }
 
 ECHConfig getECHConfig() {
   ECHConfig config;
   config.version = ECHVersion::Draft15;
-  config.ech_config_content = encode(getECHConfigContent());
+  config.ech_config_content = encode(getParsedECHConfig());
   return config;
 }
 
@@ -67,6 +67,16 @@ ClientHello getClientHelloOuter() {
   chloOuter.random.fill(0x00);
 
   return chloOuter;
+}
+
+bool isEqual(const ParsedECHConfig& l, const ParsedECHConfig& r) {
+  auto toBuf = [](const ParsedECHConfig& config) {
+    auto buf = folly::IOBuf::create(detail::getSize(config));
+    folly::io::Appender out(buf.get(), 0);
+    detail::write(config, out);
+    return buf;
+  };
+  return folly::IOBufEqualTo()(toBuf(l), toBuf(r));
 }
 
 } // namespace test

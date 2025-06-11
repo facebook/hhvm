@@ -19,60 +19,18 @@ namespace test {
 folly::StringPiece kOuterECHClientHelloExtensionData{
     "0000010001AA0003656e6300077061796c6f6164"};
 
-Buf getBuf(folly::StringPiece hex) {
-  auto data = unhexlify(hex);
-  return folly::IOBuf::copyBuffer(data.data(), data.size());
-}
-
-TEST(ECHTest, TestConfigContentEncodeDecode) {
-  // Encode config contents
-  std::unique_ptr<folly::IOBuf> echConfigContentBuf =
-      encode<ECHConfigContentDraft>(getECHConfigContent());
-
-  // Decode config content
-  folly::io::Cursor cursor(echConfigContentBuf.get());
-  auto gotEchConfigContent = decode<ECHConfigContentDraft>(cursor);
-
-  // Check decode(encode(content)) = content
-  auto expectedEchConfigContent = getECHConfigContent();
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      gotEchConfigContent.public_name, expectedEchConfigContent.public_name));
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      gotEchConfigContent.key_config.public_key,
-      expectedEchConfigContent.key_config.public_key));
-  EXPECT_EQ(
-      gotEchConfigContent.key_config.kem_id,
-      expectedEchConfigContent.key_config.kem_id);
-  EXPECT_EQ(
-      gotEchConfigContent.key_config.config_id,
-      expectedEchConfigContent.key_config.config_id);
-  EXPECT_EQ(
-      gotEchConfigContent.key_config.cipher_suites.size(),
-      expectedEchConfigContent.key_config.cipher_suites.size());
-  EXPECT_EQ(
-      gotEchConfigContent.maximum_name_length,
-      expectedEchConfigContent.maximum_name_length);
-  EXPECT_EQ(gotEchConfigContent.extensions.size(), 1);
-  auto ext = getExtension<Cookie>(gotEchConfigContent.extensions);
-  EXPECT_EQ(
-      folly::StringPiece(ext->cookie->coalesce()),
-      folly::StringPiece("cookie"));
-}
-
 TEST(ECHTest, TestECHConfigListEncodeDecode) {
+  auto configContentBuf = encode(getParsedECHConfig());
   // Make ECH configs
   ECHConfig echConfig1;
   echConfig1.version = ECHVersion::Draft15;
-  echConfig1.ech_config_content =
-      encode<ECHConfigContentDraft>(getECHConfigContent());
+  echConfig1.ech_config_content = configContentBuf->clone();
   ECHConfig echConfig2;
   echConfig2.version = ECHVersion::Draft15;
-  echConfig2.ech_config_content =
-      encode<ECHConfigContentDraft>(getECHConfigContent());
+  echConfig2.ech_config_content = configContentBuf->clone();
   ECHConfig echConfig3;
   echConfig3.version = ECHVersion::Draft15;
-  echConfig3.ech_config_content =
-      encode<ECHConfigContentDraft>(getECHConfigContent());
+  echConfig3.ech_config_content = configContentBuf->clone();
 
   // Encode ECH config List
   ECHConfigList echConfigList;
@@ -86,9 +44,9 @@ TEST(ECHTest, TestECHConfigListEncodeDecode) {
   // All ECHConfigs in ECHConfigList should be the same
   for (auto& echConfig : gotECHConfigList.configs) {
     EXPECT_EQ(echConfig.version, ECHVersion::Draft15);
-    EXPECT_TRUE(folly::IOBufEqualTo()(
-        echConfig.ech_config_content,
-        encode<ECHConfigContentDraft>(getECHConfigContent())));
+    auto gotConfigContent = ParsedECHConfig::parseSupportedECHConfig(echConfig);
+    ASSERT_TRUE(gotConfigContent.hasValue());
+    EXPECT_TRUE(isEqual(*gotConfigContent, getParsedECHConfig()));
   }
 }
 
@@ -96,8 +54,8 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;
   echConfig.version = ECHVersion::Draft15;
-  echConfig.ech_config_content =
-      encode<ECHConfigContentDraft>(getECHConfigContent());
+  auto configContentBuf = encode(getParsedECHConfig());
+  echConfig.ech_config_content = configContentBuf->clone();
   std::unique_ptr<folly::IOBuf> encodedBuf =
       encode<ECHConfig>(std::move(echConfig));
 
@@ -107,9 +65,13 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
 
   // Check decode(encode(config)) = config
   EXPECT_EQ(gotECHConfig.version, ECHVersion::Draft15);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      gotECHConfig.ech_config_content,
-      encode<ECHConfigContentDraft>(getECHConfigContent())));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(gotECHConfig.ech_config_content, configContentBuf));
+
+  auto gotConfigContent =
+      ParsedECHConfig::parseSupportedECHConfig(gotECHConfig);
+  ASSERT_TRUE(gotConfigContent.hasValue());
+  EXPECT_TRUE(isEqual(*gotConfigContent, getParsedECHConfig()));
 }
 
 TEST(ECHTest, TestOuterECHClientHelloEncode) {
@@ -144,6 +106,28 @@ TEST(ECHTest, TestOuterECHClientHelloDecode) {
   EXPECT_TRUE(folly::IOBufEqualTo()(ech->enc, folly::IOBuf::copyBuffer("enc")));
   EXPECT_TRUE(
       folly::IOBufEqualTo()(ech->payload, folly::IOBuf::copyBuffer("payload")));
+}
+
+TEST(ECHTest, TestUnsupportedECHConfigEncodeDecode) {
+  // Encode ECH config
+  ECHConfig echConfig;
+  echConfig.version = static_cast<ECHVersion>(4);
+
+  auto configContentBuf = encode(getParsedECHConfig());
+  echConfig.ech_config_content = configContentBuf->clone();
+
+  std::unique_ptr<folly::IOBuf> encodedBuf =
+      encode<ECHConfig>(std::move(echConfig));
+
+  // Decode ECH config
+  folly::io::Cursor cursor(encodedBuf.get());
+  auto gotECHConfig = decode<ECHConfig>(cursor);
+
+  EXPECT_EQ(gotECHConfig.version, static_cast<ECHVersion>(4));
+  EXPECT_FALSE(
+      ParsedECHConfig::parseSupportedECHConfig(gotECHConfig).hasValue());
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(configContentBuf, gotECHConfig.ech_config_content));
 }
 
 } // namespace test

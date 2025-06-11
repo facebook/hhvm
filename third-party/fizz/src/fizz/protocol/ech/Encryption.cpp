@@ -66,21 +66,18 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
 }
 
 std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
-    const ECHConfig& echConfig) {
-  switch (echConfig.version) {
-    case ECHVersion::Draft15: {
-      // The "info" parameter to setupWithEncap is the
-      // concatenation of "tls ech", a zero byte, and the serialized
-      // ECHConfig.
-      std::string tlsEchPrefix = "tls ech";
-      tlsEchPrefix += '\0';
-      auto bufContents = folly::IOBuf::copyBuffer(tlsEchPrefix);
-      bufContents->prependChain(encode(echConfig));
-
-      return bufContents;
-    }
-  }
-  return nullptr;
+    const ParsedECHConfig& echConfig) {
+  // The "info" parameter to setupWithEncap is the
+  // concatenation of "tls ech", a zero byte, and the serialized
+  // ECHConfig.
+  std::string tlsEchPrefix = "tls ech";
+  tlsEchPrefix += '\0';
+  auto bufContents = folly::IOBuf::copyBuffer(tlsEchPrefix);
+  auto config = ECHConfig{};
+  config.version = ECHVersion::Draft15;
+  config.ech_config_content = encode(echConfig);
+  bufContents->prependChain(encode(std::move(config)));
+  return bufContents;
 }
 
 bool isValidPublicName(const std::string& publicName) {
@@ -115,8 +112,7 @@ bool isValidPublicName(const std::string& publicName) {
 // order bit set and compare.
 //
 // If there are any mandatory extensions, we have to skip this config.
-static bool echConfigHasMandatoryExtension(
-    const ECHConfigContentDraft& config) {
+static bool echConfigHasMandatoryExtension(const ParsedECHConfig& config) {
   return std::any_of(
       config.extensions.begin(),
       config.extensions.end(),
@@ -130,58 +126,51 @@ static bool echConfigHasMandatoryExtension(
 }
 
 folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
-    const std::vector<ECHConfig>& configs,
+    const std::vector<ParsedECHConfig>& configs,
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads) {
-  // Received set of configs is in order of server preference so
+  // Received set of configs is in order of preference so
   // we should be selecting the first one that we can support.
   for (const auto& config : configs) {
-    folly::io::Cursor cursor(config.ech_config_content.get());
-    if (config.version == ECHVersion::Draft15) {
-      auto echConfig = decode<ECHConfigContentDraft>(cursor);
+    // Before anything else, check if the config has mandatory extensions.
+    // We don't support any extensions, so if any are mandatory, skip this
+    // config.
+    if (echConfigHasMandatoryExtension(config)) {
+      VLOG(8) << "ECH config has mandatory extension, skipping...";
+      continue;
+    }
 
-      // Before anything else, check if the config has mandatory extensions.
-      // We don't support any extensions, so if any are mandatory, skip this
-      // config.
-      if (echConfigHasMandatoryExtension(echConfig)) {
-        VLOG(8) << "ECH config has mandatory extension, skipping...";
-        continue;
-      }
+    // Check for an invalid public name and skip if found.
+    std::string publicName =
+        config.public_name->cloneCoalescedAsValue().to<std::string>();
+    if (!isValidPublicName(publicName)) {
+      VLOG(8) << publicName << " isn't a valid public name";
+      continue;
+    }
 
-      // Check for an invalid public name and skip if found.
-      std::string publicName =
-          echConfig.public_name->cloneCoalescedAsValue().to<std::string>();
-      if (!isValidPublicName(publicName)) {
-        VLOG(8) << publicName << " isn't a valid public name";
-        continue;
-      }
+    // Check if we (client) support the server's chosen KEM.
+    auto result = std::find(
+        supportedKEMs.begin(), supportedKEMs.end(), config.key_config.kem_id);
+    if (result == supportedKEMs.end()) {
+      continue;
+    }
 
-      // Check if we (client) support the server's chosen KEM.
-      auto result = std::find(
-          supportedKEMs.begin(),
-          supportedKEMs.end(),
-          echConfig.key_config.kem_id);
-      if (result == supportedKEMs.end()) {
-        continue;
-      }
-
-      // Check if we (client) support the HPKE cipher suite.
-      auto& cipherSuites = echConfig.key_config.cipher_suites;
-      for (const auto& suite : cipherSuites) {
-        auto isCipherSupported =
-            std::find(
-                supportedAeads.begin(), supportedAeads.end(), suite.aead_id) !=
-            supportedAeads.end();
-        if (isCipherSupported) {
-          auto associatedCipherKdf =
-              hpke::getKDFId(getHashFunction(getCipherSuite(suite.aead_id)));
-          if (suite.kdf_id == associatedCipherKdf) {
-            auto negotiatedECHConfig = config;
-            auto configId = echConfig.key_config.config_id;
-            auto maxLen = echConfig.maximum_name_length;
-            return NegotiatedECHConfig{
-                negotiatedECHConfig, configId, maxLen, suite};
-          }
+    // Check if we (client) support the HPKE cipher suite.
+    auto& cipherSuites = config.key_config.cipher_suites;
+    for (const auto& suite : cipherSuites) {
+      auto isCipherSupported =
+          std::find(
+              supportedAeads.begin(), supportedAeads.end(), suite.aead_id) !=
+          supportedAeads.end();
+      if (isCipherSupported) {
+        auto associatedCipherKdf =
+            hpke::getKDFId(getHashFunction(getCipherSuite(suite.aead_id)));
+        if (suite.kdf_id == associatedCipherKdf) {
+          auto negotiatedECHConfig = config;
+          auto configId = config.key_config.config_id;
+          auto maxLen = config.maximum_name_length;
+          return NegotiatedECHConfig{
+              negotiatedECHConfig, configId, maxLen, suite};
         }
       }
     }
@@ -215,8 +204,7 @@ hpke::SetupResult constructHpkeSetupResult(
     const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const NegotiatedECHConfig& negotiatedECHConfig) {
-  folly::io::Cursor cursor(negotiatedECHConfig.config.ech_config_content.get());
-  auto config = decode<ECHConfigContentDraft>(cursor);
+  const auto& echConfigContent = negotiatedECHConfig.config;
   auto cipherSuite = negotiatedECHConfig.cipherSuite;
   auto hash = getHashFunction(cipherSuite.kdf_id);
 
@@ -224,7 +212,9 @@ hpke::SetupResult constructHpkeSetupResult(
   auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
       fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
   std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
-      std::move(kex), getKexGroup(config.key_config.kem_id), std::move(hkdf));
+      std::move(kex),
+      getKexGroup(echConfigContent.key_config.kem_id),
+      std::move(hkdf));
 
   // Get context
   std::unique_ptr<folly::IOBuf> info =
@@ -232,11 +222,14 @@ hpke::SetupResult constructHpkeSetupResult(
 
   return setupWithEncap(
       hpke::Mode::Base,
-      config.key_config.public_key->clone()->coalesce(),
+      echConfigContent.key_config.public_key->clone()->coalesce(),
       std::move(info),
       folly::none,
       getSetupParam(
-          factory, std::move(dhkem), config.key_config.kem_id, cipherSuite));
+          factory,
+          std::move(dhkem),
+          echConfigContent.key_config.kem_id,
+          cipherSuite));
 }
 
 ServerHello makeDummyServerHello(const ServerHello& shlo) {
@@ -622,7 +615,7 @@ OuterECHClientHello encryptClientHello(
 
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,
-    const ECHConfig& /*echConfig*/,
+    const ParsedECHConfig& /*echConfig*/,
     HpkeSymmetricCipherSuite& /*cipherSuite*/,
     std::unique_ptr<folly::IOBuf> /*encapsulatedKey*/,
     uint8_t /*configId*/,
@@ -658,16 +651,14 @@ ClientHello decryptECHWithContext(
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     const fizz::Factory& factory,
-    const ECHConfig& echConfig,
+    const ParsedECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum) {
   // Get crypto primitive types used for decrypting
   hpke::KDFId kdfId = cipherSuite.kdf_id;
-  folly::io::Cursor echConfigCursor(echConfig.ech_config_content.get());
-  auto decodedConfigContent = decode<ECHConfigContentDraft>(echConfigCursor);
-  auto kemId = decodedConfigContent.key_config.kem_id;
+  auto kemId = echConfig.key_config.kem_id;
   NamedGroup group = hpke::getKexGroup(kemId);
   auto hash = getHashFunction(cipherSuite.kdf_id);
   auto hkdf = std::make_unique<fizz::hpke::Hkdf>(

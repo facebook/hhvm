@@ -158,6 +158,7 @@ set(FIZZ_TEST_HEADER_DIRS
   crypto/hpke/test
   protocol/test
   protocol/clock/test
+  protocol/ech/test
   record/test
   server/test
   tool/test

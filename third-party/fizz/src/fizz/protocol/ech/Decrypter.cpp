@@ -34,19 +34,8 @@ folly::Optional<DecrypterLookupResult> decodeAndGetParam(
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
   auto echExtension = getExtension<ech::OuterECHClientHello>(cursor);
   for (const auto& param : decrypterParams) {
-    switch (param.echConfig.version) {
-      case ECHVersion::Draft15: {
-        auto& echConfig = param.echConfig;
-        auto currentConfigDraft = decode<ECHConfigContentDraft>(
-            echConfig.ech_config_content->clone());
-        if (echExtension.config_id != currentConfigDraft.key_config.config_id) {
-          continue;
-        }
-        return DecrypterLookupResult{std::move(echExtension), param};
-      }
-      default: {
-        continue;
-      }
+    if (echExtension.config_id == param.echConfig.key_config.config_id) {
+      return DecrypterLookupResult{std::move(echExtension), param};
     }
   }
   // No match
@@ -187,19 +176,14 @@ std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs(
   std::vector<ech::ECHConfig> retryConfigs;
   std::vector<ech::ECHConfig> nonMatchingConfigs;
   for (const auto& config : configs_) {
-    switch (config.echConfig.version) {
-      case ECHVersion::Draft15: {
-        auto cursor =
-            folly::io::Cursor(config.echConfig.ech_config_content.get());
-        auto currentConfigDraft = decode<ECHConfigContentDraft>(cursor);
-        if (maybeSni.hasValue() &&
-            maybeSni.value() ==
-                currentConfigDraft.public_name->to<std::string>()) {
-          retryConfigs.push_back(config.echConfig);
-        } else {
-          nonMatchingConfigs.push_back(config.echConfig);
-        }
-      } break;
+    auto echConfig = ech::ECHConfig{};
+    echConfig.version = ech::ECHVersion::Draft15;
+    echConfig.ech_config_content = encode(config.echConfig);
+    if (maybeSni.hasValue() &&
+        maybeSni.value() == config.echConfig.public_name->to<std::string>()) {
+      retryConfigs.push_back(std::move(echConfig));
+    } else {
+      nonMatchingConfigs.push_back(std::move(echConfig));
     }
   }
   retryConfigs.insert(

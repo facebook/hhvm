@@ -158,11 +158,8 @@ class AsyncFizzClientTest : public Test {
                 newState.echState()->status = ECHStatus::Accepted;
               } else {
                 newState.echState()->status = ECHStatus::Rejected;
-                ech::ECHConfig cfg;
-                cfg.version = ech::ECHVersion::Draft15;
-                cfg.ech_config_content =
-                    folly::IOBuf::copyBuffer("retryconfig");
-                newState.echState()->retryConfigs.emplace({std::move(cfg)});
+                newState.echState()->retryConfigs.emplace(
+                    {ech::test::getParsedECHConfig()});
               }
             }
           });
@@ -230,7 +227,7 @@ class AsyncFizzClientTest : public Test {
   EventBase evb_;
   MockReplaySafetyCallback mockReplayCallback_;
   folly::Optional<std::string> pskIdentity_{"pskIdentity"};
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs_;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs_;
 };
 
 MATCHER_P(BufMatches, expected, "") {
@@ -554,7 +551,7 @@ TEST_F(AsyncFizzClientTest, TestHandshakeConnectWithUnopenedSocket) {
       nullptr,
       std::string("www.example.com"),
       pskIdentity_,
-      folly::Optional<std::vector<ech::ECHConfig>>(folly::none));
+      folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
   EXPECT_FALSE(evbClient->good());
 }
 
@@ -629,9 +626,8 @@ TEST_F(AsyncFizzClientTest, TestECHRejected) {
   auto retryConfigs = client_->getEchRetryConfigs();
   EXPECT_TRUE(retryConfigs.has_value());
   EXPECT_EQ(retryConfigs->size(), 1);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      retryConfigs->at(0).ech_config_content,
-      folly::IOBuf::copyBuffer("retryconfig")));
+  EXPECT_TRUE(
+      ech::test::isEqual(retryConfigs->at(0), ech::test::getParsedECHConfig()));
 }
 
 TEST_F(AsyncFizzClientTest, TestGetCertsNone) {
@@ -1160,18 +1156,12 @@ TEST_F(AsyncFizzClientTest, TestECHRetryAvailableAction) {
   auto callback = MockECHRetryCallback();
   EXPECT_CALL(callback, retryAvailable(_))
       .WillOnce(Invoke([](ECHRetryAvailable gotRetryConfig) {
-        EXPECT_EQ(
-            gotRetryConfig.configs.at(0).version, ech::ECHVersion::Draft15);
-        EXPECT_EQ(
-            gotRetryConfig.configs.at(0).ech_config_content->moveToFbString(),
-            "retryConfig");
+        EXPECT_TRUE(ech::test::isEqual(
+            gotRetryConfig.configs.at(0), ech::test::getParsedECHConfig()));
       }));
   client_->setECHRetryCallback(&callback);
-  ech::ECHConfig retryConfig;
-  retryConfig.version = ech::ECHVersion::Draft15;
-  retryConfig.ech_config_content = folly::IOBuf::copyBuffer("retryConfig");
   ECHRetryAvailable expectedECHRetries;
-  expectedECHRetries.configs.push_back(retryConfig);
+  expectedECHRetries.configs.push_back(ech::test::getParsedECHConfig());
   fullHandshakeSuccess(
       false,
       "h2",

@@ -169,16 +169,29 @@ folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile) {
   return json;
 }
 
-folly::Optional<ech::ECHConfigList> parseECHConfigsBase64(
+folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigsBase64(
     std::string echConfigListBase64) {
-  std::vector<ech::ECHConfig> echConfigs;
+  std::vector<ech::ParsedECHConfig> echConfigs;
   auto configBuf = folly::IOBuf::copyBuffer(
       folly::base64Decode(folly::trimWhitespace(echConfigListBase64)));
   folly::io::Cursor cursor(configBuf.get());
-  return decode<ech::ECHConfigList>(cursor);
+  auto configList = decode<ech::ECHConfigList>(cursor);
+  for (const auto& config : configList.configs) {
+    if (auto maybeParsedECHConfig =
+            ech::ParsedECHConfig::parseSupportedECHConfig(config)) {
+      echConfigs.push_back(std::move(maybeParsedECHConfig.value()));
+    }
+  }
+
+  if (echConfigs.empty()) {
+    return folly::none;
+  }
+
+  return echConfigs;
 }
 
-folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json) {
+folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigs(
+    folly::dynamic json) {
   auto getKDFId = [](std::string kdfStr) {
     if (kdfStr == "Sha256") {
       return hpke::KDFId::Sha256;
@@ -219,31 +232,27 @@ folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json) {
     }
   };
 
-  auto echConfigs = std::vector<ech::ECHConfig>();
+  auto echConfigs = std::vector<ech::ParsedECHConfig>();
   for (const auto& config : json["echconfigs"]) {
     std::string version = config["version"].asString();
 
-    ech::ECHVersion echVersion;
-    if (version == "Draft15") {
-      echVersion = ech::ECHVersion::Draft15;
-    } else {
+    if (version != "Draft15") {
       continue;
     }
 
-    ech::ECHConfigContentDraft configContent;
-    configContent.public_name =
+    ech::ParsedECHConfig echConfig;
+    echConfig.public_name =
         folly::IOBuf::copyBuffer(config["public_name"].asString());
 
-    configContent.key_config.config_id =
+    echConfig.key_config.config_id =
         folly::to<uint8_t>(strToNum(config["config_id"].asString()));
 
-    configContent.key_config.public_key = folly::IOBuf::copyBuffer(
+    echConfig.key_config.public_key = folly::IOBuf::copyBuffer(
         folly::unhexlify(config["public_key"].asString()));
-    configContent.key_config.kem_id = getKEMId(config["kem_id"].asString());
-    configContent.maximum_name_length =
+    echConfig.key_config.kem_id = getKEMId(config["kem_id"].asString());
+    echConfig.maximum_name_length =
         folly::to<uint8_t>(strToNum(config["maximum_name_length"].asString()));
 
-    // Get ciphersuites.
     auto ciphersuites = std::vector<ech::HpkeSymmetricCipherSuite>();
     for (size_t suiteIndex = 0; suiteIndex < config["cipher_suites"].size();
          ++suiteIndex) {
@@ -256,26 +265,20 @@ folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json) {
       ciphersuites.push_back(parsedSuite);
     }
 
-    configContent.key_config.cipher_suites = ciphersuites;
+    echConfig.key_config.cipher_suites = ciphersuites;
+    echConfig.extensions = getExtensions(config["extensions"].asString());
 
-    // Get extensions.
-    configContent.extensions = getExtensions(config["extensions"].asString());
-
-    ech::ECHConfig parsedConfig;
-    parsedConfig.version = echVersion;
-    parsedConfig.ech_config_content = encode(std::move(configContent));
-    echConfigs.push_back(std::move(parsedConfig));
+    echConfigs.push_back(std::move(echConfig));
   }
+
   if (echConfigs.empty()) {
     return folly::none;
-  } else {
-    ech::ECHConfigList echConfigList;
-    echConfigList.configs = echConfigs;
-    return echConfigList;
   }
+
+  return echConfigs;
 }
 
-std::vector<ech::ECHConfig> getDefaultECHConfigs() {
+std::vector<ech::ParsedECHConfig> getDefaultECHConfigs() {
   // TODO: Generate a public and private key pair each time,
   // and output it so the user can use it on the client side.
   // This allows the user to more easily use ECH without needing
@@ -284,7 +287,7 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
   LOG(INFO) << "Using default ECH configs.";
 
   // Set the ECH config content.
-  ech::ECHConfigContentDraft echConfigContent;
+  ech::ParsedECHConfig echConfigContent;
   echConfigContent.public_name = folly::IOBuf::copyBuffer("publicname");
 
   echConfigContent.key_config.cipher_suites = {ech::HpkeSymmetricCipherSuite{
@@ -305,12 +308,8 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
   // Assign a config id
   echConfigContent.key_config.config_id = 0xE6;
 
-  // Construct an ECH config to pass in to the client.
-  ech::ECHConfig echConfig;
-  echConfig.version = ech::ECHVersion::Draft15;
-  echConfig.ech_config_content = encode(std::move(echConfigContent));
-  auto configs = std::vector<ech::ECHConfig>();
-  configs.push_back(std::move(echConfig));
+  auto configs = std::vector<ech::ParsedECHConfig>();
+  configs.push_back(std::move(echConfigContent));
 
   return configs;
 }

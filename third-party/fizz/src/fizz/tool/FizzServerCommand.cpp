@@ -588,7 +588,8 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
       std::make_shared<fizz::DefaultFactory>());
 
   // If more that 1 ECH config is provided, we use the first one.
-  ech::ECHConfig gotConfig = gotECHConfigs.value().configs[0];
+  auto gotConfig = gotECHConfigs.value()[0];
+
   auto kemId =
       getKEMId((*echConfigsJson)["echconfigs"][0]["kem_id"].asString());
 
@@ -608,7 +609,7 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
 
   // Configure ECH decrpyter to be used server side.
   decrypter->addDecryptionConfig(
-      ech::DecrypterParams{gotConfig, std::move(kexWithPrivateKey)});
+      ech::DecrypterParams{std::move(gotConfig), std::move(kexWithPrivateKey)});
 
   return decrypter;
 }
@@ -619,7 +620,7 @@ std::shared_ptr<ech::Decrypter> setupDefaultDecrypter() {
   auto defaultPublicKey = folly::IOBuf::copyBuffer(folly::unhexlify(
       "8a07563949fac6232936ed6f36c4fa735930ecdeaef6734e314aeac35a56fd0a"));
 
-  ech::ECHConfig chosenConfig = getDefaultECHConfigs()[0];
+  auto chosenConfig = getDefaultECHConfigs()[0];
   auto kex = std::make_unique<libsodium::X25519KeyExchange>();
   kex->setPrivateKey(std::move(defaultPrivateKey));
 
@@ -627,7 +628,7 @@ std::shared_ptr<ech::Decrypter> setupDefaultDecrypter() {
   auto decrypter = std::make_shared<ech::ECHConfigManager>(
       std::make_shared<fizz::DefaultFactory>());
   decrypter->addDecryptionConfig(
-      ech::DecrypterParams{chosenConfig, std::move(kex)});
+      ech::DecrypterParams{std::move(chosenConfig), std::move(kex)});
 
   return decrypter;
 }

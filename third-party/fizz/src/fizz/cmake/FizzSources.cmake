@@ -77,6 +77,7 @@ set(
         protocol/ech/Decrypter.cpp
         protocol/ech/Encryption.cpp
         protocol/ech/GreaseECH.cpp
+        protocol/ech/Types.cpp
         record/BufAndPaddingPolicy.cpp
         record/EncryptedRecordLayer.cpp
         record/PlaintextRecordLayer.cpp

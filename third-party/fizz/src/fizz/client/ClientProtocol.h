@@ -33,7 +33,7 @@ class ClientStateMachine {
       folly::Optional<std::string> sni,
       folly::Optional<CachedPsk> cachedPsk,
       const std::shared_ptr<ClientExtensions>& extensions,
-      folly::Optional<std::vector<ech::ECHConfig>> echConfigs);
+      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs);
 
   virtual Actions
   processSocketData(const State&, folly::IOBufQueue&, Aead::AeadOptions);

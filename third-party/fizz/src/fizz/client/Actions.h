@@ -89,7 +89,7 @@ struct ECHRetryAvailable {
    * the set of acceptable ECHConfigs to use the next time the local
    * sender intends to open a TLS connection to `sni`.
    */
-  std::vector<ech::ECHConfig> configs;
+  std::vector<ech::ParsedECHConfig> configs;
 };
 
 #define FIZZ_CLIENT_ACTIONS(F, ...)           \

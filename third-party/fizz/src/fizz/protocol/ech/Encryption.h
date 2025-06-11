@@ -18,7 +18,7 @@ namespace fizz {
 namespace ech {
 
 struct NegotiatedECHConfig {
-  ECHConfig config;
+  ParsedECHConfig config;
   uint8_t configId;
   uint16_t maxLen;
   HpkeSymmetricCipherSuite cipherSuite;
@@ -33,7 +33,7 @@ class OuterExtensionsError : public std::runtime_error {
 };
 
 folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
-    const std::vector<ECHConfig>& configs,
+    const std::vector<ParsedECHConfig>& configs,
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads);
 
@@ -105,7 +105,7 @@ OuterECHClientHello encryptClientHello(
 
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,
-    const ECHConfig& echConfig,
+    const ParsedECHConfig& echConfig,
     HpkeSymmetricCipherSuite& cipherSuite,
     std::unique_ptr<folly::IOBuf> encapsulatedKey,
     uint8_t configId,
@@ -115,7 +115,7 @@ ClientHello decryptECHWithContext(
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     const fizz::Factory& factory,
-    const ECHConfig& echConfig,
+    const ParsedECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<KeyExchange> kex,

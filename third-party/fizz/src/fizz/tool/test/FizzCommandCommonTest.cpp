@@ -22,24 +22,24 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsBase64) {
       "AEj+DQBEAQAgACAX5SnnUbopIr5I/MqIqLWuSAZckHI2sR+aIr0slN2uGAAEAAEAAWQVZWNoLXB1YmxpYy5hdG1ldGEuY29tAAA=";
   auto expectedPubKey =
       "17e529e751ba2922be48fcca88a8b5ae48065c907236b11f9a22bd2c94ddae18";
-  auto echConfigs = parseECHConfigsBase64(echConfig64);
-  ASSERT_EQ(echConfigs->configs.size(), 1);
-  auto firstConfig = echConfigs->configs[0];
-  ASSERT_EQ(firstConfig.version, ech::ECHVersion::Draft15);
-  folly::io::Cursor cursor(firstConfig.ech_config_content.get());
-  auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
+  auto maybeParsedECHConfigs = parseECHConfigsBase64(echConfig64);
+  ASSERT_TRUE(maybeParsedECHConfigs.has_value());
+
+  auto echConfigs = std::move(maybeParsedECHConfigs.value());
+  ASSERT_EQ(echConfigs.size(), 1);
+  auto firstConfig = echConfigs[0];
   ASSERT_TRUE(folly::IOBufEqualTo()(
-      echConfigContent.public_name,
+      firstConfig.public_name,
       folly::IOBuf::copyBuffer("ech-public.atmeta.com")));
-  ASSERT_EQ(echConfigContent.key_config.kem_id, hpke::KEMId::x25519);
+  ASSERT_EQ(firstConfig.key_config.kem_id, hpke::KEMId::x25519);
   ASSERT_EQ(
-      echConfigContent.key_config.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
+      firstConfig.key_config.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
   ASSERT_EQ(
-      echConfigContent.key_config.cipher_suites[0].aead_id,
+      firstConfig.key_config.cipher_suites[0].aead_id,
       hpke::AeadId::TLS_AES_128_GCM_SHA256);
-  ASSERT_EQ(echConfigContent.maximum_name_length, 100);
+  ASSERT_EQ(firstConfig.maximum_name_length, 100);
   ASSERT_TRUE(folly::IOBufEqualTo()(
-      echConfigContent.key_config.public_key,
+      firstConfig.key_config.public_key,
       folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
 }
 
@@ -77,26 +77,24 @@ TEST(FizzCommandCommonTest, TestMissingPortHostPortFromString) {
   }
 }
 
-void checkECHConfigContent(const ech::ECHConfigContentDraft& echConfigContent) {
+void checkParsedECHConfig(const ech::ParsedECHConfig& echConfig) {
   ASSERT_TRUE(folly::IOBufEqualTo()(
-      echConfigContent.public_name, folly::IOBuf::copyBuffer("publicname")));
+      echConfig.public_name, folly::IOBuf::copyBuffer("publicname")));
   auto expectedPubKey =
       "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0";
   ASSERT_TRUE(folly::IOBufEqualTo()(
-      echConfigContent.key_config.public_key,
+      echConfig.key_config.public_key,
       folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
-  ASSERT_EQ(echConfigContent.key_config.kem_id, hpke::KEMId::secp256r1);
+  ASSERT_EQ(echConfig.key_config.kem_id, hpke::KEMId::secp256r1);
+  ASSERT_EQ(echConfig.key_config.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
   ASSERT_EQ(
-      echConfigContent.key_config.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
-  ASSERT_EQ(
-      echConfigContent.key_config.cipher_suites[0].aead_id,
+      echConfig.key_config.cipher_suites[0].aead_id,
       hpke::AeadId::TLS_AES_128_GCM_SHA256);
-  ASSERT_EQ(echConfigContent.maximum_name_length, 100);
+  ASSERT_EQ(echConfig.maximum_name_length, 100);
 
-  ASSERT_EQ(echConfigContent.extensions.size(), 1);
-  ASSERT_EQ(
-      echConfigContent.extensions[0].extension_type, ExtensionType::cookie);
-  ASSERT_EQ(echConfigContent.key_config.config_id, 144);
+  ASSERT_EQ(echConfig.extensions.size(), 1);
+  ASSERT_EQ(echConfig.extensions[0].extension_type, ExtensionType::cookie);
+  ASSERT_EQ(echConfig.key_config.config_id, 144);
 }
 
 TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
@@ -117,19 +115,14 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
         }]
       }
   )");
-  folly::Optional<ech::ECHConfigList> echConfigList = parseECHConfigs(json);
+  folly::Optional<std::vector<ech::ParsedECHConfig>> maybeParsedECHConfigs =
+      parseECHConfigs(json);
 
-  ASSERT_TRUE(echConfigList.has_value());
+  ASSERT_TRUE(maybeParsedECHConfigs.has_value());
 
-  auto echConfigs = echConfigList->configs;
-
+  auto echConfigs = std::move(maybeParsedECHConfigs.value());
   ASSERT_EQ(echConfigs.size(), 1);
-  auto echConfig = echConfigs[0];
-  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft15);
-
-  folly::io::Cursor cursor(echConfig.ech_config_content.get());
-  auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
-  checkECHConfigContent(echConfigContent);
+  checkParsedECHConfig(echConfigs[0]);
 }
 
 TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
@@ -151,19 +144,15 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
       }
   )");
 
-  folly::Optional<ech::ECHConfigList> echConfigList = parseECHConfigs(json);
+  folly::Optional<std::vector<ech::ParsedECHConfig>> maybeParsedECHConfigs =
+      parseECHConfigs(json);
 
-  ASSERT_TRUE(echConfigList.has_value());
+  ASSERT_TRUE(maybeParsedECHConfigs.has_value());
 
-  auto echConfigs = echConfigList->configs;
+  auto echConfigs = std::move(maybeParsedECHConfigs.value());
 
   ASSERT_EQ(echConfigs.size(), 1);
-  auto echConfig = echConfigs[0];
-  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft15);
-
-  folly::io::Cursor cursor(echConfig.ech_config_content.get());
-  auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
-  checkECHConfigContent(echConfigContent);
+  checkParsedECHConfig(echConfigs[0]);
 }
 
 TEST(FizzCommandCommonTest, TestParseECHConfigsFailure) {
@@ -174,8 +163,9 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsFailure) {
         }]
       }
   )");
-  folly::Optional<ech::ECHConfigList> echConfigs = parseECHConfigs(json);
-  ASSERT_FALSE(echConfigs.has_value());
+  folly::Optional<std::vector<ech::ParsedECHConfig>> maybeParsedECHConfigs =
+      parseECHConfigs(json);
+  ASSERT_FALSE(maybeParsedECHConfigs.has_value());
 }
 
 TEST(FizzCommandCommonTest, TestParseECHConfigsJsonExceptions) {

@@ -1086,11 +1086,9 @@ TEST_F(ClientProtocolTest, TestConnectCompat) {
 TEST_F(ClientProtocolTest, TestConnectECH) {
   // grease ech will be ignored
   context_->setGreaseECHSetting(ech::GreaseECHSetting{});
-  auto echConfig = ech::test::getECHConfig();
   Connect connect;
   connect.context = context_;
-  connect.echConfigs = std::vector<ech::ECHConfig>();
-  connect.echConfigs->push_back(echConfig);
+  connect.echConfigs.emplace({ech::test::getParsedECHConfig()});
   connect.sni = "www.hostname.com";
   const auto& actualChlo = getDefaultClientHello();
 
@@ -1149,15 +1147,13 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
 
 #if FIZZ_HAVE_OQS
 TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
-  auto echConfig = ech::test::getECHConfig();
   Connect connect;
   // Should not crash on named group not recognized by HPKE
   std::vector<NamedGroup> supportedGroups(context_->getSupportedGroups());
   supportedGroups.push_back(NamedGroup::x25519_kyber768_draft00);
   context_->setSupportedGroups(supportedGroups);
   connect.context = context_;
-  connect.echConfigs = std::vector<ech::ECHConfig>();
-  connect.echConfigs->push_back(echConfig);
+  connect.echConfigs.emplace({ech::test::getParsedECHConfig()});
   connect.sni = "www.hostname.com";
   const auto& actualChlo = getDefaultClientHello();
 
@@ -1217,15 +1213,13 @@ TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
 
 #if FIZZ_HAVE_LIBAEGIS
 TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
-  auto echConfig = ech::test::getECHConfig();
   Connect connect;
   // Should not crash on cipher suite not recognized by HPKE
   std::vector<CipherSuite> supportedCiphers(context_->getSupportedCiphers());
   supportedCiphers.push_back(CipherSuite::TLS_AEGIS_128L_SHA256);
   context_->setSupportedCiphers(supportedCiphers);
   connect.context = context_;
-  connect.echConfigs = std::vector<ech::ECHConfig>();
-  connect.echConfigs->push_back(echConfig);
+  connect.echConfigs.emplace({ech::test::getParsedECHConfig()});
   connect.sni = "www.hostname.com";
   const auto& actualChlo = getDefaultClientHello();
 
@@ -1286,8 +1280,7 @@ TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
 TEST_F(ClientProtocolTest, TestConnectECHWithPSK) {
   Connect connect;
   connect.context = context_;
-  connect.echConfigs = std::vector<ech::ECHConfig>();
-  connect.echConfigs->push_back(ech::test::getECHConfig());
+  connect.echConfigs.emplace({ech::test::getParsedECHConfig()});
 
   CachedPsk psk;
   psk.psk = "External";
@@ -3043,10 +3036,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->negotiatedECHConfig.config.version =
-      ech::ECHVersion::Draft15;
-  state_.echState()->negotiatedECHConfig.config.ech_config_content =
-      folly::IOBuf::copyBuffer("echconfig");
+  state_.echState()->negotiatedECHConfig.config =
+      ech::test::getParsedECHConfig();
   state_.echState()->negotiatedECHConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   state_.echState()->negotiatedECHConfig.maxLen = 42;
@@ -3316,10 +3307,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->negotiatedECHConfig.config.version =
-      ech::ECHVersion::Draft15;
-  state_.echState()->negotiatedECHConfig.config.ech_config_content =
-      folly::IOBuf::copyBuffer("echconfig");
+  state_.echState()->negotiatedECHConfig.config =
+      ech::test::getParsedECHConfig();
   state_.echState()->negotiatedECHConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   state_.echState()->negotiatedECHConfig.configId = 0xFB;
@@ -3603,10 +3592,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->negotiatedECHConfig.config.version =
-      ech::ECHVersion::Draft15;
-  state_.echState()->negotiatedECHConfig.config.ech_config_content =
-      folly::IOBuf::copyBuffer("echconfig");
+  state_.echState()->negotiatedECHConfig.config =
+      ech::test::getParsedECHConfig();
   state_.echState()->negotiatedECHConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   state_.echState()->negotiatedECHConfig.configId = 0xFB;
@@ -4174,7 +4161,8 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
   ech::ECHEncryptedExtensions serverECH;
   ech::ECHConfig cfg;
   cfg.version = ech::ECHVersion::Draft15;
-  cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
+  auto configContent = ech::test::getParsedECHConfig();
+  cfg.ech_config_content = encode<const ech::ParsedECHConfig&>(configContent);
   serverECH.retry_configs.push_back(std::move(cfg));
   ee.extensions.push_back(encodeExtension(std::move(serverECH)));
 
@@ -4183,17 +4171,13 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
   expectActions<MutateState, ECHRetryAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(*state_.alpn(), "h2");
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      state_.echState()->retryConfigs.value()[0].ech_config_content,
-      folly::IOBuf::copyBuffer("retryconfig")));
+  EXPECT_TRUE(ech::test::isEqual(
+      state_.echState()->retryConfigs.value()[0], configContent));
   EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificate);
   auto retry = expectAction<ECHRetryAvailable>(actions);
   EXPECT_EQ(retry.sni, "private.facebook.com");
   ASSERT_EQ(retry.configs.size(), 1);
-  EXPECT_EQ(retry.configs.at(0).version, ech::ECHVersion::Draft15);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      retry.configs.at(0).ech_config_content,
-      folly::IOBuf::copyBuffer("retryconfig")));
+  EXPECT_TRUE(ech::test::isEqual(retry.configs.at(0), configContent));
 }
 
 TEST_F(ClientProtocolTest, TestCertificateFlow) {

@@ -24,18 +24,18 @@ namespace ech {
 namespace test {
 ClientHello getChloOuterWithExt(
     std::unique_ptr<KeyExchange> kex,
-    std::optional<ECHConfig> config = std::nullopt) {
+    std::optional<ParsedECHConfig> config = std::nullopt) {
   if (!config) {
-    config = getECHConfig();
+    config = getParsedECHConfig();
   }
 
   // Setup ECH extension
-  folly::io::Cursor c(config->ech_config_content.get());
-  auto echConfigContent = decode<ECHConfigContentDraft>(c);
+  auto configId = config->key_config.config_id;
+  auto maxNameLength = config->maximum_name_length;
   auto negotiatedECHConfig = NegotiatedECHConfig{
       std::move(config.value()),
-      echConfigContent.key_config.config_id,
-      echConfigContent.maximum_name_length,
+      configId,
+      maxNameLength,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult = constructHpkeSetupResult(
@@ -65,9 +65,9 @@ ClientHello getChloOuterHRRWithExt(
     Buf& enc,
     ClientHello& initialOuterChlo) {
   // Setup ECH extension
-  auto echConfigContent = getECHConfigContent();
+  auto echConfigContent = getParsedECHConfig();
   auto negotiatedECHConfig = NegotiatedECHConfig{
-      getECHConfig(),
+      getParsedECHConfig(),
       echConfigContent.key_config.config_id,
       echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
@@ -103,14 +103,13 @@ ClientHello getChloOuterHRRWithExt(
   return chloOuter;
 }
 
-ECHConfig makeDummyConfig(uint8_t configId, const std::string& publicName) {
-  auto content = ECHConfigContentDraft{};
-  content.key_config.config_id = configId;
-  content.public_name = folly::IOBuf::copyBuffer(publicName);
-  content.key_config.public_key = folly::IOBuf::copyBuffer("public");
-  auto config = ECHConfig{};
-  config.version = ECHVersion::Draft15;
-  config.ech_config_content = fizz::encode(std::move(content));
+ParsedECHConfig makeDummyConfig(
+    uint8_t configId,
+    const std::string& publicName) {
+  auto config = ParsedECHConfig{};
+  config.key_config.config_id = configId;
+  config.public_name = folly::IOBuf::copyBuffer(publicName);
+  config.key_config.public_key = folly::IOBuf::copyBuffer("public");
   return config;
 }
 
@@ -124,12 +123,10 @@ void checkRetryConfigExpectation(
     const std::vector<ECHConfig>& configs) {
   ASSERT_EQ(expectations.size(), configs.size());
   for (size_t i = 0; i < expectations.size(); ++i) {
-    const auto& config = configs[i];
-    auto cursor = folly::io::Cursor(config.ech_config_content.get());
-    auto configContent = decode<ECHConfigContentDraft>(cursor);
-    EXPECT_EQ(expectations[i].id, configContent.key_config.config_id);
-    EXPECT_EQ(
-        expectations[i].name, configContent.public_name->to<std::string>());
+    auto config = ParsedECHConfig::parseSupportedECHConfig(configs[i]);
+    ASSERT_TRUE(config.hasValue());
+    EXPECT_EQ(expectations[i].id, config->key_config.config_id);
+    EXPECT_EQ(expectations[i].name, config->public_name->to<std::string>());
   }
 }
 
@@ -138,7 +135,8 @@ TEST(DecrypterTest, TestDecodeSuccess) {
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
+  decrypter.addDecryptionConfig(
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
   auto chloOuter = getChloOuterWithExt(kex->clone());
   auto gotChlo = decrypter.decryptClientHello(chloOuter);
 
@@ -162,11 +160,11 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
+  decrypter.addDecryptionConfig(
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
   Buf enc;
   ClientHello initialChlo;
   auto chloOuter = getChloOuterHRRWithExt(kex->clone(), enc, initialChlo);
-  auto echConfigContent = getECHConfigContent();
   auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, enc);
 
   auto expectedChloInner = TestMessages::clientHello();
@@ -185,7 +183,8 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
+  decrypter.addDecryptionConfig(
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
   Buf enc;
   ClientHello initialChlo;
   auto chloOuter = getChloOuterHRRWithExt(kex->clone(), enc, initialChlo);
@@ -195,7 +194,6 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   EXPECT_TRUE(gotChlo.has_value());
   auto chlo = std::move(gotChlo.value());
 
-  auto echConfigContent = getECHConfigContent();
   auto gotChloHRR = decrypter.decryptClientHelloHRR(chloOuter, chlo.context);
 
   auto expectedChloInner = TestMessages::clientHello();
@@ -211,31 +209,28 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
 }
 
 TEST(DecrypterTest, TestDecodeFailure) {
-  auto echConfig = getECHConfig();
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   decrypter.addDecryptionConfig(
-      DecrypterParams{std::move(echConfig), kex->clone()});
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
   auto gotChlo = decrypter.decryptClientHello(TestMessages::clientHello());
 
   EXPECT_FALSE(gotChlo.has_value());
 }
 
 TEST(DecrypterTest, TestDecodeHRRFailure) {
-  auto echConfig = getECHConfig();
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   decrypter.addDecryptionConfig(
-      DecrypterParams{std::move(echConfig), kex->clone()});
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
   // Get an encapsulated key to use.
   Buf enc;
   ClientHello initialClientHello;
   getChloOuterHRRWithExt(kex->clone(), enc, initialClientHello);
-  auto echConfigContent = getECHConfigContent();
 
   EXPECT_THROW(
       decrypter.decryptClientHelloHRR(TestMessages::clientHello(), enc),
@@ -243,17 +238,15 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
 }
 
 TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
-  auto echConfig = getECHConfig();
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   decrypter.addDecryptionConfig(
-      DecrypterParams{std::move(echConfig), kex->clone()});
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
   // Get a context to use.
   auto chloOuter = getChloOuterWithExt(kex->clone());
   auto gotChlo = decrypter.decryptClientHello(chloOuter);
-  auto echConfigContent = getECHConfigContent();
 
   EXPECT_THROW(
       decrypter.decryptClientHelloHRR(
@@ -262,22 +255,20 @@ TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
 }
 
 TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
-  auto targetEchConfigContent = getECHConfigContent();
-  targetEchConfigContent.key_config.config_id = 2;
-  ECHConfig targetECHConfig;
-  targetECHConfig.ech_config_content =
-      encode(std::move(targetEchConfigContent));
-  targetECHConfig.version = ECHVersion::Draft15;
+  auto targetECHConfigContent = getParsedECHConfig();
+  targetECHConfigContent.key_config.config_id = 2;
 
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   // Load multiple decrypter params
-  decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
-  decrypter.addDecryptionConfig(DecrypterParams{targetECHConfig, kex->clone()});
+  decrypter.addDecryptionConfig(
+      DecrypterParams{getParsedECHConfig(), kex->clone()});
+  decrypter.addDecryptionConfig(
+      DecrypterParams{targetECHConfigContent, kex->clone()});
 
   Buf enc;
-  auto chlo = getChloOuterWithExt(kex->clone(), targetECHConfig);
+  auto chlo = getChloOuterWithExt(kex->clone(), targetECHConfigContent);
 
   // Decrypting chlo should result in the second decrypter param being used
   auto result = decrypter.decryptClientHello(chlo);

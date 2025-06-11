@@ -197,7 +197,7 @@ class HandshakeTest : public Test {
         nullptr,
         folly::none,
         std::string("Fizz"),
-        folly::Optional<std::vector<ech::ECHConfig>>(folly::none));
+        folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
     server_->accept(&serverCallback_);
   }
 
@@ -212,7 +212,7 @@ class HandshakeTest : public Test {
         nullptr,
         folly::none,
         std::string("Fizz"),
-        folly::Optional<std::vector<ech::ECHConfig>>(folly::none));
+        folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
     evb_.loop();
   }
 
@@ -225,7 +225,7 @@ class HandshakeTest : public Test {
         nullptr,
         folly::none,
         std::string("Fizz"),
-        folly::Optional<std::vector<ech::ECHConfig>>(folly::none));
+        folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
     evb_.loop();
   }
 

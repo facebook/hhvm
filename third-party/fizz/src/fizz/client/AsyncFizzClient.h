@@ -88,7 +88,7 @@ class AsyncFizzClientT : public AsyncFizzBase,
       std::shared_ptr<const CertificateVerifier> verifier,
       folly::Optional<std::string> sni,
       folly::Optional<std::string> pskIdentity,
-      folly::Optional<std::vector<ech::ECHConfig>> echConfigs,
+      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
       std::chrono::milliseconds = std::chrono::milliseconds(0));
 
   /**
@@ -112,7 +112,7 @@ class AsyncFizzClientT : public AsyncFizzBase,
   virtual void connect(
       HandshakeCallback* callback,
       folly::Optional<std::string> hostname,
-      folly::Optional<std::vector<ech::ECHConfig>> echConfigs,
+      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
       std::chrono::milliseconds = std::chrono::milliseconds(0));
 
   bool good() const override;
@@ -188,7 +188,7 @@ class AsyncFizzClientT : public AsyncFizzBase,
    * ECH configs supported by server. May be sent if ECH is requested,
    * useful in the rejection case.
    */
-  folly::Optional<std::vector<ech::ECHConfig>> getEchRetryConfigs() const;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> getEchRetryConfigs() const;
 
   void echRetryAvailable(const ECHRetryAvailable& retry) noexcept {
     if (echRetryCallback_) {

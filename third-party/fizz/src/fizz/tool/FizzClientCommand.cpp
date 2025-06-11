@@ -115,7 +115,7 @@ class Connection : public AsyncSocket::ConnectCallback,
       bool willResume,
       std::string proxyTarget,
       std::shared_ptr<ClientExtensions> extensions,
-      folly::Optional<std::vector<ech::ECHConfig>> echConfigs,
+      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
       bool registerEventCallback)
       : evb_(evb),
         clientContext_(clientContext),
@@ -415,12 +415,8 @@ class Connection : public AsyncSocket::ConnectCallback,
                 << toString(state.echState()->status);
 
       // Get ECH config content
-      const auto& echConfig = echConfigs_.value()[0];
-      const auto& configContent = echConfig.ech_config_content;
-      folly::io::Cursor cursor(configContent.get());
-      auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
-
-      auto ciphersuite = echConfigContent.key_config.cipher_suites[0];
+      const auto& echConfigContent = echConfigs_.value()[0];
+      const auto& ciphersuite = echConfigContent.key_config.cipher_suites[0];
       LOG(INFO) << "    Hash function: "
                 << toString(getHashFunction(ciphersuite.kdf_id));
       LOG(INFO) << "    Cipher Suite: "
@@ -444,7 +440,7 @@ class Connection : public AsyncSocket::ConnectCallback,
   std::unique_ptr<IOBuf> proxyResponseBuffer_;
   std::shared_ptr<ClientExtensions> extensions_;
   std::unique_ptr<KeyLogWriter> keyLogger_;
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs_;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs_;
   bool registerEventCallback_{false};
 };
 
@@ -801,16 +797,13 @@ int fizzClientCommand(const std::vector<std::string>& args) {
         std::make_shared<MultiClientExtensions>(std::move(extensionsList));
   }
 
-  folly::Optional<ech::ECHConfigList> echConfigList = folly::none;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs;
 
   if (ech) {
-    // Use default ECH config values.
-    echConfigList = ech::ECHConfigList{};
-    auto echConfigContents = getDefaultECHConfigs();
-    echConfigList->configs = std::move(echConfigContents);
+    echConfigs = getDefaultECHConfigs();
   } else if (!echConfigsBase64.empty()) {
-    echConfigList = parseECHConfigsBase64(echConfigsBase64);
-    if (!echConfigList.has_value()) {
+    echConfigs = parseECHConfigsBase64(echConfigsBase64);
+    if (!echConfigs.has_value()) {
       LOG(ERROR) << "Unable to parse ECHConfigList base64.";
       return 1;
     }
@@ -820,8 +813,8 @@ int fizzClientCommand(const std::vector<std::string>& args) {
       LOG(ERROR) << "Unable to load ECH configs from json file";
       return 1;
     }
-    echConfigList = parseECHConfigs(echConfigsJson.value());
-    if (!echConfigList.has_value()) {
+    echConfigs = parseECHConfigs(echConfigsJson.value());
+    if (!echConfigs.has_value()) {
       LOG(ERROR)
           << "Unable to parse JSON file and make ECH config."
           << "Ensure the format matches what is expected."
@@ -829,11 +822,6 @@ int fizzClientCommand(const std::vector<std::string>& args) {
           << "See FizzCommandCommonTest for a more concrete example.";
       return 1;
     }
-  }
-
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs;
-  if (echConfigList.has_value()) {
-    echConfigs = std::move(echConfigList->configs);
   }
 
   try {

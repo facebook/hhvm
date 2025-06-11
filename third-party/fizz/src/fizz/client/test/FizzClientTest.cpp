@@ -67,11 +67,7 @@ TEST_F(FizzClientTest, TestConnect) {
       .WillOnce(InvokeWithoutArgs([] { return Actions(); }));
   const auto sni = std::string("www.example.com");
   fizzClient_->fizzClient_.connect(
-      context_,
-      nullptr,
-      sni,
-      folly::none,
-      folly::Optional<std::vector<fizz::ech::ECHConfig>>(folly::none));
+      context_, nullptr, sni, folly::none, folly::none);
 }
 
 TEST_F(FizzClientTest, TestConnectPskIdentity) {
@@ -88,7 +84,7 @@ TEST_F(FizzClientTest, TestConnectPskIdentity) {
                      folly::Optional<CachedPsk> cachedPsk,
                      const std::shared_ptr<ClientExtensions>& /* unused */,
                      const folly::Optional<
-                         std::vector<ech::ECHConfig>>& /* unused */) {
+                         std::vector<ech::ParsedECHConfig>>& /* unused */) {
             EXPECT_TRUE(cachedPsk);
             EXPECT_EQ(cachedPsk->psk, psk);
             EXPECT_EQ(sni, "www.example.com");
@@ -98,11 +94,7 @@ TEST_F(FizzClientTest, TestConnectPskIdentity) {
   CachedPsk cachedPsk;
   cachedPsk.psk = psk;
   fizzClient_->fizzClient_.connect(
-      context_,
-      nullptr,
-      sni,
-      std::move(cachedPsk),
-      folly::Optional<std::vector<ech::ECHConfig>>(folly::none));
+      context_, nullptr, sni, std::move(cachedPsk), folly::none);
 }
 
 TEST(FizzClientContextTest, TestCopy) {

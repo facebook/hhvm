@@ -16,9 +16,10 @@ namespace fizz {
 namespace ech {
 namespace test {
 
-ECHConfigContentDraft getECHConfigContent();
+ParsedECHConfig getParsedECHConfig();
 ECHConfig getECHConfig();
 ClientHello getClientHelloOuter();
+bool isEqual(const ParsedECHConfig& l, const ParsedECHConfig& r);
 
 } // namespace test
 } // namespace ech

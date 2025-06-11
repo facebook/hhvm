@@ -41,7 +41,7 @@ template <typename SM>
 void AsyncFizzClientT<SM>::connect(
     HandshakeCallback* callback,
     folly::Optional<std::string> hostname,
-    folly::Optional<std::vector<ech::ECHConfig>> echConfigs,
+    folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
     std::chrono::milliseconds timeout) {
   auto pskIdentity = hostname;
   connect(
@@ -59,7 +59,7 @@ void AsyncFizzClientT<SM>::connect(
     std::shared_ptr<const CertificateVerifier> verifier,
     folly::Optional<std::string> sni,
     folly::Optional<std::string> pskIdentity,
-    folly::Optional<std::vector<ech::ECHConfig>> echConfigs,
+    folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
     std::chrono::milliseconds timeout) {
   DelayedDestruction::DestructorGuard dg(this);
 
@@ -280,7 +280,7 @@ void AsyncFizzClientT<SM>::connectSuccess() noexcept {
       std::move(verifier_),
       sni_,
       std::move(cachedPsk),
-      folly::Optional<std::vector<ech::ECHConfig>>(folly::none),
+      folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none),
       extensions_);
 }
 
@@ -741,7 +741,7 @@ bool AsyncFizzClientT<SM>::echAccepted() const {
 }
 
 template <typename SM>
-folly::Optional<std::vector<ech::ECHConfig>>
+folly::Optional<std::vector<ech::ParsedECHConfig>>
 AsyncFizzClientT<SM>::getEchRetryConfigs() const {
   if (!getState().echState().has_value() ||
       !getState().echState()->retryConfigs.has_value()) {

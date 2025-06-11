@@ -74,15 +74,10 @@ void checkDecodedChlo(ClientHello decodedChlo, ClientHello expectedChlo) {
       expectedChlo.legacy_compression_methods);
 }
 
-ECHConfig getInvalidVECHConfig() {
-  // Add invalid config
-  ECHConfig invalidConfig;
-  invalidConfig.version = ECHVersion::Draft15;
-  auto configContent = getECHConfigContent();
-  configContent.key_config.kem_id = hpke::KEMId::secp384r1;
-  invalidConfig.ech_config_content = encode(std::move(configContent));
-
-  return invalidConfig;
+ParsedECHConfig getUnsupportedParsedECHConfig() {
+  auto unSupportedConfig = getParsedECHConfig();
+  unSupportedConfig.key_config.kem_id = hpke::KEMId::secp384r1;
+  return unSupportedConfig;
 }
 
 hpke::SetupResult constructSetupResult(
@@ -97,9 +92,9 @@ hpke::SetupResult constructSetupResult(
 }
 
 OuterECHClientHello getTestOuterECHClientHelloWithInner(ClientHello chloInner) {
-  auto configContent = getECHConfigContent();
+  auto configContent = getParsedECHConfig();
   NegotiatedECHConfig supportedConfig{
-      getECHConfig(),
+      getParsedECHConfig(),
       configContent.key_config.config_id,
       configContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
@@ -123,21 +118,20 @@ OuterECHClientHello getTestOuterECHClientHello() {
 }
 
 void checkSupportedConfigValid(
-    const std::vector<ECHConfig>& configs,
-    std::unique_ptr<folly::IOBuf> expectedECHConfigContent) {
+    const std::vector<ParsedECHConfig>& configs,
+    const ParsedECHConfig& expectedConfig) {
   folly::Optional<NegotiatedECHConfig> result =
       negotiateECHConfig(configs, supportedKEMs, supportedAeads);
-  EXPECT_TRUE(result.hasValue());
+  ASSERT_TRUE(result.hasValue());
 
-  ECHConfig gotConfig = std::move(result.value().config);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      gotConfig.ech_config_content, expectedECHConfigContent));
+  EXPECT_TRUE(isEqual(result.value().config, expectedConfig));
   EXPECT_EQ(result.value().cipherSuite.kdf_id, hpke::KDFId::Sha256);
   EXPECT_EQ(
       result.value().cipherSuite.aead_id, hpke::AeadId::TLS_AES_128_GCM_SHA256);
   EXPECT_EQ(result.value().configId, 0xFB);
-  EXPECT_EQ(result.value().maxLen, 100);
+  EXPECT_EQ(result.value().maxLen, 50);
 }
+
 auto hpkeContext(OuterECHClientHello& clientECH) {
   // Create HPKE setup prefix
   std::string tlsEchPrefix = "tls ech";
@@ -179,49 +173,22 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
 
 } // namespace
 
-TEST(EncryptionTest, TestValidECHConfigContent) {
-  // Add config that doesn't work and cannot be supported
-  ECHConfigContentDraft invalidConfigContent = getECHConfigContent();
-  invalidConfigContent.key_config.kem_id = hpke::KEMId::secp521r1;
-  std::vector<ECHConfig> configs;
-  ECHConfig invalid;
-  invalid.version = ECHVersion::Draft15;
-  invalid.ech_config_content = encode(std::move(invalidConfigContent));
-
-  // Add config that works and can be supported
-  ECHConfig valid = getECHConfig();
-
-  configs.push_back(std::move(invalid));
-  configs.push_back(std::move(valid));
-
-  checkSupportedConfigValid(configs, encode(getECHConfigContent()));
+TEST(EncryptionTest, TestNegotiatedECHConfigContent) {
+  std::vector<ParsedECHConfig> configs = {
+      getUnsupportedParsedECHConfig(), getParsedECHConfig()};
+  checkSupportedConfigValid(configs, getParsedECHConfig());
 }
 
-TEST(EncryptionTest, TestInvalidECHConfigContent) {
-  ECHConfigContentDraft configContent = getECHConfigContent();
-
-  configContent.key_config.kem_id = hpke::KEMId::secp256r1;
-  HpkeSymmetricCipherSuite suite{
-      hpke::KDFId::Sha512, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  std::vector<HpkeSymmetricCipherSuite> cipher_suites = {suite};
-  configContent.key_config.cipher_suites = cipher_suites;
-
-  ECHConfig invalidConfig;
-  invalidConfig.version = static_cast<ECHVersion>(0xfe07); // Draft 7
-  invalidConfig.ech_config_content = encode(std::move(configContent));
-
-  std::vector<ECHConfig> configs;
-  configs.push_back(std::move(invalidConfig));
-
+TEST(EncryptionTest, TestNoNegotiatedECHConfigContent) {
+  std::vector<ParsedECHConfig> configs = {getUnsupportedParsedECHConfig()};
   folly::Optional<NegotiatedECHConfig> result =
       negotiateECHConfig(configs, supportedKEMs, supportedAeads);
-
   EXPECT_FALSE(result.hasValue());
 }
 
 TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
   // Add config that would work save for a mandatory extension we don't support.
-  ECHConfigContentDraft invalidConfigContent = getECHConfigContent();
+  ParsedECHConfig invalidConfigContent = getParsedECHConfig();
 
   Extension mandatory;
   // Set high order bit for type
@@ -231,39 +198,12 @@ TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
   invalidConfigContent.extensions.clear();
   invalidConfigContent.extensions.push_back(std::move(mandatory));
 
-  std::vector<ECHConfig> configs;
-  ECHConfig invalid;
-  invalid.version = ECHVersion::Draft15;
-  invalid.ech_config_content = encode(std::move(invalidConfigContent));
-  configs.push_back(std::move(invalid));
+  std::vector<ParsedECHConfig> configs = {std::move(invalidConfigContent)};
 
   folly::Optional<NegotiatedECHConfig> result =
       negotiateECHConfig(configs, supportedKEMs, supportedAeads);
 
   // Expect no result thanks to mandatory extension.
-  EXPECT_FALSE(result.hasValue());
-}
-
-TEST(EncryptionTest, TestValidSelectECHConfigContent) {
-  // Add valid config
-  ECHConfig validConfig;
-  validConfig.version = ECHVersion::Draft15;
-  validConfig.ech_config_content = encode(getECHConfigContent());
-
-  std::vector<ECHConfig> configs;
-  configs.push_back(getInvalidVECHConfig());
-  configs.push_back(std::move(validConfig));
-
-  checkSupportedConfigValid(configs, encode(getECHConfigContent()));
-}
-
-TEST(EncryptionTest, TestInvalidSelectECHConfigContent) {
-  std::vector<ECHConfig> configs;
-  configs.push_back(getInvalidVECHConfig());
-
-  folly::Optional<NegotiatedECHConfig> result =
-      negotiateECHConfig(configs, supportedKEMs, supportedAeads);
-
   EXPECT_FALSE(result.hasValue());
 }
 
@@ -302,7 +242,7 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   auto gotChlo = decode<ClientHello>(encodedECHInnerCursor);
 
   // Check padding
-  auto configContent = getECHConfigContent();
+  auto configContent = getParsedECHConfig();
   auto paddingSize = calculateECHPadding(
       gotChlo,
       encodedECHInnerCursor.getCurrentPosition(),
@@ -339,7 +279,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
 
   auto context = setupDecryptionContext(
       fizz::DefaultFactory(),
-      getECHConfig(),
+      getParsedECHConfig(),
       testECH.cipher_suite,
       testECH.enc->clone(),
       std::move(kex),
@@ -347,7 +287,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
 
   auto chlo = decryptECHWithContext(
       chloOuter,
-      getECHConfig(),
+      getParsedECHConfig(),
       testECH.cipher_suite,
       std::move(testECH.enc),
       std::move(testECH.config_id),
@@ -381,7 +321,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsSuccess) {
 
   auto decryptedChlo = decryptECHWithContext(
       outerChlo,
-      getECHConfig(),
+      getParsedECHConfig(),
       clientECH.cipher_suite,
       std::move(clientECH.enc),
       std::move(clientECH.config_id),
@@ -414,7 +354,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   EXPECT_THROW(
       decryptECHWithContext(
           outerChlo,
-          getECHConfig(),
+          getParsedECHConfig(),
           clientECH.cipher_suite,
           std::move(clientECH.enc),
           std::move(clientECH.config_id),
@@ -439,7 +379,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   EXPECT_THROW(
       decryptECHWithContext(
           outerChlo,
-          getECHConfig(),
+          getParsedECHConfig(),
           clientECH.cipher_suite,
           std::move(clientECH.enc),
           std::move(clientECH.config_id),

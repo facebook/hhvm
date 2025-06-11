@@ -41,18 +41,19 @@ std::string tryReadFile(const std::string& echFile);
  * @param echConfigListBase64 ECH config list encoded in base64. It must use
  * the format specified in the ECH RFC
  *(https://www.ietf.org/archive/id/draft-ietf-tls-esni-16.html#name-encrypted-clienthello-confi)
- * @return Parsed ECH config list.
+ * @return Parsed ECH config contents.
  **/
-folly::Optional<ech::ECHConfigList> parseECHConfigsBase64(
+folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigsBase64(
     std::string echConfigListBase64);
 
-folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json);
+folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigs(
+    folly::dynamic json);
 
 folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile);
 
 hpke::KEMId getKEMId(std::string kemStr);
 
-std::vector<ech::ECHConfig> getDefaultECHConfigs();
+std::vector<ech::ParsedECHConfig> getDefaultECHConfigs();
 
 inline uint16_t portFromString(const std::string& portStr, bool serverSide) {
   unsigned long converted = 0;

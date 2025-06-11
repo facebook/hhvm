@@ -16,7 +16,7 @@ namespace fizz {
 namespace ech {
 
 struct DecrypterParams {
-  ECHConfig echConfig;
+  ParsedECHConfig echConfig;
   std::unique_ptr<KeyExchange> kex;
 };
 

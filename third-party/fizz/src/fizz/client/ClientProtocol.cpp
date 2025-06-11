@@ -171,7 +171,7 @@ Actions ClientStateMachine::processConnect(
     Optional<std::string> sni,
     Optional<CachedPsk> cachedPsk,
     const std::shared_ptr<ClientExtensions>& extensions,
-    Optional<std::vector<ech::ECHConfig>> echConfigs) {
+    Optional<std::vector<ech::ParsedECHConfig>> echConfigs) {
   Connect connect;
   connect.context = std::move(context);
   connect.sni = std::move(sni);
@@ -648,7 +648,7 @@ static Optional<EarlyDataParams> getEarlyDataParams(
 }
 
 static ech::NegotiatedECHConfig getNegotiatedECHConfig(
-    const std::vector<ech::ECHConfig>& echConfigs,
+    const std::vector<ech::ParsedECHConfig>& echConfigs,
     const std::vector<CipherSuite>& supportedCiphers,
     const std::vector<NamedGroup>& supportedGroups) {
   // Convert vectors to use HPKE types.
@@ -688,7 +688,7 @@ struct ECHParams {
 } // namespace
 
 static folly::Optional<ECHParams> setupECH(
-    const folly::Optional<std::vector<ech::ECHConfig>>& echConfigs,
+    const folly::Optional<std::vector<ech::ParsedECHConfig>>& echConfigs,
     const std::vector<CipherSuite>& supportedCiphers,
     const std::vector<NamedGroup>& supportedGroups,
     const Factory& factory) {
@@ -698,11 +698,8 @@ static folly::Optional<ECHParams> setupECH(
   auto negotiatedECHConfig = getNegotiatedECHConfig(
       echConfigs.value(), supportedCiphers, supportedGroups);
 
-  auto configContent = negotiatedECHConfig.config.ech_config_content->clone();
-  folly::io::Cursor cursor(configContent.get());
-  auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
-  auto fakeSni = echConfigContent.public_name->clone();
-  auto kemId = echConfigContent.key_config.kem_id;
+  auto fakeSni = negotiatedECHConfig.config.public_name->clone();
+  auto kemId = negotiatedECHConfig.config.key_config.kem_id;
   auto kex =
       factory.makeKeyExchange(getKexGroup(kemId), KeyExchangeRole::Client);
   auto setupResult =
@@ -769,33 +766,27 @@ static ClientHello constructEncryptedClientHello(
   chloOuter.random = outerRandom;
 
   // Create the encrypted client hello inner extension.
-  switch (negotiatedECHConfig.config.version) {
-    case (ech::ECHVersion::Draft15): {
-      ech::OuterECHClientHello clientECHExtension;
-      if (e == Event::ClientHello) {
-        clientECHExtension = encryptClientHello(
-            negotiatedECHConfig,
-            std::move(chlo),
-            chloOuter.clone(),
-            hpkeSetup,
-            greasePsk,
-            outerExtensionTypes);
-      } else {
-        clientECHExtension = encryptClientHelloHRR(
-            negotiatedECHConfig,
-            std::move(chlo),
-            chloOuter.clone(),
-            hpkeSetup,
-            greasePsk,
-            outerExtensionTypes);
-      }
-      chloOuter.extensions.push_back(
-          encodeExtension(std::move(clientECHExtension)));
-      if (greasePsk) {
-        chloOuter.extensions.push_back(encodeExtension(*greasePsk));
-      }
-      break;
-    }
+  ech::OuterECHClientHello clientECHExtension;
+  if (e == Event::ClientHello) {
+    clientECHExtension = encryptClientHello(
+        negotiatedECHConfig,
+        chlo,
+        chloOuter.clone(),
+        hpkeSetup,
+        greasePsk,
+        outerExtensionTypes);
+  } else {
+    clientECHExtension = encryptClientHelloHRR(
+        negotiatedECHConfig,
+        chlo,
+        chloOuter.clone(),
+        hpkeSetup,
+        greasePsk,
+        outerExtensionTypes);
+  }
+  chloOuter.extensions.push_back(encodeExtension(clientECHExtension));
+  if (greasePsk) {
+    chloOuter.extensions.push_back(encodeExtension(*greasePsk));
   }
 
   return chloOuter;
@@ -891,12 +882,9 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   }
 
   if (echParams.has_value()) {
-    if (echParams.value().negotiatedECHConfig.config.version ==
-        ech::ECHVersion::Draft15) {
-      ech::InnerECHClientHello chloIsInnerExt;
-      chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
-      requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
-    }
+    ech::InnerECHClientHello chloIsInnerExt;
+    chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
+    requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
   } else if (
       context->getGreaseECHSetting().hasValue() &&
       context->getGreaseECHSetting()->payloadStrategy ==
@@ -1570,9 +1558,7 @@ Actions EventHandler<
   // state contains the outer client hello's values. As such, we'll replace the
   // SNI and random values with the saved inner values. We'll also add the inner
   // ECH extension required.
-  if (state.echState().has_value() &&
-      state.echState()->negotiatedECHConfig.config.version ==
-          ech::ECHVersion::Draft15) {
+  if (state.echState().has_value()) {
     ech::InnerECHClientHello chloIsInnerExt;
     encodedInnerECHExt = encodeExtension(std::move(chloIsInnerExt));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
@@ -1844,13 +1830,22 @@ Actions EventHandler<
     }
   }
 
-  folly::Optional<std::vector<ech::ECHConfig>> retryConfigs;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> retryConfigs;
   folly::Optional<ECHRetryAvailable> echRetryAvailable;
   if (state.echState().has_value()) {
     // Check if we were sent retry configs
     auto serverECH = getExtension<ech::ECHEncryptedExtensions>(ee.extensions);
     if (serverECH.has_value()) {
-      retryConfigs = std::move(serverECH->retry_configs);
+      auto configs = std::vector<ech::ParsedECHConfig>();
+      for (const auto& config : serverECH->retry_configs) {
+        if (auto maybeConfig =
+                ech::ParsedECHConfig::parseSupportedECHConfig(config)) {
+          configs.push_back(std::move(maybeConfig.value()));
+        }
+      }
+      if (!configs.empty()) {
+        retryConfigs = std::move(configs);
+      }
       echRetryAvailable = ECHRetryAvailable{};
       echRetryAvailable->sni = state.echState()->sni.value_or("");
       echRetryAvailable->configs = retryConfigs.value();

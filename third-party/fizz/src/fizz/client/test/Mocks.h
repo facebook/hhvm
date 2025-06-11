@@ -29,7 +29,7 @@ class MockClientStateMachine : public ClientStateMachine {
        folly::Optional<std::string> host,
        folly::Optional<CachedPsk> cachedPsk,
        const std::shared_ptr<ClientExtensions>& extensions,
-       folly::Optional<std::vector<ech::ECHConfig>> echConfigs));
+       folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs));
   Actions processConnect(
       const State& state,
       std::shared_ptr<const FizzClientContext> context,
@@ -37,7 +37,7 @@ class MockClientStateMachine : public ClientStateMachine {
       folly::Optional<std::string> host,
       folly::Optional<CachedPsk> cachedPsk,
       const std::shared_ptr<ClientExtensions>& extensions,
-      folly::Optional<std::vector<ech::ECHConfig>> echConfigs) override {
+      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs) override {
     return *_processConnect(
         state, context, verifier, host, cachedPsk, extensions, echConfigs);
   }
@@ -116,7 +116,7 @@ class MockAsyncFizzClient : public AsyncFizzClient {
        std::shared_ptr<const CertificateVerifier>,
        folly::Optional<std::string>,
        folly::Optional<std::string>,
-       folly::Optional<std::vector<ech::ECHConfig>>,
+       folly::Optional<std::vector<ech::ParsedECHConfig>>,
        std::chrono::milliseconds));
   MOCK_METHOD(void, close, ());
   MOCK_METHOD(void, closeWithReset, ());
@@ -141,7 +141,7 @@ class MockECHRetryCallback : public ECHRetryCallback {
 class MockECHPolicy : public fizz::client::ECHPolicy {
  public:
   MOCK_METHOD(
-      folly::Optional<std::vector<fizz::ech::ECHConfig>>,
+      folly::Optional<std::vector<fizz::ech::ParsedECHConfig>>,
       getConfig,
       (const std::string& hostname),
       (const));

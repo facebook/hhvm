@@ -44,7 +44,7 @@ struct Connect : EventType<Event::Connect> {
   folly::Optional<std::string> sni;
   folly::Optional<client::CachedPsk> cachedPsk;
   std::shared_ptr<ClientExtensions> extensions;
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs;
 };
 
 struct EarlyAppWrite : EventType<Event::EarlyAppWrite> {

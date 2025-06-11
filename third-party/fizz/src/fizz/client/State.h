@@ -79,7 +79,7 @@ struct ECHState {
   mutable std::unique_ptr<HandshakeContext> handshakeContext;
   // In the case of rejection, the server may send a list of supported
   // configs, which we store here.
-  folly::Optional<std::vector<ech::ECHConfig>> retryConfigs;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> retryConfigs;
 };
 
 class State {

@@ -22,7 +22,7 @@ class ECHPolicy {
    *  @returns folly::none if config is not found, the ECH config for SNI
    *  otherwise.
    */
-  virtual folly::Optional<std::vector<fizz::ech::ECHConfig>> getConfig(
+  virtual folly::Optional<std::vector<fizz::ech::ParsedECHConfig>> getConfig(
       const std::string& hostname) const = 0;
 };
 

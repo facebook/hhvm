@@ -177,7 +177,7 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
         nullptr,
         folly::none,
         std::string("resumption-id"),
-        folly::Optional<std::vector<fizz::ech::ECHConfig>>(folly::none));
+        folly::Optional<std::vector<fizz::ech::ParsedECHConfig>>(folly::none));
   }
 
   void connectErr(const AsyncSocketException& ex) noexcept override {

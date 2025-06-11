@@ -192,9 +192,42 @@ class CommonTestsOnEden(common_tests.CommonTests):
                 )
             return (stdout, stderr, retcode)
 
+        def commitAllChanges(self, message: str = "test commit") -> str:
+            (_, _, retcode) = self.proc_call(["hg", "add", "-R", self.repo_dir])
+            self.assertEqual(retcode, 0)
+            (_, _, retcode) = self.proc_call(
+                ["hg", "commit", "--addremove", "-m", message, "-R", self.repo_dir]
+            )
+            self.assertEqual(retcode, 0)
+
+            # Get the revision hash of the commit we just created
+            (stdout, _, retcode) = self.proc_call(
+                ["hg", "whereami", "-R", self.repo_dir]
+            )
+            self.assertEqual(retcode, 0)
+            rev_hash = stdout.strip()
+            return rev_hash
+
+        def gotoRev(self, rev: str, merge: bool = False) -> None:
+            args = ["hg", "goto", rev, "-R", self.repo_dir]
+            if merge:
+                args.append("--merge")
+            (_, _, retcode) = self.proc_call(args)
+            self.assertEqual(retcode, 0)
+
     @classmethod
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
         return CommonTestsOnEden._Driver()
+
+    # Need to duplicate this here from TestCase to make pyre happy
+    _test_driver: Optional[_Driver] = None
+
+    # Need to duplicate this here from TestCase to make pyre happy
+    @property
+    def test_driver(self) -> _Driver:
+        test_driver = self._test_driver
+        assert test_driver is not None
+        return test_driver
 
     def test_sync_queries(self) -> None:
         iterations = 50
@@ -257,6 +290,107 @@ class CommonTestsOnEden(common_tests.CommonTests):
             self.test_driver.check_cmd(
                 ["string"], options=["--type-at-pos", "{root}sync_1.php:5:24"]
             )
+
+    def test_hg_update_basic(self) -> None:
+        self.test_driver.start_hh_server()
+
+        # Create a file that uses hg_test_fun1
+        hg_update2 = os.path.join(self.test_driver.repo_dir, "hg_update2.php")
+        with open(hg_update2, "w") as f:
+            f.write(
+                """<?hh
+
+function hg_test_fun2(): string {
+    return hg_test_fun1();
+}
+"""
+            )
+
+        only_hg_update2_rev = self.test_driver.commitAllChanges()
+
+        # Create a file that defines hg_test_fun1
+        hg_update1 = os.path.join(self.test_driver.repo_dir, "hg_update1.php")
+        with open(hg_update1, "w") as f:
+            f.write(
+                """<?hh
+
+function hg_test_fun1(): string {
+    return "Hello";
+}
+"""
+            )
+
+        self.test_driver.check_cmd(["No errors!"])
+
+        all_present_rev = self.test_driver.commitAllChanges()
+
+        # this effectively deletes hg_update1, so hg_test_fun1 is gone
+        self.test_driver.gotoRev(only_hg_update2_rev)
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}hg_update2.php:4:12,23: Unbound name (typing): `hg_test_fun1` (Typing[4107])",
+                "ERROR: {root}hg_update2.php:4:12,23: Unbound name: `hg_test_fun1` (a global function) (Naming[2049])",
+            ]
+        )
+
+        # Let's bring the file back
+        self.test_driver.gotoRev(all_present_rev)
+        self.test_driver.check_cmd(["No errors!"])
+
+    def test_hg_update_dirty(self) -> None:
+        """Tests that we handle dirty repos correctly.
+
+        When we switch commits from rev1 to rev2, the changes that Edenfs_watcher
+        reports to hh_server are just the difference between the two revisions. However,
+        if we have uncommitted changes, then this may not actually reflect how the
+        working copy changes.
+        """
+
+        # Create a file with a type error
+        hg_update_bad_file = os.path.join(
+            self.test_driver.repo_dir, "hg_update_bad_file.php"
+        )
+        with open(hg_update_bad_file, "w") as f:
+            f.write(
+                """<?hh
+
+function hg_test_fun(): string {
+    return 3;
+}
+"""
+            )
+
+        added_bad_file = self.test_driver.commitAllChanges()
+
+        os.remove(hg_update_bad_file)
+        self.test_driver.start_hh_server()
+
+        # Until T226510404 is fixed, this will actually cause a recheck.
+        removed_bad_file = self.test_driver.commitAllChanges()
+        self.test_driver.check_cmd(["No errors!"])
+
+        # go back one commit, where the file was still there
+        self.test_driver.gotoRev(added_bad_file)
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}hg_update_bad_file.php:4:12,12: Invalid return type (Typing[4110])",
+                "  {root}hg_update_bad_file.php:3:25,30: Expected `string`",
+                "  {root}hg_update_bad_file.php:4:12,12: But got `int`",
+            ]
+        )
+
+        # let's remove the file ourselves ...
+        os.remove(hg_update_bad_file)
+        self.test_driver.check_cmd(["No errors!"])
+
+        # ... and now remove it "again" by changing to the commit where it was removed.
+        # In other words, we now report a change to hh_server about a file that was
+        # already gone, and is still gone afterwards.
+        # Need to set "--merge" here so that hg let's us do this.
+
+        self.test_driver.gotoRev(removed_bad_file, merge=True)
+
+        self.test_driver.check_cmd(["No errors!"])
 
     # Note that we inherit all tests from CommonTests and run them,
     # but using CommonTestsOnEden._Driver

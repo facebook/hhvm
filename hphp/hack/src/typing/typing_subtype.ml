@@ -670,7 +670,7 @@ module Sd = struct
       match (coerce, get_node ty) with
       | (Some TL.CoerceToDynamic, Tdynamic) ->
         let r = get_reason ty in
-        MakeType.supportdyn_mixed ~mixed_reason:r r
+        MakeType.supportdyn_mixed r
       | (Some TL.CoerceToDynamic, _) -> ty
       | _ -> ty
 end
@@ -713,9 +713,7 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
             let r = get_reason ty2 in
             ( env,
               None,
-              MakeType.union
-                r
-                [non_dyn_ty; MakeType.supportdyn_mixed ~mixed_reason:r r] )
+              MakeType.union r [non_dyn_ty; MakeType.supportdyn_mixed r] )
           | None -> (env, coerce, ty2)
         end
       | _ -> (env, coerce, ty2)
@@ -1028,7 +1026,7 @@ end = struct
       match (subtype_env.Subtype_env.coerce, get_node ty_super) with
       | (Some TL.CoerceToDynamic, Tdynamic) ->
         let r = get_reason ty_super in
-        let ty_super = MakeType.supportdyn_mixed ~mixed_reason:r r in
+        let ty_super = MakeType.supportdyn_mixed r in
         default_subtype_inner
           ~subtype_env
           ~this_ty
@@ -1348,7 +1346,7 @@ end = struct
           Subtype_ask.is_sub_type_for_union_i
             env
             (LoclType ty)
-            (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r_super r_super))
+            (LoclType (MakeType.supportdyn_mixed r_super))
         in
         (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
         let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
@@ -3085,7 +3083,7 @@ end = struct
              (Subtype_ask.is_sub_type_for_union_i
                 env
                 (LoclType ty)
-                (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)))
+                (LoclType (MakeType.supportdyn_mixed r)))
       then
         MakeType.supportdyn r ty
       else

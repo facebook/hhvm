@@ -156,8 +156,7 @@ let closed_shape r map = shape r (nothing r) map
 
 let open_shape ~kind r map = shape r kind map
 
-let supportdyn_mixed ?(mixed_reason = Reason.none) r =
-  supportdyn r (mixed mixed_reason)
+let supportdyn_mixed r = supportdyn r (mixed r)
 
 let hh_formatstring r ty =
   mk (r, Tnewtype (SN.Classes.cHHFormatString, [ty], mixed r))

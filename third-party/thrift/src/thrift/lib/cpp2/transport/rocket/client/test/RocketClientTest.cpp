@@ -45,7 +45,6 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/AsyncProcessor_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Service_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
-#include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 

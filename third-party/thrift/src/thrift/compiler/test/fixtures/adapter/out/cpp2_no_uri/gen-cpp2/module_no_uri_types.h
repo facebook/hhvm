@@ -211,28 +211,24 @@ class RefUnion final  {
 
   /** Glean { "field": "field1" } */
   template <typename..., typename T = ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>
-  [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> field1_ref() const& {
     return {value_.field1, fbthrift_type_, folly::to_underlying(Type::field1), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "field1" } */
   template <typename..., typename T = ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>
-  [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> field1_ref() const&& {
     return {std::move(value_.field1), fbthrift_type_, folly::to_underlying(Type::field1), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "field1" } */
   template <typename..., typename T = ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>
-  [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> field1_ref() & {
     return {value_.field1, fbthrift_type_, folly::to_underlying(Type::field1), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "field1" } */
   template <typename..., typename T = ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>
-  [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> field1_ref() && {
     return {std::move(value_.field1), fbthrift_type_, folly::to_underlying(Type::field1), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }

@@ -1429,4 +1429,14 @@ module SimpliHack = struct
   let prefix = "\\HH\\SimpliHack\\"
 
   let file = prefix ^ "file"
+
+  let constructor = prefix ^ "constructor"
+
+  let methods = prefix ^ "methods"
+
+  let static_methods = prefix ^ "static_methods"
+
+  let fields = prefix ^ "fields"
+
+  let static_fields = prefix ^ "static_fields"
 end

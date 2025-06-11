@@ -52,12 +52,9 @@ end
 (* Context module maintains the interpreter's state during evaluation *)
 module Context = struct
   type t = {
-    provider: Provider_context.t;
-        (** Provides access to class/method definitions *)
+    env: Tast_env.t;
     locals: Value.t Local_id.Map.t;
         (** Map of local variables to their values *)
-    dependent_root: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
-        (** The dependent node we will add dependencies to *)
     stack_trace: StackFrame.t list;  (** The current call stack trace *)
   }
 
@@ -69,8 +66,13 @@ module Context = struct
         (* Creates new context with my_provider, dependent_root, and empty locals *)
       ]}
   *)
-  let init provider dependent_root =
-    { provider; locals = Local_id.Map.empty; dependent_root; stack_trace = [] }
+  let init env = { env; locals = Local_id.Map.empty; stack_trace = [] }
+
+  let env ctx = ctx.env
+
+  let provider ctx = (Tast_env.get_decl_env ctx.env).Decl_env.ctx
+
+  let dependent_root ctx = (Tast_env.get_decl_env ctx.env).Decl_env.droot
 
   (* Helper for raising evaluation errors *)
   let eval_error ~ctx ~pos ~msg =
@@ -130,10 +132,10 @@ module Context = struct
     { ctx with stack_trace = frame :: ctx.stack_trace } |> fresh
 
   let add_dep ctx dep =
-    match ctx.dependent_root with
+    match dependent_root ctx with
     | None -> ()
     | Some root ->
-      let mode = Provider_context.get_deps_mode ctx.provider in
+      let mode = Provider_context.get_deps_mode (provider ctx) in
       Typing_deps.add_idep mode root dep
 
   let add_file_dep ctx path = add_dep ctx Typing_deps.Dep.(File path)
@@ -151,12 +153,13 @@ module Context = struct
     add_dep ctx Typing_deps.Dep.(Type name);
     let cls =
       let open Option.Let_syntax in
-      let* path = Naming_provider.get_class_path ctx.provider name in
+      let provider = provider ctx in
+      let* path = Naming_provider.get_class_path provider name in
       add_file_dep ctx path;
       let* class_ =
-        Ast_provider.find_class_in_file ~full:true ctx.provider path name
+        Ast_provider.find_class_in_file ~full:true provider path name
       in
-      return @@ Naming.class_ ctx.provider class_
+      return @@ Naming.class_ provider class_
     in
     match cls with
     | Some cls -> cls
@@ -211,12 +214,13 @@ module Context = struct
     add_dep ctx Typing_deps.Dep.(Fun name);
     let func =
       let open Option.Let_syntax in
-      let* path = Naming_provider.get_fun_path ctx.provider name in
+      let provider = provider ctx in
+      let* path = Naming_provider.get_fun_path provider name in
       add_file_dep ctx path;
       let* fun_def =
-        Ast_provider.find_fun_in_file ~full:true ctx.provider path name
+        Ast_provider.find_fun_in_file ~full:true provider path name
       in
-      return @@ Naming.fun_def ctx.provider fun_def
+      return @@ Naming.fun_def provider fun_def
     in
     match func with
     | Some func -> func
@@ -225,7 +229,50 @@ module Context = struct
         ~ctx
         ~pos
         ~msg:(Printf.sprintf "Function `%s` not found" @@ Utils.strip_ns name)
+
+  module Class = struct
+    type ctx = t
+
+    type t = ctx * Folded_class.t
+
+    let find ~ctx (pos, name) =
+      add_dep ctx Typing_deps.Dep.(Type name);
+      let provider = provider ctx in
+      let cls = Decl_provider.get_class provider name |> Decl_entry.to_option in
+      match cls with
+      | Some cls -> (ctx, cls)
+      | None ->
+        eval_error
+          ~ctx
+          ~pos
+          ~msg:
+            (Printf.sprintf "The type `%s` is not defined"
+            @@ Utils.strip_ns name)
+
+    let constructor (ctx, cls) =
+      add_dep ctx Typing_deps.Dep.(Constructor (Folded_class.name cls));
+      let (constructor, _) = Folded_class.construct cls in
+      constructor
+
+    let methods (ctx, cls) =
+      add_dep ctx Typing_deps.Dep.(AllMembers (Folded_class.name cls));
+      Folded_class.methods cls
+
+    let static_methods (ctx, cls) =
+      add_dep ctx Typing_deps.Dep.(AllMembers (Folded_class.name cls));
+      Folded_class.smethods cls
+
+    let fields (ctx, cls) =
+      add_dep ctx Typing_deps.Dep.(AllMembers (Folded_class.name cls));
+      Folded_class.props cls
+
+    let static_fields (ctx, cls) =
+      add_dep ctx Typing_deps.Dep.(AllMembers (Folded_class.name cls));
+      Folded_class.sprops cls
+  end
 end
+
+module PromptCtx = Simplihack_prompt_context_provider.Make (Context)
 
 (* ControlFlow module represents the possible outcomes of statement evaluation *)
 module ControlFlow = struct
@@ -422,6 +469,31 @@ end = struct
               @@ Relative_path.to_absolute path)
       in
       Value.Str contents
+    | (Aast.Id (_, id), [Aast.Anormal arg])
+      when String.equal id Naming_special_names.SimpliHack.constructor ->
+      let classname = Expr.eval_str ctx arg in
+      let data = PromptCtx.Class.constructor ctx (snd3 arg, classname) in
+      Value.Str data
+    | (Aast.Id (_, id), [Aast.Anormal arg])
+      when String.equal id Naming_special_names.SimpliHack.methods ->
+      let classname = Expr.eval_str ctx arg in
+      let data = PromptCtx.Class.methods ctx (snd3 arg, classname) in
+      Value.Str data
+    | (Aast.Id (_, id), [Aast.Anormal arg])
+      when String.equal id Naming_special_names.SimpliHack.static_methods ->
+      let classname = Expr.eval_str ctx arg in
+      let data = PromptCtx.Class.static_methods ctx (snd3 arg, classname) in
+      Value.Str data
+    | (Aast.Id (_, id), [Aast.Anormal arg])
+      when String.equal id Naming_special_names.SimpliHack.fields ->
+      let classname = Expr.eval_str ctx arg in
+      let data = PromptCtx.Class.fields ctx (snd3 arg, classname) in
+      Value.Str data
+    | (Aast.Id (_, id), [Aast.Anormal arg])
+      when String.equal id Naming_special_names.SimpliHack.static_fields ->
+      let classname = Expr.eval_str ctx arg in
+      let data = PromptCtx.Class.static_fields ctx (snd3 arg, classname) in
+      Value.Str data
     | (Aast.Id name, args) ->
       let Aast.{ fd_fun = { f_params = params; f_body = body; _ }; _ } =
         Context.find_function ~ctx name
@@ -459,8 +531,7 @@ end
 
 (* Top-level evaluation function for user attributes *)
 let eval env (e : Tast.expr) =
-  let Decl_env.{ ctx; droot; _ } = Tast_env.get_decl_env env in
-  let ctx = Context.init ctx droot in
+  let ctx = Context.init env in
   try Result.Ok (Expr.eval_str ctx e) with
   | EvalError { msg; pos; stack_trace } ->
     let f { StackFrame.name; location } =

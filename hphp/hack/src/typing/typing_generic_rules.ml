@@ -132,10 +132,10 @@ let apply_rules_with_array_index_value_ty_mismatches
          the dynamic in supportdyn<t>, so don't break it apart as in the next case. *)
       default ()
     (* Preserve supportdyn<_> across operation *)
-    | (r, Tnewtype (cid, _, bound)) when String.equal cid SN.Classes.cSupportDyn
+    | (r, Tnewtype (cid, [ty], _)) when String.equal cid SN.Classes.cSupportDyn
       ->
       let (env, (ty, arr_errs, key_errs, val_errs)) =
-        iter ~supportdyn:true ~is_nonnull env bound
+        iter ~supportdyn:true ~is_nonnull env ty
       in
       let (env, ty) =
         if preserve_supportdyn then

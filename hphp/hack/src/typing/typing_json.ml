@@ -139,7 +139,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
   | (p, Tnonnull) -> obj @@ kind p "nonnull"
   | (p, Tdynamic) -> obj @@ kind p "dynamic"
   | (p, Tgeneric s) -> obj @@ kind p "generic" @ name s
-  | (_, Tnewtype (s, _, ty))
+  | (_, Tnewtype (s, [ty], _))
     when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
     from_type env ~show_like_ty ty
   | (p, Tnewtype (s, _, ty))

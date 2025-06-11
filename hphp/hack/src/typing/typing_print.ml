@@ -252,7 +252,7 @@ module Full = struct
   let rec is_supportdyn_mixed : type a. penv -> a ty -> bool =
    fun env t ->
     match get_node t with
-    | Tnewtype (n, _, ty)
+    | Tnewtype (n, [ty], _)
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv env) ->
       is_supportdyn_mixed env ty
@@ -1035,7 +1035,7 @@ module Full = struct
     | Tnewtype (s, [], _)
     | Tgeneric s ->
       (fuel, to_doc s)
-    | Tnewtype (n, _, ty)
+    | Tnewtype (n, [ty], _)
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
       k ~fuel ty
@@ -1687,7 +1687,7 @@ module ErrorString = struct
     | Tgeneric _ ->
       let (fuel, ty_str) = ety_to_string ety in
       (fuel, "a value of generic type " ^ ty_str)
-    | Tnewtype (n, _, ty)
+    | Tnewtype (n, [ty], _)
       when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env) ->
       type_ ~fuel env ty
     | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cClassname ->

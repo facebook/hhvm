@@ -120,7 +120,7 @@ let process_member ?is_declaration recv_class id ~kind =
 let concrete_cls_name_from_ty enclosing_class_name ty : string option =
   let ty =
     match Typing_defs_core.get_node ty with
-    | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn -> ty
+    | Tnewtype (n, [ty], _) when String.equal n SN.Classes.cSupportDyn -> ty
     | _ -> ty
   in
   match Typing_defs_core.get_node ty with

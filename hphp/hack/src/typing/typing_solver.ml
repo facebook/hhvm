@@ -141,7 +141,7 @@ let rec freshen_inside_ty env ty :
           (env, { p with fp_type }))
     in
     Some (env, mk (r, Tfun { ft with ft_ret; ft_params }))
-  | Tnewtype (name, _, ty)
+  | Tnewtype (name, [ty], _)
     when String.equal name Naming_special_names.Classes.cSupportDyn ->
     let* (env, ty) = freshen_inside_ty env ty in
     return (env, MakeType.supportdyn r ty)

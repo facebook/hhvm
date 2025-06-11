@@ -78,6 +78,16 @@ where
     }
 }
 
+impl<P> Deserialize<P> for u8
+where
+    P: ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        p.read_byte().map(|v| v as u8)
+    }
+}
+
 impl<P> Deserialize<P> for i8
 where
     P: ProtocolReader,

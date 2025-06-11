@@ -123,3 +123,10 @@ typedef set<string> set_string_9948
 
 typedef binary binary_t
 typedef map<string, string> map_string_string_t
+
+@rust.Type{name = "u8"}
+typedef byte u8
+
+struct TestU8Struct {
+  1: u8 b;
+}

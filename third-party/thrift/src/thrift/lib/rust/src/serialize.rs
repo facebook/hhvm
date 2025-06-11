@@ -94,6 +94,16 @@ where
     }
 }
 
+impl<P> Serialize<P> for u8
+where
+    P: ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_byte(*self as i8)
+    }
+}
+
 impl<P> Serialize<P> for i16
 where
     P: ProtocolWriter,

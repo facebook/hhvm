@@ -392,6 +392,58 @@ function hg_test_fun(): string {
 
         self.test_driver.check_cmd(["No errors!"])
 
+    def test_folder_rename(self) -> None:
+        self.test_driver.start_hh_server()
+
+        folder_path = os.path.join(self.test_driver.repo_dir, "old_folder")
+        os.makedirs(os.path.join(folder_path, "sub"), exist_ok=True)
+
+        with open(os.path.join(folder_path, "sub", "rename_test.php"), "w") as f:
+            f.write(
+                """<?hh
+
+function rename_sub_test_fun(): int {
+    return "ill-typed";
+}
+"""
+            )
+
+        with open(os.path.join(folder_path, "rename_test.php"), "w") as f:
+            f.write(
+                """<?hh
+
+function rename_test_fun(): int {
+    return "ill-typed";
+}
+"""
+            )
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}old_folder/rename_test.php:4:12,22: Invalid return type (Typing[4110])",
+                "  {root}old_folder/rename_test.php:3:29,31: Expected `int`",
+                "  {root}old_folder/rename_test.php:4:12,22: But got `string`",
+                "ERROR: {root}old_folder/sub/rename_test.php:4:12,22: Invalid return type (Typing[4110])",
+                "  {root}old_folder/sub/rename_test.php:3:33,35: Expected `int`",
+                "  {root}old_folder/sub/rename_test.php:4:12,22: But got `string`",
+            ]
+        )
+
+        # Rename the folder
+        new_folder_path = os.path.join(self.test_driver.repo_dir, "new_folder")
+        os.rename(folder_path, new_folder_path)
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}new_folder/rename_test.php:4:12,22: Invalid return type (Typing[4110])",
+                "  {root}new_folder/rename_test.php:3:29,31: Expected `int`",
+                "  {root}new_folder/rename_test.php:4:12,22: But got `string`",
+                "ERROR: {root}new_folder/sub/rename_test.php:4:12,22: Invalid return type (Typing[4110])",
+                "  {root}new_folder/sub/rename_test.php:3:33,35: Expected `int`",
+                "  {root}new_folder/sub/rename_test.php:4:12,22: But got `string`",
+            ]
+        )
+
     # Note that we inherit all tests from CommonTests and run them,
     # but using CommonTestsOnEden._Driver
 

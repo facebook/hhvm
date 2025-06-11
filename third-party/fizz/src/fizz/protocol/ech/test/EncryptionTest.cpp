@@ -118,12 +118,9 @@ OuterECHClientHello getTestOuterECHClientHello() {
 }
 
 void checkSupportedConfigValid(
-    const std::vector<ParsedECHConfig>& configs,
+    const folly::Optional<NegotiatedECHConfig>& result,
     const ParsedECHConfig& expectedConfig) {
-  folly::Optional<NegotiatedECHConfig> result =
-      negotiateECHConfig(configs, supportedKEMs, supportedAeads);
   ASSERT_TRUE(result.hasValue());
-
   EXPECT_TRUE(isEqual(result.value().config, expectedConfig));
   EXPECT_EQ(result.value().cipherSuite.kdf_id, hpke::KDFId::Sha256);
   EXPECT_EQ(
@@ -173,17 +170,61 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
 
 } // namespace
 
-TEST(EncryptionTest, TestNegotiatedECHConfigContent) {
+TEST(EncryptionTest, TestNegotiatedParsedECHConfig) {
   std::vector<ParsedECHConfig> configs = {
       getUnsupportedParsedECHConfig(), getParsedECHConfig()};
-  checkSupportedConfigValid(configs, getParsedECHConfig());
+  auto result = negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+  checkSupportedConfigValid(result, getParsedECHConfig());
 }
 
-TEST(EncryptionTest, TestNoNegotiatedECHConfigContent) {
+TEST(EncryptionTest, TestNoNegotiatedParsedECHConfig) {
   std::vector<ParsedECHConfig> configs = {getUnsupportedParsedECHConfig()};
   folly::Optional<NegotiatedECHConfig> result =
       negotiateECHConfig(configs, supportedKEMs, supportedAeads);
   EXPECT_FALSE(result.hasValue());
+}
+
+TEST(EncryptionTest, TestNegotiatedECHPublicNameValidationFails) {
+  {
+    auto echConfig = getParsedECHConfig();
+    echConfig.public_name = "";
+    std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
+    folly::Optional<NegotiatedECHConfig> result =
+        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    EXPECT_FALSE(result.hasValue());
+  }
+  {
+    auto echConfig = getParsedECHConfig();
+    echConfig.public_name = ".dummy.com";
+    std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
+    folly::Optional<NegotiatedECHConfig> result =
+        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    EXPECT_FALSE(result.hasValue());
+  }
+  {
+    auto echConfig = getParsedECHConfig();
+    echConfig.public_name = "dummy.com.";
+    std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
+    folly::Optional<NegotiatedECHConfig> result =
+        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    EXPECT_FALSE(result.hasValue());
+  }
+  {
+    auto echConfig = getParsedECHConfig();
+    echConfig.public_name = "public..dummy.com";
+    std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
+    folly::Optional<NegotiatedECHConfig> result =
+        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    EXPECT_FALSE(result.hasValue());
+  }
+  {
+    auto echConfig = getParsedECHConfig();
+    echConfig.public_name = "dummy!.com";
+    std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
+    folly::Optional<NegotiatedECHConfig> result =
+        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    EXPECT_FALSE(result.hasValue());
+  }
 }
 
 TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {

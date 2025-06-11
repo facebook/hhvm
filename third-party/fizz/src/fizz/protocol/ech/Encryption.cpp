@@ -81,12 +81,16 @@ std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
 }
 
 bool isValidPublicName(const std::string& publicName) {
+  if (publicName.empty()) {
+    return false;
+  }
+
   // Starts/ends with a dot.
   if (publicName.front() == '.' || publicName.back() == '.') {
     return false;
   }
 
-  std::vector<std::string> parts;
+  std::vector<folly::StringPiece> parts;
   folly::split('.', publicName, parts, false);
 
   // Check that each part is a valid LDH label ([a-z,A-Z,0-9,-])

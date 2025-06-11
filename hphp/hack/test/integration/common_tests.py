@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import ClassVar, List, Mapping, NamedTuple, Optional, Tuple
+from typing import ClassVar, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from hphp.hack.test.integration.hh_paths import hackfmt, hh_client, hh_server
 from hphp.hack.test.integration.test_case import TestCase, TestDriver
@@ -34,7 +34,7 @@ class CommonTestDriver(TestDriver):
     # test.
     template_repo: ClassVar[str]
     repo_dir: ClassVar[str]
-    test_env: ClassVar[Mapping[str, str]]
+    test_env: ClassVar[Dict[str, str]]
     base_tmp_dir: ClassVar[str]
     hh_tmp_dir: ClassVar[str]
     bin_dir: ClassVar[str]

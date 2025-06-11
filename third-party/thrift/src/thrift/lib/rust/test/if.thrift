@@ -126,7 +126,16 @@ typedef map<string, string> map_string_string_t
 
 @rust.Type{name = "u8"}
 typedef byte u8
+@rust.Type{name = "u16"}
+typedef i16 u16
+@rust.Type{name = "u32"}
+typedef i32 u32
+@rust.Type{name = "u64"}
+typedef i64 u64
 
-struct TestU8Struct {
+struct TestUnsignedStruct {
   1: u8 b;
+  2: u16 c;
+  3: u32 d;
+  4: u64 e;
 }

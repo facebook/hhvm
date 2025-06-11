@@ -114,6 +114,16 @@ where
     }
 }
 
+impl<P> Serialize<P> for u16
+where
+    P: ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_i16(*self as i16)
+    }
+}
+
 impl<P> Serialize<P> for i32
 where
     P: ProtocolWriter,
@@ -124,6 +134,16 @@ where
     }
 }
 
+impl<P> Serialize<P> for u32
+where
+    P: ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_i32(*self as i32)
+    }
+}
+
 impl<P> Serialize<P> for i64
 where
     P: ProtocolWriter,
@@ -131,6 +151,16 @@ where
     #[inline]
     fn rs_thrift_write(&self, p: &mut P) {
         p.write_i64(*self)
+    }
+}
+
+impl<P> Serialize<P> for u64
+where
+    P: ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_i64(*self as i64)
     }
 }
 

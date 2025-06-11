@@ -108,6 +108,16 @@ where
     }
 }
 
+impl<P> Deserialize<P> for u16
+where
+    P: ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        p.read_i16().map(|v| v as u16)
+    }
+}
+
 impl<P> Deserialize<P> for i32
 where
     P: ProtocolReader,
@@ -118,6 +128,16 @@ where
     }
 }
 
+impl<P> Deserialize<P> for u32
+where
+    P: ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        p.read_i32().map(|v| v as u32)
+    }
+}
+
 impl<P> Deserialize<P> for i64
 where
     P: ProtocolReader,
@@ -125,6 +145,16 @@ where
     #[inline]
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_i64()
+    }
+}
+
+impl<P> Deserialize<P> for u64
+where
+    P: ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        p.read_i64().map(|v| v as u64)
     }
 }
 

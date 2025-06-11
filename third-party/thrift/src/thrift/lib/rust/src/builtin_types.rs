@@ -18,6 +18,9 @@
 
 pub use std::collections::*;
 pub use std::primitive::u8;
+pub use std::primitive::u16;
+pub use std::primitive::u32;
+pub use std::primitive::u64;
 
 pub use bytes::Bytes;
 pub use ordered_float::OrderedFloat;

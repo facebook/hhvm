@@ -37,7 +37,7 @@ use interface::TestEnumEmpty;
 use interface::TestSkipMinimal;
 use interface::TestSkipV1;
 use interface::TestSkipV2;
-use interface::TestU8Struct;
+use interface::TestUnsignedStruct;
 use interface::TypedefNondefaultTypes;
 use interface::WrapBinary;
 use interface::WrapString;
@@ -191,16 +191,19 @@ fn test_bytes_shared() {
 }
 
 #[test]
-fn test_u8_serde() {
-    let original = TestU8Struct {
+fn test_unsigned_serde() {
+    let original = TestUnsignedStruct {
         b: 7u8,
+        c: 11u16,
+        d: 33u32,
+        e: 42u64,
         ..Default::default()
     };
     let bytes = serialize!(CompactProtocol, |w| Serialize::rs_thrift_write(
         &original, w
     ));
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(bytes.clone()));
-    let deser: TestU8Struct = Deserialize::rs_thrift_read(&mut deserializer).unwrap();
+    let deser: TestUnsignedStruct = Deserialize::rs_thrift_read(&mut deserializer).unwrap();
     assert_eq!(original, deser);
 }
 

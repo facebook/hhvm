@@ -214,7 +214,12 @@ inline ech::ECHConfigList decode(folly::io::Cursor& cursor) {
 template <>
 inline Buf encode<const ech::ECHConfigList&>(
     const ech::ECHConfigList& echConfigList) {
-  auto buf = folly::IOBuf::create(sizeof(uint16_t));
+  size_t len = sizeof(uint16_t);
+  for (const auto& config : echConfigList.configs) {
+    len += detail::getSize(config);
+  }
+
+  auto buf = folly::IOBuf::create(len);
   folly::io::Appender appender(buf.get(), 20);
   detail::writeVector<uint16_t>(echConfigList.configs, appender);
   return buf;

@@ -39,6 +39,11 @@ inline size_t getBufSize<bits24>(const Buf& buf) {
   return bits24::size + buf->computeChainDataLength();
 }
 
+template <class N>
+size_t getStringSize(const std::string& str) {
+  return sizeof(N) + str.size();
+}
+
 template <class T>
 size_t getSize(const T& t) {
   return Sizer<T>().template getSize<T>(t);
@@ -175,6 +180,12 @@ void writeBuf(const Buf& buf, folly::io::Appender& out) {
   writeBufWithoutLength(buf, out);
 }
 
+template <class N>
+void writeString(const std::string& str, folly::io::Appender& out) {
+  out.writeBE<N>(folly::to<N>(str.size()));
+  out.push(folly::ByteRange(str));
+}
+
 template <>
 struct Writer<Random> {
   template <class T>
@@ -231,6 +242,13 @@ inline size_t readBuf<bits24>(Buf& buf, folly::io::Cursor& cursor) {
   auto len = readBits24(cursor);
   cursor.clone(buf, len);
   return bits24::size + len;
+}
+
+template <class N>
+size_t readString(std::string& str, folly::io::Cursor& cursor) {
+  auto len = cursor.readBE<N>();
+  str = cursor.readFixedString(len);
+  return sizeof(N) + len;
 }
 
 template <class U>

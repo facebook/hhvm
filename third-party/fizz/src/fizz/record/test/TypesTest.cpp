@@ -76,5 +76,21 @@ TEST(TestTypes, WriteBuf) {
   detail::writeBuf<uint64_t>(buf, appender2);
   EXPECT_EQ(8 + buf->length(), out2->computeChainDataLength());
 }
+
+TEST(TestTypes, WriteReadString) {
+  std::string str{"str.buf.com"};
+
+  auto out = IOBuf::create(10);
+  Appender appender(out.get(), 10);
+  detail::writeString<uint8_t>(str, appender);
+  EXPECT_EQ(detail::getStringSize<uint8_t>(str), out->computeChainDataLength());
+
+  Cursor cursor(out.get());
+  std::string decodedStr;
+  auto len = detail::readString<uint8_t>(decodedStr, cursor);
+  ASSERT_TRUE(cursor.isAtEnd());
+  EXPECT_EQ(len, out->computeChainDataLength());
+  EXPECT_EQ(str, decodedStr);
+}
 } // namespace test
 } // namespace fizz

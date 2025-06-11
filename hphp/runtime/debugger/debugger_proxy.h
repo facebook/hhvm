@@ -114,6 +114,9 @@ struct DebuggerProxy : Synchronizable,
   };
 
   std::pair<bool,Variant>
+  ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand& cmd, int frame, int flags);
+
+  std::pair<bool,Variant>
   ExecutePHP(const std::string &php, String &output, int frame, int flags);
 
   std::string requestAuthToken();
@@ -171,4 +174,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

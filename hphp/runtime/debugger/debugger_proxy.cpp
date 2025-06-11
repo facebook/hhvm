@@ -506,6 +506,24 @@ struct DebuggerStdoutHook final : ExecutionContext::StdoutHook {
   }
 };
 
+// Passed to the ExecutionContext during Eval to stream writes to stdout
+// to the output buffer string.
+struct DebuggerStreamStdoutHook final : ExecutionContext::StdoutHook {
+  DebuggerProxy& proxy;
+  DebuggerCommand& cmd;
+  String &output;
+  explicit DebuggerStreamStdoutHook(DebuggerProxy& proxy,
+                                    DebuggerCommand &cmd,
+                                    String &output)
+    : proxy(proxy), cmd(cmd), output(output) {}
+  void operator()(const char* s, int len) override {
+    StringBuffer sb;
+    sb.append(s, len);
+    output = sb.detach();
+    proxy.sendToClient(&cmd);
+  }
+};
+
 struct DebuggerLoggerHook final : LoggerHook {
   StringBuffer& sb;
   explicit DebuggerLoggerHook(StringBuffer& sb) : sb(sb) {}
@@ -767,6 +785,68 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+std::pair<bool,Variant>
+DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand &cmd,
+                          int frame, int flags) {
+  TRACE(2, "DebuggerProxy::ExecutePHPWithStreaming\n");
+  // Wire up stdout and stderr to our own string buffer so we can pass
+  // any output back to the client.
+  StringBuffer sb;
+  StringBuffer *save = g_context->swapOutputBuffer(nullptr);
+  DebuggerStreamStdoutHook stdout_hook(*this, cmd, output);
+  DebuggerLoggerHook stderr_hook(sb);
+
+  auto const previousEvalOutputHook = m_evalOutputHook;
+  if (previousEvalOutputHook != nullptr) {
+    g_context->removeStdoutHook(previousEvalOutputHook);
+  }
+
+  m_evalOutputHook = &stdout_hook;
+  g_context->addStdoutHook(&stdout_hook);
+
+  if (flags & ExecutePHPFlagsLog) {
+    Logger::SetThreadHook(&stderr_hook);
+  }
+  SCOPE_EXIT {
+    g_context->removeStdoutHook(&stdout_hook);
+    g_context->swapOutputBuffer(save);
+    if (flags & ExecutePHPFlagsLog) {
+      Logger::SetThreadHook(nullptr);
+    }
+
+    if (previousEvalOutputHook != nullptr) {
+      g_context->addStdoutHook(previousEvalOutputHook);
+    }
+
+    m_evalOutputHook = previousEvalOutputHook;
+  };
+  String code(php.c_str(), php.size(), CopyString);
+  // We're about to start executing more PHP. This is typically done
+  // in response to commands from the client, and the client expects
+  // those commands to send more interrupts since, of course, the
+  // user might want to debug the code we're about to run. If we're
+  // already processing an interrupt, enable signal polling around
+  // the execution of the new PHP to ensure that we can handle
+  // signals while doing so.
+  //
+  // Note: we must switch the thread mode to Sticky so we block
+  // other threads which may hit interrupts while we're running,
+  // since nested processInterrupt() calls would normally release
+  // other threads on the way out.
+  assertx(m_thread == (int64_t)Process::GetThreadId());
+  ThreadMode origThreadMode = m_threadMode;
+  switchThreadMode(Sticky, m_thread);
+  if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
+  SCOPE_EXIT {
+    if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
+    switchThreadMode(origThreadMode, m_thread);
+  };
+  auto const ret = g_context->evalPHPDebugger(code.get(), frame);
+  output = sb.detach();
+  return {ret.failed, ret.result};
+}
+
 
 std::pair<bool,Variant>
 DebuggerProxy::ExecutePHP(const std::string &php, String &output,

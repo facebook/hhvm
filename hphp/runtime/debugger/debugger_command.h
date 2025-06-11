@@ -83,6 +83,7 @@ struct DebuggerCommand {
     KindOfMacro               = 1002,
     KindOfConfig              = 1003,
     KindOfInstrument          = 1004,
+    KindOfEvalStream          = 1005,
 
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,

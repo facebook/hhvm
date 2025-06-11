@@ -119,31 +119,32 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
 
   // Not all commands are here, as not all commands need to be sent over wire.
   switch (type) {
-    case KindOfBreak    : cmd = std::make_shared<CmdBreak>(); break;
-    case KindOfContinue : cmd = std::make_shared<CmdContinue>(); break;
-    case KindOfDown     : cmd = std::make_shared<CmdDown>(); break;
-    case KindOfException: cmd = std::make_shared<CmdException>(); break;
-    case KindOfFrame    : cmd = std::make_shared<CmdFrame>(); break;
-    case KindOfGlobal   : cmd = std::make_shared<CmdGlobal>(); break;
-    case KindOfInfo     : cmd = std::make_shared<CmdInfo>(); break;
-    case KindOfConstant : cmd = std::make_shared<CmdConstant>(); break;
-    case KindOfList     : cmd = std::make_shared<CmdList>(); break;
-    case KindOfMachine  : cmd = std::make_shared<CmdMachine>(); break;
-    case KindOfNext     : cmd = std::make_shared<CmdNext>(); break;
-    case KindOfOut      : cmd = std::make_shared<CmdOut>(); break;
-    case KindOfPrint    : cmd = std::make_shared<CmdPrint>(); break;
-    case KindOfQuit     : cmd = std::make_shared<CmdQuit>(); break;
-    case KindOfRun      : cmd = std::make_shared<CmdRun>(); break;
-    case KindOfStep     : cmd = std::make_shared<CmdStep>(); break;
-    case KindOfThread   : cmd = std::make_shared<CmdThread>(); break;
-    case KindOfUp       : cmd = std::make_shared<CmdUp>(); break;
-    case KindOfVariable : cmd = std::make_shared<CmdVariable>(); break;
-    case KindOfWhere    : cmd = std::make_shared<CmdWhere>(); break;
-    case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
-    case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
-    case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;
-    case KindOfAuth     : cmd = std::make_shared<CmdAuth>(); break;
-    case KindOfShell    : cmd = std::make_shared<CmdShell>(); break;
+    case KindOfBreak      : cmd = std::make_shared<CmdBreak>(); break;
+    case KindOfContinue   : cmd = std::make_shared<CmdContinue>(); break;
+    case KindOfDown       : cmd = std::make_shared<CmdDown>(); break;
+    case KindOfException  : cmd = std::make_shared<CmdException>(); break;
+    case KindOfFrame      : cmd = std::make_shared<CmdFrame>(); break;
+    case KindOfGlobal     : cmd = std::make_shared<CmdGlobal>(); break;
+    case KindOfInfo       : cmd = std::make_shared<CmdInfo>(); break;
+    case KindOfConstant   : cmd = std::make_shared<CmdConstant>(); break;
+    case KindOfList       : cmd = std::make_shared<CmdList>(); break;
+    case KindOfMachine    : cmd = std::make_shared<CmdMachine>(); break;
+    case KindOfNext       : cmd = std::make_shared<CmdNext>(); break;
+    case KindOfOut        : cmd = std::make_shared<CmdOut>(); break;
+    case KindOfPrint      : cmd = std::make_shared<CmdPrint>(); break;
+    case KindOfQuit       : cmd = std::make_shared<CmdQuit>(); break;
+    case KindOfRun        : cmd = std::make_shared<CmdRun>(); break;
+    case KindOfStep       : cmd = std::make_shared<CmdStep>(); break;
+    case KindOfThread     : cmd = std::make_shared<CmdThread>(); break;
+    case KindOfUp         : cmd = std::make_shared<CmdUp>(); break;
+    case KindOfVariable   : cmd = std::make_shared<CmdVariable>(); break;
+    case KindOfWhere      : cmd = std::make_shared<CmdWhere>(); break;
+    case KindOfEval       : cmd = std::make_shared<CmdEval>(); break;
+    case KindOfEvalStream : cmd = std::make_shared<CmdEvalStream>(); break;
+    case KindOfInterrupt  : cmd = std::make_shared<CmdInterrupt>(); break;
+    case KindOfSignal     : cmd = std::make_shared<CmdSignal>(); break;
+    case KindOfAuth       : cmd = std::make_shared<CmdAuth>(); break;
+    case KindOfShell      : cmd = std::make_shared<CmdShell>(); break;
     case KindOfInternalTesting :
       cmd = std::make_shared<CmdInternalTesting>();
       break;

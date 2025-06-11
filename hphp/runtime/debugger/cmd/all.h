@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_auth.h"
 #include "hphp/runtime/debugger/cmd/cmd_eval.h"
+#include "hphp/runtime/debugger/cmd/cmd_eval_stream.h"
 #include "hphp/runtime/debugger/cmd/cmd_abort.h"
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_continue.h"
@@ -50,4 +51,3 @@
 #include "hphp/runtime/debugger/cmd/cmd_complete.h"
 #include "hphp/runtime/debugger/cmd/cmd_internal_testing.h"
 //tag: new_cmd.php inserts new command here, do NOT remove/modify this line
-

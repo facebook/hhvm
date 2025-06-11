@@ -50,32 +50,6 @@ TEST(DebugTreeTest, MyStruct) {
 
   auto v = protocol::asValueStruct<type::struct_t<MyStruct>>(s);
 
-  erase_if(*v.as_object().members(), [](auto& kv) {
-    // Remove fields we are not interested in.
-    return op::invoke_by_field_id<MyStruct>(
-        FieldId{kv.first},
-        []<class Id>(Id) {
-          return !folly::IsOneOf<
-              op::get_ident<MyStruct, Id>,
-              ident::boolVal,
-              ident::byteVal,
-              ident::i16Val,
-              ident::i32Val,
-              ident::i64Val,
-              ident::floatVal,
-              ident::doubleVal,
-              ident::stringVal,
-              ident::binaryVal,
-              ident::listVal,
-              ident::setVal,
-              ident::mapVal>::value;
-        },
-        [] {
-          CHECK(false);
-          return false;
-        });
-  });
-
   EXPECT_EQ(
       to_string(
           debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
@@ -104,6 +78,12 @@ TEST(DebugTreeTest, MyStruct) {
 │  ╰─ 70
 ├─ binaryVal
 │  ╰─ \x2\x1\x0
+├─ structVal
+│  ╰─ <Struct: MyData (DebugTree.thrift)>
+│     ├─ data1
+│     │  ╰─ ""
+│     ╰─ data2
+│        ╰─ 0
 ├─ listVal
 │  ╰─ <List>
 │     ├─ 200
@@ -129,6 +109,7 @@ TEST(DebugTreeTest, MyStruct) {
       ╰─ Value #2
          ╰─ 999
 )");
+
   EXPECT_EQ(to_string(debugTree(v, getTypeFinder())), R"(<UNKNOWN STRUCT>
 ├─ FieldId(1)
 │  ╰─ true
@@ -148,6 +129,12 @@ TEST(DebugTreeTest, MyStruct) {
 │  ╰─ 70
 ├─ FieldId(9)
 │  ╰─ \x2\x1\x0
+├─ FieldId(11)
+│  ╰─ <UNKNOWN STRUCT>
+│     ├─ FieldId(1)
+│     │  ╰─ ""
+│     ╰─ FieldId(2)
+│        ╰─ 0
 ├─ FieldId(36)
 │  ╰─ <List>
 │     ├─ 200

@@ -1788,7 +1788,6 @@ void HTTPTransaction::resumeIngress() {
     switch (callback.getEvent()) {
       case HTTPEvent::Type::MESSAGE_BEGIN:
         LOG(FATAL) << "unreachable";
-        break;
       case HTTPEvent::Type::HEADERS_COMPLETE:
         processIngressHeadersComplete(callback.getHeaders());
         break;

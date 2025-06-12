@@ -55,31 +55,26 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     PolicyEnforcerCallerIdentity $caller,
     PolicyEnforcerContext $context,
   )[zoned_shallow]: Awaitable<TPolicyEnforcerResult> {
-    // Pending PAAL Consolidation
-    return await self::genPolicyEnforcerResults(
-      $asset_type,
-      $policy_enforcer_api,
-      $caller,
-      $context,
-    );
+    $old_exception = null;
+    $old_result = PolicyEnforcer::DEFAULT_POLICY_ENFORCER_RESULT;
 
-  }
+    try {
+      $old_result = await self::genPolicyEnforcerResults(
+        $asset_type,
+        $policy_enforcer_api,
+        $caller,
+        $context,
+      );
+    } catch (Exception $e) {
+      $old_exception = $e;
+    }
 
-  private static async function genPolicyEnforcerResults(
-    string $asset_type,
-    string $policy_enforcer_api,
-    PolicyEnforcerCallerIdentity $caller,
-    PolicyEnforcerContext $context,
-  )[zoned_local]: Awaitable<TPolicyEnforcerResult> {
-    // This may throw exceptions
-    $result = await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      $asset_type,
-      $policy_enforcer_api,
-      $caller,
-      $context,
-    );
+    if ($old_exception is nonnull) {
+      throw $old_exception;
+    }
 
-    // Pending Probes PrivacyLib post-rpc Integration
+    // We only run probes if no exception is thrown
+    // Pending Probes PrivacyLib Integration after PAAL Consolidation
     if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
       await self::genExecuteStandaloneProbes(
         $asset_type,
@@ -89,7 +84,22 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
       );
     }
 
-    return $result;
+    return $old_result;
+  }
+
+  private static async function genPolicyEnforcerResults(
+    string $asset_type,
+    string $policy_enforcer_api,
+    PolicyEnforcerCallerIdentity $caller,
+    PolicyEnforcerContext $context,
+  )[zoned_local]: Awaitable<TPolicyEnforcerResult> {
+    // This may throw exceptions
+    return await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
+      $asset_type,
+      $policy_enforcer_api,
+      $caller,
+      $context,
+    );
   }
 
   public static async function genProcessResponse(

@@ -122,6 +122,10 @@ class default_source_manager_backend final : public source_manager_backend {
     text.push_back('\0');
     return text;
   }
+
+  bool exists(const std::filesystem::path& path) final {
+    return std::filesystem::exists(path);
+  }
 };
 
 } // namespace
@@ -232,6 +236,10 @@ source_manager::path_or_error source_manager::find_include_file(
     return source_manager::path_or_error{std::in_place_index<0>, itr->second};
   }
 
+  const auto exists = [&](const std::filesystem::path& path) -> bool {
+    return backend_ == nullptr ? false : backend_->exists(path);
+  };
+
   auto found = [&](std::string path) {
     found_includes_[std::string(filename)] = path;
     return source_manager::path_or_error{
@@ -271,7 +279,7 @@ source_manager::path_or_error source_manager::find_include_file(
     if ((*it) != "." && (*it) != "") {
       sfilename = std::filesystem::path(*(it)) / filename;
     }
-    if (std::filesystem::exists(sfilename) ||
+    if (exists(sfilename) ||
         file_source_map_.find(sfilename.string()) != file_source_map_.end()) {
       return found(sfilename.string());
     }
@@ -282,7 +290,7 @@ source_manager::path_or_error source_manager::find_include_file(
             .make_preferred()
             .lexically_normal()
             .string();
-    if (std::filesystem::exists(sfilename)) {
+    if (exists(sfilename)) {
       return found(sfilename.string());
     }
 #endif
@@ -313,6 +321,13 @@ std::optional<std::vector<char>> in_memory_source_manager_backend::read_file(
   result.insert(result.end(), source_code.begin(), source_code.end());
   result.push_back('\0');
   return result;
+}
+
+bool in_memory_source_manager_backend::exists(
+    const std::filesystem::path& path) {
+  // The in-memory source manager backend only supports generic path format
+  // since it's intended to be platform-agnostic.
+  return files_by_path_.find(path.generic_string()) != files_by_path_.end();
 }
 
 } // namespace apache::thrift::compiler

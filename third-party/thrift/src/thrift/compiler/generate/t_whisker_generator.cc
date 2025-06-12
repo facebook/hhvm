@@ -415,36 +415,6 @@ void chomp_last_char(std::string* data, char c) {
   }
 }
 
-/**
- * This implementation of source_manager_backend builds on top of the
- * template_map that is populated from the "templates" directory during a build
- * step.
- */
-class template_source_manager_backend final : public source_manager_backend {
- public:
-  using templates_map = std::map<std::string, std::string, std::less<>>;
-
-  std::optional<std::vector<char>> read_file(std::string_view path) final {
-    auto found = templates_by_path_.find(path);
-    if (found == templates_by_path_.end()) {
-      return std::nullopt;
-    }
-    const auto& [_, source_code] = *found;
-    std::vector<char> result;
-    result.reserve(source_code.size() + 1);
-    result.insert(result.end(), source_code.begin(), source_code.end());
-    result.push_back('\0');
-    return result;
-  }
-
-  explicit template_source_manager_backend(
-      const templates_map& templates_by_path)
-      : templates_by_path_(templates_by_path) {}
-
- private:
-  const templates_map& templates_by_path_;
-};
-
 } // namespace
 
 class t_whisker_generator::whisker_source_parser

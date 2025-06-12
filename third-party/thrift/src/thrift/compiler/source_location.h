@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <memory>
@@ -114,6 +115,9 @@ class source_manager_backend {
   // Returns the file contents at the provided path, or empty optional if the
   // path is not found.
   virtual std::optional<std::vector<char>> read_file(std::string_view path) = 0;
+  // Returns true if and only if the path exists. That is, the read_file(path)
+  // call above would return a non-empty optional.
+  virtual bool exists(const std::filesystem::path& path) = 0;
 };
 
 // A source manager that caches sources in memory, loads files and enables
@@ -219,6 +223,7 @@ class in_memory_source_manager_backend final : public source_manager_backend {
   using map = std::map<std::string, std::string, std::less<>>;
 
   std::optional<std::vector<char>> read_file(std::string_view path) final;
+  bool exists(const std::filesystem::path& path) final;
 
   explicit in_memory_source_manager_backend(map files_by_path)
       : files_by_path_(std::move(files_by_path)) {}

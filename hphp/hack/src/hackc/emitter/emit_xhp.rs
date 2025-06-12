@@ -314,6 +314,7 @@ fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
         match &*(hint.1) {
             Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(h, enum_opt),
             Hint_::Happly(ast_defs::Id(_, id), _) => get_attribute_array_values(id, enum_opt),
+            Hint_::HclassPtr(_, _) => get_attribute_array_values("HH\\class", enum_opt),
             _ => Err(Error::unrecoverable(
                 "There are no other possible xhp attribute hints",
             )),

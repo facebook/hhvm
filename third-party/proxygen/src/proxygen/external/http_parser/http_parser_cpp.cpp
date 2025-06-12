@@ -1199,7 +1199,6 @@ size_t http_parser_execute_options (http_parser *parser,
             state = s_headers_almost_done;
             CALLBACK_DATA(url);
             goto reexecute_byte;
-            break;
           case '?':
             state = s_req_query_string_start;
             break;
@@ -1239,7 +1238,6 @@ size_t http_parser_execute_options (http_parser *parser,
             state = s_headers_almost_done;
             CALLBACK_DATA(url);
             goto reexecute_byte;
-            break;
           case '#':
             state = s_req_fragment_start;
             break;
@@ -1274,7 +1272,6 @@ size_t http_parser_execute_options (http_parser *parser,
             state = s_headers_almost_done;
             CALLBACK_DATA(url);
             goto reexecute_byte;
-            break;
           case '#':
             state = s_req_fragment_start;
             break;
@@ -1309,7 +1306,6 @@ size_t http_parser_execute_options (http_parser *parser,
             state = s_headers_almost_done;
             CALLBACK_DATA(url);
             goto reexecute_byte;
-            break;
           case '?':
             state = s_req_fragment;
             break;
@@ -1343,7 +1339,6 @@ size_t http_parser_execute_options (http_parser *parser,
             state = s_headers_almost_done;
             CALLBACK_DATA(url);
             goto reexecute_byte;
-            break;
           case '?':
           case '#':
             break;
@@ -1787,7 +1782,6 @@ size_t http_parser_execute_options (http_parser *parser,
           case h_transfer_encoding:
             SET_ERRNO(HPE_INVALID_HEADER_TOKEN);
             goto error;
-            break;
 
           case h_content_length:
             if (ch == ' ') break;

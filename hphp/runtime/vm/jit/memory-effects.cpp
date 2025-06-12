@@ -500,8 +500,32 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     /*
      * SP relative offset of the firstin the inlined call.
      */
-    auto inlineStackOff =
-      inst.src(0)->inst()->extra<DefCalleeFP>()->spOffset + kNumActRecCells;
+    auto const fp = inst.src(0);
+    auto const extra = fp->inst()->extra<DefCalleeFP>();
+    auto const spOff = extra->spOffset;
+    if (inst.extra<EnterInlineFrame>()->copy) {
+      auto const callee = extra->func;
+      auto const initArgs = inst.extra<EnterInlineFrame>()->numInitArgs;
+      auto argLocals = initArgs ? ALocal {fp, AliasIdSet::IdRange(0, initArgs)}
+                                : AEmpty;
+
+      auto const add = [&] (uint32_t id) { argLocals |= ALocal { fp, id }; };
+      if (callee->hasVariadicCaptureParam()) add(callee->numParams() - 1);
+      if (callee->hasCoeffectsLocal()) add(callee->coeffectsLocalId());
+      if (callee->hasReifiedGenerics()) add(callee->reifiedGenericsLocalId());
+
+      auto const numInputs = callee->numFuncEntryInputs();
+      auto const numUninit = callee->numNonVariadicParams() - initArgs;
+      auto const uninitOff = spOff - initArgs;
+
+      auto const stack =
+        numInputs ? AStack::range(spOff - numInputs, spOff) : AEmpty;
+      auto const uninits =
+        numUninit ? AStack::range(uninitOff - numUninit, uninitOff) : AEmpty;
+
+      return may_load_store_move_kill(stack, argLocals, stack, uninits);
+    }
+
     return may_load_store_kill(
       AEmpty,
       AEmpty,
@@ -511,7 +535,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * locals of the callee-- those slots are inacessible in the inlined
        * call as frame and stack locations may not alias.
        */
-      stack_below(inlineStackOff)
+      stack_below(spOff + kNumActRecCells)
     );
   }
 
@@ -677,26 +701,43 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<CallFuncEntry>();
       auto const calleePrototype = extra->calleePrototype;
       auto const numParams = calleePrototype->numNonVariadicParams();
+      auto const defCalleeFP = inst.src(0)->inst();
+      assertx(defCalleeFP->is(DefCalleeFP));
+      auto const spOffset = defCalleeFP->extra<DefCalleeFP>()->spOffset;
+
+      AliasClass uninit = AActRec { inst.src(0) };
+      if (extra->numInitArgs < numParams) {
+        uninit = *uninit.precise_union(ALocal {
+          inst.src(0),
+          AliasIdSet::IdRange(extra->numInitArgs, numParams)
+        });
+      }
+
+      if (calleePrototype->numLocals() > calleePrototype->numFuncEntryInputs()) {
+        auto const u = uninit.precise_union(ALocal{
+          inst.src(0),
+          AliasIdSet::IdRange(calleePrototype->numFuncEntryInputs(),
+                              calleePrototype->numLocals())
+        });
+        if (u) uninit = *u;
+      }
+
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
-        stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
+        stack_below(spOffset) | AMIStateAny | AVMRegAny,
         // Kill TUninit arguments.
-        extra->numInitArgs >= numParams ? AEmpty : AStack::range(
-          extra->spOffset + calleePrototype->numFuncEntryInputs() - numParams,
-          extra->spOffset + calleePrototype->numFuncEntryInputs() - extra->numInitArgs
-        ),
+        uninit,
         // Input arguments.
-        calleePrototype->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
-          extra->spOffset,
-          extra->spOffset + calleePrototype->numFuncEntryInputs()
-        ),
+        calleePrototype->numFuncEntryInputs() == 0 ? AEmpty : ALocal {
+          inst.src(0),
+          AliasIdSet::IdRange{ 0, calleePrototype->numFuncEntryInputs() }
+        },
         // ActRec.
-        actrec(inst.src(0), extra->spOffset + calleePrototype->numFuncEntryInputs()),
+        actrec(inst.src(0), spOffset),
         // Inout outputs.
         calleePrototype->numInOutParams() == 0 ? AEmpty : AStack::range(
-          extra->spOffset + calleePrototype->numFuncEntryInputs() + kNumActRecCells,
-          extra->spOffset + calleePrototype->numFuncEntryInputs() + kNumActRecCells +
-          calleePrototype->numInOutParams()
+          spOffset + kNumActRecCells,
+          spOffset + kNumActRecCells + calleePrototype->numInOutParams()
         ),
         // Backtrace locals.
         backtrace_locals(inst)

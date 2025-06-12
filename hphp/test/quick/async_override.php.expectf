@@ -1,0 +1,2 @@
+
+Fatal error: Cannot override async method Foo::bar() with a non-async method in class Bar in %s

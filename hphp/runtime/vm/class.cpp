@@ -2192,6 +2192,12 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
     }
   }
 
+  if (parentMethod->isAsync() && !method->isAsync()) {
+    raise_error("Cannot override async method %s::%s() with a non-async "
+                "method in class %s", m_parent->name()->data(),
+                parentMethod->name()->data(), m_preClass->name()->data());
+  }
+
   if ((method->attrs() & AttrAbstract) &&
       !(parentMethod->attrs() & AttrAbstract) &&
       !method->isFromTrait()) {

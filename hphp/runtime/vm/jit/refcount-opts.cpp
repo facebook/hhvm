@@ -1530,7 +1530,7 @@ RCState entry_rc_state(Env& env) {
   return ret;
 }
 
-bool merge_into(ASetInfo& dst, const ASetInfo& src) {
+bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
   auto changed = false;
 
   auto const lower_bound = std::min(dst.lower_bound, src.lower_bound);
@@ -1560,13 +1560,22 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto const supported_refs = std::min(dst_supported_refs, src_supported_refs);
   auto const unsupported_refs = lower_bound - supported_refs;
 
-  if (dst.lower_bound != lower_bound) {
-    dst.lower_bound = lower_bound;
+  if (dst.unsupported_refs != unsupported_refs) {
+    dst.unsupported_refs = unsupported_refs;
     changed = true;
   }
 
-  if (dst.unsupported_refs != unsupported_refs) {
-    dst.unsupported_refs = unsupported_refs;
+  if (dst.lower_bound != lower_bound) {
+    /*
+     * If there's a cycle, we will still converge to 0, 
+     * albeit rather slowly - after going through lower_bound iterations.
+     * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
+     */
+     if (is_back_edge) {
+      dst.lower_bound = dst.unsupported_refs = 0;
+    } else {
+      dst.lower_bound = lower_bound;
+    }
     changed = true;
   }
 
@@ -1579,7 +1588,7 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   return changed;
 }
 
-bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
+bool merge_into(Env& /*env*/, RCState& dst, const RCState& src, bool is_back_edge) {
   if (!dst.initialized) {
     dst = src;
     return true;
@@ -1624,7 +1633,8 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
   dst.has_unsupported_refs = false;
   for (auto asetID = uint32_t{0}; asetID < dst.asets.size(); ++asetID) {
     auto &daset = dst.asets[asetID];
-    if (merge_into(daset, src.asets[asetID])) {
+    if (merge_into(daset, src.asets[asetID], is_back_edge)) {
+      FTRACE(3, "  info changed for aset ID {}\n", asetID);
       changed = true;
     }
 
@@ -2386,6 +2396,7 @@ void rc_analyze_worklist(Env& env,
     auto const blk = env.rpoBlocks[id];
     FTRACE(2, "B{}:\n", blk->id());
     auto state = rca.info[blk].state_in;
+    auto rpoID = rca.info[blk].rpoId;
 
     auto propagate = [&] (Block* target) {
       FTRACE(2, "   -> {}\n", target->id());
@@ -2419,7 +2430,7 @@ void rc_analyze_worklist(Env& env,
         );
         return;
       }
-      auto const changed = merge_into(env, tinfo.state_in, state);
+      auto const changed = merge_into(env, tinfo.state_in, state, tinfo.rpoId < rpoID);
       if (changed) incompleteQ.push(tinfo.rpoId);
     };
 

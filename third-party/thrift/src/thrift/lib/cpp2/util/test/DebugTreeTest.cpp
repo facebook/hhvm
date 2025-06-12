@@ -50,16 +50,7 @@ TEST(DebugTreeTest, MyStruct) {
 
   auto v = protocol::asValueStruct<type::struct_t<MyStruct>>(s);
 
-  EXPECT_EQ(
-      to_string(
-          debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
-      to_string(debugTree(
-          v, getTypeFinder(), type::Type::get<type::struct_t<MyStruct>>())));
-
-  EXPECT_EQ(
-      to_string(
-          debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
-      R"(<Struct: MyStruct (DebugTree.thrift)>
+  constexpr auto expected = R"(<Struct: MyStruct (DebugTree.thrift)>
 ├─ boolVal
 │  ╰─ true
 ├─ byteVal
@@ -108,7 +99,19 @@ TEST(DebugTreeTest, MyStruct) {
       │  ╰─ 900
       ╰─ Value #2
          ╰─ 999
-)");
+)";
+
+  EXPECT_EQ(to_string(debugTree(s)), expected);
+
+  EXPECT_EQ(
+      to_string(debugTree(
+          v, getTypeFinder(), type::Type::get<type::struct_t<MyStruct>>())),
+      expected);
+
+  EXPECT_EQ(
+      to_string(
+          debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
+      expected);
 
   EXPECT_EQ(to_string(debugTree(v, getTypeFinder())), R"(<UNKNOWN STRUCT>
 ├─ FieldId(1)

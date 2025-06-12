@@ -287,6 +287,17 @@ struct DebugTree<T, std::enable_if_t<op::is_patch_v<T>>> {
     return debugTree(t, TypeFinder{}.add<typename T::value_type>());
   }
 };
+template <class T>
+struct DebugTree<T, std::enable_if_t<is_thrift_class_v<T>>> {
+  scope operator()(const T& t, const TypeFinder& finder, OptionalTypeRef ref) {
+    auto value = protocol::asValueStruct<type::infer_tag<T>>(t);
+    if (!ref) {
+      ref = finder.findType(Uri{apache::thrift::uri<T>()});
+    }
+    return debugTree(value, finder, ref);
+  }
+  scope operator()(const T& t) { return debugTree(t, TypeFinder{}.add<T>()); }
+};
 
 } // namespace apache::thrift::detail
 

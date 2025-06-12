@@ -59,9 +59,6 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
             cbool enableResourcePools,
         ) except +
 
-cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::apache::thrift::python::detail":
-    cdef cbool cAreResourcePoolsEnabledForPython "::apache::thrift::python::detail::areResourcePoolsEnabledForPython"()
-
 cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift":
     cdef cppclass SerializedRequest "::apache::thrift::SerializedRequest":
         unique_ptr[cIOBuf] buffer
@@ -69,7 +66,6 @@ cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift"
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     cdef dict funcMap
     cdef list lifecycleFuncs
-    cdef cbool useResourcePools
 
     cdef cbool requireResourcePools(PythonAsyncProcessorFactory self)
 

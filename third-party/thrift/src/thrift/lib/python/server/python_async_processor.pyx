@@ -374,9 +374,6 @@ cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     return cmove((<IOBuf>iobuf)._ours)
 
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
-    cdef cbool requireResourcePools(PythonAsyncProcessorFactory self):
-        return self.useResourcePools
-
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server):
         cdef cmap[string, pair[RpcKind, PyObjPtr]] funcs
@@ -394,14 +391,6 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
         cdef PythonAsyncProcessorFactory inst = PythonAsyncProcessorFactory.__new__(PythonAsyncProcessorFactory)
         inst.funcMap = funcMap
         inst.lifecycleFuncs = lifecycleFuncs
-        # To ensure that the decision to use resource pools stays
-        # consistent for the lifetime of the server and decoupled
-        # from changes to the Thrift Flag that drives that decision
-        # at construction, capture the value and use the captured value
-        # from this point forward.
-        # Even though much of this code now appears dead, leave it as it is
-        # for an easy rollback if needed.
-        inst.useResourcePools = cAreResourcePoolsEnabledForPython()
         inst._cpp_obj = static_pointer_cast[cAsyncProcessorFactory, cPythonAsyncProcessorFactory](
             cCreatePythonAsyncProcessorFactory(
                 <PyObject*>server,
@@ -409,5 +398,5 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
                 cmove(lifecycle),
                 get_executor(),
                 <bytes>server.service_name(),
-                inst.useResourcePools))
+                True))
         return inst

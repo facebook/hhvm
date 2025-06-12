@@ -28,7 +28,6 @@ from derived.thrift_clients import DerivedTestingService
 from derived.thrift_services import DerivedTestingServiceInterface
 from folly.iobuf import IOBuf
 
-from parameterized import parameterized_class
 from stack_args.thrift_clients import StackService
 from stack_args.thrift_services import StackServiceInterface
 from stack_args.thrift_types import simple
@@ -40,9 +39,6 @@ from thrift.py3.server import get_context, SocketAddress
 from thrift.python.client import get_client
 from thrift.python.common import Priority, RpcOptions
 from thrift.python.exceptions import ApplicationError
-from thrift.python.flagged.test.enable_resource_pools_for_python_test import (
-    mock_enable_resource_pools_for_python,
-)
 from thrift.python.server import ServiceInterface, ThriftServer
 
 
@@ -136,18 +132,10 @@ class TestServer:
         await self.serve_task
 
 
-@parameterized_class(
-    ("enable_resource_pools_for_python"),
-    [(True,), (False,)],
-)
 class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     """
     These are tests where a client and server talk to each other
     """
-
-    def setUp(self) -> None:
-        # pyre-fixme[16]: `ClientServerTests` has no attribute `enable_resource_pools_for_python`
-        mock_enable_resource_pools_for_python(self.enable_resource_pools_for_python)
 
     async def test_get_context(self) -> None:
         async with TestServer(ip="::1") as sa:
@@ -412,18 +400,10 @@ class StackHandler(StackServiceInterface):
             raise Exception("WRONG")
 
 
-@parameterized_class(
-    ("enable_resource_pools_for_python"),
-    [(True,), (False,)],
-)
 class ClientStackServerTests(unittest.IsolatedAsyncioTestCase):
     """
     These are tests where a client and server(stack_arguments) talk to each other
     """
-
-    def setUp(self) -> None:
-        # pyre-fixme[16]: `ClientServerTests` has no attribute `enable_resource_pools_for_python`
-        mock_enable_resource_pools_for_python(self.enable_resource_pools_for_python)
 
     async def test_server_localhost(self) -> None:
         async with TestServer(handler=StackHandler(), ip="::1") as sa:

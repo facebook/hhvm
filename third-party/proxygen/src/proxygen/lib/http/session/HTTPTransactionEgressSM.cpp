@@ -105,7 +105,6 @@ std::ostream& operator<<(std::ostream& os,
       break;
     case HTTPTransactionEgressSMData::State::NumStates:
       CHECK(false) << "Bad state";
-      break;
   }
 
   return os;
@@ -140,7 +139,6 @@ std::ostream& operator<<(std::ostream& os,
       break;
     case HTTPTransactionEgressSMData::Event::NumEvents:
       CHECK(false) << "Bad event";
-      break;
   }
 
   return os;

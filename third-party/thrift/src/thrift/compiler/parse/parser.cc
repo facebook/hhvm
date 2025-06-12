@@ -273,7 +273,6 @@ class parser {
         break;
       default:
         report_expected("definition");
-        break;
     }
   }
 
@@ -917,7 +916,6 @@ class parser {
           return actions_.on_float(parse_float(s));
         }
         report_expected("number");
-        break;
       case tok::int_literal:
         return actions_.on_integer(parse_integer());
       case tok::float_literal:

@@ -64,7 +64,7 @@ bool Sampling::isLucky(const folly::StringPiece key) const {
     return false;
   }
   // else compute the hash
-  return folly::hash::fnv32_buf(key.data(), key.size()) < getIntRate();
+  return folly::hash::fnv32_buf_BROKEN(key.data(), key.size()) < getIntRate();
 }
 
 bool Sampling::isLucky() const {

@@ -33,8 +33,9 @@ inline bool shouldLogQuicConnection(const quic::ConnectionId& connId,
   // so that server and client can be sure that they are logging the same
   // connection. However hash_combine_generic returns a size_t type which does
   // not satisfy this requirement.
-  uint32_t connIdNumHash = folly::hash::fnv32_buf(connId.data(), connId.size());
-  uint32_t saltHash = folly::hash::fnv32_buf(&salt, sizeof(salt));
+  uint32_t connIdNumHash =
+      folly::hash::fnv32_buf_BROKEN(connId.data(), connId.size());
+  uint32_t saltHash = folly::hash::fnv32_buf_BROKEN(&salt, sizeof(salt));
   uint32_t hash =
       folly::hash::twang_32from64((uint64_t(connIdNumHash) << 32) | saltHash);
   if (hash <= std::numeric_limits<uint32_t>::max() / weight) {

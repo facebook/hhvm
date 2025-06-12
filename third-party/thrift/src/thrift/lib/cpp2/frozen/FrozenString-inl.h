@@ -141,7 +141,7 @@ struct StringLayout : public LayoutBase {
   FROZEN_LOAD_INLINE(FROZEN_LOAD_FIELD(distance, 1) FROZEN_LOAD_FIELD(count, 2))
 
   static size_t hash(const View& v) {
-    return folly::hash::fnv64_buf(v.begin(), sizeof(Item) * v.size());
+    return folly::hash::fnv64_buf_BROKEN(v.begin(), sizeof(Item) * v.size());
   }
 };
 

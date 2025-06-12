@@ -49,7 +49,7 @@ struct FixedSizeStringHash {
       memcpy(&tmp, detail::rangeDataStart(value), kSize);
       return std::hash<uint64_t>()(tmp);
     } else {
-      return folly::hash::fnv64_buf(
+      return folly::hash::fnv64_buf_BROKEN(
           detail::rangeDataStart(value), value.size());
     }
   }

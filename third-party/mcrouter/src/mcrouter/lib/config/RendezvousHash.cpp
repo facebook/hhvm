@@ -150,7 +150,7 @@ void RendezvousHash::normalizeWeights() {
 }
 
 uint64_t RendezvousHash::computeHash(folly::StringPiece key) const {
-  return folly::hash::fnv64_buf(key.data(), key.size());
+  return folly::hash::fnv64_buf_BROKEN(key.data(), key.size());
 }
 
 uint64_t RendezvousHash::computeHash(uint64_t i) const {

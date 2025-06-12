@@ -221,7 +221,7 @@ std::vector<size_t> RendezvousHash::selectNUnweighted(const uint64_t key,
 }
 
 uint64_t RendezvousHash::computeHash(const char* data, size_t len) const {
-  return folly::hash::fnv64_buf(data, len);
+  return folly::hash::fnv64_buf_BROKEN(data, len);
 }
 
 uint64_t RendezvousHash::computeHash(uint64_t i) const {

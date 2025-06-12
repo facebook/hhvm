@@ -58,6 +58,19 @@ final class LowPriTest extends HackTest {
     })->toThrow(\HH\InvariantException::class, 'Unable to run LowPri twice');
   }
 
+  public async function testVoid(): Awaitable<void> {
+    $low_pri = new Async\LowPri<void>();
+    $awaitable = $low_pri->run(async () ==> {
+      await RescheduleWaitHandle::create(
+        RescheduleWaitHandle::QUEUE_DEFAULT,
+        0
+      );
+    });
+
+    $low_pri->prioritize();
+    await $awaitable;
+  }
+
   public async function testLowPriWithPollRefcounting(): Awaitable<void> {
     $payloads = vec[
       dict['id' => 1],

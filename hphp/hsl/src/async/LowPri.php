@@ -59,7 +59,7 @@ final class LowPri<T> {
     if ($this->isPrioritized) {
       $this->wh->prioritize();
     }
-    return await $this->wh as nonnull;
+    return await $this->wh;
   }
 
   /**

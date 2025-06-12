@@ -128,8 +128,7 @@ module Revision_tracker = struct
   type repo_transition =
     | State_enter of Hg.Rev.t
     | State_leave of Hg.Rev.t
-    | Changed_merge_base of
-        Hg.Rev.t * (SSet.t[@printer SSet.pp_large]) * Watchman.clock
+    | Changed_merge_base of Hg.Rev.t * Watchman.clock
   [@@deriving show]
 
   let _ = show_repo_transition (* allow unused show *)
@@ -291,7 +290,7 @@ module Revision_tracker = struct
       match transition with
       | State_enter hg_rev
       | State_leave hg_rev
-      | Changed_merge_base (hg_rev, _, _) ->
+      | Changed_merge_base (hg_rev, _) ->
         hg_rev
     in
     match Revision_map.find_global_rev hg_rev env.rev_map with
@@ -362,10 +361,10 @@ module Revision_tracker = struct
     | Watchman.Watchman_unavailable
     | Watchman.Watchman_synchronous _ ->
       None
-    | Watchman.Watchman_pushed (Watchman.Changed_merge_base (rev, files, clock))
-      ->
+    | Watchman.Watchman_pushed
+        (Watchman.Changed_merge_base (rev, _files, clock)) ->
       let () = Hh_logger.log "Changed_merge_base: %s" (Hg.Rev.to_string rev) in
-      Some (Changed_merge_base (rev, files, clock))
+      Some (Changed_merge_base (rev, clock))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
       when String.equal state "hg.update" ->
       env.is_in_hg_update_state := true;
@@ -439,7 +438,7 @@ module Revision_tracker = struct
       | Some (State_leave hg_rev) ->
         let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
         preprocess server_state (State_leave hg_rev) env
-      | Some (Changed_merge_base (hg_rev, _, _) as change) ->
+      | Some (Changed_merge_base (hg_rev, _) as change) ->
         let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
         preprocess server_state change env
     in
@@ -599,11 +598,17 @@ let init
     Resigned
   else
     let watchman =
+      (* The informant is only interested in hg state changes and Changed_merge_base notifications,
+         but not actual files.
+         Therefore, we use an expression term for our subscription that matches no files. *)
+      let expression_terms =
+        [Hh_json_helpers.AdhocJsonHelpers.strlist ["false"]]
+      in
       Watchman.init
         {
           Watchman.subscribe_mode = Some Watchman.Scm_aware;
           init_timeout = Watchman.Explicit_timeout 30.;
-          expression_terms = FilesToIgnore.watchman_monitor_expression_terms;
+          expression_terms;
           debug_logging = watchman_debug_logging;
           (* Should also take an arg *)
           sockname = None;

@@ -23,8 +23,6 @@ val get_paths_to_ignore : unit -> Str.regexp list
 and wish to store it in the global mutable list of ingore paths. *)
 val set_paths_to_ignore : Str.regexp list -> unit
 
-val watchman_monitor_expression_terms : Hh_json.json list
-
 val watchman_server_expression_terms : Hh_json.json list
 
 val watchman_watcher_expression_terms : Hh_json.json list

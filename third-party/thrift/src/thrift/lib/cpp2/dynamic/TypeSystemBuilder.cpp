@@ -331,7 +331,8 @@ void TypeSystemBuilder::addType(
 }
 
 void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
-  for (auto& [uri, def] : *typeSystemDef.types()) {
+  for (auto& [uri, entry] : *typeSystemDef.types()) {
+    const SerializableTypeDefinition& def = *entry.definition();
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef:
         addType(uri, std::move(*def.structDef_ref()));

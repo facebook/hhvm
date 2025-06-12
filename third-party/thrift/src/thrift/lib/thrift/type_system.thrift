@@ -164,10 +164,36 @@ union SerializableTypeDefinition {
   4: SerializableOpaqueAliasDefinition opaqueAliasDef;
 }
 
+struct SerializableThriftSourceInfo {
+  /**
+   * A URI of the resource (typically a file) containing the source Thrift IDL
+   * for a user-defined type.
+   *
+   * Examples:
+   *   - "file:///thrift/lib/thrift/standard.thrift"
+   *   - "fbsource://xplat/thrift/lib/thrift/standard.thrift"
+   */
+  2: string locator;
+  /**
+   * The name of the definition within the source Thrift IDL pointed to by the
+   * locator above
+   */
+  3: string name;
+}
+
+struct SerializableTypeDefinitionEntry {
+  1: SerializableTypeDefinition definition;
+  /**
+   * If applicable, information about the Thrift IDL source code from which this
+   * definition originates.
+   */
+  2: optional SerializableThriftSourceInfo sourceInfo;
+}
+
 /**
  * A type system is a collection of types where each type (and all types it
  * refers to) are fully defined within the same type system.
  */
 struct SerializableTypeSystem {
-  1: map<type_id.Uri, SerializableTypeDefinition> types;
+  1: map<type_id.Uri, SerializableTypeDefinitionEntry> types;
 }

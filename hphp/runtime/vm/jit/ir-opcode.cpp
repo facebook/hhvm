@@ -28,6 +28,7 @@ TRACE_SET_MOD(hhir)
 
 #define NF     0
 #define PRc    ProducesRC
+#define PNRc   (ProducesNewRC|ProducesRC)
 #define CRc    ConsumesRC
 #define T      Terminal
 #define B      Branch
@@ -111,6 +112,7 @@ OpInfo g_opInfo[] = {
 #undef C
 #undef E
 #undef PRc
+#undef PNRc
 #undef CRc
 #undef Er
 #undef T

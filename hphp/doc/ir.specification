@@ -124,6 +124,14 @@ PRc (ProducesRC)
 
   The instruction produces a value with an unconsumed reference that must be
   consumed, either by DecRefing it or storing it somewhere in memory.
+  The refcount on the produced value could be more than 1 after the instruction.
+
+PNRc (ProducesNewRC)
+
+  The instruction produces a new value with an unconsumed reference that must be
+  consumed, either by DecRefing it or storing it somewhere in memory. This is
+  subset of PRc flag. The refcount on the produced value will be exactly 1 after
+  the instruction.
 
 CRc (ConsumesRC)
 
@@ -1454,7 +1462,7 @@ To string conversions:
   Initialize Throwable's file name and line number assuming the stack trace
   was already initialized and the current vmfp() is a built-in.
 
-| NewInstanceRaw<class>, DAllocObj, NA, PRc
+| NewInstanceRaw<class>, DAllocObj, NA, PNRc
 
   Allocates an instance of class.
 
@@ -1466,7 +1474,7 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr), CRc|PRc
+| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr), CRc|PNRc
 
   Call the custom instance constructor of a Closure.
 
@@ -1505,17 +1513,17 @@ To string conversions:
 
   Log the result of speculation of a ClassId for sandbox mode.
 
-| NewDictArray, D(Dict), C(Int), PRc
+| NewDictArray, D(Dict), C(Int), PNRc
 
   Allocate a new dict with the expected capacity S0.
 
-| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr), PRc|CRc
+| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr), PNRc|CRc
 
   Allocate a new keyset containing N elements off the stack given by S0, at
   `offset'. This instruction moves the elements off the stack without
   manipulating their reference counts.
 
-| AllocVec<size>, D(Vec), NA, PRc
+| AllocVec<size>, D(Vec), NA, PNRc
 
   Allocate a new uninitialized vector array with space for size elements in it.
   The array will be initialized with values using either InitVecElem or
@@ -1534,7 +1542,7 @@ To string conversions:
   array.  Used to initialize an array allocated with or AllocVec that was too
   big for us to use a series of InitVecElem ops.
 
-| AllocStructDict<keys...>,   D(Dict), NA, PRc
+| AllocStructDict<keys...>,   D(Dict), NA, PNRc
 
   Allocate a new key/value dict or mixed-layout array, given N string literal
   immediates for keys. This op initializes the header and hash table of the
@@ -1546,13 +1554,13 @@ To string conversions:
   literal `key` as its key and S1 as its value. This instruction assumes that
   S1 has already been inc-reffed. Used with the result of AllocStructDict.
 
-| NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PRc|CRc
+| NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PNRc|CRc
 
   Allocate a new key/value dict, given N string literal immediates for keys
   and N stack elements at `offset` on stack S0 for values.  This op assumes it
   can move values from the stack without inc-reffing them.
 
-| AllocBespokeStructDict<layout>, DStructDict, NA, PRc
+| AllocBespokeStructDict<layout>, DStructDict, NA, PNRc
 
   Allocate a new, empty dict with the bespoke StructLayout `layout`.
 
@@ -1568,7 +1576,7 @@ To string conversions:
   with S1. This instruction assumes that S1 has already been inc-reffed.
   Used with the result of AllocUninitBespokeStructDict.
 
-| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PRc|CRc
+| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PNRc|CRc
 
   Allocate a new dict with the bespoke StructLayout `layout`.  Then, init the
   N fields with the given `slots` with N stack elements starting at `offset`.
@@ -3021,11 +3029,11 @@ fields of that struct for holding intermediate values.
   Like CheckMixedArrayOffset, this check is allowed to have false negatives -
   it may fail even if the array has keys of the given type.
 
-| CheckArrayCOW, DCOW, S(ArrLike), B|PRc|CRc|LP
+| CheckArrayCOW, DCOW, S(ArrLike), B|PNRc|CRc|LP
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
 
-| CopyArray, DCOW, S(ArrLike), PRc|LP
+| CopyArray, DCOW, S(ArrLike), PNRc|LP
 
   Make a copy of S0 (regardless of its refcount). The resultant copy will
   always be counted with a ref-count of 1. The array must be of a kind that

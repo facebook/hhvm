@@ -186,6 +186,11 @@ struct IRInstruction {
    * Whether the dest produces a reference.
    */
   bool producesReference() const;
+  
+  /*
+   * Whether the dest produces a completely new value with refcount 1
+   */
+  bool producesNewReference() const;
 
   /*
    * Get the src that is passed through.

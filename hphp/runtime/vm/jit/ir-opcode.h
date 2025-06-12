@@ -103,6 +103,7 @@ struct SSATmp;
  *
  *      NF    no flags
  *      PRc   producesRC
+ *      PNRc  producesNewRC
  *      CRc   consumesRC
  *      T     isTerminal
  *      B     isBranch
@@ -149,12 +150,13 @@ enum OpcodeFlag : uint64_t {
   Branch           = 1ULL << 1,
   ConsumesRC       = 1ULL << 2,
   ProducesRC       = 1ULL << 3,
-  Terminal         = 1ULL << 4, // has no next instruction
-  NaryDest         = 1ULL << 5, // has 0 or more destinations
-  HasExtra         = 1ULL << 6,
-  Passthrough      = 1ULL << 7,
-  LayoutAgnostic   = 1ULL << 8,
-  LayoutPreserving = 1ULL << 9,
+  ProducesNewRC    = 1ULL << 4,
+  Terminal         = 1ULL << 5, // has no next instruction
+  NaryDest         = 1ULL << 6, // has 0 or more destinations
+  HasExtra         = 1ULL << 7,
+  Passthrough      = 1ULL << 8,
+  LayoutAgnostic   = 1ULL << 9,
+  LayoutPreserving = 1ULL << 10,
 };
 
 bool hasEdges(Opcode opc);

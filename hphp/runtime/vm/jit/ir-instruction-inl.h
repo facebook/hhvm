@@ -99,6 +99,10 @@ inline bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 
+inline bool IRInstruction::producesNewReference() const {
+  return opcodeHasFlags(op(), ProducesNewRC);
+}
+
 inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
   assertx(is(CheckType, AssertType, CheckNonNull, AssertNonNull,

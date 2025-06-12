@@ -21,7 +21,6 @@
 #include <folly/dynamic.h>
 #include <folly/json.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
-#include <thrift/lib/cpp/transport/TTransportException.h>
 
 using namespace apache::thrift::transport;
 

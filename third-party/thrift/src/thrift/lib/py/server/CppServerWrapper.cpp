@@ -29,10 +29,7 @@
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
-#include <thrift/lib/cpp2/util/LegacyRequestExpiryGuard.h>
 #include <thrift/lib/py/server/CppContextData.h>
 #include <wangle/ssl/SSLContextConfig.h>
 

@@ -17,7 +17,6 @@
 #include <thrift/conformance/data/TestGenerator.h>
 
 #include <gtest/gtest.h>
-#include <thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h>
 
 namespace apache::thrift::conformance::data {
 

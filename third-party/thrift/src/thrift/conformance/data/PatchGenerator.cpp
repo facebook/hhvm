@@ -21,7 +21,6 @@
 #include <unordered_map>
 #include <thrift/conformance/data/PatchGenerator.h>
 
-#include <boost/mp11.hpp>
 #include <fmt/core.h>
 
 #include <thrift/conformance/data/ValueGenerator.h>
@@ -29,13 +28,10 @@
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Patch.h>
-#include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h>
 #include <thrift/test/testset/Testset.h>
-#include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 using apache::thrift::protocol::asValueStruct;
 

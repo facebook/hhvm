@@ -16,14 +16,11 @@
 
 #include <thrift/conformance/data/TestGenerator.h>
 
-#include <boost/mp11.hpp>
 #include <fmt/core.h>
 
 #include <thrift/conformance/data/TestUtil.h>
 #include <thrift/conformance/data/ValueGenerator.h>
-#include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/cpp2/type/ThriftType.h>
 #include <thrift/test/testset/Testset.h>
 
 #include <thrift/test/AdapterTest.h>

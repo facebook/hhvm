@@ -258,7 +258,7 @@ void HeaderClientMethodsAnnotationOnServiceSvNull::echo(::cpp2::EchoResponse& /*
 void HeaderClientMethodsAnnotationOnServiceSvNull::echo_2(::cpp2::EchoResponse& /*_return*/, std::unique_ptr<::cpp2::EchoRequest> /*request*/) {  }
 
 
-const char* HeaderClientMethodsAnnotationOnServiceAsyncProcessor::getServiceName() {
+std::string_view HeaderClientMethodsAnnotationOnServiceAsyncProcessor::getServiceName() {
   return "HeaderClientMethodsAnnotationOnService";
 }
 

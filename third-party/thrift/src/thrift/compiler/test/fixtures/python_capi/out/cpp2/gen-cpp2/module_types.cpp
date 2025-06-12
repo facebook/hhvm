@@ -70,7 +70,7 @@ void TccStructTraits<::test::fixtures::python_capi::MyStruct>::translateFieldNam
 
 namespace test::fixtures::python_capi {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/MyStruct";
 }
 
@@ -273,7 +273,7 @@ void TccStructTraits<::test::fixtures::python_capi::MyDataItem>::translateFieldN
 
 namespace test::fixtures::python_capi {
 
-const char* MyDataItem::__fbthrift_thrift_uri() {
+std::string_view MyDataItem::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/MyDataItem";
 }
 
@@ -366,7 +366,7 @@ void TccStructTraits<::test::fixtures::python_capi::TransitiveDoubler>::translat
 
 namespace test::fixtures::python_capi {
 
-const char* TransitiveDoubler::__fbthrift_thrift_uri() {
+std::string_view TransitiveDoubler::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/TransitiveDoubler";
 }
 
@@ -434,7 +434,7 @@ void TccStructTraits<::test::fixtures::python_capi::detail::DoubledPair>::transl
 namespace test::fixtures::python_capi {
 namespace detail {
 
-const char* DoubledPair::__fbthrift_thrift_uri() {
+std::string_view DoubledPair::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/DoubledPair";
 }
 
@@ -544,7 +544,7 @@ void TccStructTraits<::test::fixtures::python_capi::StringPair>::translateFieldN
 
 namespace test::fixtures::python_capi {
 
-const char* StringPair::__fbthrift_thrift_uri() {
+std::string_view StringPair::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/StringPair";
 }
 
@@ -658,7 +658,7 @@ void TccStructTraits<::test::fixtures::python_capi::VapidStruct>::translateField
 
 namespace test::fixtures::python_capi {
 
-const char* VapidStruct::__fbthrift_thrift_uri() {
+std::string_view VapidStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/EmptyStruct";
 }
 
@@ -725,7 +725,7 @@ void TccStructTraits<::test::fixtures::python_capi::PrimitiveStruct>::translateF
 
 namespace test::fixtures::python_capi {
 
-const char* PrimitiveStruct::__fbthrift_thrift_uri() {
+std::string_view PrimitiveStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/PrimitiveStruct";
 }
 
@@ -1031,7 +1031,7 @@ void TccStructTraits<::test::fixtures::python_capi::AdaptedFields>::translateFie
 
 namespace test::fixtures::python_capi {
 
-const char* AdaptedFields::__fbthrift_thrift_uri() {
+std::string_view AdaptedFields::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/AdaptedFields";
 }
 
@@ -1181,7 +1181,7 @@ void TccStructTraits<::test::fixtures::python_capi::ListStruct>::translateFieldN
 
 namespace test::fixtures::python_capi {
 
-const char* ListStruct::__fbthrift_thrift_uri() {
+std::string_view ListStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/ListStruct";
 }
 
@@ -1383,7 +1383,7 @@ void TccStructTraits<::test::fixtures::python_capi::SetStruct>::translateFieldNa
 
 namespace test::fixtures::python_capi {
 
-const char* SetStruct::__fbthrift_thrift_uri() {
+std::string_view SetStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/SetStruct";
 }
 
@@ -1559,7 +1559,7 @@ void TccStructTraits<::test::fixtures::python_capi::MapStruct>::translateFieldNa
 
 namespace test::fixtures::python_capi {
 
-const char* MapStruct::__fbthrift_thrift_uri() {
+std::string_view MapStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/MapStruct";
 }
 
@@ -1803,7 +1803,7 @@ void TccStructTraits<::test::fixtures::python_capi::ComposeStruct>::translateFie
 
 namespace test::fixtures::python_capi {
 
-const char* ComposeStruct::__fbthrift_thrift_uri() {
+std::string_view ComposeStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/ComposeStruct";
 }
 
@@ -2075,7 +2075,7 @@ bool TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::findValue(std::s
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-const char* Shallot::__fbthrift_thrift_uri() {
+std::string_view Shallot::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/Onion";
 }
 
@@ -2303,7 +2303,7 @@ bool TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type>::findValue(std
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-const char* SomeBinary::__fbthrift_thrift_uri() {
+std::string_view SomeBinary::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/SomeBinary";
 }
 

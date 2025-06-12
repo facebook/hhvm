@@ -258,7 +258,7 @@ void MyServiceSvNull::has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std:
 }
 
 
-const char* MyServiceAsyncProcessor::getServiceName() {
+std::string_view MyServiceAsyncProcessor::getServiceName() {
   return "MyService";
 }
 

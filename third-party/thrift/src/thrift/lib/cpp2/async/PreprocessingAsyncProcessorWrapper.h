@@ -61,7 +61,7 @@ class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {
       ServerRequest&& request,
       const AsyncProcessorFactory::MethodMetadata& methodMetadata) final;
 
-  const char* getServiceName() final;
+  std::string_view getServiceName() final;
 
   void processInteraction(ServerRequest&&) override {
     LOG(FATAL)

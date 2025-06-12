@@ -32,7 +32,7 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
  public:
   using ::py3::simple::SimpleServiceAsyncClient::SimpleServiceAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "DerivedService";
   }
 

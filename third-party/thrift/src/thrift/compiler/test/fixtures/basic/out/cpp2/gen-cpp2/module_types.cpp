@@ -70,7 +70,7 @@ void TccStructTraits<::test::fixtures::basic::MyStruct>::translateFieldName(
 
 namespace test::fixtures::basic {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyStruct";
 }
 
@@ -282,7 +282,7 @@ void TccStructTraits<::test::fixtures::basic::Containers>::translateFieldName(
 
 namespace test::fixtures::basic {
 
-const char* Containers::__fbthrift_thrift_uri() {
+std::string_view Containers::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/Containers";
 }
 
@@ -411,7 +411,7 @@ void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
 
 namespace test::fixtures::basic {
 
-const char* MyDataItem::__fbthrift_thrift_uri() {
+std::string_view MyDataItem::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyDataItem";
 }
 
@@ -491,7 +491,7 @@ bool TEnumTraits<::test::fixtures::basic::MyUnion::Type>::findValue(std::string_
 }} // apache::thrift
 namespace test::fixtures::basic {
 
-const char* MyUnion::__fbthrift_thrift_uri() {
+std::string_view MyUnion::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyUnion";
 }
 
@@ -638,7 +638,7 @@ void TccStructTraits<::test::fixtures::basic::MyException>::translateFieldName(
 
 namespace test::fixtures::basic {
 
-const char* MyException::__fbthrift_thrift_uri() {
+std::string_view MyException::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyException";
 }
 
@@ -787,7 +787,7 @@ void TccStructTraits<::test::fixtures::basic::MyExceptionWithMessage>::translate
 
 namespace test::fixtures::basic {
 
-const char* MyExceptionWithMessage::__fbthrift_thrift_uri() {
+std::string_view MyExceptionWithMessage::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyExceptionWithMessage";
 }
 
@@ -940,7 +940,7 @@ void TccStructTraits<::test::fixtures::basic::ReservedKeyword>::translateFieldNa
 
 namespace test::fixtures::basic {
 
-const char* ReservedKeyword::__fbthrift_thrift_uri() {
+std::string_view ReservedKeyword::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/ReservedKeyword";
 }
 
@@ -1036,7 +1036,7 @@ bool TEnumTraits<::test::fixtures::basic::UnionToBeRenamed::Type>::findValue(std
 }} // apache::thrift
 namespace test::fixtures::basic {
 
-const char* UnionToBeRenamed::__fbthrift_thrift_uri() {
+std::string_view UnionToBeRenamed::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/UnionToBeRenamed";
 }
 

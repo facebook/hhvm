@@ -258,7 +258,7 @@ void MyServicePrioParentSvNull::pong() {
 }
 
 
-const char* MyServicePrioParentAsyncProcessor::getServiceName() {
+std::string_view MyServicePrioParentAsyncProcessor::getServiceName() {
   return "MyServicePrioParent";
 }
 

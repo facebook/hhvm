@@ -46,7 +46,7 @@ void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById
 namespace cpp2 {
 
 
-const char* MyServiceFastAsyncProcessor::getServiceName() {
+std::string_view MyServiceFastAsyncProcessor::getServiceName() {
   return "MyServiceFast";
 }
 

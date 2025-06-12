@@ -157,7 +157,7 @@ class ExtraServiceSvNull : public ::apache::thrift::ServiceHandler<ExtraService>
 
 class ExtraServiceAsyncProcessor : public ::some::valid::ns::ParamServiceAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::some::valid::ns::ParamServiceAsyncProcessor;
  protected:

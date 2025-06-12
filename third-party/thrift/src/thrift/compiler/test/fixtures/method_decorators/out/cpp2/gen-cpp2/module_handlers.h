@@ -163,7 +163,7 @@ class DecoratedServiceSvNull : public ::apache::thrift::ServiceHandler<Decorated
 
 class DecoratedServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:
@@ -351,7 +351,7 @@ class UndecoratedServiceSvNull : public ::apache::thrift::ServiceHandler<Undecor
 
 class UndecoratedServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:
@@ -505,7 +505,7 @@ class DecoratedService_ExtendsUndecoratedServiceSvNull : public ::apache::thrift
 
 class DecoratedService_ExtendsUndecoratedServiceAsyncProcessor : public ::cpp2::UndecoratedServiceAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::UndecoratedServiceAsyncProcessor;
  protected:
@@ -620,7 +620,7 @@ class DecoratedService_ExtendsDecoratedServiceSvNull : public ::apache::thrift::
 
 class DecoratedService_ExtendsDecoratedServiceAsyncProcessor : public ::cpp2::DecoratedServiceAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::DecoratedServiceAsyncProcessor;
  protected:
@@ -713,7 +713,7 @@ class UndecoratedService_ExtendsDecoratedServiceSvNull : public ::apache::thrift
 
 class UndecoratedService_ExtendsDecoratedServiceAsyncProcessor : public ::cpp2::DecoratedServiceAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::DecoratedServiceAsyncProcessor;
  protected:
@@ -831,7 +831,7 @@ class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceSvNull :
 
 class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor : public ::cpp2::UndecoratedService_ExtendsDecoratedServiceAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::UndecoratedService_ExtendsDecoratedServiceAsyncProcessor;
  protected:

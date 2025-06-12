@@ -15,6 +15,7 @@
 from libcpp.memory cimport shared_ptr
 from libcpp.optional cimport optional
 from libcpp.string cimport string
+from thrift.python.std_libcpp cimport string_view
 
 cdef extern from "thrift/lib/cpp2/server/ServiceInterceptorBase.h" namespace "apache::thrift":
     cdef cppclass ServiceInterceptorBase:
@@ -52,34 +53,34 @@ cdef api object make_connection_info(cCpp2ConnContext* cpp_ctx) noexcept
 # This is lazy wrapper around RequestInfo class; it defines properties to allow python to access fields
 cdef class RequestInfo:
     cdef cCpp2RequestContext* _cpp_ctx
-    cdef const char* _service_name
-    cdef const char* _defining_service_name
-    cdef const char* _method_name 
+    cdef string_view _service_name
+    cdef string_view _defining_service_name
+    cdef string_view _method_name 
     # cdef tuple arguments # can be deserialized from IOBuf
     # just exposing this to cython until we know if anything interesting for Python handlers
     cdef cCpp2RequestContext* cpp_request_context(self)
 
 cdef api object make_request_info(
     cCpp2RequestContext* cpp_ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    string_view serviceName,
+    string_view definingServiceName,
+    string_view methodName,
 ) noexcept
 
 cdef class ResponseInfo:
     cdef const cCpp2RequestContext* _cpp_ctx
-    cdef const char* _service_name
-    cdef const char* _defining_service_name
-    cdef const char* _method_name 
+    cdef string_view _service_name
+    cdef string_view _defining_service_name
+    cdef string_view _method_name 
     cdef optional[string] _error_message
     # just exposing this to cython until we know if anything interesting for Python handlers
     cdef const cCpp2RequestContext* cpp_request_context(self)
 
 cdef api object make_response_info(
     const cCpp2RequestContext* _cpp_ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    string_view serviceName,
+    string_view definingServiceName,
+    string_view methodName,
     optional[string] errorMessage,
 ) noexcept
 

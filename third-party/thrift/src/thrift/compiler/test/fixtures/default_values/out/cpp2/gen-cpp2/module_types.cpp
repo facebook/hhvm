@@ -36,7 +36,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
-const char* TrivialStruct::__fbthrift_thrift_uri() {
+std::string_view TrivialStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStruct";
 }
 
@@ -119,7 +119,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
-const char* StructWithNoCustomDefaultValues::__fbthrift_thrift_uri() {
+std::string_view StructWithNoCustomDefaultValues::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/default_values/StructWithNoCustomDefaultValues";
 }
 
@@ -284,7 +284,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
-const char* StructWithCustomDefaultValues::__fbthrift_thrift_uri() {
+std::string_view StructWithCustomDefaultValues::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCustomDefaultValues";
 }
 

@@ -88,7 +88,7 @@ class MyServicePrioChildSvNull : public ::apache::thrift::ServiceHandler<MyServi
 
 class MyServicePrioChildAsyncProcessor : public ::cpp2::MyServicePrioParentAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::MyServicePrioParentAsyncProcessor;
  protected:

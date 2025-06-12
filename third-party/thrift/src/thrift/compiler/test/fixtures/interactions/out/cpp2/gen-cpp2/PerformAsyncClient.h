@@ -31,7 +31,7 @@ class Client<::cpp2::Perform> : public apache::thrift::GeneratedAsyncClient {
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Perform";
   }
 
@@ -41,7 +41,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Perform";
   }
 
@@ -368,7 +368,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Perform";
   }
 
@@ -695,7 +695,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Perform";
   }
 

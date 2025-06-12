@@ -41,7 +41,7 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
  public:
   std::string_view getGeneratedName() const override { return "TestService"; }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "test.dev/namespace_from_package_without_module_name/TestService";
   }
 
@@ -88,7 +88,7 @@ class TestServiceSvNull : public ::apache::thrift::ServiceHandler<TestService> {
 
 class TestServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

@@ -258,7 +258,7 @@ void SomeServiceSvNull::bounce_map(::apache::thrift::fixtures::types::SomeMap& /
 void SomeServiceSvNull::binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/) {  }
 
 
-const char* SomeServiceAsyncProcessor::getServiceName() {
+std::string_view SomeServiceAsyncProcessor::getServiceName() {
   return "SomeService";
 }
 

@@ -36,7 +36,7 @@ void TccStructTraits<::facebook::thrift::test::InterceptedFields>::translateFiel
 
 namespace facebook::thrift::test {
 
-const char* InterceptedFields::__fbthrift_thrift_uri() {
+std::string_view InterceptedFields::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/InterceptedFields";
 }
 

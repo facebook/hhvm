@@ -384,7 +384,7 @@ class service_with_special_namesSvNull : public ::apache::thrift::ServiceHandler
 
 class service_with_special_namesAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

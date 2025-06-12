@@ -126,7 +126,7 @@ class ASvNull : public ::apache::thrift::ServiceHandler<A> {
 
 class AAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:
@@ -255,7 +255,7 @@ class BSvNull : public ::apache::thrift::ServiceHandler<B>, virtual public ::apa
 
 class BAsyncProcessor : public ::cpp2::AAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::AAsyncProcessor;
  protected:
@@ -384,7 +384,7 @@ class CSvNull : public ::apache::thrift::ServiceHandler<C> {
 
 class CAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

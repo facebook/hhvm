@@ -112,7 +112,7 @@ struct struct_private_access {
   __fbthrift_cpp2_is_runtime_annotation();
 
   template <typename T>
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return T::__fbthrift_thrift_uri();
   }
 

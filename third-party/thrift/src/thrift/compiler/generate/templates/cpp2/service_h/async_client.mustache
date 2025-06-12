@@ -26,12 +26,12 @@ class Client<{{service:qualified_name}}> : public {{#service:extends}}::{{servic
  public:
   using {{#service:extends}}::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncClient::{{service:cpp_name}}AsyncClient{{/service:extends}}{{^service:extends}}apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient{{/service:extends}};
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "{{service:parent_service_name}}";
   }
 {{#service:thrift_uri}}
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "{{service:thrift_uri}}";
   }
 {{/service:thrift_uri}}

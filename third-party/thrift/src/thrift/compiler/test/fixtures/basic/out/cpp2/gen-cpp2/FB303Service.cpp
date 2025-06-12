@@ -144,7 +144,7 @@ namespace test::fixtures::basic {
 void FB303ServiceSvNull::simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) {  }
 
 
-const char* FB303ServiceAsyncProcessor::getServiceName() {
+std::string_view FB303ServiceAsyncProcessor::getServiceName() {
   return "FB303Service";
 }
 

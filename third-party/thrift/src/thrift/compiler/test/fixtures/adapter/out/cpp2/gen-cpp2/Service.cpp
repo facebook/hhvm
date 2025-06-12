@@ -142,7 +142,7 @@ namespace facebook::thrift::test {
 }
 
 
-const char* ServiceAsyncProcessor::getServiceName() {
+std::string_view ServiceAsyncProcessor::getServiceName() {
   return "Service";
 }
 

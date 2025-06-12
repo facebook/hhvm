@@ -1400,11 +1400,9 @@ struct ServiceInterceptorCheckingServiceAndMethodNames
   folly::coro::Task<std::optional<RequestState>> onRequest(
       ConnectionState*, RequestInfo requestInfo) override {
     names.emplace_back(
-        requestInfo.serviceName ? std::string(requestInfo.serviceName) : "",
-        requestInfo.definingServiceName
-            ? std::string(requestInfo.definingServiceName)
-            : "",
-        requestInfo.methodName ? std::string(requestInfo.methodName) : "");
+        std::string(requestInfo.serviceName),
+        std::string(requestInfo.definingServiceName),
+        std::string(requestInfo.methodName));
     co_return std::nullopt;
   }
 

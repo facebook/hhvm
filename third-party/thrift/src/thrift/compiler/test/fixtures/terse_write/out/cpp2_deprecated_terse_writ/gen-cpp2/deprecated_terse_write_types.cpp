@@ -53,7 +53,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyStruct
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/MyStruct";
 }
 
@@ -133,7 +133,7 @@ bool TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion::Typ
 }} // apache::thrift
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* MyUnion::__fbthrift_thrift_uri() {
+std::string_view MyUnion::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/MyUnion";
 }
 
@@ -229,7 +229,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::StructLe
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* StructLevelTerseStruct::__fbthrift_thrift_uri() {
+std::string_view StructLevelTerseStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/StructLevelTerseStruct";
 }
 
@@ -432,7 +432,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::FieldLev
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* FieldLevelTerseStruct::__fbthrift_thrift_uri() {
+std::string_view FieldLevelTerseStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/FieldLevelTerseStruct";
 }
 
@@ -851,7 +851,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::CppRefSt
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* CppRefStructFields::__fbthrift_thrift_uri() {
+std::string_view CppRefStructFields::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/CppRefStructFields";
 }
 
@@ -964,7 +964,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::Deprecat
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* DeprecatedTerseWriteWithCustomDefault::__fbthrift_thrift_uri() {
+std::string_view DeprecatedTerseWriteWithCustomDefault::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithCustomDefault";
 }
 
@@ -1250,7 +1250,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::Deprecat
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-const char* DeprecatedTerseWriteWithRedundantCustomDefault::__fbthrift_thrift_uri() {
+std::string_view DeprecatedTerseWriteWithRedundantCustomDefault::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithRedundantCustomDefault";
 }
 

@@ -41,7 +41,7 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
  public:
   std::string_view getGeneratedName() const override { return "AdapterService"; }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "facebook.com/thrift/test/AdapterService";
   }
 
@@ -99,7 +99,7 @@ class AdapterServiceSvNull : public ::apache::thrift::ServiceHandler<AdapterServ
 
 class AdapterServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

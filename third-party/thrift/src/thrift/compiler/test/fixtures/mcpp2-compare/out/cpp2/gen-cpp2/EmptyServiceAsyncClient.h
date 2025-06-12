@@ -29,7 +29,7 @@ class Client<::some::valid::ns::EmptyService> : public apache::thrift::Generated
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "EmptyService";
   }
 

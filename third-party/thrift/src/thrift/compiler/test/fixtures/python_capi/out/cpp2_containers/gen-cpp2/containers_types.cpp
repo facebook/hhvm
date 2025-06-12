@@ -36,7 +36,7 @@ void TccStructTraits<::test::fixtures::python_capi::TemplateLists>::translateFie
 
 namespace test::fixtures::python_capi {
 
-const char* TemplateLists::__fbthrift_thrift_uri() {
+std::string_view TemplateLists::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/TemplateLists";
 }
 
@@ -187,7 +187,7 @@ void TccStructTraits<::test::fixtures::python_capi::TemplateSets>::translateFiel
 
 namespace test::fixtures::python_capi {
 
-const char* TemplateSets::__fbthrift_thrift_uri() {
+std::string_view TemplateSets::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/TemplateSets";
 }
 
@@ -372,7 +372,7 @@ void TccStructTraits<::test::fixtures::python_capi::TemplateMaps>::translateFiel
 
 namespace test::fixtures::python_capi {
 
-const char* TemplateMaps::__fbthrift_thrift_uri() {
+std::string_view TemplateMaps::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/TemplateMaps";
 }
 
@@ -557,7 +557,7 @@ void TccStructTraits<::test::fixtures::python_capi::TWrapped>::translateFieldNam
 
 namespace test::fixtures::python_capi {
 
-const char* TWrapped::__fbthrift_thrift_uri() {
+std::string_view TWrapped::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/TWrapped";
 }
 
@@ -656,7 +656,7 @@ void TccStructTraits<::test::fixtures::python_capi::IndirectionA>::translateFiel
 
 namespace test::fixtures::python_capi {
 
-const char* IndirectionA::__fbthrift_thrift_uri() {
+std::string_view IndirectionA::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/IndirectionA";
 }
 
@@ -763,7 +763,7 @@ void TccStructTraits<::test::fixtures::python_capi::IndirectionB>::translateFiel
 
 namespace test::fixtures::python_capi {
 
-const char* IndirectionB::__fbthrift_thrift_uri() {
+std::string_view IndirectionB::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/IndirectionB";
 }
 
@@ -870,7 +870,7 @@ void TccStructTraits<::test::fixtures::python_capi::IndirectionC>::translateFiel
 
 namespace test::fixtures::python_capi {
 
-const char* IndirectionC::__fbthrift_thrift_uri() {
+std::string_view IndirectionC::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/IndirectionC";
 }
 

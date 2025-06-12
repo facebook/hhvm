@@ -41,7 +41,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
  public:
   std::string_view getGeneratedName() const override { return "DbMixedStackArguments"; }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "test.dev/fixtures/basic/DbMixedStackArguments";
   }
 
@@ -99,7 +99,7 @@ class DbMixedStackArgumentsSvNull : public ::apache::thrift::ServiceHandler<DbMi
 
 class DbMixedStackArgumentsAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

@@ -53,7 +53,7 @@ void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Foo::__fbthrift_thrift_uri() {
+std::string_view Foo::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Foo";
 }
 
@@ -136,7 +136,7 @@ void TccStructTraits<::facebook::thrift::test::Bar>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Bar::__fbthrift_thrift_uri() {
+std::string_view Bar::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Bar";
 }
 
@@ -237,7 +237,7 @@ void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Baz::__fbthrift_thrift_uri() {
+std::string_view Baz::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Baz";
 }
 
@@ -352,7 +352,7 @@ void TccStructTraits<::facebook::thrift::test::OpEncodeStruct>::translateFieldNa
 
 namespace facebook::thrift::test {
 
-const char* OpEncodeStruct::__fbthrift_thrift_uri() {
+std::string_view OpEncodeStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/OpEncodeStruct";
 }
 

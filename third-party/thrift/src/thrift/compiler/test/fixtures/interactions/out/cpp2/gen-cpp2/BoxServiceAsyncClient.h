@@ -31,7 +31,7 @@ class Client<::cpp2::BoxService> : public apache::thrift::GeneratedAsyncClient {
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "BoxService";
   }
 
@@ -41,7 +41,7 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "BoxService";
   }
 

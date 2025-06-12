@@ -247,7 +247,7 @@ namespace cpp2 {
 void ASvNull::foo(::cpp2::Foo& /*_return*/) {  }
 
 
-const char* AAsyncProcessor::getServiceName() {
+std::string_view AAsyncProcessor::getServiceName() {
   return "A";
 }
 
@@ -677,7 +677,7 @@ void BSvNull::bar(std::unique_ptr<::cpp2::Foo> /*foo*/) {
 }
 
 
-const char* BAsyncProcessor::getServiceName() {
+std::string_view BAsyncProcessor::getServiceName() {
   return "B";
 }
 
@@ -878,7 +878,7 @@ determineInvocationType:
 namespace cpp2 {
 
 
-const char* CAsyncProcessor::getServiceName() {
+std::string_view CAsyncProcessor::getServiceName() {
   return "C";
 }
 

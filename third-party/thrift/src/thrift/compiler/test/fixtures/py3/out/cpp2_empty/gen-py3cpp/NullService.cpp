@@ -30,7 +30,7 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 namespace cpp2 {
 
 
-const char* NullServiceAsyncProcessor::getServiceName() {
+std::string_view NullServiceAsyncProcessor::getServiceName() {
   return "NullService";
 }
 

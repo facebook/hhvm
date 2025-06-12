@@ -486,7 +486,7 @@ void RaiserSvNull::get200(::std::string& /*_return*/) {  }
 void RaiserSvNull::get500(::std::string& /*_return*/) {  }
 
 
-const char* RaiserAsyncProcessor::getServiceName() {
+std::string_view RaiserAsyncProcessor::getServiceName() {
   return "Raiser";
 }
 

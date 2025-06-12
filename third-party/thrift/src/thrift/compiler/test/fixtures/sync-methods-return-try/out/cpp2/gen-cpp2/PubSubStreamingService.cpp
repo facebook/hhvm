@@ -894,7 +894,7 @@ determineInvocationType:
 namespace cpp2 {
 
 
-const char* PubSubStreamingServiceAsyncProcessor::getServiceName() {
+std::string_view PubSubStreamingServiceAsyncProcessor::getServiceName() {
   return "PubSubStreamingService";
 }
 

@@ -25,7 +25,7 @@ using namespace ::testing;
 
 class MockAsyncProcessor : public AsyncProcessor {
  public:
-  const char* getServiceName() override { return "MockAsyncProcessor"; }
+  std::string_view getServiceName() override { return "MockAsyncProcessor"; }
 
   MOCK_METHOD7(
       processSerializedCompressedRequestWithMetadata,

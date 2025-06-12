@@ -483,7 +483,7 @@ void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, const ::std::string& /*
 }
 
 
-const char* MyServiceAsyncProcessor::getServiceName() {
+std::string_view MyServiceAsyncProcessor::getServiceName() {
   return "MyService";
 }
 

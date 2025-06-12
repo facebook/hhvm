@@ -706,7 +706,7 @@ namespace cpp2 {
 }
 
 
-const char* SinkServiceAsyncProcessor::getServiceName() {
+std::string_view SinkServiceAsyncProcessor::getServiceName() {
   return "SinkService";
 }
 

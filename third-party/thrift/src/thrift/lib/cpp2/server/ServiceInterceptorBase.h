@@ -84,7 +84,7 @@ class ServiceInterceptorBase {
     /**
      * The name of the service definition as specified in Thrift IDL.
      */
-    const char* serviceName = nullptr;
+    std::string_view serviceName = "";
     /**
      * The name of the service definition (where the corresponding method name)
      * as specified in Thrift IDL. In most cases, this will be the same as the
@@ -92,13 +92,13 @@ class ServiceInterceptorBase {
      * inheritance, then this name will match the base class that defines the
      * method.
      */
-    const char* definingServiceName = nullptr;
+    std::string_view definingServiceName = "";
     /**
      * The name of the method as specified in Thrift IDL. This does NOT include
      * the service name. If the method is an interaction method, then it will be
      * in the format `{interaction_name}.{method_name}`.
      */
-    const char* methodName = nullptr;
+    std::string_view methodName = "";
     /**
      * This is a pointer to the deserialized frameworkMetadata buffer sent as
      * part of the request. InterceptorFrameworkMetadataStorage may be empty
@@ -117,7 +117,7 @@ class ServiceInterceptorBase {
     /**
      * The name of the service definition as specified in Thrift IDL.
      */
-    const char* serviceName = nullptr;
+    std::string_view serviceName = "";
     /**
      * The name of the service definition (where the corresponding method name)
      * as specified in Thrift IDL. In most cases, this will be the same as the
@@ -125,13 +125,13 @@ class ServiceInterceptorBase {
      * inheritance, then this name will match the base class that defines the
      * method.
      */
-    const char* definingServiceName = nullptr;
+    std::string_view definingServiceName = "";
     /**
      * The name of the method as specified in Thrift IDL. This does NOT include
      * the service name. If the method is an interaction method, then it will be
      * in the format `{interaction_name}.{method_name}`.
      */
-    const char* methodName = nullptr;
+    std::string_view methodName = "";
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo, InterceptorMetricCallback&) = 0;

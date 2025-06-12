@@ -979,7 +979,7 @@ void MyServiceSvNull::foo() {
 }
 
 
-const char* MyServiceAsyncProcessor::getServiceName() {
+std::string_view MyServiceAsyncProcessor::getServiceName() {
   return "MyService";
 }
 

@@ -328,7 +328,7 @@ void TccStructTraits<::cpp2::detail::YourStruct>::translateFieldName(
 namespace cpp2 {
 namespace detail {
 
-const char* YourStruct::__fbthrift_thrift_uri() {
+std::string_view YourStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct";
 }
 

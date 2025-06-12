@@ -1167,7 +1167,7 @@ void MyServiceSvNull::rpc_skipped_codegen() {
 }
 
 
-const char* MyServiceAsyncProcessor::getServiceName() {
+std::string_view MyServiceAsyncProcessor::getServiceName() {
   return "MyService";
 }
 

@@ -68,7 +68,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::
 namespace facebook::thrift::compiler::test::fixtures::any {
 namespace detail {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyStruct";
 }
 
@@ -175,7 +175,7 @@ bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Typ
 }} // apache::thrift
 namespace facebook::thrift::compiler::test::fixtures::any {
 
-const char* MyUnion::__fbthrift_thrift_uri() {
+std::string_view MyUnion::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyUnion";
 }
 
@@ -283,7 +283,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyExcept
 
 namespace facebook::thrift::compiler::test::fixtures::any {
 
-const char* MyException::__fbthrift_thrift_uri() {
+std::string_view MyException::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyException";
 }
 

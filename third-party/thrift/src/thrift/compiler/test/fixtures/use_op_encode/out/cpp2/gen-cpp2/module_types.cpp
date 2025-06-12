@@ -36,7 +36,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::MyStruct>::translateFie
 
 namespace facebook::thrift::compiler::test {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/MyStruct";
 }
 

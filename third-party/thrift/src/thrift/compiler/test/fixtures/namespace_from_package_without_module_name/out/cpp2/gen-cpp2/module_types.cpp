@@ -36,7 +36,7 @@ void TccStructTraits<::test::namespace_from_package_without_module_name::Foo>::t
 
 namespace test::namespace_from_package_without_module_name {
 
-const char* Foo::__fbthrift_thrift_uri() {
+std::string_view Foo::__fbthrift_thrift_uri() {
   return "test.dev/namespace_from_package_without_module_name/Foo";
 }
 

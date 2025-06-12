@@ -27,18 +27,15 @@
 namespace apache::thrift {
 
 namespace {
-const char* stripServiceNamePrefix(
-    const char* method, const char* serviceName) {
-  const char* unprefixed = method;
-  for (const char* c = serviceName; *c != '\0'; ++c) {
-    if (*unprefixed != *c) {
-      // The method name does not contain the service name as prefix
-      return method;
-    }
-    unprefixed++;
+std::string_view stripServiceNamePrefix(
+    std::string_view method, std::string_view serviceName) {
+  if (method.substr(0, serviceName.size()) != serviceName) {
+    return method;
   }
-  // Almost... missing the dot implies it does not count as a prefix
-  return *unprefixed == '.' ? unprefixed + 1 : method;
+  if (method.size() > serviceName.size() && method[serviceName.size()] == '.') {
+    return method.substr(serviceName.size() + 1);
+  }
+  return method;
 }
 } // namespace
 
@@ -56,8 +53,8 @@ class ContextStack::EmbeddedClientRequestContext
 ContextStack::ContextStack(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
-    const char* serviceName,
-    const char* method,
+    std::string_view serviceName,
+    std::string_view method,
     void** serviceContexts,
     TConnectionContext* connectionContext)
     : handlers_(handlers),
@@ -84,8 +81,8 @@ ContextStack::ContextStack(
         handlers,
     const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&
         clientInterceptors,
-    const char* serviceName,
-    const char* method,
+    std::string_view serviceName,
+    std::string_view method,
     void** serviceContexts,
     EmbeddedClientContextPtr embeddedClientContext,
     util::AllocationColocator<>::ArrayPtr<
@@ -112,8 +109,8 @@ ContextStack::~ContextStack() {
 ContextStack::UniquePtr ContextStack::create(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
-    const char* serviceName,
-    const char* method,
+    std::string_view serviceName,
+    std::string_view method,
     TConnectionContext* connectionContext) {
   if (!handlers || handlers->empty()) {
     return nullptr;
@@ -136,8 +133,8 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
         handlers,
     const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&
         clientInterceptors,
-    const char* serviceName,
-    const char* method,
+    std::string_view serviceName,
+    std::string_view method,
     transport::THeader& header) {
   if ((!handlers || handlers->empty()) &&
       (!clientInterceptors || clientInterceptors->empty())) {

@@ -128,7 +128,7 @@ void ServerRequestTask::acceptIntoResourcePool(int8_t priority) {
   detail::ServerRequestHelper::resourcePool(req_)->accept(std::move(req_));
 }
 
-const char* AsyncProcessor::getServiceName() {
+std::string_view AsyncProcessor::getServiceName() {
   return "NoServiceNameSet";
 }
 
@@ -404,8 +404,8 @@ const std::string kNONE = "NONE";
 ContextStack::UniquePtr getContextStackForNonPerRequestCallbacks(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         allHandlers,
-    const char* serviceName,
-    const char* method,
+    std::string_view serviceName,
+    std::string_view method,
     TConnectionContext* connectionContext) {
   if (!allHandlers || allHandlers->empty()) {
     return nullptr;
@@ -1051,9 +1051,9 @@ void HandlerCallbackBase::breakTilePromise() {
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    std::string_view serviceName,
+    std::string_view definingServiceName,
+    std::string_view methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1079,9 +1079,9 @@ HandlerCallback<void>::HandlerCallback(
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    std::string_view serviceName,
+    std::string_view definingServiceName,
+    std::string_view methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,

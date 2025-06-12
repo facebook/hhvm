@@ -372,7 +372,7 @@ void FooBarBazServiceSvNull::baz() {
 }
 
 
-const char* FooBarBazServiceAsyncProcessor::getServiceName() {
+std::string_view FooBarBazServiceAsyncProcessor::getServiceName() {
   return "FooBarBazService";
 }
 

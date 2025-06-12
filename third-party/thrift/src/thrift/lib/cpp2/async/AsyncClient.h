@@ -74,7 +74,7 @@ class GeneratedAsyncClient : public TClientBase {
       InterceptorSpecification interceptors,
       Options options = Options());
 
-  virtual const char* getServiceName() const noexcept = 0;
+  virtual std::string_view getServiceName() const noexcept = 0;
 
   RequestChannel* getChannel() const noexcept { return channel_.get(); }
 

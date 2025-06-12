@@ -16,7 +16,7 @@
 
 }}class {{service:cpp_name}}AsyncProcessor : public {{#service:extends}}::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncProcessor{{/service:extends}}{{^service:extends}}::apache::thrift::GeneratedAsyncProcessorBase{{/service:extends}} {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 {{#service:extends}}
   using BaseAsyncProcessor = ::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncProcessor;

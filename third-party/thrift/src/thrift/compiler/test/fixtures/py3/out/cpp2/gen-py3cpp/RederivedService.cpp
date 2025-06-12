@@ -142,7 +142,7 @@ namespace py3::simple {
 }
 
 
-const char* RederivedServiceAsyncProcessor::getServiceName() {
+std::string_view RederivedServiceAsyncProcessor::getServiceName() {
   return "RederivedService";
 }
 

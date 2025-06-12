@@ -118,7 +118,7 @@ class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
 
 class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

@@ -244,7 +244,7 @@ namespace cpp2 {
 }
 
 
-const char* GoodServiceAsyncProcessor::getServiceName() {
+std::string_view GoodServiceAsyncProcessor::getServiceName() {
   return "BadService";
 }
 

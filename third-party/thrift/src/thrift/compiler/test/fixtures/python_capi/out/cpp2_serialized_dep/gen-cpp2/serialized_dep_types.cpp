@@ -36,7 +36,7 @@ void TccStructTraits<::test::fixtures::python_capi::SerializedStruct>::translate
 
 namespace test::fixtures::python_capi {
 
-const char* SerializedStruct::__fbthrift_thrift_uri() {
+std::string_view SerializedStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/SerializedStruct";
 }
 
@@ -177,7 +177,7 @@ bool TEnumTraits<::test::fixtures::python_capi::SerializedUnion::Type>::findValu
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-const char* SerializedUnion::__fbthrift_thrift_uri() {
+std::string_view SerializedUnion::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/SerializedUnion";
 }
 
@@ -294,7 +294,7 @@ void TccStructTraits<::test::fixtures::python_capi::SerializedError>::translateF
 
 namespace test::fixtures::python_capi {
 
-const char* SerializedError::__fbthrift_thrift_uri() {
+std::string_view SerializedError::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/SerializedError";
 }
 
@@ -406,7 +406,7 @@ void TccStructTraits<::test::fixtures::python_capi::MarshalStruct>::translateFie
 
 namespace test::fixtures::python_capi {
 
-const char* MarshalStruct::__fbthrift_thrift_uri() {
+std::string_view MarshalStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/MarshalStruct";
 }
 
@@ -547,7 +547,7 @@ bool TEnumTraits<::test::fixtures::python_capi::MarshalUnion::Type>::findValue(s
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-const char* MarshalUnion::__fbthrift_thrift_uri() {
+std::string_view MarshalUnion::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/MarshalUnion";
 }
 
@@ -664,7 +664,7 @@ void TccStructTraits<::test::fixtures::python_capi::MarshalError>::translateFiel
 
 namespace test::fixtures::python_capi {
 
-const char* MarshalError::__fbthrift_thrift_uri() {
+std::string_view MarshalError::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/MarshalError";
 }
 

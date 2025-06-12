@@ -88,7 +88,7 @@ class DerivedServiceSvNull : public ::apache::thrift::ServiceHandler<DerivedServ
 
 class DerivedServiceAsyncProcessor : public ::py3::simple::SimpleServiceAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::py3::simple::SimpleServiceAsyncProcessor;
  protected:

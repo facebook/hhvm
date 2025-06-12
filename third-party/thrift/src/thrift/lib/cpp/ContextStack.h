@@ -60,8 +60,8 @@ class ContextStack {
   static UniquePtr create(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
-      const char* serviceName,
-      const char* method,
+      std::string_view serviceName,
+      std::string_view method,
       TConnectionContext* connectionContext);
 
   static UniquePtr createWithClientContext(
@@ -70,8 +70,8 @@ class ContextStack {
       const std::shared_ptr<
           std::vector<std::shared_ptr<ClientInterceptorBase>>>&
           clientInterceptors,
-      const char* serviceName,
-      const char* method,
+      std::string_view serviceName,
+      std::string_view method,
       transport::THeader& header);
 
   static ContextStack::UniquePtr createWithClientContextCopyNames(
@@ -142,12 +142,11 @@ class ContextStack {
       handlers_;
   std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
       clientInterceptors_;
-  // Must be NUL-terminated.
-  const char* const serviceName_;
+  const std::string_view serviceName_;
   // "{service_name}.{method_name}"
-  const char* const methodNamePrefixed_;
+  const std::string_view methodNamePrefixed_;
   // "{method_name}", without the service name prefix
-  const char* const methodNameUnprefixed_;
+  const std::string_view methodNameUnprefixed_;
   void** serviceContexts_;
   InterceptorFrameworkMetadataStorage clientInterceptorFrameworkMetadata_;
   // While the server-side has a Cpp2RequestContext, the client-side "fakes" it
@@ -167,8 +166,8 @@ class ContextStack {
   ContextStack(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
-      const char* serviceName,
-      const char* method,
+      std::string_view serviceName,
+      std::string_view method,
       void** serviceContexts,
       TConnectionContext* connectionContext);
 
@@ -178,8 +177,8 @@ class ContextStack {
       const std::shared_ptr<
           std::vector<std::shared_ptr<ClientInterceptorBase>>>&
           clientInterceptors,
-      const char* serviceName,
-      const char* method,
+      std::string_view serviceName,
+      std::string_view method,
       void** serviceContexts,
       EmbeddedClientContextPtr embeddedClientContext,
       util::AllocationColocator<>::ArrayPtr<

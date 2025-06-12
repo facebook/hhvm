@@ -64,7 +64,7 @@ namespace {{service:qualified_namespace}} {
 
 {{> service_cpp/service_null_impl}}
 
-const char* {{service:cpp_name}}AsyncProcessor::getServiceName() {
+std::string_view {{service:cpp_name}}AsyncProcessor::getServiceName() {
   return "{{service:name}}";
 }
 

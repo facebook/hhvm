@@ -30,7 +30,7 @@ class Client<::cpp2::GoodService> : public apache::thrift::GeneratedAsyncClient 
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "BadService";
   }
 
@@ -40,7 +40,7 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "BadService";
   }
 

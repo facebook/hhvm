@@ -43,13 +43,13 @@ class ClientInterceptorBase {
     /**
      * The name of the service definition as specified in Thrift IDL.
      */
-    const char* serviceName = nullptr;
+    std::string_view serviceName = "";
     /**
      * The name of the method as specified in Thrift IDL. This does NOT include
      * the service name. If the method is an interaction method, then it will be
      * in the format `{interaction_name}.{method_name}`.
      */
-    const char* methodName = nullptr;
+    std::string_view methodName = "";
     /**
      * Mutable access to interceptor framework metadata storage - this is
      * typically initialized by the framework and will be passed along the
@@ -69,13 +69,13 @@ class ClientInterceptorBase {
     /**
      * The name of the service definition as specified in Thrift IDL.
      */
-    const char* serviceName = nullptr;
+    std::string_view serviceName = "";
     /**
      * The name of the method as specified in Thrift IDL. This does NOT include
      * the service name. If the method is an interaction method, then it will be
      * in the format `{interaction_name}.{method_name}`.
      */
-    const char* methodName = nullptr;
+    std::string_view methodName = "";
   };
   virtual void internal_onResponse(ResponseInfo) = 0;
 

@@ -3166,7 +3166,7 @@ namespace test_cpp2::cpp_reflection {
 }
 
 
-const char* service_with_special_namesAsyncProcessor::getServiceName() {
+std::string_view service_with_special_namesAsyncProcessor::getServiceName() {
   return "service_with_special_names";
 }
 

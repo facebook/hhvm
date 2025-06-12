@@ -53,7 +53,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyStruct>::translate
 
 namespace facebook::thrift::test::terse_write {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/MyStruct";
 }
 
@@ -133,7 +133,7 @@ bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findValu
 }} // apache::thrift
 namespace facebook::thrift::test::terse_write {
 
-const char* MyUnion::__fbthrift_thrift_uri() {
+std::string_view MyUnion::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/MyUnion";
 }
 
@@ -364,7 +364,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyStructWithCustomDe
 
 namespace facebook::thrift::test::terse_write {
 
-const char* MyStructWithCustomDefault::__fbthrift_thrift_uri() {
+std::string_view MyStructWithCustomDefault::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/MyStructWithCustomDefault";
 }
 
@@ -447,7 +447,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::StructLevelTerseStru
 
 namespace facebook::thrift::test::terse_write {
 
-const char* StructLevelTerseStruct::__fbthrift_thrift_uri() {
+std::string_view StructLevelTerseStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/StructLevelTerseStruct";
 }
 
@@ -652,7 +652,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::FieldLevelTerseStruc
 
 namespace facebook::thrift::test::terse_write {
 
-const char* FieldLevelTerseStruct::__fbthrift_thrift_uri() {
+std::string_view FieldLevelTerseStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/FieldLevelTerseStruct";
 }
 
@@ -1068,7 +1068,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::AdaptedFields>::tran
 
 namespace facebook::thrift::test::terse_write {
 
-const char* AdaptedFields::__fbthrift_thrift_uri() {
+std::string_view AdaptedFields::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/AdaptedFields";
 }
 
@@ -1185,7 +1185,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::TerseException>::tra
 
 namespace facebook::thrift::test::terse_write {
 
-const char* TerseException::__fbthrift_thrift_uri() {
+std::string_view TerseException::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/TerseException";
 }
 

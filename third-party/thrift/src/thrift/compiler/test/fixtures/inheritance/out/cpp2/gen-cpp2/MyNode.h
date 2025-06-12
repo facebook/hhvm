@@ -88,7 +88,7 @@ class MyNodeSvNull : public ::apache::thrift::ServiceHandler<MyNode>, virtual pu
 
 class MyNodeAsyncProcessor : public ::cpp2::MyRootAsyncProcessor {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = ::cpp2::MyRootAsyncProcessor;
  protected:

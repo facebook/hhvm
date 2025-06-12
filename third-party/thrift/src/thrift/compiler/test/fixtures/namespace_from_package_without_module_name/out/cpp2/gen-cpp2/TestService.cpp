@@ -142,7 +142,7 @@ namespace test::namespace_from_package_without_module_name {
 }
 
 
-const char* TestServiceAsyncProcessor::getServiceName() {
+std::string_view TestServiceAsyncProcessor::getServiceName() {
   return "TestService";
 }
 

@@ -30,7 +30,7 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 namespace some::valid::ns {
 
 
-const char* EmptyServiceAsyncProcessor::getServiceName() {
+std::string_view EmptyServiceAsyncProcessor::getServiceName() {
   return "EmptyService";
 }
 

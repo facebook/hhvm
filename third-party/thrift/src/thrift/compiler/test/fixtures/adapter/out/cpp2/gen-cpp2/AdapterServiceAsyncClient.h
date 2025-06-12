@@ -27,11 +27,11 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "AdapterService";
   }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "facebook.com/thrift/test/AdapterService";
   }
 

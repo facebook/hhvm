@@ -18,7 +18,7 @@
 
 namespace apache::thrift::type {
 
-const char* getBaseTypeName(BaseType type) noexcept {
+std::string_view getBaseTypeName(BaseType type) noexcept {
   switch (type) {
     case BaseType::Void:
       return "void";

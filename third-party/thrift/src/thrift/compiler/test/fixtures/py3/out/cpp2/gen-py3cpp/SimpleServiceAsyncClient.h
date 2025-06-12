@@ -27,7 +27,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "SimpleService";
   }
 

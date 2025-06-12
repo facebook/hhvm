@@ -43,7 +43,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
  public:
   std::string_view getGeneratedName() const override { return "MyService"; }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "test.dev/fixtures/basic-structured-annotations/MyService";
   }
 
@@ -101,7 +101,7 @@ class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
 
 class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

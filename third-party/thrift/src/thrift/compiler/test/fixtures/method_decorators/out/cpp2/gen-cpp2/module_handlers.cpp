@@ -711,7 +711,7 @@ void DecoratedServiceSvNull::withStruct(::cpp2::Response& /*_return*/, std::uniq
 void DecoratedServiceSvNull::multiParam(::cpp2::Response& /*_return*/, std::unique_ptr<::std::string> /*text*/, ::std::int64_t /*num*/, std::unique_ptr<::cpp2::Request> /*request*/) {  }
 
 
-const char* DecoratedServiceAsyncProcessor::getServiceName() {
+std::string_view DecoratedServiceAsyncProcessor::getServiceName() {
   return "DecoratedService";
 }
 
@@ -1524,7 +1524,7 @@ void UndecoratedServiceSvNull::withStruct(::cpp2::Response& /*_return*/, std::un
 void UndecoratedServiceSvNull::multiParam(::cpp2::Response& /*_return*/, std::unique_ptr<::std::string> /*text*/, ::std::int64_t /*num*/, std::unique_ptr<::cpp2::Request> /*request*/) {  }
 
 
-const char* UndecoratedServiceAsyncProcessor::getServiceName() {
+std::string_view UndecoratedServiceAsyncProcessor::getServiceName() {
   return "UndecoratedService";
 }
 
@@ -1771,7 +1771,7 @@ void DecoratedService_ExtendsUndecoratedServiceSvNull::extension() {
 }
 
 
-const char* DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::getServiceName() {
+std::string_view DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::getServiceName() {
   return "DecoratedService_ExtendsUndecoratedService";
 }
 
@@ -1960,7 +1960,7 @@ void DecoratedService_ExtendsDecoratedServiceSvNull::extension() {
 }
 
 
-const char* DecoratedService_ExtendsDecoratedServiceAsyncProcessor::getServiceName() {
+std::string_view DecoratedService_ExtendsDecoratedServiceAsyncProcessor::getServiceName() {
   return "DecoratedService_ExtendsDecoratedService";
 }
 
@@ -2149,7 +2149,7 @@ void UndecoratedService_ExtendsDecoratedServiceSvNull::extension() {
 }
 
 
-const char* UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::getServiceName() {
+std::string_view UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::getServiceName() {
   return "UndecoratedService_ExtendsDecoratedService";
 }
 
@@ -2338,7 +2338,7 @@ namespace cpp2 {
 void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceSvNull::secondExtension(::std::string& /*_return*/, std::unique_ptr<::std::string> /*input*/) {  }
 
 
-const char* DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor::getServiceName() {
+std::string_view DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor::getServiceName() {
   return "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService";
 }
 

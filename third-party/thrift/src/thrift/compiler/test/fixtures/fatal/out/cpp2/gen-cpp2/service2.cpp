@@ -710,7 +710,7 @@ void service2SvNull::methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/) 
 void service2SvNull::methodF(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {  }
 
 
-const char* service2AsyncProcessor::getServiceName() {
+std::string_view service2AsyncProcessor::getServiceName() {
   return "service2";
 }
 

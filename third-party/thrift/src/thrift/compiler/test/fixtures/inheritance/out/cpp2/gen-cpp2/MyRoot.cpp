@@ -144,7 +144,7 @@ void MyRootSvNull::do_root() {
 }
 
 
-const char* MyRootAsyncProcessor::getServiceName() {
+std::string_view MyRootAsyncProcessor::getServiceName() {
   return "MyRoot";
 }
 

@@ -31,7 +31,7 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "DecoratedService";
   }
 
@@ -773,7 +773,7 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "UndecoratedService";
   }
 
@@ -1515,7 +1515,7 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ::cpp2
  public:
   using ::cpp2::UndecoratedServiceAsyncClient::UndecoratedServiceAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "DecoratedService_ExtendsUndecoratedService";
   }
 
@@ -1657,7 +1657,7 @@ class Client<::cpp2::DecoratedService_ExtendsDecoratedService> : public ::cpp2::
  public:
   using ::cpp2::DecoratedServiceAsyncClient::DecoratedServiceAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "DecoratedService_ExtendsDecoratedService";
   }
 
@@ -1799,7 +1799,7 @@ class Client<::cpp2::UndecoratedService_ExtendsDecoratedService> : public ::cpp2
  public:
   using ::cpp2::DecoratedServiceAsyncClient::DecoratedServiceAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "UndecoratedService_ExtendsDecoratedService";
   }
 
@@ -1941,7 +1941,7 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecorated
  public:
   using ::cpp2::UndecoratedService_ExtendsDecoratedServiceAsyncClient::UndecoratedService_ExtendsDecoratedServiceAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService";
   }
 

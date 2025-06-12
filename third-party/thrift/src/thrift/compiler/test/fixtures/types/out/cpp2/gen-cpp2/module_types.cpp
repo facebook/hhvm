@@ -87,7 +87,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::empty_struct>::translate
 
 namespace apache::thrift::fixtures::types {
 
-const char* empty_struct::__fbthrift_thrift_uri() {
+std::string_view empty_struct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/empty_struct";
 }
 
@@ -154,7 +154,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::decorated_struct>::trans
 
 namespace apache::thrift::fixtures::types {
 
-const char* decorated_struct::__fbthrift_thrift_uri() {
+std::string_view decorated_struct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/decorated_struct";
 }
 
@@ -247,7 +247,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ContainerStruct>::transl
 
 namespace apache::thrift::fixtures::types {
 
-const char* ContainerStruct::__fbthrift_thrift_uri() {
+std::string_view ContainerStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ContainerStruct";
 }
 
@@ -446,7 +446,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CppTypeStruct>::translat
 
 namespace apache::thrift::fixtures::types {
 
-const char* CppTypeStruct::__fbthrift_thrift_uri() {
+std::string_view CppTypeStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CppTypeStruct";
 }
 
@@ -547,7 +547,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::VirtualStruct>::translat
 
 namespace apache::thrift::fixtures::types {
 
-const char* VirtualStruct::__fbthrift_thrift_uri() {
+std::string_view VirtualStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/VirtualStruct";
 }
 
@@ -643,7 +643,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyStructWithForwardRefEn
 
 namespace apache::thrift::fixtures::types {
 
-const char* MyStructWithForwardRefEnum::__fbthrift_thrift_uri() {
+std::string_view MyStructWithForwardRefEnum::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum";
 }
 
@@ -739,7 +739,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::TrivialNumeric>::transla
 
 namespace apache::thrift::fixtures::types {
 
-const char* TrivialNumeric::__fbthrift_thrift_uri() {
+std::string_view TrivialNumeric::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/TrivialNumeric";
 }
 
@@ -835,7 +835,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::TrivialNestedWithDefault
 
 namespace apache::thrift::fixtures::types {
 
-const char* TrivialNestedWithDefault::__fbthrift_thrift_uri() {
+std::string_view TrivialNestedWithDefault::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/TrivialNestedWithDefault";
 }
 
@@ -936,7 +936,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ComplexString>::translat
 
 namespace apache::thrift::fixtures::types {
 
-const char* ComplexString::__fbthrift_thrift_uri() {
+std::string_view ComplexString::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ComplexString";
 }
 
@@ -1043,7 +1043,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ComplexNestedWithDefault
 
 namespace apache::thrift::fixtures::types {
 
-const char* ComplexNestedWithDefault::__fbthrift_thrift_uri() {
+std::string_view ComplexNestedWithDefault::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ComplexNestedWithDefault";
 }
 
@@ -1158,7 +1158,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MinPadding>::translateFi
 
 namespace apache::thrift::fixtures::types {
 
-const char* MinPadding::__fbthrift_thrift_uri() {
+std::string_view MinPadding::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MinPadding";
 }
 
@@ -1305,7 +1305,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MinPaddingWithCustomType
 
 namespace apache::thrift::fixtures::types {
 
-const char* MinPaddingWithCustomType::__fbthrift_thrift_uri() {
+std::string_view MinPaddingWithCustomType::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MinPaddingWithCustomType";
 }
 
@@ -1432,7 +1432,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyStruct>::translateFiel
 
 namespace apache::thrift::fixtures::types {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MyStruct";
 }
 
@@ -1570,7 +1570,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFi
 
 namespace apache::thrift::fixtures::types {
 
-const char* MyDataItem::__fbthrift_thrift_uri() {
+std::string_view MyDataItem::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MyDataItem";
 }
 
@@ -1631,7 +1631,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::Renamed>::translateField
 
 namespace apache::thrift::fixtures::types {
 
-const char* Renamed::__fbthrift_thrift_uri() {
+std::string_view Renamed::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/Renaming";
 }
 
@@ -1714,7 +1714,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AnnotatedTypes>::transla
 
 namespace apache::thrift::fixtures::types {
 
-const char* AnnotatedTypes::__fbthrift_thrift_uri() {
+std::string_view AnnotatedTypes::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AnnotatedTypes";
 }
 
@@ -1821,7 +1821,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageRoot>::trans
 
 namespace apache::thrift::fixtures::types {
 
-const char* ForwardUsageRoot::__fbthrift_thrift_uri() {
+std::string_view ForwardUsageRoot::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ForwardUsageRoot";
 }
 
@@ -1952,7 +1952,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageStruct>::tra
 
 namespace apache::thrift::fixtures::types {
 
-const char* ForwardUsageStruct::__fbthrift_thrift_uri() {
+std::string_view ForwardUsageStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ForwardUsageStruct";
 }
 
@@ -2056,7 +2056,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageByRef>::tran
 
 namespace apache::thrift::fixtures::types {
 
-const char* ForwardUsageByRef::__fbthrift_thrift_uri() {
+std::string_view ForwardUsageByRef::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ForwardUsageByRef";
 }
 
@@ -2160,7 +2160,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMap>::translat
 
 namespace apache::thrift::fixtures::types {
 
-const char* IncompleteMap::__fbthrift_thrift_uri() {
+std::string_view IncompleteMap::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteMap";
 }
 
@@ -2267,7 +2267,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMapDep>::trans
 
 namespace apache::thrift::fixtures::types {
 
-const char* IncompleteMapDep::__fbthrift_thrift_uri() {
+std::string_view IncompleteMapDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteMapDep";
 }
 
@@ -2334,7 +2334,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteMap>::translateF
 
 namespace apache::thrift::fixtures::types {
 
-const char* CompleteMap::__fbthrift_thrift_uri() {
+std::string_view CompleteMap::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteMap";
 }
 
@@ -2441,7 +2441,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteMapDep>::transla
 
 namespace apache::thrift::fixtures::types {
 
-const char* CompleteMapDep::__fbthrift_thrift_uri() {
+std::string_view CompleteMapDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteMapDep";
 }
 
@@ -2508,7 +2508,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteList>::transla
 
 namespace apache::thrift::fixtures::types {
 
-const char* IncompleteList::__fbthrift_thrift_uri() {
+std::string_view IncompleteList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteList";
 }
 
@@ -2615,7 +2615,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteListDep>::tran
 
 namespace apache::thrift::fixtures::types {
 
-const char* IncompleteListDep::__fbthrift_thrift_uri() {
+std::string_view IncompleteListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteListDep";
 }
 
@@ -2682,7 +2682,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteList>::translate
 
 namespace apache::thrift::fixtures::types {
 
-const char* CompleteList::__fbthrift_thrift_uri() {
+std::string_view CompleteList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteList";
 }
 
@@ -2789,7 +2789,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteListDep>::transl
 
 namespace apache::thrift::fixtures::types {
 
-const char* CompleteListDep::__fbthrift_thrift_uri() {
+std::string_view CompleteListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteListDep";
 }
 
@@ -2856,7 +2856,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AdaptedList>::translateF
 
 namespace apache::thrift::fixtures::types {
 
-const char* AdaptedList::__fbthrift_thrift_uri() {
+std::string_view AdaptedList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AdaptedList";
 }
 
@@ -2964,7 +2964,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::AdaptedListDep>:
 namespace apache::thrift::fixtures::types {
 namespace detail {
 
-const char* AdaptedListDep::__fbthrift_thrift_uri() {
+std::string_view AdaptedListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AdaptedListDep";
 }
 
@@ -3066,7 +3066,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::DependentAdaptedList>::t
 
 namespace apache::thrift::fixtures::types {
 
-const char* DependentAdaptedList::__fbthrift_thrift_uri() {
+std::string_view DependentAdaptedList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/DependentAdaptedList";
 }
 
@@ -3174,7 +3174,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::DependentAdapted
 namespace apache::thrift::fixtures::types {
 namespace detail {
 
-const char* DependentAdaptedListDep::__fbthrift_thrift_uri() {
+std::string_view DependentAdaptedListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/DependentAdaptedListDep";
 }
 
@@ -3263,7 +3263,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AllocatorAware>::transla
 
 namespace apache::thrift::fixtures::types {
 
-const char* AllocatorAware::__fbthrift_thrift_uri() {
+std::string_view AllocatorAware::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AllocatorAware";
 }
 
@@ -3484,7 +3484,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AllocatorAware2>::transl
 
 namespace apache::thrift::fixtures::types {
 
-const char* AllocatorAware2::__fbthrift_thrift_uri() {
+std::string_view AllocatorAware2::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AllocatorAware2";
 }
 
@@ -3626,7 +3626,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::TypedefStruct>::translat
 
 namespace apache::thrift::fixtures::types {
 
-const char* TypedefStruct::__fbthrift_thrift_uri() {
+std::string_view TypedefStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/TypedefStruct";
 }
 
@@ -3752,7 +3752,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::StructWithDoubleUndersco
 
 namespace apache::thrift::fixtures::types {
 
-const char* StructWithDoubleUnderscores::__fbthrift_thrift_uri() {
+std::string_view StructWithDoubleUnderscores::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores";
 }
 

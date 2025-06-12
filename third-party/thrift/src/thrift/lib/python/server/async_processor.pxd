@@ -14,6 +14,7 @@
 
 from libcpp cimport bool as cbool
 from libcpp.memory cimport shared_ptr, unique_ptr
+from thrift.python.std_libcpp cimport string_view
 
 cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" namespace "apache::thrift":
     cdef cppclass cAsyncProcessor "apache::thrift::AsyncProcessor":
@@ -21,7 +22,7 @@ cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" namespace "apache::thr
 
     cdef cppclass cGeneratedAsyncProcessorBase \
             "apache::thrift::GeneratedAsyncProcessorBase"(cAsyncProcessor):
-        const char* getServiceName()
+        string_view getServiceName()
 
     cdef cppclass cAsyncProcessorFactory "apache::thrift::AsyncProcessorFactory":
         unique_ptr[cAsyncProcessor] getProcessor()

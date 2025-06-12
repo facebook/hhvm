@@ -20,21 +20,22 @@
 
 namespace apache::thrift::type {
 
-Protocol Protocol::fromName(const char* name) {
+Protocol Protocol::fromName(std::string_view name) {
   StandardProtocol standard;
   if (TEnumTraits<StandardProtocol>::findValue(name, &standard)) {
     return Protocol(standard);
   }
   validateUniversalName(name);
-  return Protocol(name);
+  return Protocol(std::string(name));
 }
 
 std::string_view Protocol::name() const noexcept {
   if (isCustom()) {
     return custom();
   }
-  if (const char* name =
-          apache::thrift::TEnumTraits<StandardProtocol>::findName(standard())) {
+  std::string_view name;
+  if (apache::thrift::TEnumTraits<StandardProtocol>::findName(
+          standard(), &name)) {
     return name;
   }
 

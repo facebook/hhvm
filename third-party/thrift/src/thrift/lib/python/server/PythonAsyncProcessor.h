@@ -99,7 +99,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       override;
 
   // Dud method for GeneratedAsyncProcessor
-  const char* getServiceName() override { return serviceName_.c_str(); }
+  std::string_view getServiceName() override { return serviceName_; }
 
   // Dud method for ServerInterface
   std::string_view getGeneratedName() const override {

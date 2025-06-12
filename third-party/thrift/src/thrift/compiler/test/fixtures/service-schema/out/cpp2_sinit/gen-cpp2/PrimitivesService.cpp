@@ -381,7 +381,7 @@ void PrimitivesServiceSvNull::return_void_method(::std::int64_t /*id*/, std::uni
 }
 
 
-const char* PrimitivesServiceAsyncProcessor::getServiceName() {
+std::string_view PrimitivesServiceAsyncProcessor::getServiceName() {
   return "PrimitivesService";
 }
 

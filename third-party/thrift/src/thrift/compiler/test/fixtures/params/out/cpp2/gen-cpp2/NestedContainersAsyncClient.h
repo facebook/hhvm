@@ -27,7 +27,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "NestedContainers";
   }
 

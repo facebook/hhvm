@@ -32,7 +32,7 @@ class Client<::cpp2::Factories> : public apache::thrift::GeneratedAsyncClient {
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Factories";
   }
 
@@ -42,7 +42,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Factories";
   }
 
@@ -369,7 +369,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Factories";
   }
 
@@ -696,7 +696,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "Factories";
   }
 

@@ -142,7 +142,7 @@ namespace py3::simple {
 }
 
 
-const char* DerivedServiceAsyncProcessor::getServiceName() {
+std::string_view DerivedServiceAsyncProcessor::getServiceName() {
   return "DerivedService";
 }
 

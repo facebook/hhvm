@@ -366,7 +366,7 @@ void CSvNull::f() {
 void CSvNull::thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {  }
 
 
-const char* CAsyncProcessor::getServiceName() {
+std::string_view CAsyncProcessor::getServiceName() {
   return "C";
 }
 

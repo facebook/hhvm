@@ -216,7 +216,8 @@ class FaultInjectionChannel : public RequestChannel {
   ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault_;
 };
 
-void validateServiceName(AsyncProcessorFactory& apf, const char* serviceName);
+void validateServiceName(
+    AsyncProcessorFactory& apf, std::string_view serviceName);
 } // namespace detail
 
 template <class AsyncClientT>

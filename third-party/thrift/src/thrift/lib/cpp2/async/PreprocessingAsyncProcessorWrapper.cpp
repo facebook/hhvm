@@ -62,7 +62,7 @@ void PreprocessingAsyncProcessorWrapper::
       tm);
 }
 
-const char* PreprocessingAsyncProcessorWrapper::getServiceName() {
+std::string_view PreprocessingAsyncProcessorWrapper::getServiceName() {
   return inner()->getServiceName();
 }
 

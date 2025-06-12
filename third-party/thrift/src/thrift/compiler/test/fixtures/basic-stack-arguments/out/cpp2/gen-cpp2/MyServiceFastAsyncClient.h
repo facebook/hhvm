@@ -27,7 +27,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "MyServiceFast";
   }
 

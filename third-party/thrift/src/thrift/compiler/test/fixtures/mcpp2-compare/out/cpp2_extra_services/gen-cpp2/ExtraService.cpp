@@ -828,7 +828,7 @@ void ExtraServiceSvNull::oneway_void_ret_listunion_param(const ::std::vector<::s
 }
 
 
-const char* ExtraServiceAsyncProcessor::getServiceName() {
+std::string_view ExtraServiceAsyncProcessor::getServiceName() {
   return "ExtraService";
 }
 

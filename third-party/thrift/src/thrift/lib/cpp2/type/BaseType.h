@@ -58,7 +58,7 @@ enum class BaseType {
   Map = 16
 };
 
-const char* getBaseTypeName(BaseType type) noexcept;
+std::string_view getBaseTypeName(BaseType type) noexcept;
 
 namespace detail {
 constexpr BaseType getBaseType(void_t) {

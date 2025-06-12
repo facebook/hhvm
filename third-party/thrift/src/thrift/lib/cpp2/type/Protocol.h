@@ -46,10 +46,7 @@ class Protocol : public detail::Wrap<ProtocolUnion, union_t<ProtocolUnion>> {
   //
   // Unlike the normal constructors, throws std::invalid_argument, if the name
   // is invalid.
-  static Protocol fromName(const char* name);
-  static Protocol fromName(const std::string& name) {
-    return fromName(name.c_str());
-  }
+  static Protocol fromName(std::string_view name);
 
   // Returns a static const value for the given standard protocol.
   //

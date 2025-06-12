@@ -13,8 +13,10 @@
 # limitations under the License.
 
 from cpython cimport PyObject
+from libcpp.optional cimport optional
 from libcpp.memory cimport make_shared
 from libcpp.string cimport string
+from thrift.python.std_libcpp cimport string_view, sv_to_str
 from libcpp.utility cimport move as cmove
 from typing import Generic, TypeVar
 
@@ -130,24 +132,24 @@ cdef class RequestInfo:
 
     @property
     def service_name(self):
-        if not self._service_name:
+        if self._service_name.empty():
             return None
-        cdef string s = self._service_name
-        return (<bytes>s).decode()
+        cdef string_view s = self._service_name
+        return sv_to_str(s)
 
     @property
     def defining_service_name(self):
-        if not self._defining_service_name:
+        if self._defining_service_name.empty():
             return None
-        cdef string s = self._defining_service_name
-        return (<bytes>s).decode()
+        cdef string_view s = self._defining_service_name
+        return sv_to_str(s)
 
     @property
     def method_name(self):
-        if not self._method_name:
+        if self._method_name.empty():
             return None
-        cdef string s = self._method_name
-        return (<bytes>s).decode()
+        cdef string_view s = self._method_name
+        return sv_to_str(s)
 
     cdef cCpp2RequestContext* cpp_request_context(self):
         return self._cpp_ctx
@@ -155,9 +157,9 @@ cdef class RequestInfo:
 
 cdef api object make_request_info(
     cCpp2RequestContext* cpp_ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    string_view serviceName,
+    string_view definingServiceName,
+    string_view methodName,
 ) noexcept:
     cdef RequestInfo inst = RequestInfo.__new__(RequestInfo)
     inst._cpp_ctx = cpp_ctx
@@ -173,24 +175,24 @@ cdef class ResponseInfo:
 
     @property
     def service_name(self):
-        if not self._service_name:
+        if self._service_name.empty():
             return None
-        cdef string s = self._service_name
-        return (<bytes>s).decode()
+        cdef string_view s = self._service_name
+        return sv_to_str(s)
 
     @property
     def defining_service_name(self):
-        if not self._defining_service_name:
+        if self._defining_service_name.empty():
             return None
-        cdef string s = self._defining_service_name
-        return (<bytes>s).decode()
+        cdef string_view s = self._defining_service_name
+        return sv_to_str(s)
 
     @property
     def method_name(self):
-        if not self._method_name:
+        if self._method_name.empty():
             return None
-        cdef string s = self._method_name
-        return (<bytes>s).decode()
+        cdef string_view s = self._method_name
+        return sv_to_str(s)
 
     @property
     def exception(self):
@@ -204,9 +206,9 @@ cdef class ResponseInfo:
 
 cdef api object make_response_info(
     const cCpp2RequestContext* cpp_ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    string_view serviceName,
+    string_view definingServiceName,
+    string_view methodName,
     optional[string] errorMessage,
 ) noexcept:
     cdef ResponseInfo inst = ResponseInfo.__new__(ResponseInfo)

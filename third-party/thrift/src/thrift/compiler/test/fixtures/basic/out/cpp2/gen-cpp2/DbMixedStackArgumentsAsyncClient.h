@@ -27,11 +27,11 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "DbMixedStackArguments";
   }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "test.dev/fixtures/basic/DbMixedStackArguments";
   }
 

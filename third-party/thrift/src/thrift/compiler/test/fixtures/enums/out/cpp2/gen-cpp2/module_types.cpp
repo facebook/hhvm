@@ -155,7 +155,7 @@ void TccStructTraits<::test::fixtures::enums::SomeStruct>::translateFieldName(
 
 namespace test::fixtures::enums {
 
-const char* SomeStruct::__fbthrift_thrift_uri() {
+std::string_view SomeStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/enums/SomeStruct";
 }
 
@@ -304,7 +304,7 @@ void TccStructTraits<::test::fixtures::enums::MyStruct>::translateFieldName(
 
 namespace test::fixtures::enums {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/enums/MyStruct";
 }
 

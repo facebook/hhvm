@@ -98,7 +98,7 @@ class AsyncProcessor : public TProcessorBase {
   ~AsyncProcessor() override = default;
 
   // Return the name of the service provided by this AsyncProcessor
-  virtual const char* getServiceName();
+  virtual std::string_view getServiceName();
 
   using MethodMetadata = AsyncProcessorFactory::MethodMetadata;
   using WildcardMethodMetadata = AsyncProcessorFactory::WildcardMethodMetadata;
@@ -1033,9 +1033,9 @@ class HandlerCallbackBase {
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      const char* serviceName,
-      const char* definingServiceName,
-      const char* methodName,
+      std::string_view serviceName,
+      std::string_view definingServiceName,
+      std::string_view methodName,
       exnw_ptr ewp,
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
@@ -1061,9 +1061,9 @@ class HandlerCallbackBase {
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      const char* serviceName,
-      const char* definingServiceName,
-      const char* methodName,
+      std::string_view serviceName,
+      std::string_view definingServiceName,
+      std::string_view methodName,
       exnw_ptr ewp,
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
@@ -1284,11 +1284,11 @@ class HandlerCallbackBase {
   ContextStack::UniquePtr ctx_;
   TilePtr interaction_;
   // The "leaf" or most derived service name
-  const char* const serviceName_ = "";
+  const std::string_view serviceName_ = "";
   // The service name where the incoming method name is defined (could be
   // different if inherited service)
-  const char* const definingServiceName_ = "";
-  const char* const methodName_ = "";
+  const std::string_view definingServiceName_ = "";
+  const std::string_view methodName_ = "";
 
   // May be null in a oneway call
   exnw_ptr ewp_;
@@ -1387,9 +1387,9 @@ class HandlerCallback : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      const char* serviceName,
-      const char* definingServiceName,
-      const char* methodName,
+      std::string_view serviceName,
+      std::string_view definingServiceName,
+      std::string_view methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1401,9 +1401,9 @@ class HandlerCallback : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      const char* serviceName,
-      const char* definingServiceName,
-      const char* methodName,
+      std::string_view serviceName,
+      std::string_view definingServiceName,
+      std::string_view methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1479,9 +1479,9 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      const char* serviceName,
-      const char* definingServiceName,
-      const char* methodName,
+      std::string_view serviceName,
+      std::string_view definingServiceName,
+      std::string_view methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1493,9 +1493,9 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      const char* serviceName,
-      const char* definingServiceName,
-      const char* methodName,
+      std::string_view serviceName,
+      std::string_view definingServiceName,
+      std::string_view methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1843,9 +1843,9 @@ template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    std::string_view serviceName,
+    std::string_view definingServiceName,
+    std::string_view methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1872,9 +1872,9 @@ template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    const char* serviceName,
-    const char* definingServiceName,
-    const char* methodName,
+    std::string_view serviceName,
+    std::string_view definingServiceName,
+    std::string_view methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,

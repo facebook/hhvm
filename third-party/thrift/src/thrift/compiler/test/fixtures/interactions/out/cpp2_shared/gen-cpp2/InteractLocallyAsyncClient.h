@@ -30,7 +30,7 @@ class Client<::thrift::shared_interactions::InteractLocally> : public apache::th
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "InteractLocally";
   }
 
@@ -40,7 +40,7 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
  public:
 
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "InteractLocally";
   }
 

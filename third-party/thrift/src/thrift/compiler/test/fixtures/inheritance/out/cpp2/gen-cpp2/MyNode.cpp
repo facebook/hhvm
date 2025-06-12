@@ -144,7 +144,7 @@ void MyNodeSvNull::do_mid() {
 }
 
 
-const char* MyNodeAsyncProcessor::getServiceName() {
+std::string_view MyNodeAsyncProcessor::getServiceName() {
   return "MyNode";
 }
 

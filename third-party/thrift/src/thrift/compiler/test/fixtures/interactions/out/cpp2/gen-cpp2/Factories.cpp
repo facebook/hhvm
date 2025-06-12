@@ -967,7 +967,7 @@ void FactoriesSvNull::foo() {
 }
 
 
-const char* FactoriesAsyncProcessor::getServiceName() {
+std::string_view FactoriesAsyncProcessor::getServiceName() {
   return "Factories";
 }
 

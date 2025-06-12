@@ -53,7 +53,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::runtime_ann
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* runtime_annotation::__fbthrift_thrift_uri() {
+std::string_view runtime_annotation::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/runtime_annotation";
 }
 
@@ -120,7 +120,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* structured_annotation_inline::__fbthrift_thrift_uri() {
+std::string_view structured_annotation_inline::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/structured_annotation_inline";
 }
 
@@ -230,7 +230,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* structured_annotation_with_default::__fbthrift_thrift_uri() {
+std::string_view structured_annotation_with_default::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/structured_annotation_with_default";
 }
 
@@ -324,7 +324,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* structured_annotation_recursive::__fbthrift_thrift_uri() {
+std::string_view structured_annotation_recursive::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/structured_annotation_recursive";
 }
 
@@ -461,7 +461,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* structured_annotation_forward::__fbthrift_thrift_uri() {
+std::string_view structured_annotation_forward::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/structured_annotation_forward";
 }
 
@@ -544,7 +544,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* structured_annotation_nested::__fbthrift_thrift_uri() {
+std::string_view structured_annotation_nested::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/structured_annotation_nested";
 }
 
@@ -657,7 +657,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::MyStruct>::
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/MyStruct";
 }
 
@@ -788,7 +788,7 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::MyException
 
 namespace test::fixtures::basic-structured-annotations {
 
-const char* MyException::__fbthrift_thrift_uri() {
+std::string_view MyException::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/MyException";
 }
 
@@ -894,7 +894,7 @@ bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>:
 }} // apache::thrift
 namespace test::fixtures::basic-structured-annotations {
 
-const char* MyUnion::__fbthrift_thrift_uri() {
+std::string_view MyUnion::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-structured-annotations/MyUnion";
 }
 

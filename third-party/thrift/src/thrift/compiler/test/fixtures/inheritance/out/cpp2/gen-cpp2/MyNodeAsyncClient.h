@@ -32,7 +32,7 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
  public:
   using ::cpp2::MyRootAsyncClient::MyRootAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "MyNode";
   }
 

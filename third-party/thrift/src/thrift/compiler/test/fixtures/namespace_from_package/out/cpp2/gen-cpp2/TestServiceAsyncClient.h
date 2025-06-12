@@ -27,11 +27,11 @@ class Client<::test::namespace_from_package::module::TestService> : public apach
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "TestService";
   }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "test.dev/namespace_from_package/module/TestService";
   }
 

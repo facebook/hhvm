@@ -488,7 +488,7 @@ void MyServiceSvNull::putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::
 }
 
 
-const char* MyServiceAsyncProcessor::getServiceName() {
+std::string_view MyServiceAsyncProcessor::getServiceName() {
   return "MyService";
 }
 

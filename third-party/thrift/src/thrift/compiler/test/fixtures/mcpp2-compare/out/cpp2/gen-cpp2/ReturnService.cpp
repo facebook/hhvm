@@ -1750,7 +1750,7 @@ void ReturnServiceSvNull::list_UnionReturn(::std::vector<::some::valid::ns::Comp
 void ReturnServiceSvNull::readData(::some::valid::ns::IOBufPtr& /*_return*/, ::std::int64_t /*size*/) {  }
 
 
-const char* ReturnServiceAsyncProcessor::getServiceName() {
+std::string_view ReturnServiceAsyncProcessor::getServiceName() {
   return "ReturnService";
 }
 

@@ -22,7 +22,7 @@ using namespace apache::thrift::type;
 
 class TestAsyncClient {
   friend struct ::apache::thrift::detail::st::struct_private_access;
-  static const char* __fbthrift_thrift_uri() { return "you are I"; }
+  static std::string_view __fbthrift_thrift_uri() { return "you are I"; }
 };
 
 TEST(NameTest, Extract) {

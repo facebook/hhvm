@@ -2878,7 +2878,7 @@ void ParamServiceSvNull::union_ret_i32_i32_param(::some::valid::ns::ComplexUnion
 void ParamServiceSvNull::listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {  }
 
 
-const char* ParamServiceAsyncProcessor::getServiceName() {
+std::string_view ParamServiceAsyncProcessor::getServiceName() {
   return "ParamService";
 }
 

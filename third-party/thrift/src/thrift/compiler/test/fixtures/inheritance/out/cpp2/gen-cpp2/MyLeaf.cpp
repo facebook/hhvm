@@ -144,7 +144,7 @@ void MyLeafSvNull::do_leaf() {
 }
 
 
-const char* MyLeafAsyncProcessor::getServiceName() {
+std::string_view MyLeafAsyncProcessor::getServiceName() {
   return "MyLeaf";
 }
 

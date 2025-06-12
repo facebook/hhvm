@@ -30,7 +30,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "service1";
   }
 

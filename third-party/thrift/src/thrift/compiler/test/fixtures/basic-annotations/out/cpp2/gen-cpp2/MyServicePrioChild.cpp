@@ -144,7 +144,7 @@ void MyServicePrioChildSvNull::pang() {
 }
 
 
-const char* MyServicePrioChildAsyncProcessor::getServiceName() {
+std::string_view MyServicePrioChildAsyncProcessor::getServiceName() {
   return "MyServicePrioChild";
 }
 

@@ -831,7 +831,7 @@ namespace cpp2 {
 void InteractWithSharedSvNull::do_some_similar_things(::thrift::shared_interactions::DoSomethingResult& /*_return*/) {  }
 
 
-const char* InteractWithSharedAsyncProcessor::getServiceName() {
+std::string_view InteractWithSharedAsyncProcessor::getServiceName() {
   return "InteractWithShared";
 }
 

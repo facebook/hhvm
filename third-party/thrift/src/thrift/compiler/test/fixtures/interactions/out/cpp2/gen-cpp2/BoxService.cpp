@@ -238,7 +238,7 @@ determineInvocationType:
 namespace cpp2 {
 
 
-const char* BoxServiceAsyncProcessor::getServiceName() {
+std::string_view BoxServiceAsyncProcessor::getServiceName() {
   return "BoxService";
 }
 

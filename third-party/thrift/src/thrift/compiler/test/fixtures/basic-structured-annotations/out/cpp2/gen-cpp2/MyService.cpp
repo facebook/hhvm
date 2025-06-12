@@ -256,7 +256,7 @@ bool MyServiceSvNull::second(::std::int64_t /*count*/) {
 }
 
 
-const char* MyServiceAsyncProcessor::getServiceName() {
+std::string_view MyServiceAsyncProcessor::getServiceName() {
   return "MyService";
 }
 

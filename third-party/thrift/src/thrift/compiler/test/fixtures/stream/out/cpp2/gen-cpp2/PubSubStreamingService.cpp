@@ -898,7 +898,7 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_eb_re
 namespace cpp2 {
 
 
-const char* PubSubStreamingServiceAsyncProcessor::getServiceName() {
+std::string_view PubSubStreamingServiceAsyncProcessor::getServiceName() {
   return "PubSubStreamingService";
 }
 

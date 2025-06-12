@@ -600,7 +600,7 @@ void NestedContainersSvNull::turtles(std::unique_ptr<::std::vector<::std::vector
 }
 
 
-const char* NestedContainersAsyncProcessor::getServiceName() {
+std::string_view NestedContainersAsyncProcessor::getServiceName() {
   return "NestedContainers";
 }
 

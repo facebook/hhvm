@@ -32,7 +32,7 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
  public:
   using ::cpp2::MyServicePrioParentAsyncClient::MyServicePrioParentAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "MyServicePrioChild";
   }
 

@@ -655,7 +655,7 @@ void PerformSvNull::foo() {
 }
 
 
-const char* PerformAsyncProcessor::getServiceName() {
+std::string_view PerformAsyncProcessor::getServiceName() {
   return "Perform";
 }
 

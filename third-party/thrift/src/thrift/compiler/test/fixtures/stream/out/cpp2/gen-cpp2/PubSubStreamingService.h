@@ -155,7 +155,7 @@ class PubSubStreamingServiceSvNull : public ::apache::thrift::ServiceHandler<Pub
 
 class PubSubStreamingServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

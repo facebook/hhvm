@@ -41,7 +41,7 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
  public:
   std::string_view getGeneratedName() const override { return "FB303Service"; }
 
-  static const char* __fbthrift_thrift_uri() {
+  static std::string_view __fbthrift_thrift_uri() {
     return "test.dev/fixtures/basic/FB303Service";
   }
 
@@ -88,7 +88,7 @@ class FB303ServiceSvNull : public ::apache::thrift::ServiceHandler<FB303Service>
 
 class FB303ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
-  const char* getServiceName() override;
+  std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:

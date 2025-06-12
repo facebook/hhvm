@@ -53,7 +53,7 @@ void TccStructTraits<::facebook::thrift::test::CustomException>::translateFieldN
 
 namespace facebook::thrift::test {
 
-const char* CustomException::__fbthrift_thrift_uri() {
+std::string_view CustomException::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/CustomException";
 }
 

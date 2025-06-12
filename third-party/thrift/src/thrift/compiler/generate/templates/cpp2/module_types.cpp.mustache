@@ -106,7 +106,7 @@ namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
 
 {{#struct:thrift_uri}}
-const char* {{struct:cpp_underlying_name}}::__fbthrift_thrift_uri() {
+std::string_view {{struct:cpp_underlying_name}}::__fbthrift_thrift_uri() {
   return "{{struct:thrift_uri}}";
 }
 

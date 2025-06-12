@@ -258,7 +258,7 @@ void DbMixedStackArgumentsSvNull::getDataByKey0(::std::string& /*_return*/, std:
 void DbMixedStackArgumentsSvNull::getDataByKey1(::std::string& /*_return*/, const ::std::string& /*key*/) {  }
 
 
-const char* DbMixedStackArgumentsAsyncProcessor::getServiceName() {
+std::string_view DbMixedStackArgumentsAsyncProcessor::getServiceName() {
   return "DbMixedStackArguments";
 }
 

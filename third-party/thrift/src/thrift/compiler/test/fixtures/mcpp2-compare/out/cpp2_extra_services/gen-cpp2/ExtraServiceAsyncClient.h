@@ -33,7 +33,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
  public:
   using ::some::valid::ns::ParamServiceAsyncClient::ParamServiceAsyncClient;
 
-  char const* getServiceName() const noexcept override {
+  std::string_view getServiceName() const noexcept override {
     return "ExtraService";
   }
 

@@ -144,7 +144,7 @@ void FooServiceSvNull::simple_rpc() {
 }
 
 
-const char* FooServiceAsyncProcessor::getServiceName() {
+std::string_view FooServiceAsyncProcessor::getServiceName() {
   return "FooService";
 }
 

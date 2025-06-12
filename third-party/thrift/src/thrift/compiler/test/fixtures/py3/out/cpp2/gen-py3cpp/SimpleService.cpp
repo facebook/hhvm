@@ -4776,7 +4776,7 @@ void SimpleServiceSvNull::get_binary_union_struct(::py3::simple::BinaryUnionStru
 void SimpleServiceSvNull::get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/) {  }
 
 
-const char* SimpleServiceAsyncProcessor::getServiceName() {
+std::string_view SimpleServiceAsyncProcessor::getServiceName() {
   return "SimpleService";
 }
 

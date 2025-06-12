@@ -70,7 +70,7 @@ void TccStructTraits<::facebook::thrift::test::MyAnnotation>::translateFieldName
 
 namespace facebook::thrift::test {
 
-const char* MyAnnotation::__fbthrift_thrift_uri() {
+std::string_view MyAnnotation::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/MyAnnotation";
 }
 
@@ -179,7 +179,7 @@ void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Foo::__fbthrift_thrift_uri() {
+std::string_view Foo::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo";
 }
 
@@ -475,7 +475,7 @@ bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findValue(std::string_vie
 }} // apache::thrift
 namespace facebook::thrift::test {
 
-const char* Baz::__fbthrift_thrift_uri() {
+std::string_view Baz::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Baz";
 }
 
@@ -619,7 +619,7 @@ void TccStructTraits<::facebook::thrift::test::Bar>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Bar::__fbthrift_thrift_uri() {
+std::string_view Bar::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Bar";
 }
 
@@ -831,7 +831,7 @@ void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdapted>::transla
 namespace facebook::thrift::test {
 namespace detail {
 
-const char* DirectlyAdapted::__fbthrift_thrift_uri() {
+std::string_view DirectlyAdapted::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/DirectlyAdapted";
 }
 
@@ -916,7 +916,7 @@ void TccStructTraits<::facebook::thrift::test::detail::IndependentDirectlyAdapte
 namespace facebook::thrift::test {
 namespace detail {
 
-const char* IndependentDirectlyAdapted::__fbthrift_thrift_uri() {
+std::string_view IndependentDirectlyAdapted::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/IndependentDirectlyAdapted";
 }
 
@@ -1000,7 +1000,7 @@ void TccStructTraits<::facebook::thrift::test::StructWithFieldAdapter>::translat
 
 namespace facebook::thrift::test {
 
-const char* StructWithFieldAdapter::__fbthrift_thrift_uri() {
+std::string_view StructWithFieldAdapter::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/StructWithFieldAdapter";
 }
 
@@ -1137,7 +1137,7 @@ void TccStructTraits<::facebook::thrift::test::TerseAdaptedFields>::translateFie
 
 namespace facebook::thrift::test {
 
-const char* TerseAdaptedFields::__fbthrift_thrift_uri() {
+std::string_view TerseAdaptedFields::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/TerseAdaptedFields";
 }
 
@@ -1264,7 +1264,7 @@ void TccStructTraits<::facebook::thrift::test::B>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* B::__fbthrift_thrift_uri() {
+std::string_view B::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/B";
 }
 
@@ -1369,7 +1369,7 @@ void TccStructTraits<::facebook::thrift::test::A>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* A::__fbthrift_thrift_uri() {
+std::string_view A::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/A";
 }
 
@@ -1436,7 +1436,7 @@ void TccStructTraits<::facebook::thrift::test::Config>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Config::__fbthrift_thrift_uri() {
+std::string_view Config::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Config";
 }
 
@@ -1529,7 +1529,7 @@ void TccStructTraits<::facebook::thrift::test::MyStruct>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* MyStruct::__fbthrift_thrift_uri() {
+std::string_view MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/MyStruct";
 }
 
@@ -1653,7 +1653,7 @@ void TccStructTraits<::facebook::thrift::test::AdaptTestStruct>::translateFieldN
 
 namespace facebook::thrift::test {
 
-const char* AdaptTestStruct::__fbthrift_thrift_uri() {
+std::string_view AdaptTestStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/AdaptTestStruct";
 }
 
@@ -1860,7 +1860,7 @@ void TccStructTraits<::facebook::thrift::test::AdaptTemplatedTestStruct>::transl
 
 namespace facebook::thrift::test {
 
-const char* AdaptTemplatedTestStruct::__fbthrift_thrift_uri() {
+std::string_view AdaptTemplatedTestStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/AdaptTemplatedTestStruct";
 }
 
@@ -2216,7 +2216,7 @@ void TccStructTraits<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::
 
 namespace facebook::thrift::test {
 
-const char* AdaptTemplatedNestedTestStruct::__fbthrift_thrift_uri() {
+std::string_view AdaptTemplatedNestedTestStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/AdaptTemplatedNestedTestStruct";
 }
 
@@ -2330,7 +2330,7 @@ bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findValu
 }} // apache::thrift
 namespace facebook::thrift::test {
 
-const char* ThriftAdaptTestUnion::__fbthrift_thrift_uri() {
+std::string_view ThriftAdaptTestUnion::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/AdaptTestUnion";
 }
 
@@ -2447,7 +2447,7 @@ void TccStructTraits<::facebook::thrift::test::ThriftAdaptedStruct>::translateFi
 
 namespace facebook::thrift::test {
 
-const char* ThriftAdaptedStruct::__fbthrift_thrift_uri() {
+std::string_view ThriftAdaptedStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/AdaptedStruct";
 }
 
@@ -2531,7 +2531,7 @@ void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::t
 namespace facebook::thrift::test {
 namespace detail {
 
-const char* DirectlyAdaptedStruct::__fbthrift_thrift_uri() {
+std::string_view DirectlyAdaptedStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/DirectlyAdaptedStruct";
 }
 
@@ -2615,7 +2615,7 @@ void TccStructTraits<::facebook::thrift::test::StructFieldAdaptedStruct>::transl
 
 namespace facebook::thrift::test {
 
-const char* StructFieldAdaptedStruct::__fbthrift_thrift_uri() {
+std::string_view StructFieldAdaptedStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/StructFieldAdaptedStruct";
 }
 
@@ -2769,7 +2769,7 @@ void TccStructTraits<::facebook::thrift::test::CircularAdaptee>::translateFieldN
 
 namespace facebook::thrift::test {
 
-const char* CircularAdaptee::__fbthrift_thrift_uri() {
+std::string_view CircularAdaptee::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/CircularAdaptee";
 }
 
@@ -2870,7 +2870,7 @@ void TccStructTraits<::facebook::thrift::test::CircularStruct>::translateFieldNa
 
 namespace facebook::thrift::test {
 
-const char* CircularStruct::__fbthrift_thrift_uri() {
+std::string_view CircularStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/CircularStruct";
 }
 
@@ -2977,7 +2977,7 @@ void TccStructTraits<::facebook::thrift::test::ReorderedStruct>::translateFieldN
 
 namespace facebook::thrift::test {
 
-const char* ReorderedStruct::__fbthrift_thrift_uri() {
+std::string_view ReorderedStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/ReorderedStruct";
 }
 
@@ -3086,7 +3086,7 @@ void TccStructTraits<::facebook::thrift::test::detail::DeclaredAfterStruct>::tra
 namespace facebook::thrift::test {
 namespace detail {
 
-const char* DeclaredAfterStruct::__fbthrift_thrift_uri() {
+std::string_view DeclaredAfterStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/DeclaredAfterStruct";
 }
 
@@ -3154,7 +3154,7 @@ void TccStructTraits<::facebook::thrift::test::UnderlyingRenamedStruct>::transla
 
 namespace facebook::thrift::test {
 
-const char* UnderlyingRenamedStruct::__fbthrift_thrift_uri() {
+std::string_view UnderlyingRenamedStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/RenamedStruct";
 }
 
@@ -3237,7 +3237,7 @@ void TccStructTraits<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::t
 
 namespace facebook::thrift::test {
 
-const char* UnderlyingSameNamespaceStruct::__fbthrift_thrift_uri() {
+std::string_view UnderlyingSameNamespaceStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/SameNamespaceStruct";
 }
 
@@ -3321,7 +3321,7 @@ void TccStructTraits<::facebook::thrift::test::detail::HeapAllocated>::translate
 namespace facebook::thrift::test {
 namespace detail {
 
-const char* HeapAllocated::__fbthrift_thrift_uri() {
+std::string_view HeapAllocated::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/HeapAllocated";
 }
 
@@ -3389,7 +3389,7 @@ void TccStructTraits<::facebook::thrift::test::MoveOnly>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* MoveOnly::__fbthrift_thrift_uri() {
+std::string_view MoveOnly::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/MoveOnly";
 }
 
@@ -3482,7 +3482,7 @@ void TccStructTraits<::facebook::thrift::test::AlsoMoveOnly>::translateFieldName
 
 namespace facebook::thrift::test {
 
-const char* AlsoMoveOnly::__fbthrift_thrift_uri() {
+std::string_view AlsoMoveOnly::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/AlsoMoveOnly";
 }
 
@@ -3570,7 +3570,7 @@ void TccStructTraits<::facebook::thrift::test::ApplyAdapter>::translateFieldName
 
 namespace facebook::thrift::test {
 
-const char* ApplyAdapter::__fbthrift_thrift_uri() {
+std::string_view ApplyAdapter::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/ApplyAdapter";
 }
 
@@ -3638,7 +3638,7 @@ void TccStructTraits<::facebook::thrift::test::detail::TransitiveAdapted>::trans
 namespace facebook::thrift::test {
 namespace detail {
 
-const char* TransitiveAdapted::__fbthrift_thrift_uri() {
+std::string_view TransitiveAdapted::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/TransitiveAdapted";
 }
 
@@ -3706,7 +3706,7 @@ void TccStructTraits<::facebook::thrift::test::CountingStruct>::translateFieldNa
 
 namespace facebook::thrift::test {
 
-const char* CountingStruct::__fbthrift_thrift_uri() {
+std::string_view CountingStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/CountingStruct";
 }
 
@@ -3839,7 +3839,7 @@ void TccStructTraits<::facebook::thrift::test::Person>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Person::__fbthrift_thrift_uri() {
+std::string_view Person::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Person";
 }
 
@@ -3932,7 +3932,7 @@ void TccStructTraits<::facebook::thrift::test::Person2>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Person2::__fbthrift_thrift_uri() {
+std::string_view Person2::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Person2";
 }
 
@@ -4025,7 +4025,7 @@ void TccStructTraits<::facebook::thrift::test::Renamed>::translateFieldName(
 
 namespace facebook::thrift::test {
 
-const char* Renamed::__fbthrift_thrift_uri() {
+std::string_view Renamed::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/RenamedStructWithStructAdapterAndFieldAdapter";
 }
 

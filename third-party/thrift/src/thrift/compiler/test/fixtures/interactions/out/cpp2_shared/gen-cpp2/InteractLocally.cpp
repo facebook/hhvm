@@ -328,7 +328,7 @@ determineInvocationType:
 namespace thrift::shared_interactions {
 
 
-const char* InteractLocallyAsyncProcessor::getServiceName() {
+std::string_view InteractLocallyAsyncProcessor::getServiceName() {
   return "InteractLocally";
 }
 

@@ -36,7 +36,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
 
-const char* EmptyStruct::__fbthrift_thrift_uri() {
+std::string_view EmptyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct";
 }
 
@@ -103,7 +103,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
 
-const char* TestStruct::__fbthrift_thrift_uri() {
+std::string_view TestStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct";
 }
 

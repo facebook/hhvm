@@ -258,7 +258,7 @@ void AdapterServiceSvNull::count(::facebook::thrift::test::CountingStruct& /*_re
 void AdapterServiceSvNull::adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/) {  }
 
 
-const char* AdapterServiceAsyncProcessor::getServiceName() {
+std::string_view AdapterServiceAsyncProcessor::getServiceName() {
   return "AdapterService";
 }
 

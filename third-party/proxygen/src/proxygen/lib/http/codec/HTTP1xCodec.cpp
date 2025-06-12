@@ -317,7 +317,8 @@ void HTTP1xCodec::onParserError(const char* what) {
              parser_errno == HPE_CB_headers_complete) {
     error.setProxygenError(validationError_.value_or(kErrorParseHeader));
   } else if (parser_errno == HPE_INVALID_CHUNK_SIZE ||
-             parser_errno == HPE_HUGE_CHUNK_SIZE) {
+             parser_errno == HPE_HUGE_CHUNK_SIZE ||
+             parser_errno == HPE_STRICT) {
     error.setProxygenError(kErrorParseBody);
   } else {
     error.setProxygenError(kErrorUnknown);

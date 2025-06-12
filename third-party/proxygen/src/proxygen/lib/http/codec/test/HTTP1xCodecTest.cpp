@@ -664,7 +664,7 @@ TEST(HTTP1xCodecTest, TestMalformedChunkDelimiter) {
       .WillOnce(Invoke(
           [&](HTTPCodec::StreamID, std::shared_ptr<HTTPException> error, bool) {
             EXPECT_EQ(error->getHttpStatusCode(), 400);
-            EXPECT_EQ(error->getProxygenError(), kErrorUnknown);
+            EXPECT_EQ(error->getProxygenError(), kErrorParseBody);
           }));
 
   codec.onIngress(*buf);

@@ -96,8 +96,6 @@ DecodeError StructuredHeadersBuffer::parseNumber(StructuredHeaderItem& result) {
   } else {
     return parseFloat(input, result);
   }
-
-  return DecodeError::OK;
 }
 
 DecodeError StructuredHeadersBuffer::parseBoolean(

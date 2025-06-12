@@ -409,8 +409,8 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     Typing_dynamic_utils.strip_dynamic env shape_ty
   in
   match get_node stripped_shape_ty with
-  | Tnewtype (n, _, _)
-    when String.equal n Naming_special_names.Classes.cSupportDyn ->
+  | Tnewtype (n, _) when String.equal n Naming_special_names.Classes.cSupportDyn
+    ->
     let r = get_reason shape_ty in
     TUtils.make_supportdyn r env res
   | _ -> (env, res)
@@ -498,6 +498,13 @@ let to_collection env pos shape_ty res return_type =
         Typing_intersection.intersect_list env r tyl
 
       method! on_type env ty =
+        let ((env, _e1), ty) =
+          Typing_solver.expand_type_and_solve
+            ~description_of_expected:"a shape"
+            env
+            pos
+            ty
+        in
         match get_node ty with
         | Tdynamic ->
           (* This makes it so that to_collection on a dynamic value returns a dynamic
@@ -511,7 +518,11 @@ let to_collection env pos shape_ty res return_type =
           super#on_type env ty
           (* Look through bound on newtype, including supportdyn. We assume that
            * supportdyn has already been pushed into the type of unknown fields *)
-        | Tnewtype (_, _, ty) -> super#on_type env ty
+        | Tnewtype (c, tyl) ->
+          let (env, ty) =
+            Typing_utils.get_newtype_super env (get_reason ty) c tyl
+          in
+          super#on_type env ty
         | _ -> (env, res)
     end
   in
@@ -526,7 +537,9 @@ let to_dict env pos shape_ty res =
       shape_ty
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
-  let shape_ty = TUtils.get_base_type ~expand_supportdyn:true env shape_ty in
+  let (env, shape_ty) =
+    TUtils.get_base_type ~expand_supportdyn:true env shape_ty
+  in
   to_collection env pos shape_ty res (fun env r key value ->
       (env, MakeType.dict r key value))
 

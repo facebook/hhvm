@@ -77,7 +77,7 @@ and try_strip_dynamic
       Typing_solver.expand_type_for_strip_dynamic env ty
   in
   match get_node ty with
-  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+  | Tnewtype (name, [tyarg]) when String.equal name SN.Classes.cSupportDyn ->
     let (env, ty_opt) = try_strip_dynamic ~accept_intersections env tyarg in
     begin
       match ty_opt with
@@ -134,7 +134,7 @@ let rec recompose_like_type env orig_ty =
   | Tfun ft ->
     let (env, ft_ret) = recompose_like_type env ft.ft_ret in
     (env, mk (get_reason ty, Tfun { ft with ft_ret }))
-  | Tnewtype (n, [ty1], _) when String.equal n SN.Classes.cSupportDyn ->
+  | Tnewtype (n, [ty1]) when String.equal n SN.Classes.cSupportDyn ->
     let (env, ty1) = recompose_like_type env ty1 in
     Typing_utils.simple_make_supportdyn (get_reason ty) env ty1
   | _ -> (env, orig_ty)

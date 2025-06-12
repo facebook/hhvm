@@ -80,15 +80,16 @@ let bool r = prim_type r Nast.Tbool
 
 let string r = prim_type r Nast.Tstring
 
+let newtype r id tyl = mk (r, Tnewtype (id, tyl))
+
 (* Mirror of the classname.hhi definition. This sucks: the type of the ::class
  * constant is burned into decls at folding time so this supports the case when
  * you want to wrap a locl ty e.g. from [Typing.class_expr] in a classname.
  * TODO: eliminate the use site of this for CIexpr and make class_expr
  * produce a class type directly *)
-let typename r tyl = mk (r, Tnewtype (SN.Classes.cTypename, tyl, string r))
+let typename r tyl = newtype r SN.Classes.cTypename tyl
 
-let classname r tyl =
-  mk (r, Tnewtype (SN.Classes.cClassname, tyl, typename r tyl))
+let classname r tyl = newtype r SN.Classes.cClassname tyl
 
 let float r = prim_type r Nast.Tfloat
 
@@ -136,9 +137,9 @@ let locl_like r ty =
 
 let supportdyn r ty =
   match get_node ty with
-  | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
+  | Tnewtype (c, _) when String.equal c SN.Classes.cSupportDyn -> ty
   | Tunion [] -> ty
-  | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
+  | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty]))
 
 let supportdyn_nonnull r = supportdyn r (nonnull r)
 
@@ -158,8 +159,7 @@ let open_shape ~kind r map = shape r kind map
 
 let supportdyn_mixed r = supportdyn r (mixed r)
 
-let hh_formatstring r ty =
-  mk (r, Tnewtype (SN.Classes.cHHFormatString, [ty], mixed r))
+let hh_formatstring r ty = newtype r SN.Classes.cHHFormatString [ty]
 
 let resource r = prim_type r Nast.Tresource
 
@@ -201,10 +201,9 @@ let intersection r tyl =
   | [ty] -> ty
   | _ -> mk (r, Tintersection tyl)
 
-let function_ref r ty = mk (r, Tnewtype (SN.Classes.cFunctionRef, [ty], ty))
+let function_ref r ty = newtype r SN.Classes.cFunctionRef [ty]
 
-let label r ty_in ty_out =
-  mk (r, Tnewtype (SN.Classes.cEnumClassLabel, [ty_in; ty_out], mixed r))
+let label r ty_in ty_out = newtype r SN.Classes.cEnumClassLabel [ty_in; ty_out]
 
 let has_member r ~name ~ty ~class_id ~explicit_targs =
   ConstraintType

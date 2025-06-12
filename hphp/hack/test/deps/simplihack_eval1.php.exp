@@ -86,5 +86,17 @@ Type HH\Capabilities\WriteProperty -> Fun func,
                                       Type A,
                                       Type FunctionParam,
                                       Type Method
-Type HH\supportdyn -> Type ClassGeneric
+Type HH\FormatString -> Fun prompt
+Type HH\supportdyn -> Fun func,
+                      Fun functionParam,
+                      Fun prompt,
+                      Module Mod,
+                      Type ClassConstant,
+                      Type ClassField,
+                      Type ClassGeneric,
+                      Type Clazz,
+                      Type FunctionParam,
+                      Type Method,
+                      Type TypeAlias,
+                      Type TypeConstant
 Type Stringish -> Fun prompt

@@ -49,8 +49,7 @@ let expand_ty ?var_hook ?pos env ty =
         in
         mk (p, Ttuple { t_required = exp_tys t_required; t_extra })
       | (p, Tfun ft) -> mk (p, Tfun (exp_fun_type ft))
-      | (p, Tnewtype (n, tyl, ty)) ->
-        mk (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
+      | (p, Tnewtype (n, tyl)) -> mk (p, Tnewtype (n, exp_tys tyl))
       | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
       | (p, Tshape s) -> mk (p, Tshape (exp_shape_type s))
       | (p, Tvec_or_dict (ty1, ty2)) ->

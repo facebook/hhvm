@@ -41,8 +41,7 @@ let rec strip_ty ty =
             | Tsplat t_splat -> Tsplat (strip_ty t_splat));
         }
     | Toption ty -> Toption (strip_ty ty)
-    | Tnewtype (name, tparams, ty) ->
-      Tnewtype (name, strip_tyl tparams, strip_ty ty)
+    | Tnewtype (name, tparams) -> Tnewtype (name, strip_tyl tparams)
     | Tdependent (dep, ty) -> Tdependent (dep, strip_ty ty)
     | Tunion tyl -> Tunion (strip_tyl tyl)
     | Tintersection tyl -> Tintersection (strip_tyl tyl)

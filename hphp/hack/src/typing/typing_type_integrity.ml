@@ -24,8 +24,7 @@ module Locl_Inst = struct
         | Tclass (n, exact, existing_args) ->
           (* We could insist on existing_args = [] here unless we want to support partial application. *)
           Tclass (n, exact, existing_args @ args)
-        | Tnewtype (n, existing_args, bound) ->
-          Tnewtype (n, existing_args @ args, bound)
+        | Tnewtype (n, existing_args) -> Tnewtype (n, existing_args @ args)
         | Tgeneric n ->
           (* Same here *)
           Tgeneric n
@@ -118,10 +117,9 @@ module Locl_Inst = struct
           ft_tparams = tparams;
           ft_where_constraints = where_constraints;
         }
-    | Tnewtype (x, tyl, bound) ->
+    | Tnewtype (x, tyl) ->
       let tyl = List.map tyl ~f:(instantiate subst) in
-      let bound = instantiate subst bound in
-      Tnewtype (x, tyl, bound)
+      Tnewtype (x, tyl)
     | Tclass (x, exact, tyl) ->
       let tyl = List.map tyl ~f:(instantiate subst) in
       Tclass (x, exact, tyl)

@@ -62,15 +62,18 @@ let check_param : env -> Nast.fun_param -> unit =
              in August 2015 *)
           ()
         | Tlabel _ -> ()
-        | Tnewtype (id, _, _) when String.equal SN.Classes.cEnumClassLabel id ->
+        | Tnewtype (id, _) when String.equal SN.Classes.cEnumClassLabel id ->
           (* EnumClassLabels are memoizable *)
           ()
         (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
          * Bar recursively. Also enums represented using AKnewtype.
          *)
-        | Tnewtype (_, _, ty)
-        | Tdependent (_, ty) ->
+        | Tnewtype (n, tyl) ->
+          let (env, ty) =
+            Typing_utils.get_newtype_super env (get_reason ty) n tyl
+          in
           check_memoizable env ty
+        | Tdependent (_, ty) -> check_memoizable env ty
         (* Handling Tunion and Tintersection case here for completeness, even though it
          * shouldn't be possible to have an unresolved type when check_memoizableing
          * the method declaration. No corresponding test case for this.

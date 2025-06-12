@@ -88,12 +88,7 @@ impl std::fmt::Debug for Ty_ {
             Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),
             Tintersection(tys) => f.debug_tuple("Tintersection").field(tys).finish(),
             TvecOrDict(tk, tv) => f.debug_tuple("TvecOrDict").field(tk).field(tv).finish(),
-            Tnewtype(name, tys, constraint) => f
-                .debug_tuple("Tnewtype")
-                .field(name)
-                .field(tys)
-                .field(constraint)
-                .finish(),
+            Tnewtype(name, tys) => f.debug_tuple("Tnewtype").field(name).field(tys).finish(),
             Tdependent(dependent_type, ty) => f
                 .debug_tuple("Tdependent")
                 .field(dependent_type)

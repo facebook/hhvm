@@ -173,9 +173,5 @@ let type_pattern (_, p, e_) =
     let (s, flags) = check_and_strip_delimiters s in
     let match_type = type_match p s ~flags in
     let r = Reason.regex p in
-    mk
-      ( r,
-        Tnewtype
-          (Naming_special_names.Regex.tPattern, [match_type], MakeType.string r)
-      )
+    MakeType.newtype r Naming_special_names.Regex.tPattern [match_type]
   | _ -> failwith "Should have caught non-Ast_defs.String prefixed expression!"

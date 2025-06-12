@@ -111,12 +111,7 @@ class type ['a] locl_type_visitor_type =
     method on_tgeneric : 'a -> Typing_reason.t -> string -> 'a
 
     method on_tnewtype :
-      'a ->
-      Typing_reason.t ->
-      string ->
-      Typing_defs.locl_ty list ->
-      Typing_defs.locl_ty ->
-      'a
+      'a -> Typing_reason.t -> string -> Typing_defs.locl_ty list -> 'a
 
     method on_tdependent :
       'a ->

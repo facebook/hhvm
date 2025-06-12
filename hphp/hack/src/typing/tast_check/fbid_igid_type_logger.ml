@@ -16,14 +16,13 @@ module SN = Naming_special_names
 
 let name ty =
   match T.get_node ty with
-  | T.Tnewtype (s, _, _) -> s
+  | T.Tnewtype (s, _) -> s
   | T.Tprim tp -> A.string_of_tprim tp
   | _ -> ""
 
 let is_int ty = Typing_defs.is_prim Aast.Tint ty
 
 let is_igid_of_meta_ent_instagram_user env ty =
-  let bound = TM.mixed TR.none in
   let meta_ent_instagram_user =
     TM.class_type TR.none "\\IMETAEntInstagramUser" []
   in
@@ -31,13 +30,11 @@ let is_igid_of_meta_ent_instagram_user env ty =
   let base_igid =
     T.mk
       ( TR.none,
-        T.Tnewtype
-          ("\\BaseIGID", [meta_ent_instagram_user; in_igid_range], bound) )
+        T.Tnewtype ("\\BaseIGID", [meta_ent_instagram_user; in_igid_range]) )
   in
   Tast_env.is_sub_type env ty base_igid
 
 let is_fbid_of_meta_ent_instagram_user env ty =
-  let bound = TM.mixed TR.none in
   let meta_ent_instagram_user =
     TM.class_type TR.none "\\IMETAEntInstagramUser" []
   in
@@ -48,8 +45,7 @@ let is_fbid_of_meta_ent_instagram_user env ty =
       ( TR.none,
         T.Tnewtype
           ( "\\BaseFBID",
-            [meta_ent_instagram_user; in_fbid_range; fbid_forbids_zero],
-            bound ) )
+            [meta_ent_instagram_user; in_fbid_range; fbid_forbids_zero] ) )
   in
   Tast_env.is_sub_type env ty base_fbid
 
@@ -59,15 +55,14 @@ let is_fbid_of_meta_ent_instagram_user env ty =
      FBID_FORBIDS_ZERO
    > *)
 let is_fbid_or_igid_of_media_id env ty =
-  let bound = TM.mixed TR.none in
   let media_ent = TM.class_type TR.none "\\IGEntMedia" [] in
   let in_oid_range = TM.class_type TR.none "\\IN_OID_RANGE" [] in
   let fbid_forbids_zero = TM.class_type TR.none "\\FBID_FORBIDS_ZERO" [] in
   let base_media_id =
     T.mk
       ( TR.none,
-        T.Tnewtype
-          ("\\BaseFBID", [media_ent; in_oid_range; fbid_forbids_zero], bound) )
+        T.Tnewtype ("\\BaseFBID", [media_ent; in_oid_range; fbid_forbids_zero])
+      )
   in
   Tast_env.is_sub_type env ty base_media_id
 

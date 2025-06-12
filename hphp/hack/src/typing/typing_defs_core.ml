@@ -383,7 +383,7 @@ and _ ty_ =
         * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tvar : (Tvid.t[@transform.opaque]) -> locl_phase ty_
-  | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
+  | Tnewtype : string * locl_phase ty list -> locl_phase ty_
       (** The type of an opaque type or enum. Outside their defining files or
         when they represent enums, they are "opaque", which means that they
         only unify with themselves. Within a file, uses of newtypes are
@@ -652,13 +652,11 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tvar@ ";
       Tvid.pp fmt a0;
       Format.fprintf fmt "@])"
-    | Tnewtype (a0, a1, a2) ->
+    | Tnewtype (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tnewtype (@,";
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt ",@ ";
       pp_list pp_ty fmt a1;
-      Format.fprintf fmt ",@ ";
-      pp_ty fmt a2;
       Format.fprintf fmt "@,))@]"
     | Tdependent (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tdependent@ ";
@@ -1006,12 +1004,9 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
     | (Ttuple t1, Ttuple t2) -> tuple_type_compare t1 t2
     | (Tgeneric n1, Tgeneric n2) -> String.compare n1 n2
-    | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) -> begin
+    | (Tnewtype (id, tyl), Tnewtype (id2, tyl2)) -> begin
       match String.compare id id2 with
-      | 0 ->
-        (match tyl_compare ~sort:false tyl tyl2 with
-        | 0 -> ty_compare cstr1 cstr2
-        | n -> n)
+      | 0 -> tyl_compare ~sort:false tyl tyl2
       | n -> n
     end
     | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) -> begin
@@ -1737,13 +1732,11 @@ module Locl_subst = struct
     | (r, Tfun fun_ty) -> mk (r, Tfun (apply_fun fun_ty ~subst ~combine_reasons))
     | (r, Tshape shape_ty) ->
       mk (r, Tshape (apply_shape shape_ty ~subst ~combine_reasons))
-    | (r, Tnewtype (nm, ty_params, ty_bound)) ->
+    | (r, Tnewtype (nm, ty_params)) ->
       mk
         ( r,
-          Tnewtype
-            ( nm,
-              List.map ty_params ~f:(apply_ty ~subst ~combine_reasons),
-              apply_ty ty_bound ~subst ~combine_reasons ) )
+          Tnewtype (nm, List.map ty_params ~f:(apply_ty ~subst ~combine_reasons))
+        )
     | (r, Tdependent (dep_ty, ty)) ->
       mk (r, Tdependent (dep_ty, apply_ty ty ~subst ~combine_reasons))
     | (r, Tclass (id, exact, tys)) ->
@@ -1888,11 +1881,7 @@ module Find_locl = struct
         | None -> find_first_ty ty_args ~p
         | res -> res
       end
-      | Tnewtype (_, ty_args, ty_bound) -> begin
-        match find_first_ty ty_args ~p with
-        | None -> find_ty ty_bound ~p
-        | res -> res
-      end
+      | Tnewtype (_, ty_args) -> find_first_ty ty_args ~p
       | Ttuple tuple_ty -> find_tuple tuple_ty ~p
       | Tfun fun_ty -> find_fun fun_ty ~p
       | Tshape shape_ty -> find_shape shape_ty ~p

@@ -252,7 +252,7 @@ module Full = struct
   let rec is_supportdyn_mixed : type a. penv -> a ty -> bool =
    fun env t ->
     match get_node t with
-    | Tnewtype (n, [ty], _)
+    | Tnewtype (n, [ty])
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv env) ->
       is_supportdyn_mixed env ty
@@ -905,7 +905,7 @@ module Full = struct
 
   let rec is_open_mixed env t =
     match get_node t with
-    | Tnewtype (n, _, ty)
+    | Tnewtype (n, [ty])
       when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env) ->
       is_open_mixed env ty
     | Toption t ->
@@ -1032,14 +1032,14 @@ module Full = struct
       end
       | _ -> (fuel, to_doc s)
     end
-    | Tnewtype (s, [], _)
+    | Tnewtype (s, [])
     | Tgeneric s ->
       (fuel, to_doc s)
-    | Tnewtype (n, [ty], _)
+    | Tnewtype (n, [ty])
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
       k ~fuel ty
-    | Tnewtype (s, tyl, _) ->
+    | Tnewtype (s, tyl) ->
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
@@ -1459,7 +1459,7 @@ module Full = struct
     in
     match (occurrence, get_node x) with
     | ( SymbolOccurrence.{ type_ = Function | Method _; _ },
-        Tnewtype (name, [tyarg], _) )
+        Tnewtype (name, [tyarg]) )
       when String.equal name SN.Classes.cSupportDyn ->
       if show_supportdyn env then
         (add_prefix prefix, tyarg)
@@ -1687,16 +1687,16 @@ module ErrorString = struct
     | Tgeneric _ ->
       let (fuel, ty_str) = ety_to_string ety in
       (fuel, "a value of generic type " ^ ty_str)
-    | Tnewtype (n, [ty], _)
+    | Tnewtype (n, [ty])
       when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env) ->
       type_ ~fuel env ty
-    | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cClassname ->
+    | Tnewtype (x, [ty]) when String.equal x SN.Classes.cClassname ->
       let (fuel, ty_str) = ety_to_string ty in
       (fuel, "a classname string for " ^ ty_str)
     | Tclass_ptr ty ->
       let (fuel, ty_str) = ety_to_string ty in
       (fuel, "a class pointer for " ^ ty_str)
-    | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cTypename ->
+    | Tnewtype (x, [ty]) when String.equal x SN.Classes.cTypename ->
       let (fuel, ty_str) = ety_to_string ty in
       (fuel, "a typename string for " ^ ty_str)
     | Tnewtype _ ->

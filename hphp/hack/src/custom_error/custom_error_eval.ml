@@ -194,7 +194,7 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
       Match.(
         matches_name patt_name ~scrut:name ~env >>= fun env ->
         aux_params patt_params tys ~env)
-    | (Apply { patt_name; patt_params }, Ty.Tnewtype (id, tys, _)) ->
+    | (Apply { patt_name; patt_params }, Ty.Tnewtype (id, tys)) ->
       Match.(
         matches_name patt_name ~scrut:(ty_pos, id) ~env >>= fun env ->
         aux_params patt_params tys ~env)

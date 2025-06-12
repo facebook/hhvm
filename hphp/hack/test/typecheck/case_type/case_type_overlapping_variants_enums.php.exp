@@ -2,17 +2,17 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-1
 Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
   This is the type `StrOpaque`, which includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
     via the constraint on the enum `StrOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
   It overlaps with `IntOpaque`, which also includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
     via the constraint on the enum `IntOpaque` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
 Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
   This is the type `StrOpaque`, which includes **strings** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
     via the constraint on the enum `StrOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
   It overlaps with `StrEnum`, which also includes **strings**
@@ -22,7 +22,7 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-1
 Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
   This is the type `StrOpaque`, which includes **strings** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
     via the constraint on the enum `StrOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
   It overlaps with `string`, which also includes **strings**
@@ -30,7 +30,7 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-1
 Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
   This is the type `IntOpaque`, which includes **strings** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
     via the constraint on the enum `IntOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
   It overlaps with `StrEnum`, which also includes **strings**
@@ -40,7 +40,7 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-1
 Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
   This is the type `IntOpaque`, which includes **strings** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
     via the constraint on the enum `IntOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
   It overlaps with `string`, which also includes **strings**
@@ -56,17 +56,17 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-1
 Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
   This is the type `StrOpaque`, which includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
     via the constraint on the enum `StrOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
   It overlaps with `IntOpaque`, which also includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
     via the constraint on the enum `IntOpaque` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
 Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
   This is the type `StrOpaque`, which includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
     via the constraint on the enum `StrOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
   It overlaps with `IntEnum`, which also includes **ints**
@@ -76,7 +76,7 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-1
 Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
   This is the type `StrOpaque`, which includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
     via the constraint on the enum `StrOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
   It overlaps with `int`, which also includes **ints**
@@ -84,7 +84,7 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-1
 Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
   This is the type `IntOpaque`, which includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
     via the constraint on the enum `IntOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
   It overlaps with `IntEnum`, which also includes **ints**
@@ -94,7 +94,7 @@ ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-1
 Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
   This is the type `IntOpaque`, which includes **ints** because arraykeys are ints or strings
-  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
+  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
     via the constraint on the enum `IntOpaque` arising from an implicit `as arraykey` constraint on this type
   File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
   It overlaps with `int`, which also includes **ints**

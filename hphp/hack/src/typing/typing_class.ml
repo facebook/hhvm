@@ -1157,7 +1157,7 @@ let class_const_def ~in_enum_class c cls env cc =
       let opt_ty =
         if in_enum_class then
           match get_node ty with
-          | Tnewtype (memberof, [_; et_type], _)
+          | Tnewtype (memberof, [_; et_type])
             when String.equal memberof SN.Classes.cMemberOf ->
             et_type
           | _ -> ty
@@ -1210,10 +1210,10 @@ let class_const_def ~in_enum_class c cls env cc =
       in
       let (te, ty') =
         match deref hint_ty with
-        | (r, Tnewtype (memberof, [enum_name; _], def_ty))
+        | (r, Tnewtype (memberof, [enum_name; def_ty]))
           when String.equal memberof SN.Classes.cMemberOf ->
           check_class env e def_ty;
-          let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
+          let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty])) in
           let (te_ty, p, te) = te in
           let te = (lift (get_reason te_ty) te_ty, p, te) in
           let ty' = lift r ty' in

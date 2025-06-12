@@ -120,7 +120,7 @@ let check_happly unchecked_tparams env h =
   let (env, hint_pos, locl_ty) = loclty_of_hint unchecked_tparams env h in
   let (env, ty_err_opt) =
     match get_node locl_ty with
-    | Tnewtype (name, targs, _)
+    | Tnewtype (name, targs)
     | Tclass ((_, name), _, targs) ->
       let tparams = Env.get_class_or_typedef_tparams env name in
       check_tparams_constraints env hint_pos tparams targs

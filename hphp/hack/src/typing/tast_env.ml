@@ -177,8 +177,12 @@ let get_receiver_ids env ty =
     match get_node ty with
     | Tclass ((_, cid), _, tyl) -> RIclass (cid, tyl) :: acc
     | Toption ty
-    | Tdependent (_, ty)
-    | Tnewtype (_, _, ty) ->
+    | Tdependent (_, ty) ->
+      aux seen acc ty
+    | Tnewtype (n, tyargs) ->
+      let (_env, ty) =
+        Typing_utils.get_newtype_super env (get_reason ty) n tyargs
+      in
       aux seen acc ty
     | Tunion tys
     | Tintersection tys ->
@@ -208,8 +212,7 @@ let get_label_receiver_ty env ty =
         ( Reason.none,
           Tnewtype
             ( Naming_special_names.Classes.cEnumClassLabel,
-              [ty_in; Typing_make_type.nothing Reason.none],
-              Typing_make_type.mixed Reason.none ) ))
+              [ty_in; Typing_make_type.nothing Reason.none] ) ))
   in
   let env = Typing_env.set_tyvar_variance ~flip:true env label_ty in
   let (env, _) = Typing_subtype.sub_type env label_ty ty None in

@@ -406,28 +406,27 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                 intersect_lists env rec_tracker r tyl1 tyl2
               (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is
                * a type variable, else we end up with recursion in constraints. *)
-              | ((r, Tnewtype (name1, [ty1arg], _)), _)
+              | ((r, Tnewtype (name1, [ty1arg])), _)
                 when String.equal name1 Naming_special_names.Classes.cSupportDyn
                      && not (is_tyvar ty2) ->
                 let (env, ty) = intersect ~r env rec_tracker ty1arg ty2 in
                 let (env, res) = Utils.simple_make_supportdyn r env ty in
                 (env, res)
-              | (_, (r, Tnewtype (name1, [ty2arg], _)))
+              | (_, (r, Tnewtype (name1, [ty2arg])))
                 when String.equal name1 Naming_special_names.Classes.cSupportDyn
                      && not (is_tyvar ty1) ->
                 let (env, ty) = intersect ~r env rec_tracker ty1 ty2arg in
                 let (env, res) = Utils.simple_make_supportdyn r env ty in
                 (env, res)
               (* If class<T> <: classname<T>, class<U> & classname<V> -> classname<U & V> *)
-              | ((_, Tnewtype (cn, [ty_cn], _)), (_, Tclass_ptr ty_c))
-              | ((_, Tclass_ptr ty_c), (_, Tnewtype (cn, [ty_cn], _)))
+              | ((_, Tnewtype (cn, [ty_cn])), (_, Tclass_ptr ty_c))
+              | ((_, Tclass_ptr ty_c), (_, Tnewtype (cn, [ty_cn])))
                 when TypecheckerOptions.class_sub_classname (Env.get_tcopt env)
                      && String.equal cn Naming_special_names.Classes.cClassname
                 ->
                 let (env, ty) = intersect ~r env rec_tracker ty_c ty_cn in
                 (env, MkType.classname r [ty])
-              | ( (_, Tnewtype (cn1, [ty_cn1], _)),
-                  (_, Tnewtype (cn2, [ty_cn2], _)) )
+              | ((_, Tnewtype (cn1, [ty_cn1])), (_, Tnewtype (cn2, [ty_cn2])))
                 when String.equal cn1 Naming_special_names.Classes.cClassname
                      && String.equal cn2 Naming_special_names.Classes.cClassname
                 ->
@@ -518,7 +517,7 @@ and try_simplifying_case_type
     env rec_tracker ~(case_type : locl_ty) ~(intersect_ty : locl_ty) :
     Typing_env_types.env * locl_ty option =
   match deref case_type with
-  | (r, Tnewtype (name, ty_args, _)) ->
+  | (r, Tnewtype (name, ty_args)) ->
     let (env, variants_opt) =
       Typing_case_types.get_variant_tys env name ty_args
     in

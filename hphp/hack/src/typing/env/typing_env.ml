@@ -1633,7 +1633,7 @@ and get_tyvars_i env (ty : internal_type) =
         Tvid.Set.union
           implicit_params_negative
           (Tvid.Set.union ret_negative params_negative) )
-    | Tnewtype (name, tyl, _) ->
+    | Tnewtype (name, tyl) ->
       if List.is_empty tyl then
         (env, Tvid.Set.empty, Tvid.Set.empty)
       else begin

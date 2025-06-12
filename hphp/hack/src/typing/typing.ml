@@ -2142,12 +2142,12 @@ let get_bound_ty_for_lvar env e =
     (Typing_env.get_local env lid).Typing_local_types.bound_ty
   | _ -> None
 
-let make_function_ref ~contains_generics env p ty =
+let make_function_ref ~contains_generics env ty =
   if
     (not contains_generics)
     && TCO.enable_function_references (Env.get_tcopt env)
   then
-    MakeType.function_ref (Reason.witness p) ty
+    MakeType.function_ref (Reason.witness_from_decl (get_pos ty)) ty
   else
     ty
 
@@ -2312,7 +2312,7 @@ let safely_refine_class_type
            || Cls.has_ancestor class_info name
            || Cls.requires_ancestor class_info name ->
       true
-    | Tnewtype (name, tyl, _) ->
+    | Tnewtype (name, tyl) ->
       (* For case types we want to open the union, filtering it to only the
        * variant types that share the same data type as [obj_ty] *)
       let (env, variants_opt) =
@@ -3759,7 +3759,6 @@ end = struct
             make_function_ref
               ~contains_generics:(not (List.is_empty fty.ft_tparams))
               env
-              p
               ty
           in
           make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty
@@ -4992,10 +4991,10 @@ end = struct
                  {
                    name;
                    ty =
-                     mk
-                       ( Reason.witness p,
-                         Tnewtype (SN.Classes.cMemberOf, [ty_in; ty_out], ty_out)
-                       );
+                     MakeType.newtype
+                       (Reason.witness p)
+                       SN.Classes.cMemberOf
+                       [ty_in; ty_out];
                  } ))
       in
       let env = Env.set_tyvar_variance_i env has_const in
@@ -5012,12 +5011,7 @@ end = struct
       let errs = Option.merge err ty_err ~f:Typing_error.both in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
       let r = Reason.witness p in
-      let ty =
-        mk
-          ( r,
-            Tnewtype
-              (SN.Classes.cEnumClassLabel, [ty_in; ty_out], MakeType.mixed r) )
-      in
+      let ty = MakeType.newtype r SN.Classes.cEnumClassLabel [ty_in; ty_out] in
       make_result env p (Aast.EnumClassLabel (Some enum_name, name)) ty
     | Package ((p, _) as id) ->
       make_result env p (Aast.Package id) (MakeType.bool (Reason.witness p))
@@ -7465,7 +7459,7 @@ end = struct
                   Typing_reason.(flow_call ~def ~use:(witness expr_pos))))
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
-        | (r, Tnewtype (name, [ty], _))
+        | (r, Tnewtype (name, [ty]))
           when String.equal name SN.Classes.cSupportDyn ->
           (* Under extended-reasons we want to use the reason on the newtype since this is
              the type at which we recorded the contravariant flow from the decl *)
@@ -8214,11 +8208,7 @@ end = struct
       (* All function pointers are readonly since they don't capture any values *)
       let (env, fpty) = set_capture_only_readonly env fpty in
       let fpty =
-        make_function_ref
-          ~contains_generics:(not (List.is_empty tal))
-          env
-          pos
-          fpty
+        make_function_ref ~contains_generics:(not (List.is_empty tal)) env fpty
       in
       make_result
         env
@@ -8234,7 +8224,6 @@ end = struct
         make_function_ref
           ~contains_generics:(not (List.is_empty ty_args))
           env
-          pos
           ty
       in
       make_result env pos (FunctionPointer (FP_id fun_id, ty_args)) ty
@@ -9014,7 +9003,7 @@ end = struct
       | Tdynamic -> (env, acc)
       | Tunion tyl ->
         List.fold_left_env env tyl ~init:acc ~f:find_unsupported_tys
-      | Tnewtype (name, _, _) -> begin
+      | Tnewtype (name, _) -> begin
         match Env.get_typedef env name with
         | Decl_entry.Found
             { td_type_assignment = CaseType (variant, variants); _ } ->
@@ -10638,11 +10627,18 @@ end = struct
           ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
             (ty, err_res) )
         in
-        let base_ty = TUtils.get_base_type env ty in
+        let (env, base_ty) = TUtils.get_base_type env ty in
+        let ((env, _ty_err1), base_ty) =
+          Typing_solver.expand_type_and_solve
+            ~description_of_expected:"an object"
+            env
+            p
+            base_ty
+        in
         match deref base_ty with
-        | (_, Tnewtype (classname, [the_cls], as_ty))
+        | (_, Tnewtype (classname, [the_cls]))
           when String.equal classname SN.Classes.cClassname ->
-          let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
+          let wrap ty = mk (Reason.none, Tnewtype (classname, [ty])) in
           let ((env, ty_err), (cls_ty, err_res)) =
             resolve_class_pointer env wrap the_cls
           in
@@ -10796,7 +10792,8 @@ end = struct
           (* Instantiation on an abstract class (e.g. from classname<T>) is
            * via the base type (to check constructor args), but the actual
            * type `ty` must be preserved. *)
-          (match get_node (TUtils.get_base_type env ty) with
+          let (env, base_ty) = TUtils.get_base_type env ty in
+          (match get_node base_ty with
           | Tdynamic -> get_info (`Dynamic :: res) tyl
           | Tclass (sid, _, _) ->
             let class_ = Env.get_class env (snd sid) in
@@ -12219,7 +12216,22 @@ end = struct
         Inter.intersect_list env (get_reason cty) (List.map ~f:fst pairs)
       in
       (env, (ty, []), rval_err)
-    | (_, Tnewtype (_, _, ty))
+    | (r, Tnewtype (n, tyargs)) ->
+      let (env, ty) = Typing_utils.get_newtype_super env r n tyargs in
+      class_get_inner
+        ~is_method
+        ~is_const
+        ~transform_fty
+        ~this_ty
+        ~explicit_targs
+        ~incl_tc
+        ~coerce_from_ty
+        ~is_function_pointer
+        ~is_attribute_param
+        env
+        cid
+        ty
+        (p, mid)
     | (_, Tdependent (_, ty)) ->
       class_get_inner
         ~is_method

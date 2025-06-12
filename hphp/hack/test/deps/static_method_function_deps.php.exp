@@ -13,4 +13,5 @@ Type HH\Capabilities\WriteProperty -> Fun bar,
                                       Type A,
                                       Type C,
                                       Type I
+Type HH\supportdyn -> Fun bar, Fun foo, Type A, Type C
 Type I -> Fun bar, Fun foo, Type C

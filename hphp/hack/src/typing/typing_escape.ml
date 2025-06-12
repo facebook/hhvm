@@ -315,10 +315,10 @@ and refresh_type renv v ty_orig =
   | (r, Taccess (ty1, id)) ->
     let (renv, ty1, ch1) = refresh_type renv Ast_defs.Invariant ty1 in
     (renv, mk (r, Taccess (ty1, id)), ch1)
-  | (r, Tnewtype (name, l, bnd)) ->
+  | (r, Tnewtype (name, l)) ->
     let tparams = Env.get_class_or_typedef_tparams env name in
     let (renv, l, ch) = refresh_types_w_variance renv v tparams l in
-    (renv, mk (r, Tnewtype (name, l, bnd)), ch)
+    (renv, mk (r, Tnewtype (name, l)), ch)
   | (r, Tclass ((p, cid), e, l)) ->
     let tparams = Env.get_class_or_typedef_tparams env cid in
     let (renv, l, ch) = refresh_types_w_variance renv v tparams l in

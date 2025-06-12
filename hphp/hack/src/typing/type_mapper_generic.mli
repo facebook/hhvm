@@ -71,7 +71,6 @@ class type ['env] type_mapper_type =
       Typing_reason.t ->
       string ->
       Typing_defs.locl_ty list ->
-      Typing_defs.locl_ty ->
       'env * Typing_defs.locl_ty
 
     method on_tdependent :

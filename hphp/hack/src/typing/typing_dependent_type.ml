@@ -146,10 +146,9 @@ module ExprDepTy = struct
       | (r, Toption ty) ->
         let (env, ty) = make ~seen env ty in
         (env, mk (r, Toption ty))
-      | (r, Tnewtype (n, p, ty)) ->
-        let (env, ty) = make ~seen env ty in
-        (env, mk (r, Tnewtype (n, p, ty)))
-      | (_, Tdependent (_, _)) -> (env, ty)
+      | (_, Tnewtype _)
+      | (_, Tdependent _) ->
+        (env, ty)
       | (r, Tunion tyl) ->
         let (env, tyl) = List.fold_map tyl ~init:env ~f:(make ~seen) in
         (env, mk (r, Tunion tyl))

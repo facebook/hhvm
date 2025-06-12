@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7d483c1f95c5b6ccd78b33a08befef45>>
+// @generated SignedSource<<f149ecfd48d517417ec9bd4c51597b3f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -795,7 +795,7 @@ pub enum Ty_ {
     /// When the constraint is omitted, the third parameter is set to mixed.
     ///
     /// The second parameter is the list of type arguments to the type.
-    Tnewtype(String, Vec<Ty>, Ty),
+    Tnewtype(String, Vec<Ty>),
     /// see dependent_type
     Tdependent(DependentType, Ty),
     /// An instance of a class or interface, ty list are the arguments

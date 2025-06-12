@@ -4,3 +4,4 @@ Type HH\Contexts\Unsafe\globals -> Fun B
 Type HH\Contexts\Unsafe\read_globals -> Fun A
 Type HH\Contexts\globals -> Fun B
 Type HH\Contexts\read_globals -> Fun A, Fun B
+Type HH\supportdyn -> Fun B

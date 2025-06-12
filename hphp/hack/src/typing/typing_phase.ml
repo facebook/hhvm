@@ -868,7 +868,8 @@ and localize_class_instantiation
            *)
           ((env, None, []), mk (r, Tclass (sid, nonexact, [])))
         else
-          let ((env, err, cycles), cstr) =
+          (* We only look at the bound here for cycle detection *)
+          let ((env, err, cycles), _cstr) =
             match Env.get_enum_constraint env name with
             (* If not specified, default bound is arraykey *)
             | Decl_entry.DoesNotExist
@@ -879,7 +880,7 @@ and localize_class_instantiation
                   (Reason.implicit_upper_bound (pos, "arraykey")) )
             | Decl_entry.Found (Some ty) -> localize ~ety_env env ty
           in
-          let enum_ty = mk (r, Tnewtype (name, [], cstr)) in
+          let enum_ty = mk (r, Tnewtype (name, [])) in
           let r_dyn = r in
           let enum_ty =
             if ety_env.ish_weakening then
@@ -919,15 +920,8 @@ and localize_class_instantiation
         let new_r =
           Reason.opaque_type_from_module (Cls.pos class_info, callee_module, r)
         in
-        let cstr = MakeType.mixed new_r in
-        (* If the class supports dynamic, reveal this in the newtype *)
-        let cstr =
-          if Cls.get_support_dynamic_type class_info then
-            MakeType.supportdyn new_r cstr
-          else
-            cstr
-        in
-        ((env, err, cycles), mk (new_r, Tnewtype (name, tyl, cstr)))
+        let ty = mk (new_r, Tnewtype (name, tyl)) in
+        ((env, err, cycles), ty)
 
 and localize_typedef_instantiation
     ~ety_env env (r : Reason.t) type_name tyargs (typedef_info : _ option) =
@@ -943,7 +937,8 @@ and localize_typedef_instantiation
         tyargs
         nkinds
     in
-    let ((env, e2, cycles_td), lty) =
+    let TUtils.{ env; ty_err_opt = e2; cycles = cycles_td; ty = lty; bound = _ }
+        =
       TUtils.expand_typedef ety_env env r type_name tyargs
     in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in

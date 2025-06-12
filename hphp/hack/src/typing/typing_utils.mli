@@ -7,16 +7,21 @@
  *)
 open Hh_prelude
 
+type expand_typedef_result = {
+  env: Typing_env_types.env;
+  ty_err_opt: Typing_error.t option;
+  cycles: Type_expansions.cycle_reporter list;
+  ty: Typing_defs.locl_ty;
+  bound: Typing_defs.locl_ty;
+}
+
 type expand_typedef =
   Typing_defs.expand_env ->
   Typing_env_types.env ->
   Typing_reason.t ->
   string ->
   Typing_defs.locl_ty list ->
-  (Typing_env_types.env
-  * Typing_error.t option
-  * Type_expansions.cycle_reporter list)
-  * Typing_defs.locl_ty
+  expand_typedef_result
 
 val expand_typedef_ref : expand_typedef ref
 
@@ -217,7 +222,7 @@ val get_base_type :
   ?expand_supportdyn:bool ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_defs.locl_ty
+  Typing_env_types.env * Typing_defs.locl_ty
 
 val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 
@@ -522,3 +527,10 @@ val get_case_type_variants_as_type :
   Typing_defs.typedef_case_type_variant ->
   Typing_defs.typedef_case_type_variant list ->
   Typing_defs.decl_ty
+
+val get_newtype_super :
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  string ->
+  Typing_defs.locl_ty list ->
+  Typing_env_types.env * Typing_defs.locl_ty

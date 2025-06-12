@@ -58,12 +58,12 @@ let derive_instantiation
     | (Tapply ((_, lname), [ty]), _)
       when String.equal lname Naming_special_names.Classes.cSupportDyn ->
       derive_instantiation ty instantiated (env, subst_acc)
-    | (_, Tnewtype (rname, [ty], _))
+    | (_, Tnewtype (rname, [ty]))
       when String.equal rname Naming_special_names.Classes.cSupportDyn ->
       derive_instantiation uninstantiated ty (env, subst_acc)
     (* All other recursive cases *)
     | ( Tapply ((_, lname), ltargs),
-        (Tclass ((_, rname), _, rtargs) | Tnewtype (rname, rtargs, _)) )
+        (Tclass ((_, rname), _, rtargs) | Tnewtype (rname, rtargs)) )
       when String.equal lname rname ->
       derive_instantiation_list ltargs rtargs (env, subst_acc)
     | (Trefinement (ty, _), _) ->

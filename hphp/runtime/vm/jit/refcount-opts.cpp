@@ -539,6 +539,7 @@ namespace {
 TRACE_SET_MOD(hhir_refcount)
 
 //////////////////////////////////////////////////////////////////////
+const int32_t kMaxReferences = std::numeric_limits<int32_t>::max();
 
 // Helper for removing instructions in the rest of this file---if a debugging
 // mode is enabled, it will replace it with a debugging instruction if
@@ -637,6 +638,12 @@ struct ASetInfo {
    * some subtleties here.
    */
   int32_t lower_bound{0};
+
+  /*
+   * An upper bound of the actual reference count of the object that this alias
+   * set refers to.
+   */
+  int32_t upper_bound{kMaxReferences};
 
   /*
    * Sometimes we know the refcount is higher than we've been able to
@@ -1483,6 +1490,7 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     // All reference count bounds are non-negative.
     always_assert(set.unsupported_refs >= 0);
     always_assert(set.lower_bound >= set.unsupported_refs);
+    always_assert(set.upper_bound >= set.lower_bound);
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
@@ -1534,6 +1542,7 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
   auto changed = false;
 
   auto const lower_bound = std::min(dst.lower_bound, src.lower_bound);
+  auto const upper_bound = std::max(dst.upper_bound, src.upper_bound);
 
   /*
    * We're going to reduce the memory support to the intersection of
@@ -1576,6 +1585,16 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
     } else {
       dst.lower_bound = lower_bound;
     }
+    changed = true;
+  }
+
+  if (dst.upper_bound != upper_bound) {
+    /*
+     * If there's a cycle, we will still converge to kMaxReferences, 
+     * albeit rather slowly - after going through kMaxReferences iterations.
+     * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
+     */
+    dst.upper_bound = is_back_edge ? kMaxReferences : upper_bound;
     changed = true;
   }
 
@@ -1662,6 +1681,7 @@ bool is_same(const RCState &dstState, const RCState& srcState) {
     auto& src = srcState.asets[asetID];
 
     if (dst.lower_bound != src.lower_bound ||
+        dst.upper_bound != src.upper_bound ||
         dst.unsupported_refs != src.unsupported_refs ||
         dst.memory_support != src.memory_support) {
       return false;
@@ -1728,6 +1748,7 @@ void observe_unbalanced_decrefs(Env& env, RCState& state, PreAdder add_node) {
 void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
                    PreAdder add_node) {
   auto& aset = state.asets[asetID];
+  aset.upper_bound = kMaxReferences;
   if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
@@ -1737,7 +1758,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
     [&](size_t id) { state.support_map[id] = -1; }
   );
   aset.memory_support.reset();
-  add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
+  add_node(asetID, NReq{kMaxReferences});
 }
 
 void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
@@ -1745,6 +1766,19 @@ void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
   observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     pessimize_one(env, state, asetID, add_node);
+  }
+}
+
+void pessimize_upper_bound_one_aset(Env& /*env*/, RCState& state, ASetID asetID) {
+  auto& aset = state.asets[asetID];
+  FTRACE(2, "      {} upper bound pessimized\n", asetID);
+  aset.upper_bound = kMaxReferences;
+}
+
+void pessimize_upper_bound_all_asets(Env& env, RCState& state) {
+  FTRACE(3, "    pessimize_all_upper_bounds\n");
+  for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
+    pessimize_upper_bound_one_aset(env, state, asetID);
   }
 }
 
@@ -1786,8 +1820,35 @@ void observe_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_all\n");
   observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
-    add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
+    add_node(asetID, NReq{kMaxReferences});
   }
+}
+
+void decrease_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
+  auto& aset = state.asets[asetID];
+  aset.upper_bound--;
+  assertx(aset.upper_bound >= aset.lower_bound);
+  FTRACE(5, "    decreased upper bound for aset {} by 1: ub({})\n",
+    asetID, aset.upper_bound);
+}
+
+void increase_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
+  auto& aset = state.asets[asetID];
+  if (aset.upper_bound < kMaxReferences) aset.upper_bound++;
+  assertx(aset.upper_bound >= aset.lower_bound);
+  FTRACE(5, "    increased upper bound for aset {} by 1: new_ub({})\n",
+    asetID, aset.upper_bound);
+}
+
+void may_incref(Env& env, RCState& state, ASetID asetID) {
+  /*
+   * We must increase the upper bound of any alias set that could alias with asetID by 1.
+   */
+  assertx(asetID != -1);
+  increase_upper_bound(env, state, asetID);
+  for (auto may_id : env.asets[asetID].may_alias) {
+    increase_upper_bound(env, state, may_id);
+  }  
 }
 
 void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
@@ -1798,7 +1859,7 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   add_node(asetID, NReq{1});
   FTRACE(3, "    {} lb: {}({})\n",
          asetID, aset.lower_bound, aset.unsupported_refs);
-
+  
   if (balanced) {
     /*
      * The intention here is to reduce just the assumed reference of may-alias sets by 1
@@ -1999,6 +2060,7 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   // The call can affect any unsupported_refs
   observe_unbalanced_decrefs(env, state, add_node);
   kill_unsupported_refs(state);
+  pessimize_upper_bound_all_asets(env, state);
 
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
@@ -2080,6 +2142,15 @@ void analyze_mem_effects(Env& env,
       if (inst.is(CallBuiltin)) {
         observe_unbalanced_decrefs(env, state, add_node);
         kill_unsupported_refs(state, add_node);
+        pessimize_upper_bound_all_asets(env, state);
+      }
+
+      /*
+       * We could have loaded from an untracked location
+       * that could be supporting any of the asets
+       */
+      if (x.loads != AEmpty || x.inout != AEmpty || !x.backtrace.empty()) {
+        pessimize_upper_bound_all_asets(env, state);
       }
 
       // Locations that are killed don't need to be tracked as memory support
@@ -2180,12 +2251,18 @@ void rc_analyze_inst(Env& env,
       auto const& defLabel = inst.taken()->front();
       assertx(defLabel.is(DefLabel));
       for (auto i = 0; i < inst.numSrcs(); i++) {
-        auto const srcID = lookup_aset(env, inst.src(i));
-        if (!srcID) continue;
-        auto& srcSet = state.asets[*srcID];
         auto const dstID = lookup_aset(env, defLabel.dst(i));
         if (!dstID) continue;
         auto& dstSet = state.asets[*dstID];
+        auto const srcID = lookup_aset(env, inst.src(i));
+        if (!srcID) {
+          dstSet.upper_bound = kMaxReferences;
+          FTRACE(3, "    DefLabel dstID {} set ub = {}\n", *dstID, dstSet.upper_bound);
+          continue;
+        }
+        auto& srcSet = state.asets[*srcID];
+        dstSet.upper_bound = srcSet.upper_bound;
+        FTRACE(3, "    DefLabel dstID {} set ub = {}\n", *dstID, dstSet.upper_bound);
         if (dstSet.lower_bound < srcSet.lower_bound) {
           auto const delta = srcSet.lower_bound - dstSet.lower_bound;
           // Add assumed references to dstSet
@@ -2217,6 +2294,7 @@ void rc_analyze_inst(Env& env,
         state.has_unsupported_refs = true;
       }
       add_node(asetID, NInc{&inst});
+      may_incref(env, state, asetID);
       ++aset.lower_bound;
       FTRACE(3, "    {} lb: {}({})\n",
              asetID, aset.lower_bound, aset.unsupported_refs);
@@ -2228,6 +2306,7 @@ void rc_analyze_inst(Env& env,
       auto old_lb = int32_t{0};
       if_aset(env, inst.src(0), [&] (ASetID asetID) {
         auto& aset = state.asets[asetID];
+        auto src_type = inst.src(0)->type();
         if (inst.op() == DecRefNZ && aset.lower_bound < 2) {
           /*
            * We DecRefNZ aset so there must be at least 2 refs to it, otherwise the input program is malformed.
@@ -2246,6 +2325,20 @@ void rc_analyze_inst(Env& env,
         add_node(asetID, NDec{&inst});
         old_lb = aset.lower_bound;
         may_decref(env, state, asetID, add_node);
+        /*
+         * We only modify upper bound for guaranteed counted asets.
+         * For asets that could be persistent, the upper bound must be kMaxReferences.
+         * However, this invariant may be temporarily broken at the moment. 
+         * One situation is if we are currently within a loop body
+         * and the Deflabel block corresponding to the loop beginning hasn't been merged
+         * with all of its ancestors because some of them are yet to be processed.
+         * It's possible that it has only been merged 
+         * with the ancestors that provide counted values (upper_bound <= kMaxReferences)
+         * but not with those that provide uncounted values (upper_bound == kMaxReferences).
+         */
+        if (src_type.subtypeOfAny(TCounted)) {
+          decrease_upper_bound(env, state, asetID);
+        }
       });
       if (old_lb <= 1) analyze_mem_effects(env, inst, state, add_node);
     }
@@ -2300,6 +2393,12 @@ void rc_analyze_inst(Env& env,
    * will be true.
    */
   for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
+
+    // The instruction might incref any of the args arbitrary number of times. 
+    if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
+      pessimize_upper_bound_one_aset(env, state, asetID);
+    });
+
     if (consumes_reference_next_not_taken(inst, srcID)) {
       assertx(!consumes_reference_taken(inst, srcID));
       if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
@@ -2327,8 +2426,16 @@ void rc_analyze_inst(Env& env,
   if (inst.producesReference()) {
     if_aset(env, inst.dst(), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
-      ++aset.lower_bound;
-      FTRACE(3, "    {} produced: lb {}\n", asetID, aset.lower_bound);
+      assertx(aset.unsupported_refs == 0);
+      assertx(aset.lower_bound == 0);
+      assertx(aset.upper_bound == kMaxReferences);
+      aset.lower_bound = 1;
+      if (inst.producesNewReference() && inst.dst()->type().subtypeOfAny(TCounted)) {
+        aset.upper_bound = 1;
+      }
+      FTRACE(3, "    {} produced: lb {} ub {}\n", 
+        asetID, aset.lower_bound, aset.upper_bound
+      );
     });
   }
 }

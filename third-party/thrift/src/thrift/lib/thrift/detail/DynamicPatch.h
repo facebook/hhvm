@@ -314,6 +314,7 @@ class DynamicListPatch : public DynamicPatchBase {
     get(op::PatchOp::Assign).emplace_list(std::move(v));
   }
 
+  [[deprecated("Use append(value) instead")]]
   void push_back(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       detail::checkCompatibleType(assign->as_list(), v);
@@ -323,6 +324,13 @@ class DynamicListPatch : public DynamicPatchBase {
     auto& l = get(op::PatchOp::Put).ensure_list();
     detail::checkCompatibleType(l, v);
     l.push_back(std::move(v));
+  }
+
+  void append(Value v) { push_back(std::move(v)); }
+  void appendMulti(ValueList v) {
+    for (auto&& i : v) {
+      append(std::move(i));
+    }
   }
 
  private:

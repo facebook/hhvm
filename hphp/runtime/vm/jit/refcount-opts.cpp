@@ -553,7 +553,8 @@ void remove_helper(IRUnit& unit, IRInstruction* inst) {
   switch (inst->op()) {
   case IncRef:
   case DecRef:
-  case DecRefNZ: {
+  case DecRefNZ: 
+  case DecReleaseCheck: {
     inst->setOpcode(DbgAssertRefCount);
     inst->clearExtra();
     auto extra = ASSERT_REASON;
@@ -2857,6 +2858,25 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
             }
             inst.setOpcode(DecRefNZ);
           }
+        }
+        if (state.asets[id].upper_bound == 1 && inst.is(DecReleaseCheck)) {
+          FTRACE(2, "    convert inst to Nop:  {}\n", inst);
+          assertx(inst.src(0)->type().subtypeOfAny(TCounted));
+          Block* inst_block = inst.block();
+          inst_block->push_back(penv.env.unit.gen(Jmp, inst.bcctx(), inst.next()));
+          remove_helper(penv.env.unit, &inst);
+        }
+      }
+      if (inst.is(CheckArrayCOW)) {
+        auto const id = penv.env.asetMap[inst.src(0)];
+        if (id > 0 && state.asets[id].upper_bound == 1) {
+          FTRACE(2, "    convert inst to AssertType:  {}\n", inst);
+          assertx(inst.src(0)->type().subtypeOfAny(TCounted));
+          auto inst_block = inst.block();
+          auto next = inst.next();
+          inst.setOpcode(AssertType);
+          inst.setTypeParam(inst.dst()->type());
+          inst_block->push_back(penv.env.unit.gen(Jmp, inst.bcctx(), next));
         }
       }
       rc_analyze_step(penv.env, inst, state, [&] (Block*) {}, preAdder);

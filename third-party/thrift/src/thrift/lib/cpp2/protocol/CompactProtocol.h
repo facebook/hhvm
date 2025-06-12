@@ -253,6 +253,8 @@ class CompactProtocolReader : public detail::ProtocolBase {
 
   static constexpr bool kHasDeferredRead() { return true; }
 
+  static constexpr bool kSupportsArithmeticVectors() { return true; }
+
   void setStringSizeLimit(int32_t string_limit) {
     string_limit_ = string_limit;
   }
@@ -294,6 +296,8 @@ class CompactProtocolReader : public detail::ProtocolBase {
   void readI64(int64_t& i64);
   void readDouble(double& dub);
   void readFloat(float& flt);
+  template <typename T>
+  void readArithmeticVector(T* outputPtr, size_t numElements);
   template <typename StrType>
   void readString(StrType& str);
   template <typename StrType>

@@ -487,6 +487,224 @@ size_t CompactProtocolWriter::writeArithmeticVector<double>(
       out_, inputPtr, numElements);
 }
 
-#endif // FOLLY_AARCH64
+// Decodes compacted zigzag varints in a vectorized manner
+template <class Cursor, typename T>
+static inline void readEncodedArithmeticVectorSIMD(
+    Cursor& c, T* outputPtr, size_t numElements) {
+  constexpr size_t simdWidth = sizeof(uint8x16_t) / sizeof(int32_t);
+  size_t i = 0;
+  size_t loopBound = numElements - (simdWidth - 1);
+  while (i < numElements) {
+    folly::ByteRange currentRange = c.peekBytes();
+    const uint8_t* inPtr = currentRange.data();
+    constexpr size_t kMaxVarintBytes = util::detail::kVarintMaxBytes<int32_t>;
+    const uint8_t* endSimd =
+        inPtr + currentRange.size() - kMaxVarintBytes * simdWidth;
+    const uint8_t* endScalar = inPtr + currentRange.size() - kMaxVarintBytes;
+    for (; i < loopBound && inPtr <= endSimd; i += simdWidth) {
+      uint32x4_t vec;
+      int32_t value;
+      inPtr += util::detail::readVarintMediumSlowUnrolledAarch64(value, inPtr);
+      vec[0] = value;
+      inPtr += util::detail::readVarintMediumSlowUnrolledAarch64(value, inPtr);
+      vec[1] = value;
+      inPtr += util::detail::readVarintMediumSlowUnrolledAarch64(value, inPtr);
+      vec[2] = value;
+      inPtr += util::detail::readVarintMediumSlowUnrolledAarch64(value, inPtr);
+      vec[3] = value;
+      uint32x4_t vecBit = vshlq_n_u32(vec, 31);
+      vecBit =
+          vreinterpretq_u32_s32(vshrq_n_s32(vreinterpretq_s32_u32(vecBit), 30));
+      vec = svget_neonq_u32(svxar_n_u32(
+          svset_neonq_u32(svundef_u32(), vec),
+          svset_neonq_u32(svundef_u32(), vecBit),
+          1));
+      if constexpr (sizeof(T) == 4) {
+        vst1q_u32(reinterpret_cast<uint32_t*>(outputPtr + i), vec);
+      } else if constexpr (sizeof(T) == 2) {
+        svst1h_s32(
+            svptrue_b8(),
+            reinterpret_cast<int16_t*>(outputPtr + i),
+            svset_neonq_s32(svundef_s32(), vreinterpretq_s32_u32(vec)));
+      }
+    }
+    for (; i < numElements && inPtr <= endScalar; ++i) {
+      int32_t value;
+      inPtr += util::detail::readVarintMediumSlowUnrolledAarch64(value, inPtr);
+      outputPtr[i] = (T)util::detail::zigzagToSignedInt(value);
+    }
+    size_t consumed = inPtr - currentRange.data();
+    c.skipNoAdvance(consumed);
+    size_t len = currentRange.size() - consumed;
+    size_t trailingLoopBound = std::min(numElements, i + len);
+    for (; i < trailingLoopBound; ++i) {
+      // Need to finish consuming current input buffer
+      int32_t value;
+      util::detail::readVarintSlow(c, value);
+      outputPtr[i] = (T)util::detail::zigzagToSignedInt(value);
+    }
+  }
+}
+
+#endif // FOLLY_ARM_FEATURE_NEON_SVE_BRIDGE
+
+// Function used with data types that are decoded from compacted zigzag
+template <class Cursor, typename T>
+static inline void readEncodedArithmeticVector(
+    Cursor& c, T* outputPtr, size_t numElements) {
+  size_t i = 0;
+  size_t loopBound = numElements - 1;
+  while (i < numElements) {
+    folly::ByteRange currentRange = c.peekBytes();
+    const uint8_t* inPtr = currentRange.data();
+    constexpr size_t kMaxVarintBytes = sizeof(T) == 2
+        ? util::detail::kVarintMaxBytes<int32_t>
+        : util::detail::kVarintMaxBytes<T>;
+    constexpr size_t kMaxBytesIter = kMaxVarintBytes * 2;
+    const uint8_t* endVec = inPtr + currentRange.size() - kMaxBytesIter;
+    for (; i < loopBound && inPtr <= endVec; i += 2) {
+      if constexpr (sizeof(T) == 2) {
+        int32_t valueA;
+        int32_t valueB;
+        inPtr += util::detail::readVarintMediumSlowUnrolled(valueA, inPtr);
+        inPtr += util::detail::readVarintMediumSlowUnrolled(valueB, inPtr);
+        valueA = util::detail::zigzagToSignedInt(valueA);
+        valueB = util::detail::zigzagToSignedInt(valueB);
+        outputPtr[i] = (int16_t)valueA;
+        outputPtr[i + 1] = (int16_t)valueB;
+      } else {
+        T valueA;
+        T valueB;
+        inPtr += util::detail::readVarintMediumSlowUnrolled(valueA, inPtr);
+        inPtr += util::detail::readVarintMediumSlowUnrolled(valueB, inPtr);
+        valueA = util::detail::zigzagToSignedInt(valueA);
+        valueB = util::detail::zigzagToSignedInt(valueB);
+        outputPtr[i] = valueA;
+        outputPtr[i + 1] = valueB;
+      }
+    }
+    size_t consumed = inPtr - currentRange.data();
+    c.skipNoAdvance(consumed);
+    size_t len = currentRange.size() - consumed;
+    size_t trailingLoopBound = std::min(numElements, i + len);
+    while (i < trailingLoopBound) {
+      if constexpr (sizeof(T) == 2) {
+        // Need to finish consuming current input buffer
+        int32_t value;
+        util::detail::readVarintSlow(c, value);
+        outputPtr[i] = (int16_t)util::detail::zigzagToSignedInt(value);
+      } else {
+        // Need to finish consuming current input buffer
+        T value;
+        util::detail::readVarintSlow(c, value);
+        outputPtr[i] = util::detail::zigzagToSignedInt(value);
+      }
+      ++i;
+    }
+  }
+}
+
+#if !FOLLY_ARM_FEATURE_NEON_SVE_BRIDGE
+// Decodes compacted zigzag varints in a vectorized manner
+template <class Cursor, typename T>
+static inline void readEncodedArithmeticVectorSIMD(
+    Cursor& c, T* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVector<Cursor, T>(c, outputPtr, numElements);
+}
+#endif // !FOLLY_ARM_FEATURE_NEON_SVE_BRIDGE
+
+// Function used with data types that are just received as BE/LE bytes
+template <class Cursor, typename T, bool BE>
+static inline void readUnencodedArithmeticVector(
+    Cursor& c, T* outputPtr, size_t numElements) {
+  size_t i = 0;
+  while (i < numElements) {
+    folly::ByteRange currentRange = c.peekBytes();
+    const uint8_t* inPtr = currentRange.data();
+    size_t loopBound =
+        std::min(numElements, i + currentRange.size() / sizeof(T));
+    size_t j = 0;
+    for (; i < loopBound; ++i, ++j) {
+      T value = BE ? folly::Endian::big<T>(
+                         folly::loadUnaligned<T>(inPtr + j * sizeof(T)))
+                   : folly::loadUnaligned<T>(inPtr + j * sizeof(T));
+      outputPtr[i] = value;
+    }
+    c.skipNoAdvance(j * sizeof(T));
+    if (i < numElements) {
+      if constexpr (sizeof(T) == 8) {
+        uint64_t bits = c.template readBE<int64_t>();
+        outputPtr[i] = folly::bit_cast<double>(bits);
+      } else if constexpr (sizeof(T) == 4) {
+        uint32_t bits = c.template readBE<int32_t>();
+        outputPtr[i] = folly::bit_cast<float>(bits);
+      } else {
+        outputPtr[i] = c.template read<int8_t>();
+      }
+      ++i;
+    }
+  }
+}
+
+template <>
+void CompactProtocolReader::readArithmeticVector<int64_t>(
+    int64_t* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVector<Cursor, int64_t>(
+      in_, outputPtr, numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<uint64_t>(
+    uint64_t* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVector<Cursor, int64_t>(
+      in_, reinterpret_cast<int64_t*>(outputPtr), numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<int32_t>(
+    int32_t* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVectorSIMD<Cursor, int32_t>(
+      in_, outputPtr, numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<uint32_t>(
+    uint32_t* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVectorSIMD<Cursor, int32_t>(
+      in_, reinterpret_cast<int32_t*>(outputPtr), numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<int16_t>(
+    int16_t* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVectorSIMD<Cursor, int16_t>(
+      in_, outputPtr, numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<uint16_t>(
+    uint16_t* outputPtr, size_t numElements) {
+  return readEncodedArithmeticVectorSIMD<Cursor, int16_t>(
+      in_, reinterpret_cast<int16_t*>(outputPtr), numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<int8_t>(
+    int8_t* outputPtr, size_t numElements) {
+  return readUnencodedArithmeticVector<Cursor, int8_t, false>(
+      in_, outputPtr, numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<uint8_t>(
+    uint8_t* outputPtr, size_t numElements) {
+  return readUnencodedArithmeticVector<Cursor, uint8_t, false>(
+      in_, outputPtr, numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<float>(
+    float* outputPtr, size_t numElements) {
+  return readUnencodedArithmeticVector<Cursor, float, true>(
+      in_, outputPtr, numElements);
+}
+template <>
+void CompactProtocolReader::readArithmeticVector<double>(
+    double* outputPtr, size_t numElements) {
+  return readUnencodedArithmeticVector<Cursor, double, true>(
+      in_, outputPtr, numElements);
+}
 
 } // namespace apache::thrift

@@ -906,7 +906,18 @@ let main_internal
     in
     go ()
   | ClientEnv.MODE_REWRITE_DECLARATIONS ->
-    DeclarationsRewriter.start (Random.State.make_self_init ());
+    (*
+    * HHVM uses existence of this file to indicate it is paused, which
+    * happens when HHVM is at a breakpoint.
+    * Is also read by the language server:
+    * https://www.internalfb.com/code/fbsource/[248c997e7acd028f9980cc9f82113106cc56b63d]/fbcode/hphp/hack/src/client/clientLsp.ml. *)
+    let file_whose_existence_indicates_hhvm_is_paused =
+      Option.map (Sys.getenv_opt "HOME") ~f:(fun home_dir ->
+          home_dir ^ "/.vscode-sockets/hhvm-paused")
+    in
+    DeclarationsRewriter.start
+      (Random.State.make_self_init ())
+      ~file_whose_existence_indicates_hhvm_is_paused;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | ClientEnv.MODE_REWRITE_LAMBDA_PARAMETERS files ->
     let%lwt conn = connect args in

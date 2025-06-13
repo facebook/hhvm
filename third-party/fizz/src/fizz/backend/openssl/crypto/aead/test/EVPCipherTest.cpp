@@ -14,9 +14,7 @@
 #include <fizz/crypto/aead/test/Data.h>
 #include <fizz/crypto/aead/test/TestUtil.h>
 #include <fizz/crypto/test/TestUtil.h>
-#include <fizz/record/Types.h>
 #include <folly/ExceptionWrapper.h>
-#include <folly/String.h>
 
 #include <list>
 #include <stdexcept>

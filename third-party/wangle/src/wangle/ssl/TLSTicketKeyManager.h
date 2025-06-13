@@ -46,7 +46,7 @@ class TLSTicketKeyManager : public folly::OpenSSLTicketHandler {
 
   TLSTicketKeyManager();
 
-  virtual ~TLSTicketKeyManager();
+  ~TLSTicketKeyManager() override;
 
   /**
    * Callback invoked by OpenSSL to prepare for ticket encryption/decryption.

@@ -68,7 +68,7 @@ class EvbHandshakeHelper : public AcceptorHandshakeHelper,
     Callback,
   };
 
-  ~EvbHandshakeHelper();
+  ~EvbHandshakeHelper() override;
 
   AcceptorHandshakeHelper::UniquePtr helper_;
   AcceptorHandshakeHelper::Callback* callback_;

@@ -182,8 +182,8 @@ void ParallelConcurrencyControllerBase::executeRequest(
         onExpireFunction_(serverRequest);
       }
       auto eb = ServerRequestHelper::eventBase(serverRequest);
-      auto req = ServerRequestHelper::request(std::move(serverRequest));
-      HandlerCallbackBase::releaseRequest(std::move(req), eb);
+      auto request = ServerRequestHelper::request(std::move(serverRequest));
+      HandlerCallbackBase::releaseRequest(std::move(request), eb);
       return;
     }
 

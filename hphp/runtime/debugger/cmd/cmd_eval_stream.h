@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
+#include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/base/req-root.h"
 
 namespace HPHP::Eval {
@@ -34,17 +35,22 @@ struct CmdEvalStream : DebuggerCommand {
     return m_failed;
   }
 
+  void handleReply(DebuggerClient&);
+  StreamStatus getStreamStatus();
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  void handleReply(DebuggerClient&);
-
   req::root<String> m_output;
+
   int m_frame{};
   bool m_bypassAccessCheck{false};
   bool m_failed{false};
+
+  // Used to check if stream can end.
+  StreamStatus m_stream_status;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

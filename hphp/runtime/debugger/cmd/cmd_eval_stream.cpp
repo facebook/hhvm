@@ -30,6 +30,7 @@ void CmdEvalStream::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_output);
   thrift.write(m_frame);
   thrift.write(m_bypassAccessCheck);
+  thrift.write(static_cast<int8_t>(m_stream_status));
   if (this->m_version == 2) thrift.write(m_failed);
 }
 
@@ -38,6 +39,9 @@ void CmdEvalStream::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_output);
   thrift.read(m_frame);
   thrift.read(m_bypassAccessCheck);
+  int8_t streamStatusValue;
+  thrift.read(streamStatusValue);
+  m_stream_status = static_cast<StreamStatus>(streamStatusValue);
   if (this->m_version == 2) thrift.read(m_failed);
   // Old senders will set version to 0. A new sender sets it to 1
   // and then expects an answer using version 2.
@@ -49,6 +53,10 @@ void CmdEvalStream::recvImpl(DebuggerThriftBuffer &thrift) {
   if (this->m_version == 1) this->m_version = 2;
 }
 
+StreamStatus CmdEvalStream::getStreamStatus() {
+  return m_stream_status;
+}
+
 void CmdEvalStream::onClient(DebuggerClient &client) {
   m_body = client.getCode();
   m_frame = client.getFrame();
@@ -56,7 +64,6 @@ void CmdEvalStream::onClient(DebuggerClient &client) {
   auto res = client.xendWithNestedExecution<CmdEvalStream>(this);
   assertx(res->is(DebuggerCommand::KindOfEvalStream));
   auto eval = std::static_pointer_cast<CmdEvalStream>(res);
-  eval->handleReply(client);
   m_failed = eval->m_failed;
 }
 
@@ -77,7 +84,7 @@ bool CmdEvalStream::onServer(DebuggerProxy &proxy) {
   locSave.swap(rid.m_flowFilter);
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   auto const result = proxy.ExecutePHPWithStreaming(
-    m_body, m_output, *this, m_frame,
+    m_body, m_output, *this, m_frame, m_stream_status,
     DebuggerProxy::ExecutePHPFlagsAtInterrupt |
       (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
        DebuggerProxy::ExecutePHPFlagsNone)

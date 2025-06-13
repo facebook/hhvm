@@ -512,14 +512,18 @@ struct DebuggerStreamStdoutHook final : ExecutionContext::StdoutHook {
   DebuggerProxy& proxy;
   DebuggerCommand& cmd;
   String &output;
+  StreamStatus& stream_status;
   explicit DebuggerStreamStdoutHook(DebuggerProxy& proxy,
                                     DebuggerCommand &cmd,
-                                    String &output)
-    : proxy(proxy), cmd(cmd), output(output) {}
+                                    String &output,
+                                    StreamStatus& stream_status)
+    : proxy(proxy), cmd(cmd), output(output), stream_status(stream_status) {}
   void operator()(const char* s, int len) override {
+    TRACE(2, "DebuggerProxy::stream_stdout\n");
     StringBuffer sb;
     sb.append(s, len);
     output = sb.detach();
+    stream_status = StreamStatus::ONGOING;
     proxy.sendToClient(&cmd);
   }
 };
@@ -788,13 +792,13 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 
 std::pair<bool,Variant>
 DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand &cmd,
-                          int frame, int flags) {
+                          int frame, StreamStatus& stream_status, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHPWithStreaming\n");
   // Wire up stdout and stderr to our own string buffer so we can pass
   // any output back to the client.
   StringBuffer sb;
   StringBuffer *save = g_context->swapOutputBuffer(nullptr);
-  DebuggerStreamStdoutHook stdout_hook(*this, cmd, output);
+  DebuggerStreamStdoutHook stdout_hook(*this, cmd, output, stream_status);
   DebuggerLoggerHook stderr_hook(sb);
 
   auto const previousEvalOutputHook = m_evalOutputHook;
@@ -821,6 +825,7 @@ DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, D
 
     m_evalOutputHook = previousEvalOutputHook;
   };
+  stream_status = StreamStatus::INITIALIZED;
   String code(php.c_str(), php.size(), CopyString);
   // We're about to start executing more PHP. This is typically done
   // in response to commands from the client, and the client expects
@@ -844,6 +849,7 @@ DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, D
   };
   auto const ret = g_context->evalPHPDebugger(code.get(), frame);
   output = sb.detach();
+  stream_status = StreamStatus::COMPLETED;
   return {ret.failed, ret.result};
 }
 

@@ -536,6 +536,7 @@ DebuggerClient::DebuggerClient()
       m_inputState(TakingCommand),
       m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
+      m_stream_status(StreamStatus::NOT_STARTED),
       m_threadId(0), m_listLine(0), m_listLineFocus(0),
       m_frame(0),
       m_unknownCmd(false) {
@@ -1156,43 +1157,61 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
         error("wire error: %s", cmd->getWireError().data());
       }
       if ((loopKind != TopLevel) &&
-          cmd->is((DebuggerCommand::Type)expectedCmd)) {
+      cmd->is((DebuggerCommand::Type)expectedCmd)) {
         // For the nested cases, the caller has sent a cmd to the server and is
-        // expecting a specific response. When we get it, return it.
-        usageLogEvent("command done", folly::to<std::string>(expectedCmd));
-        m_machine->m_interrupting = true; // Machine is stopped
-        m_inputState = TakingCommand;
-        return cmd;
+        // expecting a specific response. When we get it, return it unless it's a
+        // evalstream cmd that is still ongoing.
+        if (cmd->is(DebuggerCommand::KindOfEvalStream)) {
+          // If server returns a stream output, print it.
+          if (auto evalCmd = dynamic_cast<CmdEvalStream*>(cmd.get())) {
+            setStreamStatus(evalCmd->getStreamStatus());
+            evalCmd->handleReply(*this);
+          } else {
+              Logger::Error("Error: KindOfEvalStream cmd is not of type CmdEvalStream");
+          }
+        }
+        bool isStream = cmd->is(DebuggerCommand::KindOfEvalStream);
+        bool isStatusCompleted = m_stream_status == StreamStatus::COMPLETED;
+        if (!isStream || isStatusCompleted) {
+          usageLogEvent("command done", folly::to<std::string>(expectedCmd));
+          m_machine->m_interrupting = true; // Machine is stopped
+          m_inputState = TakingCommand;
+          return cmd;
+        }
       }
-      if ((loopKind == Nested) || !cmd->is(DebuggerCommand::KindOfInterrupt)) {
+      bool isCommandContinuable = cmd->is(DebuggerCommand::KindOfInterrupt) || m_stream_status == StreamStatus::ONGOING ;
+      if ((loopKind == Nested) || !isCommandContinuable) {
+        TRACE(2, "bad command!\n");
         Logger::Error("Received bad cmd type %d, unable to communicate "
                       "with server.", cmd->getType());
         throw DebuggerProtocolException();
       }
-      m_sigCount = 0;
-      auto intr = std::dynamic_pointer_cast<CmdInterrupt>(cmd);
-      Debugger::UsageLogInterrupt("terminal", getSandboxId(), *intr.get());
-      cmd->onClient(*this);
+      if (cmd->is(DebuggerCommand::KindOfInterrupt)) {
+        m_sigCount = 0;
+        auto intr = std::dynamic_pointer_cast<CmdInterrupt>(cmd);
+        Debugger::UsageLogInterrupt("terminal", getSandboxId(), *intr.get());
+        cmd->onClient(*this);
 
-      // When we make a new connection to a machine, we have to wait for it
-      // to interrupt us before we can send it any messages. This is our
-      // opportunity to complete the connection and make it ready to use.
-      if (!m_machine->m_initialized) {
-        if (!initializeMachine()) {
-          // False means the machine is running and we need to wait for
-          // another interrupt.
-          continue;
+        // When we make a new connection to a machine, we have to wait for it
+        // to interrupt us before we can send it any messages. This is our
+        // opportunity to complete the connection and make it ready to use.
+        if (!m_machine->m_initialized) {
+          if (!initializeMachine()) {
+            // False means the machine is running and we need to wait for
+            // another interrupt.
+            continue;
+          }
         }
-      }
-      // Execution has been interrupted, so go ahead and give the user
-      // the prompt back.
-      m_machine->m_interrupting = true; // Machine is stopped
-      m_inputState = TakingCommand;
-      console(); // Prompt loop
-      m_inputState = TakingInterrupt;
-      m_machine->m_interrupting = false; // Machine is running again.
-      if (m_scriptMode) {
-        print("Waiting for server response");
+        // Execution has been interrupted, so go ahead and give the user
+        // the prompt back.
+        m_machine->m_interrupting = true; // Machine is stopped
+        m_inputState = TakingCommand;
+        console(); // Prompt loop
+        m_inputState = TakingInterrupt;
+        m_machine->m_interrupting = false; // Machine is running again.
+        if (m_scriptMode) {
+          print("Waiting for server response");
+        }
       }
     }
   }

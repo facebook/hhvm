@@ -40,6 +40,13 @@ struct DummySandbox;
 using DebuggerProxyPtr = std::shared_ptr<DebuggerProxy>;
 using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
 
+enum class StreamStatus: int8_t{
+  NOT_STARTED,
+  INITIALIZED,
+  ONGOING,
+  COMPLETED,
+};
+
 /*
  * A DebuggerProxy provides a conection thru which a client may talk to a VM
  * which is being debugged.  The VM can also send messages to the client via the
@@ -114,7 +121,7 @@ struct DebuggerProxy : Synchronizable,
   };
 
   std::pair<bool,Variant>
-  ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand& cmd, int frame, int flags);
+  ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand& cmd, int frame, StreamStatus& stream_status, int flags);
 
   std::pair<bool,Variant>
   ExecutePHP(const std::string &php, String &output, int frame, int flags);

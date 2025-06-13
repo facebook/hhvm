@@ -15,7 +15,6 @@
 #include <folly/testing/TestUtil.h>
 
 #include "mcrouter/flavor.h"
-#include "mcrouter/lib/fbi/cpp/util.h"
 
 using facebook::memcache::mcrouter::readFlavor;
 using folly::test::TemporaryFile;

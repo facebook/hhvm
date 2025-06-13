@@ -29,6 +29,7 @@ use ir_core::ReadonlyOp;
 use ir_core::SetOpOp;
 use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
+use ir_core::TParamInfo;
 use ir_core::UpperBound;
 use ir_core::instr::HasLoc;
 use ir_core::instr::Special;
@@ -147,6 +148,54 @@ impl Display for FmtAttr {
         assert!(attr.is_empty(), "Unprocessed attr: {attr:?}");
 
         Ok(())
+    }
+}
+
+pub(crate) struct FmtIdentifierIdList<'vec>(pub &'vec [FmtIdentifierId]);
+
+impl Display for FmtIdentifierIdList<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let FmtIdentifierIdList(vec) = *self;
+        if vec.is_empty() {
+            Ok(())
+        } else {
+            write!(
+                f,
+                " <{}> ",
+                FmtSep::comma(vec.iter(), |w, id| { id.fmt(w) })
+            )
+        }
+    }
+}
+
+pub(crate) struct FmtTParamInfo<'tpi>(pub &'tpi TParamInfo);
+
+impl Display for FmtTParamInfo<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let FmtTParamInfo(tpi) = *self;
+        write!(
+            f,
+            "[{},{}]",
+            FmtIdentifierId(tpi.name.as_bytes_id()),
+            if tpi.shadows_class_tparam { "1" } else { "0" }
+        )
+    }
+}
+
+pub(crate) struct FmtTParamInfoVec<'tpis>(pub &'tpis [TParamInfo]);
+
+impl Display for FmtTParamInfoVec<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let FmtTParamInfoVec(vec) = *self;
+        if vec.is_empty() {
+            Ok(())
+        } else {
+            write!(
+                f,
+                " <{}> ",
+                FmtSep::comma(vec.iter(), |w, tpi| { FmtTParamInfo(tpi).fmt(w) })
+            )
+        }
     }
 }
 
@@ -695,25 +744,6 @@ impl Display for FmtTParams<'_> {
                         }
                     }
                     Ok(())
-                })
-            )
-        }
-    }
-}
-
-pub(crate) struct FmtShadowedTParams<'a>(pub(crate) &'a [ClassName]);
-
-impl Display for FmtShadowedTParams<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtShadowedTParams(vec) = *self;
-        if vec.is_empty() {
-            Ok(())
-        } else {
-            write!(
-                f,
-                "[{}]",
-                FmtSep::comma(vec.iter(), |f, name| {
-                    FmtIdentifierId(name.as_bytes_id()).fmt(f)
                 })
             )
         }

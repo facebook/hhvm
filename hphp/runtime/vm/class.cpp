@@ -3728,7 +3728,18 @@ void Class::setReifiedData() {
     assertx(tvIsVec(tv));
     allocExtraData();
     m_extra.raw()->m_genericsInfo =
-      extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+      extractSizeAndPosFromReifiedAttribute(
+        tv.m_data.parr,
+        m_preClass->typeParamNames()
+      );
+  } else if (!m_preClass->typeParamNames().empty()) {
+    allocExtraData();
+    std::vector<TypeParamInfo> typeParamInfos;
+    for (auto const& name : m_preClass->typeParamNames()) {
+      typeParamInfos.emplace_back(false, false, false, name);
+    }
+    m_extra.raw()->m_genericsInfo
+      = GenericsInfo(std::move(typeParamInfos));
   }
 }
 

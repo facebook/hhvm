@@ -17,8 +17,9 @@
 #pragma once
 
 #include <algorithm>
-#include <stdint.h>
 
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/containers.h"
 
 namespace HPHP {
@@ -30,6 +31,8 @@ struct TypeParamInfo {
   bool m_isSoft    : 1;
   // Does the type parameter contain a warn annotation
   bool m_isWarn    : 1;
+  // Name of the template param
+  LowStringPtr m_typeName;
 };
 
 /*
@@ -37,6 +40,9 @@ struct TypeParamInfo {
  * or class
  */
 struct GenericsInfo {
+  using iterator = VMFixedVector<TypeParamInfo>::iterator;
+  using const_iterator = VMFixedVector<TypeParamInfo>::const_iterator;
+
   GenericsInfo() : m_typeParamInfo() {}
   GenericsInfo(std::vector<TypeParamInfo>&& info)
     : m_typeParamInfo(std::move(info)) {}
@@ -65,6 +71,13 @@ struct GenericsInfo {
                          return t.m_isReified && !t.m_isSoft;
                        });
   }
+
+  const_iterator begin() const { return m_typeParamInfo.begin(); }
+  const_iterator end()   const { return m_typeParamInfo.end(); }
+  iterator begin()             { return m_typeParamInfo.begin(); }
+  iterator end()               { return m_typeParamInfo.end(); }
+  bool empty() const {return m_typeParamInfo.empty(); }
+
 };
 
 }

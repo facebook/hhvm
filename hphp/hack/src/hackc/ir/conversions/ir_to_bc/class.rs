@@ -23,6 +23,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         span,
         type_constants,
         upper_bounds,
+        tparams,
         uses,
     } = class;
 
@@ -49,6 +50,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         span,
         type_constants,
         upper_bounds,
+        tparams,
         uses,
     };
     unit.classes.push(class);

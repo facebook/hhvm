@@ -97,6 +97,7 @@ pub use hhbc::SrcLoc;
 pub use hhbc::StringId;
 pub use hhbc::SwitchKind;
 pub use hhbc::SymbolRefs;
+pub use hhbc::TParamInfo;
 pub use hhbc::TraitReqKind;
 pub use hhbc::TypeConstant;
 pub use hhbc::TypeInfo;

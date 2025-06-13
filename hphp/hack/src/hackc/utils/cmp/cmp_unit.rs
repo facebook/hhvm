@@ -127,7 +127,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
         upper_bounds: a_upper_bounds,
-        shadowed_tparams: a_shadowed_tparams,
+        tparam_info: a_tparam_info,
         return_type: a_return_type,
         doc_comment: a_doc_comment,
         span: a_span,
@@ -147,7 +147,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
         upper_bounds: b_upper_bounds,
-        shadowed_tparams: b_shadowed_tparams,
+        tparam_info: b_tparam_info,
         return_type: b_return_type,
         doc_comment: b_doc_comment,
         span: b_span,
@@ -172,7 +172,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     cmp_eq(a_stack_depth, b_stack_depth).qualified("stack_depth")?;
     cmp_eq(a_return_type, b_return_type).qualified("return_type")?;
     cmp_eq(a_upper_bounds, b_upper_bounds).qualified("upper_bounds")?;
-    cmp_eq(a_shadowed_tparams, b_shadowed_tparams).qualified("shadowed_tparams")?;
+    cmp_eq(a_tparam_info, b_tparam_info).qualified("tparam_info")?;
     cmp_eq(a_span, b_span).qualified("span")?;
 
     cmp_slice(a_decl_vars, b_decl_vars, cmp_eq).qualified("decl_vars")?;
@@ -411,6 +411,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         ctx_constants: a_ctx_constants,
         requirements: a_requirements,
         upper_bounds: a_upper_bounds,
+        tparams: a_tparams,
         doc_comment: a_doc_comment,
         flags: a_flags,
     } = a;
@@ -430,6 +431,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         ctx_constants: b_ctx_constants,
         requirements: b_requirements,
         upper_bounds: b_upper_bounds,
+        tparams: b_tparams,
         doc_comment: b_doc_comment,
         flags: b_flags,
     } = b;
@@ -460,6 +462,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         cmp_slice(&a.bounds, &b.bounds, cmp_eq)
     })
     .qualified("upper_bounds")?;
+    cmp_slice(a_tparams, b_tparams, cmp_eq).qualified("tparams")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
 

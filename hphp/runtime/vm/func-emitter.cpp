@@ -146,6 +146,16 @@ LineTable createLineTable(const SrcLoc& srcLoc, Offset bclen) {
   return lines;
 }
 
+GenericsInfo getGenericsInfoNoReified(
+  const folly::Range<const LowStringPtr*>& typeParamNames
+) {
+  std::vector<TypeParamInfo> typeParamInfos;
+  for (auto const& name : typeParamNames) {
+    typeParamInfos.emplace_back(false, false, false, name);
+  }
+  return GenericsInfo(std::move(typeParamInfos));
+}
+
 }
 
 void FuncEmitter::recordSourceLocation(const Location::Range& sLoc,
@@ -285,9 +295,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->m_isPreFunc = !!preClass;
 
-  auto const uait = userAttributes.find(s___Reified.get());
-  auto const hasReifiedGenerics = uait != userAttributes.end();
-
   // Returns (static coeffects, escapes)
   auto const coeffectsInfo = getCoeffectsInfoFromList(
     staticCoeffects,
@@ -323,12 +330,16 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     }
   }
 
+  auto const uait = userAttributes.find(s___Reified.get());
+  auto const hasReifiedGenerics = uait != userAttributes.end();
+
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
     m_bclen >= Func::kSmallDeltaLimit ||
     m_sn >= Func::kSmallDeltaLimit ||
     hasReifiedGenerics ||
+    !typeParamNames.empty() ||
     dynCallSampleRate ||
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
@@ -401,11 +412,21 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     f->shared()->m_staticCoeffectNames.push_back(name);
   }
 
-  if (hasReifiedGenerics) {
-    auto const tv = uait->second;
-    assertx(tvIsVec(tv));
-    f->extShared()->m_genericsInfo =
-      extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  if (hasReifiedGenerics || !typeParamNames.empty()) {
+    assertx(f->extShared());
+    if (hasReifiedGenerics) {
+      auto const tv = uait->second;
+      assertx(tvIsVec(tv));
+      f->extShared()->m_genericsInfo =
+        extractSizeAndPosFromReifiedAttribute(
+          tv.m_data.parr,
+          getTypeParamNames()
+        );
+    } else {
+      f->extShared()->m_genericsInfo = getGenericsInfoNoReified(
+        getTypeParamNames()
+      );
+    }
   }
 
   /*
@@ -752,6 +773,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     )
     (userAttributes)
     (retTypeConstraints)
+    (typeParamNames)
     (retUserType)
     (originalUnit)
     (originalModuleName)

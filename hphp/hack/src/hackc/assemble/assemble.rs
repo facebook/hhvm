@@ -26,6 +26,7 @@ use hhbc::ModuleName;
 use hhbc::ParamEntry;
 use hhbc::StringId;
 use hhbc::StringIdMap;
+use hhbc::TParamInfo;
 use hhbc::TypedValue;
 use hhvm_types_ffi::Attr;
 use log::trace;
@@ -321,6 +322,7 @@ fn assemble_typedef(token_iter: &mut Lexer<'_>, case_type: bool) -> Result<hhbc:
 
 fn assemble_class(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc::Class> {
     parse!(token_iter, ".class"
+       <tparams:assemble_tparams()>
        <upper_bounds:assemble_upper_bounds()>
        <attr:assemble_special_and_user_attrs()>
        <name:assemble_class_name()>
@@ -372,6 +374,7 @@ fn assemble_class(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc::
         ctx_constants: ctx_constants.into(),
         requirements: requirements.into(),
         upper_bounds: upper_bounds.into(),
+        tparams: tparams.into(),
         doc_comment,
         flags,
     };
@@ -477,7 +480,7 @@ fn assemble_const_or_type_const(
 fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc::Method> {
     let method_tok = token_iter.peek().copied();
     token_iter.expect_str(Token::is_decl, ".method")?;
-    let shadowed_tparams = assemble_shadowed_tparams(token_iter)?;
+    let tparam_info = assemble_tparam_info(token_iter)?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter)?;
     let span = assemble_span(token_iter)?;
@@ -494,7 +497,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc:
         attrs,
         params,
         return_type,
-        shadowed_tparams,
+        tparam_info,
         upper_bounds,
         span,
     )?;
@@ -510,19 +513,30 @@ fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc:
     })
 }
 
-fn assemble_shadowed_tparams(token_iter: &mut Lexer<'_>) -> Result<Vec<ClassName>> {
-    token_iter.expect(Token::is_open_curly)?;
-    let mut stp = Vec::new();
-    while token_iter.peek_is(Token::is_identifier) {
-        stp.push(ClassName::intern(
-            token_iter.expect(Token::is_identifier)?.as_str()?,
-        ));
-        if !token_iter.peek_is(Token::is_close_curly) {
-            token_iter.expect(Token::is_comma)?;
+fn assemble_single_tparam_info(token_iter: &mut Lexer<'_>) -> Result<TParamInfo> {
+    parse!(token_iter, "[" <name:assemble_class_name()> "," <num:num> "]");
+    let shadows_class_tparam = match num.into_number() {
+        Ok(b"0") => false,
+        Ok(b"1") => true,
+        _ => {
+            return Err(
+                token_iter.error(r#"Non "0"/"1" string in tparam info shadows class tparam"#)
+            );
         }
-    }
-    token_iter.expect(Token::is_close_curly)?;
-    Ok(stp)
+    };
+    Ok(TParamInfo {
+        name,
+        shadows_class_tparam,
+    })
+}
+
+fn assemble_tparam_info(token_iter: &mut Lexer<'_>) -> Result<Vec<TParamInfo>> {
+    Ok(if token_iter.peek_is(Token::is_lt) {
+        parse!(token_iter, "<" <tparams:assemble_single_tparam_info(),*> ">");
+        tparams
+    } else {
+        Vec::new()
+    })
 }
 
 fn assemble_method_flags(token_iter: &mut Lexer<'_>) -> Result<hhbc::MethodFlags> {
@@ -1023,6 +1037,7 @@ where
 /// .function {upper bounds} [special_and_user_attrs] (span) <type_info> name (params) flags? {body}
 fn assemble_function(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc::Function> {
     token_iter.expect_str(Token::is_decl, ".function")?;
+    let tparam_info = assemble_tparam_info(token_iter)?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter)?;
@@ -1038,7 +1053,6 @@ fn assemble_function(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhb
     let mut decl_map = DeclMap::default();
     let params = assemble_params(token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
-    let shadowed_tparams = Default::default();
     let body = assemble_body(
         token_iter,
         &mut decl_map,
@@ -1047,7 +1061,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhb
         attrs,
         params,
         return_type,
-        shadowed_tparams,
+        tparam_info,
         upper_bounds,
         span,
     )?;
@@ -1101,6 +1115,15 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 fn assemble_upper_bounds(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::UpperBound>> {
     parse!(token_iter, "{" <ubs:assemble_upper_bound(),*> "}");
     Ok(ubs)
+}
+
+fn assemble_tparams(token_iter: &mut Lexer<'_>) -> Result<Vec<ClassName>> {
+    Ok(if token_iter.peek_is(Token::is_lt) {
+        parse!(token_iter, "<" <tparams:assemble_class_name(),*> ">");
+        tparams
+    } else {
+        Vec::new()
+    })
 }
 
 /// Ex: (T as <"HH\\int" "HH\\int" upper_bound>)
@@ -1374,7 +1397,7 @@ fn assemble_body(
     attrs: hhbc::Attr,
     params: Vec<ParamEntry>,
     return_type: Maybe<hhbc::TypeInfo>,
-    shadowed_tparams: Vec<ClassName>,
+    tparam_info: Vec<TParamInfo>,
     upper_bounds: Vec<hhbc::UpperBound>,
     span: hhbc::Span,
 ) -> Result<hhbc::Body> {
@@ -1436,7 +1459,7 @@ fn assemble_body(
         is_memoize_wrapper_lsb,
         doc_comment,
         return_type,
-        shadowed_tparams: shadowed_tparams.into(),
+        tparam_info: tparam_info.into(),
         upper_bounds: upper_bounds.into(),
         span,
         repr: hhbc::BcRepr {

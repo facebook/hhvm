@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/base/types.h"
 
 #include "hphp/util/hash-map.h"
 
@@ -50,7 +51,10 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 // indices and whether they are soft or not and whether to error or warn
 // interleaved
 GenericsInfo
-extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
+extractSizeAndPosFromReifiedAttribute(
+  const ArrayData* arr,
+  const folly::Range<const LowStringPtr*>& typeParamNames
+);
 
 // Extract and return only the size from the attribute array
 size_t extractSizeFromReifiedAttribute(const ArrayData* arr);

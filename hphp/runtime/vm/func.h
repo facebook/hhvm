@@ -1309,6 +1309,10 @@ public:
     return mask.m_allFlags;
   }
 
+  bool hasExtendedSharedData() const {
+    return extShared();
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Lookup                                                            [static]
 

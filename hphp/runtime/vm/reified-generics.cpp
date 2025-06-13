@@ -70,7 +70,10 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
 }
 
 GenericsInfo
-extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
+extractSizeAndPosFromReifiedAttribute(
+  const ArrayData* arr,
+  const folly::Range<const LowStringPtr*>& typeParamNames
+) {
   size_t len = 0, cur = 0;
   bool isReified = false, isSoft = false;
   std::vector<TypeParamInfo> tpList;
@@ -81,26 +84,44 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
       assertx(isIntType(v.m_type));
       if (k.m_data.num == 0) {
         len = (size_t) v.m_data.num;
+        assertx(len == typeParamNames.size());
       } else {
         if (k.m_data.num % 3 == 1) {
           // This is the reified generic index
           // Insert the non reified ones
           auto const numErased = v.m_data.num - cur;
-          tpList.insert(tpList.end(), numErased, {});
+          for (auto i = 0; i < numErased; ++i) {
+            tpList.emplace_back(
+              false, false, false, typeParamNames[cur + i]
+            );
+          }
           cur = v.m_data.num;
           isReified = true;
         } else if (k.m_data.num % 3 == 2) {
           isSoft = (bool) v.m_data.num;
         } else {
           // k.m_data.num % 3 == 0
+          tpList.emplace_back(
+            isReified,
+            isSoft,
+            (bool) v.m_data.num,
+            typeParamNames[cur]
+          );
           cur++;
-          tpList.push_back({isReified, isSoft, (bool) v.m_data.num});
         }
       }
     }
   );
   // Insert the non reified ones at the end
-  tpList.insert(tpList.end(), len - cur, {});
+  for (auto i = 0; i < len - cur; ++i) {
+    tpList.emplace_back(
+      false,
+      false,
+      false,
+      typeParamNames[cur + i]
+    );
+  }
+
   return GenericsInfo(std::move(tpList));
 }
 

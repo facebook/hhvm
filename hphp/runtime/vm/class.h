@@ -1464,6 +1464,8 @@ public:
   // For assertions:
   bool validate() const;
 
+  bool hasExtraData() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1749,6 +1751,7 @@ private:
    * Allocate the ExtraData; done only when necessary.
    */
   void allocExtraData() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal types.

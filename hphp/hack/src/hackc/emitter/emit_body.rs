@@ -29,6 +29,7 @@ use hhbc::Param;
 use hhbc::ParamEntry;
 use hhbc::Span;
 use hhbc::StringId;
+use hhbc::TParamInfo;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::UpperBound;
@@ -115,7 +116,7 @@ pub fn emit_body<'b, 'd>(
         args.class_tparam_names,
         args.flags.contains(Flags::SKIP_AWAITABLE),
     );
-    let shadowed_tparams = emit_shadowed_tparams(args.immediate_tparams, args.class_tparam_names);
+    let tparam_info = emit_tparam_info(args.immediate_tparams, args.class_tparam_names);
     let decl_vars = make_decl_vars(
         emitter,
         &scope,
@@ -178,7 +179,7 @@ pub fn emit_body<'b, 'd>(
             false, // is_memoize_wrapper
             false, // is_memoize_wrapper_lsb
             upper_bounds,
-            shadowed_tparams,
+            tparam_info,
             attributes,
             attrs,
             coeffects,
@@ -388,7 +389,7 @@ pub fn make_body<'a, 'd>(
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     upper_bounds: Vec<UpperBound>,
-    shadowed_tparams: Vec<String>,
+    tparam_info: Vec<TParamInfo>,
     attributes: Vec<Attribute>,
     attrs: Attr,
     coeffects: Coeffects,
@@ -453,10 +454,7 @@ pub fn make_body<'a, 'd>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         upper_bounds: upper_bounds.into(),
-        shadowed_tparams: shadowed_tparams
-            .into_iter()
-            .map(|s| ClassName::intern(&s))
-            .collect(),
+        tparam_info: tparam_info.into(),
         return_type: return_type.into(),
         doc_comment: doc_comment
             .map(|(_, comment)| comment.into_bytes().into())
@@ -759,18 +757,22 @@ pub fn emit_generics_upper_bounds(
         .collect::<Vec<_>>()
 }
 
-fn emit_shadowed_tparams(
+fn emit_tparam_info(
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
-) -> Vec<String> {
-    let s1 = get_tp_names_set(immediate_tparams);
+) -> Vec<TParamInfo> {
+    let s1 = get_tp_names(immediate_tparams);
     let s2: HashSet<&str> = class_tparam_names.iter().cloned().collect();
-    // TODO(hrust): remove sort after Rust emitter released
-    let mut r = s1
-        .intersection(&s2)
-        .map(|s| (*s).into())
-        .collect::<Vec<_>>();
-    r.sort();
+    let r: Vec<TParamInfo> = s1
+        .iter()
+        .map(|name| {
+            let shadows_class_tparam = s2.contains(name);
+            TParamInfo {
+                name: ClassName::intern(name),
+                shadows_class_tparam,
+            }
+        })
+        .collect();
     r
 }
 
@@ -787,10 +789,6 @@ fn get_tp_name(tparam: &ast::Tparam) -> &str {
 }
 
 pub fn get_tp_names(tparams: &[ast::Tparam]) -> Vec<&str> {
-    tparams.iter().map(get_tp_name).collect()
-}
-
-pub fn get_tp_names_set(tparams: &[ast::Tparam]) -> HashSet<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 

@@ -60,8 +60,8 @@ pub fn emit_body<'a, 'd>(
         is_memoize_wrapper: Default::default(),
         is_memoize_wrapper_lsb: Default::default(),
         num_iters: Default::default(),
-        shadowed_tparams: Default::default(),
         upper_bounds: Default::default(),
+        tparam_info: Default::default(),
         span: Default::default(),
         repr: hhbc::BcRepr {
             instrs: instrs.into(),

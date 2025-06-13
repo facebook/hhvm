@@ -125,7 +125,8 @@ class ClientRunner
                size_t numClients,
                size_t numRequests,
                size_t clientsAtOnce,
-               int32_t quicTransportTimerResolutionMs);
+               int32_t quicTransportTimerResolutionMs,
+               VaryRequestParams* varyParams = nullptr);
 
   void run();
 
@@ -170,7 +171,8 @@ class ClientRunner
 } // namespace
 
 namespace proxygen {
-int httperf2(folly::Optional<folly::SocketAddress> bindAddress) {
+int httperf2(folly::Optional<folly::SocketAddress> bindAddress,
+             VaryRequestParams* varyParams) {
   if (FLAGS_threads <= 0 || FLAGS_clients <= 0 || FLAGS_clients_at_once <= 0 ||
       (FLAGS_request_avg <= 0 && FLAGS_requests <= 0) || FLAGS_ticket_pct < 0 ||
       FLAGS_ticket_pct > 100 || FLAGS_resume_pct < 0 ||
@@ -229,7 +231,8 @@ int httperf2(folly::Optional<folly::SocketAddress> bindAddress) {
                    numClients,
                    numRequests,
                    clientsAtOnce,
-                   FLAGS_client_quic_transport_timer_resolution_ms);
+                   FLAGS_client_quic_transport_timer_resolution_ms,
+                   varyParams);
     r.run();
   } else {
     std::list<std::thread> threads;
@@ -241,7 +244,8 @@ int httperf2(folly::Optional<folly::SocketAddress> bindAddress) {
           numClients,
           numRequests,
           clientsAtOnce,
-          FLAGS_client_quic_transport_timer_resolution_ms);
+          FLAGS_client_quic_transport_timer_resolution_ms,
+          varyParams);
       threads.emplace_back([r]() { r->run(); });
       if (FLAGS_delaystart > 0 && i + 1 < FLAGS_threads) {
         // @lint-ignore CLANGTIDY
@@ -274,7 +278,8 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
                            size_t numClients,
                            size_t numRequests,
                            size_t clientsAtOnce,
-                           int32_t quicTransportTimerResolutionMs)
+                           int32_t quicTransportTimerResolutionMs,
+                           VaryRequestParams* varyParams)
     : parentStats_(parentStats),
       remainingClients_(numClients),
       numRequests_(numRequests),
@@ -346,8 +351,19 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
     }
   }
 
-  request_.setURL(FLAGS_url);
+  // Set URL from VaryRequestParams if provided, otherwise use default URL
+  request_.setURL(varyParams
+                      ? varyParams->getNextRequestURL().value_or(FLAGS_url)
+                      : FLAGS_url);
 
+  // Add custom headers if provided via VaryRequestParams
+  if (varyParams) {
+    if (auto headers = varyParams->getNextRequestHeaders()) {
+      for (const auto& header : *headers) {
+        request_.getHeaders().add(header.first, header.second);
+      }
+    }
+  }
   if (FLAGS_realheaders) {
     for (const auto& p : f_real_headers) {
       request_.getHeaders().add(p.first, p.second);

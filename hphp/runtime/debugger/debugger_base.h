@@ -31,6 +31,7 @@ namespace HPHP::Eval {
 
 struct DebuggerClientOptions {
   std::string host;
+  bool is_notebook;
   int port{-1};
   std::string extension;
   std::vector<std::string> cmds;

@@ -720,7 +720,10 @@ std::string DebuggerClient::getPrompt() {
     return "";
   }
   auto name = &m_machine->m_name;
-  if (m_inputState == TakingCode) {
+  if (m_inputState == TakingCode ) {
+    if (m_options.is_notebook) {
+      return "";
+    }
     std::string prompt = " ";
     for (unsigned i = 2; i < name->size() + 2; i++) {
       prompt += '.';
@@ -2011,9 +2014,15 @@ bool DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval eval;
-  eval.onClient(*this);
-  return !eval.failed();
+  if (m_options.is_notebook) {
+    CmdEvalStream eval;
+    eval.onClient(*this);
+    return !eval.failed();
+  } else {
+    CmdEval eval;
+    eval.onClient(*this);
+    return !eval.failed();
+  }
 }
 
 void DebuggerClient::swapHelp() {

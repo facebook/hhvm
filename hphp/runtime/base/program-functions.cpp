@@ -192,6 +192,7 @@ void pcre_reinit();
 enum class ExecutionMode {
   RUN,
   DEBUG,
+  NOTEBOOK,
   EVAL,
   TRANSLATE,
   SERVER,
@@ -213,6 +214,8 @@ void validate(boost::any& v, const std::vector<std::string>& values, ExecutionMo
         v = boost::any(ExecutionMode::RUN);
     } else if (s == "debug" || s == "d") {
         v = boost::any(ExecutionMode::DEBUG);
+    } else if (s == "notebook") {
+        v = boost::any(ExecutionMode::NOTEBOOK);
     } else if (s == "eval") {
         v = boost::any(ExecutionMode::EVAL);
     } else if (s == "translate" || s == "t") {
@@ -1133,6 +1136,7 @@ static void set_execution_mode(ExecutionMode mode) {
             return;
         case ExecutionMode::RUN:
         case ExecutionMode::DEBUG:
+        case ExecutionMode::NOTEBOOK:
         case ExecutionMode::TRANSLATE:
         case ExecutionMode::DUMPHHAS:
         case ExecutionMode::VERIFY:
@@ -1541,7 +1545,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-option-hash", "print the repo-options hash for the specified file "
      "and exit")
     ("mode,m", value<ExecutionMode>(&po.mode)->default_value(ExecutionMode::RUN, "run"),
-     "run | debug (d) | vsdebug | server (s) | daemon | replay | "
+     "run | debug (d) | notebook | vsdebug | server (s) | daemon | replay | "
      "translate (t) | verify | getoption | eval")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
@@ -1716,7 +1720,7 @@ static int execute_program_impl(int argc, char** argv) {
 #endif
 
   // reuse -h for help command if possible
-  if (vm.count("help") || (vm.count("debug-host") && po.mode != ExecutionMode::DEBUG)) {
+  if (vm.count("help") || (vm.count("debug-host") && (po.mode != ExecutionMode::DEBUG || po.mode == ExecutionMode::NOTEBOOK))) {
     cout << desc << "\n";
     return 0;
   }
@@ -1769,7 +1773,7 @@ static int execute_program_impl(int argc, char** argv) {
   po.isTempFile = vm.count("temp-file");
 
   // forget the source for systemlib.php unless we are debugging
-  if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::VSDEBUG) {
+  if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::VSDEBUG && po.mode != ExecutionMode::NOTEBOOK) {
     SystemLib::s_source = "";
   }
   if (po.mode == ExecutionMode::VSDEBUG) {
@@ -2178,6 +2182,7 @@ static int execute_program_impl(int argc, char** argv) {
   if (argc <= 1 ||
     po.mode == ExecutionMode::RUN ||
     po.mode == ExecutionMode::DEBUG ||
+    po.mode == ExecutionMode::NOTEBOOK ||
     po.mode == ExecutionMode::VSDEBUG ||
     po.mode == ExecutionMode::EVAL) {
     set_stack_size();
@@ -2198,7 +2203,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     std::string const cliFile = !po.file.empty() ? po.file :
                                  new_argv[0] ? new_argv[0] : "";
-    if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::EVAL && cliFile.empty()) {
+    if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::NOTEBOOK && po.mode != ExecutionMode::EVAL && cliFile.empty()) {
       std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
       return HPHP_EXIT_FAILURE;
@@ -2242,9 +2247,10 @@ static int execute_program_impl(int argc, char** argv) {
       file = new_argv[0];
     }
 
-    if (po.mode == ExecutionMode::DEBUG) {
+    if (po.mode == ExecutionMode::DEBUG || po.mode == ExecutionMode::NOTEBOOK) {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       Cfg::Debugger::EnableHphpd = true;
+      po.debugger_options.is_notebook = po.mode == ExecutionMode::NOTEBOOK;
       po.debugger_options.fileName = file;
       po.debugger_options.user = po.user;
       Eval::DebuggerProxyPtr localProxy =

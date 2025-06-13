@@ -463,7 +463,7 @@
  (wrapped false)
  (modules
   typing_json)
- (libraries decl_provider hackfmt typing_env_types)
+ (libraries decl_provider hackfmt typing_env_types typing_utils)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -238,5 +238,35 @@ void tryClassReifiedInit(Class* cls, ArrayData* generics, ObjectData* obj) {
   }
 }
 
+size_t extractSizeFromReifiedAttribute(const ArrayData* arr) {
+  size_t len = 0;
+  IterateKV(
+    arr,
+    [&](TypedValue k, TypedValue v) {
+      assertx(isIntType(k.m_type));
+      assertx(isIntType(v.m_type));
+      if (k.m_data.num == 0) {
+        len = (size_t) v.m_data.num;
+        return true;
+      }
+      return false;
+    }
+  );
+  return len;
+}
+
+bool areAllGenericsSoft(const ArrayData* arr) {
+  bool allSoft = true;
+  IterateKV(
+    arr,
+    [&](TypedValue k, TypedValue v) {
+      if (k.m_data.num % 3 == 2) {
+        allSoft &= (bool) v.m_data.num;
+      }
+    }
+  );
+  return allSoft;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

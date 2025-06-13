@@ -52,6 +52,9 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 GenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
 
+// Extract and return only the size from the attribute array
+size_t extractSizeFromReifiedAttribute(const ArrayData* arr);
+
 // Raises a runtime error if the location of reified generics of f/c does not
 // match the location of reified_generics
 void checkFunReifiedGenericMismatch(
@@ -69,6 +72,7 @@ uint16_t getGenericsBitmap(const Func*);
 // Returns whether all the generics in the given GenericsInfo are denoted
 // as soft
 bool areAllGenericsSoft(const GenericsInfo& info);
+bool areAllGenericsSoft(const ArrayData* generics);
 
 // Raises warning for parameter at index i for function/class name
 void raise_warning_for_soft_reified(size_t i, bool fun, const StringData *name);

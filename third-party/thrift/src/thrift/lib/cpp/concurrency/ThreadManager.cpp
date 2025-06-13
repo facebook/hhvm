@@ -1159,7 +1159,6 @@ class PriorityThreadManager::PriorityImpl
 
   std::shared_ptr<ThreadFactory> threadFactory() const override {
     throw IllegalStateException("Not implemented");
-    return std::shared_ptr<ThreadFactory>();
   }
 
   void threadFactory(std::shared_ptr<ThreadFactory> value) override {
@@ -1266,7 +1265,6 @@ class PriorityThreadManager::PriorityImpl
 
   std::shared_ptr<Runnable> removeNextPending() override {
     throw IllegalStateException("Not implemented");
-    return std::shared_ptr<Runnable>();
   }
 
   void clearPending() override {

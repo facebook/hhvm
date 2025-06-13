@@ -558,6 +558,58 @@ TEST_F(ParserTest, conditional_block_not_wrong_arity) {
           1)));
 }
 
+TEST_F(ParserTest, conditional_block_omit_close_expression_for_single_line) {
+  auto ast = parse_ast(
+      "{{#if yes}} Yes! {{/if}}\n"
+      "{{#if yes}} Yes! {{#else}} No! {{/if}}\n"
+      "{{#if yes}} Yes! {{#else if no}} No! {{/if}}\n"
+      "{{#if yes}} Yes! {{#else if no}} No! {{#else}} Maybe! {{/if}}\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ if-block <line:1:1, col:25>\n"
+      "│  ├─ expression <line:1:7, col:10> 'yes'\n"
+      "│  ╰─ text <line:1:12, col:18> ' Yes! '\n"
+      "├─ newline <line:1:25, line:2:1> '\\n'\n"
+      "├─ if-block <line:2:1, col:39>\n"
+      "│  ├─ expression <line:2:7, col:10> 'yes'\n"
+      "│  ├─ text <line:2:12, col:18> ' Yes! '\n"
+      "│  ╰─ else-block <line:2:18, col:32>\n"
+      "│     ╰─ text <line:2:27, col:32> ' No! '\n"
+      "├─ newline <line:2:39, line:3:1> '\\n'\n"
+      "├─ if-block <line:3:1, col:45>\n"
+      "│  ├─ expression <line:3:7, col:10> 'yes'\n"
+      "│  ├─ text <line:3:12, col:18> ' Yes! '\n"
+      "│  ╰─ else-if-block <line:3:18, col:38>\n"
+      "│     ╰─ text <line:3:33, col:38> ' No! '\n"
+      "├─ newline <line:3:45, line:4:1> '\\n'\n"
+      "├─ if-block <line:4:1, col:62>\n"
+      "│  ├─ expression <line:4:7, col:10> 'yes'\n"
+      "│  ├─ text <line:4:12, col:18> ' Yes! '\n"
+      "│  ├─ else-if-block <line:4:18, col:38>\n"
+      "│  │  ╰─ text <line:4:33, col:38> ' No! '\n"
+      "│  ╰─ else-block <line:4:38, col:55>\n"
+      "│     ╰─ text <line:4:47, col:55> ' Maybe! '\n"
+      "╰─ newline <line:4:62, line:5:1> '\\n'\n");
+}
+
+TEST_F(
+    ParserTest,
+    conditional_block_omit_close_expression_fails_if_close_on_different_line) {
+  // Even though whitespace is not significant inside {{ tags }}, we still
+  // require single line in source to omit close expression.
+  parse_ast_should_fail(
+      "{{#if yes}} Yes! {{\n"
+      "/if}}\n");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression to close if-block 'yes' but found `}}`",
+          path_to_file(1),
+          2)));
+}
+
 TEST_F(ParserTest, basic_each) {
   auto ast = parse_ast(
       "{{#each news.updates}}\n"

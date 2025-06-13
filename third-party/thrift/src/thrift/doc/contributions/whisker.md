@@ -303,6 +303,7 @@ I don't know who you are.
 In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`.
 
 The closing tag must exactly replicate the `expression` of the matching opening tag. This serves to improve readability of complex nested conditions.
+The closing `expression` may be omitted if and only if both `{{#if}}` and `{{/if}}` are on the same line.
 
 <Example title="Example (positive)">
 
@@ -344,7 +345,7 @@ if-block       → { if-block-open ~ body* ~ else-if-block* ~ else-block? ~ if-b
 if-block-open  → { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
 else-if-block  → { "{{" ~ "#" ~ "else" ~ "if" ~ expression ~ "}}" ~ body* }
 else-block     → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
-if-block-close → { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
+if-block-close → { "{{" ~ "/" ~ "if" ~ expression? ~ "}}" }
 ```
 
 The `expression`s in `if-block-open` and `if-block-close` **must** be the same.

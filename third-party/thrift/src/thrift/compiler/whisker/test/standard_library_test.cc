@@ -172,7 +172,7 @@ TEST_F(StandardLibraryTest, array_enumerate) {
   {
     auto result = render(
         "{{#each (array.enumerate (array.of 1 \"foo\" 2) with_first=true) as |index item first?|}}\n"
-        "{{index}}: {{item}}{{#if first?}} (first){{/if first?}}\n"
+        "{{index}}: {{item}}{{#if first?}} (first){{/if}}\n"
         "{{/each}}\n",
         w::null);
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
@@ -186,7 +186,7 @@ TEST_F(StandardLibraryTest, array_enumerate) {
   {
     auto result = render(
         "{{#each (array.enumerate (array.of 1 \"foo\" 2) with_last=true) as |index item last?|}}\n"
-        "{{index}}: {{item}}{{#if last?}} (last){{/if last?}}\n"
+        "{{index}}: {{item}}{{#if last?}} (last){{/if}}\n"
         "{{/each}}\n",
         w::null);
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
@@ -200,7 +200,7 @@ TEST_F(StandardLibraryTest, array_enumerate) {
   {
     auto result = render(
         "{{#each (array.enumerate (array.of 1 \"foo\" 2) with_first=true with_last=true) as |index item first? last?|}}\n"
-        "{{index}}: {{item}}{{#if first?}} (first){{/if first?}}{{#if last?}} (last){{/if last?}}\n"
+        "{{index}}: {{item}}{{#if first?}} (first){{/if}}{{#if last?}} (last){{/if}}\n"
         "{{/each}}\n",
         w::null);
     EXPECT_THAT(diagnostics(), testing::IsEmpty());

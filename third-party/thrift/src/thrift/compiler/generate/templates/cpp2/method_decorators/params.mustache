@@ -47,6 +47,6 @@
 {{#let export partial before_declaration_params |function| captures |param_type param_name_declaration|}}
 {{#pragma ignore-newlines}}
 {{#each (array.enumerate function.params.fields with_first=true) as |index param first?|}}
-{{#if (not first?)}},{{/if (not first?)}} {{#partial param_type param=param}} {{#partial param_name_declaration param=param}}
+{{#if (not first?)}},{{/if}} {{#partial param_type param=param}} {{#partial param_name_declaration param=param}}
 {{/each}}
 {{/let partial}}

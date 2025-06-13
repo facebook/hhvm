@@ -628,6 +628,16 @@ class parser {
     return std::nullopt;
   }
 
+  unsigned line_number_of(source_location pos) const {
+    return resolved_location(pos, diags_.source_mgr()).line();
+  }
+  /**
+   * Gets the line number of start of a given token.
+   */
+  unsigned line_number_of(const token& t) const {
+    return line_number_of(t.range.begin);
+  }
+
   // root → { header* ~ body* }
   std::optional<ast::root> parse_root(parser_scan_window scan) {
     constexpr std::string_view expected_types = "text, template, or comment";
@@ -1468,7 +1478,7 @@ class parser {
   // else-if-block →
   //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
   // cond-block-close →
-  //   { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
+  //   { "{{" ~ "/" ~ "if" ~ expression? ~ "}}" }
   //
   // NOTE: the expression must match between open and close
   parse_result<ast::conditional_block> parse_conditional_block(
@@ -1518,19 +1528,26 @@ class parser {
     expect_on_close(tok::kw_if);
     condition = parse_expression(scan.make_fresh());
     if (!condition.has_value()) {
-      report_fatal_expected(
-          scan, "expression to close if-block '{}'", open.to_string());
+      // Note that this call moves the scan forward to the end of {{/if}} which
+      // affects the line number check below.
+      expect_on_close(tok::close);
+      const bool requires_close_condition =
+          line_number_of(*scan_start) != line_number_of(scan.peek());
+      if (requires_close_condition) {
+        report_fatal_expected(
+            scan.prev(), "expression to close if-block '{}'", open.to_string());
+      }
+    } else {
+      ast::expression close = {std::move(condition).consume_and_advance(&scan)};
+      if (close != open) {
+        report_error(
+            scan,
+            "conditional-block opening '{}' does not match closing '{}'",
+            open.to_string(),
+            close.to_string());
+      }
+      expect_on_close(tok::close);
     }
-    ast::expression close = {std::move(condition).consume_and_advance(&scan)};
-    if (close != open) {
-      report_error(
-          scan,
-          "conditional-block opening '{}' does not match closing '{}'",
-          open.to_string(),
-          close.to_string());
-    }
-
-    expect_on_close(tok::close);
 
     return {
         ast::conditional_block{

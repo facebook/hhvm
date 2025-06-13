@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/generics-info.h"
 
 #include "hphp/util/bitset-view.h"
 #include "hphp/util/compact-vector.h"
@@ -1441,10 +1441,15 @@ public:
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns ReifiedGenericsInfo containing how many generics this class has,
-   * indices of its reified generics, and which ones are soft reified
+   * Returns GenericsInfo which contains information about each generic
+   * parameter defined on this class which includes whether it is
+   * reified, or contains the soft or warn annotation.
+   *
+   * NB: This getter should only be called when this class is known to
+   * contain extra data where the GenericsInfo struct lives. This can be
+   * checked by testing the hasReifiedGenericsInfo flag.
    */
-  const ReifiedGenericsInfo& getReifiedGenericsInfo() const;
+  const GenericsInfo& getGenericsInfo() const;
 
   /*
    * Returns whether any of this class's parents have reified generics
@@ -1660,7 +1665,7 @@ private:
     /*
      * Cache for reified generics info
      */
-    ReifiedGenericsInfo m_reifiedGenericsInfo{{}};
+    GenericsInfo m_genericsInfo{{}};
 
     /*
      * Cache for Closure subclass scopings.

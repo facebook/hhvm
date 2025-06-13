@@ -929,7 +929,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
 
 namespace {
 
-const Array reified_generics_info_to_array(const ReifiedGenericsInfo& info) {
+const Array reified_generics_info_to_array(const GenericsInfo& info) {
   VecInit arr(info.m_typeParamInfo.size());
   for (auto const& tparam: info.m_typeParamInfo) {
     DictInit tparamArr(3);
@@ -945,7 +945,9 @@ const Array reified_generics_info_to_array(const ReifiedGenericsInfo& info) {
 
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return reified_generics_info_to_array(func->getReifiedGenericsInfo());
+  return func->hasReifiedGenerics()
+    ? reified_generics_info_to_array(func->getGenericsInfo())
+    : Array::CreateVec();
 }
 
 const StaticString s_pure("pure");
@@ -1781,7 +1783,9 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesRecursiveNamespaced) {
 
 static Array HHVM_METHOD(ReflectionClass, getReifiedTypeParamInfo) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return reified_generics_info_to_array(cls->getReifiedGenericsInfo());
+  return cls->hasReifiedGenerics()
+    ? reified_generics_info_to_array(cls->getGenericsInfo())
+    : Array::CreateVec();
 }
 
 static Array HHVM_STATIC_METHOD(

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -127,7 +127,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       if (generics->hasConstVal(TVec)) {
         auto const genericsArr = generics->arrLikeVal();
         auto const& genericsDef =
-          callee->getReifiedGenericsInfo().m_typeParamInfo;
+          callee->getGenericsInfo().m_typeParamInfo;
         if (genericsArr->size() == genericsDef.size()) {
           bool match = true;
           IterateKV(genericsArr, [&](TypedValue k, TypedValue v) {
@@ -171,7 +171,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       }
 
       // Generics not given. We will either fail or raise a warning.
-      if (!areAllGenericsSoft(callee->getReifiedGenericsInfo())) {
+      if (!areAllGenericsSoft(callee->getGenericsInfo())) {
         gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, callee));
         return;
       }

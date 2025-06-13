@@ -404,7 +404,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (hasReifiedGenerics) {
     auto const tv = uait->second;
     assertx(tvIsVec(tv));
-    f->extShared()->m_reifiedGenericsInfo =
+    f->extShared()->m_genericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   }
 

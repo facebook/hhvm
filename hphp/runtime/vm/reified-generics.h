@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/tv-val.h"
 
-#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/hash-map.h"
@@ -43,13 +43,13 @@ ArrayData* addToTypeReifiedGenericsTable(const StringData* mangledName,
 // If the cls does not have any reified generics, then returns nullptr
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 
-// Returns a ReifiedGenericsInfo that contains a vector of TypeParamInfo
+// Returns a GenericsInfo that contains a vector of TypeParamInfo
 // which specifies whether each generic param is reified, soft or warn
 // only. Format of the input is a list of integers where the first one
 // is the count of reified generics and the following numbers are their
 // indices and whether they are soft or not and whether to error or warn
 // interleaved
-ReifiedGenericsInfo
+GenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
 
 // Raises a runtime error if the location of reified generics of f/c does not
@@ -66,9 +66,9 @@ void checkClassReifiedGenericMismatch(
 uint16_t getGenericsBitmap(const ArrayData* generics);
 uint16_t getGenericsBitmap(const Func*);
 
-// Returns whether all the generics in the given ReifiedGenericsInfo are denoted
+// Returns whether all the generics in the given GenericsInfo are denoted
 // as soft
-bool areAllGenericsSoft(const ReifiedGenericsInfo& info);
+bool areAllGenericsSoft(const GenericsInfo& info);
 
 // Raises warning for parameter at index i for function/class name
 void raise_warning_for_soft_reified(size_t i, bool fun, const StringData *name);

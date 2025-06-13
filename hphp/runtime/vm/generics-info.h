@@ -36,9 +36,9 @@ struct TypeParamInfo {
  * Struct that contains information regarding reified generics of a function
  * or class
  */
-struct ReifiedGenericsInfo {
-  ReifiedGenericsInfo() : m_typeParamInfo() {}
-  explicit ReifiedGenericsInfo(std::vector<TypeParamInfo>&& info)
+struct GenericsInfo {
+  GenericsInfo() : m_typeParamInfo() {}
+  GenericsInfo(std::vector<TypeParamInfo>&& info)
     : m_typeParamInfo(std::move(info)) {}
   VMFixedVector<TypeParamInfo> m_typeParamInfo;
 

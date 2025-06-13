@@ -213,7 +213,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
   }
 
   if (!hasGenerics) {
-    if (!areAllGenericsSoft(callee->getReifiedGenericsInfo())) {
+    if (!areAllGenericsSoft(callee->getGenericsInfo())) {
       throw_call_reified_func_without_generics(callee);
     }
 

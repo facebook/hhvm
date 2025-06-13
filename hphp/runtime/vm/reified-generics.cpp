@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/generics-info.h"
 
 namespace HPHP {
 
@@ -69,7 +69,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   return tv.m_data.parr;
 }
 
-ReifiedGenericsInfo
+GenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   size_t len = 0, cur = 0;
   bool isReified = false, isSoft = false;
@@ -101,14 +101,14 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   );
   // Insert the non reified ones at the end
   tpList.insert(tpList.end(), len - cur, {});
-  return ReifiedGenericsInfo(std::move(tpList));
+  return GenericsInfo(std::move(tpList));
 }
 
 // Raises a runtime error if the location of reified generics of f does not
 // match the location of reified_generics
 template <bool fun>
 void checkReifiedGenericMismatchHelper(
-  const ReifiedGenericsInfo& info,
+  const GenericsInfo& info,
   const StringData* name,
   const ArrayData* reified_generics
 ) {
@@ -155,7 +155,7 @@ void checkFunReifiedGenericMismatch(
   const ArrayData* reified_generics
 ) {
   checkReifiedGenericMismatchHelper<true>(
-    f->getReifiedGenericsInfo(),
+    f->getGenericsInfo(),
     f->fullName(),
     reified_generics
   );
@@ -166,7 +166,7 @@ void checkClassReifiedGenericMismatch(
   const ArrayData* reified_generics
 ) {
   checkReifiedGenericMismatchHelper<false>(
-    c->getReifiedGenericsInfo(),
+    c->getGenericsInfo(),
     c->name(),
     reified_generics
   );
@@ -189,7 +189,7 @@ uint16_t getGenericsBitmap(const ArrayData* generics) {
 uint16_t getGenericsBitmap(const Func* f) {
   assertx(f);
   if (!f->hasReifiedGenerics()) return 0;
-  auto const& info = f->getReifiedGenericsInfo();
+  auto const& info = f->getGenericsInfo();
   if (info.m_typeParamInfo.size() > 15) return 0;
   uint16_t bitmap = 1;
   for (auto const& tinfo : info.m_typeParamInfo) {
@@ -198,7 +198,7 @@ uint16_t getGenericsBitmap(const Func* f) {
   return bitmap;
 }
 
-bool areAllGenericsSoft(const ReifiedGenericsInfo& info) {
+bool areAllGenericsSoft(const GenericsInfo& info) {
   for (auto const& tp : info.m_typeParamInfo) {
     if (!tp.m_isSoft) return false;
   }
@@ -216,7 +216,7 @@ void raise_warning_for_soft_reified(size_t i, bool fun,
 
 void checkClassReifiedGenericsSoft(const Class* cls) {
   assertx(cls->hasReifiedGenerics());
-  if (areAllGenericsSoft(cls->getReifiedGenericsInfo())) {
+  if (areAllGenericsSoft(cls->getGenericsInfo())) {
     raise_warning_for_soft_reified(0, false, cls->name());
   } else {
     raise_error("Cannot create a new instance of a reified class without "

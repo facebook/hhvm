@@ -82,8 +82,9 @@ bool has_lazy_field(const t_structured& node) {
 }
 
 // Reports an existing name was redefined within the given parent node.
-void report_redef_error(
+void report_redef_diag(
     diagnostics_engine& diags,
+    const diagnostic_level& level,
     const char* kind,
     std::string_view name,
     const t_named& parent,
@@ -91,16 +92,24 @@ void report_redef_error(
     const t_node& /*existing*/) {
   // TODO(afuller): Use `existing` to provide more detail in the
   // diagnostic.
-  diags.error(
-      child, "{} `{}` is already defined for `{}`.", kind, name, parent.name());
+  diags.report(
+      child,
+      level,
+      "{} `{}` is already defined for `{}`.",
+      kind,
+      name,
+      parent.name());
 }
 
 // Helper for checking for the redefinition of a name in the context of a node.
 class redef_checker {
  public:
   redef_checker(
-      diagnostics_engine& diags, const char* kind, const t_named& parent)
-      : diags_(diags), kind_(kind), parent_(parent) {}
+      diagnostics_engine& diags,
+      const char* kind,
+      const t_named& parent,
+      const diagnostic_level& level = diagnostic_level::error)
+      : diags_(diags), kind_(kind), parent_(parent), level_(level) {}
 
   // Checks if the given `name`, derived from `node` via `child`, has already
   // been defined.
@@ -116,10 +125,11 @@ class redef_checker {
     }
     if (&node == &parent_ && existing == &parent_) {
       // The degenerate case where parent_ is conflicting with itself.
-      report_redef_error(diags_, kind_, name, parent_, child, *existing);
+      report_redef_diag(diags_, level_, kind_, name, parent_, child, *existing);
     } else {
-      diags_.error(
+      diags_.report(
           child,
+          level_,
           "{} `{}.{}` and `{}.{}` can not have same name in `{}`.",
           kind_,
           node.name(),
@@ -136,8 +146,8 @@ class redef_checker {
   // For example, all functions in an interface.
   void check(const t_named& child) {
     if (const t_named* existing = insert(child.name(), child)) {
-      report_redef_error(
-          diags_, kind_, child.name(), parent_, child, *existing);
+      report_redef_diag(
+          diags_, level_, kind_, child.name(), parent_, child, *existing);
     }
   }
 
@@ -162,6 +172,7 @@ class redef_checker {
   diagnostics_engine& diags_;
   const char* kind_;
   const t_named& parent_;
+  const diagnostic_level level_;
 
   std::unordered_map<std::string_view, const t_named*> seen_;
 };
@@ -800,8 +811,9 @@ void validate_structured_annotation(sema_context& ctx, const t_named& node) {
   for (const t_const& annot : node.structured_annotations()) {
     auto [it, inserted] = seen.emplace(annot.type(), &annot);
     if (!inserted) {
-      report_redef_error(
+      report_redef_diag(
           ctx,
+          diagnostic_level::error,
           "Structured annotation",
           it->first->name(),
           node,
@@ -823,8 +835,14 @@ void validate_uri_uniqueness(sema_context& ctx, const t_program& prog) {
     }
     auto result = uri_to_node.emplace(uri, &node);
     if (!result.second) {
-      report_redef_error(
-          ctx, "Thrift URI", uri, node, node, *result.first->second);
+      report_redef_diag(
+          ctx,
+          diagnostic_level::error,
+          "Thrift URI",
+          uri,
+          node,
+          node,
+          *result.first->second);
     }
   });
   for (const auto* p : prog.get_included_programs()) {
@@ -996,6 +1014,14 @@ void validate_function_priority_annotation(
         "Bad priority '{}'. Choose one of {}.",
         *priority,
         choices);
+  }
+}
+
+void validate_function_exception_field_name_uniqueness(
+    sema_context& ctx, const t_function& node) {
+  if (node.exceptions() != nullptr) {
+    redef_checker(ctx, "Exception field", node, diagnostic_level::warning)
+        .check_all(node.exceptions()->fields());
   }
 }
 
@@ -1679,6 +1705,8 @@ ast_validator standard_validator() {
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
   validator.add_function_visitor(&detail::validate_annotation_scopes<>);
+  validator.add_function_visitor(
+      &validate_function_exception_field_name_uniqueness);
 
   validator.add_structured_definition_visitor(&validate_field_names_uniqueness);
   validator.add_structured_definition_visitor(

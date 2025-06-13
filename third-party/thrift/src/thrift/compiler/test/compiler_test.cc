@@ -680,6 +680,20 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
   )");
 }
 
+TEST(CompilerTest, function_exception_field_name_uniqueness) {
+  check_compile(R"(
+    exception Ex1 {}
+    exception Ex2 {}
+
+    service S {
+      void foo() throws (
+        1: Ex1 e,
+        2: Ex2 e, # expected-warning: Exception field `e` is already defined for `foo`.
+      );
+    }
+  )");
+}
+
 TEST(CompilerTest, annotation_positions) {
   check_compile(R"(
     struct Type {1: string name} (thrift.uri = "facebook.com/thrift/annotation/Type") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
@@ -2803,7 +2817,7 @@ TEST(CompilerTest, unresolved_struct_in_const) {
     struct MyDeclaredStruct {
         1: i64 some_field;
     }
-    const MyDeclaredStruct X = MyUndeclaredStruct{}; 
+    const MyDeclaredStruct X = MyUndeclaredStruct{};
     # expected-error-1: could not resolve type `MyUndeclaredStruct` (expected `main.MyDeclaredStruct`)
   )";
   check_compile(name_contents_map, "main.thrift");

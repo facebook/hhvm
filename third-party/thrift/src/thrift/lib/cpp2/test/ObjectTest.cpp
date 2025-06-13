@@ -665,7 +665,6 @@ using ParseObjectTestCases = ::testing::Types<
     type::list<type::i32_t>,
     type::list<type::i64_t>,
     type::list<type::float_t>,
-    type::list<type::i64_t>,
     type::list<type::double_t>,
     type::set<type::i64_t>,
     type::set<type::string_t>,

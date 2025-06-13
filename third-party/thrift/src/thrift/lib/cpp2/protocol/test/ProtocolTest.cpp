@@ -172,13 +172,13 @@ template <
 void runBigListTest(
     folly::tag_t<ProtocolWriter, ProtocolReader>, ArithmeticType) {
   for (int randomInit = 0; randomInit <= 1; ++randomInit) {
-    for (int i = 1; i < 256; ++i) {
+    for (int i = 1; i < 1024; ++i) {
       auto w = ProtocolWriter();
       auto q = folly::IOBufQueue();
       w.setOutput(&q);
 
       // Make sure we exercise the multi-IOBuf case
-      const size_t intListSize = randomInit ? i : (i + 32 * 1024);
+      const size_t intListSize = randomInit ? i : (i + 1024 * 1024);
       std::vector<ArithmeticType> intList(intListSize);
 
       // Specify the engine and distribution.
@@ -197,7 +197,7 @@ void runBigListTest(
         }
 
       } else {
-        ArithmeticType t = 0;
+        ArithmeticType t = (intList.size() / 2) * (-1);
         std::generate_n(intList.begin(), intList.size(), [&]() { return ++t; });
       }
       using prot_method_integral =
@@ -225,7 +225,11 @@ void runBigListTest(
       } else {
         prot_method_integral::read(r, outList);
       }
-      ASSERT_EQ(intList, outList);
+      ASSERT_EQ(intList.size(), outList.size());
+      size_t len = std::min(intList.size(), outList.size());
+      for (size_t j = 0; j < len; ++j) {
+        ASSERT_EQ(intList[j], outList[j]);
+      }
     }
   }
 }

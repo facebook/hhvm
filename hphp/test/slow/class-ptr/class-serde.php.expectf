@@ -4,9 +4,11 @@ class(A)
 class(A)
 
 * serialize result:
-string(8) "l:1:"A";"
+
+Notice: Implicit Class to string conversion for serialize() in %s/class-serde.php on line 7
+string(8) "s:1:"A";"
 * unserialize result:
-class(A)
+string(1) "A"
 * fb_serialize result:
 
 Notice: Implicit Class to string conversion for string conversion in %s/class-serde.php on line 17

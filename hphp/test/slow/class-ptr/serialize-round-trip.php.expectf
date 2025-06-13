@@ -1,0 +1,20 @@
+===== Basic =====
+static_string:
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 14
+ called
+string:
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 14
+ called
+lazy_class: called
+class: called
+
+
+===== Pair =====
+static_string:
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 24
+ called
+string:
+Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 24
+ called
+lazy_class: called
+class: called

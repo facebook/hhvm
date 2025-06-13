@@ -458,18 +458,19 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString: {
-      auto const op = "serialize()";
+      auto const ty = value.getType();
       auto const str =
-        isStringType(value.getType()) ? value.getStringData() :
-        isClassType(value.getType()) ?
-          classToStringHelper(value.toClassVal(), op) :
-          lazyClassToStringHelper(value.toLazyClassVal(), op);
+        isStringType(ty) ? value.getStringData() :
+        isClassType(ty) ? value.toClassVal()->name() :
+          value.toLazyClassVal().name();
+      auto const kind = isStringType(ty) ? "s" : "l";
       auto const size = str->size();
       if (size >= Cfg::ErrorHandling::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%ld) exceeds max", size);
       }
       StringBuffer sb;
-      sb.append("s:");
+      sb.append(kind);
+      sb.append(":");
       sb.append(size);
       sb.append(":\"");
       sb.append(str->data(), size);

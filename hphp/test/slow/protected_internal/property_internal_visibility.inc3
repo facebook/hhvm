@@ -3,8 +3,10 @@
 module M2;
 
 class B extends A {
-  public function foobar(): string {
+  public function foobar(): void {
     // Not OK since foo is internal
-    return (new A())->foo.'bar';
+    (new A())->foo.'bar';
+    // Not OK since static_foo is internal
+    A::$static_foo.'bar';
   }
 }

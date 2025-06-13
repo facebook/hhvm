@@ -1,0 +1,8 @@
+<?hh
+<<file: __EnableUnstableFeatures("protected_internal")>>
+
+module M1;
+
+class A {
+  protected internal static int $foo = 42;
+}

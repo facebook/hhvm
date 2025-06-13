@@ -3,7 +3,8 @@
 module M1;
 
 class B extends A {
-  public function foobar(): string {
-    return (new A())->foo().'bar'; // pass
+  public function foobar(): void {
+    (new A())->foo().'bar'; // pass
+    A::static_foo().'bar'; // pass
   }
 }

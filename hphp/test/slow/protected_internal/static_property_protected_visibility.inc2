@@ -1,0 +1,10 @@
+<?hh
+
+module M1;
+
+class B {
+  public static function foobar(): string {
+    // Not OK since foo is protected
+    return A::$foo.'bar';
+  }
+}

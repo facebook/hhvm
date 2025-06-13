@@ -5,17 +5,27 @@ module A;
 
 class A {
   protected internal function foo(): void {
-    echo 'in foo';
+    echo "in foo\n";
+  }
+
+  protected internal static function static_foo(): void {
+    echo "in static foo\n";
   }
 }
 
 class B extends A {
   protected function foo(): void {
-    echo 'in overridden foo';
+    echo "in overridden foo\n";
   }
+
+  protected static function static_foo(): void {
+    echo "in overridden static foo\n";
+  }
+
 
   public function foobar(): void {
     $this->foo();
+    static::static_foo();
   }
 }
 

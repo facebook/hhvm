@@ -17,13 +17,6 @@ interface SinkServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * SinkService
  */
-interface SinkServiceIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * SinkService
- */
 interface SinkServiceAsyncClientIf extends SinkServiceAsyncIf {
   /**
    * Original thrift definition:-

@@ -34,27 +34,6 @@ interface SomeServiceAsyncIf extends \IThriftAsyncIf {
  * SomeService
  */
 <<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/SomeService'))>>
-interface SomeServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * included.SomeMap
-   *   bounce_map(1: included.SomeMap m);
-   */
-  public function bounce_map(Map<int, string> $m): Map<int, string>;
-
-  /**
-   * Original thrift definition:-
-   * map<TBinary, i64>
-   *   binary_keyed_map(1: list<i64> r);
-   */
-  public function binary_keyed_map(KeyedContainer<int, int> $r): Map<string, int>;
-}
-
-/**
- * Original thrift service:-
- * SomeService
- */
-<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/SomeService'))>>
 interface SomeServiceAsyncClientIf extends SomeServiceAsyncIf {
 }
 

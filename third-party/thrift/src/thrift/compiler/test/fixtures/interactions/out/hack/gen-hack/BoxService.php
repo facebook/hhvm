@@ -17,13 +17,6 @@ interface BoxServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * BoxService
  */
-interface BoxServiceIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * BoxService
- */
 interface BoxServiceAsyncClientIf extends BoxServiceAsyncIf {
 }
 

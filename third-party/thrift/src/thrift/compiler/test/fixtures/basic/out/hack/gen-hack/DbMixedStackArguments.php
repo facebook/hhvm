@@ -35,27 +35,6 @@ interface DbMixedStackArgumentsAsyncIf extends \IThriftAsyncIf {
  * DbMixedStackArguments
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/DbMixedStackArguments'))>>
-interface DbMixedStackArgumentsIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * binary
-   *   getDataByKey0(1: string key);
-   */
-  public function getDataByKey0(string $key): string;
-
-  /**
-   * Original thrift definition:-
-   * binary
-   *   getDataByKey1(1: string key);
-   */
-  public function getDataByKey1(string $key): string;
-}
-
-/**
- * Original thrift service:-
- * DbMixedStackArguments
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/DbMixedStackArguments'))>>
 interface DbMixedStackArgumentsAsyncClientIf extends DbMixedStackArgumentsAsyncIf {
 }
 
@@ -178,54 +157,6 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
 class DbMixedStackArgumentsAsyncProcessor extends DbMixedStackArgumentsAsyncProcessorBase {
   const type TThriftIf = DbMixedStackArgumentsAsyncIf;
 }
-
-abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as DbMixedStackArgumentsIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
-  const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::class, $input, 'getDataByKey0', $handler_ctx);
-    $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
-      $result->success = $this->handler->getDataByKey0($args->key);
-      $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'getDataByKey0', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getDataByKey1(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey1');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::class, $input, 'getDataByKey1', $handler_ctx);
-    $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
-      $result->success = $this->handler->getDataByKey1($args->key);
-      $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'getDataByKey1', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, DbMixedStackArgumentsStaticMetadata::class);
-  }
-}
-class DbMixedStackArgumentsSyncProcessor extends DbMixedStackArgumentsSyncProcessorBase {
-  const type TThriftIf = DbMixedStackArgumentsIf;
-}
-// For backwards compatibility
-class DbMixedStackArgumentsProcessor extends DbMixedStackArgumentsSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

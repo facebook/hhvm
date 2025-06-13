@@ -23,19 +23,6 @@ interface FactoriesAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Factories
  */
-interface FactoriesIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public function foo(): void;
-}
-
-/**
- * Original thrift service:-
- * Factories
- */
 interface FactoriesAsyncClientIf extends FactoriesAsyncIf {
 }
 

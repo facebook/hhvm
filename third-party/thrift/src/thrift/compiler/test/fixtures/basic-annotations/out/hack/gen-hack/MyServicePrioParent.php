@@ -30,26 +30,6 @@ interface MyServicePrioParentAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * MyServicePrioParent
  */
-interface MyServicePrioParentIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   ping();
-   */
-  public function ping(): void;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   pong();
-   */
-  public function pong(): void;
-}
-
-/**
- * Original thrift service:-
- * MyServicePrioParent
- */
 interface MyServicePrioParentAsyncClientIf extends MyServicePrioParentAsyncIf {
 }
 
@@ -167,54 +147,6 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
 class MyServicePrioParentAsyncProcessor extends MyServicePrioParentAsyncProcessorBase {
   const type TThriftIf = MyServicePrioParentAsyncIf;
 }
-
-abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as MyServicePrioParentIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
-  const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyServicePrioParent_ping_args::class, $input, 'ping', $handler_ctx);
-    $result = MyServicePrioParent_ping_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
-      $this->handler->ping();
-      $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_pong(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('pong');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyServicePrioParent_pong_args::class, $input, 'pong', $handler_ctx);
-    $result = MyServicePrioParent_pong_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
-      $this->handler->pong();
-      $this->eventHandler_->postExec($handler_ctx, 'pong', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'pong', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'pong', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServicePrioParentStaticMetadata::class);
-  }
-}
-class MyServicePrioParentSyncProcessor extends MyServicePrioParentSyncProcessorBase {
-  const type TThriftIf = MyServicePrioParentIf;
-}
-// For backwards compatibility
-class MyServicePrioParentProcessor extends MyServicePrioParentSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

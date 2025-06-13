@@ -27,20 +27,6 @@ interface TestServiceAsyncIf extends \IThriftAsyncIf {
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/namespace_from_package/module/TestService'))>>
-interface TestServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * i64
-   *   init(1: i64 int1);
-   */
-  public function init(int $int1): int;
-}
-
-/**
- * Original thrift service:-
- * TestService
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/namespace_from_package/module/TestService'))>>
 interface TestServiceAsyncClientIf extends TestServiceAsyncIf {
 }
 
@@ -125,38 +111,6 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
 class TestServiceAsyncProcessor extends TestServiceAsyncProcessorBase {
   const type TThriftIf = TestServiceAsyncIf;
 }
-
-abstract class TestServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as TestServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_init(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('init');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\namespace_from_package\module\TestService_init_args::class, $input, 'init', $handler_ctx);
-    $result = \test\namespace_from_package\module\TestService_init_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, '\test\namespace_from_package\module\TestService', 'init', $args);
-      $result->success = $this->handler->init($args->int1);
-      $this->eventHandler_->postExec($handler_ctx, 'init', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'init', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'init', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);
-  }
-}
-class TestServiceSyncProcessor extends TestServiceSyncProcessorBase {
-  const type TThriftIf = TestServiceIf;
-}
-// For backwards compatibility
-class TestServiceProcessor extends TestServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

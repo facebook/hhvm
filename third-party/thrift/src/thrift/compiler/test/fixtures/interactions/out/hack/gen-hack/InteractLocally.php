@@ -17,13 +17,6 @@ interface InteractLocallyAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * InteractLocally
  */
-interface InteractLocallyIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * InteractLocally
- */
 interface InteractLocallyAsyncClientIf extends InteractLocallyAsyncIf {
 }
 

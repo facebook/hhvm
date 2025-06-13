@@ -27,20 +27,6 @@ interface TestServiceAsyncIf extends \FooHackServiceAsyncIf {
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/hack/ns2/TestService'))>>
-interface TestServiceIf extends \FooHackServiceIf {
-  /**
-   * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
-   */
-  public function ping(string $str_arg): int;
-}
-
-/**
- * Original thrift service:-
- * TestService
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/hack/ns2/TestService'))>>
 interface TestServiceAsyncClientIf extends TestServiceAsyncIf, \FooHackServiceAsyncClientIf {
 }
 

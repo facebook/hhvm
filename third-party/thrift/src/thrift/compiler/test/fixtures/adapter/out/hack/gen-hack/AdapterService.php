@@ -34,27 +34,6 @@ interface AdapterServiceAsyncIf extends \IThriftAsyncIf {
  * AdapterService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdapterService'))>>
-interface AdapterServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * CountingStruct
-   *   count();
-   */
-  public function count(): \facebook\thrift\test\CountingStruct;
-
-  /**
-   * Original thrift definition:-
-   * HeapAllocated
-   *   adaptedTypes(1: HeapAllocated arg);
-   */
-  public function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): \facebook\thrift\test\HeapAllocated;
-}
-
-/**
- * Original thrift service:-
- * AdapterService
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdapterService'))>>
 interface AdapterServiceAsyncClientIf extends AdapterServiceAsyncIf {
 }
 

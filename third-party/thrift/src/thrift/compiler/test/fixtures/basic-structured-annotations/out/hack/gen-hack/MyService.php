@@ -34,27 +34,6 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
  * MyService
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/MyService'))>>
-interface MyServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * annotated_inline_string
-   *   first();
-   */
-  public function first(): string;
-
-  /**
-   * Original thrift definition:-
-   * bool
-   *   second(1: i64 count);
-   */
-  public function second(int $count): bool;
-}
-
-/**
- * Original thrift service:-
- * MyService
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/MyService'))>>
 interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
 }
 

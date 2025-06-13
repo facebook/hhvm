@@ -19,13 +19,6 @@ interface FooHackServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * FooHackService
  */
-interface FooHackServiceIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * FooHackService
- */
 interface FooHackServiceAsyncClientIf extends FooHackServiceAsyncIf {
 }
 

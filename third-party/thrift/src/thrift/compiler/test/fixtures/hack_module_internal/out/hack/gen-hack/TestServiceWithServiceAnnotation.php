@@ -33,26 +33,6 @@ interface TestServiceWithServiceAnnotationAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * TestServiceWithServiceAnnotation
  */
-interface TestServiceWithServiceAnnotationIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * i32
-   *   testMethodWithServiceAnnotation();
-   */
-  internal function testMethodWithServiceAnnotation(): int;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   testMethodWithServiceAnnotation2();
-   */
-  internal function testMethodWithServiceAnnotation2(): void;
-}
-
-/**
- * Original thrift service:-
- * TestServiceWithServiceAnnotation
- */
 interface TestServiceWithServiceAnnotationAsyncClientIf extends TestServiceWithServiceAnnotationAsyncIf {
 }
 

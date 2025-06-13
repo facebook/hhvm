@@ -28,20 +28,6 @@ interface FB303ServiceAsyncIf extends \IThriftAsyncIf {
  * FB303Service
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/FB303Service'))>>
-interface FB303ServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * ReservedKeyword
-   *   renamed_rpc(1: i32 int_parameter);
-   */
-  public function renamed_rpc(int $renamed_parameter): \test\fixtures\basic\MyRenamedStruct;
-}
-
-/**
- * Original thrift service:-
- * FB303Service
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/FB303Service'))>>
 interface FB303ServiceAsyncClientIf extends FB303ServiceAsyncIf {
 }
 
@@ -126,38 +112,6 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
 class FB303ServiceAsyncProcessor extends FB303ServiceAsyncProcessorBase {
   const type TThriftIf = FB303ServiceAsyncIf;
 }
-
-abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as FB303ServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
-    $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
-      $result->success = $this->handler->renamed_rpc($args->int_parameter);
-      $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'renamed_rpc', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FB303ServiceStaticMetadata::class);
-  }
-}
-class FB303ServiceSyncProcessor extends FB303ServiceSyncProcessorBase {
-  const type TThriftIf = FB303ServiceIf;
-}
-// For backwards compatibility
-class FB303ServiceProcessor extends FB303ServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

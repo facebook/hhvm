@@ -23,19 +23,6 @@ interface PerformAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Perform
  */
-interface PerformIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public function foo(): void;
-}
-
-/**
- * Original thrift service:-
- * Perform
- */
 interface PerformAsyncClientIf extends PerformAsyncIf {
 }
 

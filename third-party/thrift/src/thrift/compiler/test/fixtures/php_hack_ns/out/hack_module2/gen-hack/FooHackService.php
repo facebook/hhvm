@@ -19,14 +19,6 @@ interface FooHackServiceAsyncIf extends \IThriftAsyncIf {
  * FooHackService
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
-interface FooHackServiceIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * FooHackService
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
 interface FooHackServiceAsyncClientIf extends FooHackServiceAsyncIf {
 }
 

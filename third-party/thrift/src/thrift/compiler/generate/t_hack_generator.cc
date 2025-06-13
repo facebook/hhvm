@@ -524,12 +524,11 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice,
       const t_function* tfunction,
       bool legacy_arrays = false);
-  void generate_service_processor(
-      const t_service* tservice, bool mangle, bool async);
+  void generate_service_processor(const t_service* tservice, bool mangle);
   void generate_process_function(
       const t_service* tservice, const t_function* tfunction, bool async);
   void generate_process_metadata_function(
-      const t_service* tservice, bool mangle, bool async);
+      const t_service* tservice, bool mangle);
 
   /**
    * Read thrift object from JSON string, generated using the
@@ -5669,12 +5668,6 @@ void t_hack_generator::generate_service(
   generate_service_interface(
       tservice,
       mangle,
-      /*async*/ false,
-      /*client*/ false);
-
-  generate_service_interface(
-      tservice,
-      mangle,
       /*async*/ true,
       /*client*/ true);
   generate_service_interface(
@@ -5685,8 +5678,7 @@ void t_hack_generator::generate_service(
   generate_service_client(tservice, mangle);
   generate_service_interactions(tservice, mangle);
   if (phps_) {
-    generate_service_processor(tservice, mangle, /*async*/ true);
-    generate_service_processor(tservice, mangle, /*async*/ false);
+    generate_service_processor(tservice, mangle);
   }
   // Generate the structures passed around and helper functions
   generate_service_helpers(tservice, mangle);
@@ -5701,15 +5693,13 @@ void t_hack_generator::generate_service(
  * @param tservice The service to generate a server for.
  */
 void t_hack_generator::generate_service_processor(
-    const t_service* tservice, bool mangle, bool async) {
+    const t_service* tservice, bool mangle) {
   // Generate the dispatch methods
-  std::string suffix = async ? "Async" : "Sync";
   std::string extends;
-  std::string extends_processor =
-      std::string("\\Thrift") + suffix + "Processor";
+  std::string extends_processor = std::string("\\ThriftAsyncProcessor");
   if (tservice->get_extends() != nullptr) {
     extends = php_servicename_mangle(mangle, tservice->get_extends(), true);
-    extends_processor = extends + suffix + "ProcessorBase";
+    extends_processor = extends + "AsyncProcessorBase";
   }
 
   std::string long_name = php_servicename_mangle(mangle, tservice);
@@ -5719,11 +5709,11 @@ void t_hack_generator::generate_service_processor(
   // const type, then branch off at each service with the processor that does
   // define the const type.
 
-  f_service_ << indent() << "abstract class " << long_name << suffix
-             << "ProcessorBase extends " << extends_processor << " {\n"
+  f_service_ << indent() << "abstract class " << long_name
+             << "AsyncProcessorBase extends " << extends_processor << " {\n"
              << indent() << "  use \\GetThriftServiceMetadata;\n"
              << indent() << "  abstract const type TThriftIf as " << long_name
-             << (async ? "Async" : "") << "If;\n"
+             << "AsyncIf;\n"
              << indent()
              << "  const classname<\\IThriftServiceStaticMetadata> "
                 "SERVICE_METADATA_CLASS = "
@@ -5734,39 +5724,32 @@ void t_hack_generator::generate_service_processor(
   indent_up();
 
   // Generate the process subfunctions
-  for (const auto* function : get_supported_server_functions(tservice, async)) {
+  for (const auto* function : get_supported_server_functions(tservice, true)) {
     if (!skip_codegen(function)) {
-      generate_process_function(tservice, function, async);
+      generate_process_function(tservice, function, true);
     }
   }
-  generate_process_metadata_function(tservice, mangle, async);
+  generate_process_metadata_function(tservice, mangle);
 
   indent_down();
   f_service_ << "}\n";
 
-  f_service_ << indent() << "class " << long_name << suffix
-             << "Processor extends " << long_name << suffix
-             << "ProcessorBase {\n"
+  f_service_ << indent() << "class " << long_name << "AsyncProcessor extends "
+             << long_name << "AsyncProcessorBase {\n"
              << indent() << "  const type TThriftIf = " << long_name
-             << (async ? "Async" : "") << "If;\n"
+             << "AsyncIf;\n"
              << indent() << "}\n";
-
-  if (!async) {
-    f_service_ << indent() << "// For backwards compatibility\n"
-               << indent() << "class " << long_name << "Processor extends "
-               << long_name << "SyncProcessor {}\n";
-  }
 
   f_service_ << "\n";
 }
 
 void t_hack_generator::generate_process_metadata_function(
-    const t_service* tservice, bool mangle, bool async) {
+    const t_service* tservice, bool mangle) {
   // Open function
-  indent(f_service_) << "protected" << (async ? " async" : "")
-                     << " function process_getThriftServiceMetadata(int "
-                        "$seqid, \\TProtocol $input, \\TProtocol $output): "
-                     << (async ? "Awaitable<void>" : "void") << " {\n";
+  indent(f_service_) << "protected async function "
+                        "process_getThriftServiceMetadata(int $seqid, "
+                        "\\TProtocol $input, \\TProtocol $output): "
+                        "Awaitable<void> {\n";
   indent_up();
 
   f_service_

@@ -29,22 +29,6 @@ interface ServiceAsyncIf extends \IThriftAsyncIf {
  * Service
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Service'))>>
-interface ServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * MyI32_4873
-   *   func(1: StringWithAdapter_7208 arg1,
-   *        2: StringWithCppAdapter arg2,
-   *        3: Foo arg3);
-   */
-  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, \facebook\thrift\test\StringWithCppAdapter $arg2, ?\facebook\thrift\test\Foo $arg3): \facebook\thrift\test\MyI32_4873;
-}
-
-/**
- * Original thrift service:-
- * Service
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Service'))>>
 interface ServiceAsyncClientIf extends ServiceAsyncIf {
 }
 

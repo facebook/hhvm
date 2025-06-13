@@ -23,19 +23,6 @@ interface BadServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * BadService
  */
-interface BadServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * i32
-   *   bar();
-   */
-  public function bar(): int;
-}
-
-/**
- * Original thrift service:-
- * BadService
- */
 interface BadServiceAsyncClientIf extends BadServiceAsyncIf {
 }
 
@@ -194,38 +181,6 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
 class BadServiceAsyncProcessor extends BadServiceAsyncProcessorBase {
   const type TThriftIf = BadServiceAsyncIf;
 }
-
-abstract class BadServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as BadServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(BadService_bar_args::class, $input, 'bar', $handler_ctx);
-    $result = BadService_bar_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'BadService', 'bar', $args);
-      $result->success = $this->handler->bar();
-      $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, BadServiceStaticMetadata::class);
-  }
-}
-class BadServiceSyncProcessor extends BadServiceSyncProcessorBase {
-  const type TThriftIf = BadServiceIf;
-}
-// For backwards compatibility
-class BadServiceProcessor extends BadServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

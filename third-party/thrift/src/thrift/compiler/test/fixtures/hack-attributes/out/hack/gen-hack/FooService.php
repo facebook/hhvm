@@ -25,19 +25,6 @@ interface FooServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * FooService
  */
-interface FooServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
-   */
-  public function ping(string $str_arg): int;
-}
-
-/**
- * Original thrift service:-
- * FooService
- */
 interface FooServiceAsyncClientIf extends FooServiceAsyncIf {
 }
 

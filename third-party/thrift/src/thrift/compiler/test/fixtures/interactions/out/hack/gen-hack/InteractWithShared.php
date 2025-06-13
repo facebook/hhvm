@@ -23,19 +23,6 @@ interface InteractWithSharedAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * InteractWithShared
  */
-interface InteractWithSharedIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * shared.DoSomethingResult
-   *   do_some_similar_things();
-   */
-  public function do_some_similar_things(): DoSomethingResult;
-}
-
-/**
- * Original thrift service:-
- * InteractWithShared
- */
 interface InteractWithSharedAsyncClientIf extends InteractWithSharedAsyncIf {
 }
 

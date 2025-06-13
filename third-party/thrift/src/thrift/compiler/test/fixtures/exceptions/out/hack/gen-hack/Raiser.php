@@ -50,46 +50,6 @@ interface RaiserAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Raiser
  */
-interface RaiserIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   doBland();
-   */
-  public function doBland(): void;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   doRaise()
-   *   throws (1: Banal b,
-   *           2: Fiery f,
-   *           3: Serious s);
-   */
-  public function doRaise(): void;
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   get200();
-   */
-  public function get200(): string;
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   get500()
-   *   throws (1: Fiery f,
-   *           2: Banal b,
-   *           3: Serious s);
-   */
-  public function get500(): string;
-}
-
-/**
- * Original thrift service:-
- * Raiser
- */
 interface RaiserAsyncClientIf extends RaiserAsyncIf {
 }
 

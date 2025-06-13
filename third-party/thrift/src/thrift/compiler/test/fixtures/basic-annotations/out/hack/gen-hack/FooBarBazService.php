@@ -37,33 +37,6 @@ interface FooBarBazServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * FooBarBazService
  */
-interface FooBarBazServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public function foo(): void;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   bar();
-   */
-  public function bar(): void;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   baz();
-   */
-  public function baz(): void;
-}
-
-/**
- * Original thrift service:-
- * FooBarBazService
- */
 interface FooBarBazServiceAsyncClientIf extends FooBarBazServiceAsyncIf {
 }
 
@@ -217,70 +190,6 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
 class FooBarBazServiceAsyncProcessor extends FooBarBazServiceAsyncProcessorBase {
   const type TThriftIf = FooBarBazServiceAsyncIf;
 }
-
-abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as FooBarBazServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(FooBarBazService_foo_args::class, $input, 'foo', $handler_ctx);
-    $result = FooBarBazService_foo_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
-      $this->handler->foo();
-      $this->eventHandler_->postExec($handler_ctx, 'foo', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'foo', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'foo', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(FooBarBazService_bar_args::class, $input, 'bar', $handler_ctx);
-    $result = FooBarBazService_bar_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
-      $this->handler->bar();
-      $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(FooBarBazService_baz_args::class, $input, 'baz', $handler_ctx);
-    $result = FooBarBazService_baz_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
-      $this->handler->baz();
-      $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'baz', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FooBarBazServiceStaticMetadata::class);
-  }
-}
-class FooBarBazServiceSyncProcessor extends FooBarBazServiceSyncProcessorBase {
-  const type TThriftIf = FooBarBazServiceIf;
-}
-// For backwards compatibility
-class FooBarBazServiceProcessor extends FooBarBazServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

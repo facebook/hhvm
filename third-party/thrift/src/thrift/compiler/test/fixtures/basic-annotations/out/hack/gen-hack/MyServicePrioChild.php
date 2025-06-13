@@ -23,19 +23,6 @@ interface MyServicePrioChildAsyncIf extends MyServicePrioParentAsyncIf {
  * Original thrift service:-
  * MyServicePrioChild
  */
-interface MyServicePrioChildIf extends MyServicePrioParentIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   pang();
-   */
-  public function pang(): void;
-}
-
-/**
- * Original thrift service:-
- * MyServicePrioChild
- */
 interface MyServicePrioChildAsyncClientIf extends MyServicePrioChildAsyncIf, MyServicePrioParentAsyncClientIf {
 }
 
@@ -117,38 +104,6 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
 class MyServicePrioChildAsyncProcessor extends MyServicePrioChildAsyncProcessorBase {
   const type TThriftIf = MyServicePrioChildAsyncIf;
 }
-
-abstract class MyServicePrioChildSyncProcessorBase extends MyServicePrioParentSyncProcessorBase {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as MyServicePrioChildIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
-  const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_pang(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('pang');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyServicePrioChild_pang_args::class, $input, 'pang', $handler_ctx);
-    $result = MyServicePrioChild_pang_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioChild', 'pang', $args);
-      $this->handler->pang();
-      $this->eventHandler_->postExec($handler_ctx, 'pang', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'pang', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'pang', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServicePrioChildStaticMetadata::class);
-  }
-}
-class MyServicePrioChildSyncProcessor extends MyServicePrioChildSyncProcessorBase {
-  const type TThriftIf = MyServicePrioChildIf;
-}
-// For backwards compatibility
-class MyServicePrioChildProcessor extends MyServicePrioChildSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

@@ -17,13 +17,6 @@ interface PubSubStreamingServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * PubSubStreamingService
  */
-interface PubSubStreamingServiceIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * PubSubStreamingService
- */
 interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyncIf {
   /**
    * Original thrift definition:-
@@ -391,22 +384,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
 class PubSubStreamingServiceAsyncProcessor extends PubSubStreamingServiceAsyncProcessorBase {
   const type TThriftIf = PubSubStreamingServiceAsyncIf;
 }
-
-abstract class PubSubStreamingServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as PubSubStreamingServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);
-  }
-}
-class PubSubStreamingServiceSyncProcessor extends PubSubStreamingServiceSyncProcessorBase {
-  const type TThriftIf = PubSubStreamingServiceIf;
-}
-// For backwards compatibility
-class PubSubStreamingServiceProcessor extends PubSubStreamingServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

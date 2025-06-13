@@ -32,28 +32,6 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * MyService
  */
-interface MyServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func(1: string arg1,
-   *        2: MyStruct arg2);
-   */
-  public function func(string $arg1, ?MyStruct $arg2): MyStruct;
-
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func1(1: string arg1,
-   *         2: MyStruct arg2);
-   */
-  public function func1(string $arg1, ?MyStruct $arg2): MyStruct;
-}
-
-/**
- * Original thrift service:-
- * MyService
- */
 interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
 }
 

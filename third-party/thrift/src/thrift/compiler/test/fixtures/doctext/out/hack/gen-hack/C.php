@@ -40,34 +40,6 @@ interface CAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * C
  */
-interface CIf extends \IThriftSyncIf {
-  /**
-   * Function doctext.
-   * 
-   * Original thrift definition:-
-   * void
-   *   f();
-   */
-  public function f(): void;
-
-  /**
-   * 
-   * Original thrift definition:-
-   * string
-   *   thing(1: i32 a,
-   *         2: string b,
-   *         3: set<i32> c)
-   *   throws (1: Bang bang);
-   */
-  public function thing(int $a, string $b, Set<int> $c): string;
-}
-
-/**
- * Detailed overview of service
- * 
- * Original thrift service:-
- * C
- */
 interface CAsyncClientIf extends CAsyncIf {
   /**
    * Streaming function

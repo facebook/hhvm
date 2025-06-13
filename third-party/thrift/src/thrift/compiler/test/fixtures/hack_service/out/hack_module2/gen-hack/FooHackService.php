@@ -19,13 +19,6 @@ interface FooHackServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * FooHackService
  */
-interface FooHackServiceIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * FooHackService
- */
 interface FooHackServiceAsyncClientIf extends FooHackServiceAsyncIf {
 }
 
@@ -72,22 +65,6 @@ abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
 class FooHackServiceAsyncProcessor extends FooHackServiceAsyncProcessorBase {
   const type TThriftIf = FooHackServiceAsyncIf;
 }
-
-abstract class FooHackServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as FooHackServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FooHackServiceStaticMetadata::class);
-  }
-}
-class FooHackServiceSyncProcessor extends FooHackServiceSyncProcessorBase {
-  const type TThriftIf = FooHackServiceIf;
-}
-// For backwards compatibility
-class FooHackServiceProcessor extends FooHackServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

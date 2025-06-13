@@ -28,20 +28,6 @@ interface RenamedServiceAsyncIf extends \IThriftAsyncIf {
  * FooService
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/FooService'))>>
-interface RenamedServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   simple_rpc();
-   */
-  public function simple_rpc(): void;
-}
-
-/**
- * Original thrift service:-
- * FooService
- */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/FooService'))>>
 interface RenamedServiceAsyncClientIf extends RenamedServiceAsyncIf {
 }
 
@@ -124,38 +110,6 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
 class RenamedServiceAsyncProcessor extends RenamedServiceAsyncProcessorBase {
   const type TThriftIf = RenamedServiceAsyncIf;
 }
-
-abstract class RenamedServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as RenamedServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\RenamedService_simple_rpc_args::class, $input, 'simple_rpc', $handler_ctx);
-    $result = \test\fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\RenamedService', 'simple_rpc', $args);
-      $this->handler->simple_rpc();
-      $this->eventHandler_->postExec($handler_ctx, 'simple_rpc', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'simple_rpc', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'simple_rpc', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, RenamedServiceStaticMetadata::class);
-  }
-}
-class RenamedServiceSyncProcessor extends RenamedServiceSyncProcessorBase {
-  const type TThriftIf = RenamedServiceIf;
-}
-// For backwards compatibility
-class RenamedServiceProcessor extends RenamedServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

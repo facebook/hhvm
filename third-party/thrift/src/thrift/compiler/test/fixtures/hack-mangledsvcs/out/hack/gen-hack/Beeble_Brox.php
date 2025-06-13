@@ -17,13 +17,6 @@ interface Beeble_BroxAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Brox
  */
-interface Beeble_BroxIf extends \IThriftSyncIf {
-}
-
-/**
- * Original thrift service:-
- * Brox
- */
 interface Beeble_BroxAsyncClientIf extends Beeble_BroxAsyncIf {
 }
 

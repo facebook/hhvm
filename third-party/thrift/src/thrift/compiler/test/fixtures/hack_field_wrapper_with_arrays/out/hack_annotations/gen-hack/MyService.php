@@ -23,19 +23,6 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * MyService
  */
-interface MyServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * bool
-   *   second(1: i64 count);
-   */
-  public function second(int $count): bool;
-}
-
-/**
- * Original thrift service:-
- * MyService
- */
 interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
 }
 
@@ -119,38 +106,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
 class MyServiceAsyncProcessor extends MyServiceAsyncProcessorBase {
   const type TThriftIf = MyServiceAsyncIf;
 }
-
-abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as MyServiceIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_second(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('second');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_second_args::class, $input, 'second', $handler_ctx);
-    $result = MyService_second_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
-      $result->success = $this->handler->second($args->count);
-      $this->eventHandler_->postExec($handler_ctx, 'second', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'second', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'second', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServiceStaticMetadata::class);
-  }
-}
-class MyServiceSyncProcessor extends MyServiceSyncProcessorBase {
-  const type TThriftIf = MyServiceIf;
-}
-// For backwards compatibility
-class MyServiceProcessor extends MyServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

@@ -27,23 +27,6 @@ interface BarAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Bar
  */
-interface BarIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * string
-   *   baz(1: set<i32> a,
-   *       2: list<map<i32, set<string>>> b,
-   *       3: i64 c,
-   *       4: Foo d,
-   *       5: i64 e);
-   */
-  public function baz(?dict<int, bool> $a, ?KeyedContainer<int, KeyedContainer<int, dict<string, bool>>> $b, ?int $c, ?Foo $d, ?int $e): string;
-}
-
-/**
- * Original thrift service:-
- * Bar
- */
 interface BarAsyncClientIf extends BarAsyncIf {
 }
 
@@ -166,38 +149,6 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
 class BarAsyncProcessor extends BarAsyncProcessorBase {
   const type TThriftIf = BarAsyncIf;
 }
-
-abstract class BarSyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as BarIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
-  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Bar_baz_args::class, $input, 'baz', $handler_ctx);
-    $result = Bar_baz_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'Bar', 'baz', $args);
-      $result->success = $this->handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
-      $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'baz', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, BarStaticMetadata::class);
-  }
-}
-class BarSyncProcessor extends BarSyncProcessorBase {
-  const type TThriftIf = BarIf;
-}
-// For backwards compatibility
-class BarProcessor extends BarSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

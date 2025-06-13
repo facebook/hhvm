@@ -27,23 +27,6 @@ interface BarAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Bar
  */
-interface BarIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * string
-   *   baz(1: set<i32> a,
-   *       2: list<map<i32, set<string>>> b,
-   *       3: i64 c,
-   *       4: Foo d,
-   *       5: i64 e);
-   */
-  public function baz(Set<int> $a, KeyedContainer<int, KeyedContainer<int, Set<string>>> $b, int $c, ?Foo $d, int $e): string;
-}
-
-/**
- * Original thrift service:-
- * Bar
- */
 interface BarAsyncClientIf extends BarAsyncIf {
 }
 

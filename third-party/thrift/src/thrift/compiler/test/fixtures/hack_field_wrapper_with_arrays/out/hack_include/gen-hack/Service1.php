@@ -40,36 +40,6 @@ interface Service1AsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * Service1
  */
-interface Service1If extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func(1: string arg1,
-   *        2: MyStruct arg2);
-   */
-  public function func(string $arg1, ?MyStruct $arg2): MyStruct;
-
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func1(1: string arg1,
-   *         2: MyStruct arg2);
-   */
-  public function func1(string $arg1, ?MyStruct $arg2): MyStruct;
-
-  /**
-   * Original thrift definition:-
-   * i64WithWrapper
-   *   func2(1: StructWithWrapper arg1,
-   *         2: i64WithWrapper arg2);
-   */
-  public function func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): i64WithWrapper;
-}
-
-/**
- * Original thrift service:-
- * Service1
- */
 interface Service1AsyncClientIf extends Service1AsyncIf {
 }
 
@@ -241,70 +211,6 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
 class Service1AsyncProcessor extends Service1AsyncProcessorBase {
   const type TThriftIf = Service1AsyncIf;
 }
-
-abstract class Service1SyncProcessorBase extends \ThriftSyncProcessor {
-  use \GetThriftServiceMetadata;
-  abstract const type TThriftIf as Service1If;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Service1StaticMetadata::class;
-  const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
-
-  protected function process_func(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('func');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service1_func_args::class, $input, 'func', $handler_ctx);
-    $result = Service1_func_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func', $args);
-      $result->success = $this->handler->func($args->arg1, $args->arg2);
-      $this->eventHandler_->postExec($handler_ctx, 'func', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'func', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'func', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_func1(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('func1');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service1_func1_args::class, $input, 'func1', $handler_ctx);
-    $result = Service1_func1_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func1', $args);
-      $result->success = $this->handler->func1($args->arg1, $args->arg2);
-      $this->eventHandler_->postExec($handler_ctx, 'func1', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'func1', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'func1', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_func2(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('func2');
-    $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service1_func2_args::class, $input, 'func2', $handler_ctx);
-    $result = Service1_func2_result::withDefaultValues();
-    try {
-      $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func2', $args);
-      $result->success = $this->handler->func2($args->arg1, $args->arg2);
-      $this->eventHandler_->postExec($handler_ctx, 'func2', $result);
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'func2', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'func2', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, Service1StaticMetadata::class);
-  }
-}
-class Service1SyncProcessor extends Service1SyncProcessorBase {
-  const type TThriftIf = Service1If;
-}
-// For backwards compatibility
-class Service1Processor extends Service1SyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 

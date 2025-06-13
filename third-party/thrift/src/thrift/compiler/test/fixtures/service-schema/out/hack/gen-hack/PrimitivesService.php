@@ -44,37 +44,6 @@ interface PrimitivesServiceAsyncIf extends \IThriftAsyncIf {
  * PrimitivesService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
-interface PrimitivesServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * i64
-   *   init(1: i64 param0,
-   *        2: i64 param1);
-   */
-  public function init(int $param0, int $param1): int;
-
-  /**
-   * Original thrift definition:-
-   * Result
-   *   method_that_throws()
-   *   throws (1: CustomException e);
-   */
-  public function method_that_throws(): \facebook\thrift\test\Result;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   return_void_method(1: i64 id,
-   *                      2: include.I i);
-   */
-  public function return_void_method(int $id, ?\I $i): void;
-}
-
-/**
- * Original thrift service:-
- * PrimitivesService
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
 interface PrimitivesServiceAsyncClientIf extends PrimitivesServiceAsyncIf {
 }
 

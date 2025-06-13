@@ -23,19 +23,6 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * MyService
  */
-interface MyServiceIf extends \IThriftSyncIf {
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public function foo(): void;
-}
-
-/**
- * Original thrift service:-
- * MyService
- */
 interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
 }
 

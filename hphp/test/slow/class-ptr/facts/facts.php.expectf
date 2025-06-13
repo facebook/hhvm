@@ -1,0 +1,27 @@
+===== subtypes =====
+
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Facts\subtypes() in %s/class-ptr/facts/facts.php on line 17
+
+Notice: Implicit string to Class conversion for classname E in %s/class-ptr/facts/facts.php on line 10
+E
+
+Notice: Implicit string to Class conversion for classname D in %s/class-ptr/facts/facts.php on line 10
+D
+===== transitive_subtypes =====
+
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Facts\transitive_subtypes() in %s/class-ptr/facts/facts.php on line 21
+
+Notice: Implicit string to Class conversion for classname E in %s/class-ptr/facts/facts.php on line 10
+E
+
+Notice: Implicit string to Class conversion for classname D in %s/class-ptr/facts/facts.php on line 10
+D
+
+Notice: Implicit string to Class conversion for classname F in %s/class-ptr/facts/facts.php on line 10
+F
+===== supertypes =====
+
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Facts\supertypes() in %s/class-ptr/facts/facts.php on line 25
+
+Notice: Implicit string to Class conversion for classname D in %s/class-ptr/facts/facts.php on line 10
+D

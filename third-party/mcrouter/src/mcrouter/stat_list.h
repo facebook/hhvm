@@ -122,7 +122,6 @@ STUI(retrans_num_total, 0, 0)
  */
 #define GROUP ods_stats | basic_stats
 STUI(ps_rss, 0, 0)
-STUI(ps_openfd, 0, 0)
 #undef GROUP
 #define GROUP basic_stats | detailed_stats
 STAT(rusage_system, stat_double, 0, .dbl = 0.0)

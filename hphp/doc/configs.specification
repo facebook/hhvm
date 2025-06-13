@@ -493,11 +493,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Raise a notice if a Class type is passed to is_string
 
-- uint32_t Eval.ClassnameNoticesSampleRate = 0, UNKNOWN, globaldata
+- uint32_t Eval.ClassnameNoticesSampleRate = 0, UNKNOWN
 
   Raise notice if a Class type is passed to a classname type-hint
 
-- uint32_t Eval.ClassNoticesSampleRate = 0, UNKNOWN, globaldata
+- uint32_t Eval.ClassNoticesSampleRate = 0, UNKNOWN
 
   Raise notice if a string type is passed to a class type-hint
 

@@ -1,6 +1,4 @@
 -vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1
--vRuntime.Eval.ClassnameNoticesSampleRate=1
--vRuntime.Eval.ClassNoticesSampleRate=1
 -vRuntime.Eval.DynamicallyReferencedNoticeSampleRate=1
 -vRuntime.Hack.Lang.AllowUnstableFeatures=true

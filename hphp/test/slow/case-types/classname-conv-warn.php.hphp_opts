@@ -1,3 +1,2 @@
 --inputs=__DIR__/test.inc
--vRuntime.Eval.ClassnameNoticesSampleRate=1
 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1

@@ -1709,8 +1709,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           return exact(TStr);
         }
         return C{
-          Cfg::Eval::ClassnameNoticesSampleRate > 0 ?
-            TStr : union_of(TStr, TCls, TLazyCls),
+          TStr,
           union_of(TStr, TCls, TLazyCls)
         };
       case AnnotMetaType::Class:
@@ -1719,8 +1718,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           return exact(union_of(TCls, TLazyCls));
         }
         return C{
-          Cfg::Eval::ClassNoticesSampleRate > 0 ?
-            union_of(TCls, TLazyCls) : union_of(TStr, TCls, TLazyCls),
+          union_of(TCls, TLazyCls),
           union_of(TStr, TCls, TLazyCls)
         };
       case AnnotMetaType::ClassOrClassname:

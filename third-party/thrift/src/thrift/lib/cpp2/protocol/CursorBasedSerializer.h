@@ -481,14 +481,6 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
     state_ = State::Done;
   }
 
-  void abandon() {
-    if (state_ != State::Active && state_ != State::Abandoned) {
-      folly::throw_exception<std::runtime_error>(
-          "Unexpected state when abandoning reader");
-    }
-    state_ = State::Done;
-  }
-
   template <typename Ident>
   bool beforeReadField() {
     checkState(State::Active);
@@ -761,14 +753,6 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
   ContainerCursorReader() { remaining_ = 0; }
 
   void finalize();
-
-  void abandon() {
-    if (state_ != State::Active && state_ != State::Abandoned) {
-      folly::throw_exception<std::runtime_error>(
-          "Unexpected state when abandoning reader");
-    }
-    state_ = State::Done;
-  }
 
   bool advance() {
     checkState(State::Active);

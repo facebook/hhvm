@@ -164,6 +164,14 @@ class BaseCursorReader {
     return *this;
   }
 
+  void abandon() {
+    if (state_ != State::Active && state_ != State::Abandoned) {
+      folly::throw_exception<std::runtime_error>(
+          "Unexpected state when abandoning reader");
+    }
+    state_ = State::Done;
+  }
+
  public:
   BaseCursorReader(const BaseCursorReader&) = delete;
   BaseCursorReader& operator=(const BaseCursorReader&) = delete;
@@ -220,14 +228,20 @@ class BaseCursorWriter {
     return *this;
   }
 
+  void abandon() {
+    if (state_ != State::Active && state_ != State::Abandoned) {
+      folly::throw_exception<std::runtime_error>(
+          "Unexpected state when abandoning writer");
+    }
+    state_ = State::Done;
+  }
+
  public:
   BaseCursorWriter(const BaseCursorWriter&) = delete;
   BaseCursorWriter& operator=(const BaseCursorWriter&) = delete;
 
   template <typename T>
   friend class StructuredCursorWriter;
-
-  void abandon() { state_ = State::Abandoned; }
 };
 
 // std::swap isn't constexpr until C++20 so we need to reimplement :(

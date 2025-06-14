@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/iter.h"
-#include "hphp/runtime/vm/generics-info.h"
+#include "hphp/runtime/vm/reified-generics-info.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
@@ -1045,15 +1045,10 @@ public:
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns GenericsInfo which contains information about each generic
-   * parameter defined on this class whether it is reified, or contains
-   * the soft or warn annotation.
-   *
-   * NB: This getter should only be called when this func is known to
-   * contain extended data which is where the GenericsInfo struct lives.
-   * This can be checked by testing the hasReifiedGenericsInfo flag.
+   * Returns a ReifiedGenericsInfo containing how many generics this func has,
+   * indices of its reified generics, and which ones are soft reified
    */
-  const GenericsInfo& getGenericsInfo() const;
+  const ReifiedGenericsInfo& getReifiedGenericsInfo() const;
 
   /*
    * Does this function wrap a builtin?
@@ -1309,10 +1304,6 @@ public:
     return mask.m_allFlags;
   }
 
-  bool hasExtendedSharedData() const {
-    return extShared();
-  }
-
   /////////////////////////////////////////////////////////////////////////////
   // Lookup                                                            [static]
 
@@ -1479,7 +1470,7 @@ private:
 
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
-    GenericsInfo m_genericsInfo;
+    ReifiedGenericsInfo m_reifiedGenericsInfo;
     CoeffectRules m_coeffectRules;
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit

@@ -56,7 +56,7 @@ fn convert_body(body: &Body) -> ir::Func {
         is_memoize_wrapper_lsb,
         num_iters,
         ref return_type,
-        ref tparam_info,
+        ref shadowed_tparams,
         ref upper_bounds,
         span,
         repr:
@@ -79,7 +79,7 @@ fn convert_body(body: &Body) -> ir::Func {
         is_memoize_wrapper_lsb,
         num_iters,
         return_type: return_type.clone(),
-        tparam_info: tparam_info.clone(),
+        shadowed_tparams: shadowed_tparams.clone(),
         span,
         upper_bounds: upper_bounds.clone(),
         repr: ir::IrRepr {

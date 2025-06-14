@@ -104,7 +104,6 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
     (originalClass)
     (originalModuleName)
     (retTypeConstraints)
-    (typeParamNames)
     (requiredCoeffects)
     (coeffectEscapes)
     (staticCoeffects)
@@ -215,7 +214,6 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
     (constants)
     (userAttributes)
     (enumBaseTy)
-    (typeParamNames)
     (methods, this)
     (closures)
     ;

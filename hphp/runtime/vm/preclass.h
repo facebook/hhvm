@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/vm/containers.h"
-#include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -396,13 +395,6 @@ public:
     return m_nativeDataInfo;
   }
 
-  const folly::Range<const LowStringPtr*> typeParamNames() const {
-    return folly::Range<const LowStringPtr*>(
-      m_typeParamNames.begin(),
-      m_typeParamNames.end()
-    );
-  }
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Other accessors.
@@ -480,7 +472,6 @@ private:
   PropMap m_properties;
   ConstMap m_constants;
   int64_t m_dynConstructSampleRate;
-  FixedVector<LowStringPtr> m_typeParamNames;
 };
 
 using PreClassPtr = AtomicSharedPtr<PreClass>;

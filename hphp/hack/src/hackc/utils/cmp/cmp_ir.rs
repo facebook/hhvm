@@ -103,7 +103,6 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         span: a_span,
         type_constants: a_type_constants,
         upper_bounds: a_upper_bounds,
-        tparams: a_tparams,
         uses: a_uses,
     } = a;
     let Class {
@@ -123,7 +122,6 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         span: b_span,
         type_constants: b_type_constants,
         upper_bounds: b_upper_bounds,
-        tparams: b_tparams,
         uses: b_uses,
     } = b;
 
@@ -153,7 +151,6 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
     cmp_span(a_span, b_span).qualified("span")?;
     cmp_slice(a_type_constants, b_type_constants, cmp_type_constant).qualified("type_constants")?;
     cmp_slice(a_upper_bounds, b_upper_bounds, cmp_upper_bounds).qualified("upper_bounds")?;
-    cmp_slice(a_tparams.iter(), b_tparams.iter(), cmp_eq).qualified("tparams")?;
     cmp_slice(a_uses.iter(), b_uses.iter(), cmp_eq).qualified("uses")?;
     Ok(())
 }
@@ -287,8 +284,8 @@ fn cmp_body(a: &Func, b: &Func) -> Result {
         span: a_span,
         num_iters: a_num_iters,
         return_type: a_return_type,
+        shadowed_tparams: a_shadowed_tparams,
         upper_bounds: a_upper_bounds,
-        tparam_info: a_tparam_info,
         repr:
             ir::IrRepr {
                 blocks: a_blocks,
@@ -309,8 +306,8 @@ fn cmp_body(a: &Func, b: &Func) -> Result {
         span: b_span,
         num_iters: b_num_iters,
         return_type: b_return_type,
+        shadowed_tparams: b_shadowed_tparams,
         upper_bounds: b_upper_bounds,
-        tparam_info: b_tparam_info,
         repr:
             ir::IrRepr {
                 blocks: b_blocks,
@@ -337,14 +334,15 @@ fn cmp_body(a: &Func, b: &Func) -> Result {
         cmp_type_info,
     )
     .qualified("return_type")?;
-    cmp_slice(a_tparam_info.iter(), b_tparam_info.iter(), cmp_eq).qualified("tparam_info")?;
+    cmp_slice(a_shadowed_tparams.iter(), b_shadowed_tparams.iter(), cmp_eq)
+        .qualified("shadowed_tparams")?;
 
     cmp_slice(
         a_upper_bounds.iter(),
         b_upper_bounds.iter(),
         cmp_tparam_bounds,
     )
-    .qualified("upper_bounds")?;
+    .qualified("tparams")?;
 
     cmp_slice(a_blocks.iter(), b_blocks.iter(), cmp_block).qualified("blocks")?;
     cmp_map_t(a_ex_frames.iter(), b_ex_frames.iter(), cmp_ex_frame).qualified("ex_frames")?;

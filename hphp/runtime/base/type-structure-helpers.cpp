@@ -458,7 +458,7 @@ bool typeStructureIsTypeList(
   if (!strict && clsname) {
     auto const cls = Class::load(clsname);
     if (cls->hasReifiedGenerics()) {
-      tpinfo = &cls->getGenericsInfo().m_typeParamInfo;
+      tpinfo = &cls->getReifiedGenericsInfo().m_typeParamInfo;
       if (tpinfo->size() == 0) return true;
       if (tpinfo->size() != size) return false;
     }
@@ -546,7 +546,7 @@ bool checkReifiedGenericsMatch(
       continue;
     }
     if (!typeStructureIsType(objrg.val().parr, tsvalue, warn, opkind == CheckOpKind::Deep)) {
-      auto const& tpinfo = cls->getGenericsInfo().m_typeParamInfo;
+      auto const& tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
       assertx(tpinfo.size() == size);
       if (warn || tpinfo[i].m_isWarn || is_ts_soft(tsvalue)) {
         willWarn = true;

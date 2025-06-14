@@ -98,7 +98,7 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   assertx(func->hasReifiedGenerics());
   auto& v = vmain(env);
 
-  auto const& info = func->getGenericsInfo();
+  auto const& info = func->getReifiedGenericsInfo();
   if (info.hasSoft() || info.m_typeParamInfo.size() > 15) {
     // Punt checks to CheckFunReifiedGenericMismatch
     v << copy{v.cns(0), dst};

@@ -681,9 +681,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType.ptr(ue);
   ret->retTypeConstraints = fe.retTypeConstraints;
-  for (auto const& typeParam : fe.typeParamNames) {
-    ret->typeParamNames.emplace_back(typeParam);
-  }
   ret->originalUnit       = fe.originalUnit;
   ret->originalModuleName = unit->moduleName;
 
@@ -1011,9 +1008,6 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   }
 
   ret->enumBaseTy = pce.enumBaseTy();
-  for (auto const& name : pce.getTypeParamNames()) {
-    ret->typeParamNames.push_back(name);
-  }
 
   return ret;
 }

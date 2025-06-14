@@ -450,7 +450,7 @@ void addConstant(TranslationState& ts,
 TypeIntersectionConstraint upperBoundsHelper(
   const UpperBoundMap& ubs,
   const UpperBoundMap& classUbs,
-  const hphp_fast_set<const StringData*>& shadowedTParams,
+  const TParamNameVec& shadowedTParams,
   const TypeConstraint& tc,
   bool hasReifiedGenerics
 ) {
@@ -467,7 +467,7 @@ std::pair<bool, TypeIntersectionConstraint> upperBoundsHelper(
   TranslationState& ts,
   const UpperBoundMap& ubs,
   const UpperBoundMap& classUbs,
-  const hphp_fast_set<const StringData*>& shadowedTParams,
+  const TParamNameVec& shadowedTParams,
   const TypeConstraint& tc,
   const UserAttributeMap& userAttrs
 ) {
@@ -1034,7 +1034,7 @@ void translateDefaultParameterValue(TranslationState& ts,
 void translateParameter(TranslationState& ts,
                         const UpperBoundMap& ubs,
                         const UpperBoundMap& classUbs,
-                        const hphp_fast_set<const StringData*>& shadowedTParams,
+                        const TParamNameVec& shadowedTParams,
                         bool hasReifiedGenerics,
                         const hhbc::ParamEntry& e) {
   auto& p = e.param;
@@ -1073,7 +1073,7 @@ void translateFunctionBody(TranslationState& ts,
                            const hhbc::BodyImpl<hhbc::BcRepr>& b,
                            const UpperBoundMap& ubs,
                            const UpperBoundMap& classUbs,
-                           const hphp_fast_set<const StringData*>& shadowedTParams,
+                           const TParamNameVec& shadowedTParams,
                            bool hasReifiedGenerics) {
   ts.fe->isMemoizeWrapper = b.is_memoize_wrapper | b.is_memoize_wrapper_lsb;
   ts.fe->isMemoizeWrapperLSB = b.is_memoize_wrapper_lsb;
@@ -1207,20 +1207,6 @@ if (coeffects.caller) {
   }
 }
 
-std::pair<std::vector<LowStringPtr>, hphp_fast_set<const StringData*>>
-translateTParamInfo(const Vector<TParamInfo>& tParamInfo) {
-  std::vector<LowStringPtr> typeParamNames;
-  hphp_fast_set<const StringData*> shadowedTParams;
-  for (auto const& t : range(tParamInfo)) {
-    auto const name = toStaticString(t.name._0);
-    typeParamNames.emplace_back(name);
-    if (t.shadows_class_tparam) {
-      shadowedTParams.insert(name);
-    }
-  }
-  return std::make_pair(typeParamNames, shadowedTParams);
-}
-
 void translateFunction(TranslationState& ts,
     const hhbc::FunctionImpl<hhbc::BcRepr>& f) {
   UpperBoundMap ubs;
@@ -1238,10 +1224,7 @@ void translateFunction(TranslationState& ts,
   auto const name = toStaticString(f.name._0);
   SCOPE_ASSERT_DETAIL("translate function") {return name->data();};
 
-  auto [typeParamNames, _] = translateTParamInfo(f.body.tparam_info);
-
   ts.fe = ts.ue->newFuncEmitter(name);
-  ts.fe->typeParamNames = std::move(typeParamNames);
   ts.fe->init(f.body.span.line_begin, f.body.span.line_end, attrs, nullptr, ts.ue->isSystemLib());
   ts.fe->isGenerator = (bool)(f.flags & hhbc::FunctionFlags_GENERATOR);
   ts.fe->isAsync = (bool)(f.flags & hhbc::FunctionFlags_ASYNC);
@@ -1280,14 +1263,13 @@ void translateMethod(TranslationState& ts,
     translateUbs(u, ubs);
   }
 
+  TParamNameVec shadowedTParams;
+  translateShadowedTParams(shadowedTParams, m.body.shadowed_tparams);
+
   Attr attrs = m.body.attrs;
   assertx(IMPLIES(ts.isSystemLib, attrs & AttrBuiltin));
   auto const name = toStaticString(m.name._0);
-  auto [typeParamNames, shadowedTParams] = translateTParamInfo(
-    m.body.tparam_info
-  );
   ts.fe = ts.ue->newMethodEmitter(name, ts.pce);
-  ts.fe->typeParamNames = std::move(typeParamNames);
   ts.pce->addMethod(ts.fe);
   ts.fe->init(m.body.span.line_begin, m.body.span.line_end, attrs, nullptr, ts.ue->isSystemLib());
   ts.fe->isGenerator = (bool)(m.flags & hhbc::MethodFlags_IS_GENERATOR);
@@ -1350,12 +1332,6 @@ void translateClass(TranslationState& ts,
   auto const dc = maybe(c.doc_comment);
   if (dc) ts.pce->setDocComment(makeDocComment(dc.value()));
   ts.pce->setUserAttributes(userAttrs);
-
-  std::vector<LowStringPtr> names;
-  for (auto const& tparam: range(c.tparams)) {
-    names.emplace_back(toStaticString(tparam._0));
-  }
-  ts.pce->setTypeParamNames(std::move(names));
 
   auto impls = range(c.implements);
   for (auto const& i : impls) {

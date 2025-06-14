@@ -121,14 +121,20 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   assertx(it != ua.end());
   auto const tv = it->second;
   assertx(tvIsVec(&tv));
-  auto const numGenerics = extractSizeFromReifiedAttribute(tv.m_data.parr);
+  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  auto const numGenerics = info.m_typeParamInfo.size();
   assertx(numGenerics > 0);
 
   auto t = vec(std::vector<Type>(numGenerics, TDict));
 
   // If the type params are all soft, the reified list is allowed to
   // be empty.
-  auto const allSoft = areAllGenericsSoft(tv.m_data.parr);
+  auto const allSoft = [&] {
+    for (auto const& tp : info.m_typeParamInfo) {
+      if (!tp.m_isSoft) return false;
+    }
+    return true;
+  }();
   if (allSoft) t |= TVecE;
   return t;
 }
@@ -140,12 +146,18 @@ TypedValue get_default_value_of_reified_list(const UserAttributeMap& ua) {
   assertx(it != ua.end());
   auto const tv = it->second;
   assertx(tvIsVec(&tv));
-  auto const numGenerics = extractSizeFromReifiedAttribute(tv.m_data.parr);
+  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  auto const numGenerics = info.m_typeParamInfo.size();
   assertx(numGenerics > 0);
 
   // Empty vec is allowed for the "all soft" case, so use that if it
   // applies.
-  auto const allSoft = areAllGenericsSoft(tv.m_data.parr);
+  auto const allSoft = [&] {
+    for (auto const& tp : info.m_typeParamInfo) {
+      if (!tp.m_isSoft) return false;
+    }
+    return true;
+  }();
   if (allSoft) return make_tv<KindOfPersistentVec>(staticEmptyVec());
 
   // Otherwise make a vec of the appropriate size filled with empty

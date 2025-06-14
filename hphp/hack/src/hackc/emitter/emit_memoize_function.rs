@@ -12,7 +12,6 @@ use env::emitter::Emitter;
 use error::Result;
 use hhbc::Attribute;
 use hhbc::Body;
-use hhbc::ClassName;
 use hhbc::Coeffects;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
@@ -24,7 +23,6 @@ use hhbc::LocalRange;
 use hhbc::Param;
 use hhbc::Span;
 use hhbc::StringId;
-use hhbc::TParamInfo;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc_string_utils::reified;
@@ -83,14 +81,6 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
-    let tparam_info = fd
-        .tparams
-        .iter()
-        .map(|s| TParamInfo {
-            name: ClassName::intern(s.name.1.as_str()),
-            shadows_class_tparam: false,
-        })
-        .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(&fd.tparams));
@@ -138,7 +128,6 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         decl_vars,
         instrs,
         Span::from_pos(&f.span),
-        tparam_info,
     )?;
 
     let mut flags = FunctionFlags::empty();
@@ -399,7 +388,6 @@ fn make_wrapper_body<'a, 'd>(
     decl_vars: Vec<StringId>,
     instrs: InstrSeq,
     span: Span,
-    tparam_info: Vec<TParamInfo>,
 ) -> Result<Body> {
     emit_body::make_body(
         emitter,
@@ -408,7 +396,7 @@ fn make_wrapper_body<'a, 'd>(
         true,   /* is_memoize_wrapper */
         false,  /* is_memoize_wrapper_lsb */
         vec![], /* upper_bounds */
-        tparam_info,
+        vec![], /* shadowed_tparams */
         attributes,
         Attr::AttrNone,
         coeffects,

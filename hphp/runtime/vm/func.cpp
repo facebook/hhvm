@@ -567,10 +567,15 @@ void Func::resetFuncEntry() {
 ///////////////////////////////////////////////////////////////////////////////
 // Reified Generics
 
-const GenericsInfo& Func::getGenericsInfo() const {
+namespace {
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{{}};
+} // namespace
+
+const ReifiedGenericsInfo& Func::getReifiedGenericsInfo() const {
+  if (!shared()->m_allFlags.m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
   auto const ex = extShared();
   assertx(ex);
-  return ex->m_genericsInfo;
+  return ex->m_reifiedGenericsInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

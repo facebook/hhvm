@@ -969,10 +969,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
   fe.retTypeConstraints = func.retTypeConstraints;
-  fe.typeParamNames = std::vector<LowStringPtr>(
-    func.typeParamNames.begin(),
-    func.typeParamNames.end()
-  );
   fe.originalUnit =
     func.originalUnit ? func.originalUnit : nullptr;
   fe.originalModuleName = func.originalModuleName;
@@ -1201,11 +1197,6 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   assertx(uvIt == useVars.end());
 
   pce->setEnumBaseTy(cls.enumBaseTy);
-  std::vector<LowStringPtr> names;
-  for (auto const& name : cls.typeParamNames) {
-    names.emplace_back(name);
-  }
-  pce->setTypeParamNames(std::move(names));
 }
 
 void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {

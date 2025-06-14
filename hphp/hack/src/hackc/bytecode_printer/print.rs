@@ -46,7 +46,6 @@ use hhbc::Span;
 use hhbc::SrcLoc;
 use hhbc::StringId;
 use hhbc::SymbolRefs;
-use hhbc::TParamInfo;
 use hhbc::TraitReqKind;
 use hhbc::TypeConstant;
 use hhbc::TypeInfo;
@@ -330,7 +329,6 @@ fn print_fun_def(
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
-    print_tparam_info(w, &body.tparam_info)?;
     print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
@@ -526,19 +524,11 @@ fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName]) -> Result
     write_bytes!(w, " enum_includes ({})", fmt_separated(" ", enum_includes))
 }
 
-fn print_tparam_info(w: &mut dyn Write, tparam_info: &[TParamInfo]) -> Result<()> {
-    if tparam_info.is_empty() {
-        return Ok(());
-    }
+fn print_shadowed_tparams(w: &mut dyn Write, shadowed_tparams: &[ClassName]) -> Result<()> {
     write_bytes!(
         w,
-        "<{}> ",
-        fmt_separated(
-            ",",
-            tparam_info
-                .iter()
-                .map(|t| { format!("[{} {}]", t.name.as_str(), t.shadows_class_tparam) })
-        )
+        "{{{}}}",
+        fmt_separated(", ", shadowed_tparams.iter().map(|s| s.as_str()))
     )
 }
 
@@ -551,7 +541,7 @@ fn print_method_def(
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
-    print_tparam_info(w, &body.tparam_info)?;
+    print_shadowed_tparams(w, &body.shadowed_tparams)?;
     print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
@@ -592,17 +582,6 @@ fn print_method_def(
     })
 }
 
-fn print_tparams(w: &mut dyn Write, tparams: &[ClassName]) -> Result<()> {
-    if tparams.is_empty() {
-        return Ok(());
-    }
-    write_bytes!(
-        w,
-        "<{}> ",
-        fmt_separated(",", tparams.iter().map(|s| s.as_str()))
-    )
-}
-
 fn print_class_def(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -611,7 +590,6 @@ fn print_class_def(
 ) -> Result<()> {
     newline(w)?;
     w.write_all(b".class ")?;
-    print_tparams(w, class_def.tparams.as_ref())?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(

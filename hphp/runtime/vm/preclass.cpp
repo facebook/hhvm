@@ -42,7 +42,6 @@ PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
   , m_name(n)
   , m_parent(parent)
   , m_docComment(docComment)
-  , m_typeParamNames()
 {
 }
 

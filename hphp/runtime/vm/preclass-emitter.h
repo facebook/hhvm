@@ -255,8 +255,6 @@ struct PreClassEmitter {
     bool fromTrait,
     bool isAbstract
   );
-  void setTypeParamNames(std::vector<LowStringPtr>&& typeParamNames);
-  folly::Range<const LowStringPtr*> getTypeParamNames() const;
   bool addContextConstant(
     const StringData* n,
     Const::CoeffectsVec coeffects,
@@ -323,7 +321,6 @@ struct PreClassEmitter {
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
-  FixedVector<LowStringPtr> m_typeParamNames;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

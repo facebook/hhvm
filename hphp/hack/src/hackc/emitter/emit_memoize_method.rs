@@ -15,7 +15,6 @@ use error::Result;
 use hhbc::Attr;
 use hhbc::Attribute;
 use hhbc::Body;
-use hhbc::ClassName;
 use hhbc::Coeffects;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
@@ -28,7 +27,6 @@ use hhbc::Param;
 use hhbc::Span;
 use hhbc::SpecialClsRef;
 use hhbc::StringId;
-use hhbc::TParamInfo;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Visibility;
@@ -212,17 +210,10 @@ fn emit_memoize_wrapper_body<'a, 'd>(
 ) -> Result<Body> {
     let mut tparams: Vec<&str> = args
         .scope
-        .get_fun_tparams()
+        .get_tparams()
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect();
-    let tparam_info = tparams
-        .iter()
-        .map(|s| TParamInfo {
-            name: ClassName::intern(s),
-            shadows_class_tparam: false,
-        })
-        .collect::<Vec<_>>();
     let return_type =
         emit_body::emit_return_type(&tparams[..], args.flags.contains(Flags::IS_ASYNC), args.ret)?;
     let hhas_params = emit_param::from_asts(emitter, &mut tparams, true, args.scope, args.params)?;
@@ -237,7 +228,6 @@ fn emit_memoize_wrapper_body<'a, 'd>(
         attributes,
         coeffects,
         args,
-        tparam_info,
     )
 }
 
@@ -250,7 +240,6 @@ fn emit<'a, 'd>(
     attributes: Vec<Attribute>,
     coeffects: Coeffects,
     args: &Args<'_, 'a>,
-    tparam_info: Vec<TParamInfo>,
 ) -> Result<Body> {
     let pos = &args.method.span;
     let depr_info = match args.emit_deprecation_info {
@@ -271,7 +260,6 @@ fn emit<'a, 'd>(
         attributes,
         coeffects,
         args,
-        tparam_info,
     )
 }
 
@@ -559,7 +547,6 @@ fn make_wrapper<'a, 'd>(
     attributes: Vec<Attribute>,
     coeffects: Coeffects,
     args: &Args<'_, 'a>,
-    tparam_info: Vec<TParamInfo>,
 ) -> Result<Body> {
     emit_body::make_body(
         emitter,
@@ -568,7 +555,7 @@ fn make_wrapper<'a, 'd>(
         true,
         args.flags.contains(Flags::WITH_LSB),
         vec![], /* upper_bounds */
-        tparam_info,
+        vec![], /* shadowed_tparams */
         attributes,
         Attr::AttrNone,
         coeffects,

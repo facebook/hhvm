@@ -288,13 +288,6 @@ public:
    */
   void recordSourceLocation(const Location::Range& sLoc, Offset start);
 
-  const folly::Range<const LowStringPtr*> getTypeParamNames() const {
-    return folly::Range<const LowStringPtr*>(
-      typeParamNames.data(),
-      typeParamNames.size()
-    );
-  }
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
@@ -328,7 +321,6 @@ public:
 
   LowStringPtrOrId retUserType;
   TypeIntersectionConstraint retTypeConstraints;
-  std::vector<LowStringPtr> typeParamNames;
   StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;
 

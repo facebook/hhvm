@@ -608,27 +608,12 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
-std::string func_tparam_names(const Func* func) {
-  std::vector<std::string> names;
-  if (func->hasExtendedSharedData()) {
-    auto const& info = func->getGenericsInfo();
-    for (auto const& param : info.m_typeParamInfo) {
-      names.push_back(escaped(param.m_typeName->slice()));
-    }
-  }
-
-  return names.empty()
-    ? ""
-    : folly::sformat("[{}]", folly::join(" ", names));
-}
-
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  auto const tparams = func_tparam_names(func);
-  out.fmtln(".function{}{} {} {}{}({}){}{{",
+
+  out.fmtln(".function{}{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    tparams,
     type_info(
       func->returnUserType(),
       func->returnTypeConstraints()
@@ -708,29 +693,18 @@ void print_property(Output& out, const PreClass::Prop* prop) {
   print_prop_or_field_impl(out, *prop);
 }
 
-std::string cls_tparam_names(const PreClass* preCls) {
-  if (preCls->typeParamNames().empty()) return "";
-  std::vector<std::string> names;
-  for (auto const& name : preCls->typeParamNames()) {
-    names.emplace_back(escaped(name));
-  }
-  return folly::sformat(" [{}]", folly::join(" ", names));
-}
-
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{}{} {} {}{}({}){}{{",
+  out.fmtln(".method{}{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    func_tparam_names(func),
     type_info(
       func->returnUserType(),
       func->returnTypeConstraints()
     ),
     func->name(),
     func_param_list(finfo),
-    func_flag_list(finfo)
-  );
+    func_flag_list(finfo));
   indented(out, [&] {
     print_func_directives(out, finfo);
     print_func_body(out, finfo);
@@ -818,12 +792,10 @@ void print_cls(Output& out, const PreClass* cls) {
     }
   }
 
-  out.fmt(".class {} {}{} {}",
+  out.fmt(".class {} {}{}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
     name,
-    format_line_pair(cls),
-    cls_tparam_names(cls)
-  );
+    format_line_pair(cls));
   print_cls_inheritance_list(out, cls);
   print_enum_includes(out, cls);
   out.fmt(" {{");

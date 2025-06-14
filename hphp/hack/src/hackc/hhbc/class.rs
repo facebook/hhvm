@@ -75,8 +75,6 @@ pub struct ClassImpl<R> {
 
     /// For class generics the upper bounds of each generic.
     pub upper_bounds: Vector<UpperBound>,
-    /// Names of generic type params declared for this class.
-    pub tparams: Vector<ClassName>,
 
     /// Doc comment for the class.
     pub doc_comment: Maybe<Vector<u8>>,

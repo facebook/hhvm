@@ -41,7 +41,6 @@ use ir_core::SilenceOp;
 use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
 use ir_core::StringId;
-use ir_core::TParamInfo;
 use ir_core::TypeConstraintFlags;
 use ir_core::TypeInfo;
 use ir_core::TypeStructEnforceKind;
@@ -135,6 +134,7 @@ pub(crate) fn parse_attr(tokenizer: &mut Tokenizer<'_>) -> Result<Attr> {
             attr.add(bit);
         }
     }
+
     Ok(attr)
 }
 
@@ -570,27 +570,10 @@ pub(crate) fn parse_readonly(tokenizer: &mut Tokenizer<'_>) -> Result<ReadonlyOp
     .unwrap_or(ReadonlyOp::Any))
 }
 
-pub(crate) fn parse_single_tparam_info(tokenizer: &mut Tokenizer<'_>) -> Result<TParamInfo> {
-    parse!(tokenizer, "[" <name:parse_class_name> <shadows_class_tparam:parse_bool> "]");
-    Ok(TParamInfo {
-        name,
-        shadows_class_tparam,
-    })
-}
-
-pub(crate) fn parse_tparam_info(tokenizer: &mut Tokenizer<'_>) -> Result<Vec<TParamInfo>> {
-    Ok(if tokenizer.next_is_identifier("<")? {
-        parse!(tokenizer, <elems:parse_single_tparam_info,*> ">");
-        elems
-    } else {
-        Vec::new()
-    })
-}
-
-pub(crate) fn parse_tparams(tokenizer: &mut Tokenizer<'_>) -> Result<Vec<ClassName>> {
-    Ok(if tokenizer.next_is_identifier("<")? {
-        parse!(tokenizer, <elems:parse_class_name,*> ">");
-        elems
+pub(crate) fn parse_shadowed_tparams(tokenizer: &mut Tokenizer<'_>) -> Result<Vec<ClassName>> {
+    Ok(if tokenizer.next_is_identifier("[")? {
+        parse!(tokenizer, <tparams:parse_class_name,*> "]");
+        tparams
     } else {
         Vec::new()
     })
@@ -817,12 +800,6 @@ pub(crate) fn parse_usize(tokenizer: &mut Tokenizer<'_>) -> Result<usize> {
     let t = tokenizer.expect_any_identifier()?;
     let i = t.identifier().parse()?;
     Ok(i)
-}
-
-pub(crate) fn parse_bool(tokenizer: &mut Tokenizer<'_>) -> Result<bool> {
-    let t = tokenizer.expect_any_identifier()?;
-    let b = t.identifier().parse()?;
-    Ok(b)
 }
 
 pub(crate) fn parse_user_id(tokenizer: &mut Tokenizer<'_>) -> Result<(Vec<u8>, TokenLoc)> {

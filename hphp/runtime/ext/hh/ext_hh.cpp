@@ -880,7 +880,7 @@ TypedValue dynamicFun(const StringData* fun) {
     );
   }
   if (func->hasReifiedGenerics()) {
-    if (func->getGenericsInfo().allGenericsSoft()) {
+    if (func->getReifiedGenericsInfo().allGenericsSoft()) {
       raise_warning(
         "Function %s is reified and cannot be used with dynamic_fun",
         fun->data()
@@ -983,7 +983,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
     }
   }
   if (func->hasReifiedGenerics()) {
-    if (func->getGenericsInfo().allGenericsSoft()) {
+    if (func->getReifiedGenericsInfo().allGenericsSoft()) {
       raise_warning(
         "Method %s::%s is reified and cannot be used with dynamic_class_meth",
         c->name()->data(),

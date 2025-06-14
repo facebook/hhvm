@@ -162,7 +162,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
         upper_bounds: a_upper_bounds,
-        tparam_info: a_tparam_info,
+        shadowed_tparams: a_shadowed_tparams,
         return_type: a_return_type,
         doc_comment: a_doc_comment,
         span: a_span,
@@ -182,7 +182,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
         upper_bounds: b_upper_bounds,
-        tparam_info: b_tparam_info,
+        shadowed_tparams: b_shadowed_tparams,
         return_type: b_return_type,
         doc_comment: b_doc_comment,
         span: b_span,
@@ -222,7 +222,11 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
         a_upper_bounds,
         b_upper_bounds,
     )?;
-    sem_diff_eq(&path.qualified("tparam_info"), a_tparam_info, b_tparam_info)?;
+    sem_diff_eq(
+        &path.qualified("shadowed_tparams"),
+        a_shadowed_tparams,
+        b_shadowed_tparams,
+    )?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
 
     // Don't bother comparing decl_vars - when we use named vars later we'll
@@ -305,7 +309,6 @@ fn sem_diff_class(path: &CodePath<'_>, a: &Class, b: &Class) -> Result<()> {
         ctx_constants: a_ctx_constants,
         requirements: a_requirements,
         upper_bounds: a_upper_bounds,
-        tparams: a_tparams,
         doc_comment: a_doc_comment,
         flags: a_flags,
     } = a;
@@ -325,7 +328,6 @@ fn sem_diff_class(path: &CodePath<'_>, a: &Class, b: &Class) -> Result<()> {
         ctx_constants: b_ctx_constants,
         requirements: b_requirements,
         upper_bounds: b_upper_bounds,
-        tparams: b_tparams,
         doc_comment: b_doc_comment,
         flags: b_flags,
     } = b;
@@ -383,12 +385,6 @@ fn sem_diff_class(path: &CodePath<'_>, a: &Class, b: &Class) -> Result<()> {
         a_upper_bounds,
         b_upper_bounds,
         |path, a, b| sem_diff_slice(path, &a.bounds, &b.bounds, sem_diff_eq),
-    )?;
-    sem_diff_iter(
-        &path.qualified("tparams"),
-        a_tparams.iter(),
-        b_tparams.iter(),
-        sem_diff_eq,
     )?;
     sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;

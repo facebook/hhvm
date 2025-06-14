@@ -571,12 +571,7 @@ pub(crate) fn parse_readonly(tokenizer: &mut Tokenizer<'_>) -> Result<ReadonlyOp
 }
 
 pub(crate) fn parse_single_tparam_info(tokenizer: &mut Tokenizer<'_>) -> Result<TParamInfo> {
-    parse!(tokenizer, "[" <name:parse_class_name> "," <shadows:id> "]");
-    let shadows_class_tparam = match shadows.identifier() {
-        "0" => false,
-        "1" => true,
-        _ => return Err(shadows.bail("Unexpected token when parsing TParamInfo")),
-    };
+    parse!(tokenizer, "[" <name:parse_class_name> <shadows_class_tparam:parse_bool> "]");
     Ok(TParamInfo {
         name,
         shadows_class_tparam,
@@ -822,6 +817,12 @@ pub(crate) fn parse_usize(tokenizer: &mut Tokenizer<'_>) -> Result<usize> {
     let t = tokenizer.expect_any_identifier()?;
     let i = t.identifier().parse()?;
     Ok(i)
+}
+
+pub(crate) fn parse_bool(tokenizer: &mut Tokenizer<'_>) -> Result<bool> {
+    let t = tokenizer.expect_any_identifier()?;
+    let b = t.identifier().parse()?;
+    Ok(b)
 }
 
 pub(crate) fn parse_user_id(tokenizer: &mut Tokenizer<'_>) -> Result<(Vec<u8>, TokenLoc)> {

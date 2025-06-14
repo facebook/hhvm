@@ -175,9 +175,9 @@ impl Display for FmtTParamInfo<'_> {
         let FmtTParamInfo(tpi) = *self;
         write!(
             f,
-            "[{},{}]",
+            "[{} {}]",
             FmtIdentifierId(tpi.name.as_bytes_id()),
-            if tpi.shadows_class_tparam { "1" } else { "0" }
+            tpi.shadows_class_tparam
         )
     }
 }

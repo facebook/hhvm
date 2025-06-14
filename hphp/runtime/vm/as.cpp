@@ -2359,9 +2359,9 @@ std::vector<LowStringPtr> parse_tparam_names(AsmState& as) {
 }
 
 /*
- * directive-function : upper-bound-list attribute-list ?line-range type-info
- *                      identifier
- *                      parameter-list function-flags '{' function-body
+ * directive-function : attribute-list ?line-range tparam-names type-info
+ *                      identifier parameter-list function-flags '{'
+ *                      function-body
  *                    ;
  */
 void parse_function(AsmState& as) {
@@ -2410,9 +2410,9 @@ void parse_function(AsmState& as) {
 }
 
 /*
- * directive-method : shadowed-tparam-list upper-bound-list attribute-list
- *                      ?line-range tparam-names type-info identifier
- *                      parameter-list function-flags '{' function-body
+ * directive-method : attribute-list ?line-range tparam-names type-info
+ *                    identifier parameter-list function-flags '{'
+ *                    function-body
  *                  ;
  */
 void parse_method(AsmState& as) {
@@ -2785,9 +2785,8 @@ void parse_class_body(AsmState& as) {
 }
 
 /*
- * directive-class : upper-bound-list ?"top" attribute-list identifier
- *                   ?line-range extension-clause implements-clause '{'
- *                   class-body
+ * directive-class : attribute-list identifier ?line-range tparam-names
+ *                   extension-clause implements-clause '{' class-body
  *                 ;
  *
  * extension-clause : empty

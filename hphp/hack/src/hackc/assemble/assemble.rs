@@ -513,17 +513,15 @@ fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc:
     })
 }
 
+fn parse_bool(token_iter: &mut Lexer<'_>) -> Result<bool> {
+    let tok = token_iter.expect(Token::is_identifier)?;
+    let id = tok.as_str()?;
+    let b = id.parse()?;
+    Ok(b)
+}
+
 fn assemble_single_tparam_info(token_iter: &mut Lexer<'_>) -> Result<TParamInfo> {
-    parse!(token_iter, "[" <name:assemble_class_name()> "," <num:num> "]");
-    let shadows_class_tparam = match num.into_number() {
-        Ok(b"0") => false,
-        Ok(b"1") => true,
-        _ => {
-            return Err(
-                token_iter.error(r#"Non "0"/"1" string in tparam info shadows class tparam"#)
-            );
-        }
-    };
+    parse!(token_iter, "[" <name:assemble_class_name()> <shadows_class_tparam:parse_bool> "]");
     Ok(TParamInfo {
         name,
         shadows_class_tparam,

@@ -535,13 +535,9 @@ fn print_tparam_info(w: &mut dyn Write, tparam_info: &[TParamInfo]) -> Result<()
         "<{}> ",
         fmt_separated(
             ",",
-            tparam_info.iter().map(|t| {
-                format!(
-                    "[{},{}]",
-                    t.name.as_str(),
-                    if t.shadows_class_tparam { 1 } else { 0 }
-                )
-            })
+            tparam_info
+                .iter()
+                .map(|t| { format!("[{} {}]", t.name.as_str(), t.shadows_class_tparam) })
         )
     )
 }

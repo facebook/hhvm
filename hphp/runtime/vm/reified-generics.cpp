@@ -84,7 +84,7 @@ extractSizeAndPosFromReifiedAttribute(
       assertx(isIntType(v.m_type));
       if (k.m_data.num == 0) {
         len = (size_t) v.m_data.num;
-        assertx(len == typeParamNames.size());
+        always_assert(len == typeParamNames.size());
       } else {
         if (k.m_data.num % 3 == 1) {
           // This is the reified generic index

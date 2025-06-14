@@ -1622,13 +1622,19 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(')');
       break;
     case Type::JSON:
-      write(StrNR(classToStringHelper(cls, "serialization")));
-      break;
     case Type::Serialize:
-    case Type::Internal:
-    case Type::APCSerialize:
       write(StrNR(classToStringHelper(cls, "serialization")));
       break;
+    case Type::Internal:
+    case Type::APCSerialize: {
+      auto cname = cls->name();
+      m_buf->append("l:");
+      m_buf->append(cname->size());
+      m_buf->append(":\"");
+      m_buf->append(cname->data(), cname->size());
+      m_buf->append("\";");
+      break;
+    }
     case Type::DebuggerSerialize:
       m_buf->append("c:");
       m_buf->append(cls->name()->size());

@@ -110,7 +110,7 @@ class DistributionRoute {
     auto bucketId = fiber_local<RouterInfo>::getBucketId();
     assert(axonCtx && bucketId);
     auto finalReq = req;
-    finalReq.bucketId_ref() = fmt::to_string(*bucketId);
+    finalReq.bucketId() = fmt::to_string(*bucketId);
     auto distributionRegion = distributionRegionOpt.value().empty()
         ? std::string(kBroadcast)
         : std::move(distributionRegionOpt.value());

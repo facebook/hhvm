@@ -365,6 +365,8 @@ struct HSLFileDescriptor :
     return fd;
   }
 
+  void sweep() {}
+
   void close() {
     switch (m_type) {
       case Type::FD:

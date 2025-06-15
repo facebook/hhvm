@@ -230,8 +230,8 @@ struct FOLLY_EXPORT EncodedStreamError : std::exception {
     if (encoded.metadata.payloadMetadata().has_value()) {
       auto& md = *encoded.metadata.payloadMetadata();
       if (md.getType() == PayloadMetadata::Type::exceptionMetadata &&
-          md.exceptionMetadata_ref()->what_utf8().has_value()) {
-        return md.exceptionMetadata_ref()->what_utf8()->c_str();
+          md.exceptionMetadata()->what_utf8().has_value()) {
+        return md.exceptionMetadata()->what_utf8()->c_str();
       }
     }
     return "";
@@ -241,8 +241,8 @@ struct FOLLY_EXPORT EncodedStreamError : std::exception {
     if (encoded.metadata.payloadMetadata().has_value()) {
       auto& md = *encoded.metadata.payloadMetadata();
       if (md.getType() == PayloadMetadata::Type::exceptionMetadata &&
-          md.exceptionMetadata_ref()->name_utf8().has_value()) {
-        return md.exceptionMetadata_ref()->name_utf8()->c_str();
+          md.exceptionMetadata()->name_utf8().has_value()) {
+        return md.exceptionMetadata()->name_utf8()->c_str();
       }
     }
     return "";

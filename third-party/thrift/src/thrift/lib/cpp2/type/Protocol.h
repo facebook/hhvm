@@ -69,7 +69,7 @@ class Protocol : public detail::Wrap<ProtocolUnion, union_t<ProtocolUnion>> {
 
   /*implicit*/ Protocol(StandardProtocol standard) noexcept {
     if (standard != StandardProtocol::Custom) {
-      data_.standard_ref() = standard;
+      data_.standard() = standard;
     }
   }
 
@@ -79,11 +79,11 @@ class Protocol : public detail::Wrap<ProtocolUnion, union_t<ProtocolUnion>> {
   // protocol.
   std::string_view name() const noexcept;
   StandardProtocol standard() const noexcept {
-    return data_.standard_ref().value_or(StandardProtocol::Custom);
+    return data_.standard().value_or(StandardProtocol::Custom);
   }
   std::string_view custom() const noexcept {
-    if (data_.custom_ref().has_value()) {
-      return *data_.custom_ref();
+    if (data_.custom().has_value()) {
+      return *data_.custom();
     }
     return {};
   }
@@ -95,9 +95,7 @@ class Protocol : public detail::Wrap<ProtocolUnion, union_t<ProtocolUnion>> {
 
  private:
   using Base::data_;
-  explicit Protocol(std::string custom) {
-    data_.custom_ref() = std::move(custom);
-  }
+  explicit Protocol(std::string custom) { data_.custom() = std::move(custom); }
 
   friend bool operator==(const Protocol& lhs, const Protocol& rhs) {
     return lhs.data_ == rhs.data_;

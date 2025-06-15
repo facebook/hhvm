@@ -180,10 +180,10 @@ class MaskRef {
   template <typename T>
   size_t numFieldsSet() {
     throwIfNotFieldMask();
-    if (auto includes = mask.includes_ref()) {
+    if (auto includes = mask.includes()) {
       return includes->size();
     } else {
-      return op::num_fields<T> - mask.excludes_ref()->size();
+      return op::num_fields<T> - mask.excludes()->size();
     }
   }
 

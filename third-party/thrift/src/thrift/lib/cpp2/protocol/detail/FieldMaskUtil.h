@@ -55,9 +55,8 @@ bool validate_mask(MaskRef ref) {
   ids.reserve(op::num_fields<T>);
   op::for_each_ordinal<T>(
       [&](auto ord) { ids.insert(op::get_field_id<T, decltype(ord)>()); });
-  const FieldIdToMask& map = ref.mask.includes_ref()
-      ? ref.mask.includes_ref().value()
-      : ref.mask.excludes_ref().value();
+  const FieldIdToMask& map = ref.mask.includes() ? ref.mask.includes().value()
+                                                 : ref.mask.excludes().value();
   for (auto& [id, _] : map) {
     // Mask contains a field not in the struct.
     if (ids.find(FieldId{id}) == ids.end()) {
@@ -179,7 +178,7 @@ Mask path(const Mask& other) {
   Mask mask;
   using fieldId = op::get_field_id<T, Id>;
   static_assert(fieldId::value != FieldId{});
-  mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
+  mask.includes().emplace()[static_cast<int16_t>(fieldId::value)] =
       path<op::get_type_tag<T, Id>, Ids...>(other);
   return mask;
 }
@@ -201,15 +200,15 @@ Mask path(
     Mask mask;
     op::for_each_field_id<T>([&](auto id) {
       using Id = decltype(id);
-      if (mask.includes_ref()) { // already set
+      if (mask.includes()) { // already set
         return;
       }
       if (op::get_name_v<T, Id> == fieldNames[index]) {
-        mask.includes_ref().emplace()[folly::to_underlying(id())] =
+        mask.includes().emplace()[folly::to_underlying(id())] =
             path<op::get_type_tag<T, Id>>(fieldNames, index + 1, other);
       }
     });
-    if (!mask.includes_ref()) { // field not found
+    if (!mask.includes()) { // field not found
       folly::throw_exception<std::runtime_error>("field doesn't exist");
     }
     return mask;
@@ -378,7 +377,7 @@ void setMaskedDataFull(
   apache::thrift::skip(prot, arg_type);
   cursor.clone(encodedValue.data().emplace(), prot.getCursor() - cursor);
   const auto pos = folly::to<int32_t>(values.size() - 1);
-  maskedData.full_ref() = type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
+  maskedData.full() = type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
 }
 
 inline MaskRef getKeyMaskRefByValue(MaskRef maskRef, const Value& value) {
@@ -484,7 +483,7 @@ MaskedDecodeResultValue parseValueWithMask(
       }
       if constexpr (KeepExcludedData) {
         if (!apache::thrift::empty(nestedResult.excluded)) {
-          result.excluded.fields_ref().ensure()[FieldId{fid}] =
+          result.excluded.fields().ensure()[FieldId{fid}] =
               std::move(nestedResult.excluded);
         }
       }
@@ -525,7 +524,7 @@ MaskedDecodeResultValue parseValueWithMask(
           const auto pos = folly::to<int32_t>(keys.size() - 1);
           type::ValueId id =
               type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
-          result.excluded.values_ref().ensure()[id] =
+          result.excluded.values().ensure()[id] =
               std::move(nestedResult.excluded);
         }
       }

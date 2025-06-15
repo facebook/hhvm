@@ -47,52 +47,50 @@ inline bool isExclusive(const Mask& mask) {
 
 // Returns mask == allMask() but faster
 inline bool isAllMask(const Mask& mask) {
-  return mask.excludes_ref() && mask.excludes_ref()->empty();
+  return mask.excludes() && mask.excludes()->empty();
 }
 
 // Returns mask == noneMask() but faster
 inline bool isNoneMask(const Mask& mask) {
-  return mask.includes_ref() && mask.includes_ref()->empty();
+  return mask.includes() && mask.includes()->empty();
 }
 
 // Checks whether it is ALL map mask.
 inline bool isAllMapMask(const Mask& mask) {
-  if (!mask.excludes_map_ref() && !mask.excludes_string_map_ref() &&
-      !mask.includes_map_ref() && !mask.includes_string_map_ref()) {
+  if (!mask.excludes_map() && !mask.excludes_string_map() &&
+      !mask.includes_map() && !mask.includes_string_map()) {
     folly::throw_exception<std::runtime_error>("This is not a map mask.");
   }
 
-  return (mask.excludes_map_ref() && mask.excludes_map_ref()->empty()) ||
-      (mask.excludes_string_map_ref() &&
-       mask.excludes_string_map_ref()->empty());
+  return (mask.excludes_map() && mask.excludes_map()->empty()) ||
+      (mask.excludes_string_map() && mask.excludes_string_map()->empty());
 }
 
 // Checks whether it is NONE map mask.
 inline bool isNoneMapMask(const Mask& mask) {
-  if (!mask.excludes_map_ref() && !mask.excludes_string_map_ref() &&
-      !mask.includes_map_ref() && !mask.includes_string_map_ref()) {
+  if (!mask.excludes_map() && !mask.excludes_string_map() &&
+      !mask.includes_map() && !mask.includes_string_map()) {
     folly::throw_exception<std::runtime_error>("This is not a map mask.");
   }
 
-  return (mask.includes_map_ref() && mask.includes_map_ref()->empty()) ||
-      (mask.includes_string_map_ref() &&
-       mask.includes_string_map_ref()->empty());
+  return (mask.includes_map() && mask.includes_map()->empty()) ||
+      (mask.includes_string_map() && mask.includes_string_map()->empty());
 }
 
 // Checks whether it is ALL type mask.
 inline bool isAllTypeMask(const Mask& mask) {
-  if (!mask.excludes_type_ref() && !mask.includes_type_ref()) {
+  if (!mask.excludes_type() && !mask.includes_type()) {
     folly::throw_exception<std::runtime_error>("This is not a type mask.");
   }
-  return mask.excludes_type_ref() && mask.excludes_type_ref()->empty();
+  return mask.excludes_type() && mask.excludes_type()->empty();
 }
 
 // Checks whether it is NONE type mask.
 inline bool isNoneTypeMask(const Mask& mask) {
-  if (!mask.excludes_type_ref() && !mask.includes_type_ref()) {
+  if (!mask.excludes_type() && !mask.includes_type()) {
     folly::throw_exception<std::runtime_error>("This is not a type mask.");
   }
-  return mask.includes_type_ref() && mask.includes_type_ref()->empty();
+  return mask.includes_type() && mask.includes_type()->empty();
 }
 
 // If mask is a field mask, return it, otherwise return nullptr
@@ -152,7 +150,7 @@ void compare_impl(const T& original, const T& modified, FieldIdToMask& mask) {
     using FieldType = op::get_native_type<T, Id>;
     if constexpr (is_thrift_class_v<FieldType>) {
       compare_impl(
-          *original_ptr, *modified_ptr, mask[fieldId].includes_ref().emplace());
+          *original_ptr, *modified_ptr, mask[fieldId].includes().emplace());
       return;
     }
     // The values are different and not nested.

@@ -685,12 +685,12 @@ void writeRawField(
     FieldId fieldId,
     const MaskedProtocolData& protocolData,
     const MaskedData& maskedData) {
-  const auto& nestedMaskedData = maskedData.fields_ref().value().at(fieldId);
+  const auto& nestedMaskedData = maskedData.fields().value().at(fieldId);
   // When value doesn't exist in the object, maskedData should have full field.
-  if (!nestedMaskedData.full_ref()) {
+  if (!nestedMaskedData.full()) {
     throw std::runtime_error("incompatible value and maskedData");
   }
-  type::ValueId valueId = nestedMaskedData.full_ref().value();
+  type::ValueId valueId = nestedMaskedData.full().value();
   const EncodedValue& value = getByValueId(*protocolData.values(), valueId);
   prot.writeFieldBegin(
       "", toTType(*value.wireType()), folly::to_underlying(fieldId));
@@ -706,10 +706,10 @@ void writeRawMapValue(
     const MaskedProtocolData& protocolData,
     const MaskedData& maskedData) {
   // When value doesn't exist in the object, maskedData should have full field.
-  if (!maskedData.full_ref()) {
+  if (!maskedData.full()) {
     throw std::runtime_error("incompatible value and maskedData");
   }
-  type::ValueId valueId = maskedData.full_ref().value();
+  type::ValueId valueId = maskedData.full().value();
   const EncodedValue& value = getByValueId(*protocolData.values(), valueId);
   if (toTType(*value.wireType()) != valueType) {
     TProtocolException::throwInvalidFieldData();
@@ -723,7 +723,7 @@ void serializeObject(
     const Object& obj,
     const MaskedProtocolData& protocolData,
     const MaskedData& maskedData) {
-  if (!maskedData.fields_ref()) {
+  if (!maskedData.fields()) {
     throw std::runtime_error("incompatible value and maskedData");
   }
   prot.writeStructBegin("");
@@ -732,7 +732,7 @@ void serializeObject(
   for (const auto& [fieldId, _] : obj) {
     fieldIds.insert(FieldId{fieldId});
   }
-  for (const auto& [fieldId, _] : *maskedData.fields_ref()) {
+  for (const auto& [fieldId, _] : *maskedData.fields()) {
     fieldIds.insert(fieldId);
   }
 
@@ -747,10 +747,10 @@ void serializeObject(
     auto fieldType = getTType(fieldVal);
     prot.writeFieldBegin("", fieldType, folly::to_underlying(fieldId));
     // just serialize the value
-    if (folly::get_ptr(*maskedData.fields_ref(), fieldId) == nullptr) {
+    if (folly::get_ptr(*maskedData.fields(), fieldId) == nullptr) {
       serializeValue(prot, fieldVal);
     } else { // recursively serialize value with maskedData
-      const auto& nextMaskedData = maskedData.fields_ref().value().at(fieldId);
+      const auto& nextMaskedData = maskedData.fields().value().at(fieldId);
       serializeValue(prot, fieldVal, protocolData, nextMaskedData);
     }
     prot.writeFieldEnd();
@@ -774,7 +774,7 @@ void serializeValue(
   }
 
   if (value.getType() == Value::Type::mapValue) {
-    if (!maskedData.values_ref()) {
+    if (!maskedData.values()) {
       throw std::runtime_error("incompatible value and maskedData");
     }
     TType keyType = protocol::T_STRING;
@@ -787,11 +787,11 @@ void serializeValue(
       keyType = getTType(mapVal.begin()->first);
       valueType = getTType(mapVal.begin()->second);
     }
-    for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
+    for (auto& [keyValueId, nestedMaskedData] : *maskedData.values()) {
       const Value& key = getByValueId(*protocolData.keys(), keyValueId);
       if (size == 0) { // need to set keyType and valueType
         keyType = getTType(key);
-        type::ValueId valueId = nestedMaskedData.full_ref().value();
+        type::ValueId valueId = nestedMaskedData.full().value();
         valueType =
             toTType(*getByValueId(*protocolData.values(), valueId).wireType());
       }
@@ -808,7 +808,7 @@ void serializeValue(
         std::equal_to<Value>>
         keys;
     prot.writeMapBegin(keyType, valueType, size);
-    for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
+    for (auto& [keyValueId, nestedMaskedData] : *maskedData.values()) {
       const Value& key = getByValueId(*protocolData.keys(), keyValueId);
       keys.insert(key);
       ensureSameType(key, keyType);

@@ -41,7 +41,7 @@ inline void insertTypeToMaskIfNotAllMask(Mask& mask, const type::Type& type) {
   if (isAllMask(mask)) {
     return;
   }
-  mask.includes_type_ref().ensure().emplace(type, allMask());
+  mask.includes_type().ensure().emplace(type, allMask());
 }
 
 template <typename T>
@@ -55,10 +55,10 @@ const K& getKeyOrElem(const std::pair<const K, V>& value) {
 
 // Put allMask() if the key was never included in the mask before.
 inline void insertKeysToMask(Mask& mask, int64_t k) {
-  mask.includes_map_ref().ensure().emplace(k, allMask());
+  mask.includes_map().ensure().emplace(k, allMask());
 }
 inline void insertKeysToMask(Mask& mask, std::string k) {
-  mask.includes_string_map_ref().ensure().emplace(std::move(k), allMask());
+  mask.includes_string_map().ensure().emplace(std::move(k), allMask());
 }
 template <typename Container>
 void insertKeysToMask(Mask& mask, const Container& c) {
@@ -66,10 +66,10 @@ void insertKeysToMask(Mask& mask, const Container& c) {
     const auto& v = getKeyOrElem(elem);
 
     if (getArrayKeyFromValue(v) == ArrayKey::Integer) {
-      mask.includes_map_ref().ensure().emplace(
+      mask.includes_map().ensure().emplace(
           static_cast<int64_t>(getMapIdFromValue(v)), allMask());
     } else {
-      mask.includes_string_map_ref().ensure().emplace(
+      mask.includes_string_map().ensure().emplace(
           getStringFromValue(v), allMask());
     }
   }
@@ -84,11 +84,11 @@ void insertKeysToMaskIfNotAllMask(Mask& mask, const Container& c) {
 }
 
 inline void insertFieldsToMask(Mask& mask, FieldId id) {
-  mask.includes_ref().ensure().emplace(static_cast<int16_t>(id), allMask());
+  mask.includes().ensure().emplace(static_cast<int16_t>(id), allMask());
 }
 inline void insertFieldsToMask(Mask& mask, const Object& obj) {
   for (const auto& [id, value] : obj) {
-    mask.includes_ref().ensure().emplace(id, allMask());
+    mask.includes().ensure().emplace(id, allMask());
   }
 }
 
@@ -110,7 +110,7 @@ inline void insertFieldsToMaskIfNotAllMask(
     return;
   }
   for (const Value& id : ids) {
-    mask.includes_ref().ensure().emplace(id.as_i16(), allMask());
+    mask.includes().ensure().emplace(id.as_i16(), allMask());
   }
 }
 

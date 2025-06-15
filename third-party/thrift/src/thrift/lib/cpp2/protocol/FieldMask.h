@@ -178,7 +178,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   template <typename... Id>
   MaskBuilder& includes_map_element(int64_t key, const Mask& mask = allMask()) {
     Mask map;
-    map.includes_map_ref().emplace()[key] = mask;
+    map.includes_map().emplace()[key] = mask;
     return includes<Id...>(map);
   }
 
@@ -186,14 +186,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& includes_map_element(
       std::string key, const Mask& mask = allMask()) {
     Mask map;
-    map.includes_string_map_ref().emplace()[std::move(key)] = mask;
+    map.includes_string_map().emplace()[std::move(key)] = mask;
     return includes<Id...>(map);
   }
 
   template <typename... Id>
   MaskBuilder& includes_type(type::Type type, const Mask& mask = allMask()) {
     Mask typeMap;
-    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    typeMap.includes_type().emplace().emplace(std::move(type), mask);
     return includes<Id...>(typeMap);
   }
 
@@ -222,7 +222,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   template <typename... Id>
   MaskBuilder& excludes_map_element(int64_t key, const Mask& mask = allMask()) {
     Mask map;
-    map.includes_map_ref().emplace()[key] = mask;
+    map.includes_map().emplace()[key] = mask;
     return excludes<Id...>(map);
   }
 
@@ -230,14 +230,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& excludes_map_element(
       std::string key, const Mask& mask = allMask()) {
     Mask map;
-    map.includes_string_map_ref().emplace()[std::move(key)] = mask;
+    map.includes_string_map().emplace()[std::move(key)] = mask;
     return excludes<Id...>(map);
   }
 
   template <typename... Id>
   MaskBuilder& excludes_type(type::Type type, const Mask& mask = allMask()) {
     Mask typeMap;
-    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    typeMap.includes_type().emplace().emplace(std::move(type), mask);
     return excludes<Id...>(typeMap);
   }
 
@@ -295,7 +295,7 @@ struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
       int64_t key,
       const Mask& mask = allMask()) {
     Mask map;
-    map.includes_map_ref().emplace()[key] = mask;
+    map.includes_map().emplace()[key] = mask;
     return includes(path, map);
   }
 
@@ -304,7 +304,7 @@ struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
       std::string key,
       const Mask& mask = allMask()) {
     Mask map;
-    map.includes_string_map_ref().emplace().emplace(std::move(key), mask);
+    map.includes_string_map().emplace().emplace(std::move(key), mask);
     return includes(path, map);
   }
 
@@ -313,7 +313,7 @@ struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
       type::Type type,
       const Mask& mask = allMask()) {
     Mask typeMap;
-    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    typeMap.includes_type().emplace().emplace(std::move(type), mask);
     return includes(path, typeMap);
   }
 
@@ -328,7 +328,7 @@ struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
       int64_t key,
       const Mask& mask = allMask()) {
     Mask map;
-    map.includes_map_ref().emplace()[key] = mask;
+    map.includes_map().emplace()[key] = mask;
     return excludes(path, map);
   }
 
@@ -337,7 +337,7 @@ struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
       std::string key,
       const Mask& mask = allMask()) {
     Mask map;
-    map.includes_string_map_ref().emplace().emplace(std::move(key), mask);
+    map.includes_string_map().emplace().emplace(std::move(key), mask);
     return excludes(path, map);
   }
 
@@ -346,7 +346,7 @@ struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
       type::Type type,
       const Mask& mask = allMask()) {
     Mask typeMap;
-    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    typeMap.includes_type().emplace().emplace(std::move(type), mask);
     return excludes(path, typeMap);
   }
 
@@ -362,7 +362,7 @@ Mask compare(const T& original, const T& modified) {
       is_thrift_class_v<T> || is_thrift_union_v<T>,
       "not a thrift struct or union");
   Mask result;
-  detail::compare_impl(original, modified, result.includes_ref().emplace());
+  detail::compare_impl(original, modified, result.includes().emplace());
   return result;
 }
 

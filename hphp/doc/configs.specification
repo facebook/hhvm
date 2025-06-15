@@ -1827,6 +1827,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   translations will be logged, and run_key column will be logged with
   the value of this option.
 
+- std::string Jit.SerializeDebugLocation = "/tmp/debugprof.jit", paulbiss
+
+  If jit profiles are disabled write serialized JIT data to disk for use in the
+  event of a crash. While crashing HHVM will map this file into memory so that
+  it may be retrieved from the core.
+
 - bool Jit.ProfileGuardTypes = false, UNKNOWN
 - uint32_t Jit.FilterLease = 1, UNKNOWN
 

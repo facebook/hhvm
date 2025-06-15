@@ -869,7 +869,9 @@ rds::Ordering::Item read_rds_ordering_item(ProfDataDeserializer& des) {
 
 void write_rds_ordering(ProfDataSerializer& ser) {
   rds::Ordering order;
-  if (Cfg::Eval::ReorderRDS) order = rds::profiledOrdering();
+  if (Cfg::Eval::ReorderRDS && isJitSerializing()) {
+    order = rds::profiledOrdering();
+  }
   write_container(ser, order.persistent, write_rds_ordering_item);
   write_container(ser, order.local, write_rds_ordering_item);
   write_container(ser, order.normal, write_rds_ordering_item);
@@ -2208,6 +2210,10 @@ std::string serializeProfData(const std::string& filename) {
     if (serializeOptProfEnabled()) {
       s_lastMappers = std::move(ser.getMappers());
     }
+
+    // If we crash we can recover the current TC state using the profile we just
+    // serialized so ensure it gets mapped back into the core.
+    s_deserializedFile = filename;
 
     return "";
   } catch (std::runtime_error& err) {

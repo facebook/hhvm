@@ -311,6 +311,29 @@ bool serializeProfDataAndLog() {
   return serializeOptProfEnabled() && Cfg::Jit::SerializeOptProfRestart;
 }
 
+void debugDumpProfDataAndLog() {
+  auto const serverMode = Cfg::Server::Mode;
+
+  if (Cfg::Jit::SerializeDebugLocation.empty()) return;
+
+  if (serverMode) {
+    Logger::Info("retranslateAll: serializing profile data for debugging");
+  }
+
+  std::string errMsg;
+  VMWorker([&errMsg] () {
+    errMsg = serializeProfData(Cfg::Jit::SerializeDebugLocation);
+  }).run();
+
+  if (serverMode) {
+    if (errMsg.empty()) {
+      Logger::Info("retranslateAll: serializing done");
+    } else {
+      Logger::FError("serializeProfData failed with: {}", errMsg);
+    }
+  }
+}
+
 /*
  * Schedule serialization of optimized code's profile to happen in the future.
  */
@@ -410,6 +433,10 @@ void retranslateAll(bool skipSerialize) {
   //    serialization of optimized code's profile is also enabled.
 
   if (serialize && !skipSerialize && serializeProfDataAndLog()) return;
+  if (!skipSerialize && !isJitSerializing() && !isJitDeserializing() &&
+      Cfg::Repo::Authoritative) {
+    debugDumpProfDataAndLog();
+  }
 
   // 5) Generate machine code for all the profiled functions.
 

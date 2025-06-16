@@ -1342,8 +1342,7 @@ EncodedStreamError encode_stream_exception(folly::exception_wrapper ew) {
   if (mapException(res, ew)) {
     prot.setOutput(&queue, res.serializedSizeZC(&prot));
     res.write(&prot);
-    exceptionMetadata.declaredException_ref() =
-        PayloadDeclaredExceptionMetadata();
+    exceptionMetadata.declaredException() = PayloadDeclaredExceptionMetadata();
   } else {
     constexpr size_t kQueueAppenderGrowth = 4096;
     prot.setOutput(&queue, kQueueAppenderGrowth);
@@ -1351,7 +1350,7 @@ EncodedStreamError encode_stream_exception(folly::exception_wrapper ew) {
     apache::thrift::detail::serializeExceptionBody(&prot, &ex);
     PayloadAppUnknownExceptionMetdata aue;
     aue.errorClassification().ensure().blame() = Blame;
-    exceptionMetadata.appUnknownException_ref() = std::move(aue);
+    exceptionMetadata.appUnknownException() = std::move(aue);
   }
 
   exceptionMetadataBase.name_utf8() = ew.class_name();
@@ -1359,7 +1358,7 @@ EncodedStreamError encode_stream_exception(folly::exception_wrapper ew) {
   exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
   StreamPayloadMetadata streamPayloadMetadata;
   PayloadMetadata payloadMetadata;
-  payloadMetadata.exceptionMetadata_ref() = std::move(exceptionMetadataBase);
+  payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
   streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
   return EncodedStreamError(
       StreamPayload(std::move(queue).move(), std::move(streamPayloadMetadata)));
@@ -1376,7 +1375,7 @@ class StreamElementEncoderImpl final
   folly::Try<StreamPayload> operator()(T&& val) override {
     StreamPayloadMetadata streamPayloadMetadata;
     PayloadMetadata payloadMetadata;
-    payloadMetadata.responseMetadata_ref().ensure();
+    payloadMetadata.responseMetadata().ensure();
     streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
     return folly::Try<StreamPayload>(
         {encode_stream_payload<Protocol, PResult>(std::move(val)),

@@ -26,11 +26,13 @@
 
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerBase.h>
+#include <thrift/lib/cpp2/server/RequestExpirationDelegate.h>
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
 
 namespace apache::thrift {
 
-class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
+class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
+                                         public RequestExpirationDelegate {
  public:
   TokenBucketConcurrencyController(
       RequestPileInterface& pile, folly::Executor& executor)
@@ -146,6 +148,18 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
   std::string describe() const override {
     return fmt::format(
         "{{TokenBucketConcurrencyController qpsLimit={}}}", qpsLimit_.load());
+  }
+
+  void processExpiredRequest(ServerRequest&& request) override {
+    using namespace apache::thrift::detail;
+    if (onExpireFunction_) {
+      onExpireFunction_(request);
+    }
+    auto eb = ServerRequestHelper::eventBase(request);
+    auto req = ServerRequestHelper::request(std::move(request));
+    HandlerCallbackBase::releaseRequest(std::move(req), eb);
+
+    pendingDequeueOps_--;
   }
 
   using ServerRequestLoggingFunction =

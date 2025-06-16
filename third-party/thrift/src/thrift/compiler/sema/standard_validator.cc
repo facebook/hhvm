@@ -497,8 +497,23 @@ void validate_orderable_structured_types(
         return;
       }
 
-      ctx.error(
+      // @cpp.EnableCustomTypeOrdering is present, but not needed.
+
+      const diagnostic_level lvl = [&]() {
+        const sema_params& sparams = ctx.sema_parameters();
+        switch (sparams.unnecessary_enable_custom_type_ordering) {
+          case sema_params::ValidationLevel::Error:
+            return diagnostic_level::error;
+          case sema_params::ValidationLevel::Warn:
+            return diagnostic_level::warning;
+          case sema_params::ValidationLevel::None:
+            return diagnostic_level::debug;
+        }
+      }();
+
+      ctx.report(
           *annotation,
+          lvl,
           "Type `{}` does not need `@cpp.EnableCustomTypeOrdering` to be "
           "orderable in C++: remove the annotation.",
           node.name());

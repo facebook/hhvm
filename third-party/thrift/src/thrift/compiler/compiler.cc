@@ -117,6 +117,10 @@ Options:
                   values equal to the intrinsic default for that type (eg. 0
                   for integers, false for boolean, etc.)
 
+                unnecessary_enable_custom_type_ordering=none|warn|error
+                  Action to take if a @cpp.EnableCustomTypeOrdering annotation
+                  is found on a type that does not need it.
+
                 forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
                   Struct (and exception) fields with a @cpp.Ref (or
                   cpp[2].ref[_type]) annotation must be optional, unless
@@ -744,18 +748,50 @@ std::string parse_args(
       for (const auto& validator : validators) {
         if (validator == "unstructured_annotations") {
           sparams.forbid_unstructured_annotations = true;
-        } else if (validator == "warn_on_redundant_custom_default_values") {
-          sparams.warn_on_redundant_custom_default_values = true;
-        } else if (validator == "forbid_non_optional_cpp_ref_fields") {
-          // no-op
-        } else if (validator == "implicit_field_ids") {
-          // no-op
-        } else {
-          fprintf(
-              stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());
-          printUsageError();
-          return {};
+          continue;
         }
+        if (validator == "warn_on_redundant_custom_default_values") {
+          sparams.warn_on_redundant_custom_default_values = true;
+          continue;
+        }
+        if (validator == "forbid_non_optional_cpp_ref_fields") {
+          // no-op
+          continue;
+        }
+
+        if (validator == "implicit_field_ids") {
+          // no-op
+          continue;
+        }
+
+        static constexpr std::string_view
+            kUnecessaryEnableCustomTypeOrderingPrefix{
+                "unnecessary_enable_custom_type_ordering"};
+        if (validator.find(kUnecessaryEnableCustomTypeOrderingPrefix) == 0) {
+          try {
+            const std::string suffix = validator.substr(
+                kUnecessaryEnableCustomTypeOrderingPrefix.size());
+            if (suffix.find('=') != 0) {
+              throw std::runtime_error("Missing '=' after validator name.");
+            }
+            sparams.unnecessary_enable_custom_type_ordering =
+                sema_params::parseValidationLevel(suffix.substr(1));
+          } catch (const std::exception& e) {
+            fmt::print(
+                stderr,
+                "!!! Invalid extra-validation {}: {}\n\n",
+                kUnecessaryEnableCustomTypeOrderingPrefix,
+                e.what());
+            printUsageError();
+            return {};
+          }
+          continue;
+        }
+
+        fprintf(
+            stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());
+        printUsageError();
+        return {};
       }
     } else {
       fprintf(

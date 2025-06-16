@@ -118,6 +118,11 @@ struct sema_params {
   bool warn_on_redundant_custom_default_values = false;
 
   bool forbid_unstructured_annotations = false;
+
+  // Action to take when @cpp.EnableCustomTypeOrdering is present on a
+  // (structured) type that does not need it.
+  ValidationLevel unnecessary_enable_custom_type_ordering =
+      ValidationLevel::None;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

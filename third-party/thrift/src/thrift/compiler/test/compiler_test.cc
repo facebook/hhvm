@@ -2448,7 +2448,6 @@ struct AlwaysOrderable {
 }
 
 @cpp.EnableCustomTypeOrdering
-# expected-error@-1: Type `UnnecessaryAnnotation` does not need `@cpp.EnableCustomTypeOrdering` to be orderable in C++: remove the annotation.
 struct UnnecessaryAnnotation {
   1: set<i32> a;
 }
@@ -2478,6 +2477,36 @@ struct ExplicitlyEnabledCustomTypeWithUri {
   1: set<i32> a;
 }
 )");
+}
+
+TEST(CompilerTest, cpp_orderable_unnecessary_annotation_error) {
+  check_compile(
+      R"(
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@cpp.EnableCustomTypeOrdering
+# expected-error@-1: Type `UnnecessaryAnnotation` does not need `@cpp.EnableCustomTypeOrdering` to be orderable in C++: remove the annotation.
+struct UnnecessaryAnnotation {
+  1: set<i32> a;
+}
+)",
+      {"--extra-validation", "unnecessary_enable_custom_type_ordering=error"});
+}
+
+TEST(CompilerTest, cpp_orderable_unnecessary_annotation_warn) {
+  check_compile(
+      R"(
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@cpp.EnableCustomTypeOrdering
+# expected-warning@-1: Type `UnnecessaryAnnotation` does not need `@cpp.EnableCustomTypeOrdering` to be orderable in C++: remove the annotation.
+struct UnnecessaryAnnotation {
+  1: set<i32> a;
+}
+)",
+      {"--extra-validation", "unnecessary_enable_custom_type_ordering=warn"});
 }
 
 TEST(CompilerTest, invalid_include_alias) {

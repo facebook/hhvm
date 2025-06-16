@@ -55,7 +55,7 @@ let remove_tyvar_from_lower_bound env var lower_bound =
           MakeType.intersection r tyl
       in
       (env, ty)
-    | (r, Tnewtype (name, [tyarg]))
+    | (r, Tnewtype (name, [tyarg], _))
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
       let (env, ty) = remove env tyarg in
       if is_nothing ty then

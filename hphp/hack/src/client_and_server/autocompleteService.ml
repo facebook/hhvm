@@ -221,7 +221,7 @@ let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
 let param_snippet_prefix : type a. a Typing_defs.ty -> string =
  fun ty ->
   match Typing_defs.get_node ty with
-  | Typing_defs.Tnewtype (label_kind, _)
+  | Typing_defs.Tnewtype (label_kind, _, _)
   | Typing_defs.Tapply ((_, label_kind), _)
     when String.equal label_kind Naming_special_names.Classes.cEnumClassLabel ->
     "#"
@@ -721,7 +721,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
       let ty = expand_and_strip_dynamic env ty in
       match get_node ty with
       | Toption ty -> get_class_name ty
-      | Tnewtype (name, _) -> Some name
+      | Tnewtype (name, _, _) -> Some name
       | _ -> None
     in
 
@@ -1126,7 +1126,7 @@ let autocomplete_enum_class_label_call env f args =
         in
         match (arg, get_node (expand_and_strip_dynamic env arg_ty.fp_type)) with
         | ( (_, p, Aast.EnumClassLabel (None, n)),
-            Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty]) )
+            Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty], _) )
           when is_enum_class_label_ty_name ty_name && is_auto_complete n ->
           suggest_members_from_ty env enum_ty (p, n) (Some member_ty)
         | (_, _) -> ())
@@ -1469,7 +1469,7 @@ let autocomplete_enum_case env (expr : Tast.expr) (cases : Tast.case list) =
         let (_, ty_) = Typing_defs_core.deref ty in
         let replace_pos = replace_pos_of_id (pos, id) in
         (match ty_ with
-        | Tnewtype (name, _) ->
+        | Tnewtype (name, _, _) ->
           (match enum_consts env name with
           | Some consts ->
             let used_consts = case_names name cases in
@@ -1504,7 +1504,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
         let replace_pos = replace_pos_of_id (pos, id) in
 
         (match ty_ with
-        | Tnewtype (name, _) ->
+        | Tnewtype (name, _, _) ->
           (match enum_consts env name with
           | Some consts ->
             let prefix = Utils.strip_ns name ^ "::" in
@@ -1520,7 +1520,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
         let replace_pos = replace_pos_of_id (pos, id) in
 
         (match ty_ with
-        | Tnewtype (name, _) ->
+        | Tnewtype (name, _, _) ->
           (match enum_consts env name with
           | Some consts ->
             List.iter consts ~f:(add_enum_const_result env pos replace_pos "")

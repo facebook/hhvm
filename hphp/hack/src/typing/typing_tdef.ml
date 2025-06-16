@@ -80,7 +80,10 @@ let expand_typedef_decl
   or [force_expand] is true.
   *)
 let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
-    Typing_utils.expand_typedef_result * expand_env =
+    (Typing_env_types.env
+    * Typing_error.t option
+    * Type_expansions.cycle_reporter list)
+    * (expand_env * locl_ty) =
   let td = unsafe_opt @@ Decl_entry.to_option (Env.get_typedef env x) in
   let { td_pos; td_as_constraint; _ } = td in
   match
@@ -110,14 +113,12 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
          using Always_expand_newtype require to localize as an the opaque newtype to be
          able to make proper conclusions about the cycle. *)
       match ety_env.visibility_behavior with
-      | Always_expand_newtype -> mk (r, Tnewtype (x, argl))
+      | Always_expand_newtype -> mk (r, Tnewtype (x, argl, mixed))
       | Never_expand_newtype
       | Expand_visible_newtype_only ->
         mixed
     in
-    ( Typing_utils.
-        { env; ty_err_opt = None; cycles = [cycle]; ty; bound = mixed },
-      ety_env )
+    ((env, None, [cycle]), (ety_env, ty))
   | Ok ety_env ->
     let { tparams; expansion } =
       expand_typedef_decl
@@ -129,11 +130,9 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
     in
     let substs = Subst.make_locl tparams argl in
     let ety_env = { ety_env with substs } in
-    let ((env, err, cycles), expanded_ty, bound) =
+    let ((env, err, cycles), expanded_ty) =
       match expansion with
-      | Rhs ty ->
-        let ((env, err, cycles), ty) = Phase.localize_rec ~ety_env env ty in
-        ((env, err, cycles), ty, ty)
+      | Rhs ty -> Phase.localize_rec ~ety_env env ty
       | Opaque cstr_ty ->
         let ((env, err, cycles), cstr_ty) =
           (* Special case for supportdyn<T> defined with "as T" in order to
@@ -143,17 +142,16 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
           else
             Phase.localize_rec ~ety_env env cstr_ty
         in
-        let ty = mk (r, Tnewtype (x, argl)) in
-        ((env, err, cycles), ty, cstr_ty)
+        let ty = mk (r, Tnewtype (x, argl, cstr_ty)) in
+        ((env, err, cycles), ty)
     in
-    ( { env; ty_err_opt = err; cycles; ty = with_reason expanded_ty r; bound },
-      ety_env )
+    ((env, err, cycles), (ety_env, with_reason expanded_ty r))
 
 let expand_typedef ety_env env r type_name argl =
-  let (res, _ety_env) =
+  let (env, (_ety_env, ty)) =
     expand_typedef_ ~force_expand:false ety_env env r type_name argl
   in
-  res
+  (env, ty)
 
 (** Expand a typedef, smashing abstraction and collecting a trail
   of where the typedefs come from.
@@ -166,16 +164,15 @@ let force_expand_typedef ~ety_env env (t : locl_ty) =
       ((env, e1), t, Type_expansions.def_positions ety_env.type_expansions)
     in
     match deref t with
-    | (_, Tnewtype (x, _)) when String.equal SN.Classes.cEnumClassLabel x ->
+    | (_, Tnewtype (x, _, _)) when String.equal SN.Classes.cEnumClassLabel x ->
       (* Labels are Resources at runtime, so we don't want to force them
        * to string. MemberOf on the other hand are "typed alias" on the
        * underlying type so it's ok to force them. So we only special case
        * Labels here *)
       default ()
-    | (r, Tnewtype (x, argl))
+    | (r, Tnewtype (x, argl, _))
       when not (Env.is_enum env x || Env.is_enum_class env x) ->
-      let ( Typing_utils.{ env; ty_err_opt = e2; cycles = _; ty; bound = _ },
-            ety_env ) =
+      let ((env, e2, _cycles), (ety_env, ty)) =
         expand_typedef_ ~force_expand:true ety_env env r x argl
       in
       aux (Option.merge e1 e2 ~f:Typing_error.both) ety_env env ty

@@ -2388,7 +2388,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             Ty_::Tdependent(_, _)
             | Ty_::Tneg(_)
             | Ty_::Tlabel(_)
-            | Ty_::Tnewtype(_, _)
+            | Ty_::Tnewtype(_, _, _)
             | Ty_::Tvar(_) => panic!("unexpected decl type in constraint"),
         };
         Ty(ty.0, Box::new(ty_))

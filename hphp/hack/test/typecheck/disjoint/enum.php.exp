@@ -16,7 +16,7 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 10, characters 6-7:
+  File "enum.php", line 37, characters 8-9:
   But got `arraykey` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "enum.php", line 37, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
@@ -26,7 +26,7 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 14, characters 6-7:
+  File "enum.php", line 37, characters 12-13:
   But got `arraykey` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "enum.php", line 40, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
@@ -46,8 +46,8 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 10, characters 6-7:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+  File "enum.php", line 26, characters 21-26:
+  But got `string`
 ERROR: File "enum.php", line 40, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "enum.php", line 3, characters 10-13:
@@ -56,8 +56,8 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 26, characters 21-26:
-  But got `string`
+  File "enum.php", line 40, characters 8-9:
+  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "enum.php", line 41, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "enum.php", line 3, characters 10-13:
@@ -76,7 +76,7 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 10, characters 6-7:
+  File "enum.php", line 41, characters 8-9:
   But got `arraykey` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "enum.php", line 41, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
@@ -108,8 +108,10 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 10, characters 6-7:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+  File "enum.php", line 42, characters 8-10:
+  But got `int`
+  File "enum.php", line 3, characters 57-58:
+    via this generic `T1`
 ERROR: File "enum.php", line 42, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "enum.php", line 3, characters 10-13:
@@ -118,10 +120,8 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 42, characters 8-10:
-  But got `int`
-  File "enum.php", line 3, characters 57-58:
-    via this generic `T1`
+  File "enum.php", line 42, characters 13-14:
+  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "enum.php", line 43, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "enum.php", line 3, characters 10-13:
@@ -160,5 +160,5 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `nothing`
   File "enum.php", line 3, characters 42-43:
     via this generic `T3`
-  File "enum.php", line 10, characters 6-7:
+  File "enum.php", line 46, characters 18-19:
   But got `arraykey` arising from an implicit `as arraykey` constraint on this type

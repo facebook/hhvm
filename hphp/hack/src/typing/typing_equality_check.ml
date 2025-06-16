@@ -93,15 +93,14 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
   match (get_node ty1, get_node ty2) with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
-  | (Tnewtype (e1, tyargs1), Tnewtype (e2, tyargs2))
-    when Env.is_enum env e1 && Env.is_enum env e2 ->
-    let (env, bound1) =
-      Typing_utils.get_newtype_super env (get_reason ty1) e1 tyargs1
-    in
-    let (env, bound2) =
-      Typing_utils.get_newtype_super env (get_reason ty2) e2 tyargs2
-    in
-    if is_arraykey bound1 && is_arraykey bound2 && not (String.equal e1 e2) then
+  | (Tnewtype (e1, _, bound1), Tnewtype (e2, _, bound2))
+    when Env.is_enum env e1
+         && Env.is_enum env e2
+         && is_arraykey bound1
+         && is_arraykey bound2 ->
+    if String.equal e1 e2 then
+      ()
+    else
       eq_incompatible_types env p ety1 ety2
   | _ ->
     (match (deref ety1, deref ety2) with
@@ -138,14 +137,12 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
           wellformedness
           @@ Primary.Wellformedness.Void_usage
                { pos = p; reason = lazy (Reason.to_string "This is `void`" r) })
-    | ((_, Tprim a), (r, Tnewtype (e, tyargs))) when Env.is_enum env e ->
-      let (env, bound) = Typing_utils.get_newtype_super env r e tyargs in
-      if bad_compare_prim_to_enum a bound then
-        trivial_comparison_error env p bop ty1 bound trail1 trail2 ~as_warning
-    | ((r, Tnewtype (e, tyargs)), (_, Tprim a)) when Env.is_enum env e ->
-      let (env, bound) = Typing_utils.get_newtype_super env r e tyargs in
-      if bad_compare_prim_to_enum a bound then
-        trivial_comparison_error env p bop bound ty2 trail1 trail2 ~as_warning
+    | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
+      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
+      trivial_comparison_error env p bop ty1 bound trail1 trail2 ~as_warning
+    | ((_, Tnewtype (e, _, bound)), (_, Tprim a))
+      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
+      trivial_comparison_error env p bop bound ty2 trail1 trail2 ~as_warning
     | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
       trivial_comparison_error env p bop ty1 ty2 trail1 trail2 ~as_warning
     | ((_, Toption ty1), (_, Tprim _)) ->

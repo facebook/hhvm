@@ -312,7 +312,7 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
       ty_equiv env ty1 ty2 ~are_ty_param:false
     | (_, (_, Tdependent (_, ty2))) when Utils.is_class ty2 ->
       ty_equiv env ty2 ty1 ~are_ty_param:false
-    | ((r1, Tnewtype (id1, [tyl1])), (r2, Tnewtype (id2, [tyl2])))
+    | ((r1, Tnewtype (id1, [tyl1], _)), (r2, Tnewtype (id2, [tyl2], _)))
       when String.equal id1 id2
            && String.equal id1 Naming_special_names.Classes.cSupportDyn ->
       let r = union_reason r1 r2 in
@@ -320,7 +320,7 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         simplify_union ~approx_cancel_neg env tyl1 tyl2 r
       in
       (env, Option.map ~f:(MakeType.supportdyn r) try_union)
-    | ((_, Tnewtype (id1, tyl1)), (_, Tnewtype (id2, tyl2)))
+    | ((_, Tnewtype (id1, tyl1, tcstr1)), (_, Tnewtype (id2, tyl2, tcstr2)))
       when String.equal id1 id2
            && not (String.equal id1 Naming_special_names.Classes.cSupportDyn) ->
       if List.is_empty tyl1 then
@@ -329,7 +329,8 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         let (env, tyl) =
           union_class_or_newtype ~approx_cancel_neg env id1 tyl1 tyl2
         in
-        (env, Some (mk (r, Tnewtype (id1, tyl))))
+        let (env, tcstr) = union ~approx_cancel_neg env tcstr1 tcstr2 in
+        (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
     | ((_, Tclass_ptr ty1), (_, Tclass_ptr ty2)) ->
       (* Follows newtype classname<T> equal case above *)
       let (env, ty) = union ~approx_cancel_neg env ty1 ty2 in
@@ -770,7 +771,7 @@ let normalize_union env ?on_tyvar tyl :
           normalize_union env tyl' r_null (orr r_union r) r_dyn
         | ((r, Tdynamic), _) ->
           normalize_union env [] r_null r_union (orr r_dyn r)
-        | ((r, Tnewtype (n, [ty])), _)
+        | ((r, Tnewtype (n, [ty], _)), _)
           when String.equal n Naming_special_names.Classes.cSupportDyn ->
           let (_, env, ty) = Utils.strip_supportdyn env ty in
           let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in
@@ -817,7 +818,7 @@ let rec is_minimal env ty =
     | Decl_entry.NotYetAvailable ->
       false
   end
-  | Tnewtype (name, [ty])
+  | Tnewtype (name, [ty], _)
     when String.equal name Naming_special_names.Classes.cClassname ->
     is_minimal env ty
   | Tdependent _ -> true

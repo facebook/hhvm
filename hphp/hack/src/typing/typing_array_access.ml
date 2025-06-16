@@ -840,12 +840,12 @@ let rec array_get
               ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
           in
           (env, (ty, err_res_arr, err_res_idx))
-      | Tnewtype (cid, _) when String.equal cid SN.Classes.cSupportDyn ->
+      | Tnewtype (cid, _, _bound) when String.equal cid SN.Classes.cSupportDyn
+        ->
         (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype *)
         got_dynamic ()
-      | Tnewtype (ts, [ty]) -> begin
-        let (env, bound) = TUtils.get_newtype_super env r ts [ty] in
+      | Tnewtype (ts, [ty], bound) -> begin
         match deref bound with
         | ( r,
             Tshape
@@ -1097,7 +1097,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tprim Tnull)
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
-      | (_, Tnewtype (cid, _)) when String.equal cid SN.Classes.cSupportDyn ->
+      | (_, Tnewtype (cid, _, _bound))
+        when String.equal cid SN.Classes.cSupportDyn ->
         (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype.
            In this case we just accept the assignment because it's as though
@@ -1517,7 +1518,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
                 } )
         in
         (env, (ty, Ok ty, Ok tkey, Ok ty2))
-      | Tnewtype (cid, _) when String.equal cid SN.Classes.cSupportDyn ->
+      | Tnewtype (cid, _, _bound) when String.equal cid SN.Classes.cSupportDyn
+        ->
         (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype.
            In this case we just accept the assignment because it's as though

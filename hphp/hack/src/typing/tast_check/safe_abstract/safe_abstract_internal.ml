@@ -156,10 +156,10 @@ end = struct
        * `None` indicates no class information found *)
       let rec fold_ty abstractness ty : acc option =
         match snd @@ Typing_defs_core.deref ty with
-        | Typing_defs.Tnewtype (new_type, [hd_targ])
+        | Typing_defs.Tnewtype (new_type, [hd_targ], _)
           when String.equal new_type Naming_special_names.Classes.cConcrete ->
           fold_ty Concrete hd_targ
-        | Typing_defs.Tnewtype (new_type, [hd_targ])
+        | Typing_defs.Tnewtype (new_type, [hd_targ], _)
           when String.equal new_type Naming_special_names.Classes.cClassname ->
           fold_targ abstractness hd_targ
         | Typing_defs.Tclass_ptr ty -> fold_targ abstractness ty

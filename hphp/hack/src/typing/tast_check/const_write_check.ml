@@ -91,16 +91,9 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
         | Tclass ((_, c), _, _) ->
           check_prop env c id (Some cty);
           seen
-        | Tnewtype (name, tyl) ->
-          let (_, bound) =
-            Typing_utils.get_newtype_super
-              (Tast_env.tast_env_as_typing_env env)
-              (get_reason cty)
-              name
-              tyl
-          in
+        | Tnewtype (_, _, bound)
+        | Tdependent (_, bound) ->
           check_const_cty seen bound
-        | Tdependent (_, bound) -> check_const_cty seen bound
         | Tgeneric name ->
           let upper_bounds = Env.get_upper_bounds env name in
           let check_class cty seen = check_const_cty seen cty in

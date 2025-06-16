@@ -87,7 +87,11 @@ let rec validate_free_type env locl_ty =
       List.map (TShapeMap.values fm) ~f:(fun field -> field.sft_ty)
     in
     validate_l env field_tys
-  | Tnewtype (_name, tyargs) -> validate_l env tyargs
+  | Tnewtype (_name, tyargs, as_ty) ->
+    (* Typing_json.to_locl_ty already validates the name
+       Interestingly it doesn't validate that the given "as" matches
+       the defined one *)
+    validate_l env tyargs @ validate_free_type env as_ty
   | Tclass_ptr ty -> validate_free_type env ty
   (* These aren't even created by Typing_json.to_locl_ty *)
   | Tneg _

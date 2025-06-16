@@ -32,16 +32,10 @@ let rec type_non_nullable env ty =
   | Tshape _
   | Tclass _ ->
     true
-  | Tdependent (_, ty) when type_non_nullable env ty -> true
-  | Tnewtype (name, tyl) ->
-    let (_, ty) =
-      Typing_utils.get_newtype_super
-        (Tast_env.tast_env_as_typing_env env)
-        (get_reason ty)
-        name
-        tyl
-    in
-    type_non_nullable env ty
+  | Tnewtype (_, _, ty)
+  | Tdependent (_, ty)
+    when type_non_nullable env ty ->
+    true
   | Tunion tyl when not (List.is_empty tyl) ->
     List.for_all tyl ~f:(type_non_nullable env)
   | _ -> false
@@ -116,7 +110,7 @@ let rec truthiness env ty =
   | Tneg _
   | Toption _ ->
     Possibly_falsy
-  | Tnewtype (id, _) when Env.is_enum env id -> Possibly_falsy
+  | Tnewtype (id, _, _) when Env.is_enum env id -> Possibly_falsy
   | Tclass ((_, cid), _, _) ->
     if String.equal cid SN.Classes.cStringish then
       Possibly_falsy

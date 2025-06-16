@@ -139,18 +139,16 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
   | (p, Tnonnull) -> obj @@ kind p "nonnull"
   | (p, Tdynamic) -> obj @@ kind p "dynamic"
   | (p, Tgeneric s) -> obj @@ kind p "generic" @ name s
-  | (_, Tnewtype (s, [ty]))
+  | (_, Tnewtype (s, [ty], _))
     when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
     from_type env ~show_like_ty ty
-  | (p, Tnewtype (s, tys))
+  | (p, Tnewtype (s, _, ty))
     when Decl_provider.get_class env.decl_env.Decl_env.ctx s
          |> Decl_entry.to_option
          >>| Cls.enum_type
          |> Option.is_some ->
-    let (_, ty) = Typing_utils.get_newtype_super env (get_reason ty) s tys in
     obj @@ kind p "enum" @ name s @ as_type ty
-  | (p, Tnewtype (s, tys)) ->
-    let (_, ty) = Typing_utils.get_newtype_super env (get_reason ty) s tys in
+  | (p, Tnewtype (s, tys, ty)) ->
     obj @@ kind p "newtype" @ name s @ args tys @ as_type ty
   | (p, Tdependent (DTexpr _, ty)) ->
     obj
@@ -364,7 +362,7 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
         ty (Tgeneric name)
       | "enum" ->
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
-        ty (Tnewtype (name, []))
+        aux_as json ~keytrace >>= fun as_ty -> ty (Tnewtype (name, [], as_ty))
       | "newtype" ->
         get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
         begin
@@ -386,7 +384,8 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
         >>= fun typedef_name ->
         get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
         aux_args args ~keytrace:args_keytrace >>= fun args ->
-        ty (Tnewtype (typedef_name, args))
+        aux_as json ~keytrace >>= fun as_ty ->
+        ty (Tnewtype (typedef_name, args, as_ty))
       | "path" ->
         get_obj "type" (json, keytrace) >>= fun (type_json, type_keytrace) ->
         get_string "kind" (type_json, type_keytrace)

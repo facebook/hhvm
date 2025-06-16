@@ -889,10 +889,10 @@ end = struct
       in
       cycle_handler ~env ~trail ty
     | Tdependent (_, ty) -> fromTy ctx env ty
-    | Tnewtype (name, _)
+    | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)
-    | Tnewtype (name, ty_args) -> begin
+    | Tnewtype (name, ty_args, as_ty) -> begin
       (* A Tnewtype is either an opaque alias (defined with keyword `newtype`)
        * or a case type.
        * For opaque type aliases, we look at the upper bound, but for case types,
@@ -948,9 +948,6 @@ end = struct
             DataTypeReason.enum ~trail
           else
             DataTypeReason.newtype ~trail
-        in
-        let (env, as_ty) =
-          Typing_utils.get_newtype_super env (get_reason ty) name ty_args
         in
         let trail = trail_f (get_reason as_ty) name in
         cycle_handler ~env ~trail as_ty

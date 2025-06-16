@@ -117,7 +117,7 @@ module TyPredicate = struct
     | Tvec_or_dict _ -> Result.Error "vec_or_dict"
     | Taccess _ -> Result.Error "access"
     | Tvar _ -> Result.Error "tvar"
-    | Tnewtype (s, _) -> Result.Error ("newtype-" ^ s)
+    | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
     | Tdependent _ -> Result.Error "dependent"
     | Tneg _ -> Result.Error "neg"
     | Tlabel _ -> Result.Error "label"
@@ -604,7 +604,7 @@ and split_ty
       in
       (env, TyPartition.(meet (mk_span ~env ~predicate ty) partition))
     | Tgeneric name
-    | Tnewtype (name, _)
+    | Tnewtype (name, _, _)
       when SSet.mem name expansions ->
       (env, TyPartition.mk_span ~env ~predicate ty)
     | Tgeneric name ->
@@ -617,10 +617,7 @@ and split_ty
         ~init
         ~expansions
         upper_bounds
-    | Tnewtype (name, tyl) ->
-      let (env, as_ty) =
-        Typing_utils.get_newtype_super env (get_reason ty) name tyl
-      in
+    | Tnewtype (name, tyl, as_ty) ->
       let init = TyPartition.mk_span ~env ~predicate ty in
       let expansions = SSet.add name expansions in
       begin

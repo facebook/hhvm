@@ -4,4 +4,3 @@ Method Compare::eq -> Type C
 Type C -> Type Compare
 Type Compare -> Type C
 Type HH\Capabilities\WriteProperty -> Type C, Type Compare
-Type HH\supportdyn -> Type C

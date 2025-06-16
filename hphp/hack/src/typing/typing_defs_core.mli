@@ -357,7 +357,7 @@ and _ ty_ =
         * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tvar : (Tvid.t[@transform.opaque]) -> locl_phase ty_
-  | Tnewtype : string * locl_phase ty list -> locl_phase ty_
+  | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
       (** The type of an opaque type or enum. Outside their defining files or
         when they represent enums, they are "opaque", which means that they
         only unify with themselves. Within a file, uses of newtypes are

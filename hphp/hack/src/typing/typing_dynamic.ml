@@ -261,12 +261,12 @@ let rec try_push_like env ty =
                  } ))
       else
         None )
-  | (r, Tnewtype (n, tyl)) ->
+  | (r, Tnewtype (n, tyl, bound)) ->
     let tparams = Env.get_class_or_typedef_tparams env n in
     let (changed, tyl) = push_like_tyargs env tyl tparams in
     ( env,
       if changed then
-        Some (mk (r, Tnewtype (n, tyl)))
+        Some (mk (r, Tnewtype (n, tyl, bound)))
       else
         None )
   | (r, Tclass ((p, n), exact, tyl)) ->
@@ -338,10 +338,16 @@ let rec strip_covariant_like env ty =
                 s_unknown_value = kind;
                 s_fields = fields;
               } ) )
-    | (r, Tnewtype (n, tyl)) ->
+    | (r, Tnewtype (n, tyl, bound)) ->
       let tparams = Env.get_class_or_typedef_tparams env n in
       let (env, tyl) = strip_covariant_like_tyargs env tyl tparams in
-      (env, mk (r, Tnewtype (n, tyl)))
+      let (env, bound) =
+        if String.equal n Naming_special_names.Classes.cMemberOf then
+          strip_covariant_like env bound
+        else
+          (env, bound)
+      in
+      (env, mk (r, Tnewtype (n, tyl, bound)))
     | (r, Tclass ((p, n), exact, tyl)) ->
       let tparams = Env.get_class_or_typedef_tparams env n in
       let (env, tyl) = strip_covariant_like_tyargs env tyl tparams in

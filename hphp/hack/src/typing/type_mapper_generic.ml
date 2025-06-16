@@ -49,7 +49,7 @@ class type ['env] type_mapper_type =
     method on_tgeneric : 'env -> Reason.t -> string -> 'env * locl_ty
 
     method on_tnewtype :
-      'env -> Reason.t -> string -> locl_ty list -> 'env * locl_ty
+      'env -> Reason.t -> string -> locl_ty list -> locl_ty -> 'env * locl_ty
 
     method on_tdependent :
       'env -> Reason.t -> dependent_type -> locl_ty -> 'env * locl_ty
@@ -100,7 +100,8 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tgeneric env r name = (env, mk (r, Tgeneric name))
 
-    method on_tnewtype env r name tyl = (env, mk (r, Tnewtype (name, tyl)))
+    method on_tnewtype env r name tyl ty =
+      (env, mk (r, Tnewtype (name, tyl, ty)))
 
     method on_tdependent env r dep ty = (env, mk (r, Tdependent (dep, ty)))
 
@@ -145,7 +146,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Toption ty -> this#on_toption env r ty
       | Tfun fun_type -> this#on_tfun env r fun_type
       | Tgeneric x -> this#on_tgeneric env r x
-      | Tnewtype (x, tyl) -> this#on_tnewtype env r x tyl
+      | Tnewtype (x, tyl, ty) -> this#on_tnewtype env r x tyl ty
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
@@ -287,9 +288,10 @@ class ['env] deep_type_mapper =
       in
       (env, mk (r, Tfun ft))
 
-    method! on_tnewtype env r x tyl =
+    method! on_tnewtype env r x tyl cstr =
       let (env, tyl) = List.map_env env tyl ~f:this#on_type in
-      (env, mk (r, Tnewtype (x, tyl)))
+      let (env, cstr) = this#on_type env cstr in
+      (env, mk (r, Tnewtype (x, tyl, cstr)))
 
     method! on_tdependent env r x cstr =
       let (env, cstr) = this#on_type env cstr in

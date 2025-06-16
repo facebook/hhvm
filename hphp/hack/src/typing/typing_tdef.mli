@@ -11,7 +11,10 @@ val expand_typedef :
   Typing_reason.t ->
   string ->
   Typing_defs.locl_ty list ->
-  Typing_utils.expand_typedef_result
+  (Typing_env_types.env
+  * Typing_error.t option
+  * Type_expansions.cycle_reporter list)
+  * Typing_defs.locl_ty
 
 (** Expand a typedef, smashing abstraction and collecting a trail
   of where the typedefs come from.

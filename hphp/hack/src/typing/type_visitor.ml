@@ -213,7 +213,8 @@ class type ['a] locl_type_visitor_type =
 
     method on_tgeneric : 'a -> Reason.t -> string -> 'a
 
-    method on_tnewtype : 'a -> Reason.t -> string -> locl_ty list -> 'a
+    method on_tnewtype :
+      'a -> Reason.t -> string -> locl_ty list -> locl_ty -> 'a
 
     method on_tdependent : 'a -> Reason.t -> dependent_type -> locl_ty -> 'a
 
@@ -284,8 +285,9 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tgeneric acc _ _ = acc
 
-    method on_tnewtype acc _ _ tyl =
+    method on_tnewtype acc _ _ tyl ty =
       let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
+      let acc = this#on_type acc ty in
       acc
 
     method on_tdependent acc _ _ ty =
@@ -380,7 +382,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tvar id -> this#on_tvar acc r id
       | Tfun fty -> this#on_tfun acc r fty
       | Tgeneric x -> this#on_tgeneric acc r x
-      | Tnewtype (x, tyl) -> this#on_tnewtype acc r x tyl
+      | Tnewtype (x, tyl, ty) -> this#on_tnewtype acc r x tyl ty
       | Tdependent (x, ty) -> this#on_tdependent acc r x ty
       | Ttuple t -> this#on_ttuple acc r t
       | Tunion tyl -> this#on_tunion acc r tyl

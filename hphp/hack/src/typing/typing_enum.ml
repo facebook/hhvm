@@ -108,7 +108,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
    * Forbid for now until we can more thoroughly audit the behavior *)
   let check_if_case_type env ty =
     match get_node ty with
-    | Tnewtype (name, _) ->
+    | Tnewtype (name, _, _) ->
       (match Typing_env.get_typedef env name with
       | Decl_entry.Found { td_type_assignment = CaseType _; td_pos; _ } ->
         Typing_error_utils.add_typing_error ~env
@@ -138,9 +138,9 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
       && List.for_all ~f:is_valid_base t_optional
       && is_nothing t_variadic
     | Ttuple { t_extra = Tsplat _; _ } -> false
-    | Tnewtype (_, ltys) ->
+    | Tnewtype (_, ltys, lty) ->
       check_if_case_type env ty;
-      List.for_all ~f:is_valid_base ltys
+      List.for_all ~f:is_valid_base (lty :: ltys)
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
     | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
     | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1

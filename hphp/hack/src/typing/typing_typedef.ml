@@ -116,7 +116,7 @@ let check_invalid_recursive_case_type
   let rec is_invalid_single_type (ty : Typing_defs.locl_ty) =
     let open Typing_defs in
     match (get_node ty : locl_phase ty_) with
-    | Tnewtype (id, _targs) -> String.equal name id
+    | Tnewtype (id, _targs, _bound) -> String.equal name id
     | Toption ty -> is_invalid_single_type ty
     | Taccess _
     | Tgeneric _

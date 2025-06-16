@@ -338,7 +338,7 @@ module AlternativeSet = struct
              ~f:(ValueSet.add @@ ValueWithPos.of_value Value.Null))
       in
       (env, value_set)
-    | T.Tnewtype (name, [enum_class; _])
+    | T.Tnewtype (name, [enum_class; _], _)
       when List.mem
              ~equal:String.equal
              [SN.Classes.cMemberOf; SN.Classes.cEnumClassLabel]
@@ -355,7 +355,7 @@ module AlternativeSet = struct
           enum_class_name
       | _ -> (env, None)
     end
-    | T.Tnewtype (enum_name, _) when Tast_env.is_enum env enum_name ->
+    | T.Tnewtype (enum_name, _, _) when Tast_env.is_enum env enum_name ->
       (* An enum E is exhaustively switched if there is a case for all of its
          declared values (including inherited ones). *)
       of_enum_name ~is_enum_class_label:false ~bound:None env enum_name

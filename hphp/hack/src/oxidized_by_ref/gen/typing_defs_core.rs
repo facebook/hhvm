@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4680324b5dac0d2721dd72c93b8f05ac>>
+// @generated SignedSource<<3c2865f1da2f2599ed0d9591593217d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -821,7 +821,7 @@ pub enum Ty_<'a> {
     /// The second parameter is the list of type arguments to the type.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
-    Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>])),
+    Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
     /// see dependent_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]

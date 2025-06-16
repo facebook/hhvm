@@ -125,14 +125,15 @@ let apply_rules_with_array_index_value_ty_mismatches
       let (env, val_ty_mismatch) = intersect_errs env val_errs in
       let (env, ty) = Typing_intersection.intersect_list env r tys in
       (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
-    | (_, Tnewtype (cid, _))
+    | (_, Tnewtype (cid, _, _))
       when String.equal cid SN.Classes.cSupportDyn
            && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
       (* If we are under_dynamic_assumptions, we might want to take advantage of
          the dynamic in supportdyn<t>, so don't break it apart as in the next case. *)
       default ()
     (* Preserve supportdyn<_> across operation *)
-    | (r, Tnewtype (cid, [ty])) when String.equal cid SN.Classes.cSupportDyn ->
+    | (r, Tnewtype (cid, [ty], _)) when String.equal cid SN.Classes.cSupportDyn
+      ->
       let (env, (ty, arr_errs, key_errs, val_errs)) =
         iter ~supportdyn:true ~is_nonnull env ty
       in
@@ -166,21 +167,18 @@ let apply_rules_with_array_index_value_ty_mismatches
       (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
-    | (r, Tnewtype (cid, tyl)) ->
-      let (env, bound) = Typing_utils.get_newtype_super env r cid tyl in
-      if
-        String.equal cid SN.FB.cTypeStructure
-        && is_shape bound
-        && ignore_type_structure
-      then
-        default ()
-      (* Enums with arraykey upper bound are treated as "abstract" *)
-      else if Env.is_enum env cid && is_arraykey bound then
-        default ()
-      else
-        iter ~supportdyn ~is_nonnull env bound
+    | (_, Tnewtype (cid, _, bound))
+      when String.equal cid SN.FB.cTypeStructure
+           && is_shape bound
+           && ignore_type_structure ->
+      default ()
+    (* Enums with arraykey upper bound are treated as "abstract" *)
+    | (_, Tnewtype (cid, _, bound))
+      when Env.is_enum env cid && is_arraykey bound ->
+      default ()
     (* If there is an explicit upper bound, delegate to it *)
-    | (_, Tdependent (_, ty)) -> iter ~supportdyn ~is_nonnull env ty
+    | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) ->
+      iter ~supportdyn ~is_nonnull env ty
     (* For type parameters with upper bounds, delegate to intersection of the upper bounds *)
     | (r, Tgeneric _) ->
       let (env, tyl) = get_transitive_upper_bounds env ty in

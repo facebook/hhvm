@@ -426,7 +426,6 @@ let is_opaque_internal ty =
 
 let rec expand ctx env root =
   let (env, root) = Env.expand_type env root in
-  let (_, env, root) = Typing_utils.strip_supportdyn env root in
   let err_opt =
     let (pos, tconst) = ctx.id in
     let ty_name = lazy (Typing_print.error env root) in
@@ -450,21 +449,20 @@ let rec expand ctx env root =
     match get_node root with
     | Tany _ -> ((env, None, []), Exact root)
     (* We allow inheritance of members from internal classes and traits into public ones,
-        even if their signatures include internal types, but when localizing such internal
-        types we pretend that a Tclass is a Tnewtype i.e. is opaque.
-        Here we deal with projection from a newtype that was generated in such cases e.g.
-            internal class Base { const type TC = int; public static function foo(self::TC $_):void { } }
-            class Derived extends Base { }
-            function bar():void { Derived::foo("A"); }
-       Generate another fake newtype by mangling the name using the projection syntax.
+       even if their signatures include internal types, but when localizing such internal
+       types we pretend that a Tclass is a Tnewtype i.e. is opaque.
+       Here we deal with projection from a newtype that was generated in such cases e.g.
+           internal class Base { const type TC = int; public static function foo(self::TC $_):void { } }
+           class Derived extends Base { }
+           function bar():void { Derived::foo("A"); }
+        Generate another fake newtype by mangling the name using the projection syntax.
     *)
-    | Tnewtype (name, _tyl) when is_opaque_internal root ->
+    | Tnewtype (name, _tyl, bound) when is_opaque_internal root ->
       ( (env, None, []),
-        Exact (mk (get_reason root, Tnewtype (name ^ "::" ^ snd ctx.id, []))) )
-    | Tnewtype (name, tyl) ->
-      let (env, ty) =
-        Typing_utils.get_newtype_super env (get_reason root) name tyl
-      in
+        Exact
+          (mk (get_reason root, Tnewtype (name ^ "::" ^ snd ctx.id, [], bound)))
+      )
+    | Tnewtype (name, _, ty) ->
       let ctx =
         let base = Some (Option.value ctx.base ~default:root) in
         let allow_abstract = true in

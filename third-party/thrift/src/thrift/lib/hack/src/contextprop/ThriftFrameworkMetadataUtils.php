@@ -65,13 +65,4 @@ abstract final class ThriftFrameworkMetadataUtils {
     return Base64::encode($buf->getBuffer());
   }
 
-  public static function encodeThriftFrameworkMetadataWithoutMemo(
-    ThriftFrameworkMetadata $tfm,
-  )[globals, zoned_shallow]: string {
-    $buf = new TMemoryBuffer();
-    $proto = new TCompactProtocolAccelerated($buf);
-    $tfm->write($proto);
-    return Base64::encode($buf->getBuffer());
-  }
-
 }

@@ -599,7 +599,10 @@ let rec expand ctx env root =
         Phase.list_map_env_err_cycles
           env
           tyl_nonvars
-          ~f:(expand ctx)
+          ~f:(fun env root ->
+            let ety_env = { ctx.ety_env with this_ty = root } in
+            let ctx = { ctx with ety_env } in
+            expand ctx env root)
           ~combine_ty_errs:Typing_error.multiple_opt
       in
       let result = intersect_results err_opt resl in
@@ -611,7 +614,10 @@ let rec expand ctx env root =
             Phase.list_map_env_err_cycles
               env
               tyl_vars
-              ~f:(expand ctx)
+              ~f:(fun env root ->
+                let ety_env = { ctx.ety_env with this_ty = root } in
+                let ctx = { ctx with ety_env } in
+                expand ctx env root)
               ~combine_ty_errs:Typing_error.multiple_opt
           in
           (* TODO: should we be taking the intersection of the errors? *)
@@ -627,7 +633,10 @@ let rec expand ctx env root =
         Phase.list_map_env_err_cycles
           env
           tyl
-          ~f:(expand ctx)
+          ~f:(fun env root ->
+            let ety_env = { ctx.ety_env with this_ty = root } in
+            let ctx = { ctx with ety_env } in
+            expand ctx env root)
           ~combine_ty_errs:Typing_error.union_opt
       in
       let result = union_results err_opt resl in

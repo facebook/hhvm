@@ -12,7 +12,7 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"  private function ${0:method0}(): vec<int> {\n    $x = vec[1];\n    return $x;\n  }\n\n",
-          "range":{"end":{"character":0,"line":6},"start":{"character":0,"line":6}}
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
           "newText":"$x = $this->${0:method0}();",
@@ -30,14 +30,14 @@ Applied edit for code action:
 <?hh
 
 class A {
-  /** This is the doc comment
-   * for the function foo
-  */
   private function ${0:method0}(): vec<int> {
     $x = vec[1];
     return $x;
   }
 
+  /** This is the doc comment
+   * for the function foo
+  */
   public function foo(): void {
     /*range-start*/$x = $this->${0:method0}();/*range-end*/
     var_dump($x);

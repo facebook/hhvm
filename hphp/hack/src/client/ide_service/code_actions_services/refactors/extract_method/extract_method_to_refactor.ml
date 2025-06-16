@@ -10,8 +10,8 @@ module T = Extract_method_types
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
-let tree_from_string s =
-  let source_text = Full_fidelity_source_text.make Relative_path.default s in
+(* note: returns None iff there are syntax errros *)
+let tree_from_source_text source_text : SyntaxTree.t option =
   let env = Full_fidelity_parser_env.make ~mode:FileInfo.Mstrict () in
   let tree = SyntaxTree.make ~env source_text in
 
@@ -19,6 +19,11 @@ let tree_from_string s =
     Some tree
   else
     None
+
+(* note: returns None iff there are syntax errros *)
+let tree_from_string s : SyntaxTree.t option =
+  let source_text = Full_fidelity_source_text.make Relative_path.default s in
+  tree_from_source_text source_text
 
 let hackfmt src =
   let prefix = "<?hh\n" in
@@ -259,6 +264,43 @@ let method_call_string_of_candidate
       as_string
       comment_and_whitespace
 
+let include_leading_trivia
+    (source_text : Full_fidelity_source_text.t)
+    (path : Relative_path.t)
+    ~(method_pos : Pos.t) : Pos.t =
+  let new_pos =
+    let open Option.Let_syntax in
+    let* tree = tree_from_source_text source_text in
+    let root = SyntaxTree.root tree in
+    let (line, start, _) = Pos.info_pos method_pos in
+    let offset =
+      Full_fidelity_source_text.position_to_offset source_text (line, start + 1)
+    in
+    let+ node =
+      Full_fidelity_positioned_syntax.parentage root offset
+      |> List.find ~f:Full_fidelity_positioned_syntax.is_methodish_declaration
+    in
+    let (line_one_based, _) =
+      Full_fidelity_positioned_syntax.leading_start_position node
+    in
+    let offset =
+      Full_fidelity_source_text.position_to_offset
+        source_text
+        (line_one_based, 0)
+    in
+    let triple = (line_one_based, offset, offset) in
+    Pos.make_from_lnum_bol_offset
+      ~pos_file:path
+      ~pos_start:triple
+      ~pos_end:triple
+  in
+  match new_pos with
+  | Some pos -> pos
+  | None ->
+    (* When not found (such as when there are syntax errors),
+     * fall back to just using the start of the method in the Nast *)
+    method_pos |> Pos.set_col_start 0 |> Pos.shrink_to_start
+
 let edits_of_candidate
     ~source_text
     ~path
@@ -280,11 +322,11 @@ let edits_of_candidate
     { Code_action_types.pos; text = call_string }
   in
   let change_add_method =
-    let pos = method_pos |> Pos.set_col_start 0 |> Pos.shrink_to_start in
+    let method_pos = include_leading_trivia source_text path ~method_pos in
     let method_string =
       method_string_of_candidate ~source_text ~params ~return ~snippet candidate
     in
-    Code_action_types.{ pos; text = method_string }
+    Code_action_types.{ pos = method_pos; text = method_string }
   in
   Relative_path.Map.singleton path [change_add_method; change_add_call]
 

@@ -688,7 +688,7 @@ TEST(CompilerTest, function_exception_field_name_uniqueness) {
     service S {
       void foo() throws (
         1: Ex1 e,
-        2: Ex2 e, # expected-warning: Exception field `e` is already defined for `foo`.
+        2: Ex2 e, # expected-error: Exception field `e` is already defined for `foo`.
       );
     }
   )");

@@ -1035,7 +1035,7 @@ void validate_function_priority_annotation(
 void validate_function_exception_field_name_uniqueness(
     sema_context& ctx, const t_function& node) {
   if (node.exceptions() != nullptr) {
-    redef_checker(ctx, "Exception field", node, diagnostic_level::warning)
+    redef_checker(ctx, "Exception field", node)
         .check_all(node.exceptions()->fields());
   }
 }

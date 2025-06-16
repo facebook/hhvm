@@ -1255,9 +1255,10 @@ let go_with_interrupt
       | Some (fanout_aware_threshold, fanout_threshold) ->
         assert (fanout_threshold >= fanout_aware_threshold);
         let fanout_aware_distc =
-          fanout_size > fanout_aware_threshold && fanout_size < fanout_threshold
+          fanout_size >= fanout_aware_threshold
+          && fanout_size < fanout_threshold
         in
-        (fanout_size > fanout_aware_threshold, fanout_aware_distc)
+        (fanout_size >= fanout_aware_threshold, fanout_aware_distc)
       | None -> (false, false)
     in
     let fanout =
@@ -1272,15 +1273,7 @@ let go_with_interrupt
     if check_info.log_errors then
       Server_progress.ErrorsWrite.telemetry
         (Telemetry.create ()
-        |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc
-        |>
-        if fanout_aware_distc then
-          Telemetry.int_
-            ~key:"fanout_aware_distc_fanout_size"
-            ~value:fanout_size
-        else
-          fun t ->
-        t);
+        |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
     if will_use_distc then (
       (* TODO(ljw): time_first_error isn't properly calculated in this path *)
       (* distc doesn't yet give any profiling_info about how its workers fared *)

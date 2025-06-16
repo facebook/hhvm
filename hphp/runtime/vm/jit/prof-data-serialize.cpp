@@ -1442,7 +1442,8 @@ void ProfDataSerializer::finalize() {
   // rename it to its file name (signifying completion).
   if (fileMode == FileMode::Create &&
       !Cfg::Eval::EnableSBProfSerialize &&
-      serializeOptProfEnabled()) {
+      serializeOptProfEnabled() &&
+      isJitSerializing()) {
     // Don't rename the file to it's final name yet as we're still going to
     // append the profile data collected for the optimized code to it.
     FTRACE(1, "Finished serializing base profile data to {}\n", fileName);

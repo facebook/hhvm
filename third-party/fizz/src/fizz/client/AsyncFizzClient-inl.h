@@ -9,6 +9,15 @@
 namespace fizz {
 namespace client {
 
+#if FOLLY_HAVE_WEAK_SYMBOLS
+FOLLY_ATTR_WEAK void fizz_hook_on_handshake_success(
+    AsyncFizzBase*,
+    const State&);
+#else
+static void (*fizz_hook_on_handshake_success)(AsyncFizzBase*, const State&) =
+    nullptr;
+#endif
+
 template <typename SM>
 AsyncFizzClientT<SM>::AsyncFizzClientT(
     folly::AsyncTransportWrapper::UniquePtr socket,
@@ -552,6 +561,10 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
   // Disable record aligned reads. At this point, we are aligned on a record
   // boundary (if handshakeRecordAlignedReads = true).
   client_.updateReadHint(0);
+
+  if (fizz_hook_on_handshake_success) {
+    fizz_hook_on_handshake_success(&client_, client_.getState());
+  }
 
   // if there are app writes pending this handshake success, flush them first,
   // then flush the early data buffers

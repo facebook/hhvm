@@ -10,7 +10,7 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
   const PolicyEnforcerAssetClass ASSET_CLASS =
     PolicyEnforcerAssetClass::THRIFT_CLIENT;
 
-  <<__Memoize>>
+  <<__Memoize(#MakeICInaccessible)>>
   private static function getPrivacyLibObject(
     ThriftServiceMethodNameAssetXID $asset_xid,
     string $sr_config_service_name,

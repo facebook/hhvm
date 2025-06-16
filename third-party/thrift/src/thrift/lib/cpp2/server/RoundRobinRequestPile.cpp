@@ -167,7 +167,13 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
   // achieve that.
   if (!retrievalIndexQueues_[pri]) {
     if (singleBucketRequestQueues_[pri]->enqueue(std::move(request))) {
+      if (onRequestAcceptedFunction_) {
+        onRequestAcceptedFunction_(pri, bucket);
+      }
       return std::nullopt;
+    }
+    if (onRequestRejectedFunction_) {
+      onRequestRejectedFunction_(pri, bucket);
     }
     return std::make_optional<ServerRequestRejection>(AppServerException(
         "AppServerException", "RequestPile enqueue error : reached max limit"));
@@ -178,6 +184,9 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
         std::move(request), opts_.numMaxRequests);
     switch (res) {
       case RequestQueue::TryPushResult::FAILED_LIMIT_REACHED: {
+        if (onRequestRejectedFunction_) {
+          onRequestRejectedFunction_(pri, bucket);
+        }
         return std::make_optional<ServerRequestRejection>(AppServerException(
             "AppServerException",
             "RequestPile enqueue error : reached max limit"));
@@ -195,6 +204,10 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
       // the request queue
       retrievalIndexQueues_[pri]->enqueue(bucket);
     }
+  }
+
+  if (onRequestAcceptedFunction_) {
+    onRequestAcceptedFunction_(pri, bucket);
   }
   return std::nullopt;
 }

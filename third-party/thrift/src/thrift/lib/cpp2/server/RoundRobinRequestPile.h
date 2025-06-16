@@ -208,6 +208,20 @@ class RoundRobinRequestPile : public RequestPileBase {
   std::optional<ServerRequest> dequeueImpl(unsigned pri, unsigned bucket);
 
   RequestExpirationDelegate* requestExpirationDelegate_{nullptr};
+
+  using BucketEventLoggingFunction = std::function<void(Priority, Bucket)>;
+
+  BucketEventLoggingFunction onRequestAcceptedFunction_;
+  BucketEventLoggingFunction onRequestRejectedFunction_;
+
+ public:
+  void setOnRequestAcceptedFunction(BucketEventLoggingFunction fn) {
+    onRequestAcceptedFunction_ = std::move(fn);
+  }
+
+  void setOnRequestRejectedFunction(BucketEventLoggingFunction fn) {
+    onRequestRejectedFunction_ = std::move(fn);
+  }
 };
 
 // RoundRobinRequestPile is the default request pile used by most of

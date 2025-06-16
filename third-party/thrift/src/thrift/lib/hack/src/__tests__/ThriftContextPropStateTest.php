@@ -578,4 +578,16 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getExperimentIds())->toBeEmpty();
   }
 
+  public function testRequestIdEncoded(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->setRequestId("\x00");
+    expect($tcps->getRequestIdEncoded())->toEqual("AA==");
+  }
+
+  public function testRequestIdEncodedEmpty(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->setRequestId("");
+    expect($tcps->getRequestIdEncoded())->toEqual("0");
+  }
+
 }

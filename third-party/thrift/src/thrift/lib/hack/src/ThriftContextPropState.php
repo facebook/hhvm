@@ -341,6 +341,11 @@ final class ThriftContextPropState {
     return ($this->storage->request_id as string);
   }
 
+  public readonly function getRequestIdEncoded()[leak_safe]: string {
+    $request_id = $this->getRequestId();
+    return $request_id === "" ? "0" : Base64::encode($request_id);
+  }
+
   public function setRequestId(?string $s)[write_props]: void {
     $this->storage->request_id = $s;
     $this->dirty();

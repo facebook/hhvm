@@ -46,7 +46,7 @@ final class ThriftPolicyEnforcer
     'TitanMessagingService',
     'ZGatewayService',
     // for tests
-    'fake_service',
+    'FakeService',
   ];
 
   <<__Override>>

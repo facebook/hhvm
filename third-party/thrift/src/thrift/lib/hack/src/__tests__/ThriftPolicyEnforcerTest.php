@@ -74,7 +74,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
 
     // Unconfigured service uses the global default
     expect(await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      'fake_service',
+      'FakeService',
       'fake_api',
       PolicyEnforcerCallerIdentity::unauthorizedCaller(),
       PolicyEnforcerContext::empty(),
@@ -107,7 +107,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     expect(
       async () ==>
         await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-          'fake_service',
+          'FakeService',
           'a_different_fake_api',
           PolicyEnforcerCallerIdentity::unauthorizedCaller(),
           PolicyEnforcerContext::empty(),
@@ -115,7 +115,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     )->toThrow(Exception::class);
     // Unconfigured API uses the global default
     expect(await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      'fake_service',
+      'FakeService',
       'another_fake_api',
       PolicyEnforcerCallerIdentity::unauthorizedCaller(),
       PolicyEnforcerContext::empty(),
@@ -147,7 +147,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
         HH\FIXME\UNSAFE_CAST<
           shape(
             'config' => shape(
-              'another_fake_service' => shape(
+              'AnotherFakeService' => shape(
                 'config' => shape(
                   'www' => shape(
                     'allow_sampling_rate' => int,
@@ -162,7 +162,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
         >(
           shape(
             'config' => shape(
-              'another_fake_service' => shape(
+              'AnotherFakeService' => shape(
                 'config' => shape(
                   'www' => shape(
                     'enforce_rate' => 1,
@@ -180,7 +180,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     expect(
       async () ==>
         await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-          'another_fake_service',
+          'AnotherFakeService',
           'another_fake_api',
           PolicyEnforcerCallerIdentity::unauthorizedCaller(),
           PolicyEnforcerContext::empty(),
@@ -220,10 +220,10 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
       'fbcodeCommon' => 1,
       'thrift' => shape(
         'www' => dict[
-          'fake_service' => self::getFakeBitmask(vec[self::FAKE_CALLER_1]),
+          'FakeService' => self::getFakeBitmask(vec[self::FAKE_CALLER_1]),
         ],
         'wwwRequiresCIPPCheck' => dict[
-          'fake_service' => self::getFakeBitmask(vec[self::FAKE_CALLER_2]),
+          'FakeService' => self::getFakeBitmask(vec[self::FAKE_CALLER_2]),
         ],
         'fbcodeCommon' => 1,
       ),
@@ -231,7 +231,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
 
     // Standard trusted caller
     expect(await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      'fake_service',
+      'FakeService',
       'fake_api',
       new PolicyEnforcerCallerIdentity(self::FAKE_CALLER_1),
       PolicyEnforcerContext::empty(),
@@ -243,7 +243,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     ));
     // Conditionally allowed caller even though privacy unsafe
     expect(await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      'fake_service',
+      'FakeService',
       'fake_api',
       new PolicyEnforcerCallerIdentity(self::FAKE_CALLER_2),
       PolicyEnforcerContext::empty(),
@@ -257,7 +257,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     expect(
       async () ==>
         await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-          'fake_service',
+          'FakeService',
           'fake_api',
           new PolicyEnforcerCallerIdentity(self::FAKE_CALLER_3),
           PolicyEnforcerContext::empty(),
@@ -266,10 +266,10 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
   }
 
   public async function testGetCallerName(): Awaitable<void> {
-    expect(ThriftPolicyEnforcer::getCallerName('fake_service', null))
+    expect(ThriftPolicyEnforcer::getCallerName('FakeService', null))
       ->toBeNull();
     expect(ThriftPolicyEnforcer::getCallerName(
-      'fake_service',
+      'FakeService',
       LaserCaller::ENT_LOADER,
     ))
       ->toBeNull();
@@ -295,7 +295,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     $mock = self::mockFunction(ThriftServiceMethodNamePrivacyLib::get<>);
 
     await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      'fake_service',
+      'FakeService',
       'fake_api',
       new PolicyEnforcerCallerIdentity(null),
       PolicyEnforcerContext::builder()
@@ -303,18 +303,18 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
           #ThriftPolicyZones,
           new ThriftPolicyZoneModuleContext(
             ThriftServiceMethodNameAssetXID::unsafeGet(
-              'fake_service',
+              'FakeService',
               'fake_method',
             ),
-            'fake_service',
+            'FakeService',
           ),
         )
         ->build(),
     );
     expect($mock)->toBeCalledWithInAnyOrder(
       vec[vec[
-        ThriftServiceMethodNameAssetXID::get('fake_service', 'fake_method'),
-        'fake_service',
+        ThriftServiceMethodNameAssetXID::get('FakeService', 'fake_method'),
+        'FakeService',
       ]],
     );
   }
@@ -376,7 +376,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
       nameof self,
     );
     await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      'fake_service',
+      'FakeService',
       'fake_api',
       new PolicyEnforcerCallerIdentity(null),
       PolicyEnforcerContext::builder()
@@ -384,10 +384,10 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
           #ThriftPolicyZones,
           new ThriftPolicyZoneModuleContext(
             ThriftServiceMethodNameAssetXID::unsafeGet(
-              'fake_service',
+              'FakeService',
               'fake_method',
             ),
-            'fake_service',
+            'FakeService',
           ),
         )
         ->add(
@@ -424,7 +424,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
         $sr_client,
         nameof self,
       )
-    )->genBefore('fake_service', 'fake_method');
+    )->genBefore('FakeService', 'fake_method');
 
     await PSP()->genRunFromUnitTest(); // flush logs
     expect($mock)->wasCalledWithArgumentsPassingNTimes(
@@ -456,7 +456,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
         $sr_client,
         nameof self,
       )
-    )->genBefore('fake_service', 'fake_method');
+    )->genBefore('FakeService', 'fake_method');
 
     await PSP()->genRunFromUnitTest(); // flush logs
     expect($mock)->wasCalledWithArgumentsPassingNTimes(

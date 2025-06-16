@@ -927,10 +927,11 @@ void HQSession::checkForShutdown() {
   }
 }
 
-void HQSession::errorOnTransactionId(quic::StreamId id, HTTPException ex) {
+void HQSession::errorOnTransactionId(quic::StreamId id,
+                                     const HTTPException& ex) {
   auto stream = findStream(id);
   if (stream) {
-    stream->errorOnTransaction(std::move(ex));
+    stream->errorOnTransaction(ex);
   }
 }
 
@@ -948,14 +949,15 @@ void HQSession::HQStreamTransportBase::errorOnTransaction(
                                           streamIdStr,
                                           extraErrorMsg));
   ex.setProxygenError(err);
-  errorOnTransaction(std::move(ex));
+  errorOnTransaction(ex);
 }
 
-void HQSession::HQStreamTransportBase::errorOnTransaction(HTTPException ex) {
+void HQSession::HQStreamTransportBase::errorOnTransaction(
+    const HTTPException& ex) {
   auto isIngressException = ex.isIngressException();
   auto isEgressException = ex.isEgressException();
   if (!detached_) {
-    txn_.onError(std::move(ex));
+    txn_.onError(ex);
   }
   if (isIngressException) {
     abortIngress();
@@ -1228,7 +1230,7 @@ void HQSession::readError(quic::StreamId id, quic::QuicError error) noexcept {
       ex.setHttp3ErrorCode(errorCode);
       auto stream = findNonDetachedStream(id);
       if (stream) {
-        stream->onResetStream(errorCode, std::move(ex));
+        stream->onResetStream(errorCode, ex);
       } else {
         // When a stream is erased, it's callback is cancelled, so it really
         // should be here
@@ -1249,7 +1251,7 @@ void HQSession::readError(quic::StreamId id, quic::QuicError error) noexcept {
       } else {
         ex.setProxygenError(kErrorShutdown);
       }
-      errorOnTransactionId(id, std::move(ex));
+      errorOnTransactionId(id, ex);
       break;
     }
     case quic::QuicErrorCode::Type::TransportErrorCode: {
@@ -1259,7 +1261,7 @@ void HQSession::readError(quic::StreamId id, quic::QuicError error) noexcept {
       ex.setProxygenError(kErrorConnectionReset);
       // TODO: set Quic error when fbcode/quic/QuicConstants.h is OSS
       ex.setErrno(uint32_t(errorCode));
-      errorOnTransactionId(id, std::move(ex));
+      errorOnTransactionId(id, ex);
       break;
     }
   }
@@ -1944,7 +1946,7 @@ void HQSession::handleWriteError(HQStreamTransportBase* hqStream,
   abortStream(ex.getDirection(),
               hqStream->getStreamId(),
               HTTP3::ErrorCode::HTTP_REQUEST_CANCELLED);
-  hqStream->errorOnTransaction(std::move(ex));
+  hqStream->errorOnTransaction(ex);
 }
 
 template <typename WriteFunc, typename DataType>
@@ -2521,7 +2523,7 @@ bool HQSession::HQStreamTransportBase::processReadData() {
             << ", len=" << static_cast<int>(readBuf_.chainLength());
     HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
                      "Unexpected data after request");
-    errorOnTransaction(std::move(ex));
+    errorOnTransaction(ex);
     return false;
   }
   while (!ingressError_ && readBuf_.chainLength() > 0) {
@@ -3177,7 +3179,7 @@ void HQSession::HQStreamTransportBase::onResetStream(HTTP3::ErrorCode errorCode,
   }
   ex.setHttp3ErrorCode(errorCode);
   auto msg = ex.what();
-  errorOnTransaction(std::move(ex));
+  errorOnTransaction(ex);
   sendAbortImpl(replyError, msg);
 }
 
@@ -3393,7 +3395,7 @@ void HQSession::HQStreamTransportBase::armStreamByteEventCb(
     LOG(ERROR) << errStr;
     HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS, errStr);
     ex.setProxygenError(kErrorNetwork);
-    errorOnTransaction(std::move(ex));
+    errorOnTransaction(ex);
     return;
   }
   numActiveDeliveryCallbacks_++;

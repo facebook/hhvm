@@ -871,7 +871,7 @@ class HQSession
   void onGoawayAck();
   quic::StreamId getGoawayStreamId();
 
-  void errorOnTransactionId(quic::StreamId id, HTTPException ex);
+  void errorOnTransactionId(quic::StreamId id, const HTTPException& ex);
 
   /**
    * Shared implementation of "findXXXstream" methods
@@ -1654,7 +1654,7 @@ class HQSession
     void abortEgress(bool checkForDetach);
 
     void errorOnTransaction(ProxygenError err, const std::string& errorMsg);
-    void errorOnTransaction(HTTPException ex);
+    void errorOnTransaction(const HTTPException& ex);
 
     bool wantsOnWriteReady(size_t canSend) const;
 

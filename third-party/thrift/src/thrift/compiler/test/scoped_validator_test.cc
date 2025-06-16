@@ -353,7 +353,7 @@ TEST(ScopedValidatorTest, InvalidFunctionParameterScopeTest) {
         @annotations.UnionAnnotation              # expected-error: `UnionAnnotation` cannot annotate `param`
         @annotations.ExceptionAnnotation          # expected-error: `ExceptionAnnotation` cannot annotate `param`
         @annotations.ThrownExceptionAnnotation    # expected-error: `ThrownExceptionAnnotation` cannot annotate `param`
-        @annotations.FieldAnnotation              # expected-warning: Using field-scoped annotation `FieldAnnotation` to annotate parameter `param` - add @scope.FunctionParameter for function parameters
+        @annotations.FieldAnnotation              # expected-error: `FieldAnnotation` cannot annotate `param`
         @annotations.FieldOrParameterAnnotation
         @annotations.TypedefAnnotation            # expected-error: `TypedefAnnotation` cannot annotate `param`
         @annotations.ServiceAnnotation            # expected-error: `ServiceAnnotation` cannot annotate `param`

@@ -137,24 +137,10 @@ void detail::validate_annotation_scopes(
 
     auto is_valid_scope = false;
     if constexpr (check_type == detail::scope_check_type::function_parameter) {
-      // Checking function parameters is a special case, because they are
-      // modelled in the AST as t_field but do not accept field-scoped
+      // Function parameters are modelled in the AST as t_field in a struct for
+      // all arguments to a function, but do not accept field-scoped
       // annotations.
       is_valid_scope = allowed.scope_uris.count(kScopeFunctionParameterUri) > 0;
-
-      if (!is_valid_scope && allowed.scope_uris.count(kScopeFieldUri)) {
-        // Legacy behaviour - field annotation without a function parameter
-        // scope applied to a function parameter. Warn until migration complete.
-        ctx.warning(
-            annot.src_range().begin,
-            "Using field-scoped annotation `{}` to annotate parameter `{}` - "
-            "add @scope.FunctionParameter for function parameters",
-            annot_type->name(),
-            node.name());
-
-        // Prevent duplicate error for field annotation on function parameter
-        is_valid_scope = true;
-      }
     } else if constexpr (
         check_type == detail::scope_check_type::thrown_exception) {
       // Thrown exceptions are modelled in the AST as t_field in a struct for

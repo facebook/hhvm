@@ -101,10 +101,10 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
           $context,
         );
 
-        $old_allow = $old_result['allow'];
+        $old_allow = $old_exception is null && $old_result['allow'];
         $new_allow = $result['allow'];
 
-        $old_safe = $old_result['is_privacy_safe'];
+        $old_safe = $old_exception is null && $old_result['is_privacy_safe'];
         $new_safe = $result['is_privacy_safe'];
 
         if ($old_allow != $new_allow) {

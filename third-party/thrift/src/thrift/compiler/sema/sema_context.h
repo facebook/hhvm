@@ -89,6 +89,26 @@ class node_metadata_cache {
 };
 
 struct sema_params {
+  /**
+   * Action to take on extra validation failure (see `sema_params`).
+   */
+  enum class ValidationLevel {
+    /** Do not take any action. */
+    None,
+
+    /** Issue a diagnostic warning. */
+    Warn,
+
+    /** Issue a diagnostic error (i.e., will fail to compile). */
+    Error,
+  };
+
+  /**
+   * Returns the validation level with the given human readable name, or
+   * throws if none exists.
+   */
+  static ValidationLevel parseValidationLevel(const std::string& name);
+
   bool skip_lowering_annotations = false;
 
   bool skip_lowering_cpp_type_annotations = false;

@@ -207,14 +207,15 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
 
 <<Oncalls('thrift')>>
 final class TCompactProtocolAcceleratedTestServer extends METAThriftServer {
-  const type TProcessor = CompactTestServiceProcessor;
+  const type TProcessor = CompactTestServiceAsyncProcessor;
   public bool $throwExn = false;
   public bool $useAcceleratedProtocol = true;
 
   <<__Override>>
-  protected function getProcessor(): CompactTestServiceProcessor {
-    return
-      new CompactTestServiceProcessor(new CompactTestService($this->throwExn));
+  protected function getProcessor(): CompactTestServiceAsyncProcessor {
+    return new CompactTestServiceAsyncProcessor(
+      new CompactTestService($this->throwExn),
+    );
   }
 
   <<__Override>>
@@ -233,9 +234,11 @@ final class TCompactProtocolAcceleratedTestServer extends METAThriftServer {
   }
 }
 
-final class CompactTestService implements CompactTestServiceIf {
+final class CompactTestService implements CompactTestServiceAsyncIf {
   public function __construct(private bool $throwExn = false) {}
-  public function test(?CompactTestStruct $t): CompactTestStruct {
+  public async function test(
+    ?CompactTestStruct $t,
+  ): Awaitable<CompactTestStruct> {
     if ($this->throwExn) {
       throw CompactTestExn::fromShape(shape('t' => $t));
     }

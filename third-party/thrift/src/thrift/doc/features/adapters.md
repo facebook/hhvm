@@ -4,7 +4,7 @@
 
 ## Overview
 
-Thrift Adapter is the standard customization method to allow users to use their own custom types on Thrift generated structs and fields. Thrift Adapter **must** be able to convert from [standard type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types) and vice versa. Thrift Adapter is designed so that it can be enabled per each langauge without intefering wire format. Thrift Adapter serves as a building blocks for other Thrift features, such as Protocol Object.
+Thrift Adapter is the standard customization method to allow users to use their own custom types on Thrift generated structs and fields. Thrift Adapter **must** be able to convert from [standard type](../glossary/kinds-of-types) to [adapted type](../glossary/kinds-of-types) and vice versa. Thrift Adapter is designed so that it can be enabled per each langauge without intefering wire format. Thrift Adapter serves as a building blocks for other Thrift features, such as Protocol Object.
 
 Thrift Adapter **may** provide customization for [value operators](operators.md), including comparison, equality, hash, clear, serialized size, serialize, and deserialize. This allows Thrift Adapter to avoid conversion back to standard type for evaluation and manipulation.
 
@@ -18,7 +18,7 @@ struct Adapter {
   static DefaultType toThrift(const AdaptedType&);
 };
 ```
-This changes the type used by Thrift from the [default type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types).
+This changes the type used by Thrift from the [default type](../glossary/kinds-of-types) to [adapted type](../glossary/kinds-of-types).
 
 ## Definitions
 ### Type Adapter
@@ -138,7 +138,7 @@ More examples can be found [here](https://www.internalfb.com/code/fbsource/fbcod
 
 #### In-place Deserialization
 
-Deserialization for adapted types can be costly, as the deserializer creates temporaries of [standard types](../glossary/#kinds-of-types), deserializes binary into them, and uses `fromThrift` to convert them to adapted values. Thrift Adapter optimizes deserialization when `toThrift` returns mutable reference. This avoids construction of temporary values, and the deserializer directly deserialize binary to the mutable reference returned by `toThrift`. It is recommended to return a mutable reference from `toThrift` if the adapted type has access to an object of the standard type internally. The following adapter utilizes in-place deserialization:
+Deserialization for adapted types can be costly, as the deserializer creates temporaries of [standard types](../glossary/kinds-of-types), deserializes binary into them, and uses `fromThrift` to convert them to adapted values. Thrift Adapter optimizes deserialization when `toThrift` returns mutable reference. This avoids construction of temporary values, and the deserializer directly deserialize binary to the mutable reference returned by `toThrift`. It is recommended to return a mutable reference from `toThrift` if the adapted type has access to an object of the standard type internally. The following adapter utilizes in-place deserialization:
 
 ```cpp
 template <typename T>

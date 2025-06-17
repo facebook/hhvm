@@ -112,7 +112,6 @@ struct SSATmp;
  *      NF    no flags
  *      PRc   producesRC
  *      PNRc  producesNewRC
- *      CRc   consumesRC
  *      T     isTerminal
  *      B     isBranch
  *      P     passthrough

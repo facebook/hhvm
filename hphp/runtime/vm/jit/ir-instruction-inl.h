@@ -59,7 +59,10 @@ inline bool IRInstruction::naryDst() const {
 }
 
 inline bool IRInstruction::consumesReferences() const {
-  return opcodeHasFlags(op(), ConsumesRC);
+  for (auto flag : g_opInfo[(uint16_t)op()].srcFlags) 
+    if ((flag & IRSrcFlag::Consume) == IRSrcFlag::Consume) 
+      return true;
+  return false;
 }
 
 inline bool IRInstruction::mayRaiseError() const {

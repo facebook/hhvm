@@ -568,7 +568,7 @@ bool conflicts(const IRInstruction& sinkee, const IRInstruction& barrier) {
     return true;
   }
 
-  if (barrier.consumesReferences() && !barrier.is(DecRefNZ)) {
+  if (!barrier.is(DecRefNZ)) {
     // We need to check if the barrier can potentially trigger a
     // DecRef which would release sinkee's def.
     for (auto const src : sinkee.srcs()) {

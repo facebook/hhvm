@@ -80,8 +80,9 @@ void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
   logEvent(lad, lad->entryTypes, lad->keyOrder, op, std::forward<Ts>(args)...);
 }
 
-// PRc|CRc method that returns a copy of the vanilla array `vad` with the
-// sampled bit set, operating in place whenever possible.
+// A method that returns a copy of the vanilla array `vad` with the
+// sampled bit set, operating in place whenever possible. Consumes the
+// reference from the input and produces output with single reference.
 ArrayData* makeSampledArray(ArrayData* vad) {
   assertx(vad->isVanilla());
   auto const result = [&]{

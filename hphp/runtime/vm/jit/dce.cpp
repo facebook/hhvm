@@ -335,7 +335,7 @@ bool canDCE(const IRInstruction& inst) {
   case ConvObjToKeyset:
   case LdOutAddr:
     return !opcodeMayRaise(inst.op()) &&
-      (!inst.consumesReferences() || inst.producesReference());
+      (inst.producesReference() || !inst.consumesReferences());
 
   case DbgTraceCall:
   case AKExistsObj:
@@ -1274,23 +1274,22 @@ void killInstrAdjustRC(
     state[ins].setLive();
   };
   auto anyRemaining = false;
-  if (inst->consumesReferences()) {
+  auto srcIx = 0;
+  for (auto src : inst->srcs()) {
     // ConsumesReference inputs that are definitely not moved can
     // simply be decreffed as a replacement for the dead consumesref
     // instruction
-    auto srcIx = 0;
-    for (auto src : inst->srcs()) {
-      auto const ix = srcIx++;
-      if (inst->consumesReference(ix) && src->type().maybe(TCounted)) {
-        if (inst->mayMoveReference(ix)) {
-          anyRemaining = true;
-          continue;
-        }
-        insertDecRef(inst, src);
+    auto const ix = srcIx++;
+    if (inst->consumesReference(ix) && src->type().maybe(TCounted)) {
+      if (inst->mayMoveReference(ix)) {
+        anyRemaining = true;
+        continue;
       }
+      insertDecRef(inst, src);
     }
   }
-  for (auto dec : decs) {
+
+    for (auto dec : decs) {
     auto replaced = canonical(dec->src(0)) != canonical(inst->dst());
     auto srcIx = 0;
     if (dec->is(DecReleaseCheck)) {

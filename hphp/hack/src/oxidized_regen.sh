@@ -99,6 +99,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/typing/xhp_attribute.ml                                       \
   hphp/hack/src/utils/decl_reference.ml                                       \
+  hphp/hack/src/utils/ignore/facebook/filesToIgnore.ml                        \
   hphp/hack/src/parser/scoured_comments.ml                                    \
 
 # Add exports in oxidized/lib.rs from oxidized/gen/mod.rs.

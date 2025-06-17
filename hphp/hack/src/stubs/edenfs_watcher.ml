@@ -10,7 +10,10 @@ open Hh_prelude
 
 type clock = string
 
-type init_settings = { root: Path.t }
+type init_settings = {
+  root: Path.t;
+  watch_spec: FilesToIgnore.watch_spec;
+}
 
 type instance_handle_ffi
 

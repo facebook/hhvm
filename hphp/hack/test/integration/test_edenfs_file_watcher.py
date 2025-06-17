@@ -12,10 +12,13 @@ decide what setup and teardown code goes where.
 """
 
 import os
+import re
 
 import shutil
 import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
 from typing import ClassVar, List, Optional
 
@@ -25,6 +28,14 @@ from hphp.hack.test.integration.common_tests import CommonTestDriver
 from hphp.hack.test.integration.hh_paths import hh_server
 
 from watchman.integration.lib import WatchmanInstance
+
+# Matches the message that is logged by ServerNotifier.get_changes_sync and
+# get_changes_async when it saw a non-zero number of changes. We look at the server log
+# to test if the server did or didn't pick up some changes.
+#
+# While this approach is very brittle, we do have test_server_notifier_re in place to
+# check that the RE still works.
+SERVER_NOTIFIER_RE = r"ServerNotifier\.get_changes_(sync|async) got (\d+) changes"
 
 # Used to debug this test suite.
 # If enabled, we launch hh_server in the foreground and
@@ -46,6 +57,7 @@ watchman_debug_logging = false
 watchman_subscribe_v2 = true
 watchman_sync_directory = .hg
 edenfs_file_watcher_enabled=true
+min_log_level=Debug
 """
 
     config = config + f"watchman_sockname={watchman_socket_path}\n"
@@ -99,12 +111,21 @@ def unmountEden(eden_instance: EdenFS, eden_mount_point: str) -> None:
     eden_instance.remove(eden_mount_point)
 
 
-def assertServerLogContains(driver: CommonTestDriver, needle: str) -> None:
+def assertCurrentServerLogContains(driver: CommonTestDriver, needle: str) -> None:
     if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
         # We don't have access to any logs
         return
 
     server_log = driver.get_all_logs(driver.repo_dir).current_server_log
+    contains = needle in server_log
+    if not contains:
+        print("Server log:")
+        print(server_log)
+    driver.assertTrue(contains)
+
+
+def assertAnyServerLogContains(driver: CommonTestDriver, needle: str) -> None:
+    server_log = driver.get_all_logs(driver.repo_dir).all_server_logs
     contains = needle in server_log
     if not contains:
         print("Server log:")
@@ -128,7 +149,7 @@ def assertEdenFsWatcherInitialized(driver: CommonTestDriver) -> None:
     initialization fails, this prevents tests from passing even though the
     EdenFS watcher wasn't actually used.
     """
-    assertServerLogContains(driver, "[edenfs_watcher][init] finished init")
+    assertCurrentServerLogContains(driver, "[edenfs_watcher][init] finished init")
 
 
 def assertServerNotCrashed(driver: CommonTestDriver) -> None:
@@ -138,6 +159,25 @@ def assertServerNotCrashed(driver: CommonTestDriver) -> None:
     monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
 
     driver.assertFalse("Exit_status.Edenfs_watcher_failed" in monitor_log)
+
+
+def assertServerNotifierChangesYes(driver: CommonTestDriver) -> None:
+    if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+        # We don't have access to any logs
+        return
+    server_log = driver.get_all_logs(driver.repo_dir).current_server_log
+    matches = re.search(SERVER_NOTIFIER_RE, server_log)
+    driver.assertTrue(matches is not None)
+
+
+def assertServerNotifierChangesNo(driver: CommonTestDriver) -> None:
+    if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+        # We don't have access to any logs
+        return
+    # Not that in the "No" version, we check all logs
+    server_log = driver.get_all_logs(driver.repo_dir).all_server_logs
+    matches = re.search(SERVER_NOTIFIER_RE, server_log)
+    driver.assertTrue(matches is None)
 
 
 class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
@@ -312,6 +352,17 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         test_driver = self._test_driver
         assert test_driver is not None
         return test_driver
+
+    def test_server_notifier_re(self) -> None:
+        "This just makes sure that SERVER_NOTIFIER_RE still matches the messages that ServerNotifier logs on file changes"
+
+        self.test_driver.start_hh_server()
+
+        with open(os.path.join(self.test_driver.repo_dir, "test_file.php"), "w") as f:
+            f.write("<?hh")
+
+        self.test_driver.check_cmd(["No errors!"])
+        assertServerNotifierChangesYes(self.test_driver)
 
     def test_interrupt(self) -> None:
         # Unlike the other users of CommonTests, we set up our own Watchman instance. We
@@ -559,6 +610,33 @@ function rename_test_fun(): int {
         assertMonitorLogContains(
             self.test_driver,
             "Exit_status.Hhconfig_changed",
+        )
+
+    def test_filter_file_changes(self) -> None:
+        self.test_driver.start_hh_server()
+
+        # Let's check that changes to random files are not picked up:
+        ignored_file1 = os.path.join(
+            self.test_driver.repo_dir, "randomfileweshouldignore"
+        )
+        with open(ignored_file1, "w") as f:
+            f.write("should be ignored")
+        ignored_file2 = os.path.join(self.test_driver.repo_dir, "almost.hhconfig")
+        with open(ignored_file2, "w") as f:
+            f.write("should be ignored")
+        assertServerNotifierChangesNo(self.test_driver)
+        self.test_driver.check_cmd(["No errors!"])
+
+        # Let's check that extensions other than php are included
+        hhi_file = os.path.join(self.test_driver.repo_dir, "invalid_file.hhi")
+
+        with open(hhi_file, "w") as f:
+            f.write("not a valid file")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}invalid_file.hhi:1:5,5: A semicolon `;` is expected here. (Parsing[1002])"
+            ]
         )
 
     # Note that we inherit all tests from CommonTests and run them,

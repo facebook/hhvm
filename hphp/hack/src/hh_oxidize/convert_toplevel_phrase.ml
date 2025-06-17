@@ -50,6 +50,7 @@ let module_blacklist =
     "common";
     "hh_core";
     "hh_json";
+    "hh_json_helpers::adhoc_json_helpers";
     "hh_prelude";
     "naming_special_names";
     "pp_type";

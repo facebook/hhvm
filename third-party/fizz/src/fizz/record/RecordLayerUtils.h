@@ -3,6 +3,7 @@
 #pragma once
 
 #include <fizz/crypto/aead/Aead.h>
+#include <fizz/record/BufAndPaddingPolicy.h>
 #include <fizz/record/Types.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
@@ -66,6 +67,27 @@ class RecordLayerUtils {
   static folly::Optional<ParsedEncryptedRecord> parseEncryptedRecord(
       folly::IOBufQueue& buf);
 };
+
+/**
+ * Prepares a buffer with appropriate padding for encryption.
+ * This function handles extracting data from the queue and applying padding
+ * according to the provided policy.
+ *
+ * REQUIRES: `queue` must not be empty. Caller is responsible for enforcing.
+ *
+ * @param queue The input buffer queue containing data to encrypt
+ * @param contentType The TLS content type to append
+ * @param paddingPolicy The padding policy to use
+ * @param maxRecord Maximum record size
+ * @param aead The AEAD implementation to use
+ * @return A buffer prepared for encryption
+ */
+std::unique_ptr<folly::IOBuf> prepareBufferWithPadding(
+    folly::IOBufQueue& queue,
+    ContentType contentType,
+    const BufAndPaddingPolicy& paddingPolicy,
+    uint16_t maxRecord,
+    Aead* aead);
 
 } // namespace fizz
 

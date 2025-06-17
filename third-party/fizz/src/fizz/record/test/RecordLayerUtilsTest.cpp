@@ -4,6 +4,7 @@
 #include <folly/portability/GTest.h>
 
 #include <fizz/crypto/aead/test/Mocks.h>
+#include <fizz/record/BufAndPaddingPolicy.h>
 #include <fizz/record/RecordLayerUtils.h>
 
 #include <folly/String.h>
@@ -12,6 +13,13 @@ using namespace folly;
 
 namespace fizz {
 namespace test {
+
+class MockBufAndPaddingPolicy : public BufAndPaddingPolicy {
+ public:
+  MOCK_CONST_METHOD2(
+      getBufAndPaddingToEncrypt,
+      std::pair<Buf, uint16_t>(folly::IOBufQueue&, uint16_t));
+};
 
 class RecordLayerUtilsTest : public testing::Test {
  protected:
@@ -406,6 +414,132 @@ TEST_F(RecordLayerUtilsTest, TestParseEncryptedRecordPartialMultiple) {
   expectSame(result5->header, "1603030004");
 
   EXPECT_TRUE(queue_.empty());
+}
+
+TEST_F(RecordLayerUtilsTest, TestPrepareBufferWithPaddingEmptyBuffer) {
+  MockAead aead;
+  folly::IOBufQueue emptyQueue{folly::IOBufQueue::cacheChainLength()};
+  testing::NiceMock<MockBufAndPaddingPolicy> paddingPolicy;
+
+  // Add a small buffer to the queue to satisfy the DCHECK
+  auto smallBuf = folly::IOBuf::copyBuffer("x");
+  emptyQueue.append(std::move(smallBuf));
+
+  // Set up the mock to return an empty buffer (not null) from
+  // getBufAndPaddingToEncrypt
+  EXPECT_CALL(paddingPolicy, getBufAndPaddingToEncrypt(_, _))
+      .WillOnce(Invoke([](folly::IOBufQueue& q, uint16_t) {
+        q.move();
+        return std::make_pair(folly::IOBuf::create(0), uint16_t(0));
+      }));
+
+  // Test that the function handles an empty buffer correctly
+  auto result = prepareBufferWithPadding(
+      emptyQueue,
+      ContentType::application_data,
+      paddingPolicy,
+      1000, // maxRecord
+      &aead);
+
+  EXPECT_TRUE(result != nullptr);
+  EXPECT_FALSE(
+      result->empty()); // Should contain at least the content type byte
+  EXPECT_TRUE(emptyQueue.empty());
+}
+
+TEST_F(RecordLayerUtilsTest, TestPrepareBufferWithPaddingSingleRecord) {
+  MockAead aead;
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+
+  auto data = folly::IOBuf::copyBuffer("hello world");
+  queue.append(std::move(data));
+
+  EXPECT_CALL(aead, getCipherOverhead()).WillRepeatedly(Return(16));
+
+  BufAndConstPaddingPolicy paddingPolicy(0);
+  auto result = prepareBufferWithPadding(
+      queue,
+      ContentType::application_data,
+      paddingPolicy,
+      1000, // maxRecord
+      &aead);
+
+  EXPECT_TRUE(result != nullptr);
+  EXPECT_FALSE(result->empty());
+
+  auto copy = result->clone();
+  copy->coalesce();
+  EXPECT_EQ(
+      copy->data()[copy->length() - 1],
+      static_cast<uint8_t>(ContentType::application_data));
+
+  EXPECT_TRUE(queue.empty());
+}
+
+TEST_F(RecordLayerUtilsTest, TestPrepareBufferWithPaddingMultipleRecords) {
+  MockAead aead;
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+
+  auto data = folly::IOBuf::create(1000);
+  data->append(1000);
+  memset(data->writableData(), 'X', data->length());
+  queue.append(std::move(data));
+
+  const size_t maxRecord = 300;
+
+  EXPECT_CALL(aead, getCipherOverhead()).WillRepeatedly(Return(16));
+
+  BufAndConstPaddingPolicy paddingPolicy(0);
+  auto result = prepareBufferWithPadding(
+      queue, ContentType::application_data, paddingPolicy, maxRecord, &aead);
+
+  EXPECT_TRUE(result != nullptr);
+  EXPECT_FALSE(result->empty());
+
+  EXPECT_LE(result->computeChainDataLength(), maxRecord + 1);
+
+  EXPECT_FALSE(queue.empty());
+
+  auto result2 = prepareBufferWithPadding(
+      queue, ContentType::application_data, paddingPolicy, maxRecord, &aead);
+
+  EXPECT_TRUE(result2 != nullptr);
+  EXPECT_FALSE(result2->empty());
+}
+
+TEST_F(RecordLayerUtilsTest, TestPrepareBufferWithPaddingWithPadding) {
+  MockAead aead;
+  testing::NiceMock<MockBufAndPaddingPolicy> paddingPolicy;
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+
+  auto data = folly::IOBuf::copyBuffer("hello world");
+  queue.append(std::move(data));
+
+  EXPECT_CALL(paddingPolicy, getBufAndPaddingToEncrypt(_, _))
+      .WillOnce(Invoke([](folly::IOBufQueue& q, uint16_t) {
+        auto buf = q.move();
+        return std::make_pair(std::move(buf), uint16_t(10));
+      }));
+
+  EXPECT_CALL(aead, getCipherOverhead()).WillRepeatedly(Return(16));
+
+  auto result = prepareBufferWithPadding(
+      queue,
+      ContentType::application_data,
+      paddingPolicy,
+      1000, // maxRecord
+      &aead);
+
+  EXPECT_TRUE(result != nullptr);
+  EXPECT_FALSE(result->empty());
+
+  auto copy = result->clone();
+  copy->coalesce();
+  // Buffer should now be: "hello world" + content_type + 10 zeros
+  // So length should be 11 (hello world) + 1 (content type) + 10 (padding) = 22
+  EXPECT_EQ(copy->length(), 22);
+
+  EXPECT_TRUE(queue.empty());
 }
 
 } // namespace test

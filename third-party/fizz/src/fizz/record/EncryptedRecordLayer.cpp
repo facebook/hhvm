@@ -137,34 +137,14 @@ TLSContent EncryptedWriteRecordLayer::write(
   std::array<uint8_t, RecordLayerUtils::kEncryptedHeaderSize> headerBuf{};
   auto header = folly::IOBuf::wrapBufferAsValue(folly::range(headerBuf));
   aead_->setEncryptedBufferHeadroom(RecordLayerUtils::kEncryptedHeaderSize);
+
   while (!queue.empty()) {
-    Buf dataBuf;
-    uint16_t paddingSize;
-    std::tie(dataBuf, paddingSize) =
-        bufAndPaddingPolicy_->getBufAndPaddingToEncrypt(queue, maxRecord_);
-
-    // check if we have enough room to add padding and the encrypted footer.
-    if (!dataBuf->isShared() &&
-        dataBuf->prev()->tailroom() >= sizeof(ContentType) + paddingSize) {
-      // extend it and add padding and footer
-      folly::io::Appender appender(dataBuf.get(), 0);
-      appender.writeBE(static_cast<ContentTypeType>(msg.type));
-      memset(appender.writableData(), 0, paddingSize);
-      appender.append(paddingSize);
-    } else {
-      // not enough or shared - let's add enough for the tag as well
-      auto encryptedFooter = folly::IOBuf::create(
-          sizeof(ContentType) + paddingSize + aead_->getCipherOverhead());
-      folly::io::Appender appender(encryptedFooter.get(), 0);
-      appender.writeBE(static_cast<ContentTypeType>(msg.type));
-      memset(appender.writableData(), 0, paddingSize);
-      appender.append(paddingSize);
-      dataBuf->prependChain(std::move(encryptedFooter));
-    }
-
     if (seqNum_ == std::numeric_limits<uint64_t>::max()) {
       throw std::runtime_error("max write seq num");
     }
+    // Use the helper function to prepare the buffer with padding
+    auto dataBuf = prepareBufferWithPadding(
+        queue, msg.type, *bufAndPaddingPolicy_, maxRecord_, aead_.get());
 
     // we will either be able to memcpy directly into the ciphertext or
     // need to create a new buf to insert before the ciphertext but we need

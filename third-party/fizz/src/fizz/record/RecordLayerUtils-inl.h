@@ -150,4 +150,42 @@ RecordLayerUtils::parseEncryptedRecord(folly::IOBufQueue& buf) {
   return result;
 }
 
+inline std::unique_ptr<folly::IOBuf> prepareBufferWithPadding(
+    folly::IOBufQueue& queue,
+    ContentType contentType,
+    const BufAndPaddingPolicy& paddingPolicy,
+    uint16_t maxRecord,
+    Aead* aead) {
+  // Caller contract: queue must not be empty
+  DCHECK(!queue.empty());
+
+  // Get the buffer and padding size from the policy
+  auto bufAndPadding =
+      paddingPolicy.getBufAndPaddingToEncrypt(queue, maxRecord);
+  auto dataBuf = std::move(bufAndPadding.first);
+  auto paddingSize = bufAndPadding.second;
+
+  // Assert our invariant that dataBuf should never be null
+  DCHECK(dataBuf) << "getBufAndPaddingToEncrypt returned nullptr";
+
+  // check if we have enough room to add padding and the encrypted footer.
+  if (!dataBuf->isShared() &&
+      dataBuf->prev()->tailroom() >= sizeof(ContentType) + paddingSize) {
+    folly::io::Appender appender(dataBuf.get(), 0);
+    appender.writeBE(static_cast<uint8_t>(contentType));
+    memset(appender.writableData(), 0, paddingSize);
+    appender.append(paddingSize);
+  } else {
+    auto encryptedFooter = folly::IOBuf::create(
+        sizeof(ContentType) + paddingSize + aead->getCipherOverhead());
+    folly::io::Appender appender(encryptedFooter.get(), 0);
+    appender.writeBE(static_cast<uint8_t>(contentType));
+    memset(appender.writableData(), 0, paddingSize);
+    appender.append(paddingSize);
+    dataBuf->prependChain(std::move(encryptedFooter));
+  }
+
+  return dataBuf;
+}
+
 } // namespace fizz

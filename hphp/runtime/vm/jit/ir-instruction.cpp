@@ -175,9 +175,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
 
     case DictSet:
     case BespokeSet:
-      // Consumes the reference to its input array, and moves input value
-      return move == Consume && (srcNo == 0 || srcNo == 2);
-
     case BespokeSetPos:
       // Consumes the reference to its input array, and moves input value
       return (move == Consume && srcNo == 0) || srcNo == 2;

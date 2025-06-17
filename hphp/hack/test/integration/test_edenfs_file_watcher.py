@@ -107,6 +107,13 @@ def assertEdenFsWatcherInitialized(driver: CommonTestDriver) -> None:
     assertServerLogContains(driver, "[edenfs_watcher][init] finished init")
 
 
+def assertServerNotCrashed(driver: CommonTestDriver) -> None:
+    monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
+
+    driver.assertFalse("Exit_status.Edenfs_watcher_failed" in monitor_log)
+    driver.assertFalse("writing crash log" in monitor_log)
+
+
 class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
     """Driver compatible with CommonTestDriver, but creating an Eden-backed repo.
 
@@ -205,6 +212,13 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         # It's ugly to do this here, since this isn't really tear-down code,
         # but core testing logic, but we need to get this into every test
         assertEdenFsWatcherInitialized(self)
+
+        # Similarly, another check: hh_server's resiliance is sometimes hiding bugs:
+        # We may accidentally crash the Edenfs_watcher, which can take the server down.
+        # But then the monitor restarts it and it re-checks the testing repo.
+        # From the outside, that looks very similar to the server correctly
+        # picking up a change we've made to the testing repo!
+        assertServerNotCrashed(self)
 
         # For hygiene, we (re-)mount our Eden repo for each individual test.
         # Note that we must stop the server before unmounting the Eden repo that it works on.

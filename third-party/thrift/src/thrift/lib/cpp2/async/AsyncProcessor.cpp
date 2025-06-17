@@ -210,7 +210,10 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
   auto nullthrows = [](std::unique_ptr<Tile> tile) {
     if (!tile) {
       DLOG(FATAL) << "Nullptr returned from interaction constructor";
+      FOLLY_PUSH_WARNING
+      FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
       throw std::runtime_error("Nullptr returned from interaction constructor");
+      FOLLY_POP_WARNING
     }
     return tile;
   };
@@ -308,7 +311,10 @@ bool GeneratedAsyncProcessorBase::createInteraction(
   auto nullthrows = [](std::unique_ptr<Tile> tile) {
     if (!tile) {
       DLOG(FATAL) << "Nullptr returned from interaction constructor";
+      FOLLY_PUSH_WARNING
+      FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
       throw std::runtime_error("Nullptr returned from interaction constructor");
+      FOLLY_POP_WARNING
     }
     return tile;
   };
@@ -1016,9 +1022,12 @@ void HandlerCallbackBase::sendReply(
 bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {
   if (!ptr) {
     DLOG(FATAL) << "Nullptr interaction yielded from handler";
+    FOLLY_PUSH_WARNING
+    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
     exception(TApplicationException(
         TApplicationException::MISSING_RESULT,
         "Nullptr interaction yielded from handler"));
+    FOLLY_POP_WARNING
     return false;
   }
 
@@ -1219,7 +1228,10 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
+    FOLLY_PUSH_WARNING
+    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
     co_yield folly::coro::co_error(TApplicationException(message));
+    FOLLY_POP_WARNING
   }
 }
 
@@ -1269,7 +1281,10 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
+    FOLLY_PUSH_WARNING
+    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
     co_yield folly::coro::co_error(TApplicationException(message));
+    FOLLY_POP_WARNING
   }
 }
 

@@ -215,7 +215,15 @@ void ParallelConcurrencyControllerBase::processExpiredRequest(
   auto eb = ServerRequestHelper::eventBase(request);
   auto req = ServerRequestHelper::request(std::move(request));
   HandlerCallbackBase::releaseRequest(std::move(req), eb);
-  onExecuteFinish(true);
+
+  for (;;) {
+    auto countersOld = counters_.load();
+    auto counters = countersOld;
+    counters.pendingDequeCalls -= 1;
+    if (counters_.compare_exchange_weak(countersOld, counters)) {
+      break;
+    }
+  }
 }
 
 void ParallelConcurrencyControllerBase::stop() {}

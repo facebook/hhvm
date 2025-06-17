@@ -1023,6 +1023,10 @@ function hhvm_cmd(
       $options->repo && $input_dir is nonnull
         ? str_replace($input_dir.'/', '', realpath($test_run))
         : $test_run),
+
+    // Dump profile to working dir
+    '-vEval.JitSerializeDebugLocation='
+      . Status::getTestWorkingDir($test) . '/debugdump.jit',
   );
 
   $cmd = "";

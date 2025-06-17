@@ -10823,20 +10823,6 @@ private:
           return false;
         }
       }
-
-      if (existingMeth.isAsync & !index.meth(meth).isAsync) {
-        ITRACE(
-          2,
-          "{}: Cannot override async method {}::{} with a non-async "
-          "method in class {}\n",
-          cls.name,
-          existing.meth().cls,
-          existingMeth.name,
-          meth.cls
-        );
-        return false;
-      }
-
       ITRACE(
         4,
         "{}: overriding method {}::{} with {}::{}\n",

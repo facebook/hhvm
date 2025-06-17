@@ -16,7 +16,6 @@ using ContentTypeType = typename std::underlying_type<ContentType>::type;
 using ProtocolVersionType =
     typename std::underlying_type<ProtocolVersion>::type;
 
-static constexpr uint16_t kMaxEncryptedRecordSize = 0x4000 + 256; // 16k + 256
 static constexpr size_t kEncryptedHeaderSize =
     sizeof(ContentType) + sizeof(ProtocolVersion) + sizeof(uint16_t);
 
@@ -25,72 +24,47 @@ EncryptedReadRecordLayer::getDecryptedBuf(
     folly::IOBufQueue& buf,
     Aead::AeadOptions options) {
   while (true) {
-    // Cache the front buffer, calling front may invoke and update
-    // of the tail cache.
-    auto frontBuf = buf.front();
-    folly::io::Cursor cursor(frontBuf);
-
-    if (buf.empty() || !cursor.canAdvance(kEncryptedHeaderSize)) {
+    // Check if we have enough data for the header
+    if (buf.chainLength() < kEncryptedHeaderSize) {
       return ReadResult<Buf>::noneWithSizeHint(
           kEncryptedHeaderSize - buf.chainLength());
     }
 
-    std::array<uint8_t, kEncryptedHeaderSize> ad;
-    folly::io::Cursor adCursor(cursor);
-    adCursor.pull(ad.data(), ad.size());
-    folly::IOBuf adBuf{folly::IOBuf::wrapBufferAsValue(folly::range(ad))};
-
-    auto contentType =
-        static_cast<ContentType>(cursor.readBE<ContentTypeType>());
-    cursor.skip(sizeof(ProtocolVersion));
-
+    // We have the header, check if we have enough data for the full record
+    folly::io::Cursor cursor(buf.front());
+    cursor.skip(3); // Skip content type and protocol version
     auto length = cursor.readBE<uint16_t>();
-    if (length == 0) {
-      throw std::runtime_error("received 0 length encrypted record");
-    }
+
+    // Check if the record is too large
     if (length > kMaxEncryptedRecordSize) {
       throw std::runtime_error("received too long encrypted record");
     }
-    auto consumedBytes = cursor - frontBuf;
+
+    // Calculate how many more bytes we need
+    auto consumedBytes = cursor - buf.front();
     if (buf.chainLength() < consumedBytes + length) {
       auto remaining = (consumedBytes + length) - buf.chainLength();
       return ReadResult<Buf>::noneWithSizeHint(remaining);
     }
 
-    if (contentType == ContentType::alert && length == 2) {
-      auto alert = decode<Alert>(cursor);
-      throw std::runtime_error(folly::to<std::string>(
-          "received plaintext alert in encrypted record: ",
-          toString(alert.description)));
+    // Now we have enough data, parse the record
+    auto parsedRecord = RecordLayerUtils::parseEncryptedRecord(buf);
+
+    // If this is a change_cipher_spec record, continue to the next record
+    if (parsedRecord->continueReading) {
+      continue;
     }
 
-    // If we already know that the length of the buffer is the
-    // same as the number of bytes we need, move the entire buffer.
-    std::unique_ptr<folly::IOBuf> encrypted;
-    if (buf.chainLength() == consumedBytes + length) {
-      encrypted = buf.move();
-    } else {
-      encrypted = buf.split(consumedBytes + length);
-    }
-    trimStart(*encrypted, consumedBytes);
-
-    if (contentType == ContentType::change_cipher_spec) {
-      encrypted->coalesce();
-      if (encrypted->length() == 1 && *encrypted->data() == 0x01) {
-        continue;
-      } else {
-        throw FizzException(
-            "received ccs", AlertDescription::illegal_parameter);
-      }
-    }
-
+    // Check sequence number limit
     if (seqNum_ == std::numeric_limits<uint64_t>::max()) {
       throw std::runtime_error("max read seq num");
     }
+
+    // Handle decryption with support for skipping failed decryption
     if (skipFailedDecryption_) {
       auto decryptAttempt = aead_->tryDecrypt(
-          std::move(encrypted),
-          useAdditionalData_ ? &adBuf : nullptr,
+          std::move(parsedRecord->ciphertext),
+          useAdditionalData_ ? parsedRecord->header.get() : nullptr,
           seqNum_,
           options);
       if (decryptAttempt) {
@@ -102,8 +76,8 @@ EncryptedReadRecordLayer::getDecryptedBuf(
       }
     } else {
       return ReadResult<Buf>::from(aead_->decrypt(
-          std::move(encrypted),
-          useAdditionalData_ ? &adBuf : nullptr,
+          std::move(parsedRecord->ciphertext),
+          useAdditionalData_ ? parsedRecord->header.get() : nullptr,
           seqNum_++,
           options));
     }

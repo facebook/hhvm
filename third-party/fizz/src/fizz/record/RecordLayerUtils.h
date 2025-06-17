@@ -5,6 +5,7 @@
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/record/Types.h>
 #include <folly/io/Cursor.h>
+#include <folly/io/IOBufQueue.h>
 
 namespace fizz {
 
@@ -38,6 +39,32 @@ class RecordLayerUtils {
       uint64_t seqNum,
       bool useAdditionalData,
       Aead::AeadOptions options);
+
+  /**
+   * Structure to hold parsed encrypted record data before decryption.
+   * This is used to share parsing logic between different record layer
+   * implementations.
+   */
+  struct ParsedEncryptedRecord {
+    ContentType contentType{
+        ContentType::application_data}; // Default initialization
+    std::unique_ptr<folly::IOBuf> ciphertext;
+    std::unique_ptr<folly::IOBuf> header;
+    bool continueReading{false}; // Set to true for change_cipher_spec records
+  };
+
+  /**
+   * Parse an encrypted TLS record from the given buffer.
+   * This function handles all the parsing logic up to but excluding the
+   * decryption step.
+   *
+   * @param buf The input buffer containing the encrypted record
+   * @return An Optional containing the parsed record, or folly::none if
+   *         more data is needed
+   * @throws std::runtime_error if the record is invalid
+   */
+  static folly::Optional<ParsedEncryptedRecord> parseEncryptedRecord(
+      folly::IOBufQueue& buf);
 };
 
 } // namespace fizz

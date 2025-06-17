@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include <fizz/crypto/aead/IOBufUtil.h>
 #include <fizz/record/Types.h>
 
 namespace fizz {
+
+// Maximum size for encrypted records (16k + 256)
+constexpr uint16_t kMaxEncryptedRecordSize = 0x4000 + 256;
 
 inline folly::Optional<ContentType> RecordLayerUtils::parseAndRemoveContentType(
     std::unique_ptr<folly::IOBuf>& decryptedBuf) {
@@ -76,6 +80,74 @@ inline std::unique_ptr<folly::IOBuf> RecordLayerUtils::writeEncryptedRecord(
   }
 
   return record;
+}
+
+inline folly::Optional<RecordLayerUtils::ParsedEncryptedRecord>
+RecordLayerUtils::parseEncryptedRecord(folly::IOBufQueue& buf) {
+  using ContentTypeType = typename std::underlying_type<ContentType>::type;
+
+  auto frontBuf = buf.front();
+  folly::io::Cursor cursor(frontBuf);
+
+  if (buf.empty() || !cursor.canAdvance(kEncryptedHeaderSize)) {
+    return folly::none;
+  }
+
+  // Create additional data buffer from the header
+  std::array<uint8_t, kEncryptedHeaderSize> ad{};
+  folly::io::Cursor adCursor(cursor);
+  adCursor.pull(ad.data(), ad.size());
+  auto adBuf = folly::IOBuf::copyBuffer(ad.data(), ad.size());
+
+  auto contentType = static_cast<ContentType>(cursor.readBE<ContentTypeType>());
+  cursor.skip(sizeof(ProtocolVersion));
+  auto length = cursor.readBE<uint16_t>();
+
+  if (length == 0) {
+    throw std::runtime_error("received 0 length encrypted record");
+  }
+  if (length > kMaxEncryptedRecordSize) {
+    throw std::runtime_error("received too long encrypted record");
+  }
+
+  auto consumedBytes = cursor - frontBuf;
+  if (buf.chainLength() < consumedBytes + length) {
+    return folly::none;
+  }
+
+  if (contentType == ContentType::alert && length == 2) {
+    auto alert = decode<Alert>(cursor);
+    throw std::runtime_error(folly::to<std::string>(
+        "received plaintext alert in encrypted record: ",
+        toString(alert.description)));
+  }
+
+  // Extract the ciphertext
+  std::unique_ptr<folly::IOBuf> ciphertext;
+  if (buf.chainLength() == consumedBytes + length) {
+    ciphertext = buf.move();
+  } else {
+    ciphertext = buf.split(consumedBytes + length);
+  }
+  trimStart(*ciphertext, consumedBytes);
+
+  ParsedEncryptedRecord result;
+  result.contentType = contentType;
+  result.ciphertext = std::move(ciphertext);
+  result.header = std::move(adBuf);
+  result.continueReading = false;
+
+  if (contentType == ContentType::change_cipher_spec) {
+    result.ciphertext->coalesce();
+    if (result.ciphertext->length() == 1 &&
+        *result.ciphertext->data() == 0x01) {
+      result.continueReading = true;
+    } else {
+      throw FizzException("received ccs", AlertDescription::illegal_parameter);
+    }
+  }
+
+  return result;
 }
 
 } // namespace fizz

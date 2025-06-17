@@ -128,11 +128,11 @@ Unit::~Unit() {
 
 void* Unit::operator new(size_t sz) {
   MemoryStats::LogAlloc(AllocKind::Unit, sz);
-  return low_malloc(sz);
+  return vm_malloc(sz);
 }
 
 void Unit::operator delete(void* p, size_t /*sz*/) {
-  low_free(p);
+  vm_free(p);
 }
 
 void Unit::destroy() {

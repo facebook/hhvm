@@ -814,7 +814,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(
 
 int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
   int32_t version = 1;
-  for (const auto& [fieldId, patch] : *patch.members()) {
+  for (const auto& [fieldId, patchMember] : *patch.members()) {
     switch (static_cast<PatchOp>(fieldId)) {
       case PatchOp::Assign:
       case PatchOp::Clear:
@@ -828,12 +828,12 @@ int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
       case PatchOp::PatchPrior:
       case PatchOp::PatchAfter: {
         // We need to handle both StructPatch and MapPatch here.
-        if (const auto* fieldPatch = patch.if_object()) {
+        if (const auto* fieldPatch = patchMember.if_object()) {
           for (const auto& [_, p] : *fieldPatch) {
             version =
                 std::max(version, calculateMinSafePatchVersion(p.as_object()));
           }
-        } else if (const auto* elemPatch = patch.if_map()) {
+        } else if (const auto* elemPatch = patchMember.if_map()) {
           for (const auto& [_, p] : *elemPatch) {
             version =
                 std::max(version, calculateMinSafePatchVersion(p.as_object()));

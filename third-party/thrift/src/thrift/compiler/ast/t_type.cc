@@ -65,15 +65,6 @@ uint64_t t_type::get_type_id() const {
   return (hash & ~t_type::kTypeMask) | static_cast<int>(get_type_value());
 }
 
-std::string t_type::get_scoped_name() const {
-  std::ostringstream os;
-  if (program_) {
-    os << program_->name() << ".";
-  }
-  os << name_;
-  return os.str();
-}
-
 const t_type* t_type::get_true_type() const {
   return t_typedef::find_type_if(
       this, [](const t_type* type) { return !type->is_typedef(); });

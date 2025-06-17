@@ -21,6 +21,8 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/uri.h>
 
+#include <fmt/core.h>
+
 namespace apache::thrift::compiler {
 
 t_named::t_named(const t_program* program, std::string name)
@@ -40,6 +42,10 @@ t_named::t_named(const t_named& named)
 
 // NOTE: Must be defined here for t_const's destructor defintion.
 t_named::~t_named() = default;
+
+std::string t_named::get_scoped_name() const {
+  return program_ ? fmt::format("{}.{}", program_->name(), name_) : name_;
+}
 
 void t_named::add_structured_annotation(std::unique_ptr<t_const> annot) {
   assert(annot->type() != nullptr);

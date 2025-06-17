@@ -42,6 +42,9 @@ class t_named : public t_node {
   const std::string& name() const noexcept { return name_; }
   void set_name(const std::string& name) { name_ = name; }
 
+  // Returns a string in the format "program_name.type_name"
+  std::string get_scoped_name() const;
+
   node_list_view<const t_const> structured_annotations() const {
     return structured_annotations_;
   }

@@ -310,8 +310,11 @@ A Thrift **<KW>structured type</KW>** is defined by:
 
 * A [<KW>Thrift URI</KW>](#thrift-uri)
 * A set of <KW>fields</KW>
-* A set of <KW>user-specified properties</KW>, which specify:
+* A set of <KW>user-specified properties</KW>, which are:
   * The <KW>type</KW>’s <Bookmark id="structured-type-sealed">[<KW>sealed</KW>](#sealed-types)-ness</Bookmark>.
+  * A set of [<KW>annotation maps</KW>](#annotation-maps):
+    * an <KW>annotation map</KW> for the <KW>structured type</KW> itself, and
+    * an <KW>annotation map</KW> for each <KW>field</KW>.
 
 A <Bookmark id="field">**<KW>field</KW>**</Bookmark> is defined by:
 
@@ -333,8 +336,8 @@ Two <KW>fields</KW> share the same identity if either their <KW>field ids</KW> o
 A <Bookmark id="presence-qualifier">**<KW>presence qualifier</KW>**</Bookmark> is one of the following:
 
 * **<KW>optional</KW>** — a <KW>value</KW> of the containing <KW>type</KW> may or may not have a <KW>value</KW> for this <KW>field</KW>.
-* **<KW>unqualified</KW>** — a <KW>value</KW> of the containing <KW>type</KW> always has a <KW>value</KW> for this <KW>field</KW>.
-* **<KW>terse</KW>** — identical to <KW>unqualified</KW>, but cannot have a <KW>custom default value</KW>.
+* **<KW>always-present</KW>** — a <KW>value</KW> of the containing <KW>type</KW> always has a <KW>value</KW> for this <KW>field</KW>.
+* **<KW>terse</KW>** — identical to <KW>always-present</KW>, but cannot have a <KW>custom default value</KW>.
 
 If the <KW>type</KW> of a <KW>field</KW> forms a cycle of references between the <KW>structured types’ fields</KW> (recursive types), then at least one of those <KW>fields</KW> must have the <KW>presence qualifier</KW> of <KW>optional</KW>.
 
@@ -344,7 +347,7 @@ If the <KW>presence qualifier</KW> is <KW>optional</KW> or <KW>terse</KW>, there
 
 :::note **Implementation Detail** — <KW>required</KW> qualifier
 Historically, the Thrift IDL supported a <KW>**required** field qualifier</KW>.
-Its semantics were quite confusing, as they combined the <KW>unqualified</KW> <KW>presence qualifier</KW> above with specific serialization constraints.
+Its semantics were quite confusing, as they combined the <KW>always-present</KW> <KW>presence qualifier</KW> above with specific serialization constraints.
 It is deprecated, and effectively unsupported in practice.
 :::
 
@@ -358,7 +361,7 @@ The <KW>datum</KW> of a <KW>structured type</KW> `T` is a **collection of <KW>fi
 * and the collection has...
   * **exactly one** *field value* for every <KW>field</KW> of `T` whose <KW>presence qualifier</KW> is **not <KW>optional</KW>**.
   * **at most one** *field value* for every <KW>field</KW> of `T` whose <KW>presence qualifier</KW> is **<KW>optional</KW>**.
-    * i.e., an <KW>optional</KW> <KW>field</KW> may or may not have a corresponding <KW>field value</KW>, whereas a non-<KW>optional</KW> (<KW>unqualified</KW> or <KW>terse</KW>) field always has a <KW>field value</KW>.
+    * i.e., an <KW>optional</KW> <KW>field</KW> may or may not have a corresponding <KW>field value</KW>, whereas a non-<KW>optional</KW> (<KW>always-present</KW> or <KW>terse</KW>) field always has a <KW>field value</KW>.
 
 ##### Struct
 
@@ -378,7 +381,11 @@ A Thrift **<KW>union</KW>** is a <KW>structured type</KW> with the following add
 
 A Thrift **<KW>enum</KW>** is defined by:
 * A [*Thrift URI*](#thrift-uri)
-* A [*user-specified*](#user-specified-properties) mapping from unique textual *enum-names* to their corresponding unique [32-bit signed integer](#fixed-width-signed-integer-types) <KW>enum-values</KW>.
+* A set of <KW>user-specified properties</KW>, which are:
+  * A mapping from unique textual <Bookmark id="enum-name"><KW>enum-names</KW></Bookmark> to their corresponding unique [32-bit signed integer](#fixed-width-signed-integer-types) <Bookmark id="enum-value"><KW>enum-values</KW></Bookmark>.
+  * A set of [<KW>annotation maps</KW>](#annotation-maps):
+    * an <KW>annotation map</KW> for the <KW>enum type</KW> itself, and
+    * an <KW>annotation map</KW> for each specified <KW>enum-name</KW>.
 
 #### Opaque Alias Types
 
@@ -387,6 +394,8 @@ Opaque aliases associate a new <KW>type identity</KW> with the <KW>schema</KW> o
 A Thrift **<KW>opaque alias</KW>** is defined by:
 * A [<KW>Thrift URI</KW>](#thrift-uri)
 * A <KW>target type</KW>, which must not be a [<KW>user-defined type</KW>](#user-defined-types).
+* A set of <KW>user-specified properties</KW>, which are:
+  * an <KW>annotation map</KW>
 
 :::info Restricting Opaque Aliases to non-user-defined types
 Thrift <KW>opaque alias types</KW> are restricted to <KW>built-in types</KW> because defining such aliases for <KW>user-defined types</KW> would be redundant.
@@ -439,6 +448,28 @@ Every <KW>typeid</KW> has a canonical, stable, and human-readable textual repres
 | Any | `“any”` |
 
 </CenterHorizontally>
+
+
+### Annotation Maps
+
+An <KW>annotation map</KW> is a (possibly empty) collection of <KW>values</KW> (the <Bookmark id="annotation"><KW>annotations</KW></Bookmark>), with the following properties:
+1. all <KW>values</KW> are <KW>structs</KW>
+2. no two <KW>values</KW> have the same <KW>type</KW>
+
+The term "annotation map" follows from these properties, as it can be thought of as a collection of <KW>annotations</KW> indexed by their (unique) <KW>type</KW>'s <KW>Thrift URI</KW>.
+
+Annotation maps can be attached to [<KW>user-specified properties</KW>](#user-specified-properties). They typically serve as a means to attach application-level information to <KW>user-defined types</KW> without affecting the outcome of Thrift Object Model [operations](#operations), except for those explicitly related to retrieving <KW>annotations</KW>.
+
+:::note **Implementation Detail** - `RuntimeAnnotation`
+
+Not all annotations specified in Thrift IDL correspond to <KW>Thrift Object Model</KW> <KW>annotations</KW>.
+
+Only annotations whose (`struct`) definition is annotated with `@thrift.RuntimeAnnotation` are considered part of the <KW>user-specified properties</KW> when applied to a <KW>user-defined type</KW>, and therefore part of the [<KW>type system</KW>](#type-system).
+
+Thrift IDL annotations that are not `RuntimeAnnotation`s are meant to only be consumed by the Thrift compiler. For example, the `@cpp.Type` annotations alter the (C++) code generated by the Thrift compiler for a given schema, but is not retained in the <KW>type system</KW>.
+
+This is similar to Java's [`RetentionPolicy.RUNTIME`](https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/RetentionPolicy.html#RUNTIME).
+:::
 
 ## Records
 
@@ -968,7 +999,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
           </ul>
         </li>
         <li>
-          if <code>f</code> is <KW>unqualified</KW>, then <code>fields</code> has the entry
+          if <code>f</code> is <KW>always-present</KW>, then <code>fields</code> has the entry
           <ul>
             <li>
               (<KW>field identity</KW> of <code>f</code> → <code>createStandardDefault<sub>S</sub>(<i>field type</i> of f)</code>)
@@ -1031,8 +1062,8 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 * `S` — a <KW>type system</KW>
 
 **Inputs**:
-* <code>lhs = Value(L<sub>S</sub>, l)</code> — a <KW>value</KW> whose <KW>type</KW> `L` exists in `S`, with <KW>datum</KW> `l`.
-* <code>rhs = Value(R<sub>S</sub>, r)</code> — a <KW>value</KW> whose <KW>type</KW> `R` exists in `S`, with <KW>datum</KW> `r`.
+* <code>lhs = Value(L<sub>S</sub>, l)</code> — a <KW>value</KW> whose <KW>type</KW> <code>L</code> exists in <code>S</code>, with <KW>datum</KW> <code>l</code>.
+* <code>rhs = Value(R<sub>S</sub>, r)</code> — a <KW>value</KW> whose <KW>type</KW> <code>R</code> exists in <code>S</code>, with <KW>datum</KW> <code>r</code>.
 
 **Outputs**:
 * a boolean <KW>value</KW>
@@ -1069,7 +1100,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 * `a` — a [non-empty `Any` <KW>value</KW>](#any-type) with components (`typeid`, <KW>protocol</KW> `P`, <code>cipher<sub>P</sub></code>)
 
 **Outputs**:
-* <KW>value</KW> — of <KW>type</KW> matching the <KW>typeid</KW> of `v`
+* <KW>value</KW> — of <KW>type</KW> matching the <KW>typeid</KW> of <code>v</code>
 
 **Outcome**:
 * if `typeid` exists in `S`, then produces [`deserialize`](#operation-deserialize) (`P`, `S`, `typeid`, <code>cipher<sub>P</sub></code>).
@@ -1190,7 +1221,7 @@ Despite this, it allows (with varying levels of target language support) using (
 **Outcome**:
 * If `T` is not a <KW>structured type</KW>, produces `r` unchanged.
 * If `T` is a <KW>structured type</KW>, produces a `FieldSet`-kind record `o`, where for each <KW>field</KW> `f` in `T`...
-  * If `f` is <KW>unqualified</KW>, then `o` contains the corresponding <KW>field value</KW> from `r`.
+  * If `f` is <KW>always-present</KW>, then `o` contains the corresponding <KW>field value</KW> from `r`.
   * If `f` is <KW>optional</KW>, then `o` contains the corresponding <KW>field value</KW> from `r` if it is present.
     Otherwise, `o` does not contain a <KW>field value</KW> for `f`.
   * If `f` is <KW>terse</KW>, then given `e` = <code>project<sub>S</sub>(<i>field value</i> of f)</code>...
@@ -1278,7 +1309,7 @@ If `T` is...
           * FAILS if the aforementioned `embed` fails.
         * If `r` does not contain <KW>field identity</KW> of `f`,
           * If `f` is <KW>optional</KW>, then `f` is absent in `result`.
-          * If `f` is <KW>unqualified</KW>, then `result` contains the entry:
+          * If `f` is <KW>always-present</KW>, then `result` contains the entry:
             * (<KW>field identity</KW> of `f`, <code><a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f)</code>).
       * FAILS if `T` is [<KW>sealed</KW>](#sealed-types) and there are <KW>field values</KW> in `r` that are not in `T`.
       * Otherwise, remaining <KW>field values</KW> in `r` are dropped.
@@ -1593,20 +1624,21 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 | Date released | Version | Description
 |---------------|---------|----------------
 | May 20, 2025  | 1.0.0   | Initial version
+| June 16, 2025 | 1.1.0   | [`MINOR`](#versioning-minor):<ol><li>Added [<KW>Annotation Map</KW>](#annotation-maps) concept, and updated <KW>user-specified properties</KW> to include annotations.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Changed [<KW>presence qualifiers</KW>](#presence-qualifier): renamed <KW>unqualified</KW> to <KW>always-present</KW>.<br />Rationale: the term "unqualified" conflates a Thrift IDL concept (i.e., the lack of a qualifier in the `.thrift` source) with a semantic one in the object model (of a field always having a value). Indeed, the lack of a qualifier in IDL may actually correspond to different *semantic presence qualifiers*: in a <KW>struct</KW>, it corresponds to <KW>always-present</KW>, whereas in a <KW>union</KW> it corresponds to <KW>optional</KW>.</li><li>Various typos and style fixes.</li></ol>
 
 ### Versioning
 
 Releases use [Semantic Versioning](https://semver.org/), with a 3-component version number: `MAJOR.MINOR.PATCH`, where:
 
-* `MAJOR` version bumps indicate changes that are *backwards incompatible*.
+* <Bookmark id="versioning-major"><code>MAJOR</code></Bookmark> version bumps indicate changes that are *backwards incompatible*.
   * Previously compliant implementations and uses may no longer be compliant.
   * For example, this could be due to new semantics that directly contradict previous versions.
   * Such changes should be *extremely rare*.
-* `MINOR` version bumps indicate changes that *do not contradict previous versions, but may extend them*.
+* <Bookmark id="versioning-minor"><code>MINOR</code></Bookmark> version bumps indicate changes that *do not contradict previous versions, but may extend them*.
   * Previously compliant implementations and uses remain compliant.
   * Previously undefined behavior may become compliant or non-compliant.
   * Such changes should be relatively common, as the result of an explicit review by the Thrift team of formal change proposals.
-* `PATCH` version bumps *do not impact compliance in any way.*
+* <Bookmark id="versioning-patch"><code>PATCH</code></Bookmark> version bumps *do not impact compliance in any way.*
   * They are typically non-semantic changes to the document, such as examples, clarifications, typographical fixes, etc.
   * All previous assumptions and semantics remain unchanged.
   * Such changes are extremely common.

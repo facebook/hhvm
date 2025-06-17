@@ -283,6 +283,7 @@ final class ThriftTypeStructAdapter implements IThriftAdapter {
       case TypeStructureKind::OF_FLOAT:
         $type_name->set_floatType(apache_thrift_type_standard_Void::Unused);
         break;
+      case TypeStructureKind::OF_CLASS_PTR:
       case TypeStructureKind::OF_STRING:
         $type_name->set_stringType(apache_thrift_type_standard_Void::Unused);
         break;

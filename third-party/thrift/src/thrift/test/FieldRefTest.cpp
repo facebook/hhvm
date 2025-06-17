@@ -434,13 +434,12 @@ TEST(field_ref_test, copy_from_other_type) {
 template <template <typename> class FieldRef>
 void check_is_assignable() {
   using IntAssignableRef = FieldRef<IntAssignable&>;
-  static_assert(std::is_assignable<IntAssignableRef, int>::value, "");
-  static_assert(!std::is_assignable<IntAssignableRef, std::string>::value, "");
-  static_assert(std::is_nothrow_assignable<IntAssignableRef, int>::value, "");
+  static_assert(std::is_assignable<IntAssignableRef, int>::value);
+  static_assert(!std::is_assignable<IntAssignableRef, std::string>::value);
+  static_assert(std::is_nothrow_assignable<IntAssignableRef, int>::value);
 
   using StringAssignableRef = FieldRef<StringAssignable&>;
-  static_assert(
-      !std::is_nothrow_assignable<StringAssignableRef&, int>::value, "");
+  static_assert(!std::is_nothrow_assignable<StringAssignableRef&, int>::value);
 }
 
 TEST(field_ref_test, is_assignable) {
@@ -476,9 +475,9 @@ TEST(field_ref_test, const_accessors) {
   EXPECT_EQ(*name, "bar");
   EXPECT_EQ(name.value(), "bar");
   EXPECT_EQ(name->size(), 3);
-  static_assert(is_const_ref<decltype(*name)>(), "");
-  static_assert(is_const_ref<decltype(name.value())>(), "");
-  static_assert(is_const_ref<decltype(*name.operator->())>(), "");
+  static_assert(is_const_ref<decltype(*name)>());
+  static_assert(is_const_ref<decltype(name.value())>());
+  static_assert(is_const_ref<decltype(*name.operator->())>());
 }
 
 TEST(field_ref_test, mutable_accessors) {
@@ -678,9 +677,9 @@ TYPED_TEST(optional_field_ref_typed_test, const_accessors) {
   EXPECT_EQ(*name, "bar");
   EXPECT_EQ(name.value(), "bar");
   EXPECT_EQ(name->size(), 3);
-  static_assert(is_const_ref<decltype(*name)>(), "");
-  static_assert(is_const_ref<decltype(name.value())>(), "");
-  static_assert(is_const_ref<decltype(*name.operator->())>(), "");
+  static_assert(is_const_ref<decltype(*name)>());
+  static_assert(is_const_ref<decltype(name.value())>());
+  static_assert(is_const_ref<decltype(*name.operator->())>());
   s.opt_uptr() = std::make_unique<int>(42);
   std::move(s).opt_uptr()->get();
 }
@@ -1017,8 +1016,8 @@ TEST(terse_field_ref_test, conversions) {
 template <template <typename> class FieldRef>
 void check_is_assignable_boxed() {
   using IntAssignableRef = FieldRef<boxed_value_ptr<IntAssignable>&>;
-  static_assert(std::is_assignable<IntAssignableRef, int>::value, "");
-  static_assert(!std::is_assignable<IntAssignableRef, std::string>::value, "");
+  static_assert(std::is_assignable<IntAssignableRef, int>::value);
+  static_assert(!std::is_assignable<IntAssignableRef, std::string>::value);
 }
 
 const ThriftStruct* getInternDefaultAddress() {

@@ -47,7 +47,7 @@ class Wrap;
 template <typename Tag, typename = void>
 struct NativeTypes {
   // No types to declare for non concrete types.
-  static_assert(is_abstract_v<Tag>, "");
+  static_assert(is_abstract_v<Tag>);
 };
 
 // Infers an appropriate type tag for given non-adapted native type.

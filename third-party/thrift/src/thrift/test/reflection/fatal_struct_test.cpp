@@ -598,11 +598,10 @@ TEST(fatal_struct, field_ref_getter) {
   EXPECT_EQ(a.field0(), 1);
   a.field0() = 2;
   EXPECT_EQ(req(a), 2);
-  static_assert(
+  static_assert( //
       std::is_same<
           apache::thrift::required_field_ref<std::int32_t&>,
-          decltype(req(a))>::value,
-      "");
+          decltype(req(a))>::value);
 
   opt_field::field_ref_getter opt;
   EXPECT_FALSE(opt(a));
@@ -610,11 +609,10 @@ TEST(fatal_struct, field_ref_getter) {
   EXPECT_EQ(a.field1(), "1");
   a.field1() = "2";
   EXPECT_EQ(opt(a), "2");
-  static_assert(
+  static_assert( //
       std::is_same<
           apache::thrift::optional_field_ref<std::string&>,
-          decltype(opt(a))>::value,
-      "");
+          decltype(opt(a))>::value);
 
   def_field::field_ref_getter def;
   EXPECT_FALSE(def(a).is_set());
@@ -623,8 +621,7 @@ TEST(fatal_struct, field_ref_getter) {
   a.field2() = enum1::field2;
   EXPECT_EQ(def(a), enum1::field2);
   static_assert(
-      std::is_same<apache::thrift::field_ref<enum1&>, decltype(def(a))>::value,
-      "");
+      std::is_same<apache::thrift::field_ref<enum1&>, decltype(def(a))>::value);
 
   ref_field::field_ref_getter ref;
   EXPECT_TRUE(ref(a));
@@ -633,7 +630,7 @@ TEST(fatal_struct, field_ref_getter) {
   a.field3_ref()->a() = 2;
   EXPECT_EQ(ref(a)->a(), 2);
   static_assert(
-      std::is_same<std::unique_ptr<structA>&, decltype(ref(a))>::value, "");
+      std::is_same<std::unique_ptr<structA>&, decltype(ref(a))>::value);
 }
 
 TEST(fatal_struct, renamed_field) {

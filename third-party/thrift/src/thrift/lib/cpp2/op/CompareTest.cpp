@@ -183,8 +183,8 @@ using InternSetTag = type::cpp_type<InternSet<KTag>, type::set<KTag>>;
 TEST(CompareTest, InternSet_Dbl) {
   using Tag = InternSetTag<type::double_t>;
   using SetT = type::native_type<Tag>;
-  static_assert(detail::less_than_comparable_v<Tag>, "");
-  static_assert(detail::comparable_v<Tag>, "");
+  static_assert(detail::less_than_comparable_v<Tag>);
+  static_assert(detail::comparable_v<Tag>);
 
   EXPECT_FALSE(identical<Tag>({0.0}, {-0.0}));
   // Comparing whether these two sets are equal is undefined behavior because
@@ -212,8 +212,8 @@ using InternMapTag =
 TEST(CompareTest, InternMap_Flt) {
   using Tag = InternMapTag<type::float_t, type::float_t>;
   using MapT = type::native_type<Tag>;
-  static_assert(detail::less_than_comparable_v<Tag>, "");
-  static_assert(detail::comparable_v<Tag>, "");
+  static_assert(detail::less_than_comparable_v<Tag>);
+  static_assert(detail::comparable_v<Tag>);
 
   MapT map{{0.0f, 0.0f}, {-0.0f, 0.0f}};
   EXPECT_EQ(map.size(), 2);
@@ -242,8 +242,8 @@ TEST(CompareTest, MapOfUnorderedMaps) {
   using MapT = type::native_type<Tag>;
 
   // using res_t = decltype(less<Tag>(MapT{}, MapT{}));
-  static_assert(detail::less_than_comparable_v<Tag>, "");
-  static_assert(detail::comparable_v<Tag>, "");
+  static_assert(detail::less_than_comparable_v<Tag>);
+  static_assert(detail::comparable_v<Tag>);
 
   MapT map{{1, {{0, 1}}}, {2, {{2, 3}}}};
   MapT largerMap{{1, {{0, 1}}}, {2, {{2, 3}, {3, 5}}}};

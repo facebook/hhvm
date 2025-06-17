@@ -249,16 +249,13 @@ constexpr void staticAssertDefaultConstructible() {
   static_assert(sizeof(T), "Type is incomplete");
   static_assert(
       std::is_default_constructible_v<T> ==
-          test::is_throw_compat_v<DefaultType>,
-      "");
+      test::is_throw_compat_v<DefaultType>);
   static_assert( // is_nothrow_default_constructible_v
       std::is_nothrow_default_constructible_v<T> ==
-          test::is_nothrow_compat_v<DefaultType>,
-      "");
+      test::is_nothrow_compat_v<DefaultType>);
   static_assert( // is_trivially_default_constructible_v
       std::is_trivially_default_constructible_v<T> ==
-          test::is_trivial_compat_v<DefaultType>,
-      "");
+      test::is_trivial_compat_v<DefaultType>);
 }
 
 // Statically asserts that T has the required properties.
@@ -266,15 +263,13 @@ template <typename T, CtorType CopyType>
 constexpr void staticAssertCopyConstructible() {
   static_assert(sizeof(T), "Type is incomplete");
   static_assert(
-      std::is_copy_constructible_v<T> == test::is_throw_compat_v<CopyType>, "");
+      std::is_copy_constructible_v<T> == test::is_throw_compat_v<CopyType>);
   static_assert( // is_nothrow_copy_constructible_v
       std::is_nothrow_copy_constructible_v<T> ==
-          test::is_nothrow_compat_v<CopyType>,
-      "");
+      test::is_nothrow_compat_v<CopyType>);
   static_assert( // is_trivially_copy_constructible_v
       std::is_trivially_copy_constructible_v<T> ==
-          test::is_trivial_compat_v<CopyType>,
-      "");
+      test::is_trivial_compat_v<CopyType>);
 }
 
 // Statically asserts that T has the required properties.
@@ -282,15 +277,13 @@ template <typename T, CtorType CopyType>
 constexpr void staticAssertCopyAssignable() {
   static_assert(sizeof(T), "Type is incomplete");
   static_assert(
-      std::is_copy_assignable_v<T> == test::is_throw_compat_v<CopyType>, "");
+      std::is_copy_assignable_v<T> == test::is_throw_compat_v<CopyType>);
   static_assert( // is_nothrow_copy_assignable_v
       std::is_nothrow_copy_assignable_v<T> ==
-          test::is_nothrow_compat_v<CopyType>,
-      "");
+      test::is_nothrow_compat_v<CopyType>);
   static_assert( // is_trivially_copy_assignable_v
       std::is_trivially_copy_assignable_v<T> ==
-          test::is_trivial_compat_v<CopyType>,
-      "");
+      test::is_trivial_compat_v<CopyType>);
 }
 
 // Statically asserts that T has the required properties.
@@ -298,15 +291,13 @@ template <typename T, CtorType MoveType>
 constexpr void staticAssertMoveConstructible() {
   static_assert(sizeof(T), "Type is incomplete");
   static_assert(
-      std::is_move_constructible_v<T> == test::is_throw_compat_v<MoveType>, "");
+      std::is_move_constructible_v<T> == test::is_throw_compat_v<MoveType>);
   static_assert( // is_nothrow_move_constructible_v
       std::is_nothrow_move_constructible_v<T> ==
-          test::is_nothrow_compat_v<MoveType>,
-      "");
+      test::is_nothrow_compat_v<MoveType>);
   static_assert( // is_trivially_move_constructible_v
       std::is_trivially_move_constructible_v<T> ==
-          test::is_trivial_compat_v<MoveType>,
-      "");
+      test::is_trivial_compat_v<MoveType>);
 }
 
 // Statically asserts that T has the required properties.
@@ -314,15 +305,13 @@ template <typename T, CtorType MoveType>
 constexpr void staticAssertMoveAssignable() {
   static_assert(sizeof(T), "Type is incomplete");
   static_assert(
-      std::is_move_assignable_v<T> == test::is_throw_compat_v<MoveType>, "");
+      std::is_move_assignable_v<T> == test::is_throw_compat_v<MoveType>);
   static_assert( // is_nothrow_move_assignable_v
       std::is_nothrow_move_assignable_v<T> ==
-          test::is_nothrow_compat_v<MoveType>,
-      "");
+      test::is_nothrow_compat_v<MoveType>);
   static_assert( // is_trivially_move_assignable_v
       std::is_trivially_move_assignable_v<T> ==
-          test::is_trivial_compat_v<MoveType>,
-      "");
+      test::is_trivial_compat_v<MoveType>);
 }
 
 // Statically asserts that T has the required properties.
@@ -331,12 +320,10 @@ constexpr void staticAssertDestructible() {
   static_assert(sizeof(T), "Type is incomplete");
   static_assert(DtorType != CtorType::Delete, "can't delete destructor.");
   static_assert( // is_nothrow_destructible_v
-      std::is_nothrow_destructible_v<T> == test::is_nothrow_compat_v<DtorType>,
-      "");
+      std::is_nothrow_destructible_v<T> == test::is_nothrow_compat_v<DtorType>);
   static_assert( // is_trivially_destructible_v
       std::is_trivially_destructible_v<T> ==
-          test::is_trivial_compat_v<DtorType>,
-      "");
+      test::is_trivial_compat_v<DtorType>);
 }
 
 template <CtorType Ctor, CtorType Dtor>

@@ -160,8 +160,8 @@ uint32_t TBinaryProtocolT<Transport_>::writeI64(const int64_t i64) {
 
 template <class Transport_>
 uint32_t TBinaryProtocolT<Transport_>::writeDouble(const double dub) {
-  static_assert(sizeof(double) == sizeof(uint64_t), "");
-  static_assert(std::numeric_limits<double>::is_iec559, "");
+  static_assert(sizeof(double) == sizeof(uint64_t));
+  static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = folly::bit_cast<uint64_t>(dub);
   bits = folly::Endian::big(bits);
@@ -171,8 +171,8 @@ uint32_t TBinaryProtocolT<Transport_>::writeDouble(const double dub) {
 
 template <class Transport_>
 uint32_t TBinaryProtocolT<Transport_>::writeFloat(const float flt) {
-  static_assert(sizeof(float) == sizeof(uint32_t), "");
-  static_assert(std::numeric_limits<float>::is_iec559, "");
+  static_assert(sizeof(float) == sizeof(uint32_t));
+  static_assert(std::numeric_limits<float>::is_iec559);
 
   uint32_t bits = folly::bit_cast<uint32_t>(flt);
   bits = folly::Endian::big(bits);
@@ -391,8 +391,8 @@ uint32_t TBinaryProtocolT<Transport_>::readI64(int64_t& i64) {
 
 template <class Transport_>
 uint32_t TBinaryProtocolT<Transport_>::readDouble(double& dub) {
-  static_assert(sizeof(double) == sizeof(uint64_t), "");
-  static_assert(std::numeric_limits<double>::is_iec559, "");
+  static_assert(sizeof(double) == sizeof(uint64_t));
+  static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits;
   uint8_t b[8];
@@ -405,8 +405,8 @@ uint32_t TBinaryProtocolT<Transport_>::readDouble(double& dub) {
 
 template <class Transport_>
 uint32_t TBinaryProtocolT<Transport_>::readFloat(float& flt) {
-  static_assert(sizeof(float) == sizeof(uint32_t), "");
-  static_assert(std::numeric_limits<float>::is_iec559, "");
+  static_assert(sizeof(float) == sizeof(uint32_t));
+  static_assert(std::numeric_limits<float>::is_iec559);
 
   uint32_t bits;
   uint8_t b[4];

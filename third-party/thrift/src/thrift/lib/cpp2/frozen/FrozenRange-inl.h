@@ -216,8 +216,7 @@ struct ArrayLayout : public LayoutBase {
     size_t size() const { return count_; }
 
     folly::Range<const Item*> range() const {
-      static_assert(
-          apache::thrift::frozen::detail::IsBlitType<Item>::value, "");
+      static_assert(apache::thrift::frozen::detail::IsBlitType<Item>::value);
       auto data = reinterpret_cast<const Item*>(data_);
       return {data, data + count_};
     }

@@ -39,7 +39,7 @@ struct invoke_reffer;
 
 template <class List, FieldOrdinal>
 struct at_impl {
-  static_assert(sizeof(List) < 0, "");
+  static_assert(sizeof(List) < 0);
 };
 
 template <class... Args, FieldOrdinal Ord>

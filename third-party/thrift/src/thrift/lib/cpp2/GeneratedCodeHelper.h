@@ -131,7 +131,7 @@ struct FieldData {
   using value_type = std::remove_pointer_t<T>;
   using Ops = Cpp2Ops<value_type>;
   T value;
-  static_assert(std::is_pointer_v<T> != std::is_base_of_v<TException, T>, "");
+  static_assert(std::is_pointer_v<T> != std::is_base_of_v<TException, T>);
 
   value_type& ref() { return detail::maybe_deref(value); }
   const value_type& ref() const { return detail::maybe_deref(value); }

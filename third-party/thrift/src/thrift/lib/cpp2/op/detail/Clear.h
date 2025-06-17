@@ -41,7 +41,7 @@ namespace apache::thrift::op::detail {
 // unstructured types.
 template <typename Tag>
 struct GetDefault {
-  static_assert(!type::is_a_v<Tag, type::structured_c>, "");
+  static_assert(!type::is_a_v<Tag, type::structured_c>);
   constexpr auto operator()() const { return type::native_type<Tag>{}; }
 };
 
@@ -50,7 +50,7 @@ struct GetDefault {
 // This is the same as the default for all non-structured types.
 template <typename Tag>
 struct GetIntrinsicDefault : GetDefault<Tag> {
-  static_assert(!type::is_a_v<Tag, type::structured_c>, "");
+  static_assert(!type::is_a_v<Tag, type::structured_c>);
 };
 
 // Clear the given value, setting it to it's intrinsic default.
@@ -391,7 +391,7 @@ template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
 struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
     : ClearOptionalField {
   using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
-  static_assert(type::is_concrete_v<Tag>, "");
+  static_assert(type::is_concrete_v<Tag>);
 
   using ClearOptionalField::operator();
   template <typename T>
@@ -432,7 +432,7 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
 
 template <typename Id, typename Tag>
 struct Clear<Id, Tag, type::if_thrift_type_tag<Tag>> {
-  static_assert(type::is_id_v<Id>, "");
+  static_assert(type::is_id_v<Id>);
   using T = type::native_type<Tag>;
   constexpr void operator()(T& val) const {
     using FieldTag = op::get_field_tag<T, Id>;

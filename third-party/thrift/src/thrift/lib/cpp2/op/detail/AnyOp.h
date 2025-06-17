@@ -32,7 +32,7 @@ namespace apache::thrift::op::detail {
 // Compile-time and type-erased Thrift operator implementations.
 template <typename Tag, typename>
 struct AnyOp : BaseOp<Tag> {
-  static_assert(type::is_concrete_v<Tag>, "");
+  static_assert(type::is_concrete_v<Tag>);
   using Base = BaseOp<Tag>;
 
   // TODO(afuller): Implement all Tags and remove runtime throwing fallback.

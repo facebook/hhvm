@@ -91,7 +91,7 @@ class Type : public detail::Wrap<TypeStruct> {
   }
   template <typename Tag>
   FOLLY_EXPORT static const Type& get() {
-    static_assert(is_concrete_v<Tag>, "");
+    static_assert(is_concrete_v<Tag>);
     static const Type& kInst = *new Type(Tag{});
     return kInst;
   }

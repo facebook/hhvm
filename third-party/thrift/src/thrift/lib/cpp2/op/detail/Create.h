@@ -112,7 +112,7 @@ T& ensureValue(std::shared_ptr<T>& ptr) {
 
 template <typename Tag>
 struct Create {
-  static_assert(type::is_concrete_v<Tag>, "");
+  static_assert(type::is_concrete_v<Tag>);
 
   template <typename T = type::native_type<Tag>>
   constexpr T operator()() const {
@@ -147,7 +147,7 @@ struct Ensure<void, void> {
 template <typename Adapter, typename Tag>
 struct Create<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
+  static_assert(type::is_concrete_v<adapted_tag>);
 
   template <typename T = type::native_type<adapted_tag>>
   constexpr T operator()() const {
@@ -167,7 +167,7 @@ struct Create<
     type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>> {
   using field_adapted_tag =
       type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
-  static_assert(type::is_concrete_v<field_adapted_tag>, "");
+  static_assert(type::is_concrete_v<field_adapted_tag>);
 
   template <typename AdapterT = Adapter>
   constexpr adapt_detail::
@@ -191,7 +191,7 @@ struct Create<
 template <typename Tag, typename Context>
 struct Ensure<type::field<Tag, Context>> {
   using field_tag = type::field<Tag, Context>;
-  static_assert(type::is_concrete_v<field_tag>, "");
+  static_assert(type::is_concrete_v<field_tag>);
   template <typename T, typename Struct>
   decltype(auto) operator()(T&& val, Struct&) const {
     return ensureValue(std::forward<T>(val));

@@ -66,8 +66,8 @@ inline constexpr bool is_gteq(folly::ordering cmp) noexcept {
 // Delegates to operator==, by default.
 template <typename LTag = void, typename RTag = LTag, typename = void>
 struct EqualTo {
-  static_assert(type::is_concrete_v<LTag>, "");
-  static_assert(type::is_concrete_v<RTag>, "");
+  static_assert(type::is_concrete_v<LTag>);
+  static_assert(type::is_concrete_v<RTag>);
 
   bool operator()(
       const type::native_type<LTag>& lhs,
@@ -115,8 +115,8 @@ struct IdenticalTo<type::void_t> {
 // For use with ordered containers.
 template <typename LTag, typename RTag = LTag, typename = void>
 struct LessThan : std::less<> { // Deletegates to std::less<>, by default.
-  static_assert(type::is_concrete_v<LTag>, "");
-  static_assert(type::is_concrete_v<RTag>, "");
+  static_assert(type::is_concrete_v<LTag>);
+  static_assert(type::is_concrete_v<RTag>);
 };
 template <>
 struct LessThan<type::void_t> {
@@ -271,7 +271,7 @@ template <
     typename T = type::native_type<Tag>,
     typename = void>
 struct DefaultCompareThreeWay {
-  static_assert(type::is_concrete_v<Tag>, "");
+  static_assert(type::is_concrete_v<Tag>);
 
   constexpr folly::ordering operator()(const T& lhs, const T& rhs) const {
     if (EqualTo<Tag>{}(lhs, rhs)) {
@@ -687,7 +687,7 @@ struct CompareThreeWay<type::set<VTag>> {
 template <typename Adapter, typename Tag>
 struct EqualTo<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
+  static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
     if constexpr (adapt_detail::is_equal_adapter_v<Adapter, T>) {
@@ -705,7 +705,7 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
 template <typename Adapter, typename Tag>
 struct LessThan<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
+  static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
     if constexpr (adapt_detail::is_less_adapter_v<Adapter, T>) {
@@ -722,7 +722,7 @@ struct LessThan<type::adapted<Adapter, Tag>> {
 template <typename Adapter, typename Tag>
 struct CompareThreeWay<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
+  static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
   constexpr folly::ordering operator()(const T& lhs, const T& rhs) const {
     if constexpr (adapt_detail::is_compare_three_way_adapter_v<Adapter, T>) {

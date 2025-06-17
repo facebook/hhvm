@@ -287,8 +287,8 @@ inline uint32_t CompactProtocolWriter::writeI64(int64_t i64) {
 }
 
 inline uint32_t CompactProtocolWriter::writeDouble(double dub) {
-  static_assert(sizeof(double) == sizeof(uint64_t), "");
-  static_assert(std::numeric_limits<double>::is_iec559, "");
+  static_assert(sizeof(double) == sizeof(uint64_t));
+  static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = folly::bit_cast<uint64_t>(dub);
   out_.writeBE(bits);
@@ -296,8 +296,8 @@ inline uint32_t CompactProtocolWriter::writeDouble(double dub) {
 }
 
 inline uint32_t CompactProtocolWriter::writeFloat(float flt) {
-  static_assert(sizeof(float) == sizeof(uint32_t), "");
-  static_assert(std::numeric_limits<float>::is_iec559, "");
+  static_assert(sizeof(float) == sizeof(uint32_t));
+  static_assert(std::numeric_limits<float>::is_iec559);
 
   uint32_t bits = folly::bit_cast<uint32_t>(flt);
   out_.writeBE(bits);
@@ -707,16 +707,16 @@ inline void CompactProtocolReader::readI64(int64_t& i64) {
 }
 
 inline void CompactProtocolReader::readDouble(double& dub) {
-  static_assert(sizeof(double) == sizeof(uint64_t), "");
-  static_assert(std::numeric_limits<double>::is_iec559, "");
+  static_assert(sizeof(double) == sizeof(uint64_t));
+  static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = in_.readBE<int64_t>();
   dub = folly::bit_cast<double>(bits);
 }
 
 inline void CompactProtocolReader::readFloat(float& flt) {
-  static_assert(sizeof(float) == sizeof(uint32_t), "");
-  static_assert(std::numeric_limits<float>::is_iec559, "");
+  static_assert(sizeof(float) == sizeof(uint32_t));
+  static_assert(std::numeric_limits<float>::is_iec559);
 
   uint32_t bits = in_.readBE<int32_t>();
   flt = folly::bit_cast<float>(bits);

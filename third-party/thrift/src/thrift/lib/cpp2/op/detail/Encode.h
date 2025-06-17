@@ -1193,7 +1193,7 @@ struct Decode<
     type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>> {
   using field_adapted_tag =
       type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
-  static_assert(type::is_concrete_v<field_adapted_tag>, "");
+  static_assert(type::is_concrete_v<field_adapted_tag>);
 
   template <typename Protocol, typename U, typename AdapterT = Adapter>
   constexpr adapt_detail::

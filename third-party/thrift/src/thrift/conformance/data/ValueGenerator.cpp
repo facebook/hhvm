@@ -100,7 +100,7 @@ void addNumberValues(NamedValues<Tag>& values) {
 
 template <typename Tag, bool key>
 NamedValues<Tag> generateValues() {
-  static_assert(type::is_a_v<Tag, type::primitive_c>, "");
+  static_assert(type::is_a_v<Tag, type::primitive_c>);
   using T = type::standard_type<Tag>;
   NamedValues<Tag> values;
 

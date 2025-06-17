@@ -57,7 +57,7 @@ FOLLY_CONSTEVAL type::Ordinal findOrdinal(
 
 template <class T, class List>
 class FindOrdinal {
-  static_assert(sizeof(T) < 0, "");
+  static_assert(sizeof(T) < 0);
 };
 
 template <class T, class... Args>
@@ -219,7 +219,7 @@ struct get_ordinal_impl {
 
   // TODO(ytj): To reduce build time, only check whether Id is reflection
   // metadata if we couldn't find Id.
-  static_assert(type::is_id_v<Id>, "");
+  static_assert(type::is_id_v<Id>);
 
   using type = type::ordinal_tag<getFieldOrdinal<
       Id,

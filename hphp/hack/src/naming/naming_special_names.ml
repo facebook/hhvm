@@ -937,10 +937,10 @@ module UserAttributes = struct
 end
 
 (* Tested before \\-prepending name-canonicalization *)
-module SpecialFunctions = struct
+module PreNamespacedFunctions = struct
   let echo = "echo" (* pseudo-function *)
 
-  let is_special_function =
+  let is_pre_namespaced_function =
     let all_special_functions = HashSet.of_list [echo] in
     (fun x -> HashSet.mem all_special_functions x)
 end
@@ -1030,6 +1030,51 @@ module PseudoFunctions = struct
   let is_pseudo_function x = HashSet.mem all_pseudo_functions x
 end
 
+(* This is slightly different but related to pseudo-functions; these functions
+ * may be defined in HHIs, so we don't want to restrict looking them up, but
+ * do not have runtime definitions -- the emitter transforms them to special
+ * bytecode sequences instead of FCalls. So, they are not valid for use as
+ * function pointers.
+ *
+ * Should be kept in sync with emit_expression::emit_special_function for cases
+ * that are declared in HHI.
+ *)
+module SpecialFunctions = struct
+  let classname_to_class = "\\HH\\classname_to_class"
+
+  let exit = PseudoFunctions.exit
+
+  let get_class_from_type = "\\HH\\ReifiedGenerics\\get_class_from_type"
+
+  let global_get = "\\HH\\global_get"
+
+  let global_set = "\\HH\\global_set"
+
+  let global_unset = "\\HH\\global_set"
+
+  let tag_provenance_here = "\\HH\\tag_provenance_here"
+
+  let unsafe_cast = PseudoFunctions.unsafe_cast
+
+  let unsafe_nonnull_cast = PseudoFunctions.unsafe_nonnull_cast
+
+  let all_special_functions =
+    HashSet.of_list
+      [
+        classname_to_class;
+        exit;
+        get_class_from_type;
+        global_get;
+        global_set;
+        global_unset;
+        tag_provenance_here;
+        unsafe_cast;
+        unsafe_nonnull_cast;
+      ]
+
+  let is_special_function = HashSet.mem all_special_functions
+end
+
 module StdlibFunctions = struct
   let get_class = "\\get_class"
 
@@ -1048,7 +1093,7 @@ module StdlibFunctions = struct
     String.Hash_set.of_list
       ~growth_allowed:false
       [
-        SpecialFunctions.echo;
+        PreNamespacedFunctions.echo;
         PseudoFunctions.isset;
         PseudoFunctions.unset;
         type_structure;
@@ -1266,18 +1311,6 @@ end
 
 module Regex = struct
   let tPattern = "\\HH\\Lib\\Regex\\Pattern"
-end
-
-(* These are functions treated by the emitter specially. They are not
- * autoimported (see hh_autoimport.ml) nor are they consider PseudoFunctions
- * so they can be overridden by namespacing (at least currently)
- *)
-module EmitterSpecialFunctions = struct
-  let eval = "\\eval"
-
-  let set_frame_metadata = "\\HH\\set_frame_metadata"
-
-  let systemlib_reified_generics = "\\__systemlib_reified_generics"
 end
 
 module XHP = struct

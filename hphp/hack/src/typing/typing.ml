@@ -1540,7 +1540,7 @@ end = struct
       localize_with fun_ty ty_args fun_id fe_pos env
     in
     let fun_ty =
-      if String.equal (snd fun_id) SN.SpecialFunctions.echo then
+      if String.equal (snd fun_id) SN.PreNamespacedFunctions.echo then
         set_echo_capabilities fun_ty fe_pos
       else
         fun_ty
@@ -1563,7 +1563,7 @@ end = struct
   let synth fun_id ty_args env =
     let lookup_id =
       let (_, name) = fun_id in
-      if String.equal name SN.SpecialFunctions.echo then
+      if String.equal name SN.PreNamespacedFunctions.echo then
         SN.PseudoFunctions.echo
       else
         name
@@ -1638,7 +1638,7 @@ end = struct
   let synth_for_call fun_id ty_args nargs env =
     let lookup_id =
       let (_, name) = fun_id in
-      if String.equal name SN.SpecialFunctions.echo then
+      if String.equal name SN.PreNamespacedFunctions.echo then
         SN.PseudoFunctions.echo
       else
         name

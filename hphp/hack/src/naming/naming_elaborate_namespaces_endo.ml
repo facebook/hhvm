@@ -306,7 +306,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         in
         Collection (id, c_targ_opt, flds)
       | Call { func = (ty, p, Id (p2, cn)); targs; args; unpacked_arg }
-        when SN.SpecialFunctions.is_special_function cn ->
+        when SN.PreNamespacedFunctions.is_pre_namespaced_function cn ->
         Call
           {
             func = (ty, p, Id (p2, cn));

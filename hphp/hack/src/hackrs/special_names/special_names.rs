@@ -369,10 +369,10 @@ pub mod user_attributes {
     }
 }
 
-pub mod special_functions {
+pub mod pre_namespaced_functions {
     use super::*;
 
-    pub static echo: Lazy<FunName> = lazy!(sn::special_functions::ECHO);
+    pub static echo: Lazy<FunName> = lazy!(sn::pre_namespaced_functions::ECHO);
 }
 
 pub mod autoimported_functions {

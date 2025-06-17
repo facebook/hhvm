@@ -481,12 +481,12 @@ pub mod attribute_kinds {
 }
 
 /* Tested before \\-prepending name-canonicalization */
-pub mod special_functions {
+pub mod pre_namespaced_functions {
     use lazy_static::lazy_static;
 
     pub const ECHO: &str = "echo"; /* pseudo-function */
 
-    pub fn is_special_function(x: &str) -> bool {
+    pub fn is_pre_namespaced_function(x: &str) -> bool {
         lazy_static! {
             static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> = vec![ECHO].into_iter().collect();
         }

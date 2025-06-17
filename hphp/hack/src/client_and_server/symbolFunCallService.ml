@@ -56,7 +56,7 @@ class visitor =
         self#zero
       else
         let name = Utils.strip_ns name in
-        if String.equal name SN.SpecialFunctions.echo then
+        if String.equal name SN.PreNamespacedFunctions.echo then
           self#zero
         else
           let cur_class =

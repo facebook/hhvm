@@ -20,7 +20,7 @@ impl Pass for ValidateExprCallEchoPass {
                 func: Expr(_, _, Expr_::Id(box Id(_, fn_name))),
                 unpacked_arg: Some(Expr(_, pos, _)),
                 ..
-            }) if fn_name == sn::special_functions::ECHO => {
+            }) if fn_name == sn::pre_namespaced_functions::ECHO => {
                 env.emit_error(NamingError::TooFewTypeArguments(pos.clone()))
             }
             _ => (),
@@ -45,7 +45,7 @@ mod tests {
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
                     elab_utils::pos::null(),
-                    sn::special_functions::ECHO.to_string(),
+                    sn::pre_namespaced_functions::ECHO.to_string(),
                 ))),
             ),
             targs: vec![],
@@ -64,7 +64,7 @@ mod tests {
                 match expr_ {
                     Expr_::Id(id) => {
                         let Id(_, nm) = *id;
-                        nm == sn::special_functions::ECHO
+                        nm == sn::pre_namespaced_functions::ECHO
                     }
                     _ => false,
                 }
@@ -84,7 +84,7 @@ mod tests {
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
                     elab_utils::pos::null(),
-                    sn::special_functions::ECHO.to_string(),
+                    sn::pre_namespaced_functions::ECHO.to_string(),
                 ))),
             ),
             targs: vec![],
@@ -103,7 +103,7 @@ mod tests {
                 match expr_ {
                     Expr_::Id(id) => {
                         let Id(_, nm) = *id;
-                        nm == sn::special_functions::ECHO
+                        nm == sn::pre_namespaced_functions::ECHO
                     }
                     _ => false,
                 }

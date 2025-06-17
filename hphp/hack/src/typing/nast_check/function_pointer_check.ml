@@ -45,8 +45,7 @@ let handler =
       let () =
         match e with
         | Aast.FunctionPointer (Aast.FP_id (pos, name), _) ->
-          if String.(name = Naming_special_names.PseudoFunctions.unsafe_cast)
-          then
+          if Naming_special_names.SpecialFunctions.is_special_function name then
             Errors.add_error
               Naming_error.(to_user_error @@ Invalid_fun_pointer { pos; name })
         | Aast.FunctionPointer

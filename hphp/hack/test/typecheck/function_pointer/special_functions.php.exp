@@ -1,0 +1,16 @@
+ERROR: File "special_functions.php", line 4, characters 8-28:
+`HH\classname_to_class` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 5, characters 8-11:
+`exit` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 6, characters 8-45:
+`HH\ReifiedGenerics\get_class_from_type` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 7, characters 8-20:
+`HH\global_get` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 8, characters 8-20:
+`HH\global_set` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 10, characters 8-29:
+`HH\tag_provenance_here` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 11, characters 8-27:
+`HH\FIXME\UNSAFE_CAST` cannot be used as a function pointer (Naming[2105])
+ERROR: File "special_functions.php", line 12, characters 8-35:
+`HH\FIXME\UNSAFE_NONNULL_CAST` cannot be used as a function pointer (Naming[2105])

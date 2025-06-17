@@ -21,7 +21,7 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
   let (res, errs) =
     match expr_ with
     | Aast.(Call { func = (_, _, Id (_, fn_name)); unpacked_arg; _ } as call)
-      when String.equal fn_name SN.SpecialFunctions.echo ->
+      when String.equal fn_name SN.PreNamespacedFunctions.echo ->
       let errs =
         Option.to_list
         @@ Option.map

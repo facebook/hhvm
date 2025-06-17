@@ -62,9 +62,9 @@ use lazy_static::lazy_static;
 use naming_special_names_rust::collections;
 use naming_special_names_rust::emitter_special_functions;
 use naming_special_names_rust::fb;
+use naming_special_names_rust::pre_namespaced_functions;
 use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
-use naming_special_names_rust::special_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
@@ -2646,6 +2646,8 @@ fn has_inout_arg(es: &[ast::Argument]) -> bool {
     es.iter().any(|arg| arg.is_inout())
 }
 
+/// Should be kept in sync with Naming_special_names.SpecialFunctions for
+/// functions exposed in HHI
 fn emit_special_function<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
@@ -2659,7 +2661,7 @@ fn emit_special_function<'a, 'd>(
     use ast::Expr_;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
     match (lower_fq_name, args) {
-        (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
+        (id, _) if id == pre_namespaced_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
                 .enumerate()
                 .map(|(i, arg)| {
@@ -5889,7 +5891,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         Expr_::Call(box aast::CallExpr {
             func: ast::Expr(_, _, Expr_::Id(id)),
             ..
-        }) if id.1 == special_functions::ECHO => false,
+        }) if id.1 == pre_namespaced_functions::ECHO => false,
         Expr_::ObjGet(o) if o.as_ref().3 == ast::PropOrMethod::IsProp => true,
         Expr_::ClassGet(c) if c.as_ref().2 == ast::PropOrMethod::IsProp => true,
         Expr_::Lvar(_)

@@ -67,7 +67,8 @@ let has_canon_name env get_name get_pos (pos, name) =
   end
 
 let check_fun_name env ((_, name) as id) =
-  if Naming_special_names.SpecialFunctions.is_special_function name then
+  if Naming_special_names.PreNamespacedFunctions.is_pre_namespaced_function name
+  then
     ()
   else if Naming_provider.fun_exists env.ctx name then
     ()

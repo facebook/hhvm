@@ -389,7 +389,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 unpacked_arg.accept(env, self.object())?;
 
                 if let Some(sid) = func.2.as_id_mut() {
-                    if !sn::special_functions::is_special_function(&sid.1) {
+                    if !sn::pre_namespaced_functions::is_pre_namespaced_function(&sid.1) {
                         namespaces::elaborate_id(
                             &env.namespace,
                             namespaces::ElaborateKind::Fun,

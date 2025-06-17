@@ -27,7 +27,7 @@ use naming_special_names_rust as sn;
 use naming_special_names_rust::classes as special_classes;
 use naming_special_names_rust::literal;
 use naming_special_names_rust::modules as special_modules;
-use naming_special_names_rust::special_functions;
+use naming_special_names_rust::pre_namespaced_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints as special_typehints;
 use naming_special_names_rust::user_attributes as special_attrs;
@@ -2167,7 +2167,7 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
                 func: Expr::new(
                     (),
                     pos.clone(),
-                    Expr_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
+                    Expr_::mk_id(ast::Id(pos, pre_namespaced_functions::ECHO.into())),
                 ),
                 targs: vec![],
                 args: vec![aast::Argument::Anormal(expr)],

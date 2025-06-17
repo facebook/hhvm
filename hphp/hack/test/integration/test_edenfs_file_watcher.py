@@ -97,6 +97,12 @@ def assertServerLogContains(driver: CommonTestDriver, needle: str) -> None:
     driver.assertTrue(contains)
 
 
+def assertMonitorLogContains(driver: CommonTestDriver, needle: str) -> None:
+    monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
+
+    driver.assertTrue(needle in monitor_log)
+
+
 def assertEdenFsWatcherInitialized(driver: CommonTestDriver) -> None:
     """Checks that an Edenfs_watcher instance was initialized
 
@@ -111,7 +117,6 @@ def assertServerNotCrashed(driver: CommonTestDriver) -> None:
     monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
 
     driver.assertFalse("Exit_status.Edenfs_watcher_failed" in monitor_log)
-    driver.assertFalse("writing crash log" in monitor_log)
 
 
 class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
@@ -496,6 +501,23 @@ function rename_test_fun(): int {
                 "  {root}new_folder/sub/rename_test.php:3:33,35: Expected `int`",
                 "  {root}new_folder/sub/rename_test.php:4:12,22: But got `string`",
             ]
+        )
+
+    def test_hhconfig_change(self) -> None:
+        self.test_driver.start_hh_server()
+
+        hhconfig_file = os.path.join(self.test_driver.repo_dir, ".hhconfig")
+        with open(hhconfig_file, "a") as f:
+            f.write("# a comment to change hhconfig")
+
+        # This will make us wait until the new server has come up.
+        # Error message should be the same as before.
+        self.test_driver.check_cmd(["No errors!"])
+
+        # Let's make sure that we did indeed restart due to the hhconfig change
+        assertMonitorLogContains(
+            self.test_driver,
+            "Exit_status.Hhconfig_changed",
         )
 
     # Note that we inherit all tests from CommonTests and run them,

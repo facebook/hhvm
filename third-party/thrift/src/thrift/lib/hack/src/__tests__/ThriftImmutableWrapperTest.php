@@ -89,6 +89,17 @@ final class ThriftImmutableWrapperTest extends WWWTest {
     $thrift_key = $underlying->getInstanceKey();
     expect($key)->toEqual($thrift_key);
   }
+
+  public async function testToShape(): Awaitable<void> {
+    $underlying = AdsConsentPlatformParams::fromShape(shape(
+      'traceID' => '123',
+      'useCase' => SignalsPipeUseCase::ADS_IMPRESSION_POLICY_ONLY,
+      'offsitePolicyEndpoint' => 'PIXEL_FIRE',
+    ));
+
+    $test = new TestThriftImmutableWrapper($underlying);
+    expect($test->toShape())->toEqual($underlying->__toShape());
+  }
 }
 
 final class TestThriftImmutableWrapper extends ThriftImmutableWrapper {

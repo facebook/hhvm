@@ -27,6 +27,7 @@ abstract class ThriftImmutableWrapper
   implements JsonSerializable, \HH\IMemoizeParam {
 
   abstract const type TThrift as IThriftShapishSyncStruct;
+  const type TShape = this::TThrift::TShape;
 
   final public function __construct(protected this::TThrift $data) {}
 
@@ -47,7 +48,7 @@ abstract class ThriftImmutableWrapper
   final public function createDeepCopy(): this::TThrift {
     return TCompactSerializer::deserialize(
       TCompactSerializer::serialize($this->data),
-      Classnames::get($this->data) as nonnull
+      Classnames::getx($this->data)
         |> HH\classname_to_class($$)
         |> $$::withDefaultValues(),
     );
@@ -63,4 +64,9 @@ abstract class ThriftImmutableWrapper
   public function toString(): string {
     return JSON::encode($this->data);
   }
+
+  public function toShape(): this::TShape {
+    return $this->data->__toShape();
+  }
+
 }

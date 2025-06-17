@@ -15,14 +15,25 @@ import os
 
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import ClassVar, List, Optional
 
 import hphp.hack.test.integration.common_tests as common_tests
 from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.hh_paths import hh_server
 
 from watchman.integration.lib import WatchmanInstance
+
+# Used to debug this test suite.
+# If enabled, we launch hh_server in the foreground and
+# redirect its stdout and stderr into this process'.
+# Make sure that this is never enabled by default, it disabled some testing
+# assertions!
+DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND: bool = (
+    os.environ.get("DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND") is not None
+)
 
 
 # Contents of hh.conf used in these tests Currently, enabling the EdenFS file
@@ -89,6 +100,10 @@ def unmountEden(eden_instance: EdenFS, eden_mount_point: str) -> None:
 
 
 def assertServerLogContains(driver: CommonTestDriver, needle: str) -> None:
+    if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+        # We don't have access to any logs
+        return
+
     server_log = driver.get_all_logs(driver.repo_dir).current_server_log
     contains = needle in server_log
     if not contains:
@@ -98,6 +113,9 @@ def assertServerLogContains(driver: CommonTestDriver, needle: str) -> None:
 
 
 def assertMonitorLogContains(driver: CommonTestDriver, needle: str) -> None:
+    if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+        # We don't have access to any logs
+        return
     monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
 
     driver.assertTrue(needle in monitor_log)
@@ -114,6 +132,9 @@ def assertEdenFsWatcherInitialized(driver: CommonTestDriver) -> None:
 
 
 def assertServerNotCrashed(driver: CommonTestDriver) -> None:
+    if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+        # We don't have access to any logs
+        return
     monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
 
     driver.assertFalse("Exit_status.Edenfs_watcher_failed" in monitor_log)
@@ -230,6 +251,26 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         # 3 retries is the value used in CommonTestDriver.tearDown
         self.stop_hh_server(retries=3)
         unmountEden(self.eden_instance, self.eden_mount_point)
+
+    def start_hh_server(
+        self,
+        changed_files: Optional[List[str]] = None,
+        saved_state_path: Optional[str] = None,
+        args: Optional[List[str]] = None,
+    ) -> None:
+        args = args or []
+        if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+            cmd = [hh_server, "--max-procs", "2", self.repo_dir] + args
+            subprocess.Popen(
+                cmd,
+                env=self.test_env,
+                stdout=sys.stderr,
+                stderr=sys.stderr,
+                universal_newlines=True,
+            )
+            self.wait_until_server_ready()
+        else:
+            super().start_hh_server(changed_files, saved_state_path, args)
 
     def commitAllChanges(self, message: str = "test commit") -> str:
         (_, _, retcode) = self.proc_call(["hg", "add", "-R", self.eden_mount_point])

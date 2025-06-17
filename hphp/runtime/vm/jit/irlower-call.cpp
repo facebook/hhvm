@@ -405,13 +405,15 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     v << load{rvmtl()[returnOffset + TVOFF(m_data)], tmpData};
 
     if (dstType.isValid()) {
-      auto const rtype = v.makeReg();
-      v << loadb{rvmtl()[returnOffset + TVOFF(m_type)], rtype};
-
-      auto const sf = v.makeReg();
-      auto const nulltype = v.cns(KindOfNull);
-      v << cmpbi{static_cast<data_type_t>(KindOfUninit), rtype, sf};
-      v << cmovb{CC_Z, sf, rtype, nulltype, tmpType};
+      v << loadb{rvmtl()[returnOffset + TVOFF(m_type)], tmpType};
+      if (debug) {
+        auto const sf = v.makeReg();
+        v << cmpbi{static_cast<data_type_t>(KindOfUninit), tmpType, sf};
+        ifThen(
+          v, CC_E, sf,
+          [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
+        );
+      }
     }
     return end(v);
   }

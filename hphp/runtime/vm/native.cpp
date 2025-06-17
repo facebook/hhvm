@@ -209,10 +209,8 @@ void callFuncImpl(const Func* const func,
     } else {
       new (&ret) Variant(callFuncIndirectImpl<Variant>(f, GP_args, GP_count,
                                                        SIMD_args, SIMD_count));
-      if (ret.m_type == KindOfUninit) {
-        ret.m_type = KindOfNull;
-      }
     }
+    assertx(ret.m_type != KindOfUninit);
     return;
   }
 

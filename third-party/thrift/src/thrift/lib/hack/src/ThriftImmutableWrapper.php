@@ -23,11 +23,14 @@
  * allow a caller to mutate the underlying thrift object.
  */
 <<__ConsistentConstruct, Oncalls('signals_infra')>>
-abstract class ThriftImmutableWrapper<T as \IThriftShapishSyncStruct>
+abstract class ThriftImmutableWrapper
   implements JsonSerializable, \HH\IMemoizeParam {
-  final public function __construct(protected T $data) {}
 
-  final public static function createInstance(?T $data): ?this {
+  abstract const type TThrift as IThriftShapishSyncStruct;
+
+  final public function __construct(protected this::TThrift $data) {}
+
+  final public static function createInstance(?this::TThrift $data): ?this {
     return $data is null ? null : new static($data);
   }
 
@@ -41,7 +44,7 @@ abstract class ThriftImmutableWrapper<T as \IThriftShapishSyncStruct>
     return $this->data->getInstanceKey();
   }
 
-  final public function createDeepCopy(): T {
+  final public function createDeepCopy(): this::TThrift {
     return TCompactSerializer::deserialize(
       TCompactSerializer::serialize($this->data),
       Classnames::get($this->data) as nonnull

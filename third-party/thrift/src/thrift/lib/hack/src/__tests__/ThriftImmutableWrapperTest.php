@@ -91,8 +91,9 @@ final class ThriftImmutableWrapperTest extends WWWTest {
   }
 }
 
-final class TestThriftImmutableWrapper
-  extends ThriftImmutableWrapper<AdsConsentPlatformParams> {
+final class TestThriftImmutableWrapper extends ThriftImmutableWrapper {
+
+  const type TThrift = AdsConsentPlatformParams;
 
   public function getTraceId(): ?string {
     return $this->data->traceID;

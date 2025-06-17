@@ -82,13 +82,13 @@ struct SSATmp;
  *
  *   Contains a series of tests on the source parameters in order.
  *
- *     NA               instruction takes no sources
- *     S(t1,...,tn)     source must be a subtype of {t1|..|tn}
- *     S(AK(<kind>))    source must be an array with specified kind
- *     C(type)          source must be a constant, and subtype of type
- *     CStr             same as C(StaticStr)
- *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
- *     SCrossTrace      cross-trace arguments specific to the SrcKey target
+ *     NA                         instruction takes no sources
+ *     S(t1 OR ... OR tn)         source's type must one of t1, ..., tn
+ *     S(AK(<kind>))              source must be an array with specified kind
+ *     C(type)                    source must be a constant, and subtype of type
+ *     CStr                       same as C(StaticStr)
+ *     SVar(t1 OR ... OR tn)      variadic source list, each one's type one of t1, ..., tn
+ *     SCrossTrace                cross-trace arguments specific to the SrcKey target
  *
  * flags:
  *

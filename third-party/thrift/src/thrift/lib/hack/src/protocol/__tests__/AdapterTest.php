@@ -221,8 +221,11 @@ final class AdapterTestStructToShape implements IThriftAdapter {
   }
 }
 
-final class AdapterTestServiceHandler implements AdapterTest\ServiceIf {
-  public function func(string $arg1, ?AdapterTest\Foo $arg2): vec<int> {
+final class AdapterTestServiceHandler implements AdapterTest\ServiceAsyncIf {
+  public async function func(
+    string $arg1,
+    ?AdapterTest\Foo $arg2,
+  ): Awaitable<vec<int>> {
     expect($arg1)->toEqual('1');
     expect($arg2?->intField)->toEqual('2');
     return vec[3, 4];
@@ -231,12 +234,12 @@ final class AdapterTestServiceHandler implements AdapterTest\ServiceIf {
 
 <<Oncalls('thrift')>>
 final class AdapterTestServer extends METAThriftServer {
-  const type TProcessor = AdapterTest\ServiceSyncProcessor;
+  const type TProcessor = AdapterTest\ServiceAsyncProcessor;
 
   <<__Override>>
-  protected function getProcessor(): AdapterTest\ServiceSyncProcessor {
+  protected function getProcessor(): AdapterTest\ServiceAsyncProcessor {
     return
-      new AdapterTest\ServiceSyncProcessor(new AdapterTestServiceHandler());
+      new AdapterTest\ServiceAsyncProcessor(new AdapterTestServiceHandler());
   }
 
   <<__Override>>

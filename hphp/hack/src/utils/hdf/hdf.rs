@@ -12,6 +12,7 @@ pub(crate) mod ffi {
         fn hdf_first_child(parent: &Hdf) -> Result<UniquePtr<Hdf>>;
         fn hdf_next(hdf: &Hdf) -> Result<UniquePtr<Hdf>>;
         fn hdf_name(hdf: &Hdf) -> Result<String>;
+        fn hdf_file_name(hdf: &Hdf) -> Result<String>;
         fn hdf_child_names(hdf: &Hdf) -> Result<Vec<String>>;
         fn hdf_has_child_nodes(hdf: &Hdf) -> bool;
         fn hdf_is_list(hdf: &Hdf) -> bool;

@@ -514,6 +514,13 @@ std::string Hdf::getName(bool markVisited /* = true */) const {
   return name ? name : "";
 }
 
+std::string Hdf::getFileName(bool markVisited /* = true */) const {
+  HDF *hdf = getRaw();
+  char *file_name = hdf_obj_file_name(hdf);
+  if (markVisited) hdf_set_visited(hdf, 1);
+  return file_name ? file_name : "";
+}
+
 bool Hdf::isWildcardName() const {
   HDF *hdf = getRaw();
   return hdf_is_wildcard(hdf) != 0;

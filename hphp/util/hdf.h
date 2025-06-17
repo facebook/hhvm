@@ -194,6 +194,7 @@ struct Hdf {
    */
   std::string getFullPath() const;
   std::string getName(bool markVisited = true) const;
+  std::string getFileName(bool markVisited = true) const;
   bool isWildcardName() const;
 
   /**
@@ -350,7 +351,7 @@ private:
   mutable char *m_dump; // entire tree dump in HDF format
 
   /**
-   * There are only two different "modes" of an Hdf object: hdf_ being null or
+   * There are only two different "modes" of an Hdf object: m_hdf being null or
    * non-null. First case is when we proactively constructed an Hdf object by
    * either opening a file or starting from scratch by calling Hdf(). Second
    * case is when we attach a raw HDF*, almost exclusively used by iterations.

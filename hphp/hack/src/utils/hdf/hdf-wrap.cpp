@@ -26,6 +26,10 @@ rust::String hdf_name(const Hdf& hdf) {
   return rust::String{hdf.getName()};
 }
 
+rust::String hdf_file_name(const Hdf& hdf) {
+  return rust::String{hdf.getFileName()};
+}
+
 rust::Vec<rust::String> hdf_child_names(const Hdf& hdf) {
   auto keys = rust::Vec<rust::String>{};
   for (auto child = hdf.firstChild(false); child.exists(); child = child.next(false)) {

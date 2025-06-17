@@ -259,6 +259,11 @@ impl Value {
         Ok(ffi::hdf_name(&self.inner)?)
     }
 
+    /// Return this node's file name.
+    pub fn file_name(&self) -> Result<String> {
+        Ok(ffi::hdf_file_name(&self.inner)?)
+    }
+
     /// Return this node's name as read by the config, this detects
     /// when a wildcard name exists and returns '*' instead of the internal
     /// numeric index.

@@ -137,6 +137,36 @@ static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
   return STATUS_OK;
 }
 
+/*
+ * Wrapper around _alloc_hdf that also sets file_name.
+ * We want to keep track of this and hook it up to hhvm_configtool
+ * to improve config.hdf debuggability across imports.
+ */
+static NEOERR *_alloc_tagged_hdf (HDF **hdf, const char *name, size_t nlen,
+  const char *value, int dupl, int wf, HDF *top, int wc, const char *file_name, size_t file_name_len)
+{
+  NEOERR *err;
+  err = _alloc_hdf (hdf, name, nlen, value, dupl, wf, top, wc);
+  if (err != STATUS_OK)
+    return nerr_pass (err);
+
+  if (file_name != NULL)
+  {
+    (*hdf)->file_name_len = file_name_len;
+    (*hdf)->file_name = (char *) malloc (file_name_len + 1);
+    if ((*hdf)->file_name == NULL)
+    {
+      free((*hdf));
+      (*hdf) = NULL;
+      return nerr_raise (NERR_NOMEM,
+         "Unable to allocate memory for hdf element: %s in file: %s", name, file_name);
+    }
+    strncpy((*hdf)->file_name, file_name, file_name_len);
+    (*hdf)->file_name[file_name_len] = '\0';
+  }
+  return STATUS_OK;
+}
+
 static void _dealloc_hdf (HDF **hdf)
 {
   HDF *myhdf = *hdf;
@@ -160,6 +190,11 @@ static void _dealloc_hdf (HDF **hdf)
   {
     free (myhdf->name);
     myhdf->name = NULL;
+  }
+  if (myhdf->file_name != NULL)
+  {
+    free (myhdf->file_name);
+    myhdf->file_name = NULL;
   }
   if (myhdf->value != NULL)
   {
@@ -321,6 +356,12 @@ char* hdf_obj_name (HDF *hdf)
   return hdf->name;
 }
 
+char* hdf_obj_file_name (HDF *hdf)
+{
+  if (hdf == NULL) return NULL;
+  return hdf->file_name;
+}
+
 char* hdf_obj_value (HDF *hdf, NEOERR** err)
 {
   if (hdf == NULL) return NULL;
@@ -346,7 +387,7 @@ NEOERR* _hdf_hash_level(HDF *hdf)
 }
 
 static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
-                           int dupl, int wf, HDF **set_node, int wc)
+                           int dupl, int wf, HDF **set_node, int wc, const char *file_name)
 {
   NEOERR *err;
   HDF *hn, *hp, *hs;
@@ -468,8 +509,19 @@ skip_search:
       }
       else
       {
-        err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top, wc);
+        /*
+         * For leaf nodes that have a non-NULL filename, store this filename in the HDF object.
+         */
+        if (file_name != NULL)
+        {
+          err = _alloc_tagged_hdf (&hp, n, x, value, dupl, wf, hdf->top, wc, file_name, strlen(file_name));
+        }
+        else
+        {
+          err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top, wc);
+        }
       }
+
       if (err != STATUS_OK)
         return nerr_pass (err);
       if (hn->child == NULL)
@@ -542,7 +594,7 @@ skip_search:
 
 NEOERR* hdf_set_value (HDF *hdf, const char *name, const char *value)
 {
-  return nerr_pass(_set_value (hdf, name, value, 1, 1, NULL, 0));
+  return nerr_pass(_set_value (hdf, name, value, 1, 1, NULL, 0, NULL));
 }
 
 NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
@@ -552,7 +604,7 @@ NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
   if (*ret == NULL)
   {
     if (err != STATUS_OK) return err;
-    return nerr_pass(_set_value (hdf, name, NULL, 0, 1, ret, 0));
+    return nerr_pass(_set_value (hdf, name, NULL, 0, 1, ret, 0, NULL));
   }
   return STATUS_OK;
 }
@@ -631,6 +683,8 @@ NEOERR* hdf_remove_tree (HDF *hdf, const char *name)
   return STATUS_OK;
 }
 
+/* Recursively copy all of src's descendants to dest.
+ */
 static NEOERR * _copy_nodes (HDF *dest, HDF *src)
 {
   NEOERR *err = STATUS_OK;
@@ -640,7 +694,7 @@ static NEOERR * _copy_nodes (HDF *dest, HDF *src)
   while (st != NULL)
   {
     if (err) return nerr_pass(err);
-    err = _set_value(dest, st->name, st->value, 1, 1, &dt, st->is_wildcard);
+    err = _set_value(dest, st->name, st->value, 1, 1, &dt, st->is_wildcard, st->file_name);
     if (err) {
       return nerr_pass(err);
     }
@@ -664,7 +718,7 @@ NEOERR* hdf_copy (HDF *dest, const char *name, HDF *src)
   {
     if (err) return err;
     if (err) return nerr_pass(err);
-    err = _set_value (dest, name, src->value, 1, 1, &node, src->is_wildcard);
+    err = _set_value (dest, name, src->value, 1, 1, &node, src->is_wildcard, src->file_name);
     if (err) {
       return nerr_pass(err);
     }
@@ -1081,7 +1135,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
         name = neos_strip(name);
         s++;
         value = neos_strip(s);
-        err = _set_value (hdf, name, value, 1, 1, NULL, is_wildcard);
+        err = _set_value (hdf, name, value, 1, 1, NULL, is_wildcard, path);
         if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
@@ -1106,11 +1160,11 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
         lower = hdf_get_obj (hdf, name, &err);
         if (lower == NULL)
         {
-          err = _set_value (hdf, name, NULL, 1, 1, &lower, is_wildcard);
+          err = _set_value (hdf, name, NULL, 1, 1, &lower, is_wildcard, NULL);
         }
         else
         {
-          err = _set_value (lower, NULL, lower->value, 1, 1, NULL, is_wildcard);
+          err = _set_value (lower, NULL, lower->value, 1, 1, NULL, is_wildcard, NULL);
         }
         if (err != STATUS_OK)
         {
@@ -1173,7 +1227,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
             m = (char *) new_ptr;
           }
         }
-        err = _set_value (hdf, name, m, 0, 1, NULL, is_wildcard);
+        err = _set_value (hdf, name, m, 0, 1, NULL, is_wildcard, path);
         if (err != STATUS_OK)
         {
           free (m);

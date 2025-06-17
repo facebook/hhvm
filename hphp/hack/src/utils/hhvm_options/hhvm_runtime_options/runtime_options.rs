@@ -24,6 +24,8 @@ pub struct TracedRule {
     traced_property: String,
     // The body of the rule that matched
     rule_body: hdf::Value,
+    // The file name where the property was set
+    file_name: String,
     // TODO: We also want to store what property/rule matched what input potentially?
 }
 
@@ -31,9 +33,11 @@ impl fmt::Display for TracedRule {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "\n{}: {},\n{}:\n{}",
+            "\n{}: {},\n{}: {},\n{}:\n{}",
             "Rule".magenta(),
             self.rule_name.yellow().bold(),
+            "File".magenta(),
+            self.file_name.yellow().bold(),
             "Body".purple(),
             if self.rule_name == "Root" {
                 "Root {\n ... \n}".to_string()
@@ -115,6 +119,7 @@ pub fn apply_tier_overrides_with_params(
                 rule_name: "Root".to_string(),
                 traced_property: debug_prop_name.clone(),
                 rule_body: config.clone(),
+                file_name: _config_body.file_name()?,
             });
         }
     }
@@ -164,11 +169,12 @@ pub fn apply_tier_overrides_with_params(
                             config.copy(overwrite)?;
 
                             if let Some(ref debug_prop_name) = trace_property {
-                                if overwrite.get(debug_prop_name)?.is_some() {
+                                if let Some(_config_body) = overwrite.get(debug_prop_name)? {
                                     traced_rules.push(TracedRule {
                                         rule_name: tier.name()?,
                                         traced_property: debug_prop_name.clone(),
                                         rule_body: overwrite.clone(),
+                                        file_name: _config_body.file_name()?,
                                     });
                                     log::debug!(
                                         "Applied overrides from rule {:?}\n{:?}",

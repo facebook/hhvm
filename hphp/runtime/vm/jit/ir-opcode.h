@@ -82,15 +82,23 @@ struct SSATmp;
  *
  *   Contains a series of tests on the source parameters in order.
  *
- *     NA                         instruction takes no sources
- *     S(t1 OR ... OR tn)         source's type must one of t1, ..., tn
- *     S(AK(<kind>))              source must be an array with specified kind
- *     C(type)                    source must be a constant, and subtype of type
- *     CStr                       same as C(StaticStr)
- *     SVar(t1 OR ... OR tn)      variadic source list, each one's type one of t1, ..., tn
- *     SCrossTrace                cross-trace arguments specific to the SrcKey target
+ *     NA                                     instruction takes no sources
+ *     S(t1 OR ... OR tn, f1 | ... | fk)      source's type must one of t1, ..., tn
+ *     S(AK(<kind>), f1 | ... | fk)           source must be an array with specified kind
+ *     C(T, f1 | ... | fk)                    source must be a constant 
+ *                                            and subtype of T
+ *     CStr(f1 | ... | fk)                    same as C(StaticStr)
+ *     SVar(t1 OR ... OR tn, f1 | ... | fk)   variadic source list, 
+ *                                            each one's type one of t1, ..., tn
+ *     SCrossTrace                            cross-trace arguments specific
+ *                                            to the SrcKey target
  *
- * flags:
+ *     f1, ..., fk  are source-specific flags:
+ *     CR         consumes reference: the instruction will decref the source
+ *     MMR        may move reference: the instruction will either decref or store the source somewhere
+ *     MR         moves reference:    the instuction will store the source somewhere 
+ *
+ * Opcode flags:
  *
  *   See doc/ir.specification for the meaning of these flags.
  *
@@ -158,6 +166,27 @@ enum OpcodeFlag : uint64_t {
   LayoutAgnostic   = 1ULL << 9,
   LayoutPreserving = 1ULL << 10,
 };
+
+enum class IRSrcFlag : uint8_t {
+  None            = 0,
+  Consume         = 1U << 0,
+  MayMove         = 1U << 1,
+  Move            = 1U << 2,
+};
+
+inline constexpr IRSrcFlag operator|(const IRSrcFlag a, const IRSrcFlag b) {
+  return IRSrcFlag(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+
+inline constexpr IRSrcFlag operator&(const IRSrcFlag a, const IRSrcFlag b) {
+  return IRSrcFlag(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+}
+
+inline constexpr IRSrcFlag operator~(const IRSrcFlag a) {
+  return IRSrcFlag(~static_cast<uint8_t>(a));
+}
+
+
 
 bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);

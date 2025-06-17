@@ -125,128 +125,23 @@ void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum MoveKind {
-  Consume,
-  MustMove,
-  MayMove,
-};
-
-template<MoveKind move>
-bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
-  if (!inst->consumesReferences()) {
-    return false;
-  }
-
-  switch (inst->op()) {
-    case ConcatStrStr:
-    case ConcatStrInt:
-    case ConcatStr3:
-    case ConcatStr4:
-      // Call a helper that decrefs the first argument
-      return move == Consume && srcNo == 0;
-
-    case ConstructClosure:
-      return srcNo == 0;
-
-    case StClosureArg:
-    case StContArValue:
-    case StContArKey:
-      return srcNo == 1;
-
-    case ContEnter:
-      return move != MustMove && srcNo == 4;
-
-    case Call:
-      return move != MustMove && srcNo == 3;
-
-    case CallFuncEntry:
-      return move != MustMove && srcNo == 3;
-
-    case EndCatch:
-      return srcNo == 2;
-
-    case RaiseTooManyArg:
-      // RaiseTooManyArg decrefs the unpack arguments.
-      return move == Consume && srcNo == 0;
-
-    case AFWHBlockOn:
-      // Consume the value being stored, not the thing it's being stored into
-      return srcNo == 1;
-
-    case DictSet:
-    case BespokeSet:
-    case BespokeSetPos:
-      // Consumes the reference to its input array, and moves input value
-      return (move == Consume && srcNo == 0) || srcNo == 2;
-
-    case BespokeUnset:
-    case StructDictUnset:
-      // Only consumes the reference to its input array
-      return move == Consume && srcNo == 0;
-
-    case BespokeAppend:
-      // Consumes the reference to its input array, and moves input value (both
-      // parameters).
-      return move == Consume;
-
-    case MapSet:
-    case VectorSet:
-      // Moves input value
-      return move == Consume && srcNo == 2;
-
-    case AddNewElemKeyset:
-    case AddNewElemVec:
-      // Only consumes the reference to its input array
-      return move == Consume && srcNo == 0;
-
-    case CreateAFWH:
-      return srcNo == 4;
-
-    case CreateAGWH:
-      return srcNo == 3;
-
-    case CreateSSWH:
-    case CreateFSWH:
-      return srcNo == 0;
-
-    case InitDictElem:
-    case InitVecElem:
-    case InitStructElem:
-      return srcNo == 1;
-
-    case InitVecElemLoop:
-      return srcNo > 0;
-
-    case StPtrIterVal:
-      return (move == Consume && srcNo == 0) || srcNo == 2;
-
-    case NewPair:
-    case NewColFromArray:
-      return true;
-
-    case VerifyParamCoerce:
-    case VerifyRetCoerce:
-      return move != MustMove && srcNo == 0;
-
-    case VerifyPropCoerce:
-    case VerifyPropCoerceAll:
-      return move != MustMove && srcNo == 2;
-
-    default:
-      return move != MustMove;
-  }
+bool hasSrcFlag(const IRInstruction* inst, int srcNo, IRSrcFlag flag) {
+  const auto& srcFlags = g_opInfo[(uint16_t)inst->op()].srcFlags;
+  // Variadic sources are specified at the end in ir.specification
+  srcNo = std::min(srcNo, (int)srcFlags.size() - 1);
+  return (srcFlags[srcNo] & flag) == flag;
 }
 
 bool IRInstruction::consumesReference(int srcNo) const {
-  return consumesRefImpl<Consume>(this, srcNo);
-}
-
-bool IRInstruction::movesReference(int srcNo) const {
-  return consumesRefImpl<MustMove>(this, srcNo);
+  return hasSrcFlag(this, srcNo, IRSrcFlag::Consume);
 }
 
 bool IRInstruction::mayMoveReference(int srcNo) const {
-  return consumesRefImpl<MayMove>(this, srcNo);
+  return hasSrcFlag(this, srcNo, IRSrcFlag::MayMove);
+}
+
+bool IRInstruction::movesReference(int srcNo) const {
+  return hasSrcFlag(this, srcNo, IRSrcFlag::Move);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

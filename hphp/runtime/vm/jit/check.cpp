@@ -470,43 +470,43 @@ using TypeNames::TCA;
 
 #define OR ,
 
-#define NA                return checkNoArgs();
-#define S(T)              {                                                     \
-                            static auto const types = checkLayoutFlags({T});    \
-                            static auto const names = getTypeNames(types);      \
-                            checkMultiple(src(), types, names);                 \
-                            ++curSrc;                                           \
-                          }
-#define SNullptr(T)       {                                                     \
-                            static auto const types                             \
-                              = addNullptr(checkLayoutFlags({T}));              \
-                            static auto const names = getTypeNames(types);      \
-                            checkMultiple(src(), types, names);                 \
-                            ++curSrc;                                           \
-                          }
-#define AK(kind)          Type::Array(ArrayData::k##kind##Kind)
-#define C(T)              checkConstant(src(), T, "constant " #T); ++curSrc;
-#define CStr              C(StaticStr)
-#define SVar(T)           {                                                     \
-                            static auto const types = checkLayoutFlags({T});    \
-                            static auto const names = getTypeNames(types);      \
-                            for (; curSrc < inst->numSrcs(); ++curSrc) {        \
-                              checkMultiple(src(), types, names);               \
-                            }                                                   \
-                          }
-#define SCrossTrace       {                                                     \
-                            auto const extra = inst->extra<ReqBindJmpData>();   \
-                            if (extra->target.funcEntry() && !extra->popFrame) {\
-                              S(Int)  /* ActRec flags */                        \
-                              S(Int)  /* func id of the callee */               \
-                              S(Cls|Obj|Nullptr)  /* prologue context */        \
-                            }                                                   \
-                          }
-#define SBespokeArr       checkBespokeArr();
-#define SMonotypeVec      checkMonotypeArr(TVec);
-#define SMonotypeDict     checkMonotypeArr(TDict);
-#define STypeStructure    checkTypeStructure();
-#define SStructDict       checkStructDict();
+#define NA                    return checkNoArgs();
+#define S(T, ...)             {                                                     \
+                                static auto const types = checkLayoutFlags({T});    \
+                                static auto const names = getTypeNames(types);      \
+                                checkMultiple(src(), types, names);                 \
+                                ++curSrc;                                           \
+                              }
+#define SNullptr(T, ...)      {                                                     \
+                                static auto const types                             \
+                                  = addNullptr(checkLayoutFlags({T}));              \
+                                static auto const names = getTypeNames(types);      \
+                                checkMultiple(src(), types, names);                 \
+                                ++curSrc;                                           \
+                              }
+#define AK(kind)              Type::Array(ArrayData::k##kind##Kind)
+#define C(T, ...)             checkConstant(src(), T, "constant " #T); ++curSrc;
+#define CStr(...)             C(StaticStr)
+#define SVar(T, ...)          {                                                     \
+                                static auto const types = checkLayoutFlags({T});    \
+                                static auto const names = getTypeNames(types);      \
+                                for (; curSrc < inst->numSrcs(); ++curSrc) {        \
+                                  checkMultiple(src(), types, names);               \
+                                }                                                   \
+                              }
+#define SCrossTrace           {                                                     \
+                                auto const extra = inst->extra<ReqBindJmpData>();   \
+                                if (extra->target.funcEntry() && !extra->popFrame) {\
+                                  S(Int)  /* ActRec flags */                        \
+                                  S(Int)  /* func id of the callee */               \
+                                  S(Cls|Obj|Nullptr)  /* prologue context */        \
+                                }                                                   \
+                              }
+#define SBespokeArr(...)      checkBespokeArr();
+#define SMonotypeVec(...)     checkMonotypeArr(TVec);
+#define SMonotypeDict(...)    checkMonotypeArr(TDict);
+#define STypeStructure(...)   checkTypeStructure();
+#define SStructDict(...)      checkStructDict();
 #define ND
 #define DMulti
 #define DSetElem

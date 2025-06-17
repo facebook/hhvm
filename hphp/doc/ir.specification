@@ -349,23 +349,23 @@ Instruction set
 
 To vec conversions:
 
-| ConvArrLikeToVec,             D(Vec), S(ArrLike),                  PRc|CRc|LP
+| ConvArrLikeToVec,             D(Vec), S(ArrLike,MMR),                  PRc|CRc|LP
 
-| ConvObjToVec,                 D(Vec), S(Obj),                      PRc|CRc
+| ConvObjToVec,                 D(Vec), S(Obj,MMR),                      PRc|CRc
 
 
 To dict conversions:
 
-| ConvArrLikeToDict,            D(Dict), S(ArrLike),                 PRc|CRc|LP
+| ConvArrLikeToDict,            D(Dict), S(ArrLike,MMR),                 PRc|CRc|LP
 
-| ConvObjToDict,                D(Dict), S(Obj),                     PRc|CRc
+| ConvObjToDict,                D(Dict), S(Obj,MMR),                     PRc|CRc
 
 
 To keyset conversions:
 
-| ConvArrLikeToKeyset,          D(Keyset), S(ArrLike),               PRc|CRc|LP
+| ConvArrLikeToKeyset,          D(Keyset), S(ArrLike,MMR),               PRc|CRc|LP
 
-| ConvObjToKeyset,              D(Keyset), S(Obj),                   PRc|CRc
+| ConvObjToKeyset,              D(Keyset), S(Obj,MMR),                   PRc|CRc
 
 
 To bool conversions:
@@ -637,7 +637,7 @@ To string conversions:
   canCheckVtable signals that this opcode may be simplified to
   InstanceOfIfaceVtable, which we allow when S0 was fetched from an object.
 
-| InstanceOfIface<canCheckVtable>, D(Bool), S(Cls) CStr, NF
+| InstanceOfIface<canCheckVtable>, D(Bool), S(Cls) CStr(), NF
 
   Fast path for interface checks. Sets D based on whether S0 implements S1, but
   S1 must be a known interface.
@@ -657,9 +657,9 @@ To string conversions:
 
   If strictLikely is true, optimize for the case where S0 is not equal to S1.
 
-| InstanceOfBitmask,           D(Bool), S(Cls) CStr,                      NF
+| InstanceOfBitmask,           D(Bool), S(Cls) CStr(),                      NF
 
-| NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                      NF
+| NInstanceOfBitmask,          D(Bool), S(Cls) CStr(),                      NF
 
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
   of the class named by S1, where S1 must have a bit allocated for it in the
@@ -1026,7 +1026,7 @@ To string conversions:
   class is undefined. If the fallback is set to be silent, the caller must
   handle the nullptr return.
 
-| LdClsCached<fallback>, DLdCls, CStr, NF
+| LdClsCached<fallback>, DLdCls, CStr(), NF
 
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
@@ -1036,7 +1036,7 @@ To string conversions:
   Looks up the class named S0 via the RDS. Returns nullptr if the class is not
   defined. Does not invoke autoload.
 
-| LookupClsCached, D(Cls|Nullptr), CStr, NF
+| LookupClsCached, D(Cls|Nullptr), CStr(), NF
 
   Looks up the class named S0 via the RDS. Returns nullptr if the class is not
   defined. Does not invoke autoload.
@@ -1045,11 +1045,11 @@ To string conversions:
 
   Loads the pointer to the property initializer array for class S0.
 
-| LdCns, D(InitCell), CStr, B
+| LdCns, D(InitCell), CStr(), B
 
   Load the constant named S0, branching to B if isn't present.
 
-| LookupCnsE<T,constName>,  D(InitCell), CStr, PRc
+| LookupCnsE<T,constName>,  D(InitCell), CStr(), PRc
 
   Load a constant via the RDS. Raises a fatal error if it cannot define the
   constant.  This should only be executed if LdCns on the same constant has
@@ -1474,7 +1474,7 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr), CRc|PNRc
+| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr,MR), CRc|PNRc
 
   Call the custom instance constructor of a Closure.
 
@@ -1486,7 +1486,7 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewLoggingArray, DLoggingArrLike, S(Vec OR Dict OR Keyset), PRc|CRc|LA
+| NewLoggingArray, DLoggingArrLike, S(Vec OR Dict OR Keyset,MMR), PRc|CRc|LA
 
   Maybe create a LoggingArray wrapping the vanilla array-like S0. The decision
   may be based on flags or sampling. If we don't create an array, we return S0
@@ -1517,7 +1517,7 @@ To string conversions:
 
   Allocate a new dict with the expected capacity S0.
 
-| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr), PNRc|CRc
+| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr,MMR), PNRc|CRc
 
   Allocate a new keyset containing N elements off the stack given by S0, at
   `offset'. This instruction moves the elements off the stack without
@@ -1529,13 +1529,13 @@ To string conversions:
   The array will be initialized with values using either InitVecElem or
   InitVecElemLoop.
 
-| InitVecElem<index>, ND, S(Vec) S(Cell), CRc
+| InitVecElem<index>, ND, S(Vec) S(Cell,MR), CRc
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
   array allocated with AllocVec.
 
-| InitVecElemLoop<offset,size>, ND, S(Vec) S(StkPtr), CRc
+| InitVecElemLoop<offset,size>, ND, S(Vec) S(StkPtr,MR), CRc
 
   Move `size' elements from the stack given by S1, at `offset', into the array
   S0.  Assumes that the first element on the stack is the last element in the
@@ -1548,13 +1548,13 @@ To string conversions:
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitDictElem for that.
 
-| InitDictElem<index,key>, ND, S(Dict) S(Cell), CRc
+| InitDictElem<index,key>, ND, S(Dict) S(Cell,MR), CRc
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that
   S1 has already been inc-reffed. Used with the result of AllocStructDict.
 
-| NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PNRc|CRc
+| NewStructDict<offset,keys...>,   D(Dict), S(StkPtr,MMR), PNRc|CRc
 
   Allocate a new key/value dict, given N string literal immediates for keys
   and N stack elements at `offset` on stack S0 for values.  This op assumes it
@@ -1564,19 +1564,19 @@ To string conversions:
 
   Allocate a new, empty dict with the bespoke StructLayout `layout`.
 
-| InitStructPositions<slots>, ND, SStructDict, NF
+| InitStructPositions<slots>, ND, SStructDict(), NF
 
   Initialize the size and iterator positions of the bespoke StructDict S0 for
   the fields specified by `slots`. This instruction does not set the elements
   of the dict; use InitStructElem for that.
 
-| InitStructElem<slot,key>, ND, SStructDict S(InitCell), CRc
+| InitStructElem<slot,key>, ND, SStructDict() S(InitCell,MR), CRc
 
   Initialize the element at slot `slot` corresponding to `key` in StructDict S0
   with S1. This instruction assumes that S1 has already been inc-reffed.
   Used with the result of AllocUninitBespokeStructDict.
 
-| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PNRc|CRc
+| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr,MMR), PNRc|CRc
 
   Allocate a new dict with the bespoke StructLayout `layout`.  Then, init the
   N fields with the given `slots` with N stack elements starting at `offset`.
@@ -1586,12 +1586,12 @@ To string conversions:
 
   Create an empty new collection of `type'. `type' cannot be Pair.
 
-| NewPair<offset>, DCol, S(Cell) S(Cell), PRc|CRc
+| NewPair<offset>, DCol, S(Cell,MR) S(Cell,MR), PRc|CRc
 
   Allocate a new Pair and fill it with the given cells. Ownership of the cells
   is transferred from $1 and $2 to the pair without manipulating the refcounts.
 
-| NewColFromArray<type>, DCol, S(Vec OR Dict), PRc|CRc
+| NewColFromArray<type>, DCol, S(Vec OR Dict,MR), PRc|CRc
 
   Create a collection of `type` from a Vec or Dict kind. `type` cannot be
   Pair. S0 must be vec kind when `type` is Vector or ImmVector, and must be
@@ -1686,7 +1686,7 @@ ReqBindJmp and CallFuncEntry.
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr) S(Int),
+|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr,MMR) S(Int),
 |   CRc|PRc
 
   Transfer control to the prologue of a callee S2, based on the pre-live
@@ -1696,7 +1696,7 @@ ReqBindJmp and CallFuncEntry.
 
 | CallFuncEntry<target,spOffset,arFlags>,
 |   DCall,
-|   S(FramePtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
+|   S(FramePtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr,MMR),
 |   CRc|PRc
 
   Transfer control to the func entry of a callee S2, based on the pre-live
@@ -1894,7 +1894,7 @@ ReqBindJmp and CallFuncEntry.
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
 
-| RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec), CRc|LA
+| RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec,MMR), CRc|LA
 
   Takes a varray of reified generics from the stack and adds them to the reified
   generics table and returns the input varray of reified generics, possibly
@@ -1965,7 +1965,7 @@ ReqBindJmp and CallFuncEntry.
 
   If S0 is a refcounted type, increment its refcount.
 
-| DecRef<locId>, ND, S(Cell), CRc
+| DecRef<locId>, ND, S(Cell,MMR), CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -1973,7 +1973,7 @@ ReqBindJmp and CallFuncEntry.
   The locId is just a hint to the runtime indicating which local variable is
   being DecRef'd, if any.
 
-| DecRefNZ<locId>, ND, S(Cell), CRc
+| DecRefNZ<locId>, ND, S(Cell,MMR), CRc
 
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
@@ -1990,7 +1990,7 @@ ReqBindJmp and CallFuncEntry.
   Release memory associated with S0 without performing any other
   operations.
 
-| DecReleaseCheck<locId>, ND, S(Cell), B|CRc
+| DecReleaseCheck<locId>, ND, S(Cell,MMR), B|CRc
 
   If the refcount of S0 is 1, fall through.
   Otherwise, decrease the refcount of S0 and branch to B.
@@ -2137,7 +2137,7 @@ ReqBindJmp and CallFuncEntry.
 
 | VerifyParamCoerce<func,param,tc>,
 |   DVerifyCoerce,
-|   S(Cell) S(Cls|Nullptr),
+|   S(Cell,MMR) S(Cls|Nullptr),
 |   PRc|CRc
 
   Verify that S0 is compatible with the parameter type hint. The verification
@@ -2164,7 +2164,7 @@ ReqBindJmp and CallFuncEntry.
 
   Verify a return type hint. The verification is guaranteed to not coerce.
 
-| VerifyRetCoerce<func,param,tc>, DVerifyCoerce, S(Cell) S(Cls|Nullptr), PRc|CRc
+| VerifyRetCoerce<func,param,tc>, DVerifyCoerce, S(Cell,MMR) S(Cls|Nullptr), PRc|CRc
 
   Verify a return type hint. The verification may coerce.
 
@@ -2201,14 +2201,14 @@ ReqBindJmp and CallFuncEntry.
   S1 on S0 including upper-bounds. S3 is true if this is a static property,
   false otherwise.
 
-| VerifyPropCoerce, DVerifyCoerce, S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+| VerifyPropCoerce, DVerifyCoerce, S(Cls) S(Int) S(Cell,MMR) C(Bool), PRc|CRc
 
   Verify that S2 is compatible with the type hint for the property at slot S1
   on S0. S3 is true if this is a static property, false otherwise. Once support
   for coercing class_meth types is removed this ir instruction can also be
   removed (T61738946).
 
-| VerifyPropCoerceAll, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+| VerifyPropCoerceAll, D(InitCell), S(Cls) S(Int) S(Cell,MMR) C(Bool), PRc|CRc
 
   Verify that S2 is compatible with all type hints for the property at slot S1
   on S0, including upper-bounds. S3 is true if this is a static property,
@@ -2234,12 +2234,12 @@ ReqBindJmp and CallFuncEntry.
 
   Throws an UndefinedVariableException on an uninitialized local variable.
 
-| ThrowUndefPropException, ND, S(Obj) CStr, T
+| ThrowUndefPropException, ND, S(Obj) CStr(), T
 
   Throws an UndefinedPropertyException on an undefined property named S1 on the
   class of S0.
 
-| RaiseTooManyArg<func>, ND, S(Vec), CRc|LA
+| RaiseTooManyArg<func>, ND, S(Vec,CR), CRc|LA
 
   Raise a too many argument warning because extra arguments stored in S0 were
   passed to function func.
@@ -2392,11 +2392,11 @@ ReqBindJmp and CallFuncEntry.
   is not defined. The initialized value is returned. This instruction may raise
   an undefined constant error if autoload cannot define the constant.
 
-| PrintStr,  ND, S(Str),  CRc
+| PrintStr,  ND, S(Str,MMR),  CRc
 
-| PrintInt,  ND, S(Int),  CRc
+| PrintInt,  ND, S(Int,MMR),  CRc
 
-| PrintBool, ND, S(Bool), CRc
+| PrintBool, ND, S(Bool,MMR), CRc
 
   Print for various types.
 
@@ -2404,25 +2404,25 @@ ReqBindJmp and CallFuncEntry.
 
   Concatenate S0 and S1 after converting S0 to String.
 
-| ConcatStrInt, D(Str), S(Str) S(Int), CRc|PRc
+| ConcatStrInt, D(Str), S(Str,CR) S(Int), CRc|PRc
 
   Concatenate S0 and S1 after converting S1 to String.
 
-| ConcatStrStr, D(Str), S(Str) S(Str), CRc|PRc
+| ConcatStrStr, D(Str), S(Str,CR) S(Str), CRc|PRc
 
   Concatenate S0 and S1.
 
-| ConcatStr3, D(Str), S(Str) S(Str) S(Str), CRc|PRc
+| ConcatStr3, D(Str), S(Str,CR) S(Str) S(Str), CRc|PRc
 
   Concatenate S0, S1, and S2.
 
-| ConcatStr4, D(Str), S(Str) S(Str) S(Str) S(Str), CRc|PRc
+| ConcatStr4, D(Str), S(Str,CR) S(Str) S(Str) S(Str), CRc|PRc
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElemKeyset, D(Keyset),    S(Keyset) S(InitCell), CRc|PRc
+| AddNewElemKeyset, D(Keyset),    S(Keyset,CR) S(InitCell), CRc|PRc
 
-| AddNewElemVec,    DModified(0), S(Vec) S(InitCell),    CRc|PRc
+| AddNewElemVec,    DModified(0), S(Vec,CR) S(InitCell),    CRc|PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
@@ -2545,7 +2545,7 @@ ReqBindJmp and CallFuncEntry.
   Load the context from the closure object S0 into D, assuming `func' is
   S0's closure Func.
 
-| StClosureArg<index>, ND, S(Obj) S(Cell), CRc
+| StClosureArg<index>, ND, S(Obj) S(Cell,MR), CRc
 
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
@@ -2563,7 +2563,7 @@ ReqBindJmp and CallFuncEntry.
   resume address to S2 and resume offset to S3.
 
 | CreateAFWH, DAllocObj,
-|             S(FramePtr) C(Int) S(TCA OR Nullptr) C(Int) S(Obj),
+|             S(FramePtr) C(Int) S(TCA OR Nullptr) C(Int) S(Obj,MR),
 |             CRc|PRc
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
@@ -2576,7 +2576,7 @@ ReqBindJmp and CallFuncEntry.
   Same as `CreateAFWH`, but force low priority on the awaitable.
 
 | CreateAGWH, DAllocObj,
-|             S(FramePtr) S(TCA OR Nullptr) C(Int) S(Obj),
+|             S(FramePtr) S(TCA OR Nullptr) C(Int) S(Obj,MR),
 |             CRc|PRc
 
   Create an AsyncGeneratorWaitHandle object and link it to the AsyncGenerator
@@ -2590,11 +2590,11 @@ ReqBindJmp and CallFuncEntry.
   total number of non-completed waithandles. All locals must be subclasses of
   WaitHandle.
 
-| CreateSSWH, DAllocObj, S(Cell), CRc|PRc
+| CreateSSWH, DAllocObj, S(Cell,MR), CRc|PRc
 
   Call c_StaticWaitHandle::CreateSucceeded.
 
-| CreateFSWH, DAllocObj, S(Cell), CRc|PRc
+| CreateFSWH, DAllocObj, S(Cell,MR), CRc|PRc
 
   Call c_StaticWaitHandle::CreateFailed.
 
@@ -2625,7 +2625,7 @@ ReqBindJmp and CallFuncEntry.
 
 | ContEnter<spOffset,callBCOffset>,
 |   DGenIter,
-|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA) S(Cell),
+|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA) S(Cell,MMR),
 |   CRc
 
   Enters a generator body. S0 + `spOffset' (in cells) is a pointer to the
@@ -2678,7 +2678,7 @@ ReqBindJmp and CallFuncEntry.
 
   Loads 'value' from the Generator object ActRec of which is S0.
 
-| StContArValue, ND, S(FramePtr) S(InitCell), CRc
+| StContArValue, ND, S(FramePtr) S(InitCell,MR), CRc
 
   Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
@@ -2687,12 +2687,12 @@ ReqBindJmp and CallFuncEntry.
 
   Loads 'key' from the Generator object ActRec of which is S0.
 
-| StContArKey, ND, S(FramePtr) S(InitCell), CRc
+| StContArKey, ND, S(FramePtr) S(InitCell,MR), CRc
 
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| AFWHBlockOn, ND, S(FramePtr) S(Obj), CRc
+| AFWHBlockOn, ND, S(FramePtr) S(Obj,MR), CRc
 
   Establish dependency between parent AsyncFunctionWaitHandle object, whose
   ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
@@ -2887,7 +2887,7 @@ ReqBindJmp and CallFuncEntry.
   T is used to type the result. For LdPtrIterKey, it must be a valid type for
   the array's keys - i.e., a subtype of TInt|TStr.
 
-| StPtrIterVal, DofS(0), S(Dict) S(PtrToElem) S(InitCell), CRc|PRc
+| StPtrIterVal, DofS(0), S(Dict,CR) S(PtrToElem) S(InitCell,MR), CRc|PRc
 
   Store the val S2 to the element of the dict S0 pointed to by S1. S1 must be
   a valid elm. Expects S0 to have a refcount of 1. Consumes S0 and replaces it
@@ -3030,7 +3030,7 @@ fields of that struct for holding intermediate values.
   Like CheckMixedArrayOffset, this check is allowed to have false negatives -
   it may fail even if the array has keys of the given type.
 
-| CheckArrayCOW, DCOW, S(ArrLike), B|PNRc|CRc|LP
+| CheckArrayCOW, DCOW, S(ArrLike,MMR), B|PNRc|CRc|LP
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
 
@@ -3218,7 +3218,7 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| DictSet, DArrLikeSet, S(Dict) S(Int OR Str) S(InitCell), PRc|CRc
+| DictSet, DArrLikeSet, S(Dict,CR) S(Int OR Str) S(InitCell,MR), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
@@ -3242,22 +3242,22 @@ fields of that struct for holding intermediate values.
   If the key is missing in the array, we'll use S2 to determine what to do.
   If S2 is true, we'll throw; else, we'll return an immutable lval to null.
 
-| BespokeSet, DArrLikeSet, S(Vec OR Dict OR Keyset) S(Int OR Str) S(InitCell), LA|PRc|CRc
+| BespokeSet, DArrLikeSet, S(Vec OR Dict OR Keyset,CR) S(Int OR Str) S(InitCell,MR), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
 
-| BespokeSetPos, DArrLikeSetPos, S(Vec OR Dict) S(Int) S(InitCell), LA|PRc|CRc
+| BespokeSetPos, DArrLikeSetPos, S(Vec OR Dict,CR) S(Int) S(InitCell,MR), LA|PRc|CRc
 
   Set element in the array S0 at a valid position S1 to S2. The array might have
   an arbitrary layout.
 
-| BespokeUnset, DArrLikeUnset, S(Vec OR Dict OR Keyset) S(Int OR Str), LA|PRc|CRc
+| BespokeUnset, DArrLikeUnset, S(Vec OR Dict OR Keyset,CR) S(Int OR Str), LA|PRc|CRc
 
   Unset element with key S1 in the array S0, which may have an arbitrary layout.
 
-| BespokeAppend, DArrLikeAppend, S(Vec OR Dict OR Keyset) S(InitCell), LA|PRc|CRc
+| BespokeAppend, DArrLikeAppend, S(Vec OR Dict OR Keyset,CR) S(InitCell,CR), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has AppendMove semantics; it consumes a refcount on the input array
@@ -3286,40 +3286,40 @@ fields of that struct for holding intermediate values.
 
   Obtain the value at the valid pos S1 in the array S0.
 
-| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, PRc
+| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr() CStr(), PRc
 
   Escalate the bespoke array S0 to a vanilla array for the reason S1.
 
-| LdMonotypeDictTombstones, D(Int), SMonotypeDict, NF
+| LdMonotypeDictTombstones, D(Int), SMonotypeDict(), NF
 
   Returns the number of tombstones in the given MonotypeDict's value array.
   The MonotypeDict's IterEnd is equal to its size plus its tombstone count.
 
-| LdMonotypeDictKey, DBespokePosKey, SMonotypeDict S(Int), NF
+| LdMonotypeDictKey, DBespokePosKey, SMonotypeDict() S(Int), NF
 
-| LdMonotypeDictVal, DBespokePosVal, SMonotypeDict S(Int), NF
+| LdMonotypeDictVal, DBespokePosVal, SMonotypeDict() S(Int), NF
 
   Specializations of BespokeIterGetKey and BespokeIterGetVal for when the base
   is a monotype dict. The GetKey and GetVal ops require that S1 is a valid
   iterator position for S0.
 
-| LdMonotypeVecElem, DBespokeElem, SMonotypeVec S(Int), NF
+| LdMonotypeVecElem, DBespokeElem, SMonotypeVec() S(Int), NF
 
   Loads the element of the monotype vec in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (i.e. the
   index is within bounds).
 
-| StructDictUnset, DArrLikeUnset, SStructDict C(StaticStr), PRc|CRc
+| StructDictUnset, DArrLikeUnset, SStructDict(CR) C(StaticStr), PRc|CRc
 
   Unset element with key S1 in the struct-layout dict S0. This op has move
   semantics: it consumes a refcount on S0 and produces one on the output.
 
-| StructDictSlot, D(Int), SStructDict S(Str), B
+| StructDictSlot, D(Int), SStructDict() S(Str), B
 
   Calculate the slot corresponding to key S1 in struct dict S0, branching if
   that key is not present.
 
-| StructDictElemAddr, D(LvalToElem), SStructDict S(Str) S(Int) SStructDict, NF
+| StructDictElemAddr, D(LvalToElem), SStructDict() S(Str) S(Int) SStructDict(), NF
 
   Calculate the pointer to the value in struct dict S0 corresponding to slot
   S2. S1 is the corresponding key used to calculate the slot, and S3 is the
@@ -3327,44 +3327,44 @@ fields of that struct for holding intermediate values.
   this will correspond to the pre-COW version). S1 and S3 are only used for
   type calculations and not used at runtime.
 
-| StructDictAddNextSlot, ND, SStructDict S(Int), NF
+| StructDictAddNextSlot, ND, SStructDict() S(Int), NF
 
   Mark the slot S1 as being used in struct dict S0. The slot must not have been
   previously in use (its corresponding value must have been Uninit).
 
-| StructDictTypeBoundCheck, DStructTypeBound, S(InitCell) SStructDict S(Int), B|P
+| StructDictTypeBoundCheck, DStructTypeBound, S(InitCell) SStructDict() S(Int), B|P
 
   Check if S0 passes the type bound associated with slot S2 in struct dict
   S1. If not, branch. The returned value is a passthrough of S0, possibly
   refined with what we know statically of the type-bound. This is like a
   CheckType, but the type isn't known statically.
 
-| StructDictSlotInPos, D(Int), SStructDict S(Int), NF
+| StructDictSlotInPos, D(Int), SStructDict() S(Int), NF
 
   Returns the slot at iterator position S1 in the struct dict S0.
 
-| LdStructDictKey, DBespokePosKey, SStructDict S(Int), NF
+| LdStructDictKey, DBespokePosKey, SStructDict() S(Int), NF
 
-| LdStructDictVal, DBespokePosVal,  SStructDict S(Int), NF
+| LdStructDictVal, DBespokePosVal,  SStructDict() S(Int), NF
 
   Returns the key or value at slot S1 in the struct dict S0. This slot must be
   known to be present. (The result of StructDictSlotInPos is always present.)
 
-| LdTypeStructureVal, DBespokeElem, STypeStructure S(Str), B|LA
+| LdTypeStructureVal, DBespokeElem, STypeStructure() S(Str), B|LA
 
   Specialization of BespokeGet for when the base is a type structure. Get
   element with key S1 in the type structure S0. Branches if the key is not in
   the type structure.
 
-| LdTypeStructureValCns<key>, DTypeStructElem, STypeStructure, LA
+| LdTypeStructureValCns<key>, DTypeStructElem, STypeStructure(), LA
 
   Simplification of LdTypeStructureVal for when the key is a constant value.
 
-| MapSet, ND, S(Obj) S(Int OR Str) S(InitCell), CRc
+| MapSet, ND, S(Obj) S(Int OR Str) S(InitCell,CR), CRc
 
   Set element with key S1 in S0 to S2.
 
-| VectorSet, ND, S(Obj) S(Int OR Str) S(InitCell), CRc
+| VectorSet, ND, S(Obj) S(Int OR Str) S(InitCell,CR), CRc
 
   Set element with key S1 in S0 to S2.
 
@@ -3614,13 +3614,13 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the given array has the legacy bit set.
 
-| ArrayMarkLegacyShallow,     DModified(0), S(Vec OR Dict), CRc|PRc|LA
+| ArrayMarkLegacyShallow,     DModified(0), S(Vec OR Dict,MMR), CRc|PRc|LA
 
-| ArrayMarkLegacyRecursive,   DModified(0), S(Vec OR Dict), CRc|PRc|LA
+| ArrayMarkLegacyRecursive,   DModified(0), S(Vec OR Dict,MMR), CRc|PRc|LA
 
-| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec OR Dict), CRc|PRc|LA
+| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec OR Dict,MMR), CRc|PRc|LA
 
-| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec OR Dict), CRc|PRc|LA
+| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec OR Dict,MMR), CRc|PRc|LA
 
   Set or unset the legacy bit on the array-like in S0, copying it if needed.
   The recursive variants traverse through the array-like's transitive elements
@@ -3636,7 +3636,7 @@ fields of that struct for holding intermediate values.
 
 | EndCatch<spOffset,mode,stublogue>,
 |   ND,
-|   S(FramePtr) S(StkPtr) S(Obj|Nullptr),
+|   S(FramePtr) S(StkPtr) S(Obj|Nullptr,MR),
 |   CRc|T
 
   Marks the end of a catch region and returns control to the unwinder.  The

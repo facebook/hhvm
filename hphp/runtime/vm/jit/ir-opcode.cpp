@@ -86,6 +86,29 @@ TRACE_SET_MOD(hhir)
 #define DStructTypeBound HasDest
 #define DLdCls         HasDest
 
+#define CR    IRSrcFlag::Consume
+#define MMR   IRSrcFlag::Consume | IRSrcFlag::MayMove
+#define MR    IRSrcFlag::Consume | IRSrcFlag::MayMove | IRSrcFlag::Move
+
+constexpr auto processIRSrcFlags = [] (const vector<IRSrcFlag>& flags) {
+  if (flags.empty()) return IRSrcFlag::None;
+  assertx(flags.size() == 1);
+  return flags[0];
+};
+
+#define NA
+#define C(T, ...)                 processIRSrcFlags({__VA_ARGS__}),
+#define CStr(...)                 processIRSrcFlags({__VA_ARGS__}),
+#define SBespokeArr(...)          processIRSrcFlags({__VA_ARGS__}),
+#define SMonotypeVec(...)         processIRSrcFlags({__VA_ARGS__}),
+#define SMonotypeDict(...)        processIRSrcFlags({__VA_ARGS__}),
+#define STypeStructure(...)       processIRSrcFlags({__VA_ARGS__}),
+#define SNullptr(T, ...)          processIRSrcFlags({__VA_ARGS__}),
+#define SVar(T, ...)              processIRSrcFlags({__VA_ARGS__}),
+#define SStructDict(...)          processIRSrcFlags({__VA_ARGS__}),
+#define S(T, ...)                 processIRSrcFlags({__VA_ARGS__}),
+#define SCrossTrace               IRSrcFlag::None, IRSrcFlag::None, MMR,
+
 namespace {
 template<Opcode op, uint64_t flags>
 struct op_flags {
@@ -99,10 +122,11 @@ struct op_flags {
 }
 
 OpInfo g_opInfo[] = {
-#define O(name, dsts, srcs, flags)                    \
-    { #name,                                          \
-       op_flags<name, dsts | flags>::value            \
-    },
+#define O(name, dsts, srcs, flags)                      \
+    { #name,                                            \
+      op_flags<name, dsts | flags>::value,              \
+      {srcs}                                            \
+    },                                                  
   IR_OPCODES
 #undef O
   { 0 }
@@ -173,6 +197,23 @@ OpInfo g_opInfo[] = {
 #undef DCOW
 #undef DStructTypeBound
 #undef DLdCls
+
+#undef CR
+#undef MMR
+#undef MR
+
+#undef NA
+#undef S
+#undef SNullptr
+#undef C
+#undef CStr
+#undef SVar
+#undef SCrossTrace
+#undef SBespokeArr
+#undef SMonotypeVec
+#undef SMonotypeDict
+#undef STypeStructure
+#undef SStructDict
 
 ///////////////////////////////////////////////////////////////////////////////
 

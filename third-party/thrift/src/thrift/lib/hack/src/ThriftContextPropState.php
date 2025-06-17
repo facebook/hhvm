@@ -29,7 +29,7 @@ final class ThriftContextPropState {
   public static ?bool $setFBUserIdInPSP = null;
   public static ?bool $setIGUserIdInPSP = null;
 
-  private function __construct()[write_props, zoned_shallow] {
+  private function __construct()[write_props] {
     $this->storage = ThriftFrameworkMetadata::withDefaultValues();
     $this->serializedStorage = dict[];
   }
@@ -304,8 +304,7 @@ final class ThriftContextPropState {
   /**
    * Returns the ThriftContextPropState singleton
    */
-  public static function get(
-  )[globals, write_props, zoned_shallow]: ThriftContextPropState {
+  public static function get()[globals, write_props]: ThriftContextPropState {
     if (self::$instance === null) {
       self::$instance = new ThriftContextPropState();
     }
@@ -547,7 +546,7 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public function setExperimentIds(vec<int> $eids): void {
+  public function setExperimentIds(vec<int> $eids)[write_props]: void {
     $this->storage->experiment_ids = $eids;
     $this->dirty();
   }

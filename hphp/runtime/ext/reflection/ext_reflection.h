@@ -53,7 +53,7 @@ struct ReflectionFileHandle : SystemLib::ClassLoader<"ReflectionFile"> {
   }
 
  private:
-  LowPtr<const Unit> m_unit{nullptr};
+  const Unit* m_unit{nullptr};
 };
 
 /* A ReflectionModuleHandle is a NativeData object wrapping a Module*

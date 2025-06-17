@@ -126,6 +126,7 @@ add_library(
   sema/explicit_include_validator.cc
   sema/scope_validator.cc
   sema/sema.cc
+  sema/sema_context.cc
   sema/schematizer.cc
   sema/standard_validator.cc
 )

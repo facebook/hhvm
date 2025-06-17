@@ -710,7 +710,6 @@ bool canDCE(const IRInstruction& inst) {
   case EnterInlineFrame:
   case SetOpTV:
   case OutlineSetOp:
-  case ConjureUse:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case LogArrayReach:

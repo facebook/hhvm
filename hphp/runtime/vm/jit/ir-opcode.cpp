@@ -590,7 +590,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ColIsEmpty:
   case ColIsNEmpty:
   case Conjure:
-  case ConjureUse:
   case ConstructClosure:
   case ContArIncIdx:
   case ContArIncKey:

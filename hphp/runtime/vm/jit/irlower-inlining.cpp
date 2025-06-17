@@ -163,17 +163,6 @@ void cgConjure(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgConjureUse(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0);
-  auto& v = vmain(env);
-  if (src.hasReg(0)) {
-    v << conjureuse{src.reg(0)};
-  }
-  if (src.hasReg(1)) {
-    v << conjureuse{src.reg(1)};
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

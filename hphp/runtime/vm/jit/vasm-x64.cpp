@@ -310,7 +310,6 @@ struct Vgen {
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
   void emit(const conjure& /*i*/) { always_assert(false); }
-  void emit(const conjureuse& /*i*/) { always_assert(false); }
   void emit(const crc32q& i);
 
   void emit_nop() {

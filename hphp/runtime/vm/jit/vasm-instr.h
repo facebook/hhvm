@@ -85,7 +85,6 @@ struct Vunit;
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
-  O(conjureuse, Inone, U(c), Dn)\
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
@@ -565,7 +564,6 @@ struct phijmp { Vlabel target; Vtuple uses; };
  * They should not be used in any translations that will eventually be emitted.
  */
 struct conjure { Vreg c; };
-struct conjureuse { Vreg c; };
 
 /*
  * This pseudo instruction marks the end of raw manipulation of the native

@@ -1511,7 +1511,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore {
       ARds { ImplicitContext::activeCtx.handle() }, inst.src(0), nullptr
     };
-
+  case EndBlock: {
+    auto extra = inst.extra<EndBlock>();
+    auto spOff = extra->spOff;
+    auto numInOutParams = extra->func->numInOutParams();
+    auto stack = AStack::range(spOff, spOff + 1 + numInOutParams);
+    return may_load_store(stack, AEmpty);
+  }
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -1611,7 +1617,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Mod:
   case Conjure:
   case ConjureUse:
-  case EndBlock:
   case ConvBoolToInt:
   case ConvBoolToDbl:
   case DefConst:

@@ -196,7 +196,7 @@ void cgUnreachable(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgEndBlock(IRLS& env, const IRInstruction* inst) {
-  auto reason = inst->extra<AssertReason>()->reason;
+  auto reason = inst->extra<EndBlock>()->reason;
   vmain(env) << trap{reason, Fixup::none()};
 }
 

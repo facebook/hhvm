@@ -2778,6 +2778,35 @@ struct EndCatchData : IRExtraData {
   Optional<IRSPRelOffset> vmspOffset;
 };
 
+struct EndBlockData : IRExtraData {
+  explicit EndBlockData(IRSPRelOffset spOff, const Func* func, Reason r)
+   : spOff(spOff)
+   , func(func)
+   , reason{r.file, r.line} {}
+
+  std::string show() const {
+    return folly::sformat("spOff={} func={} reason={}", spOff.offset,
+                          func->fullName(), jit::show(reason));
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<int32_t>()(spOff.offset),
+      func->stableHash(),
+      std::hash<const char*>()(reason.file),
+      std::hash<unsigned>()(reason.line)
+    );
+  }
+
+  bool equals(const EndBlockData& o) const {
+    return spOff == o.spOff && func == o.func && reason == o.reason;
+  }
+
+  IRSPRelOffset spOff;
+  const Func* func;
+  Reason reason;
+};
+
 /*
  * Func/Class/Prop attributes
  */
@@ -3301,7 +3330,7 @@ X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(DbgAssertRefCount,            AssertReason);
 X(Unreachable,                  AssertReason);
-X(EndBlock,                     AssertReason);
+X(EndBlock,                     EndBlockData);
 X(VerifyParam,                  FuncParamWithTCData);
 X(VerifyParamCallable,          FuncParamWithTCData);
 X(VerifyParamCls,               FuncParamWithTCData);

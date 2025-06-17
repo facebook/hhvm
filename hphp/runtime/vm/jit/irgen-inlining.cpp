@@ -666,9 +666,10 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
 
 bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
                         bool builtin) {
+  auto const callee = curFunc(env);
   if (!endInlining(env, calleeRegion)) return false;
-  gen(env, ConjureUse, pop(env));
-  gen(env, EndBlock, ASSERT_REASON);
+  auto spOff = spOffBCFromIRSP(env);
+  gen(env, EndBlock, EndBlockData{spOff, callee, ASSERT_REASON.reason});
   return true;
 }
 

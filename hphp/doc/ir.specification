@@ -870,7 +870,7 @@ To string conversions:
   by an Unreachable may be treated as unreachable by the optimizer, and the
   behavior of a program that attempts to execute an Unreachable is undefined.
 
-| EndBlock<AssertReason>, ND, NA, T
+| EndBlock<spOff, func, AssertReason>, ND, NA, T
 
   Halt execution, without implying anything about the reachability of
   instructions preceding this. Intended for use in internal tests or other code

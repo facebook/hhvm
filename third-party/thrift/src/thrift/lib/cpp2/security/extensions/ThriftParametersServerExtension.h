@@ -46,8 +46,8 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
       compressionAlgorithms |= 1ull << (int(comp) - 1);
     }
     NegotiationParameters negotiatedParams;
-    negotiatedParams.compressionAlgos_ref() = compressionAlgorithms;
-    negotiatedParams.useStopTLS_ref() = context_->getUseStopTLS();
+    negotiatedParams.compressionAlgos() = compressionAlgorithms;
+    negotiatedParams.useStopTLS() = context_->getUseStopTLS();
     ThriftParametersExt paramsExt;
     paramsExt.params = negotiatedParams;
     serverExtensions.push_back(encodeThriftExtension(paramsExt));
@@ -63,7 +63,7 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
       return folly::none;
     }
     auto compressionAlgos =
-        clientExtensions_->params.compressionAlgos_ref().value_or(0);
+        clientExtensions_->params.compressionAlgos().value_or(0);
     for (const auto& comp : context_->getSupportedCompressionAlgorithms()) {
       assert(comp != CompressionAlgorithm::NONE);
       if (compressionAlgos & 1ull << (int(comp) - 1)) {
@@ -75,7 +75,7 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
 
   bool getNegotiatedStopTLS() {
     return context_->getUseStopTLS() && clientExtensions_.has_value() &&
-        clientExtensions_->params.useStopTLS_ref().value_or(false);
+        clientExtensions_->params.useStopTLS().value_or(false);
   }
 
  private:

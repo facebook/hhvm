@@ -1593,7 +1593,7 @@ SSATmp* builtinCall(IRGS& env,
     env.irb->exceptionStackBoundary();
   }
 
-  bool eagerSync = callee->userAttributes().count(LowStringPtr(s_EagerVMSync.get()));
+  bool eagerSync = callee->userAttributes().contains(LowStringPtr(s_EagerVMSync.get()));
   if (eagerSync) {
     auto const spOff = offsetFromIRSP(env, env.irb->curMarker().bcSPOff());
     eagerVMSync(env, spOff);
@@ -1687,7 +1687,7 @@ void emitNativeImpl(IRGS& env) {
   auto const callee = curFunc(env);
 
   auto genericNativeImpl = [&]() {
-    bool eagerSync = callee->userAttributes().count(LowStringPtr(s_EagerVMSync.get()));
+    bool eagerSync = callee->userAttributes().contains(LowStringPtr(s_EagerVMSync.get()));
     if (eagerSync) {
       auto const spOff = offsetFromIRSP(env, env.irb->curMarker().bcSPOff());
       eagerVMSync(env, spOff);

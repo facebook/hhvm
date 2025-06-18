@@ -813,7 +813,7 @@ void Func::def(Func* func) {
   assertx(!func->isMethod());
 
   // Don't define the __debugger_main() function
-  DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().count(s_DebuggerMain.get())) { return; });
+  DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().contains(s_DebuggerMain.get())) { return; });
 
   auto const ne = func->getNamedFunc();
 

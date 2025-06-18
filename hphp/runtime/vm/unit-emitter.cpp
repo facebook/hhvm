@@ -521,7 +521,7 @@ void UnitEmitter::calculateEntryPointId() {
   if (m_entryPointIdCalculated) return;
 
   for (auto& fe : m_fes) {
-    auto hasEntryPointAttr = fe->userAttributes.count(s___EntryPoint.get()) > 0;
+    auto hasEntryPointAttr = fe->userAttributes.contains(s___EntryPoint.get());
     if (hasEntryPointAttr) {
       // Hack already enforce that there is only one func marked with entryPoint.
       always_assert(m_entryPointId == kInvalidId);
@@ -538,7 +538,7 @@ void UnitEmitter::setEntryPointIdCalculated() {
 
   for (auto& fe : m_fes) {
     auto isEntryPoint = m_entryPointId == fe->id();
-    auto hasEntryPointAttr = fe->userAttributes.count(s___EntryPoint.get()) > 0;
+    auto hasEntryPointAttr = fe->userAttributes.contains(s___EntryPoint.get());
     always_assert(isEntryPoint == hasEntryPointAttr);
   }
 }

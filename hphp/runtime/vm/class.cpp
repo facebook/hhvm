@@ -2273,7 +2273,7 @@ void Class::setMethods() {
     // internal or module level trait. Otherwise, if the well-formedness checks
     // had failed, the method would not have been inlined in the current trait.
     if (isPublicTrait &&
-        (m_preClass->userAttributes().count(s___ModuleLevelTrait.get()) == 0)
+        (!m_preClass->userAttributes().contains(s___ModuleLevelTrait.get()))
         && method->isInternal()
         && !(method->isFromTrait())) {
       raise_error(
@@ -2389,7 +2389,7 @@ void Class::setRTAttributes() {
  *   that have the <<__MethodLevelTrait>> attribute themselves
  */
 void Class::checkUserAttributes() {
-  if (m_preClass->userAttributes().count(s___ModuleLevelTrait.get())) {
+  if (m_preClass->userAttributes().contains(s___ModuleLevelTrait.get())) {
     if (!(attrs() & AttrTrait) || (attrs() & AttrInternal)) {
       raise_error("Attribute <<__ModuleLevelTrait>> can only be specified on public traits");
     }

@@ -477,7 +477,7 @@ bool hasConstParamMemoCache(IRGS& env, const Func* callee, SSATmp* objOrClass,
   if (!callee->isMemoizeWrapper() || !callee->isNoICMemoize()) {
     return false;
   }
-  if (callee->userAttributes().count(LowStringPtr(s_attr_Deprecated.get()))) {
+  if (callee->userAttributes().contains(LowStringPtr(s_attr_Deprecated.get()))) {
     return false;
   }
   // Classes are converted to strings before storing to memo caches.

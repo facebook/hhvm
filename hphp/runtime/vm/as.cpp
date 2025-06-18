@@ -2335,7 +2335,7 @@ static StaticString s_native("__Native");
  * If the give function is op code implementation, then isNative is not set
  */
 void check_native(AsmState& as) {
-  if (as.fe->userAttributes.count(s_native.get())) {
+  if (as.fe->userAttributes.contains(s_native.get())) {
 
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
@@ -2930,7 +2930,7 @@ void parse_adata(AsmState& as) {
   if (!as.in.readword(dataLabel)) {
     as.error("expected name for .adata");
   }
-  if (as.adataMap.count(dataLabel)) {
+  if (as.adataMap.contains(dataLabel)) {
     as.error("duplicate adata label name " + dataLabel);
   }
 

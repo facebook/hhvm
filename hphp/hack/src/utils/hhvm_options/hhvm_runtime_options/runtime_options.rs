@@ -74,7 +74,7 @@ pub fn apply_tier_overrides(config: hdf::Value) -> Result<hdf::Value> {
 
     let tags: String = config
         .get_str("Machine.tags")?
-        .and_then(|tiers| fs::read_to_string(tiers).ok())
+        .and_then(|tags| fs::read_to_string(tags).ok())
         .unwrap_or_else(|| "".to_owned());
 
     let results = apply_tier_overrides_with_params(

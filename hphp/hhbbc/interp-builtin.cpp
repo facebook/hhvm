@@ -185,6 +185,20 @@ TypeOrReduced builtin_is_numeric(ISS& env, const php::Func* func,
   return TBool;
 }
 
+TypeOrReduced builtin_is_object(ISS& env, const php::Func* func,
+                                const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  reduce(env, bc::IsTypeC { IsTypeOp::Obj });
+  return Reduced{};
+}
+
+TypeOrReduced builtin_is_scalar(ISS& env, const php::Func* func,
+                                const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  reduce(env, bc::IsTypeC { IsTypeOp::Scalar });
+  return Reduced{};
+}
+
 TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
                                       const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
@@ -618,6 +632,8 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(min2, min2)                                                         \
   X(strlen, strlen)                                                     \
   X(is_numeric, is_numeric)                                             \
+  X(is_scalar, is_scalar)                                               \
+  X(is_object, is_object)                                               \
   X(function_exists, function_exists)                                   \
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \

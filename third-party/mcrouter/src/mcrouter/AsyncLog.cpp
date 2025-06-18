@@ -27,9 +27,7 @@
 
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/McrouterLogFailure.h"
-#include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/options.h"
-#include "mcrouter/stats.h"
 
 constexpr folly::StringPiece kAsyncLogMagic{"AS1.0"};
 constexpr folly::StringPiece kAsyncLogMagic2{"AS2.0"};

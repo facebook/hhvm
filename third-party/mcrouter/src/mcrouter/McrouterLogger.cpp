@@ -7,8 +7,6 @@
 
 #include "McrouterLogger.h"
 
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include <string>
@@ -19,7 +17,6 @@
 #include <folly/json/DynamicConverter.h>
 #include <folly/json/dynamic.h>
 #include <folly/json/json.h>
-#include <folly/system/ThreadName.h>
 
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/McrouterLogFailure.h"

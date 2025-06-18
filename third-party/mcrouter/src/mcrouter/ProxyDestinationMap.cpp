@@ -11,15 +11,11 @@
 
 #include <folly/Format.h>
 #include <folly/io/async/AsyncTimeout.h>
-#include <folly/io/async/EventBase.h>
 
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/McrouterLogFailure.h"
 #include "mcrouter/ProxyBase.h"
-#include "mcrouter/ProxyDestination.h"
 #include "mcrouter/ProxyDestinationBase.h"
-#include "mcrouter/lib/fbi/cpp/util.h"
-#include "mcrouter/lib/network/AccessPoint.h"
 
 namespace facebook {
 namespace memcache {

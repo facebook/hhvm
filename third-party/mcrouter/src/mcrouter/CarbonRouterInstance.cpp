@@ -9,11 +9,6 @@
 
 #include <folly/executors/thread_factory/InitThreadFactory.h>
 #include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
-#include <folly/io/async/EventBase.h>
-#include <folly/json/json.h>
-
-#include "mcrouter/lib/AuxiliaryCPUThreadPool.h"
-#include "mcrouter/lib/fbi/cpp/LogFailure.h"
 
 namespace facebook {
 namespace memcache {

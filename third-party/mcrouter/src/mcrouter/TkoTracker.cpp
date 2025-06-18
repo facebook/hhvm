@@ -11,8 +11,6 @@
 #include <functional>
 #include <unordered_map>
 
-#include <folly/MapUtil.h>
-
 #include "mcrouter/ProxyDestinationBase.h"
 #include "mcrouter/TkoCounters.h"
 #include "mcrouter/lib/network/AccessPoint.h"

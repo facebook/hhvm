@@ -13,7 +13,6 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/system/error_code.hpp>
 #include <glog/logging.h>
 
 #include <folly/FileUtil.h>

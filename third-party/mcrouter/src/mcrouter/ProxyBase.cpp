@@ -8,8 +8,6 @@
 #include "ProxyBase.h"
 
 #include "mcrouter/CarbonRouterInstanceBase.h"
-#include "mcrouter/config-impl.h"
-#include "mcrouter/config.h"
 #include "mcrouter/options.h"
 
 namespace facebook {

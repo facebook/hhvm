@@ -8,7 +8,6 @@
 #include "FileObserver.h"
 
 #include <memory>
-#include <vector>
 
 #include <glog/logging.h>
 

@@ -12,12 +12,10 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <folly/Singleton.h>
-#include <folly/system/ThreadName.h>
 
 #include "mcrouter/AsyncWriter.h"
 #include "mcrouter/ProxyBase.h"
 #include "mcrouter/lib/CompressionCodecManager.h"
-#include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/stats.h"
 
 namespace facebook {

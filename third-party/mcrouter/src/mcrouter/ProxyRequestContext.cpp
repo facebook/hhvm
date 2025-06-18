@@ -11,7 +11,6 @@
 
 #include "mcrouter/CarbonRouterClientBase.h"
 #include "mcrouter/ProxyBase.h"
-#include "mcrouter/config.h"
 
 namespace facebook {
 namespace memcache {

@@ -7,7 +7,6 @@
 
 #include "stats.h"
 
-#include <dirent.h>
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <time.h>
@@ -18,7 +17,6 @@
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
-#include <folly/json/json.h>
 
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/McrouterLogFailure.h"
@@ -27,8 +25,6 @@
 #include "mcrouter/ProxyDestinationMap.h"
 #include "mcrouter/config.h"
 #include "mcrouter/lib/StatsReply.h"
-#include "mcrouter/lib/fbi/cpp/util.h"
-#include "mcrouter/lib/network/gen/MemcacheMessages.h"
 
 /**                             .__
  * __  _  _______ _______  ____ |__| ____    ____

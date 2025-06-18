@@ -702,7 +702,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
   if (isAlwaysNop(ni)) return inputs;
 
   always_assert_flog(
-    instrInfo.count(ni.op()),
+    instrInfo.contains(ni.op()),
     "Invalid opcode in getInputsImpl: {}\n",
     opcodeToName(ni.op())
   );

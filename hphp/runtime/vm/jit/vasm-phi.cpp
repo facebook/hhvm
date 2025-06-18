@@ -180,7 +180,7 @@ void optimizePhis(Vunit& unit) {
         auto predNeedsFixing = [&](Iter it2, Iter begin) -> bool {
           if (it2->op != Vinstr::phijmp) return false;
           auto const use = unit.tuples[it2->phijmp_.uses][0];
-          if (!unit.regToConst.count(use)) {
+          if (!unit.regToConst.contains(use)) {
             if (useCounts[use] > 1) return false;
             if (it2 == begin) return false;
             --it2;

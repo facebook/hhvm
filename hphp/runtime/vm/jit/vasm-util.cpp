@@ -936,7 +936,7 @@ struct FlagsVisitor {
   template<class R> void use(R&) {}
   template<class R, class H> void useHint(R& r, H) { use(r); }
 
-  void use(VregSF& r) { if (m_sf_renames.count(r)) r = RegSF{0}; }
+  void use(VregSF& r) { if (m_sf_renames.contains(r)) r = RegSF{0}; }
   void def(VregSF& r) { use(r); }
 
  private:

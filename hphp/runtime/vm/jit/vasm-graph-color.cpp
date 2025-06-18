@@ -1554,14 +1554,14 @@ compute_place_constants_block_info(State& state) {
         invalidate_cached_operands(inst);
       } else {
         for (auto const r : uses_set_cached(state, inst)) {
-          if (unit.regToConst.count(r)) uses.add(r);
+          if (unit.regToConst.contains(r)) uses.add(r);
         }
       }
 
       // A constant should never have a definition (before we place them).
       if (debug) {
         for (auto const r : defs_set_cached(state, inst)) {
-          always_assert(!unit.regToConst.count(r));
+          always_assert(!unit.regToConst.contains(r));
         }
       }
     }

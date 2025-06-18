@@ -146,7 +146,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->maxStackCells() >= Cfg::Eval::StackCheckLeafPadding) {
     return refuse("function stack depth too deep");
   }
-  if (callee->userAttributes().count(s_NeverInline.get())) {
+  if (callee->userAttributes().contains(s_NeverInline.get())) {
     return refuse("callee marked __NEVER_INLINE");
   }
 

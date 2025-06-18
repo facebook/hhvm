@@ -501,7 +501,7 @@ void Vgen<X64Asm>::retargetBinds(Venv& env) {
   // smashableBinds.
   GrowableVector<IncomingBranch> newTailJumps;
   for (auto& jmp : env.meta.inProgressTailJumps) {
-    if (retargeted.count(jmp.toSmash()) == 0) {
+    if (!retargeted.contains(jmp.toSmash())) {
       newTailJumps.push_back(jmp);
     }
   }
@@ -509,7 +509,7 @@ void Vgen<X64Asm>::retargetBinds(Venv& env) {
 
   decltype(env.meta.smashableBinds) newBinds;
   for (auto& bind : env.meta.smashableBinds) {
-    if (retargeted.count(bind.smashable.toSmash()) == 0) {
+    if (!retargeted.contains(bind.smashable.toSmash())) {
       newBinds.push_back(bind);
     } else {
       FTRACE(3, "retargetBinds: removed {} from smashableBinds\n",

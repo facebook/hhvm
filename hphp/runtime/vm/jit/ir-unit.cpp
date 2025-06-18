@@ -157,7 +157,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // execute.
     case ReqBindJmp: {
       auto destSk = inst.extra<ReqBindJmp>()->target;
-      return sk.succSrcKeys().count(destSk);
+      return sk.succSrcKeys().contains(destSk);
     }
 
     default:

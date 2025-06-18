@@ -52,7 +52,7 @@ void BCPattern::matchAnchored(const Expr& pattern, PC entry,
     auto const op = peek_op(entry + inst);
 
     // Skip pattern-globally ignored opcodes.
-    if (m_ignores.count(op)) {
+    if (m_ignores.contains(op)) {
       inst = next(entry, inst);
       continue;
     }

@@ -876,7 +876,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
     // value that was killed by a Call. The value won't be live but it's ok to
     // use it to track down the guard.
 
-    always_assert_flog(m_constraints.typeSrcs.count(inst),
+    always_assert_flog(m_constraints.typeSrcs.contains(inst),
                        "no typeSrcs found for {}", *inst);
 
     bool changed = false;
@@ -1160,7 +1160,7 @@ Block* IRBuilder::makeBlock(SrcKey sk, uint64_t profCount) {
 }
 
 bool IRBuilder::hasBlock(SrcKey sk) const {
-  return m_skToBlockMap.count(sk);
+  return m_skToBlockMap.contains(sk);
 }
 
 void IRBuilder::setBlock(SrcKey sk, Block* block) {

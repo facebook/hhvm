@@ -185,7 +185,7 @@ EveryDefiningInstVisitor::next() {
   auto const inst = canonT->inst();
 
   if (!inst->is(DefLabel)) return {inst, t};
-  if (m_visited.count(inst)) return next();
+  if (m_visited.contains(inst)) return next();
   m_visited.emplace(inst);
 
   auto const dsts = inst->dsts();

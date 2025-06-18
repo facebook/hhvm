@@ -228,7 +228,7 @@ void cgInterpOneCF(IRLS& env, const IRInstruction* inst) {
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], sync_sp};
   v << syncvmsp{sync_sp};
 
-  assertx(tc::ustubs().interpOneCFHelpers.count(extra->opcode));
+  assertx(tc::ustubs().interpOneCFHelpers.contains(extra->opcode));
 
   // We pass the Offset in the third argument register.
   v << ldimml{extra->bcOff, rarg(2)};

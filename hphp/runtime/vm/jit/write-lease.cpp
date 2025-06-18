@@ -189,7 +189,7 @@ bool couldAcquireOptimizeLease(const Func* func) {
       break;
     case LockLevel::Func: {
       return !func->atomicFlags().check(Func::Flags::Locked) ||
-             tl_ownedFunc.count(func->getFuncId()) != 0;
+             tl_ownedFunc.contains(func->getFuncId());
     }
     case LockLevel::Kind:
       return s_optimizeLease.couldAcquire();
@@ -233,7 +233,7 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
       }
     } else {
       // Already owned by another thread.
-      if (tl_ownedFunc.count(fid) == 0) return;
+      if (!tl_ownedFunc.contains(fid)) return;
     }
   }
 

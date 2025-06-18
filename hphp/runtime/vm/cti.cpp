@@ -79,7 +79,7 @@ struct PatchTable {
   }
 private:
   bool checkPc(PC pc) const {
-    return m_ctimap.count(pc - m_unitpc) != 0;
+    return m_ctimap.contains(pc - m_unitpc);
   }
 private:
   boost::container::flat_map<Offset,uint32_t> m_ctimap;

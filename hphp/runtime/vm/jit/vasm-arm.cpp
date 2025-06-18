@@ -680,7 +680,7 @@ void Vgen::patch(Venv& env) {
     auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
-    if (env.meta.smashableLocations.count(p.instr)) {
+    if (env.meta.smashableLocations.contains(p.instr)) {
       assertx(possiblySmashableJmp(addr));
       // Update `addr' to point to the veneer.
       addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
@@ -692,7 +692,7 @@ void Vgen::patch(Venv& env) {
     auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
-    if (env.meta.smashableLocations.count(p.instr)) {
+    if (env.meta.smashableLocations.contains(p.instr)) {
       assertx(possiblySmashableJcc(addr));
       // Update `addr' to point to the veneer.
       addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());

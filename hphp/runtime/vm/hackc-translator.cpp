@@ -1133,7 +1133,7 @@ static StaticString s_native("__Native");
  * If the give function is op code implementation, then isNative is not set
  */
 void checkNative(TranslationState& ts) {
-  if (ts.fe->userAttributes.count(s_native.get())) {
+  if (ts.fe->userAttributes.contains(s_native.get())) {
     ts.fe->isNative =
       !(ts.fe->parseNativeAttributes(ts.fe->attrs) & Native::AttrOpCodeImpl);
   }

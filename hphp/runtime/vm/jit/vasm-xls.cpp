@@ -1005,7 +1005,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
       uv.across(implicit_across);
       if (inst.op == Vinstr::recordbasenativesp) {
         forEach(live, [&](Vreg r) {
-          if (!unit.regToConst.count(r)) {
+          if (!unit.regToConst.contains(r)) {
             // We mark the instruction as a use so no spills span the
             // instruction  unless they have to.
             uv.use(r);
@@ -1015,7 +1015,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
         });
       } else if (inst.op == Vinstr::unrecordbasenativesp) {
         forEach(live, [&](Vreg r) {
-          if (!unit.regToConst.count(r)) {
+          if (!unit.regToConst.contains(r)) {
             // We mark the instruction as a use so no spills span the
             // instruction  unless they have to.
             uv.use(r);
@@ -2499,7 +2499,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         insertCopiesAt(ctx, code, j, c->second, pos);
         insertLoadsAt(code, j, c->second, slots, pos);
       }
-      assertx(resolution.spills.count(pos) == 0);
+      assertx(!resolution.spills.contains(pos));
       if (code[j].op == Vinstr::recordbasenativesp) {
         assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
                     "already initialized.", size_t(b), j);

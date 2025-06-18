@@ -739,7 +739,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         return TranslateResult::Retry;
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk2{canonTransID(irgs.profTransIDs), sk};
-        always_assert_flog(!irgs.retryContext->toInterp.count(psk2),
+        always_assert_flog(!irgs.retryContext->toInterp.contains(psk2),
                            "IR generation failed with {}\n",
                            exn.what());
         FTRACE(1, "ir generation for {} failed with {}\n",

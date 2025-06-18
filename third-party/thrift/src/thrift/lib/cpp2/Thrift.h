@@ -213,13 +213,19 @@ inline static constexpr empty_fn empty{};
 
 template <typename T>
 FOLLY_EXPORT const std::string& uri() {
-  static_assert(sizeof(T) > 0, "T must be a complete type");
+  static_assert(
+      folly::is_detected_v<detail::st::detect_complete, T> ||
+          folly::is_detected_v<detail::st::detect_complete, Client<T>>,
+      "T must be a complete type or service tag.");
   std::string_view uri;
   if constexpr (detail::st::private_access::detect_uri<T>::value) {
     uri = detail::st::private_access::__fbthrift_thrift_uri<T>();
   } else if constexpr (detail::st::private_access::detect_uri<
                            TEnumTraits<T>>::value) {
     uri = detail::st::private_access::__fbthrift_thrift_uri<TEnumTraits<T>>();
+  } else if constexpr (detail::st::private_access::detect_uri<
+                           Client<T>>::value) {
+    uri = detail::st::private_access::__fbthrift_thrift_uri<Client<T>>();
   } else {
     // MSVC fires this assert even when we took an earlier branch...
     if constexpr (!folly::kIsWindows) {

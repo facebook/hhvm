@@ -2071,7 +2071,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     auto const ctx = fp ? fp->func()->cls() : nullptr;
     auto const f = [&] () -> Func* {
       for (auto orig_f : unit->funcs()) {
-        if (orig_f->userAttributes().count(s_DebuggerMainAttr.get())) {
+        if (orig_f->userAttributes().contains(s_DebuggerMainAttr.get())) {
           auto const f = ctx ? orig_f->clone(ctx) : orig_f;
           if (ctx) {
             f->setBaseCls(ctx);

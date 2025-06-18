@@ -1164,7 +1164,7 @@ bool IniSetting::GetSystem(const String& name, Variant& value) {
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
   auto& defaults = s_saved_defaults->init();
-  if (!defaults.count(name.toCppString())) {
+  if (!defaults.contains(name.toCppString())) {
     Variant def;
     auto success = Get(name, def); // def gets populated here
     if (success) {
@@ -1223,7 +1223,7 @@ void IniSetting::Log(StructuredLogEntry& ent,
   for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
     if (shouldHideSetting(iter.first)) continue;
     if (!toLog.empty() && !toLog.count(iter.first.toCppString())) continue;
-    if (toExclude.count(iter.first.toCppString())) continue;
+    if (toExclude.contains(iter.first.toCppString())) continue;
 
     doLog(iter.second.callbacks, iter.first.data(), ent);
   }
@@ -1244,7 +1244,7 @@ size_t IniSetting::HashAll(const hphp_fast_string_set& toLog,
   size_t hash = 0;
   for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
     if (!toLog.empty() && !toLog.count(iter.first.toCppString())) continue;
-    if (toExclude.count(iter.first.toCppString())) continue;
+    if (toExclude.contains(iter.first.toCppString())) continue;
     if (shouldHideSetting(iter.first)) continue;
 
     hash = folly::hash::commutative_hash_combine_value_generic(

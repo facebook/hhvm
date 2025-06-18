@@ -484,10 +484,6 @@ Cpp2Worker::PerServiceMetadata::findMethod(std::string_view methodName) const {
   }
 
   LOG(FATAL) << "Invalid CreateMethodMetadataResult from service";
-  FOLLY_PUSH_WARNING
-  FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
-  folly::assume_unreachable();
-  FOLLY_POP_WARNING
 }
 
 std::shared_ptr<folly::RequestContext>

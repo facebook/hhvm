@@ -113,7 +113,7 @@ void enable_numa() {
     for (unsigned i = 0; i < cpus; ++i) {
       if (numa_bitmask_isbitset(numa_all_cpus_ptr, i)) {
         auto const l3 = getL3CacheId(i);
-        if (!l3toCpus.count(l3)) {
+        if (!l3toCpus.contains(l3)) {
           l3toCpus[l3] = numa_allocate_cpumask();
         }
         numa_bitmask_setbit(l3toCpus[l3], i);

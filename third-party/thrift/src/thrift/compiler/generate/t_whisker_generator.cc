@@ -37,15 +37,13 @@ using whisker::array;
 using whisker::i64;
 using whisker::map;
 using whisker::object;
+using whisker::prototype;
+using whisker::prototype_database;
 using whisker::string;
-
-template <typename T>
-using prototype = whisker::prototype<T>;
 
 namespace dsl = whisker::dsl;
 using dsl::function;
-template <typename T>
-using prototype_builder = dsl::prototype_builder<T>;
+using dsl::prototype_builder;
 
 namespace apache::thrift::compiler {
 
@@ -65,7 +63,12 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_named>::extends(proto.of<t_node>());
   def.property("name", mem_fn(&t_named::name));
+  def.property("scoped_name", mem_fn(&t_named::get_scoped_name));
+  def.property("doc", mem_fn(&t_named::doc));
   def.property("program", mem_fn(&t_named::program, proto.of<t_program>()));
+  def.property(
+      "structured_annotations",
+      mem_fn(&t_named::structured_annotations, proto.of<t_const>()));
 
   def.property("definition_key", [this](const t_named& named) {
     map::raw m;
@@ -84,6 +87,80 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
 
   return std::move(def).make();
 }
+
+namespace {
+
+template <typename T>
+object t_type_as(const prototype_database& proto, const t_type& self) {
+  static_assert(std::is_base_of_v<t_type, T>);
+  return proto.create_nullable<T>(self.try_as<T>());
+}
+
+// When a t_type is bound to a native_handle for use within Whisker templates,
+// we want to make sure that we attach the prototype of the most-derived t_type
+// subclass. This allows the following usage pattern:
+//
+//   {{#if type.struct?}}
+//     {{type.fields}}
+//     ...
+//
+// The object `type.fields` is accessible after the check for `type.struct?`
+// because this function will attach the prototype of t_struct.
+object resolve_derived_t_type(
+    const prototype_database& proto, const t_type& self) {
+  if (self.is_typedef()) {
+    // t_typedef::get_type_value() returns the underlying type value, which is
+    // not useful for detecting t_typedef. So we handle it separately.
+    return object(proto.create<t_typedef>(*self.try_as<t_typedef>()));
+  }
+  switch (self.get_type_value()) {
+    case t_type::type::t_void:
+    case t_type::type::t_bool:
+    case t_type::type::t_byte:
+    case t_type::type::t_i16:
+    case t_type::type::t_i32:
+    case t_type::type::t_i64:
+    case t_type::type::t_float:
+    case t_type::type::t_double:
+    case t_type::type::t_string:
+    case t_type::type::t_binary:
+      return t_type_as<t_primitive_type>(proto, self);
+
+    case t_type::type::t_list:
+      return t_type_as<t_list>(proto, self);
+    case t_type::type::t_set:
+      return t_type_as<t_set>(proto, self);
+    case t_type::type::t_map:
+      return t_type_as<t_map>(proto, self);
+
+    case t_type::type::t_enum:
+      return t_type_as<t_enum>(proto, self);
+    case t_type::type::t_structured: {
+      if (auto union_ = self.try_as<t_union>()) {
+        return object(proto.create<t_union>(*union_));
+      }
+      if (auto exception_ = self.try_as<t_exception>()) {
+        return object(proto.create<t_exception>(*exception_));
+      }
+      if (auto struct_ = self.try_as<t_struct>()) {
+        // All other t_struct subtypes (t_throws, t_paramlist) should be opaque
+        // to Whisker to avoid additional tech debt.
+        return object(proto.create<t_struct>(*struct_));
+      }
+      throw std::logic_error("Unknown t_structured subtype");
+    } break;
+    case t_type::type::t_service:
+      // This is tech debt from a time before t_interaction was moved out of
+      // t_type (for return types). This case should no longer happen in
+      // practice.
+      throw std::logic_error("t_type -> t_service is not supported");
+    default:
+      break;
+  }
+  throw std::logic_error("Unknown t_type subtype");
+}
+
+} // namespace
 
 prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
     const prototype_database& proto) const {
@@ -115,6 +192,9 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("scalar?",           mem_fn(&t_type::is_scalar));
   def.property("int_or_enum?",      mem_fn(&t_type::is_int_or_enum));
   // clang-format on
+
+  def.property("full_name", mem_fn(&t_type::get_full_name));
+
   return std::move(def).make();
 }
 
@@ -122,7 +202,7 @@ prototype<t_typedef>::ptr t_whisker_generator::make_prototype_for_typedef(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_typedef>::extends(proto.of<t_type>());
   def.property("resolved", [&](const t_typedef& self) {
-    return proto.create<t_type>(self.type().deref());
+    return resolve_derived_t_type(proto, self.type().deref());
   });
   return std::move(def).make();
 }
@@ -176,7 +256,22 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
   auto def = prototype_builder<h_field>::extends(proto.of<t_named>());
   def.property("id", [](const t_field& self) { return i64(self.id()); });
   def.property("type", [&](const t_field& self) {
-    return proto.create<t_type>(self.type().deref());
+    return resolve_derived_t_type(proto, self.type().deref());
+  });
+  def.property("default_value", [&](const t_field& self) {
+    return proto.create_nullable<t_const_value>(self.get_default_value());
+  });
+  def.property("unqualified?", [&](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::none;
+  });
+  def.property("required?", [&](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::required;
+  });
+  def.property("optional?", [&](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::optional;
+  });
+  def.property("terse?", [&](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::terse;
   });
   return std::move(def).make();
 }
@@ -191,12 +286,27 @@ prototype<t_enum>::ptr t_whisker_generator::make_prototype_for_enum(
 prototype<t_enum_value>::ptr t_whisker_generator::make_prototype_for_enum_value(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_enum_value>::extends(proto.of<t_named>());
+  def.property(
+      "value", [](const t_enum_value& self) { return i64(self.get_value()); });
   return std::move(def).make();
 }
 
 prototype<t_const>::ptr t_whisker_generator::make_prototype_for_const(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_const>::extends(proto.of<t_named>());
+  def.property("type", [&](const t_const& self) {
+    return resolve_derived_t_type(proto, self.type_ref().deref());
+  });
+  def.property("value", [&](const t_const& self) {
+    return proto.create<t_const_value>(*self.value());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_const_value>::ptr
+t_whisker_generator::make_prototype_for_const_value(
+    const prototype_database&) const {
+  prototype_builder<h_const_value> def;
   return std::move(def).make();
 }
 
@@ -209,18 +319,30 @@ prototype<t_container>::ptr t_whisker_generator::make_prototype_for_container(
 prototype<t_map>::ptr t_whisker_generator::make_prototype_for_map(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_map>::extends(proto.of<t_container>());
+  def.property("key_type", [&](const t_map& self) {
+    return resolve_derived_t_type(proto, self.key_type().deref());
+  });
+  def.property("val_type", [&](const t_map& self) {
+    return resolve_derived_t_type(proto, self.val_type().deref());
+  });
   return std::move(def).make();
 }
 
 prototype<t_set>::ptr t_whisker_generator::make_prototype_for_set(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_set>::extends(proto.of<t_container>());
+  def.property("elem_type", [&](const t_set& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
   return std::move(def).make();
 }
 
 prototype<t_list>::ptr t_whisker_generator::make_prototype_for_list(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_list>::extends(proto.of<t_container>());
+  def.property("elem_type", [&](const t_list& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
   return std::move(def).make();
 }
 
@@ -244,11 +366,15 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
         ctx.declare_named_arguments({"language"});
         return self.get_namespace(*ctx.named_argument<string>("language"));
       });
+
   def.property(
       "structured_definitions",
       mem_fn(&t_program::structured_definitions, proto.of<t_structured>()));
   def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
   def.property("typedefs", mem_fn(&t_program::typedefs, proto.of<t_typedef>()));
+  def.property("enums", mem_fn(&t_program::enums, proto.of<t_enum>()));
+  def.property("consts", mem_fn(&t_program::consts, proto.of<t_const>()));
+
   def.property("definition_key", [this](const t_program& self) {
     map::raw m;
     detail::schematizer s(*self.global_scope(), source_mgr_, {});
@@ -329,7 +455,7 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
     } else if (function.sink_or_stream()) {
       type = &t_primitive_type::t_void();
     }
-    return proto.create<t_type>(*type);
+    return resolve_derived_t_type(proto, *type);
   });
 
   return std::move(def).make();
@@ -380,6 +506,7 @@ void t_whisker_generator::define_prototypes(prototype_database& db) const {
   db.define(make_prototype_for_enum(db));
   db.define(make_prototype_for_enum_value(db));
   db.define(make_prototype_for_const(db));
+  db.define(make_prototype_for_const_value(db));
 
   db.define(make_prototype_for_container(db));
   db.define(make_prototype_for_map(db));

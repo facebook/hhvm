@@ -240,6 +240,9 @@ class t_whisker_generator : public t_generator {
   virtual prototype<t_const>::ptr make_prototype_for_const(
       const prototype_database&) const;
 
+  virtual prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database&) const;
+
   virtual prototype<t_container>::ptr make_prototype_for_container(
       const prototype_database&) const;
 
@@ -307,6 +310,7 @@ class t_whisker_generator : public t_generator {
   using h_container = make_handle<t_container, h_set, h_list, h_map>;
 
   using h_const = make_handle<t_const>;
+  using h_const_value = whisker::native_handle<t_const_value>;
   using h_enum = make_handle<t_enum>;
   using h_enum_value = make_handle<t_enum_value>;
   using h_field = make_handle<t_field>;

@@ -35,7 +35,6 @@ final class UpdateUniverseContextHandlerTest
     PrivacyLibTestsUtils::clearArtifactLoaderMemoization();
 
     ThriftContextPropState::get()->clear();
-    PZ2RequestLevelState::clear_FOR_TESTING_ONLY();
     MockPrivacyLibKS::restore();
   }
 

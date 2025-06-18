@@ -77,84 +77,37 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     PolicyEnforcerCallerIdentity $caller,
     PolicyEnforcerContext $context,
   )[zoned_shallow]: Awaitable<TPolicyEnforcerResult> {
-    $old_exception = null;
-    $old_result = PolicyEnforcer::DEFAULT_POLICY_ENFORCER_RESULT;
+    $should_rollout_consolidation =
+      JustKnobs::eval('www/privacylib_rollout:thrift_paal_consolidation');
 
-    try {
-      $old_result = await self::genPolicyEnforcerResults(
+    $exception = null;
+    $result = PolicyEnforcer::DEFAULT_POLICY_ENFORCER_RESULT;
+
+    if ($should_rollout_consolidation) {
+      list($result, $pl_failure) = await self::genPrivacyLibResults(
         $asset_type,
         $policy_enforcer_api,
         $caller,
         $context,
       );
-    } catch (Exception $e) {
-      $old_exception = $e;
-    }
-
-    if (!PrivacyLibKS::isKilled(PLKS::PAAL_CONSOLIDATION_THRIFT)) {
-      // Run shadow traffic to validate results
+      if ($pl_failure) {
+        $exception = $pl_failure->getException();
+      }
+    } else {
       try {
-        list($result, $pl_failure) = await self::genPrivacyLibResults(
+        $result = await self::genPolicyEnforcerResults(
           $asset_type,
           $policy_enforcer_api,
           $caller,
           $context,
         );
-
-        $old_allow = $old_exception is null && $old_result['allow'];
-        $new_allow = $result['allow'];
-
-        $old_safe = $old_exception is null && $old_result['is_privacy_safe'];
-        $new_safe = $result['is_privacy_safe'];
-
-        if ($old_allow != $new_allow) {
-          CategorizedOBC::typedBumpKey(
-            ODSCategoryID::ODS_PRIVACYLIB,
-            'www.privacylib.thrift.consolidation_mismatch.result',
-          );
-          PrivacyLibPaalConsolidationLogging::logResultMismatch(
-            PaalConsolidationAssetClassName::THRIFT,
-            $asset_type,
-            $policy_enforcer_api,
-            $caller,
-            $old_allow,
-            $new_allow,
-            $pl_failure,
-            $old_exception,
-          );
-        }
-
-        if ($old_safe != $new_safe) {
-          CategorizedOBC::typedBumpKey(
-            ODSCategoryID::ODS_PRIVACYLIB,
-            'www.privacylib.thrift.consolidation_mismatch.privacy_safe',
-          );
-          PrivacyLibPaalConsolidationLogging::logResultMismatch(
-            PaalConsolidationAssetClassName::THRIFT_PRIVACY_SAFE,
-            $asset_type,
-            $policy_enforcer_api,
-            $caller,
-            $old_safe,
-            $new_safe,
-          );
-        }
       } catch (Exception $e) {
-        CategorizedOBC::typedBumpKey(
-          ODSCategoryID::ODS_PRIVACYLIB,
-          'www.privacylib.thrift.consolidation_exception',
-        );
-        PrivacyLibPaalConsolidationLogging::logEvaluationError(
-          PaalConsolidationAssetClassName::THRIFT,
-          $asset_type,
-          $policy_enforcer_api,
-          $caller,
-          $e,
-        );
+        $exception = $e;
       }
     }
 
-    if ($old_exception is nonnull) {
-      throw $old_exception;
+    if ($exception is nonnull) {
+      throw $exception;
     }
 
     // We only run probes if no exception is thrown
@@ -168,7 +121,7 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
       );
     }
 
-    return $old_result;
+    return $result;
   }
 
   <<StringMetadataExtractor>>

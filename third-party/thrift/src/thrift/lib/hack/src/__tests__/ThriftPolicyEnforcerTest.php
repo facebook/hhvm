@@ -32,6 +32,12 @@ final class ThriftPolicyEnforcerTest extends WWWTest implements IOPEWWWTest {
     MockJustKnobs::setInt('privacy:emergency_sampling_backoff_www', 1);
     MockPZ2::disableSampling();
     MockPrivacyLib::neverDisableLibrary();
+
+    // TODO(duan): pending consoldiation cleanup
+    MockJustKnobs::overrideKnob<bool>(
+      'www/privacylib_rollout:thrift_paal_consolidation',
+      false,
+    );
   }
 
   public function testTrustedCallersBitmask(): void {

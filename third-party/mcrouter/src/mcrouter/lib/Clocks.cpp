@@ -6,7 +6,6 @@
  */
 
 #include "Clocks.h"
-#include <sys/time.h>
 
 namespace facebook::memcache::cycles {
 

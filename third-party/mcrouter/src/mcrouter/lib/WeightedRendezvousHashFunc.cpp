@@ -10,8 +10,6 @@
 #include <cassert>
 #include <cmath>
 
-#include <glog/logging.h>
-
 #include "mcrouter/lib/RendezvousHashHelper.h"
 #include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/lib/fbi/hash.h"

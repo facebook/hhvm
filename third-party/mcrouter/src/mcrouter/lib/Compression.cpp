@@ -10,7 +10,6 @@
 #include <memory>
 
 #include <folly/Format.h>
-#include <folly/Portability.h>
 #include <folly/io/IOBuf.h>
 
 #include "mcrouter/lib/IovecCursor.h"

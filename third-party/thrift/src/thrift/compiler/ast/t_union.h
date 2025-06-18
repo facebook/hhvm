@@ -23,7 +23,7 @@ namespace apache::thrift::compiler {
 /**
  * Represents a union definition.
  */
-class t_union : public t_structured {
+class t_union final : public t_structured {
  public:
   using t_structured::t_structured;
 
@@ -38,14 +38,6 @@ class t_union : public t_structured {
 
   // TODO(T219861020): remove this is_struct override
   bool is_struct_or_union() const override { return true; }
-
- private:
-  friend class t_structured;
-  t_union* clone_DO_NOT_USE() const {
-    auto clone = std::make_unique<t_union>(program_, name_);
-    clone_structured(clone.get());
-    return clone.release();
-  }
 };
 
 } // namespace apache::thrift::compiler

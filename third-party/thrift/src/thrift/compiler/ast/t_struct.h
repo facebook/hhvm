@@ -31,7 +31,7 @@ class t_program;
 /**
  * Represents a struct definition.
  */
-class t_struct : public t_structured {
+class t_struct final : public t_structured {
  public:
   t_struct(const t_program* program, std::string name)
       : t_structured(program, std::move(name)) {}
@@ -39,18 +39,8 @@ class t_struct : public t_structured {
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
-  bool is_struct_or_union() const override { return !is_exception(); }
-  bool is_struct() const override { return !is_exception(); }
-
-  using t_structured::clone_DO_NOT_USE;
-
- protected:
-  friend class t_structured;
-  virtual t_struct* clone_DO_NOT_USE() const {
-    auto clone = std::make_unique<t_struct>(program_, name_);
-    clone_structured(clone.get());
-    return clone.release();
-  }
+  bool is_struct_or_union() const override { return true; }
+  bool is_struct() const override { return true; }
 };
 
 } // namespace apache::thrift::compiler

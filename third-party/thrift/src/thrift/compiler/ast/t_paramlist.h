@@ -17,23 +17,28 @@
 #pragma once
 
 #include <thrift/compiler/ast/t_field.h>
-#include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 
 namespace apache::thrift::compiler {
 
 class t_program;
 
-// TODO(afuller): Inherit from t_structured instead.
-class t_paramlist : public t_struct {
+class t_paramlist final : public t_structured {
  public:
   // Param lists are unnamed.
   // TODO(afuller): The program should always be null, because this is an
   // 'unnamed' t_type (or more accurately, not a type at all).
-  explicit t_paramlist(const t_program* program) : t_struct(program, "") {}
+  explicit t_paramlist(const t_program* program) : t_structured(program, "") {}
 
- private:
-  friend class t_structured;
-  t_paramlist* clone_DO_NOT_USE() const override;
+  // TODO(hchok): Remove everything below this comment. It is only provided
+  // for backwards compatibility.
+ public:
+  /**
+   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
+   * never be cloned. This method exists to grand-father specific uses in the
+   * target language generators. Do NOT add any new usage of this method.
+   */
+  std::unique_ptr<t_paramlist> clone_DO_NOT_USE() const;
 };
 
 } // namespace apache::thrift::compiler

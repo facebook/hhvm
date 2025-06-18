@@ -1171,7 +1171,7 @@ class rust_mstch_function : public mstch_function {
     return rust_make_unique_exceptions(
         sink ? sink->final_response_exceptions() : nullptr);
   }
-  mstch::node rust_make_unique_exceptions(const t_struct* s) {
+  mstch::node rust_make_unique_exceptions(const t_structured* s) {
     // When generating From<> impls for an error type, we must not generate one
     // where more than one variant contains the same type of exception. Find
     // only those exceptions that map uniquely to a variant.

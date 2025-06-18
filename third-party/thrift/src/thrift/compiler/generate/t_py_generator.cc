@@ -3864,16 +3864,16 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
     return "None";
   } else if (ttype->is_enum()) {
     return type_name(ttype);
-  } else if (ttype->is_struct_or_union()) {
+  } else if (ttype->is_exception()) {
+    return "[" + type_name(ttype) + ", " + type_name(ttype) +
+        ".thrift_spec, False]";
+  } else if (ttype->is<t_structured>()) {
     string ret = "[" + type_name(ttype) + ", " + type_name(ttype) +
-        ".thrift_spec, " + (((t_struct*)ttype)->is_union() ? "True" : "False");
+        ".thrift_spec, " + (ttype->is<t_union>() ? "True" : "False");
     if (adapter) {
       ret += ", " + *adapter;
     }
     return ret + "]";
-  } else if (ttype->is_exception()) {
-    return "[" + type_name(ttype) + ", " + type_name(ttype) +
-        ".thrift_spec, False]";
   } else if (ttype->is_map()) {
     auto tmap = (t_map*)ttype;
     return std::string("(") + type_to_enum(tmap->get_key_type()) + "," +

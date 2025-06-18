@@ -178,7 +178,7 @@ class t_java_deprecated_generator : public t_concat_generator {
       std::ofstream& out, const t_field* tfield, std::string prefix = "");
 
   void generate_deserialize_struct(
-      std::ofstream& out, const t_struct* tstruct, std::string prefix = "");
+      std::ofstream& out, const t_structured* tstruct, std::string prefix = "");
 
   void generate_deserialize_container(
       std::ofstream& out, const t_type* ttype, std::string prefix = "");
@@ -196,7 +196,7 @@ class t_java_deprecated_generator : public t_concat_generator {
       std::ofstream& out, const t_field* tfield, std::string prefix = "");
 
   void generate_serialize_struct(
-      std::ofstream& out, const t_struct* tstruct, std::string prefix = "");
+      std::ofstream& out, const t_structured* tstruct, std::string prefix = "");
 
   void generate_serialize_container(
       std::ofstream& out, const t_type* ttype, std::string prefix = "");

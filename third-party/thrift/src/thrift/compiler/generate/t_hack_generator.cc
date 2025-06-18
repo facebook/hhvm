@@ -1009,7 +1009,7 @@ class t_hack_generator : public t_concat_generator {
       const t_structured* tstruct,
       bool is_exception = false);
   void generate_php_docstring_args(
-      std::ofstream& out, size_t start_pos, const t_struct* arg_list);
+      std::ofstream& out, size_t start_pos, const t_structured* arg_list);
   void generate_php_docstring_stream_exceptions(
       std::ofstream& out, const t_throws* ex);
 
@@ -6500,7 +6500,7 @@ void t_hack_generator::generate_php_docstring(
  * and then render the argument.
  */
 void t_hack_generator::generate_php_docstring_args(
-    std::ofstream& out, size_t start_pos, const t_struct* arg_list) {
+    std::ofstream& out, size_t start_pos, const t_structured* arg_list) {
   if (arg_list) {
     bool first = true;
     for (const auto& param : arg_list->fields()) {

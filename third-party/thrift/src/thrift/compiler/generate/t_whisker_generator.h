@@ -320,8 +320,14 @@ class t_whisker_generator : public t_generator {
   using h_union = make_handle<t_union>;
   using h_throws = make_handle<t_throws>;
   using h_paramlist = make_handle<t_paramlist>;
-  using h_struct = make_handle<t_struct, h_exception, h_throws, h_paramlist>;
-  using h_structured = make_handle<t_structured, h_struct, h_union>;
+  using h_struct = make_handle<t_struct>;
+  using h_structured = make_handle<
+      t_structured,
+      h_exception,
+      h_paramlist,
+      h_struct,
+      h_throws,
+      h_union>;
   using h_typedef = make_handle<t_typedef>;
   using h_type = make_handle<
       t_type,

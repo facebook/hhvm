@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 
 namespace apache::thrift::compiler {
 
@@ -47,10 +47,10 @@ enum class t_error_safety {
  *
  * Exceptions are similar to structs but can only be used in throws clauses.
  */
-// TODO(afuller): Inherit from t_structured instead.
-class t_exception : public t_struct {
+class t_exception final : public t_structured {
  public:
-  using t_struct::t_struct;
+  t_exception(const t_program* program, std::string name)
+      : t_structured(program, std::move(name)) {}
 
   t_error_kind kind() const { return kind_; }
   void set_kind(t_error_kind kind) { kind_ = kind; }
@@ -82,17 +82,6 @@ class t_exception : public t_struct {
   // for backwards compatibility.
  public:
   bool is_exception() const override { return true; }
-
- private:
-  friend class t_struct;
-  t_exception* clone_DO_NOT_USE() const override {
-    auto clone = std::make_unique<t_exception>(program_, name_);
-    clone_structured(clone.get());
-    clone->kind_ = kind_;
-    clone->blame_ = blame_;
-    clone->safety_ = safety_;
-    return clone.release();
-  }
 };
 
 } // namespace apache::thrift::compiler

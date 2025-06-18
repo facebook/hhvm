@@ -87,16 +87,6 @@ class t_structured : public t_type {
   // Everyting below here is for backwards compatiblity, and will be removed.
   ////
  public:
-  /**
-   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
-   * never be cloned. This method exists to grand-father specific uses in the
-   * target language generators. Do NOT add any new usage of this method.
-   */
-  template <typename S>
-  static std::unique_ptr<S> clone_DO_NOT_USE(const S* sval) {
-    return std::unique_ptr<S>(sval->clone_DO_NOT_USE());
-  }
-
   // Tries to append the gieven field, throwing an exception on failure.
   void append(std::unique_ptr<t_field> elem);
 
@@ -132,12 +122,6 @@ class t_structured : public t_type {
  protected:
   std::vector<t_field*> fields_raw_;
   std::vector<t_field*> fields_raw_id_order_;
-
-  void clone_structured(t_structured* clone) const {
-    for (const auto& field : fields_) {
-      clone->append(field->clone_DO_NOT_USE());
-    }
-  }
 };
 
 } // namespace apache::thrift::compiler

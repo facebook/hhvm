@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 
 namespace apache::thrift::compiler {
 
@@ -25,10 +25,9 @@ class t_program;
 /**
  * The exceptions thrown by a t_function, t_sink, etc.
  */
-// TODO(afuller): Inherit from t_structured instead.
-class t_throws : public t_struct {
+class t_throws : public t_structured {
  public:
-  t_throws() : t_struct(nullptr, "") {}
+  t_throws() : t_structured(nullptr, "") {}
 
   // A helper that returns true if value contains now exceptions, either because
   // it is not set, or because it is empty.
@@ -36,12 +35,21 @@ class t_throws : public t_struct {
     return value == nullptr || !value->has_fields();
   }
 
- private:
-  friend class t_structured;
-  t_throws* clone_DO_NOT_USE() const override {
+  // TODO(hchok): Remove everything below this comment. It is only provided
+  // for backwards compatibility.
+ public:
+  /**
+   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
+   * never be cloned. This method exists to grand-father specific uses in the
+   * target language generators. Do NOT add any new usage of this method.
+   */
+  std::unique_ptr<t_throws> clone_DO_NOT_USE() const {
     auto clone = std::make_unique<t_throws>();
-    clone_structured(clone.get());
-    return clone.release();
+    for (const auto& field : fields_) {
+      clone->append(field->clone_DO_NOT_USE());
+    }
+
+    return clone;
   }
 };
 

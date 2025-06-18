@@ -2576,7 +2576,7 @@ void t_java_deprecated_generator::generate_service_client(
         nullptr,
         t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
         string("send_") + (*f_iter)->get_name(),
-        t_struct::clone_DO_NOT_USE(&(*f_iter)->params()));
+        (*f_iter)->params().clone_DO_NOT_USE());
 
     string argsname = (*f_iter)->get_name() + "_args";
 
@@ -2626,7 +2626,7 @@ void t_java_deprecated_generator::generate_service_client(
           "recv_" + (*f_iter)->get_name(),
           std::make_unique<t_paramlist>(program_));
       if (const t_throws* exceptions = (*f_iter)->exceptions()) {
-        recv_function.set_exceptions(t_struct::clone_DO_NOT_USE(exceptions));
+        recv_function.set_exceptions(exceptions->clone_DO_NOT_USE());
       }
       // Open the recv function
       indent(f_service_) << "public " << function_signature(&recv_function)
@@ -3241,7 +3241,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
   string name = prefix + tfield->get_name();
 
   if (type->is_struct_or_union() || type->is_exception()) {
-    generate_deserialize_struct(out, (t_struct*)type, name);
+    generate_deserialize_struct(out, (t_structured*)type, name);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, name);
   } else if (type->is_enum()) {
@@ -3302,7 +3302,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
  * Generates an unserializer for a struct, invokes read()
  */
 void t_java_deprecated_generator::generate_deserialize_struct(
-    ofstream& out, const t_struct* tstruct, string prefix) {
+    ofstream& out, const t_structured* tstruct, string prefix) {
   if (generate_immutable_structs_ && !tstruct->is_union()) {
     out << indent() << prefix << " = " << type_name(tstruct)
         << ".deserialize(iprot);" << endl;
@@ -3460,7 +3460,7 @@ void t_java_deprecated_generator::generate_serialize_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_serialize_struct(
-        out, (t_struct*)type, prefix + tfield->get_name());
+        out, (t_structured*)type, prefix + tfield->get_name());
   } else if (type->is_container()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
   } else if (type->is_enum()) {
@@ -3527,7 +3527,7 @@ void t_java_deprecated_generator::generate_serialize_field(
  * @param prefix  String prefix to attach to all fields
  */
 void t_java_deprecated_generator::generate_serialize_struct(
-    ofstream& out, const t_struct* /*tstruct*/, string prefix) {
+    ofstream& out, const t_structured* /*tstruct*/, string prefix) {
   out << indent() << prefix << ".write(oprot);" << endl;
 }
 
@@ -4096,7 +4096,16 @@ bool t_java_deprecated_generator::is_comparable(
     return true;
   } else if (type->is_enum()) {
     return true;
-  } else if (type->is_struct_or_union()) {
+  } else if (type->is_exception()) {
+    // There's no particular reason this wouldn't work exactly the same
+    // as it does for structs. I'm not sure we actually want exceptions
+    // to be Comparable though: in addition to the fields we have, which
+    // we know how to compare, they also have stack trace info etc.
+    // inherited from Throwable, which we'd be ignoring. (OTOH, I suppose
+    // we already ignore it for equals.) Let's leave it off for now; we
+    // can always change this to `true` later if somebody has a use case.
+    return false;
+  } else if (type->is<t_structured>()) {
     vector<const t_type*> enclosing2;
     enclosing = enclosing ? enclosing : &enclosing2;
     for (auto iter = enclosing->begin(); iter != enclosing->end(); iter++) {
@@ -4108,15 +4117,6 @@ bool t_java_deprecated_generator::is_comparable(
     bool ret = struct_has_all_comparable_fields((t_struct*)type, enclosing);
     enclosing->pop_back();
     return ret;
-  } else if (type->is_exception()) {
-    // There's no particular reason this wouldn't work exactly the same
-    // as it does for structs. I'm not sure we actually want exceptions
-    // to be Comparable though: in addition to the fields we have, which
-    // we know how to compare, they also have stack trace info etc.
-    // inherited from Throwable, which we'd be ignoring. (OTOH, I suppose
-    // we already ignore it for equals.) Let's leave it off for now; we
-    // can always change this to `true` later if somebody has a use case.
-    return false;
   } else if (type->is_map()) {
     return is_comparable(((t_map*)type)->get_key_type(), enclosing) &&
         is_comparable(((t_map*)type)->get_val_type(), enclosing);
@@ -4149,7 +4149,7 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
     return type->is_binary();
   } else if (type->is_enum()) {
     return false;
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is<t_structured>()) {
     return false;
   } else if (type->is_map()) {
     return type_has_naked_binary(((t_map*)type)->get_key_type()) ||

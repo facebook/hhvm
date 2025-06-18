@@ -222,13 +222,13 @@ prototype<t_struct>::ptr t_whisker_generator::make_prototype_for_struct(
 
 prototype<t_paramlist>::ptr t_whisker_generator::make_prototype_for_paramlist(
     const prototype_database& proto) const {
-  auto def = prototype_builder<h_paramlist>::extends(proto.of<t_struct>());
+  auto def = prototype_builder<h_paramlist>::extends(proto.of<t_structured>());
   return std::move(def).make();
 }
 
 prototype<t_throws>::ptr t_whisker_generator::make_prototype_for_throws(
     const prototype_database& proto) const {
-  auto def = prototype_builder<h_throws>::extends(proto.of<t_struct>());
+  auto def = prototype_builder<h_throws>::extends(proto.of<t_structured>());
   return std::move(def).make();
 }
 

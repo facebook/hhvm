@@ -20,13 +20,13 @@
 
 namespace apache::thrift::compiler {
 
-t_paramlist* t_paramlist::clone_DO_NOT_USE() const {
+std::unique_ptr<t_paramlist> t_paramlist::clone_DO_NOT_USE() const {
   auto clone = std::make_unique<t_paramlist>(program_);
   auto itr = fields_.begin();
   for (; itr != fields_.end(); ++itr) {
     clone->append((*itr)->clone_DO_NOT_USE());
   }
-  return clone.release();
+  return clone;
 }
 
 } // namespace apache::thrift::compiler

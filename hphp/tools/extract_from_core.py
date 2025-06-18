@@ -1,5 +1,4 @@
-#!/usr/bin/env fbpython.lag
-# TODO(T224836988) Change this script to use normal fbpython instead of .lag
+#!/usr/bin/env fbpython
 import argparse
 import io
 import os

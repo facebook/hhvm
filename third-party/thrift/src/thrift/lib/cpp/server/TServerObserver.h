@@ -206,6 +206,8 @@ class TServerObserver {
 
   virtual void pendingConnections(int32_t /*numPendingConnections*/) {}
 
+  virtual void quotaExceeded() {}
+
   // The observer has to specify a sample rate for callCompleted notifications
   inline uint32_t getSampleRate() const { return sampleRate_; }
 

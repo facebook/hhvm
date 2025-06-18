@@ -620,6 +620,12 @@ void Cpp2Worker::dispatchRequest(
         if (result) {
           auto errorCode = errorCodeFromTapplicationException(
               result.value().applicationException().getType());
+
+          if (errorCode == kTenantQuotaExceededErrorCode && server) {
+            if (auto observer = server->getObserver()) {
+              observer->quotaExceeded();
+            }
+          }
           // @lint-ignore CLANGTIDY bugprone-use-after-move
           serverRequest.request()->sendErrorWrapped(
               folly::exception_wrapper(

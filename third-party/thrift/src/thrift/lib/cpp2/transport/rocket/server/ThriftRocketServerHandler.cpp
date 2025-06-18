@@ -896,6 +896,7 @@ void ThriftRocketServerHandler::handleQuotaExceededException(
     const std::string& errorMessage) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
+    observer->quotaExceeded();
   }
 
   request->sendErrorWrapped(

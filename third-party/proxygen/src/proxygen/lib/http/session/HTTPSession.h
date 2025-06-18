@@ -670,7 +670,7 @@ class HTTPSession
                              ProxygenError err,
                              const std::string& extraErrorMsg = "");
 
-  void errorOnTransactionId(HTTPCodec::StreamID id, HTTPException ex);
+  void errorOnTransactionId(HTTPCodec::StreamID id, const HTTPException& ex);
 
   /**
    * Returns true iff this session should shutdown at this time. Default

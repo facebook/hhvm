@@ -2994,15 +2994,15 @@ void HTTPSession::errorOnTransactionIds(
         folly::to<std::string>(
             getErrorString(err), " on transaction id: ", id, extraErrorMsg));
     ex.setProxygenError(err);
-    errorOnTransactionId(id, std::move(ex));
+    errorOnTransactionId(id, ex);
   }
 }
 
 void HTTPSession::errorOnTransactionId(HTTPCodec::StreamID id,
-                                       HTTPException ex) {
+                                       const HTTPException& ex) {
   auto txn = findTransaction(id);
   if (txn != nullptr) {
-    txn->onError(std::move(ex));
+    txn->onError(ex);
   }
 }
 

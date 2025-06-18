@@ -831,7 +831,7 @@ DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
 
   combineActions(dst, am);
 
-  if (!am.count(env.id)) {
+  if (!am.contains(env.id)) {
     dst.emplace(env.id, DceAction::Kill);
   }
   return dst;
@@ -2776,7 +2776,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
 
   auto checkLive = [&] (std::vector<UseInfo>& uis, uint32_t i,
                         LocationId location) {
-    if (forcedLiveLocations.count(location)) return true;
+    if (forcedLiveLocations.contains(location)) return true;
     if (!isLinked(uis[i])) return false;
     assertx(i);
     return uis[i - 1].usage == Use::Used;

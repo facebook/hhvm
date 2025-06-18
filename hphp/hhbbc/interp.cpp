@@ -3861,7 +3861,7 @@ bool fcallTryFold(
     std::move(args),
     std::move(context)
   };
-  if (env.collect.unfoldableFuncs.count(calleeCtx)) return false;
+  if (env.collect.unfoldableFuncs.contains(calleeCtx)) return false;
 
   auto [foldableReturnType, _] = env.index.lookup_foldable_return_type(
     env.ctx,

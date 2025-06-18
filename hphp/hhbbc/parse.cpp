@@ -1215,7 +1215,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
       for (auto const& clo : c->closures) classes.emplace(clo->name);
     }
       for (auto const [name, _] : puState.createClMap) {
-      always_assert(classes.count(name));
+      always_assert(classes.contains(name));
     }
 
     for (auto const& f : ret.funcs)   always_assert(check(*f));

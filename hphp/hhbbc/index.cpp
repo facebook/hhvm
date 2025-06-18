@@ -2487,13 +2487,13 @@ std::vector<ClassGraph> ClassGraph::candidateRegOnlyEquivs() const {
   {
     TLNodeIdxSet visited;
     for (auto const n : nonParents) {
-      if (!heads.count(n)) continue;
+      if (!heads.contains(n)) continue;
       forEachParent(
         *n,
         [&] (Node& p) {
           if (&p == n) return Action::Continue;
-          if (!nonParents.count(&p)) return Action::Continue;
-          if (!heads.count(&p)) return Action::Skip;
+          if (!nonParents.contains(&p)) return Action::Continue;
+          if (!heads.contains(&p)) return Action::Skip;
           heads.erase(&p);
           return Action::Continue;
         },
@@ -2667,7 +2667,7 @@ bool ClassGraph::subSubtypeOf(ClassGraph o, bool nonRegL, bool nonRegR) const {
   if (this_->isTrait() || missing2 || o.this_->isTrait()) {
     return false;
   }
-  return this_->nonRegularInfo().subclassOf.count(o.this_);
+  return this_->nonRegularInfo().subclassOf.contains(o.this_);
 }
 
 bool ClassGraph::exactCouldBeExact(ClassGraph o,
@@ -2813,7 +2813,7 @@ ClassGraph::calcSubclassOfSplit(Node& n) {
     *first,
     [&] (Node& p) {
       // Ignore parents since we already know about this.
-      if (parents.count(&p)) return Action::Skip;
+      if (parents.contains(&p)) return Action::Skip;
       candidates.emplace_back(&p);
       return Action::Continue;
     }
@@ -2867,7 +2867,7 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
     if (!base.hasRegularSubclass()) return nullptr;
   }
   if (subclassOf.size() == 1) {
-    assertx(subclassOf.count(&base));
+    assertx(subclassOf.contains(&base));
     return &base;
   }
 
@@ -2885,13 +2885,13 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
   {
     TLNodeIdxSet visited;
     for (auto const n : subclassOf) {
-      if (!heads.count(n)) continue;
+      if (!heads.contains(n)) continue;
       forEachParent(
         *n,
         [&] (Node& p) {
           if (&p == n) return Action::Continue;
-          if (!subclassOf.count(&p)) return Action::Continue;
-          if (!heads.count(&p)) return Action::Skip;
+          if (!subclassOf.contains(&p)) return Action::Continue;
+          if (!heads.contains(&p)) return Action::Skip;
           heads.erase(&p);
           return Action::Continue;
         },
@@ -3018,11 +3018,11 @@ ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
       combined.insert(begin(s1), end(s1));
     } else if (s1.size() < s2.size()) {
       for (auto const e : s1) {
-        if (s2.count(e)) combined.emplace(e);
+        if (s2.contains(e)) combined.emplace(e);
       }
     } else {
       for (auto const e : s2) {
-        if (s1.count(e)) combined.emplace(e);
+        if (s1.contains(e)) combined.emplace(e);
       }
     }
   };
@@ -3167,7 +3167,7 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
         // candidates (all of the parents of this node minus the
         // heads) and set up the tracker.
         auto common = n.isMissing() ? NodeSet{&n} : allParents(n);
-        folly::erase_if(common, [&] (Node* c) { return heads.count(c); });
+        folly::erase_if(common, [&] (Node* c) { return heads.contains(c); });
         if (common.size() <= SmallBitset::kMaxSize) {
           small.emplace(common, &heads);
         } else {
@@ -3332,15 +3332,15 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
   {
     TLNodeIdxSet visited;
     for (auto const n : nodes) {
-      if (!heads.count(n)) continue;
+      if (!heads.contains(n)) continue;
       auto const allowed = ClassGraph{n}.ensure();
       if (!allowed || n->isMissing()) continue;
       forEachParent(
         *n,
         [&] (Node& p) {
           if (&p == n) return Action::Continue;
-          if (!nodes.count(&p)) return Action::Continue;
-          if (!heads.count(&p)) return Action::Skip;
+          if (!nodes.contains(&p)) return Action::Continue;
+          if (!heads.contains(&p)) return Action::Skip;
           heads.erase(&p);
           return Action::Continue;
         },
@@ -6349,19 +6349,19 @@ struct DepTracker {
 
   void restrict(Class c, BucketPresence b) {
     assertx(b.present->contains(index.bucketIdx));
-    assertx(index.badClasses.count(c.name));
+    assertx(index.badClasses.contains(c.name));
     always_assert(badClassAllows.emplace(c.name, std::move(b)).second);
   }
 
   void restrict(Func f, BucketPresence b) {
     assertx(b.present->contains(index.bucketIdx));
-    assertx(index.badFuncs.count(f.name));
+    assertx(index.badFuncs.contains(f.name));
     always_assert(badFuncAllows.emplace(f.name, std::move(b)).second);
   }
 
   void restrict(Constant cns, BucketPresence b) {
     assertx(b.present->contains(index.bucketIdx));
-    assertx(index.badConstants.count(cns.name));
+    assertx(index.badConstants.contains(cns.name));
     always_assert(badConstantAllows.emplace(cns.name, std::move(b)).second);
   }
 
@@ -6424,7 +6424,7 @@ private:
         assertx(ua->present->contains(index.bucketIdx));
         return a->process->isSubset(*ua->present);
       }
-      if (index.badClasses.count(c.name)) {
+      if (index.badClasses.contains(c.name)) {
         auto const ca = folly::get_ptr(badClassAllows, c.name);
         assertx(ca);
         assertx(ca->present->contains(index.bucketIdx));
@@ -6449,7 +6449,7 @@ private:
         bytecode ? *fa->withBC : *fa->present
       );
     }
-    if (index.badFuncs.count(f.name)) {
+    if (index.badFuncs.contains(f.name)) {
       auto const fa = folly::get_ptr(badFuncAllows, f.name);
       assertx(fa);
       assertx(fa->present->contains(index.bucketIdx));
@@ -6471,7 +6471,7 @@ private:
       assertx(ua->present->contains(index.bucketIdx));
       return a->process->isSubset(*ua->present);
     }
-    if (index.badConstants.count(cns.name)) {
+    if (index.badConstants.contains(cns.name)) {
       auto const ca = folly::get_ptr(badConstantAllows, cns.name);
       assertx(ca);
       assertx(ca->present->contains(index.bucketIdx));
@@ -6723,7 +6723,7 @@ const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
   auto const cls = folly::get_default(index.classes, meth.cls);
   if (!cls) {
     always_assert_flog(
-      !index.badClasses.count(meth.cls),
+      !index.badClasses.contains(meth.cls),
       "MethRef references non-existent class {}\n",
       meth.cls
     );
@@ -6750,7 +6750,7 @@ bool ClassGraph::storeAuxs(AnalysisIndex::IndexData& i, bool children) const {
       auxs.newNoChildren.erase(*this);
       return true;
     } else {
-      if (auxs.newWithChildren.count(*this)) return false;
+      if (auxs.newWithChildren.contains(*this)) return false;
       return auxs.newNoChildren.emplace(*this).second;
     }
   };
@@ -6797,8 +6797,8 @@ bool ClassGraph::onAuxs(AnalysisIndex::IndexData& i, bool children) const {
 
     if (target == this_) return true;
     // Check for direct membership first
-    if (auxs.withChildren.count(*this)) return true;
-    if (auxs.noChildren.count(*this)) return !children;
+    if (auxs.withChildren.contains(*this)) return true;
+    if (auxs.noChildren.contains(*this)) return !children;
     if (this_->isMissing()) return false;
 
     // Check if any parents of this Node are on the set.
@@ -6807,7 +6807,7 @@ bool ClassGraph::onAuxs(AnalysisIndex::IndexData& i, bool children) const {
         *this_,
         [&] (Node& p) {
           if (target == &p) return Action::Stop;
-          return auxs.withChildren.count(ClassGraph { &p })
+          return auxs.withChildren.contains(ClassGraph { &p })
             ? Action::Stop
             : Action::Continue;
         }
@@ -7209,7 +7209,7 @@ void compute_iface_vtables(IndexData& index,
   if (debug) {
     // Make sure we have an initialized entry for each slot for the sort below.
     for (Slot slot = 0; slot < maxSlot; ++slot) {
-      always_assert(slotUses.count(slot));
+      always_assert(slotUses.contains(slot));
     }
   }
 
@@ -7797,7 +7797,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     // no override.
     if (is_special_method_name(name) || (mte.attrs & AttrNoOverride)) {
       always_assert(famIt == end(cinfo->methodFamilies));
-      always_assert(!cinfo->methodFamiliesAux.count(name));
+      always_assert(!cinfo->methodFamiliesAux.contains(name));
       continue;
     } else {
       always_assert(famIt != end(cinfo->methodFamilies));
@@ -7884,14 +7884,14 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
   // "Aux" entries should only exist for methods on this class, and
   // with a corresponding methodFamilies entry.
   for (auto const& [name, _] : cinfo->methodFamiliesAux) {
-    always_assert(cinfo->methods.count(name));
-    always_assert(cinfo->methodFamilies.count(name));
+    always_assert(cinfo->methods.contains(name));
+    always_assert(cinfo->methodFamilies.contains(name));
   }
 
   // We should only have func families for methods declared on this
   // class (except for interfaces and abstract classes).
   for (auto const& [name, entry] : cinfo->methodFamilies) {
-    if (cinfo->methods.count(name)) continue;
+    if (cinfo->methods.contains(name)) continue;
     // Interfaces and abstract classes can have func families for
     // methods not defined on this class.
     always_assert(cinfo->cls->attrs & (AttrInterface|AttrAbstract));
@@ -9551,7 +9551,7 @@ struct FlattenJob {
 
       auto const cinfoIt = index.m_classInfos.find(name);
       if (cinfoIt == end(index.m_classInfos)) {
-        assertx(outMeta.uninstantiable.count(name));
+        assertx(outMeta.uninstantiable.contains(name));
         continue;
       }
       auto& cinfo = cinfoIt->second;
@@ -9646,7 +9646,7 @@ struct FlattenJob {
     );
     for (auto clo : newClosures) {
       assertx(clo->closureContextCls);
-      if (!outNames.count(clo->closureContextCls)) continue;
+      if (!outNames.contains(clo->closureContextCls)) continue;
       outMeta.newClosures.emplace_back(
         OutputMeta::NewClosure{clo->unit, clo->name, clo->closureContextCls}
       );
@@ -9790,7 +9790,7 @@ private:
     }
 
     bool uninstantiable(SString name) const {
-      return m_uninstantiable.count(name);
+      return m_uninstantiable.contains(name);
     }
 
     const TypeMapping* typeMapping(SString name) const {
@@ -9798,7 +9798,7 @@ private:
     }
 
     bool missingType(SString name) const {
-      return m_missingTypes.count(name);
+      return m_missingTypes.contains(name);
     }
 
     const php::Func& meth(const MethRef& r) const {
@@ -10125,7 +10125,7 @@ private:
     }
 
     auto const clsHasModuleLevelTrait =
-      cls.userAttributes.count(s___ModuleLevelTrait.get());
+      cls.userAttributes.contains(s___ModuleLevelTrait.get());
     if (clsHasModuleLevelTrait &&
         (!(cls.attrs & AttrTrait) || (cls.attrs & AttrInternal))) {
       ITRACE(2,
@@ -10213,7 +10213,7 @@ private:
     // necessary later), except for special methods, which are always
     // considered to be overridden.
     for (auto& [name, mte] : cinfo->methods) {
-      assertx(!cinfo->missingMethods.count(name));
+      assertx(!cinfo->missingMethods.contains(name));
       if (is_special_method_name(name)) {
         attribute_setter(mte.attrs, false, AttrNoOverride);
         mte.clearNoOverrideRegular();
@@ -10469,7 +10469,7 @@ private:
       for (auto const& [cnsName, cnsIdx] : iface.clsConstants) {
         auto const added = add_constant(
           index, cinfo, state, cnsName,
-          cnsIdx, ifaceState.m_cnsFromTrait.count(cnsName)
+          cnsIdx, ifaceState.m_cnsFromTrait.contains(cnsName)
         );
         if (!added) return false;
       }
@@ -10644,7 +10644,7 @@ private:
       if (fromTrait) {
         always_assert(state.m_cnsFromTrait.emplace(name).second);
       } else {
-        always_assert(!state.m_cnsFromTrait.count(name));
+        always_assert(!state.m_cnsFromTrait.contains(name));
       }
       return true;
     }
@@ -10794,7 +10794,7 @@ private:
         auto const res = cinfo.methods.emplace(m->name, MethTabEntry { *m });
         always_assert(res.second);
         always_assert(state.m_methodIndices.emplace(m->name, idx++).second);
-        if (cinfo.missingMethods.count(m->name)) {
+        if (cinfo.missingMethods.contains(m->name)) {
           assertx(!res.first->second.firstName());
           cinfo.missingMethods.erase(m->name);
         } else {
@@ -10881,7 +10881,7 @@ private:
 
     auto idx = cinfo.methods.size();
     auto const clsHasModuleLevelTrait =
-      cls.userAttributes.count(s___ModuleLevelTrait.get());
+      cls.userAttributes.contains(s___ModuleLevelTrait.get());
 
     // Now add our methods.
     for (auto const& m : cls.methods) {
@@ -10906,7 +10906,7 @@ private:
           m->name
         );
         always_assert(state.m_methodIndices.emplace(m->name, idx++).second);
-        if (cinfo.missingMethods.count(m->name)) {
+        if (cinfo.missingMethods.contains(m->name)) {
           assertx(!emplaced.first->second.firstName());
           cinfo.missingMethods.erase(m->name);
         } else {
@@ -10917,7 +10917,7 @@ private:
 
       // If the method is already in our table, it shouldn't be
       // missing.
-      assertx(!cinfo.missingMethods.count(m->name));
+      assertx(!cinfo.missingMethods.contains(m->name));
 
       assertx(!emplaced.first->second.firstName());
 
@@ -10953,7 +10953,7 @@ private:
 
         for (auto const name : t.missingMethods) {
           assertx(!is_special_method_name(name));
-          if (cinfo.methods.count(name)) continue;
+          if (cinfo.methods.contains(name)) continue;
           cinfo.missingMethods.emplace(name);
         }
 
@@ -10974,7 +10974,7 @@ private:
 
       auto const traitMethods = tmid.finish(
         std::make_pair(&cinfo, &cls),
-        cls.userAttributes.count(s___EnableMethodTraitDiamond.get())
+        cls.userAttributes.contains(s___EnableMethodTraitDiamond.get())
       );
 
       // Import the methods.
@@ -11008,7 +11008,7 @@ private:
           );
           cinfo.missingMethods.erase(mdata.name);
         } else {
-          assertx(!cinfo.missingMethods.count(mdata.name));
+          assertx(!cinfo.missingMethods.contains(mdata.name));
           if (attrs & AttrAbstract) continue;
           if (emplaced.first->second.meth().cls->tsame(cls.name)) continue;
           if (!overridden(emplaced.first->second, MethRef { *method }, attrs)) {
@@ -11554,13 +11554,13 @@ private:
       auto const firstName = [&, name=name] {
         if (cls.parentName) {
           auto const& parentInfo = index.classInfo(cls.parentName);
-          if (parentInfo.methods.count(name)) return false;
-          if (parentInfo.missingMethods.count(name)) return false;
+          if (parentInfo.methods.contains(name)) return false;
+          if (parentInfo.missingMethods.contains(name)) return false;
         }
         for (auto const iname : cinfo.classGraph.interfaces()) {
           auto const& iface = index.classInfo(iname.name());
-          if (iface.methods.count(name)) return false;
-          if (iface.missingMethods.count(name)) return false;
+          if (iface.methods.contains(name)) return false;
+          if (iface.missingMethods.contains(name)) return false;
         }
         return true;
       }();
@@ -12000,7 +12000,7 @@ void flatten_type_mappings(IndexData& index,
               }
               tvu.emplace_back(next_type, tc.flags() | flags, next_value);
             }
-          } else if (index.classRefs.count(name)) {
+          } else if (index.classRefs.contains(name)) {
             if (inEnum) {
               FTRACE(
                 2, "Type-mapping '{}' is invalid because it resolves to "
@@ -12487,7 +12487,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     size_t parentIdx = 0;
     size_t methodIdx = 0;
     for (auto const name : work.classes) {
-      if (clsMeta.uninstantiable.count(name)) {
+      if (clsMeta.uninstantiable.contains(name)) {
         assertx(methodIdx < methodRefs.size());
         updates.emplace_back(
           MethodUpdate{ name, std::move(methodRefs[methodIdx]) }
@@ -12507,8 +12507,8 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(cinfoRefs[outputIdx]),
           nullptr,
           std::move(clsMeta.classTypeUses[outputIdx]),
-          (bool)clsMeta.interfaces.count(name),
-          (bool)clsMeta.with86init.count(name)
+          (bool)clsMeta.interfaces.contains(name),
+          (bool)clsMeta.with86init.contains(name)
         }
       );
 
@@ -12534,7 +12534,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     }
 
     for (auto const name : work.uninstantiable) {
-      assertx(clsMeta.uninstantiable.count(name));
+      assertx(clsMeta.uninstantiable.contains(name));
       assertx(methodIdx < methodRefs.size());
       updates.emplace_back(
         MethodUpdate{ name, std::move(methodRefs[methodIdx]) }
@@ -13168,7 +13168,7 @@ struct BuildSubclassListJob {
         begin(phpClasses.vals),
         end(phpClasses.vals),
         [&] (const std::unique_ptr<php::Class>& c) {
-          return !index.top.count(c->name);
+          return !index.top.contains(c->name);
         }
       ),
       end(phpClasses.vals)
@@ -13398,7 +13398,7 @@ protected:
       info.regularComplete = false;
 
       for (auto const& meth : entryInfo.regularMeths) {
-        if (info.regularMeths.count(meth)) continue;
+        if (info.regularMeths.contains(meth)) continue;
         info.regularMeths.emplace(meth);
         info.nonRegularPrivateMeths.erase(meth);
         info.nonRegularMeths.erase(meth);
@@ -13495,7 +13495,7 @@ protected:
     auto const onParent = [&] (SString parent, const ClassInfo2* child) {
       // Due to how work is divided, a class might have parents not
       // present in this job. Ignore those.
-      if (!index.classInfos.count(parent)) return;
+      if (!index.classInfos.contains(parent)) return;
       children[parent].emplace(child->name);
       // If you're a parent, you're not a leaf.
       index.leafs.erase(parent);
@@ -13517,8 +13517,8 @@ protected:
       SCOPE_ASSERT_DETAIL("Edge not present in job") {
         return folly::sformat("{} -> {}", edge.cls, edge.split);
       };
-      assertx(index.classInfos.count(edge.cls));
-      assertx(index.splits.count(edge.split));
+      assertx(index.classInfos.contains(edge.cls));
+      assertx(index.splits.contains(edge.split));
       children[edge.cls].emplace(edge.split);
     }
 
@@ -13549,7 +13549,7 @@ protected:
       while (!toExplore.empty()) {
         toExploreNext.clear();
         for (auto const child : toExplore) {
-          if (visited.count(child)) continue;
+          if (visited.contains(child)) continue;
           visited.emplace(child);
           auto const it = children.find(child);
           // May not exist in children if processed in earlier round.
@@ -13753,8 +13753,8 @@ protected:
 
       // Create a MethInfo for any missing methods as well.
       for (auto const name : cinfo->missingMethods) {
-        assertx(!cinfo->methods.count(name));
-        if (data.methods.count(name)) continue;
+        assertx(!cinfo->methods.contains(name));
+        if (data.methods.contains(name)) continue;
         // The MethInfo will be empty, and be marked as incomplete.
         auto& info = data.methods[name];
         info.complete = false;
@@ -13794,7 +13794,7 @@ protected:
 
     // A split cannot be both a root and a dependency due to how we
     // set up the buckets.
-    assertx(!index.top.count(clsname));
+    assertx(!index.top.contains(clsname));
     auto const split = folly::get_default(index.splits, clsname);
     always_assert(split != nullptr);
     assertx(split->children.empty());
@@ -13817,7 +13817,7 @@ protected:
           // child. "Promote" the MethRefs if they're in a superior
           // status in the child.
           for (auto const& meth : childInfo->regularMeths) {
-            if (info.regularMeths.count(meth)) continue;
+            if (info.regularMeths.contains(meth)) continue;
             info.regularMeths.emplace(meth);
             info.nonRegularPrivateMeths.erase(meth);
             info.nonRegularMeths.erase(meth);
@@ -13895,7 +13895,7 @@ protected:
         if (!info.regularComplete || info.privateAncestor) continue;
         if (is_special_method_name(name)) continue;
         if (name == s_construct.get()) continue;
-        if (data.methods.count(name)) continue;
+        if (data.methods.contains(name)) continue;
         auto& newInfo = data.methods[name];
         newInfo.regularMeths = std::move(info.regularMeths);
         newInfo.nonRegularPrivateMeths =
@@ -14066,7 +14066,7 @@ protected:
 
     // See if this id exists already. If so, record it in the cache
     // and we're done.
-    if (index.funcFamilies.count(id)) {
+    if (index.funcFamilies.contains(id)) {
       index.funcFamilyCache.emplace(
         MethInfoTuple{
           std::move(info.regularMeths),
@@ -14219,7 +14219,7 @@ protected:
     const std::vector<std::unique_ptr<Split>>& splits
   ) {
     for (auto const& cinfo : roots) {
-      assertx(index.top.count(cinfo->name));
+      assertx(index.top.contains(cinfo->name));
       // Process the children of this class and build a unified Data
       // for it.
       auto data = aggregate_data(index, cinfo->name);
@@ -14304,16 +14304,16 @@ protected:
             // nonRegularPrivateMeths.
             assertx(!cinfo->isRegularClass);
             if (info.nonRegularPrivateMeths.empty()) {
-              assertx(info.nonRegularMeths.count(meth));
+              assertx(info.nonRegularMeths.contains(meth));
               return true;
             }
             assertx(info.nonRegularMeths.empty());
-            assertx(info.nonRegularPrivateMeths.count(meth));
+            assertx(info.nonRegularPrivateMeths.contains(meth));
             return true;
           }
           assertx(info.nonRegularPrivateMeths.empty());
           assertx(info.nonRegularMeths.empty());
-          assertx(info.regularMeths.count(meth));
+          assertx(info.regularMeths.contains(meth));
           return true;
         };
 
@@ -14337,18 +14337,18 @@ protected:
             // good.
             assertx(!cinfo->isRegularClass);
             if (info.nonRegularPrivateMeths.empty()) return true;
-            return (bool)info.nonRegularPrivateMeths.count(meth);
+            return (bool)info.nonRegularPrivateMeths.contains(meth);
           }
           if (cinfo->isRegularClass) {
             // If this class is regular, the method on this class
             // should be marked as regular.
-            assertx(info.regularMeths.count(meth));
+            assertx(info.regularMeths.contains(meth));
             return true;
           }
           // We know regularMeths is non-empty, and the size is at
           // most one. If this method is the (only) one in
           // regularMeths, it's not overridden by anything.
-          return (bool)info.regularMeths.count(meth);
+          return (bool)info.regularMeths.contains(meth);
         };
 
         if (!noOverrideRegular()) {
@@ -14372,7 +14372,7 @@ protected:
             if (cinfo->isRegularClass ||
                 cinfo->classGraph.mightHaveRegularSubclass()) {
               always_assert(info.regularMeths.size() == 1);
-              always_assert(info.regularMeths.count(meth));
+              always_assert(info.regularMeths.contains(meth));
               always_assert(info.nonRegularPrivateMeths.empty());
               always_assert(info.nonRegularMeths.empty());
             } else {
@@ -14453,7 +14453,7 @@ protected:
        * abstract class/interface in a later round.
        */
       for (auto& [name, info] : data.methods) {
-        if (cinfo->methods.count(name)) continue;
+        if (cinfo->methods.contains(name)) continue;
         assertx(!is_special_method_name(name));
         auto entry = make_method_family_entry(index, name, std::move(info));
         always_assert(
@@ -14466,7 +14466,7 @@ protected:
             !(prop.attrs & (AttrStatic | AttrPrivate))) {
           attribute_setter(
             prop.attrs,
-            !data.propsWithImplicitNullable.count(prop.name),
+            !data.propsWithImplicitNullable.contains(prop.name),
             AttrNoImplicitNullable
           );
         }
@@ -14497,7 +14497,7 @@ protected:
     // been processed yet (and no other job should process it), all of
     // the fields should be their default settings.
     for (auto& split : splits) {
-      assertx(index.top.count(split->name));
+      assertx(index.top.contains(split->name));
       split->data = aggregate_data(index, split->name);
       // This split inherits all of the splits of their children.
       for (auto const child : split->children) {
@@ -14628,15 +14628,15 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
   };
 
   auto const processSubgraph = [&](SString cls) {
-    assertx(!processed.count(cls));
+    assertx(!processed.contains(cls));
 
     addRoot(cls);
     for (auto const& child : getDeps(cls, getDeps).deps) {
-      if (processed.count(child)) continue;
-      if (visited.count(child)) continue;
+      if (processed.contains(child)) continue;
+      if (visited.contains(child)) continue;
       visited.insert(child);
       // Leaves use special leaf-promotion logic in assign_hierarchial_work
-      if (leafs.count(child)) continue;
+      if (leafs.contains(child)) continue;
       addRoot(child);
     }
     if (cost < kMaxBucketSize) return;
@@ -14711,7 +14711,7 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
       return std::make_pair(&deps, true);
     },
     [&] (const TSStringSet&, size_t, SString c) -> Optional<size_t> {
-      if (!leafs.count(c)) return std::nullopt;
+      if (!leafs.contains(c)) return std::nullopt;
       return subclassMeta.meta.at(c).idx;
     }
   );
@@ -14772,7 +14772,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
                                auto const& self) -> const DepData& {
       // If it's processed, there's implicitly no dependencies
       static DepData empty;
-      if (processed.count(cls)) return empty;
+      if (processed.contains(cls)) return empty;
 
       // Look up the metadata for this class. If we don't find any,
       // assume that it's for a split.
@@ -14795,7 +14795,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
             // At a minimum, we need the immediate deps in order to
             // construct the subclass lists for the parent.
             out.deps.emplace(c);
-            if (splitDeps.count(c)) out.edges.emplace(c);
+            if (splitDeps.contains(c)) out.edges.emplace(c);
             auto const& childDeps = self(c, self);
             if (childDeps.deps.size() <= kMaxBucketSize) ++out.processChildren;
             out.deps.insert(begin(childDeps.deps), end(childDeps.deps));
@@ -15049,7 +15049,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       for (auto const cls : w.classes) {
         bucket.cost += depsSize(cls);
         markProcessed.emplace_back(cls);
-        if (leafs.count(cls)) {
+        if (leafs.contains(cls)) {
           leafs.erase(cls);
           bucket.leafs.emplace_back(cls);
         } else {
@@ -15088,7 +15088,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     toProcess.erase(
       std::remove_if(
         begin(toProcess), end(toProcess),
-        [&] (SString c) { return processed.count(c); }
+        [&] (SString c) { return processed.contains(c); }
       ),
       end(toProcess)
     );
@@ -15522,7 +15522,7 @@ struct InitTypesJob {
       if (cinfo->isRegularClass) {
         folly::erase_if(
           cinfo->methodFamilies,
-          [&] (auto const& e) { return !cinfo->methods.count(e.first); }
+          [&] (auto const& e) { return !cinfo->methods.contains(e.first); }
         );
       }
 
@@ -15597,7 +15597,7 @@ private:
   static void unresolve_missing(const LocalIndex& index, TypeConstraint& tc) {
     if (!tc.isSubObject()) return;
     auto const name = tc.clsName();
-    if (index.classInfos.count(name)) return;
+    if (index.classInfos.contains(name)) return;
     FTRACE(
       4, "Unresolving type-constraint for '{}' because it does not exist\n",
       name
@@ -15859,7 +15859,7 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
       for (auto const& entry : entries) {
         auto entryInfo = meth_info_from_func_family_entry(index, entry);
         for (auto const& meth : entryInfo.regularMeths) {
-          if (info.regularMeths.count(meth)) continue;
+          if (info.regularMeths.contains(meth)) continue;
           info.regularMeths.emplace(meth);
           info.nonRegularPrivateMeths.erase(meth);
           info.nonRegularMeths.erase(meth);
@@ -15941,7 +15941,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
         // A class and a func could have the same name. Avoid
         // duplicates. If we do have a name collision it just means
         // the func and class will be assigned to the same bucket.
-        if (meta.classes.count(name)) continue;
+        if (meta.classes.contains(name)) continue;
         roots.emplace_back(name);
       }
       return roots;
@@ -16015,11 +16015,11 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     classNames.reserve(work.size());
 
     for (auto const w : work) {
-      if (meta.classes.count(w)) {
+      if (meta.classes.contains(w)) {
         always_assert(roots.emplace(w).second);
         classNames.emplace_back(w);
       }
-      if (meta.funcs.count(w)) funcNames.emplace_back(w);
+      if (meta.funcs.contains(w)) funcNames.emplace_back(w);
     }
 
     // Add a dependency to the job. A class is a dependency if it
@@ -16524,7 +16524,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
     FTRACE(5, "class bytecode {} -> {}\n", bc.name, bc.bc.id().toString());
 
     always_assert_flog(
-      index.classRefs.count(bc.name),
+      index.classRefs.contains(bc.name),
       "Class bytecode for non-existent class {}",
       bc.name
     );
@@ -16539,7 +16539,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
     FTRACE(5, "func bytecode {} -> {}\n", bc.name, bc.bc.id().toString());
 
     always_assert_flog(
-      index.funcRefs.count(bc.name),
+      index.funcRefs.contains(bc.name),
       "Func bytecode for non-existent func {}",
       bc.name
     );
@@ -16566,7 +16566,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
       }
     } else {
       always_assert_flog(
-        !methCallerUnits.count(bc.name),
+        !methCallerUnits.contains(bc.name),
         "Bytecode for func {} is not marked as meth-caller, "
         "but func is a meth-caller",
         bc.name
@@ -16586,7 +16586,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
       if (is_native_unit(unitAndInit.first)) continue;
       auto const initName = Constant::funcNameFromName(cns);
       always_assert_flog(
-        index.funcRefs.count(initName) > 0,
+        index.funcRefs.contains(initName),
         "Constant {} is marked as having initialization func {}, "
         "but it does not exist",
         cns, initName
@@ -17025,7 +17025,7 @@ void make_class_infos_local(
           assertx(!is_special_method_name(name));
 
           auto expanded = false;
-          if (!cinfo->methods.count(name)) {
+          if (!cinfo->methods.contains(name)) {
             if (!(cinfo->cls->attrs & (AttrAbstract|AttrInterface))) continue;
             if (!cinfo->classGraph.mightHaveRegularSubclass()) continue;
             if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
@@ -20608,16 +20608,16 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
                                const SStringSet& keepUnits,
                                const SStringSet& keepConstants) {
   folly::erase_if(
-    funcs, [&] (auto const& p) { return !keepFuncs.count(p.first); }
+    funcs, [&] (auto const& p) { return !keepFuncs.contains(p.first); }
   );
   folly::erase_if(
-    methods, [&] (auto const& p) { return !keepClasses.count(p.first.cls); }
+    methods, [&] (auto const& p) { return !keepClasses.contains(p.first.cls); }
   );
   folly::erase_if(
-    constants, [&] (SString s) { return !keepConstants.count(s); }
+    constants, [&] (SString s) { return !keepConstants.contains(s); }
   );
   folly::erase_if(
-    clsConstants, [&] (ConstIndex idx) { return !keepClasses.count(idx.cls); }
+    clsConstants, [&] (ConstIndex idx) { return !keepClasses.contains(idx.cls); }
   );
   folly::erase_if(
     fixedClsConstants,
@@ -20626,16 +20626,16 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
     }
   );
   folly::erase_if(
-    allClsConstantsFixed, [&] (SString s) { return !keepClasses.count(s); }
+    allClsConstantsFixed, [&] (SString s) { return !keepClasses.contains(s); }
   );
   folly::erase_if(
-    unitsFixed, [&] (SString s) { return !keepUnits.count(s); }
+    unitsFixed, [&] (SString s) { return !keepUnits.contains(s); }
   );
   folly::erase_if(
-    clsTypeCnsNames, [&] (auto const& p) { return !keepClasses.count(p.first); }
+    clsTypeCnsNames, [&] (auto const& p) { return !keepClasses.contains(p.first); }
   );
   folly::erase_if(
-    unitTypeCnsNames, [&] (auto const& p) { return !keepUnits.count(p.first); }
+    unitTypeCnsNames, [&] (auto const& p) { return !keepUnits.contains(p.first); }
   );
 }
 
@@ -21064,15 +21064,15 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
       case DepState::Func:
         return funcs.count(name) || output.meta.removedFuncs.count(name);
       case DepState::Class: {
-        if (!is_closure_name(name)) return (bool)classes.count(name);
+        if (!is_closure_name(name)) return (bool)classes.contains(name);
         auto const ctx = folly::get_default(index.m_data->closureToClass, name);
-        if (ctx) return (bool)classes.count(ctx);
+        if (ctx) return (bool)classes.contains(ctx);
         auto const f = folly::get_default(index.m_data->closureToFunc, name);
         always_assert(f);
-        return (bool)funcs.count(f);
+        return (bool)funcs.contains(f);
       }
       case DepState::Unit:
-        return (bool)units.count(name);
+        return (bool)units.contains(name);
     }
   };
 
@@ -21449,7 +21449,7 @@ void AnalysisScheduler::removeFuncs() {
   funcNames.erase(
     std::remove_if(
       begin(funcNames), end(funcNames),
-      [&] (SString name) { return funcsToRemove.count(name); }
+      [&] (SString name) { return funcsToRemove.contains(name); }
     ),
     end(funcNames)
   );
@@ -21458,7 +21458,7 @@ void AnalysisScheduler::removeFuncs() {
     traceNames.erase(
       std::remove_if(
         begin(traceNames), end(traceNames),
-        [&] (SString name) { return traceNamesToRemove.count(name); }
+        [&] (SString name) { return traceNamesToRemove.contains(name); }
       ),
       end(traceNames)
     );
@@ -21935,9 +21935,9 @@ void AnalysisScheduler::addClassToInput(SString name,
 
   using K = AnalysisInput::Kind;
   auto k = K::Rep | K::Bytecode;
-  if (index.m_data->classInfoRefs.count(name)) {
+  if (index.m_data->classInfoRefs.contains(name)) {
     k |= K::Info;
-  } else if (index.m_data->uninstantiableClsMethRefs.count(name)) {
+  } else if (index.m_data->uninstantiableClsMethRefs.contains(name)) {
     k |= K::MInfo;
   } else {
     input.meta.badClasses.emplace(name);
@@ -21993,13 +21993,13 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
   auto const clsRef = folly::get_ptr(index.m_data->classRefs, cls);
   if (!clsRef) {
     if (!is_closure_name(cls)) return badClass();
-    assertx(!index.m_data->closureToFunc.count(cls));
+    assertx(!index.m_data->closureToFunc.contains(cls));
     auto const ctx = folly::get_default(index.m_data->closureToClass, cls);
     if (!ctx) return badClass();
     if (fromClosureCtx) return;
     return addDepClassToInput(ctx, depSrc, addBytecode, input);
   }
-  assertx(!index.m_data->closureToClass.count(cls));
+  assertx(!index.m_data->closureToClass.contains(cls));
 
   if (any(old & K::Dep)) {
     if (!addBytecode || any(old & K::Bytecode)) return;
@@ -22106,7 +22106,7 @@ void AnalysisScheduler::addDepConstantToInput(SString cns,
 
   auto const initName = Constant::funcNameFromName(cns);
   always_assert_flog(
-    index.m_data->funcRefs.count(initName),
+    index.m_data->funcRefs.contains(initName),
     "Constant {} is missing expected initialization function {}",
     cns, initName
   );
@@ -22519,7 +22519,7 @@ void AnalysisScheduler::maybeDumpTraces() const {
             from, *d,
             [&] (SString to) {
               if (from->tsame(to)) return;
-              if (!traceState.count(to)) return;
+              if (!traceState.contains(to)) return;
               traceEdges[from].emplace(to);
               if (!traces.emplace(to).second) return;
               worklist.emplace_back(to);
@@ -22677,7 +22677,7 @@ void AnalysisScheduler::tracePass2() {
       // Build the trace up by using the transitive dependencies.
       std::vector<SString> worklist;
       auto const add = [&] (SString n) {
-        if (!traceState.count(n)) return;
+        if (!traceState.contains(n)) return;
         if (!state.trace.emplace(n).second) return;
         if (n->tsame(name)) return;
         worklist.emplace_back(n);
@@ -22918,7 +22918,7 @@ AnalysisScheduler::tracePass5(size_t bucketSize,
         always_assert(s);
         if (!s->eligible) return;
         always_assert_flog(
-          inputs.count(n),
+          inputs.contains(n),
           "{} should be present in at least one bucket's inputs, but is not",
           n
         );
@@ -23147,7 +23147,7 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
         }
       }
       if (any(k & K::Bytecode)) withBC.add(i);
-      if (input.meta.badClasses.count(name)) present.add(i);
+      if (input.meta.badClasses.contains(name)) present.add(i);
     }
   };
 
@@ -23172,7 +23172,7 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
         }
       }
       if (any(k & K::Bytecode)) withBC.add(i);
-      if (input.meta.badFuncs.count(name)) present.add(i);
+      if (input.meta.badFuncs.contains(name)) present.add(i);
     }
   };
 
@@ -23287,7 +23287,7 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
          A::BucketSet&) {
       for (size_t i = 0, size = inputs.inputs.size(); i < size; ++i) {
         auto const& input = inputs.inputs[i];
-        if (input.meta.badConstants.count(name)) {
+        if (input.meta.badConstants.contains(name)) {
           present.add(i);
         }
       }
@@ -23386,7 +23386,7 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
            assertx(b->present->contains(i));
            always_assert(seenClasses.emplace(name).second);
            input.meta.classBuckets.emplace_back(name, *b);
-         } else if (!seenClasses.count(name)) {
+         } else if (!seenClasses.contains(name)) {
            auto const t = traceForClass(name);
            always_assert_flog(
              t, "{} is on input dep classes, but has no tracking state",
@@ -23403,7 +23403,7 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
            assertx(b->present->contains(i));
            always_assert(seenFuncs.emplace(name).second);
            input.meta.funcBuckets.emplace_back(name, *b);
-         } else if (!seenFuncs.count(name)) {
+         } else if (!seenFuncs.contains(name)) {
            auto const t = traceForFunc(name);
            always_assert_flog(
              t, "{} is on input dep funcs, but has no tracking state",
@@ -23420,7 +23420,7 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
            assertx(b->present->contains(i));
            always_assert(seenUnits.emplace(name).second);
            input.meta.unitBuckets.emplace_back(name, *b);
-         } else if (!seenUnits.count(name)) {
+         } else if (!seenUnits.contains(name)) {
            auto const t = traceForUnit(name);
            always_assert_flog(
              t, "{} is on input dep units, but has no tracking state",
@@ -23432,7 +23432,7 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
        }
 
        for (auto const name : input.meta.badClasses) {
-         if (seenClasses.count(name)) continue;
+         if (seenClasses.contains(name)) continue;
          if (auto const b = folly::get_ptr(untracked.classes, name)) {
            assertx(!traceForClass(name));
            assertx(b->present->contains(i));
@@ -23454,7 +23454,7 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
            assertx(b->present->contains(i));
            always_assert(seenFuncs.emplace(name).second);
            input.meta.funcBuckets.emplace_back(name, *b);
-         } else if (!seenFuncs.count(name)) {
+         } else if (!seenFuncs.contains(name)) {
            auto const t = traceForFunc(name);
            always_assert_flog(
              t, "{} is on input bad funcs, but has no tracking state",
@@ -23676,7 +23676,7 @@ FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
   index.outFuncNames.erase(
     std::remove_if(
       begin(index.outFuncNames), end(index.outFuncNames),
-      [&] (SString f) { return stripped.count(f); }
+      [&] (SString f) { return stripped.contains(f); }
     ),
     end(index.outFuncNames)
   );
@@ -23686,7 +23686,7 @@ FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
       std::remove_if(
         begin(unit->funcs), end(unit->funcs),
         [&, unit=unit] (SString f) {
-          if (!stripped.count(f)) return false;
+          if (!stripped.contains(f)) return false;
           assertx(
             index.deps->bucketFor(unit).process->contains(index.bucketIdx)
           );
@@ -23977,7 +23977,7 @@ AnalysisIndex::AnalysisIndex(
       always_assert(
         m_data->constants.try_emplace(cns->name, cns.get(), unit).second
       );
-      assertx(!m_data->badConstants.count(cns->name));
+      assertx(!m_data->badConstants.contains(cns->name));
       if (isNative && type(cns->val) == KindOfUninit) {
         m_data->dynamicConstants.emplace(cns->name);
       }
@@ -23990,7 +23990,7 @@ AnalysisIndex::AnalysisIndex(
           unit
         ).second
       );
-      assertx(!m_data->badClasses.count(typeAlias->name));
+      assertx(!m_data->badClasses.contains(typeAlias->name));
     }
     always_assert(m_data->units.emplace(unit->filename, unit).second);
   };
@@ -24028,14 +24028,14 @@ AnalysisIndex::AnalysisIndex(
   for (auto& [n, b] : meta.classBuckets) {
     if (auto const c = folly::get_default(m_data->classes, n)) {
       m_data->deps->restrict(c, std::move(b));
-    } else if (m_data->badClasses.count(n)) {
+    } else if (m_data->badClasses.contains(n)) {
       m_data->deps->restrict(DepTracker::Class { n }, std::move(b));
     }
   }
   for (auto& [n, b] : meta.funcBuckets) {
     if (auto const f = folly::get_default(m_data->funcs, n)) {
       m_data->deps->restrict(f, std::move(b));
-    } else if (m_data->badFuncs.count(n)) {
+    } else if (m_data->badFuncs.contains(n)) {
       m_data->deps->restrict(DepTracker::Func { n }, std::move(b));
     }
   }
@@ -24045,7 +24045,7 @@ AnalysisIndex::AnalysisIndex(
     }
   }
   for (auto& [n, b] : meta.badConstantBuckets) {
-    assertx(m_data->badConstants.count(n));
+    assertx(m_data->badConstants.contains(n));
     m_data->deps->restrict(DepTracker::Constant { n }, std::move(b));
   }
 
@@ -24091,7 +24091,7 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
     if (is_closure(*cls)) {
       assertx(!cls->closureContextCls);
       assertx(cls->closureDeclFunc);
-      assertx(!meta.classDeps.count(name));
+      assertx(!meta.classDeps.contains(name));
       continue;
     }
     assertx(m_data->deps->bucketFor(cls).process->contains(m_data->bucketIdx));
@@ -24109,7 +24109,7 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
           .process->contains(m_data->bucketIdx)
       );
       add(m_data->classes.at(name), *deps);
-    } else if (meta.processDepCls.count(name)) {
+    } else if (meta.processDepCls.contains(name)) {
       assertx(
         m_data->deps->bucketFor(m_data->classes.at(name))
           .process->contains(m_data->bucketIdx)
@@ -24135,7 +24135,7 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
           .process->contains(m_data->bucketIdx)
       );
       add(m_data->funcs.at(name), *deps);
-    } else if (meta.processDepFunc.count(name)) {
+    } else if (meta.processDepFunc.contains(name)) {
       assertx(
         m_data->deps->bucketFor(m_data->funcs.at(name))
           .process->contains(m_data->bucketIdx)
@@ -24163,7 +24163,7 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
           .process->contains(m_data->bucketIdx)
       );
       add(m_data->units.at(name), *deps);
-    } else if (meta.processDepUnit.count(name)) {
+    } else if (meta.processDepUnit.contains(name)) {
       assertx(
         m_data->deps->bucketFor(m_data->units.at(name))
           .process->contains(m_data->bucketIdx)
@@ -24279,7 +24279,7 @@ res::Func AnalysisIndex::resolve_func(SString n) const {
     if (auto const finfo = folly::get_default(m_data->finfos, n)) {
       return res::Func { res::Func::Fun2 { finfo } };
     }
-    if (m_data->badFuncs.count(n)) {
+    if (m_data->badFuncs.contains(n)) {
       return res::Func { res::Func::MissingFunc { n } };
     }
   }
@@ -24296,7 +24296,7 @@ Optional<res::Class> AnalysisIndex::resolve_class(SString n) const {
   if (auto const cinfo = folly::get_default(m_data->cinfos, n)) {
     return res::Class::get(*cinfo);
   }
-  if (m_data->typeAliases.count(n)) return std::nullopt;
+  if (m_data->typeAliases.contains(n)) return std::nullopt;
   // A php::Class should always be accompanied by it's ClassInfo,
   // unless if it's uninstantiable. So, if we have a php::Class here,
   // we know it's uninstantiable.
@@ -24331,7 +24331,7 @@ Type AnalysisIndex::lookup_constant(SString name) const {
   if (auto const p = folly::get_ptr(m_data->constants, name)) {
     auto const cns = p->first;
     if (type(cns->val) != KindOfUninit) return from_cell(cns->val);
-    if (m_data->dynamicConstants.count(name)) return TInitCell;
+    if (m_data->dynamicConstants.contains(name)) return TInitCell;
     auto const fname = Constant::funcNameFromName(name);
     auto const fit = m_data->finfos.find(fname);
     // We might have the unit present by chance, but without an
@@ -24340,7 +24340,7 @@ Type AnalysisIndex::lookup_constant(SString name) const {
     if (fit == end(m_data->finfos)) return TInitCell;
     return unctx(unserialize_type(fit->second->returnTy));
   }
-  return m_data->badConstants.count(name) ? TBottom : TInitCell;
+  return m_data->badConstants.contains(name) ? TBottom : TInitCell;
 }
 
 std::vector<std::pair<SString, ConstIndex>>
@@ -24438,7 +24438,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
     if (idxIt == end(cinfo->clsConstants)) return notFound();
     auto const& idx = idxIt->second;
 
-    assertx(!m_data->badClasses.count(idx.idx.cls));
+    assertx(!m_data->badClasses.contains(idx.idx.cls));
     if (idx.kind != ConstModifiers::Kind::Value) return notFound();
 
     if (!m_data->deps->add(idx.idx)) return conservative();
@@ -24558,7 +24558,7 @@ AnalysisIndex::lookup_class_type_constant(
     if (idxIt == end(cinfo->clsConstants)) return notFound();
     auto const& idx = idxIt->second;
 
-    assertx(!m_data->badClasses.count(idx.idx.cls));
+    assertx(!m_data->badClasses.contains(idx.idx.cls));
     if (idx.kind != ConstModifiers::Kind::Type) return notFound();
 
     if (!m_data->deps->add(idx.idx)) return conservative(rcls.name());
@@ -24611,7 +24611,7 @@ AnalysisIndex::lookup_class_type_constant(const php::Class& ctx,
          show(idx, AnalysisIndexAdaptor{ *this }));
   Trace::Indent _;
 
-  assertx(!m_data->badClasses.count(idx.cls));
+  assertx(!m_data->badClasses.contains(idx.cls));
 
   using R = ClsTypeConstLookupResult;
 
@@ -25404,11 +25404,11 @@ AnalysisIndex::lookup_type_alias(SString name) const {
   if (!m_data->deps->add(AnalysisDeps::Class { name })) {
     return std::make_pair(nullptr, true);
   }
-  if (m_data->classes.count(name)) return std::make_pair(nullptr, false);
+  if (m_data->classes.contains(name)) return std::make_pair(nullptr, false);
   if (auto const ta = folly::get_ptr(m_data->typeAliases, name)) {
     return std::make_pair(ta->first, true);
   }
-  return std::make_pair(nullptr, !m_data->badClasses.count(name));
+  return std::make_pair(nullptr, !m_data->badClasses.contains(name));
 }
 
 Index::ClassOrTypeAlias
@@ -25426,7 +25426,7 @@ AnalysisIndex::lookup_class_or_type_alias(SString n) const {
   return Index::ClassOrTypeAlias{
     nullptr,
     nullptr,
-    !m_data->badClasses.count(n)
+    !m_data->badClasses.contains(n)
   };
 }
 
@@ -25928,7 +25928,7 @@ AnalysisIndex::Output AnalysisIndex::finish() {
   finfos.vals.reserve(m_data->outFuncNames.size());
   meta.funcDeps.reserve(m_data->outFuncNames.size());
   for (auto const name : m_data->outFuncNames) {
-    assertx(!meta.removedFuncs.count(name));
+    assertx(!meta.removedFuncs.contains(name));
 
     auto& func = m_data->allFuncs.at(name);
     auto& finfo = m_data->allFInfos.at(name);
@@ -25962,7 +25962,7 @@ AnalysisIndex::Output AnalysisIndex::finish() {
 
   SStringSet outConstants;
   for (auto const& [_, p] : m_data->constants) {
-    if (!outUnits.count(p.second)) continue;
+    if (!outUnits.contains(p.second)) continue;
     outConstants.emplace(p.first->name);
   }
 

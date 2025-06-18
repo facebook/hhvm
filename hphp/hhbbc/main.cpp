@@ -180,7 +180,7 @@ void parse_options(int argc, char** argv) {
   );
   po::notify(vm);
 
-  if (vm.count("help")) {
+  if (vm.contains("help")) {
     std::cout << basic << "\n"
 "Individual optimizations may be turned on and off using gcc-style -fflag\n"
 "and -fno-flag arguments.  The various optimization flags are documented\n"

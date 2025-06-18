@@ -652,7 +652,7 @@ void analyze_constants(Index& index) {
       std::remove_if(
         begin(funcNames),
         end(funcNames),
-        [&] (SString n) { return meta.removedFuncs.count(n); }
+        [&] (SString n) { return meta.removedFuncs.contains(n); }
       ),
       end(funcNames)
     );

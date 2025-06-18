@@ -80,12 +80,12 @@ bool has_name_only_func_family(SString name) {
 }
 
 bool is_mock_class(const php::Class* cls) {
-  return cls->userAttributes.count(s_MockClass.get());
+  return cls->userAttributes.contains(s_MockClass.get());
 }
 
 bool is_noflatten_trait(const php::Class* cls) {
   assertx(cls->attrs & AttrTrait);
-  return cls->userAttributes.count(s_NoFlatten.get());
+  return cls->userAttributes.contains(s_NoFlatten.get());
 }
 
 bool is_closure_base(SString name) {

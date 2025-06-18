@@ -1306,7 +1306,7 @@ std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
   index.for_each_unit_func_mutable(
     unit,
     [&] (php::Func& f) {
-      if (const_86cinit_funcs.count(f.name)) return;
+      if (const_86cinit_funcs.contains(f.name)) return;
       auto fe = ue->newFuncEmitter(f.name);
       emit_func(state, *ue, *fe, f);
     }

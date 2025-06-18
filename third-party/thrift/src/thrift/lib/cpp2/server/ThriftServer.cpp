@@ -1017,6 +1017,10 @@ void ThriftServer::setupThreadManagerImpl() {
                           resourcePoolSet()
                               .resourcePool(ResourcePoolHandle::defaultAsync())
                               .concurrencyController()) {
+                    if (folly::test_once(
+                            cancelSetMaxRequestsCallbackHandleFlag_)) {
+                      THRIFT_SERVER_EVENT(concurrencyLimitClobberedS532283);
+                    }
                     (cc.value().get())
                         .setExecutionLimitRequests(
                             maxRequests != 0
@@ -1056,6 +1060,9 @@ void ThriftServer::setupThreadManagerImpl() {
                           resourcePoolSet()
                               .resourcePool(ResourcePoolHandle::defaultAsync())
                               .concurrencyController()) {
+                    if (folly::test_once(cancelSetMaxQpsCallbackHandleFlag_)) {
+                      THRIFT_SERVER_EVENT(executionRateClobberedS532283);
+                    }
                     cc.value().get().setQpsLimit(
                         maxQps != 0
                             ? maxQps

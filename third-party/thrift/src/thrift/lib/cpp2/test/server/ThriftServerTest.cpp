@@ -3995,6 +3995,53 @@ TEST(ThriftServer, GetSetMaxRequests) {
   }
 }
 
+TEST(ThriftServer, GetSetConcurrencyLimit) {
+  auto getExecutionLimitRequests = [](const ThriftServer& server) {
+    return server.resourcePoolSet()
+        .resourcePool(ResourcePoolHandle::defaultAsync())
+        .concurrencyController()
+        .value()
+        .get()
+        .getExecutionLimitRequests();
+  };
+
+  for (auto concurrencyLimit : std::array<uint32_t, 2>{1000, 1}) {
+    {
+      // Test set before setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      server.setConcurrencyLimit(concurrencyLimit);
+      EXPECT_EQ(server.getConcurrencyLimit(), concurrencyLimit);
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+
+      EXPECT_EQ(concurrencyLimit, server.getConcurrencyLimit());
+      if (server.useResourcePools()) {
+        // S532283 causes this behavior.
+        EXPECT_NE(concurrencyLimit, getExecutionLimitRequests(server));
+      }
+    }
+    {
+      // Test set after setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      server.setConcurrencyLimit(concurrencyLimit);
+      EXPECT_EQ(concurrencyLimit, server.getConcurrencyLimit());
+      if (server.useResourcePools()) {
+        EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
+      }
+    }
+  }
+}
+
 TEST(ThriftServer, GetSetMaxQps) {
   FLAGS_thrift_use_token_bucket_concurrency_controller = true;
 
@@ -4059,6 +4106,54 @@ TEST(ThriftServer, GetSetMaxQps) {
 
         server.setMaxQps(target);
         EXPECT_NE(maxQps, getQpsLimit(server));
+      }
+    }
+  }
+}
+
+TEST(ThriftServer, GetSetExecutionRate) {
+  FLAGS_thrift_use_token_bucket_concurrency_controller = true;
+
+  auto getQpsLimit = [](const ThriftServer& server) {
+    return server.resourcePoolSet()
+        .resourcePool(ResourcePoolHandle::defaultAsync())
+        .concurrencyController()
+        .value()
+        .get()
+        .getQpsLimit();
+  };
+
+  for (auto executionRate : std::array<uint32_t, 2>{1000, 1}) {
+    {
+      // Test set before setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      server.setExecutionRate(executionRate);
+      EXPECT_EQ(server.getExecutionRate(), executionRate);
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      EXPECT_EQ(executionRate, server.getExecutionRate());
+      if (server.useResourcePools()) {
+        // S532283 causes this behavior.
+        EXPECT_NE(executionRate, getQpsLimit(server));
+      }
+    }
+    {
+      // Test set after setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      server.setExecutionRate(executionRate);
+      EXPECT_EQ(executionRate, server.getExecutionRate());
+      if (server.useResourcePools()) {
+        EXPECT_EQ(executionRate, getQpsLimit(server));
       }
     }
   }

@@ -1149,19 +1149,27 @@ let check_class_get
   let needs_concrete_is_enabled =
     TypecheckerOptions.needs_concrete env.genv.tcopt
   in
-  let is_concrete (class_ : Cls.t) =
-    let is_non_abstract = not (Cls.abstract class_) in
-    let is_final_non_consistent_construct =
-      match snd @@ Cls.construct class_ with
-      | FinalClass -> true
-      | Inconsistent
-      | ConsistentConstruct ->
-        false
-    in
-    is_non_abstract || is_final_non_consistent_construct
-  in
   let callee_is_needs_concrete_method =
     is_method && get_ce_readonly_prop_or_needs_concrete ce
+  in
+  let check_needs_concrete_call (via : [ `Static | `Self | `Parent ]) : unit =
+    (* `self` and `parent` forward the referent of `static` so are just as dangerous *)
+    if
+      needs_concrete_is_enabled
+      && callee_is_needs_concrete_method
+      && not (Env.static_points_to_concrete_class env)
+    then
+      Typing_error_utils.add_typing_error
+        ~env
+        (Typing_error.primary
+        @@ Call_needs_concrete
+             {
+               call_pos = p;
+               class_name = cid;
+               meth_name = mid;
+               decl_pos = def_pos;
+               via = (via :> [ `Id | `Static | `Self | `Parent ]);
+             })
   in
   match e with
   | CIself when get_ce_abstract ce -> begin
@@ -1242,7 +1250,18 @@ let check_class_get
     Env.get_class env cid
     |> Decl_entry.to_option
     |> Option.iter ~f:(fun class_ ->
-           if not (is_concrete class_) then
+           let is_concrete =
+             let is_non_abstract = not (Cls.abstract class_) in
+             let is_final_non_consistent_construct =
+               match snd @@ Cls.construct class_ with
+               | FinalClass -> true
+               | Inconsistent
+               | ConsistentConstruct ->
+                 false
+             in
+             is_non_abstract || is_final_non_consistent_construct
+           in
+           if not is_concrete then
              Typing_error_utils.add_typing_error
                ~env
                Typing_error.(
@@ -1293,58 +1312,21 @@ let check_class_get
                    })
         | _ -> ()
       end)
-  | CIself when needs_concrete_is_enabled && callee_is_needs_concrete_method ->
-    Env.get_self_class env
-    |> Decl_entry.to_option
-    |> Option.iter ~f:(fun class_ ->
-           if not (is_concrete class_) then
-             Typing_error_utils.add_typing_error
-               ~env
-               Typing_error.(
-                 primary
-                 @@ Primary.Call_needs_concrete
-                      {
-                        call_pos = p;
-                        class_name = cid;
-                        meth_name = mid;
-                        decl_pos = def_pos;
-                        via = `Self;
-                      }))
-  | CIparent when needs_concrete_is_enabled && callee_is_needs_concrete_method
-    ->
-    Env.get_parent_class env
-    |> Decl_entry.to_option
-    |> Option.iter ~f:(fun class_ ->
-           if not (is_concrete class_) then
-             Typing_error_utils.add_typing_error
-               ~env
-               Typing_error.(
-                 primary
-                 @@ Primary.Call_needs_concrete
-                      {
-                        call_pos = p;
-                        class_name = cid;
-                        meth_name = mid;
-                        decl_pos = def_pos;
-                        via = `Parent;
-                      }))
-  | CIstatic
-    when needs_concrete_is_enabled
-         && not (Env.static_points_to_concrete_class env) ->
-    if callee_is_needs_concrete_method then
-      Typing_error_utils.add_typing_error
-        ~env
-        Typing_error.(
-          primary
-          @@ Primary.Call_needs_concrete
-               {
-                 call_pos = p;
-                 class_name = cid;
-                 meth_name = mid;
-                 decl_pos = def_pos;
-                 via = `Static;
-               })
-    else if get_ce_abstract ce then
+  | CIself -> check_needs_concrete_call `Self
+  | CIparent -> check_needs_concrete_call `Parent
+  | CIstatic ->
+    let () = check_needs_concrete_call `Static in
+    if
+      needs_concrete_is_enabled
+      && get_ce_abstract ce
+      && not (Env.static_points_to_concrete_class env)
+    then
+      (* We check for abstract access via `static`
+       * as part of the "needs concrete" feature, because
+       * checking for calls to `abstract` functions for
+       * `self`/`parent`/classname, etc. is already covered by other type
+       * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
+       *)
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(

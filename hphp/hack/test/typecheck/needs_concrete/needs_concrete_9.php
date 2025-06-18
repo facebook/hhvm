@@ -2,7 +2,9 @@
 
 class C {
   public static function m1(): void {
-    self::m2();
+    // This method should be marked __NeedsConcrete,
+    // because `self` forwards the referent of `static`
+    self::m2(); // Error
   }
 
   <<__NeedsConcrete>>

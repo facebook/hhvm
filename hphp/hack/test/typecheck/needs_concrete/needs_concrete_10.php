@@ -13,7 +13,7 @@ class C1 extends C0 {
   public static function m1(): void {
     // This method should be marked __NeedsConcrete,
     // since `parent` forwards the referent of `static`
-    parent::m2();
+    parent::m2(); // Error
   }
 }
 

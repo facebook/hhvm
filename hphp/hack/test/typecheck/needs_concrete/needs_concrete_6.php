@@ -13,6 +13,7 @@ class D extends C {
   }
   <<__NeedsConcrete>>
   public static function testparentcall(): void {
+    // OK because called from a `__NeedsConcrete` method
     parent::foo();
   }
 }

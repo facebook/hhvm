@@ -24,13 +24,10 @@
 #include <type_traits>
 
 #include <gtest/gtest.h>
-#include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/io/Cursor.h>
-#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/op/Hash.h>
 #include <thrift/lib/cpp2/op/StdHasher.h>
-#include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
 
 namespace apache::thrift::op {
 namespace {

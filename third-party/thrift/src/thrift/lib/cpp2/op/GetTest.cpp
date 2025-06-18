@@ -21,7 +21,6 @@
 
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
-#include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #include <thrift/test/gen-cpp2/get_value_or_null_types.h>
 

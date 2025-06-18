@@ -20,7 +20,6 @@
 #include <gtest/gtest.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/op/Testing.h>
-#include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>

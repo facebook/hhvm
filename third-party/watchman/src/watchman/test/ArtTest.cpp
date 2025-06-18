@@ -5,14 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <fcntl.h>
 #include <fmt/core.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/GTest.h>
-#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include "watchman/watchman_system.h"
 
 #include "watchman/thirdparty/libart/src/art.h"
 

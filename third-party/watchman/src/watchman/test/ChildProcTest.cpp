@@ -9,7 +9,6 @@
 #include <folly/test/TestUtils.h>
 #include <list>
 #include "watchman/ChildProcess.h"
-#include "watchman/watchman_system.h"
 
 using watchman::ChildProcess;
 using Options = ChildProcess::Options;

@@ -26,6 +26,7 @@ enum MyEnum1 {
   ME1_6 = 6,
 }
 
+@thrift.Uri{value = "facebook.com/thrift/test/MyEnum2"}
 enum MyEnum2 {
   ME2_0 = 0,
   ME2_1 = 1,

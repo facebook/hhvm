@@ -216,6 +216,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/Metasyntactic";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -242,6 +246,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
+  }
+
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/MyEnum1";
   }
 
   static char const* findName(type value) noexcept {
@@ -272,6 +280,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/MyEnum2";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -298,6 +310,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
+  }
+
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/MyEnum3";
   }
 
   static char const* findName(type value) noexcept {
@@ -328,6 +344,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/MyEnum4";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -356,6 +376,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/MyBitmaskEnum1";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -382,6 +406,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
+  }
+
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/enums/MyBitmaskEnum2";
   }
 
   static char const* findName(type value) noexcept {

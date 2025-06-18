@@ -133,6 +133,10 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/basic-structured-annotations/MyEnum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);

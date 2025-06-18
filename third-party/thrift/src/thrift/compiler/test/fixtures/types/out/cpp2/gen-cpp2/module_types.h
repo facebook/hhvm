@@ -417,6 +417,10 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "apache.org/thrift/fixtures/types/has_bitwise_ops";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -445,6 +449,10 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "apache.org/thrift/fixtures/types/is_unscoped";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -471,6 +479,10 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
+  }
+
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "apache.org/thrift/fixtures/types/MyForwardRefEnum";
   }
 
   static char const* findName(type value) noexcept {

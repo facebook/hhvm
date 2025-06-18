@@ -131,6 +131,10 @@ template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "facebook.com/thrift/test/Enum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);

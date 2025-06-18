@@ -160,3 +160,7 @@ TEST(EnumTestCpp2, UnderlyingType) {
   EXPECT_TRUE((std::is_same_v<std::underlying_type_t<U16>, std::uint16_t>));
   EXPECT_TRUE((std::is_same_v<std::underlying_type_t<U32>, std::uint32_t>));
 }
+
+TEST(EnumTestCpp2, uri) {
+  EXPECT_EQ(apache::thrift::uri<MyEnum2>(), "facebook.com/thrift/test/MyEnum2");
+}

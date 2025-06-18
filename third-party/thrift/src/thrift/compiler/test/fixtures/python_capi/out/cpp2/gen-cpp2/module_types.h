@@ -467,6 +467,10 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/python_capi/MyEnum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -493,6 +497,10 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
+  }
+
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "test.dev/fixtures/python_capi/AnnoyingEnum";
   }
 
   static char const* findName(type value) noexcept {

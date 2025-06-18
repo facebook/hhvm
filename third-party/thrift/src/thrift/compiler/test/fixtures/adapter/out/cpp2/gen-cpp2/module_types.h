@@ -542,6 +542,10 @@ template <> struct TEnumTraits<::facebook::thrift::test::Color> {
     return "module";
   }
 
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "facebook.com/thrift/test/Color";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -568,6 +572,10 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
+  }
+
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
+    return "facebook.com/thrift/test/ThriftAdaptedEnum";
   }
 
   static char const* findName(type value) noexcept {

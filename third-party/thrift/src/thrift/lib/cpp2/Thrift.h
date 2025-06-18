@@ -115,6 +115,11 @@ struct struct_private_access {
   static std::string_view __fbthrift_thrift_uri() {
     return T::__fbthrift_thrift_uri();
   }
+  template <typename T, typename = void>
+  struct detect_uri : std::false_type {};
+  template <typename T>
+  struct detect_uri<T, folly::void_t<decltype(T::__fbthrift_thrift_uri())>>
+      : std::true_type {};
 
   template <typename T, typename Ord>
   static const folly::StringPiece __fbthrift_get_field_name() {
@@ -206,11 +211,24 @@ inline constexpr clear_fn clear{};
 using empty_fn = detail::st::private_access::empty_fn;
 inline static constexpr empty_fn empty{};
 
-// TODO(dokwon): Add apache::thrift::uri support for generated enum types.
 template <typename T>
 FOLLY_EXPORT const std::string& uri() {
-  static const auto& kUri =
-      *new std::string(detail::st::private_access::__fbthrift_thrift_uri<T>());
+  static_assert(sizeof(T) > 0, "T must be a complete type");
+  std::string_view uri;
+  if constexpr (detail::st::private_access::detect_uri<T>::value) {
+    uri = detail::st::private_access::__fbthrift_thrift_uri<T>();
+  } else if constexpr (detail::st::private_access::detect_uri<
+                           TEnumTraits<T>>::value) {
+    uri = detail::st::private_access::__fbthrift_thrift_uri<TEnumTraits<T>>();
+  } else {
+    // MSVC fires this assert even when we took an earlier branch...
+    if constexpr (!folly::kIsWindows) {
+      static_assert(folly::always_false<T>, "No URI defined for type");
+    } else {
+      uri = detail::st::private_access::__fbthrift_thrift_uri<T>();
+    }
+  }
+  static const auto& kUri = *new std::string(uri);
   return kUri;
 }
 

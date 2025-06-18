@@ -110,6 +110,7 @@ THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
 THRIFT_FLAG_DEFINE_bool(watch_default_ticket_path, true);
 THRIFT_FLAG_DEFINE_bool(
     init_decorated_processor_factory_only_resource_pools_checks, false);
+THRIFT_FLAG_DEFINE_bool(do_not_clobber_S532283, true);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -1019,6 +1020,9 @@ void ThriftServer::setupThreadManagerImpl() {
                               .concurrencyController()) {
                     if (folly::test_once(
                             cancelSetMaxRequestsCallbackHandleFlag_)) {
+                      if (THRIFT_FLAG(do_not_clobber_S532283)) {
+                        return;
+                      }
                       THRIFT_SERVER_EVENT(concurrencyLimitClobberedS532283);
                     }
                     (cc.value().get())
@@ -1061,6 +1065,9 @@ void ThriftServer::setupThreadManagerImpl() {
                               .resourcePool(ResourcePoolHandle::defaultAsync())
                               .concurrencyController()) {
                     if (folly::test_once(cancelSetMaxQpsCallbackHandleFlag_)) {
+                      if (THRIFT_FLAG(do_not_clobber_S532283)) {
+                        return;
+                      }
                       THRIFT_SERVER_EVENT(executionRateClobberedS532283);
                     }
                     cc.value().get().setQpsLimit(

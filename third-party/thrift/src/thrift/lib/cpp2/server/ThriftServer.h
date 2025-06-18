@@ -113,6 +113,8 @@ THRIFT_FLAG_DECLARE_bool(enforce_queue_concurrency_resource_pools);
 THRIFT_FLAG_DECLARE_bool(
     init_decorated_processor_factory_only_resource_pools_checks);
 
+THRIFT_FLAG_DECLARE_bool(do_not_clobber_S532283);
+
 namespace wangle {
 class ConnectionManager;
 }

@@ -372,7 +372,7 @@ void conjureBeginInlining(IRGS& env,
   gen(env, EnterInlineFrame, EnterInlineFrameData::NoCopy(), fp);
 
   for (uint32_t i = 0; i < inputs.size(); ++i) {
-    stLocRaw(env, i, fp, conjure(inputs[i]));
+    gen(env, AssertLoc, inputs[i], LocalId(i), fp);
   }
 
   beginInlining(env, entry, ctx, kInvalidOffset /* asyncEagerOffset */,

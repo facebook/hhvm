@@ -168,7 +168,7 @@ apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
   channel->setCloseCallback(this);
   if (connectionOptions_.thriftCompression) {
     apache::thrift::CodecConfig codec;
-    codec.zstdConfig_ref() = apache::thrift::ZstdCompressionCodecConfig();
+    codec.zstdConfig() = apache::thrift::ZstdCompressionCodecConfig();
     apache::thrift::CompressionConfig compressionConfig;
     if (connectionOptions_.thriftCompressionThreshold > 0) {
       compressionConfig.compressionSizeLimit() =

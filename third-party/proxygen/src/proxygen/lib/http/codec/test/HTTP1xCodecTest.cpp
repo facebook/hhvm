@@ -11,6 +11,7 @@
 #include <folly/String.h>
 #include <folly/base64.h>
 #include <folly/portability/GTest.h>
+#include <list>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>

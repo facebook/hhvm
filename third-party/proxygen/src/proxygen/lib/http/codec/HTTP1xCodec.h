@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <list>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/codec/TransportDirection.h>

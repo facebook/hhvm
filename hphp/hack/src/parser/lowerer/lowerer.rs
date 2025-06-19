@@ -5793,6 +5793,7 @@ fn check_effect_memoized<'a>(
         } else if env.parser_options.disallow_non_annotated_memoize
             && !env.parser_options.treat_non_annotated_memoize_as_kbic
             && u.params.is_empty()
+            && env.file_mode() != file_info::Mode::Mhhi
         {
             // if DisallowNonAnnotatedMemoize was supplied by config and coeffects allow
             // <<__Memoize>> to be categorized, then plain <<__Memoize>> are not allowed.

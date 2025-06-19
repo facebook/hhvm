@@ -1,0 +1,2 @@
+--extra-builtin some_builtin.hhi
+--config disallow_non_annotated_memoize=true

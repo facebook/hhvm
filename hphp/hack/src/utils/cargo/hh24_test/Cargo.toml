@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../hh24_test.rs"
 
 [dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.98"
 direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/direct_decl_parser" }
 hh24_types = { version = "0.0.0", path = "../../hh24_types" }
 names = { version = "0.0.0", path = "../../../naming/names_rust" }

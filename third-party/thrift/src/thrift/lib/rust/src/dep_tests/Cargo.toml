@@ -13,7 +13,7 @@ name = "fbthrift_test"
 path = "lib.rs"
 
 [dev-dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.98"
 approx = "0.5.1"
 fbthrift = { version = "0.0.1+unstable", path = "../.." }
 fbthrift_test_if = { version = "0.0.1+unstable", path = "cargo_thrift" }

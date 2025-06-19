@@ -11,7 +11,7 @@ license = "MIT"
 path = "../multifile.rs"
 
 [dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.98"
 lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 regex = "1.11.1"
 

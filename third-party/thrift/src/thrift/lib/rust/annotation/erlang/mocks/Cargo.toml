@@ -16,7 +16,7 @@ doctest = false
 doc = false
 
 [dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.98"
 async-trait = "0.1.86"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 erlang__clients = { package = "erlang_clients", version = "0.0.1+unstable", path = "../clients" }

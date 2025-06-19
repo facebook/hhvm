@@ -14,7 +14,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.98"
 direct_decl_parser = { version = "0.0.0", path = "../../../../parser/api/cargo/direct_decl_parser" }
 file_info = { version = "0.0.0", path = "../../../../deps/rust/file_info" }
 ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

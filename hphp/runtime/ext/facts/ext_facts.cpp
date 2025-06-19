@@ -699,27 +699,44 @@ bool HHVM_FUNCTION(facts_is_final, const String& type) {
   return Facts::getFactsOrThrow().isTypeFinal(type);
 }
 
+const StringData* className(TypedValue tv) {
+  if (tvIsClass(tv)) {
+    return val(tv).pclass->name();
+  } else if (tvIsLazyClass(tv)) {
+    return val(tv).plazyclass.name();
+  } else if (tvIsString(tv)) {
+    return val(tv).pstr;
+  } else {
+    always_assert_flog(
+        false, "value should not have passed class_or_classname type hint");
+  }
+}
+
 Array HHVM_FUNCTION(
     facts_subtypes,
-    const String& baseType,
+    TypedValue baseType,
     const Variant& filters) {
-  return Facts::getFactsOrThrow().getDerivedTypes(baseType, filters);
+  return Facts::getFactsOrThrow().getDerivedTypes(
+      StrNR(className(baseType)).asString(), filters);
 }
 
 Array HHVM_FUNCTION(
     facts_transitive_subtypes,
-    const String& baseType,
+    TypedValue baseType,
     const Variant& filters,
     bool includeInterfaceRequireExtends) {
   return Facts::getFactsOrThrow().getTransitiveDerivedTypes(
-      baseType, filters, includeInterfaceRequireExtends);
+      StrNR(className(baseType)).asString(),
+      filters,
+      includeInterfaceRequireExtends);
 }
 
 Array HHVM_FUNCTION(
     facts_supertypes,
-    const String& derivedType,
+    TypedValue derivedType,
     const Variant& filters) {
-  return Facts::getFactsOrThrow().getBaseTypes(derivedType, filters);
+  return Facts::getFactsOrThrow().getBaseTypes(
+      StrNR(className(derivedType)).asString(), filters);
 }
 
 Array HHVM_FUNCTION(facts_types_with_attribute, const String& attr) {

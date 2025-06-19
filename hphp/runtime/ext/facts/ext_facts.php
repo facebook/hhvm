@@ -205,7 +205,7 @@ function is_final(
  */
 <<__Native>>
 function subtypes(
-  /* classname<T> */ string $base_type,
+  class_or_classname<mixed> $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
 )[]: vec<string>;
 
@@ -216,7 +216,7 @@ function subtypes(
  */
 <<__Native>>
 function transitive_subtypes(
-  /* classname<T> */ string $base_type,
+  class_or_classname<mixed> $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
   bool $include_interface_require_extends = false,
  )[]: vec<string>;
@@ -228,7 +228,7 @@ function transitive_subtypes(
  */
 <<__Native>>
 function supertypes(
-  /* classname<nonnull> */ string $derived_type,
+  class_or_classname<mixed> $derived_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
 )[]: vec<string>;
 

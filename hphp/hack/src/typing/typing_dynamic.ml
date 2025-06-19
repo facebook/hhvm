@@ -302,6 +302,7 @@ let rec strip_covariant_like env ty =
   with
   | (env, Some ty) -> (env, ty)
   | (env, None) ->
+    let (env, ty) = Env.expand_type env ty in
     (match deref ty with
     | (r, Ttuple { t_required; t_extra }) ->
       let (env, t_required) =

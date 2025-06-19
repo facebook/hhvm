@@ -21,7 +21,7 @@ final class ThriftUnionSerializationTraitTest extends WWWTest {
 
   use ClassLevelTest;
 
-  public static function provideUnionSerialize(
+  public static function provideUnionJsonSerialize(
   ): dict<string, (SerializerTestUnion, string, SerializerTestUnionEnum)> {
     return dict[
       'union_int' => tuple(
@@ -64,8 +64,8 @@ final class ThriftUnionSerializationTraitTest extends WWWTest {
     ];
   }
 
-  <<DataProvider('provideUnionSerialize')>>
-  public function testUnionSerialize(
+  <<DataProvider('provideUnionJsonSerialize')>>
+  public function testUnionJsonSerialize(
     SerializerTestUnion $object,
     string $serialized_string,
     SerializerTestUnionEnum $set_field,
@@ -76,5 +76,42 @@ final class ThriftUnionSerializationTraitTest extends WWWTest {
     $test_object = SerializerTestUnion::withDefaultValues();
     JSONThriftSerializer::deserialize($serialized_string, $test_object);
     expect($set_field)->toBePHPEqual($test_object->getType());
+  }
+
+  public static function provideUseHHVMExtension(): dict<string, (bool)> {
+    return dict[
+      'disable_hhvm_extension' => tuple(true),
+      'enable_hhvm_extension' => tuple(false),
+    ];
+  }
+
+  <<DataProvider('provideUseHHVMExtension')>>
+  public function testDeserializeUnionWithMultipleFields(
+    bool $disable_hphp_extension,
+  ): void {
+    $union = new SerializerTestUnion(1, "test");
+    $serialized =
+      TCompactSerializer::serialize($union, null, $disable_hphp_extension);
+
+    // deserializing non-strict union with multiple fields is okay
+    $deserialized = TCompactSerializer::deserialize($serialized, $union);
+    expect($deserialized->get_int_value())->toBePHPEqual(
+      $union->get_int_value(),
+    );
+    expect($deserialized->get_str_value())->toBePHPEqual(
+      $union->get_str_value(),
+    );
+
+    // deserializing strict union with multiple fields should throw
+    $strict_union = new SerializerTestStrictUnion();
+    expect(
+      () ==> TCompactSerializer::deserialize(
+        $serialized,
+        $strict_union,
+        null,
+        $disable_hphp_extension,
+      ),
+    )
+      ->toThrow(TProtocolException::class, 'Union field already set');
   }
 }

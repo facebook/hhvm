@@ -25,3 +25,6 @@
 interface IThriftUnion<T> extends IThriftStruct {
   public function getType()[]: T;
 }
+
+interface IThriftStrictUnion<T> extends IThriftUnion<T> {
+}

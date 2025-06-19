@@ -36,6 +36,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       $this is IThriftUnion<_>,
       "ThriftUnionSerializationTrait is meant to be used only with unions.",
     );
+    $is_strict_union = $this is IThriftStrictUnion<_>;
     if ($this is IThriftStructWithClearTerseFields) {
       $this->clearTerseFields();
     }
@@ -121,6 +122,9 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       }
       $xfer += $protocol->readFieldEnd();
       $num_field_count++;
+      if ($is_strict_union && $num_field_count > 1) {
+        throw new TProtocolException('Union field already set');
+      }
     }
     $xfer += $protocol->readStructEnd();
     if ($num_field_count > 1) {

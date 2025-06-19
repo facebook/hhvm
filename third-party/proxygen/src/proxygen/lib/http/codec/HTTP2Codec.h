@@ -16,9 +16,6 @@
 #include <proxygen/lib/http/codec/HeaderDecodeInfo.h>
 #include <proxygen/lib/http/codec/compress/HPACKCodec.h>
 
-#include <bitset>
-#include <set>
-
 namespace proxygen {
 
 /**

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <climits>
 #include <folly/Optional.h>
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransport.h>

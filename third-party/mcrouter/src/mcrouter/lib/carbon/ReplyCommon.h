@@ -33,8 +33,19 @@ class ReplyCommon : public MessageCommon {
     destination_ = std::move(ap);
   }
 
+  // Store region string in an optional field.
+  void setRegion(const std::string& region) {
+    region_.emplace(region);
+  }
+
+  // Get region string if set
+  const std::optional<std::string>& getRegion() const {
+    return region_;
+  }
+
  private:
   std::shared_ptr<const facebook::memcache::AccessPoint> destination_;
+  std::optional<std::string> region_;
 };
 
 class ReplyCommonThrift : public ReplyCommon {

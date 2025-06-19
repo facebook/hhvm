@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <bitset>
 #include <optional>
 #include <utility>
 
@@ -25,12 +26,14 @@ class RequestCommon : public MessageCommon {
   RequestCommon(const RequestCommon& other) {
     traceContext_ = other.traceContext_;
     cryptoAuthToken_ = other.cryptoAuthToken_;
+    replyBitMask_ = other.replyBitMask_;
     clientIdentifier_ = other.clientIdentifier_;
   }
   RequestCommon& operator=(const RequestCommon& other) {
     if (this != &other) {
       traceContext_ = other.traceContext_;
       cryptoAuthToken_ = other.cryptoAuthToken_;
+      replyBitMask_ = other.replyBitMask_;
       clientIdentifier_ = other.clientIdentifier_;
     }
     return *this;
@@ -78,12 +81,22 @@ class RequestCommon : public MessageCommon {
     cryptoAuthToken_.emplace(std::move(token));
   }
 
+  // Store region string in an optional field.
+  void setRegionFlag() {
+    replyBitMask_.set(ReplyMetadataFlags::Region);
+  }
+
   /**
    * get the optional field that may store a CAT token
    * Used by mcrouter transport layer to pass the value to thrift header
    */
   const std::optional<std::string>& getCryptoAuthToken() const {
     return cryptoAuthToken_;
+  }
+
+  // Check if region flag is set
+  bool hasRegionFlag() const noexcept {
+    return replyBitMask_.test(ReplyMetadataFlags::Region);
   }
 
   const std::optional<std::string>& getClientIdentifier() const noexcept {
@@ -125,6 +138,9 @@ class RequestCommon : public MessageCommon {
   std::optional<folly::IPAddress> sourceIpAddr_;
   // write timestamp
   std::optional<uint64_t> writeTimestamp_;
+  // Bit mask to indicate the metadata to fetch in the reply
+  enum ReplyMetadataFlags : size_t { Region, NumFlags };
+  std::bitset<NumFlags> replyBitMask_;
 };
 
 } // namespace carbon

@@ -384,6 +384,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::get(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = getCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -584,6 +588,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::getter(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = getterCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_getter(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -784,6 +792,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::lists(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = listsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_lists(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -984,6 +996,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::maps(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = mapsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_maps(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -1184,6 +1200,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = nameCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_name(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -1384,6 +1404,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::name_to_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = name_to_valueCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_name_to_value(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -1584,6 +1608,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::names(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = namesCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_names(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -1784,6 +1812,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::prefix_tree(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = prefix_treeCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_prefix_tree(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -1984,6 +2016,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::sets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = setsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_sets(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2184,6 +2220,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::setter(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = setterCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_setter(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2384,6 +2424,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::str(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = strCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_str(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2584,6 +2628,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::strings(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = stringsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_strings(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2784,6 +2832,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::type(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = typeCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_type(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2984,6 +3036,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = valueCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_value(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -3184,6 +3240,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::value_to_name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = value_to_nameCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_value_to_name(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -3384,6 +3444,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::values(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = valuesCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_values(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -3584,6 +3648,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::id(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = idCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_id(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -3784,6 +3852,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::ids(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = idsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_ids(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -3984,6 +4056,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::descriptor(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = descriptorCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_descriptor(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -4184,6 +4260,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::descriptors(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = descriptorsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_descriptors(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -4384,6 +4464,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::key(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = keyCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_key(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -4584,6 +4668,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::keys(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = keysCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_keys(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -4784,6 +4872,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::annotation(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = annotationCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_annotation(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -4984,6 +5076,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::annotations(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = annotationsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_annotations(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -5184,6 +5280,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::member(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = memberCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_member(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -5384,6 +5484,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::members(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = membersCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_members(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -5584,6 +5688,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::field(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = fieldCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_field(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -5784,6 +5892,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::fields(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = fieldsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_fields(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }

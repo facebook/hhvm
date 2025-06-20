@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 namespace cpp2 apache.thrift.test
 
 interaction SampleInteraction {
@@ -58,4 +60,7 @@ service ClientInterceptorTest {
   sink<i32, i32> dump();
 
   oneway void fireAndForget(1: i32 ignored);
+
+  @cpp.GenerateDeprecatedHeaderClientMethods
+  string headerClientMethod(1: string str);
 }

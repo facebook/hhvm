@@ -93,6 +93,16 @@ class FutureCallbackHelper {
   }
 };
 
+inline void runClientInterceptorsInHeaderSemiFutureCallback(
+    const ClientReceiveState& state) {
+  auto* contextStack = state.ctx();
+  auto* header = state.header();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse(header)
+        .throwUnlessValue();
+  }
+}
+
 } // namespace detail
 
 template <typename Result>
@@ -358,6 +368,9 @@ makeHeaderSemiFutureCallback(
         if (ew) {
           ew.throw_exception();
         }
+
+        detail::runClientInterceptorsInHeaderSemiFutureCallback(state);
+
         return std::make_pair(std::move(result), state.extractHeader());
       })};
 }
@@ -385,6 +398,8 @@ makeHeaderSemiFutureCallback(
         if (ew) {
           ew.throw_exception();
         }
+
+        detail::runClientInterceptorsInHeaderSemiFutureCallback(state);
 
         return std::make_pair(folly::unit, state.extractHeader());
       })};

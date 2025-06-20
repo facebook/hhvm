@@ -33,6 +33,10 @@ void apache::thrift::Client<::py3::simple::RederivedService>::get_seven(std::uni
 
 void apache::thrift::Client<::py3::simple::RederivedService>::get_seven(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = get_sevenCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_seven(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }

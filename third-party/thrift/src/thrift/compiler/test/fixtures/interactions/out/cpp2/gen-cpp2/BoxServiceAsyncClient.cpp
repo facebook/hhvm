@@ -33,6 +33,10 @@ void apache::thrift::Client<::cpp2::BoxService>::fbthrift_send_getABoxSession(ap
 
 void apache::thrift::Client<::cpp2::BoxService>::getABoxSession(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle, const ::cpp2::ShouldBeBoxed& p_req) {
   auto [ctx, header] = getABoxSessionCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_req);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_getABoxSession(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), handle, p_req);
 }
@@ -254,6 +258,10 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::fbthrift_send
 
 void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::getABox(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = getABoxCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_getABox(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }

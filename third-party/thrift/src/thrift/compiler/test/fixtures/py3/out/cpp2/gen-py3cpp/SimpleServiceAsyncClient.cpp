@@ -566,6 +566,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_five(std::unique_
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_five(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = get_fiveCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_five(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -766,6 +770,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::add_five(std::unique_
 
 void apache::thrift::Client<::py3::simple::SimpleService>::add_five(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_num) {
   auto [ctx, header] = add_fiveCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_num);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_add_five(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_num);
 }
@@ -967,6 +975,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::do_nothing(std::uniqu
 
 void apache::thrift::Client<::py3::simple::SimpleService>::do_nothing(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = do_nothingCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_do_nothing(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -1165,6 +1177,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::concat(std::unique_pt
 
 void apache::thrift::Client<::py3::simple::SimpleService>::concat(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_first, const ::std::string& p_second) {
   auto [ctx, header] = concatCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_first, p_second);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_concat(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_first, p_second);
 }
@@ -1365,6 +1381,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_value(std::unique
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::SimpleStruct& p_simple_struct) {
   auto [ctx, header] = get_valueCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_simple_struct);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_value(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_simple_struct);
 }
@@ -1566,6 +1586,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::negate(std::unique_pt
 
 void apache::thrift::Client<::py3::simple::SimpleService>::negate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_input) {
   auto [ctx, header] = negateCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_input);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_negate(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
@@ -1767,6 +1791,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::tiny(std::unique_ptr<
 
 void apache::thrift::Client<::py3::simple::SimpleService>::tiny(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_input) {
   auto [ctx, header] = tinyCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_input);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_tiny(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
@@ -1968,6 +1996,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::small(std::unique_ptr
 
 void apache::thrift::Client<::py3::simple::SimpleService>::small(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_input) {
   auto [ctx, header] = smallCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_input);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_small(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
@@ -2169,6 +2201,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::big(std::unique_ptr<a
 
 void apache::thrift::Client<::py3::simple::SimpleService>::big(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_input) {
   auto [ctx, header] = bigCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_input);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_big(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
@@ -2370,6 +2406,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::two(std::unique_ptr<a
 
 void apache::thrift::Client<::py3::simple::SimpleService>::two(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_input) {
   auto [ctx, header] = twoCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_input);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_two(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
@@ -2571,6 +2611,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::expected_exception(st
 
 void apache::thrift::Client<::py3::simple::SimpleService>::expected_exception(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = expected_exceptionCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_expected_exception(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2769,6 +2813,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::unexpected_exception(
 
 void apache::thrift::Client<::py3::simple::SimpleService>::unexpected_exception(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = unexpected_exceptionCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_unexpected_exception(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -2969,6 +3017,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_i16_list(std::uni
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_i16_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int16_t>& p_numbers) {
   auto [ctx, header] = sum_i16_listCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_numbers);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_sum_i16_list(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
@@ -3170,6 +3222,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_i32_list(std::uni
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_i32_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int32_t>& p_numbers) {
   auto [ctx, header] = sum_i32_listCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_numbers);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_sum_i32_list(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
@@ -3371,6 +3427,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_i64_list(std::uni
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_i64_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_numbers) {
   auto [ctx, header] = sum_i64_listCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_numbers);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_sum_i64_list(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
@@ -3572,6 +3632,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::concat_many(std::uniq
 
 void apache::thrift::Client<::py3::simple::SimpleService>::concat_many(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words) {
   auto [ctx, header] = concat_manyCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_words);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_concat_many(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words);
 }
@@ -3771,6 +3835,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::count_structs(std::un
 
 void apache::thrift::Client<::py3::simple::SimpleService>::count_structs(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
   auto [ctx, header] = count_structsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_items);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_count_structs(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_items);
 }
@@ -3972,6 +4040,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_set(std::unique_p
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_set(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::int32_t>& p_numbers) {
   auto [ctx, header] = sum_setCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_numbers);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_sum_set(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
@@ -4173,6 +4245,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::contains_word(std::un
 
 void apache::thrift::Client<::py3::simple::SimpleService>::contains_word(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
   auto [ctx, header] = contains_wordCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_words, p_word);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_contains_word(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words, p_word);
 }
@@ -4375,6 +4451,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_map_value(std::un
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_map_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
   auto [ctx, header] = get_map_valueCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_words, p_key);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_map_value(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words, p_key);
 }
@@ -4575,6 +4655,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::map_length(std::uniqu
 
 void apache::thrift::Client<::py3::simple::SimpleService>::map_length(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
   auto [ctx, header] = map_lengthCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_items);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_map_length(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_items);
 }
@@ -4776,6 +4860,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_map_values(std::u
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_map_values(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int16_t>& p_items) {
   auto [ctx, header] = sum_map_valuesCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_items);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_sum_map_values(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_items);
 }
@@ -4977,6 +5065,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::complex_sum_i32(std::
 
 void apache::thrift::Client<::py3::simple::SimpleService>::complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter) {
   auto [ctx, header] = complex_sum_i32Ctx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_counter);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_complex_sum_i32(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_counter);
 }
@@ -5178,6 +5270,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::repeat_name(std::uniq
 
 void apache::thrift::Client<::py3::simple::SimpleService>::repeat_name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter) {
   auto [ctx, header] = repeat_nameCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_counter);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_repeat_name(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_counter);
 }
@@ -5377,6 +5473,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_struct(std::uniqu
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_struct(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = get_structCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_struct(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -5575,6 +5675,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fib(std::unique_ptr<a
 
 void apache::thrift::Client<::py3::simple::SimpleService>::fib(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_n) {
   auto [ctx, header] = fibCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_n);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_fib(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_n);
 }
@@ -5774,6 +5878,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::unique_words(std::uni
 
 void apache::thrift::Client<::py3::simple::SimpleService>::unique_words(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words) {
   auto [ctx, header] = unique_wordsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_words);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_unique_words(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words);
 }
@@ -5973,6 +6081,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::words_count(std::uniq
 
 void apache::thrift::Client<::py3::simple::SimpleService>::words_count(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words) {
   auto [ctx, header] = words_countCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_words);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_words_count(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words);
 }
@@ -6172,6 +6284,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::set_enum(std::unique_
 
 void apache::thrift::Client<::py3::simple::SimpleService>::set_enum(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::py3::simple::AnEnum p_in_enum) {
   auto [ctx, header] = set_enumCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_in_enum);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_set_enum(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_in_enum);
 }
@@ -6373,6 +6489,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::list_of_lists(std::un
 
 void apache::thrift::Client<::py3::simple::SimpleService>::list_of_lists(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
   auto [ctx, header] = list_of_listsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_num_lists, p_num_items);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_list_of_lists(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_num_lists, p_num_items);
 }
@@ -6573,6 +6693,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::word_character_freque
 
 void apache::thrift::Client<::py3::simple::SimpleService>::word_character_frequency(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_sentence) {
   auto [ctx, header] = word_character_frequencyCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_sentence);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_word_character_frequency(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_sentence);
 }
@@ -6772,6 +6896,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::list_of_sets(std::uni
 
 void apache::thrift::Client<::py3::simple::SimpleService>::list_of_sets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_some_words) {
   auto [ctx, header] = list_of_setsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_some_words);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_list_of_sets(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_some_words);
 }
@@ -6971,6 +7099,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::nested_map_argument(s
 
 void apache::thrift::Client<::py3::simple::SimpleService>::nested_map_argument(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
   auto [ctx, header] = nested_map_argumentCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_struct_map);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_nested_map_argument(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_struct_map);
 }
@@ -7172,6 +7304,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::make_sentence(std::un
 
 void apache::thrift::Client<::py3::simple::SimpleService>::make_sentence(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
   auto [ctx, header] = make_sentenceCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_word_chars);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_make_sentence(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_word_chars);
 }
@@ -7371,6 +7507,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_union(std::unique
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_union(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
   auto [ctx, header] = get_unionCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_sets);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_union(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_sets);
 }
@@ -7570,6 +7710,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_keys(std::unique_
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_keys(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
   auto [ctx, header] = get_keysCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_string_map);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_keys(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_string_map);
 }
@@ -7769,6 +7913,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::lookup_double(std::un
 
 void apache::thrift::Client<::py3::simple::SimpleService>::lookup_double(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_key) {
   auto [ctx, header] = lookup_doubleCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_key);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_lookup_double(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
@@ -7970,6 +8118,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::retrieve_binary(std::
 
 void apache::thrift::Client<::py3::simple::SimpleService>::retrieve_binary(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_something) {
   auto [ctx, header] = retrieve_binaryCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_something);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_retrieve_binary(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_something);
 }
@@ -8169,6 +8321,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::contain_binary(std::u
 
 void apache::thrift::Client<::py3::simple::SimpleService>::contain_binary(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_binaries) {
   auto [ctx, header] = contain_binaryCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_binaries);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_contain_binary(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_binaries);
 }
@@ -8368,6 +8524,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::contain_enum(std::uni
 
 void apache::thrift::Client<::py3::simple::SimpleService>::contain_enum(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
   auto [ctx, header] = contain_enumCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_the_enum);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_contain_enum(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_the_enum);
 }
@@ -8567,6 +8727,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_binary_union_stru
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::BinaryUnion& p_u) {
   auto [ctx, header] = get_binary_union_structCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_u);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_binary_union_struct(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_u);
 }
@@ -8766,6 +8930,10 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(std
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = get_struct_hiddenCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_get_struct_hidden(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }

@@ -46,6 +46,10 @@ void apache::thrift::Client<::cpp2::MyService>::query(std::unique_ptr<apache::th
 
 void apache::thrift::Client<::cpp2::MyService>::query(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
   auto [ctx, header] = queryCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_s, p_i);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_query(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_s, p_i);
 }
@@ -246,6 +250,10 @@ void apache::thrift::Client<::cpp2::MyService>::has_arg_docs(std::unique_ptr<apa
 
 void apache::thrift::Client<::cpp2::MyService>::has_arg_docs(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
   auto [ctx, header] = has_arg_docsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_s, p_i);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_has_arg_docs(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_s, p_i);
 }

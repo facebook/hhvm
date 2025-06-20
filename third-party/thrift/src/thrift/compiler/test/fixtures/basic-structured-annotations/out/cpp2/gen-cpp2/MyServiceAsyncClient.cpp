@@ -46,6 +46,10 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
 
 void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::first(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = firstCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_first(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -244,6 +248,10 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
 
 void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::second(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count) {
   auto [ctx, header] = secondCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_count);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_second(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_count);
 }

@@ -33,6 +33,10 @@ void apache::thrift::Client<::cpp2::MyServicePrioChild>::pang(std::unique_ptr<ap
 
 void apache::thrift::Client<::cpp2::MyServicePrioChild>::pang(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = pangCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_pang(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }

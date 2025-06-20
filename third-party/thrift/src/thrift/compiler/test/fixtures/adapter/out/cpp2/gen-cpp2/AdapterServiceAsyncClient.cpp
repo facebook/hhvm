@@ -46,6 +46,10 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::count(std
 
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::count(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = countCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_count(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
@@ -244,6 +248,10 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::adaptedTy
 
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::HeapAllocated& p_arg) {
   auto [ctx, header] = adaptedTypesCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_arg);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_adaptedTypes(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_arg);
 }

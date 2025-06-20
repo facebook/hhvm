@@ -132,7 +132,7 @@ folly::Future<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_pt
   auto future = promise.getFuture();
   auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<{{> types/return_type_client_lift_unit}}>>(std::move(promise), recv_wrapped_{{function:self.cpp_name}}, channel_);
   {{function:self.cpp_name}}(rpcOptions, std::move(callback){{function:comma}}{{> service_common/param_list}});
-  return std::move(future).thenValue(CallbackHelper::extractResult);
+  return std::move(future).thenValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 {{/function:stream?}}
 

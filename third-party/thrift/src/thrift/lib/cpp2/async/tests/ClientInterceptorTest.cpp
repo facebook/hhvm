@@ -124,6 +124,11 @@ struct TestHandler
           co_return count;
         }};
   }
+
+  folly::coro::Task<std::unique_ptr<std::string>> co_headerClientMethod(
+      std::unique_ptr<std::string> p_str) override {
+    co_return std::move(p_str);
+  }
 };
 
 class ClientInterface {
@@ -157,6 +162,11 @@ class ClientInterface {
   dump() = 0;
 
   virtual folly::coro::Task<void> fireAndForget(std::int32_t value) = 0;
+
+  virtual folly::coro::Task<std::pair<
+      std::string,
+      std::unique_ptr<apache::thrift::transport::THeader>>>
+  headerClientMethod(std::string str) = 0;
 
  protected:
   std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
@@ -209,6 +219,13 @@ class CoroClientInterface : public ClientInterface {
 
   folly::coro::Task<void> fireAndForget(std::int32_t value) override {
     co_await client_->co_fireAndForget(value);
+  }
+
+  folly::coro::Task<std::pair<
+      std::string,
+      std::unique_ptr<apache::thrift::transport::THeader>>>
+  headerClientMethod(std::string) override {
+    throw std::logic_error("Should not be called from coro client");
   }
 };
 
@@ -264,6 +281,13 @@ class SyncClientInterface : public ClientInterface {
     client_->sync_fireAndForget(value);
     co_return;
   }
+
+  folly::coro::Task<std::pair<
+      std::string,
+      std::unique_ptr<apache::thrift::transport::THeader>>>
+  headerClientMethod(std::string) override {
+    throw std::logic_error("Should not be called from sync client");
+  }
 };
 
 class SemiFutureClientInterface : public ClientInterface {
@@ -313,6 +337,15 @@ class SemiFutureClientInterface : public ClientInterface {
   folly::coro::Task<void> fireAndForget(std::int32_t value) override {
     co_await client_->semifuture_fireAndForget(value);
   }
+
+  folly::coro::Task<std::pair<
+      std::string,
+      std::unique_ptr<apache::thrift::transport::THeader>>>
+  headerClientMethod(std::string str) override {
+    RpcOptions rpcOptions;
+    co_return co_await client_->header_semifuture_headerClientMethod(
+        rpcOptions, std::move(str));
+  }
 };
 
 class FutureClientInterface : public ClientInterface {
@@ -358,6 +391,15 @@ class FutureClientInterface : public ClientInterface {
 
   folly::coro::Task<void> fireAndForget(std::int32_t value) override {
     co_await client_->future_fireAndForget(value);
+  }
+
+  folly::coro::Task<std::pair<
+      std::string,
+      std::unique_ptr<apache::thrift::transport::THeader>>>
+  headerClientMethod(std::string str) override {
+    RpcOptions rpcOptions;
+    co_return co_await client_->header_future_headerClientMethod(
+        rpcOptions, std::move(str));
   }
 };
 
@@ -1033,6 +1075,23 @@ CO_TEST_P(ClientInterceptorTestP, BasicSink) {
   };
   EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
   EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
+}
+
+CO_TEST_P(ClientInterceptorTestP, DepreceatedHeaderClientMethods) {
+  if (clientCallbackType() != ClientCallbackKind::SEMIFUTURE &&
+      clientCallbackType() != ClientCallbackKind::FUTURE) {
+    // this test case only testts deprecated header client methods, which are
+    // future / semifuture
+    co_return;
+  }
+
+  auto interceptor =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  co_await client->headerClientMethod("foo");
+  EXPECT_EQ(interceptor->onRequestCount, 1);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
 INSTANTIATE_TEST_SUITE_P(

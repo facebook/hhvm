@@ -85,6 +85,10 @@ void apache::thrift::Client<::cpp2::NestedContainers>::mapList(std::unique_ptr<a
 
 void apache::thrift::Client<::cpp2::NestedContainers>::mapList(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo) {
   auto [ctx, header] = mapListCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_foo);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_mapList(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
@@ -284,6 +288,10 @@ void apache::thrift::Client<::cpp2::NestedContainers>::mapSet(std::unique_ptr<ap
 
 void apache::thrift::Client<::cpp2::NestedContainers>::mapSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo) {
   auto [ctx, header] = mapSetCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_foo);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_mapSet(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
@@ -483,6 +491,10 @@ void apache::thrift::Client<::cpp2::NestedContainers>::listMap(std::unique_ptr<a
 
 void apache::thrift::Client<::cpp2::NestedContainers>::listMap(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo) {
   auto [ctx, header] = listMapCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_foo);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_listMap(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
@@ -682,6 +694,10 @@ void apache::thrift::Client<::cpp2::NestedContainers>::listSet(std::unique_ptr<a
 
 void apache::thrift::Client<::cpp2::NestedContainers>::listSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_foo) {
   auto [ctx, header] = listSetCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_foo);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_listSet(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
@@ -881,6 +897,10 @@ void apache::thrift::Client<::cpp2::NestedContainers>::turtles(std::unique_ptr<a
 
 void apache::thrift::Client<::cpp2::NestedContainers>::turtles(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo) {
   auto [ctx, header] = turtlesCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_foo);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_turtles(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }

@@ -46,6 +46,10 @@ void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::get
 
 void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key) {
   auto [ctx, header] = getDataByKey0Ctx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_key);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_getDataByKey0(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
@@ -245,6 +249,10 @@ void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::get
 
 void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key) {
   auto [ctx, header] = getDataByKey1Ctx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_key);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fbthrift_serialize_and_send_getDataByKey1(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }

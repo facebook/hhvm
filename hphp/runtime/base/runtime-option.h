@@ -75,6 +75,7 @@ enum class JitSerdesMode {
   DeserializeOrGenerate = 0xa,          // 01010
   DeserializeAndDelete  = 0xe,          // 01110
   DeserializeAndExit    = 0x12,         // 10010
+  DeserializeForPreload = 0x16,         // 10110
 };
 
 enum class RepoMode {

@@ -448,17 +448,18 @@ void logTranslation(const Translator* trans, const TransRange& range) {
     auto const func = trans->sk.func();
     cols.setStr("func", func->fullName()->data());
     switch (RuntimeOption::EvalJitSerdesMode) {
-    case JitSerdesMode::Off:
-    case JitSerdesMode::Serialize:
-    case JitSerdesMode::SerializeAndExit:
-      break;
-    case JitSerdesMode::Deserialize:
-    case JitSerdesMode::DeserializeOrFail:
-    case JitSerdesMode::DeserializeOrGenerate:
-    case JitSerdesMode::DeserializeAndDelete:
-    case JitSerdesMode::DeserializeAndExit:
-      cols.setInt("func_id", func->getFuncId().toInt());
-      break;
+      case JitSerdesMode::Off:
+      case JitSerdesMode::Serialize:
+      case JitSerdesMode::SerializeAndExit:
+      case JitSerdesMode::DeserializeForPreload:
+        break;
+      case JitSerdesMode::Deserialize:
+      case JitSerdesMode::DeserializeOrFail:
+      case JitSerdesMode::DeserializeOrGenerate:
+      case JitSerdesMode::DeserializeAndDelete:
+      case JitSerdesMode::DeserializeAndExit:
+        cols.setInt("func_id", func->getFuncId().toInt());
+        break;
     }
   }
   if (trans->kind == TransKind::Optimize) {

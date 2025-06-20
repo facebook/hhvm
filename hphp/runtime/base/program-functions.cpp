@@ -1274,7 +1274,7 @@ static int start_server(const std::string &username) {
     start_cli_server();
   }
 
-	if (jit::mcgen::retranslateAllScheduled()) {
+  if (jit::mcgen::retranslateAllScheduled()) {
     // We ran retranslateAll from deserialized profile.
     BootStats::Block timer("waitForRetranslateAll", true);
     jit::mcgen::joinWorkerThreads();
@@ -2668,8 +2668,7 @@ void hphp_process_init(bool skipExtensions) {
   StaticContentCache::load();
 
   if (Cfg::Repo::Authoritative &&
-      !Cfg::Jit::SerdesFile.empty() &&
-      jit::mcgen::retranslateAllEnabled()) {
+      !Cfg::Jit::SerdesFile.empty()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
     auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
         Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
@@ -2746,8 +2745,9 @@ void hphp_process_init(bool skipExtensions) {
           Logger::FInfo("JitDeserialize: Loaded {} Units with {} workers",
                         numLoadedUnits(), numWorkers);
         }
-        rta("jit::deserializeProfData", false);
-
+        if (mode != JitSerdesMode::DeserializeForPreload) {
+          rta("jit::deserializeProfData", false);
+        }
         if (mode == JitSerdesMode::DeserializeAndExit) {
           if (Cfg::Server::Mode) {
             Logger::Info("JitDeserialize finished; exiting");

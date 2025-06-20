@@ -48,8 +48,6 @@ using ClassConstraint = TypeConstraint::ClassConstraint;
 using UnionConstraint = TypeConstraint::UnionConstraint;
 using UnionClassList = TypeConstraint::UnionClassList;
 using UnionTypeMask = TypeConstraint::UnionTypeMask;
-using ClsNameKind = ClassConstraint::ClsNameKind;
-using NamePtr = ClassConstraint::NamePtr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -404,7 +402,7 @@ void TypeConstraint::serdeUnion(SerDe& sd) {
     if (classes) {
       bool resolved = contains(m_flags, TypeConstraintFlags::Resolved);
       for (const ClassConstraint& oc : classes->m_list) {
-        oc.serdeHelper(sd, resolved);
+        const_cast<ClassConstraint&>(oc).serdeHelper(sd, resolved);
       }
     }
   }
@@ -427,11 +425,11 @@ void TypeConstraint::serdeSingle(SerDe& sd)  {
 }
 
 ClassConstraint::ClassConstraint(LowStringPtr typeName)
-  : ClassConstraint(NamePtr{}, typeName, nullptr) {
+  : ClassConstraint(nullptr, typeName, nullptr) {
   assertx(!typeName || typeName->isStatic());
 }
 
-ClassConstraint::ClassConstraint(NamePtr clsName,
+ClassConstraint::ClassConstraint(LowStringPtr clsName,
                                  LowStringPtr typeName,
                                  LowPtr<const NamedType> namedType)
   : m_clsName(clsName)
@@ -443,29 +441,20 @@ ClassConstraint::ClassConstraint(NamePtr clsName,
 }
 
 ClassConstraint::ClassConstraint(Class& cls)
-  : ClassConstraint(NamePtr{cls.name(), ClsNameKind::Unset},
+  : ClassConstraint(cls.name(),
                     cls.name(),
                     nullptr) {}
 
-void ClassConstraint::serdeHelper(BlobDecoder& sd, bool isSubObject) {
+template <typename SerDe>
+void ClassConstraint::serdeHelper(SerDe& sd, bool isSubObject) {
   sd(m_typeName);
   if (isSubObject) {
-    const StringData* clsName;
-    sd(clsName);
-    ClsNameKind k;
-    sd(k);
-    m_clsName = NamePtr{clsName, k};
+    sd(m_clsName);
   }
 }
 
-void ClassConstraint::serdeHelper(BlobEncoder& sd, bool isSubObject) const {
-  sd(m_typeName);
-  if (isSubObject) {
-    auto const clsName = m_clsName.get();
-    sd(clsName);
-    sd(m_clsName.kind());
-  }
-}
+template void ClassConstraint::serdeHelper(BlobEncoder&, bool isSubObject);
+template void ClassConstraint::serdeHelper(BlobDecoder&, bool isSubObject);
 
 void ClassConstraint::init(AnnotType const type) {
   bool isSubObject = type == Type::SubObject;
@@ -521,11 +510,7 @@ ClassConstraint TypeConstraint::makeClass(Type type,
                                           const LowStringPtr typeName) {
   switch (type) {
     case Type::SubObject:
-      return ClassConstraint {
-        NamePtr{typeName.get(), ClsNameKind::Unset},
-        typeName,
-        nullptr
-      };
+      return ClassConstraint { typeName, typeName, nullptr };
     default:
       return ClassConstraint { typeName };
   }
@@ -2035,7 +2020,7 @@ void TypeConstraint::resolveType(AnnotType t,
   m_flags |= TypeConstraintFlags::Resolved;
   if (nullable) m_flags |= TypeConstraintFlags::Nullable;
   m_u.single.type = t;
-  m_u.single.class_.m_clsName.set(clsName, ClsNameKind::Unset);
+  m_u.single.class_.m_clsName = clsName;
 }
 
 void TypeConstraint::unresolve() {

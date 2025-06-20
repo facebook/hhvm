@@ -101,15 +101,9 @@ struct TypeConstraint {
   /// An ClassConstraint is used to represent class-specific (or
   /// enum-specific) information about a TypeConstraint.
   struct ClassConstraint {
-    enum class ClsNameKind : uint8_t {
-      Unset = 0,
-      Object = 1,
-      Class = 2
-    };
-    using NamePtr = TaggedLowStringPtr<ClsNameKind>;
     /// Resolved class name. Only valid if this TypeConstraint represents a
     /// resolved object.
-    NamePtr m_clsName;
+    LowStringPtr m_clsName;
     /// Source type name. In general this is the name from the source code.
     LowStringPtr m_typeName;
     /// The NamedType is used to differentiate implementations of
@@ -120,7 +114,7 @@ struct TypeConstraint {
 
     ClassConstraint() = default;
     explicit ClassConstraint(LowStringPtr typeName);
-    ClassConstraint(NamePtr clsName,
+    ClassConstraint(LowStringPtr clsName,
                     LowStringPtr typeName,
                     LowPtr<const NamedType> namedType);
     explicit ClassConstraint(Class& cls);
@@ -128,8 +122,8 @@ struct TypeConstraint {
     size_t stableHash() const;
     bool operator==(const ClassConstraint& o) const;
 
-    void serdeHelper(BlobDecoder& sd, bool isSubObject);
-    void serdeHelper(BlobEncoder& sd, bool isSubObject) const;
+    template <typename SerDe>
+    void serdeHelper(SerDe& sd, bool isSubObject);
 
     void init(AnnotType type);
   };

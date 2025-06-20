@@ -126,6 +126,7 @@ type env = {
   retries: int;
   sql_retries: int;
   watchman_retries: int;
+  edenfs_watcher_retries: int;
   max_purgatory_clients: int;
   (* Version of this running server, as specified in the config file. *)
   current_version: Config_file.version;
@@ -741,6 +742,17 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
     | Some c when c = Exit_status.(exit_code Watchman_failed) -> true
     | _ -> false
   in
+  let is_edenfs_watcher_lost_changes =
+    match exit_status with
+    | Some c when c = Exit_status.(exit_code Edenfs_watcher_lost_changes) ->
+      true
+    | _ -> false
+  in
+  let is_edenfs_watcher_failed =
+    match exit_status with
+    | Some c when c = Exit_status.(exit_code Edenfs_watcher_failed) -> true
+    | _ -> false
+  in
   let is_config_changed =
     match exit_status with
     | Some c when c = Exit_status.(exit_code Hhconfig_changed) -> true
@@ -784,6 +796,7 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
     | _ -> false
   in
   let max_watchman_retries = 3 in
+  let max_edenfs_watcher_retries = 3 in
   let max_sql_retries = 3 in
   let (reason, msg_update) =
     match (informant_report, env.server) with
@@ -809,6 +822,19 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
             (env.watchman_retries + 1)
         in
         let env = { env with watchman_retries = env.watchman_retries + 1 } in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if
+        (is_edenfs_watcher_failed || is_edenfs_watcher_lost_changes)
+        && env.edenfs_watcher_retries < max_edenfs_watcher_retries
+      then
+        let reason =
+          Printf.sprintf
+            "Edenfs_watcher died. Restarting hh_server (attempt: %d)"
+            (env.edenfs_watcher_retries + 1)
+        in
+        let env =
+          { env with edenfs_watcher_retries = env.edenfs_watcher_retries + 1 }
+        in
         (Some reason, set_server (Ok env) Not_yet_started)
       else if is_decl_heap_elems_bug then
         let reason = "hh_server died due to Decl_heap_elems_bug. Restarting" in
@@ -1041,6 +1067,7 @@ let start_monitor
       retries = 0;
       sql_retries = 0;
       watchman_retries = 0;
+      edenfs_watcher_retries = 0;
       ignore_hh_version = Informant.should_ignore_hh_version informant_init_env;
     }
   in

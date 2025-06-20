@@ -234,6 +234,7 @@ where
     }
 }
 
+// Special case collections for u8 since it doesn't implement GetTType
 impl<P> Serialize<P> for Vec<u8>
 where
     P: ProtocolWriter,
@@ -251,6 +252,109 @@ where
     #[inline]
     fn rs_thrift_write(&self, p: &mut P) {
         p.write_binary(self)
+    }
+}
+
+impl<P, V> Serialize<P> for BTreeMap<u8, V>
+where
+    P: ProtocolWriter,
+    V: GetTType,
+    V: Serialize<P>,
+{
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_map_begin(crate::TType::Byte, V::TTYPE, self.len());
+        for (k, v) in self.iter() {
+            p.write_map_key_begin();
+            k.rs_thrift_write(p);
+            p.write_map_value_begin();
+            v.rs_thrift_write(p);
+        }
+        p.write_map_end();
+    }
+}
+
+impl<P, K> Serialize<P> for BTreeMap<K, u8>
+where
+    P: ProtocolWriter,
+    K: GetTType + Ord,
+    K: Serialize<P>,
+{
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_map_begin(K::TTYPE, crate::TType::Byte, self.len());
+        for (k, v) in self.iter() {
+            p.write_map_key_begin();
+            k.rs_thrift_write(p);
+            p.write_map_value_begin();
+            v.rs_thrift_write(p);
+        }
+        p.write_map_end();
+    }
+}
+
+impl<P> Serialize<P> for BTreeSet<u8>
+where
+    P: ProtocolWriter,
+{
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_set_begin(crate::TType::Byte, self.len());
+        for item in self.iter() {
+            p.write_set_value_begin();
+            item.rs_thrift_write(p);
+        }
+        p.write_set_end();
+    }
+}
+
+impl<P, K, S> Serialize<P> for HashMap<K, u8, S>
+where
+    P: ProtocolWriter,
+    K: GetTType + Hash + Eq,
+    K: Serialize<P>,
+    S: std::hash::BuildHasher,
+{
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_map_begin(K::TTYPE, crate::TType::Byte, self.len());
+        for (k, v) in self.iter() {
+            p.write_map_key_begin();
+            k.rs_thrift_write(p);
+            p.write_map_value_begin();
+            v.rs_thrift_write(p);
+        }
+        p.write_map_end();
+    }
+}
+
+impl<P, V, S> Serialize<P> for HashMap<u8, V, S>
+where
+    P: ProtocolWriter,
+    V: GetTType,
+    V: Serialize<P>,
+    S: std::hash::BuildHasher,
+{
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_map_begin(crate::TType::Byte, V::TTYPE, self.len());
+        for (k, v) in self.iter() {
+            p.write_map_key_begin();
+            k.rs_thrift_write(p);
+            p.write_map_value_begin();
+            v.rs_thrift_write(p);
+        }
+        p.write_map_end();
+    }
+}
+
+impl<P, S> Serialize<P> for HashSet<u8, S>
+where
+    P: ProtocolWriter,
+    S: std::hash::BuildHasher,
+{
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_set_begin(crate::TType::Byte, self.len());
+        for item in self.iter() {
+            p.write_set_value_begin();
+            item.rs_thrift_write(p);
+        }
+        p.write_set_end();
     }
 }
 

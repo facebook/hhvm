@@ -127,6 +127,18 @@ impl GetTType for bool {
     const TTYPE: TType = TType::Bool;
 }
 
+impl GetTType for u16 {
+    const TTYPE: TType = TType::I16;
+}
+
+impl GetTType for u32 {
+    const TTYPE: TType = TType::I32;
+}
+
+impl GetTType for u64 {
+    const TTYPE: TType = TType::I64;
+}
+
 impl GetTType for i8 {
     const TTYPE: TType = TType::Byte;
 }
@@ -167,42 +179,36 @@ impl GetTType for Bytes {
     const TTYPE: TType = TType::String;
 }
 
-// This only narrowly avoids a collision with Vec<T>, because
-// it requires T: GetTType, but u8 does not impl it (only i8).
-impl GetTType for Vec<u8> {
-    const TTYPE: TType = TType::String;
-}
-
 impl<T> GetTType for BTreeSet<T>
 where
-    T: GetTType + Ord,
+    T: Ord,
 {
     const TTYPE: TType = TType::Set;
 }
 
 impl<T, S> GetTType for HashSet<T, S>
 where
-    T: GetTType + Hash + Eq,
+    T: Hash + Eq,
     S: std::hash::BuildHasher,
 {
     const TTYPE: TType = TType::Set;
 }
 
-impl<K, V> GetTType for BTreeMap<K, V>
-where
-    K: GetTType + Ord,
-    V: GetTType,
-{
+impl<K, V> GetTType for BTreeMap<K, V> {
     const TTYPE: TType = TType::Map;
 }
 
 impl<K, V, S> GetTType for HashMap<K, V, S>
 where
-    K: GetTType + Hash + Eq,
-    V: GetTType,
+    K: Hash + Eq,
     S: std::hash::BuildHasher,
 {
     const TTYPE: TType = TType::Map;
+}
+
+// special case for pre-existing usage of Vec<u8>
+impl GetTType for Vec<u8> {
+    const TTYPE: TType = TType::String;
 }
 
 impl<T> GetTType for Vec<T>

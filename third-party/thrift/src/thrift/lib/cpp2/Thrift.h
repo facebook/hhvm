@@ -227,10 +227,12 @@ FOLLY_EXPORT const std::string& uri() {
                            Client<T>>::value) {
     uri = detail::st::private_access::__fbthrift_thrift_uri<Client<T>>();
   } else {
-    // MSVC fires this assert even when we took an earlier branch...
-    if constexpr (!folly::kIsWindows) {
+    // MSVC and GCC fire this assert even when we took an earlier branch...
+    if constexpr (!folly::kIsWindows && !folly::kGnuc) {
       static_assert(folly::always_false<T>, "No URI defined for type");
     } else {
+      // This will fail to build because we checked earlier that no URI is
+      // defined for this type.
       uri = detail::st::private_access::__fbthrift_thrift_uri<T>();
     }
   }

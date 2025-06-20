@@ -30,8 +30,6 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/SecondaryAuthManagerBase.h>
 #include <proxygen/lib/utils/WheelTimerInstance.h>
-#include <queue>
-#include <set>
 #include <vector>
 
 namespace proxygen {

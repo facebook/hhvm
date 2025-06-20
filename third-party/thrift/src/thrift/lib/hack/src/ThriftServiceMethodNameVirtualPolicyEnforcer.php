@@ -112,14 +112,12 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
 
     // We only run probes if no exception is thrown
     // Pending Probes PrivacyLib Integration after PAAL Consolidation
-    if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
-      await self::genExecuteStandaloneProbes(
-        $asset_type,
-        $policy_enforcer_api,
-        $caller,
-        $context,
-      );
-    }
+    await self::genExecuteStandaloneProbes(
+      $asset_type,
+      $policy_enforcer_api,
+      $caller,
+      $context,
+    );
 
     return $result;
   }
@@ -196,21 +194,12 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     PolicyEnforcerContext $context,
   ): Awaitable<void> {
     // Pending Probes PrivacyLib post-read Integration
-    if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
-      await self::genExecuteStandaloneProbes(
-        $asset_type,
-        $policy_enforcer_api,
-        $caller,
-        $context,
-      );
-    } else {
-      await ThriftPolicyEnforcer::genProcessResponse(
-        $asset_type,
-        $policy_enforcer_api,
-        $caller,
-        $context,
-      );
-    }
+    await self::genExecuteStandaloneProbes(
+      $asset_type,
+      $policy_enforcer_api,
+      $caller,
+      $context,
+    );
   }
 
   private static async function genExecuteStandaloneProbes(

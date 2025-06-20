@@ -16,17 +16,13 @@
  *
  */
 
-final class ThriftPolicyEnforcer
-  extends PolicyEnforcer
-  implements IPolicyEnforcerAtThrift {
+final class ThriftPolicyEnforcer extends PolicyEnforcer {
   const PolicyEnforcerAssetClass ASSET_CLASS =
     PolicyEnforcerAssetClass::THRIFT_CLIENT;
   const classname<TrustedAPIEnforcerModule> TAE_MODULE =
     ThriftTrustedAPIEnforcerModule::class;
   const classname<PolicyZoneModule> POLICY_ZONE_MODULE =
     ThriftPolicyZoneModule::class;
-  const classname<PrivacyProbesModule> PRIVACY_PROBES_MODULE =
-    PrivacyProbesThriftModule::class;
 
   const bool IS_THRIFT = true;
   const int ODS_ONE_IN = 100;
@@ -48,22 +44,6 @@ final class ThriftPolicyEnforcer
     // for tests
     'FakeService',
   ];
-
-  <<__Override>>
-  protected static function getEnforceModulesForExecution(
-  ): vec<?classname<PolicyEnforcerModule>> {
-    if (!PrivacyLibKS::isKilled(PLKS::TIR_THRIFT_PROBES)) {
-      return vec[
-        static::TAE_MODULE,
-        static::POLICY_ZONE_MODULE,
-      ];
-    }
-    return vec[
-      static::TAE_MODULE,
-      static::POLICY_ZONE_MODULE,
-      static::PRIVACY_PROBES_MODULE,
-    ];
-  }
 
   <<__Override>>
   public static function getNotConfigured(

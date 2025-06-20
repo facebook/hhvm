@@ -153,6 +153,14 @@ module Switch_redundancy = struct
     | RedundantDefault  (** Primary position on the default *)
 end
 
+module Static_call_on_trait = struct
+  type t = {
+    meth_name: string;
+    trait_name: string;
+    trait_pos: Pos_or_decl.t;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Safe_abstract : (Safe_abstract.t, warn) kind
@@ -166,5 +174,6 @@ type (_, _) kind =
   | Class_pointer_to_string : (Class_pointer_to_string.t, warn) kind
   | No_disjoint_union_check : (No_disjoint_union_check.t, warn) kind
   | Switch_redundancy : (Switch_redundancy.t, warn) kind
+  | Static_call_on_trait : (Static_call_on_trait.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

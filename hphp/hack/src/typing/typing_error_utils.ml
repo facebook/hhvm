@@ -4043,7 +4043,12 @@ end = struct
     create ~code:Error_code.StaticSyntheticMethod ~claim ~reasons ()
 
   let static_call_on_trait_require_non_strict
-      call_pos meth_name trait_name req_constraint_name req_constraint_kind =
+      call_pos
+      meth_name
+      trait_name
+      req_constraint_name
+      req_constraint_kind
+      trait_pos =
     let trait_name = Render.strip_ns trait_name in
     let req_constraint_name = Render.strip_ns req_constraint_name in
     match req_constraint_kind with
@@ -4076,6 +4081,8 @@ end = struct
               ^ Markdown_lite.md_codify
                   ("require this as " ^ req_constraint_name)
               ^ " constraint." ))
+        ~reasons:
+          (lazy [(trait_pos, Printf.sprintf "%s is defined here" trait_name)])
         ()
 
   let isset_in_strict pos =
@@ -5297,14 +5304,21 @@ end = struct
     | Static_synthetic_method { pos; meth_name; class_name; decl_pos } ->
       static_synthetic_method pos meth_name class_name decl_pos
     | Static_call_on_trait_require_non_strict
-        { pos; meth_name; trait_name; req_constraint_name; req_constraint_kind }
-      ->
+        {
+          pos;
+          meth_name;
+          trait_name;
+          req_constraint_name;
+          req_constraint_kind;
+          trait_pos;
+        } ->
       static_call_on_trait_require_non_strict
         pos
         meth_name
         trait_name
         req_constraint_name
         req_constraint_kind
+        trait_pos
     | Isset_in_strict pos -> isset_in_strict pos
     | Isset_inout_arg pos -> isset_inout_arg pos
     | Unpacking_disallowed_builtin_function { pos; fn_name } ->

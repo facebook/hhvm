@@ -1,3 +1,7 @@
+WARN: File "trait_private_bad3.php", line 22, characters 21-23:
+Static method call on a trait: `MyTrait::foo` (Warn[12020])
+  File "trait_private_bad3.php", line 12, characters 7-13:
+  `MyTrait` is defined here
 ERROR: File "trait_private_bad3.php", line 22, characters 21-23:
 You cannot access private members using the trait's name (did you mean to use self::?) (Typing[4112])
   File "trait_private_bad3.php", line 13, characters 27-29:

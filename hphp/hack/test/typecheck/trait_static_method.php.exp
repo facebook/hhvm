@@ -1,3 +1,11 @@
+WARN: File "trait_static_method.php", line 33, characters 12-15:
+Static method call on a trait: `R_Trait::good` (Warn[12020])
+  File "trait_static_method.php", line 21, characters 7-13:
+  `R_Trait` is defined here
+WARN: File "trait_static_method.php", line 36, characters 12-16:
+Static method call on a trait: `R_Trait::good2` (Warn[12020])
+  File "trait_static_method.php", line 21, characters 7-13:
+  `R_Trait` is defined here
 ERROR: File "trait_static_method.php", line 42, characters 12-14:
 Cannot call `R_Trait::bad()`; `bad` is not defined in `R_Trait` (Typing[4185])
   File "trait_static_method.php", line 4, characters 26-28:

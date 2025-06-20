@@ -1127,6 +1127,7 @@ module Primary = struct
         trait_name: string;
         req_constraint_name: string;
         req_constraint_kind: [ `class_ | `this_as ];
+        trait_pos: Pos_or_decl.t;
       }
     | Isset_in_strict of Pos.t
     | Isset_inout_arg of Pos.t

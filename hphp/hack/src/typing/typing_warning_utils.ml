@@ -558,6 +558,35 @@ module Switch_redundancy = struct
   let quickfixes _ = []
 end
 
+module Static_call_on_trait = struct
+  open Typing_warning.Static_call_on_trait
+
+  type t = Typing_warning.Static_call_on_trait.t
+
+  let code = Codes.StaticCallOnTrait
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { trait_name; meth_name; _ } =
+    let trait_call =
+      Printf.sprintf "%s::%s" (Utils.strip_ns trait_name) meth_name
+      |> Markdown_lite.md_codify
+    in
+    Printf.sprintf "Static method call on a trait: %s" trait_call
+
+  let reasons { trait_pos; trait_name; _ } =
+    let trait_name = Utils.strip_ns trait_name in
+    [
+      ( trait_pos,
+        Printf.sprintf "%s is defined here" (Markdown_lite.md_codify trait_name)
+      );
+    ]
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -573,6 +602,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Class_pointer_to_string -> (module Class_pointer_to_string)
   | Typing_warning.No_disjoint_union_check -> (module No_disjoint_union_check)
   | Typing_warning.Switch_redundancy -> (module Switch_redundancy)
+  | Typing_warning.Static_call_on_trait -> (module Static_call_on_trait)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

@@ -1,1 +1,4 @@
-No errors
+WARN: File "T81198878.php", line 7, characters 8-10:
+Static method call on a trait: `T::foo` (Warn[12020])
+  File "T81198878.php", line 4, characters 7-7:
+  `T` is defined here

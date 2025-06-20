@@ -812,6 +812,7 @@ module Warning = struct
     | NoDisjointUnion [@value 12017]
     | SafeAbstractConstAccess [@value 12018]
     | SwitchRedundancy [@value 12019]
+    | StaticCallOnTrait [@value 12020]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

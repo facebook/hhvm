@@ -1281,36 +1281,50 @@ let check_class_get
       ()
     | Decl_entry.Found cd ->
       let req_non_strict = Cls.all_ancestor_req_constraints_requirements cd in
-      if Ast_defs.is_c_trait (Cls.kind cd) && not (List.is_empty req_non_strict)
-      then begin
-        let elab ty =
-          match TUtils.try_unwrap_class_type ty with
-          | None -> None
-          | Some (_r, (_p, req_name), _paraml) -> Some req_name
-        in
-        let ty_kind =
-          match List.hd req_non_strict with
-          | Some (CR_Equal (_, ty)) -> (elab ty, `class_)
-          | Some (CR_Subtype (_, ty)) -> (elab ty, `this_as)
-          | None ->
-            (* cannot happen *)
-            (None, `class_)
-        in
-        match ty_kind with
-        | (Some req_constraint_name, req_constraint_kind) ->
-          Typing_error_utils.add_typing_error
-            ~env
-            Typing_error.(
-              primary
-              @@ Primary.Static_call_on_trait_require_non_strict
-                   {
-                     trait_name = class_name;
-                     meth_name = mid;
-                     req_constraint_name;
-                     req_constraint_kind;
-                     pos = p;
-                   })
-        | _ -> ()
+      if Ast_defs.is_c_trait (Cls.kind cd) then begin
+        if not (List.is_empty req_non_strict) then begin
+          let elab ty =
+            match TUtils.try_unwrap_class_type ty with
+            | None -> None
+            | Some (_r, (_p, req_name), _paraml) -> Some req_name
+          in
+          let ty_kind =
+            match List.hd req_non_strict with
+            | Some (CR_Equal (_, ty)) -> (elab ty, `class_)
+            | Some (CR_Subtype (_, ty)) -> (elab ty, `this_as)
+            | None ->
+              (* cannot happen *)
+              (None, `class_)
+          in
+          match ty_kind with
+          | (Some req_constraint_name, req_constraint_kind) ->
+            Typing_error_utils.add_typing_error
+              ~env
+              Typing_error.(
+                primary
+                @@ Primary.Static_call_on_trait_require_non_strict
+                     {
+                       trait_name = class_name;
+                       meth_name = mid;
+                       req_constraint_name;
+                       req_constraint_kind;
+                       pos = p;
+                       trait_pos = Cls.pos cd;
+                     })
+          | _ -> ()
+        end else begin
+          Typing_warning_utils.add
+            env
+            Typing_warning.
+              ( p,
+                Static_call_on_trait,
+                Static_call_on_trait.
+                  {
+                    trait_name = class_name;
+                    meth_name = mid;
+                    trait_pos = Cls.pos cd;
+                  } )
+        end
       end)
   | CIself -> check_needs_concrete_call `Self
   | CIparent -> check_needs_concrete_call `Parent

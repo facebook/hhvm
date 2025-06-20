@@ -308,6 +308,8 @@ struct mixed {
   9: optional i32 opt_int = 1;
   // @lint-ignore THRIFTCHECKS
   10: optional Color opt_enum = Color.red;
+  11: optional string opt_pointless_default_str = "";
+  12: optional i64 opt_pointless_default_int = 0;
 }
 
 struct numerical {

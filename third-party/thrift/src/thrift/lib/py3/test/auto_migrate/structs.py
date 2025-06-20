@@ -544,11 +544,15 @@ class NumericalConversionsTests(unittest.TestCase):
                 self.assertIsNone(m.opt_float)
                 self.assertIsNone(m.opt_int)
                 self.assertIsNone(m.opt_enum)
+                self.assertIsNone(m.opt_pointless_default_str)
+                self.assertIsNone(m.opt_pointless_default_int)
             else:
                 self.assertEqual(m.opt_field, "optional")
                 self.assertEqual(m.opt_float, 1.0)
                 self.assertEqual(m.opt_int, 1)
                 self.assertEqual(m.opt_enum, Color.red)
+                self.assertEqual(m.opt_pointless_default_str, "")
+                self.assertEqual(m.opt_pointless_default_int, 0)
 
         def assert_isset(m: mixed) -> None:
             # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
@@ -593,11 +597,20 @@ class NumericalConversionsTests(unittest.TestCase):
         assert_isset(m)
 
         # basic sanity check for normal set behavior
-        non_opt = mixed(opt_field="foo", opt_float=2.0, opt_int=3, opt_enum=Color.blue)
+        non_opt = mixed(
+            opt_field="foo",
+            opt_float=2.0,
+            opt_int=3,
+            opt_enum=Color.blue,
+            opt_pointless_default_str="bar",
+            opt_pointless_default_int=4,
+        )
         self.assertEqual(non_opt.opt_field, "foo")
         self.assertEqual(non_opt.opt_float, 2.0)
         self.assertEqual(non_opt.opt_int, 3)
         self.assertEqual(non_opt.opt_enum, Color.blue)
+        self.assertEqual(non_opt.opt_pointless_default_str, "bar")
+        self.assertEqual(non_opt.opt_pointless_default_int, 4)
         # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
         non_opt_isset = Struct.isset(non_opt)
         for field, field_value in non_opt:

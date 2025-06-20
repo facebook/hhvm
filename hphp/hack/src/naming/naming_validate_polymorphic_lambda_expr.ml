@@ -48,6 +48,12 @@ let on_fun_ on_error fun_ ~ctx =
   let ctx = set_in_poly_lambda ctx in_poly_lambda in
   (ctx, Ok fun_)
 
+let on_func_body func_body ~ctx =
+  (* We only want to disallow wildcards in hints appearing the signature, not
+     the body *)
+  let ctx = set_in_poly_lambda ctx false in
+  (ctx, Ok func_body)
+
 let on_hint on_error hint ~ctx =
   let () =
     if get_in_poly_lambda ctx then
@@ -70,4 +76,5 @@ let pass on_error =
         id with
         on_ty_fun_ = Some (fun elem ~ctx -> on_fun_ on_error elem ~ctx);
         on_ty_hint = Some (fun elem ~ctx -> on_hint on_error elem ~ctx);
+        on_ty_func_body = Some (fun elem ~ctx -> on_func_body elem ~ctx);
       }

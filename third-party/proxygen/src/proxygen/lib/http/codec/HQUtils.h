@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <deque>
 #include <folly/Optional.h>
 #include <proxygen/lib/http/HTTP3ErrorCode.h>
 #include <proxygen/lib/http/HTTPException.h>

@@ -9,7 +9,6 @@
 #pragma once
 
 #include <assert.h>
-#include <cctype>
 #include <folly/Range.h>
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
 #include <proxygen/lib/http/HTTPMessage.h>

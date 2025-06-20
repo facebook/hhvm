@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <array>
 #include <boost/variant.hpp>
 #include <folly/Conv.h>
 #include <folly/Optional.h>

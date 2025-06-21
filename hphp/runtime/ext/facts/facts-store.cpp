@@ -343,6 +343,21 @@ std::vector<fs::path> removeHashes(
 }
 
 /**
+ * Produce a lazy class `vec<class<mixed>>` for Facts functions
+ * that return known classes. NOTE: there is a possibility of
+ * conflating some aliases with classes here due to the lack of
+ * distinction on the Type symbol kind, but it should be OK on
+ * functions that inspect class hierarchies.
+ */
+Array makeVecOfLazyClass(const std::vector<Symbol<SymKind::Type>>& vector) {
+  auto ret = VecInit{vector.size()};
+  for (auto const& str : vector) {
+    ret.append(make_tv<KindOfLazyClass>(LazyClassData::create(str.get())));
+  }
+  return ret.toArray();
+}
+
+/**
  * Convert a C++ StringData structure into a Hack `vec<string>`.
  */
 template <typename StringPtrIterable>
@@ -1298,7 +1313,7 @@ struct FactsStoreImpl final
       addBaseTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(filterByFlags(
+    return makeVecOfLazyClass(filterByFlags(
         filterByKind(std::move(baseTypes), filters.m_kindFilters),
         filters.m_typeFlagFilters));
   }
@@ -1327,7 +1342,7 @@ struct FactsStoreImpl final
       addDerivedTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(filterByFlags(
+    return makeVecOfLazyClass(filterByFlags(
         filterByKind(std::move(derivedTypes), filters.m_kindFilters),
         filters.m_typeFlagFilters));
   }
@@ -1339,7 +1354,7 @@ struct FactsStoreImpl final
     auto derivedTypes = m_symbolMap.getTransitiveDerivedTypes(
         Symbol<SymKind::Type>{*baseType.get()}, includeInterfaceRequireExtends);
 
-    return makeVecOfString(filterByFlags(
+    return makeVecOfLazyClass(filterByFlags(
         filterByKind(std::move(derivedTypes), filters.m_kindFilters),
         filters.m_typeFlagFilters));
   }

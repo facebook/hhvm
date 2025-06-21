@@ -207,7 +207,7 @@ function is_final(
 function subtypes(
   class_or_classname<mixed> $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<string>;
+)[]: vec<class<mixed>>;
 
 /**
  * Get the transitive types which extend, implement, or use the given base type.
@@ -219,7 +219,7 @@ function transitive_subtypes(
   class_or_classname<mixed> $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
   bool $include_interface_require_extends = false,
- )[]: vec<string>;
+ )[]: vec<class<mixed>>;
 
 /**
  * Get all types which the given type extends, implements, or uses.
@@ -230,7 +230,7 @@ function transitive_subtypes(
 function supertypes(
   class_or_classname<mixed> $derived_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<string>;
+)[]: vec<class<mixed>>;
 
 /**
  * Get all types matching the given filters.

@@ -32,8 +32,7 @@ namespace Facts {
  * Stripped-down interface to HPHP::StringData.
  */
 struct StringPtr {
-  explicit StringPtr(const StringData* impl) noexcept : m_impl{impl} {}
-
+  explicit StringPtr(const StringData* impl) noexcept;
   StringPtr() = default;
 
   bool operator==(const StringPtr& o) const noexcept {

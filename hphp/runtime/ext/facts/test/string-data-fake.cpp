@@ -25,7 +25,7 @@
  * Implements our StringPtr class in terms of std::string.
  *
  * For unit-testing purposes only. By contrast, see
- * string_data_ptr.cpp, which implements this class in terms of
+ * string-data-ptr.cpp, which implements this class in terms of
  * HPHP::StringData for production use.
  */
 namespace HPHP {
@@ -63,6 +63,8 @@ bool StringData::fsame(const StringData& o) const noexcept {
 }
 
 namespace Facts {
+
+StringPtr::StringPtr(const StringData* impl) noexcept : m_impl{impl} {}
 
 std::string_view StringPtr::StringPtr::slice() const noexcept {
   assertx(m_impl != nullptr);

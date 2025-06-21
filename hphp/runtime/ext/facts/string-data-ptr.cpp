@@ -21,13 +21,17 @@
 /**
  * Implements our StringPtr class in terms of HPHP::StringData.
  *
- * By contrast, see std_string_ptr.cpp, which implements this class in
+ * By contrast, see string-data-fake.cpp, which implements this class in
  * terms of std::string so our tests don't need to link against
  * //hphp/runtime/base:runtime_base.
  */
 
 namespace HPHP {
 namespace Facts {
+
+StringPtr::StringPtr(const StringData* impl) noexcept : m_impl{impl} {
+  assertx(m_impl == nullptr || m_impl->isStatic());
+}
 
 std::string_view StringPtr::slice() const noexcept {
   if (m_impl == nullptr) {

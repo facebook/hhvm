@@ -71,29 +71,20 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     return keyset[];
   }
 
+  public static function shouldKillConsolidation()[zoned_local]: bool {
+    return PrivacyLibKS::isKilled(PLKS::PAAL_CONSOLIDATION_THRIFT_ROLLOUT);
+  }
+
   public static async function genEnforcePolicyEnforcerAndPolicyZone(
     string $asset_type,
     string $policy_enforcer_api,
     PolicyEnforcerCallerIdentity $caller,
     PolicyEnforcerContext $context,
   )[zoned_shallow]: Awaitable<TPolicyEnforcerResult> {
-    $should_rollout_consolidation =
-      JustKnobs::eval('www/privacylib_rollout:thrift_paal_consolidation');
-
     $exception = null;
     $result = PolicyEnforcer::DEFAULT_POLICY_ENFORCER_RESULT;
 
-    if ($should_rollout_consolidation) {
-      list($result, $pl_failure) = await self::genPrivacyLibResults(
-        $asset_type,
-        $policy_enforcer_api,
-        $caller,
-        $context,
-      );
-      if ($pl_failure) {
-        $exception = $pl_failure->getException();
-      }
-    } else {
+    if (self::shouldKillConsolidation()) {
       try {
         $result = await self::genPolicyEnforcerResults(
           $asset_type,
@@ -103,6 +94,34 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
         );
       } catch (Exception $e) {
         $exception = $e;
+      }
+    } else {
+      if (
+        IsItFaster::shouldExperiment(
+          'privacylib_consolidation_thrift',
+          OncallShortName\www_privacy_frameworks,
+        )
+      ) {
+        list($result, $pl_failure) = await self::genPrivacyLibResults(
+          $asset_type,
+          $policy_enforcer_api,
+          $caller,
+          $context,
+        );
+        if ($pl_failure) {
+          $exception = $pl_failure->getException();
+        }
+      } else {
+        try {
+          $result = await self::genPolicyEnforcerResults(
+            $asset_type,
+            $policy_enforcer_api,
+            $caller,
+            $context,
+          );
+        } catch (Exception $e) {
+          $exception = $e;
+        }
       }
     }
 

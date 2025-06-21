@@ -306,18 +306,4 @@ StaticCoeffects PreClass::Const::coeffects() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PreClass::TraitAliasRule.
-
-PreClass::TraitAliasRule::NamePair
-PreClass::TraitAliasRule::asNamePair() const {
-  auto const tmp = folly::sformat(
-    "{}::{}",
-    traitName()->empty() ? "(null)" : traitName()->data(),
-    origMethodName());
-
-  auto origName = makeStaticString(tmp);
-  return std::make_pair(newMethodName(), origName);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

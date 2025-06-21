@@ -57,49 +57,6 @@ inline Func* PreClass::lookupMethod(const StringData* methName) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PreClass::TraitPrecRule.
-
-inline
-PreClass::TraitPrecRule::TraitPrecRule()
-  : m_methodName(nullptr)
-  , m_selectedTraitName(nullptr)
-{}
-
-inline
-PreClass::TraitPrecRule::TraitPrecRule(const StringData* selectedTraitName,
-                                       const StringData* methodName)
-  : m_methodName(methodName)
-  , m_selectedTraitName(selectedTraitName)
-{}
-
-inline void
-PreClass::TraitPrecRule::addOtherTraitName(const StringData* traitName) {
-  m_otherTraitNames.insert(traitName);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PreClass::TraitAliasRule.
-
-inline
-PreClass::TraitAliasRule::TraitAliasRule()
-  : m_traitName(nullptr)
-  , m_origMethodName(nullptr)
-  , m_newMethodName(nullptr)
-  , m_modifiers(AttrNone)
-{}
-
-inline
-PreClass::TraitAliasRule::TraitAliasRule(const StringData* traitName,
-                                         const StringData* origMethodName,
-                                         const StringData* newMethodName,
-                                         Attr modifiers)
-  : m_traitName(traitName)
-  , m_origMethodName(origMethodName)
-  , m_newMethodName(newMethodName)
-  , m_modifiers(modifiers)
-{}
-
-///////////////////////////////////////////////////////////////////////////////
 // PreClass::ClassRequirement.
 
 namespace {

@@ -608,15 +608,6 @@ inline const VMCompactVector<ClassPtr>& Class::usedTraitClasses() const {
   return m_extra->m_usedTraits;
 }
 
-inline const Class::TraitAliasVec& Class::traitAliases() const {
-  return m_extra->m_traitAliases;
-}
-
-inline void Class::addTraitAlias(const PreClass::TraitAliasRule& rule) const {
-  allocExtraData();
-  m_extra.raw()->m_traitAliases.push_back(rule.asNamePair());
-}
-
 inline const Class::RequirementMap& Class::allRequirements() const {
   return m_requirements;
 }

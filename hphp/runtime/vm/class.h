@@ -457,7 +457,6 @@ struct Class : AtomicCountable {
   using IncludedEnumMap   = IndexedStringMap<LowPtr<Class>, int>;
   using RequirementMap    = IndexedStringMap<
                               const PreClass::ClassRequirement*, int>;
-  using TraitAliasVec     = vm_vector<PreClass::TraitAliasRule::NamePair>;
 
   /*
    * Map from a Closure subclass C's scope context to the appropriately scoped
@@ -1216,14 +1215,6 @@ public:
   const VMCompactVector<ClassPtr>& usedTraitClasses() const;
 
   /*
-   * Trait alias rules.
-   *
-   * This is only used by reflection.
-   */
-  const TraitAliasVec& traitAliases() const;
-  void addTraitAlias(const PreClass::TraitAliasRule& rule) const;
-
-  /*
    * All trait and interface requirements imposed on this class, including
    * those imposed by traits.
    */
@@ -1630,11 +1621,6 @@ private:
   struct ExtraData {
     ExtraData() = default;
     ~ExtraData();
-
-    /*
-     * Vector of (new name, original name) pairs, representing trait aliases.
-     */
-    TraitAliasVec m_traitAliases;
 
     /*
      * In RepoAuthoritative mode, we rely on trait flattening in the compile

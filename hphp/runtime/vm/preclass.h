@@ -49,8 +49,6 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TraitNameSet = std::set<LowStringPtr, string_data_lt_type>;
-
 using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
 using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
 
@@ -182,72 +180,6 @@ struct PreClass : AtomicCountable {
   };
 
   /*
-   * Trait precedence rule.  Describes a usage of the `insteadof' operator.
-   *
-   * @see: http://php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
-   */
-  struct TraitPrecRule {
-    TraitPrecRule();
-    TraitPrecRule(const StringData* selectedTraitName,
-                  const StringData* methodName);
-
-    const StringData* methodName()        const { return m_methodName; }
-    const StringData* selectedTraitName() const { return m_selectedTraitName; }
-    const TraitNameSet& otherTraitNames() const { return m_otherTraitNames; }
-
-    void addOtherTraitName(const StringData* traitName);
-
-    template<class SerDe> void serde(SerDe& sd) {
-      sd(m_methodName)(m_selectedTraitName)(m_otherTraitNames);
-    }
-
-  private:
-    LowStringPtr m_methodName;
-    LowStringPtr m_selectedTraitName;
-    TraitNameSet m_otherTraitNames;
-  };
-
-  /*
-   * Trait alias rule.  Describes a usage of the `as' operator.
-   *
-   * @see: http://php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
-   */
-  struct TraitAliasRule {
-    TraitAliasRule();
-    TraitAliasRule(const StringData* traitName,
-                   const StringData* origMethodName,
-                   const StringData* newMethodName,
-                   Attr modifiers);
-
-    const StringData* traitName()      const { return m_traitName; }
-    const StringData* origMethodName() const { return m_origMethodName; }
-    const StringData* newMethodName()  const { return m_newMethodName; }
-    Attr              modifiers()      const { return m_modifiers; }
-
-    template<class SerDe> void serde(SerDe& sd) {
-      sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);
-    }
-
-    /*
-     * Pair of (new name, original name) representing the rule.
-     *
-     * This is the format for alias rules expected by reflection.
-     */
-    using NamePair = std::pair<LowStringPtr,LowStringPtr>;
-
-    /*
-     * Get the rule as a NamePair.
-     */
-    NamePair asNamePair() const;
-
-  private:
-    LowStringPtr m_traitName;
-    LowStringPtr m_origMethodName;
-    LowStringPtr m_newMethodName;
-    Attr         m_modifiers;
-  };
-
-  /*
    * Trait and interface requirements.
    *
    * Represents a `require implements', `require extends', or `require class' declaration.
@@ -289,8 +221,6 @@ public:
   using IncludedEnumsVec = VMFixedVector<LowStringPtr>;
   using UsedTraitVec = VMFixedVector<LowStringPtr>;
   using ClassRequirementsVec = VMFixedVector<ClassRequirement>;
-  using TraitPrecRuleVec = VMFixedVector<TraitPrecRule>;
-  using TraitAliasRuleVec = VMFixedVector<TraitAliasRule>;
 
 
   /////////////////////////////////////////////////////////////////////////////

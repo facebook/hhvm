@@ -41,6 +41,9 @@ class ConnectionKey {
 
   [[nodiscard]] virtual int port() const = 0;
 
+  [[nodiscard]] virtual const std::unordered_map<std::string, std::string>&
+  loggingInfo() const = 0;
+
   [[nodiscard]] virtual const std::string& special_tag() const noexcept = 0;
 
   [[nodiscard]] virtual bool operator==(
@@ -107,6 +110,11 @@ class MysqlConnectionKey : public ConnectionKey {
     return port_;
   }
 
+  [[nodiscard]] const std::unordered_map<std::string, std::string>&
+  loggingInfo() const override {
+    return loggingInfo_;
+  }
+
   [[nodiscard]] const std::string& special_tag() const noexcept override {
     return specialTag_;
   }
@@ -125,6 +133,7 @@ class MysqlConnectionKey : public ConnectionKey {
   size_t hash_;
   int port_;
   bool ignoreDbName_;
+  std::unordered_map<std::string, std::string> loggingInfo_;
 };
 
 } // namespace facebook::common::mysql_client

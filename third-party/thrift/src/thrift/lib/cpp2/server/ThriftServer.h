@@ -112,6 +112,7 @@ THRIFT_FLAG_DECLARE_bool(enable_io_queue_lag_detection);
 THRIFT_FLAG_DECLARE_bool(enforce_queue_concurrency_resource_pools);
 THRIFT_FLAG_DECLARE_bool(
     init_decorated_processor_factory_only_resource_pools_checks);
+THRIFT_FLAG_DECLARE_bool(default_sync_max_requests_to_concurrency_limit);
 
 THRIFT_FLAG_DECLARE_bool(do_not_clobber_S532283);
 

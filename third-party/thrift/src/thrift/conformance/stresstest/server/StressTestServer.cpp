@@ -43,6 +43,10 @@ DEFINE_int32(
     concurrency_limit,
     -1,
     "Configures concurrency limit. Special value -1 will skip setting concurrency limit. Special value 0 will set concurrency limit to maximum value.");
+DEFINE_bool(
+    default_sync_max_requests_to_concurrency_limit,
+    false,
+    "Sets Thrift Server's default_sync_max_requests_to_concurrency_limit flag.");
 DEFINE_int32(
     max_qps,
     -1,
@@ -281,6 +285,11 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (FLAGS_execution_rate > -1) {
     LOG(INFO) << "Setting executionRate: " << FLAGS_execution_rate;
     server->setExecutionRate(FLAGS_execution_rate);
+  }
+  if (FLAGS_default_sync_max_requests_to_concurrency_limit == true) {
+    LOG(INFO)
+        << "Setting THRIFT_FLAG default_sync_max_requests_to_concurrency_limit: true";
+    THRIFT_FLAG_SET_MOCK(default_sync_max_requests_to_concurrency_limit, true);
   }
 
   return server;

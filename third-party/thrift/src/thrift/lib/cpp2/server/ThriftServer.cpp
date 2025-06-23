@@ -111,6 +111,7 @@ THRIFT_FLAG_DEFINE_bool(watch_default_ticket_path, true);
 THRIFT_FLAG_DEFINE_bool(
     init_decorated_processor_factory_only_resource_pools_checks, false);
 THRIFT_FLAG_DEFINE_bool(do_not_clobber_S532283, true);
+THRIFT_FLAG_DEFINE_bool(default_sync_max_requests_to_concurrency_limit, false);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -1004,35 +1005,41 @@ void ThriftServer::setupThreadManagerImpl() {
                                   decltype(concurrencyLimit)>::max());
                   }
                 });
-    // ThriftServer's maxRequests was historically synced to
-    // ConcurrencyController's executionLimitRequests. This syncing behavior
-    // will be removed, but for now we sync by default.
-    setMaxRequestsCallbackHandle =
-        detail::getThriftServerConfig(*this)
-            .getMaxRequests()
-            .getObserver()
-            .addCallback(
-                [this](const folly::observer::Snapshot<uint32_t>& snapshot) {
-                  auto maxRequests = *snapshot;
-                  if (auto cc =
-                          resourcePoolSet()
-                              .resourcePool(ResourcePoolHandle::defaultAsync())
-                              .concurrencyController()) {
-                    if (folly::test_once(
-                            cancelSetMaxRequestsCallbackHandleFlag_)) {
-                      if (THRIFT_FLAG(do_not_clobber_S532283)) {
-                        return;
-                      }
-                      THRIFT_SERVER_EVENT(concurrencyLimitClobberedS532283);
+    if (THRIFT_FLAG(default_sync_max_requests_to_concurrency_limit)) {
+      // ThriftServer's maxRequests was historically synced to
+      // ConcurrencyController's executionLimitRequests. We are migrating away
+      // from this syncing behavior, but gate the functionality behind a flag
+      // for services that still rely on the behavior.
+      XLOG(WARN)
+          << "--default_sync_max_requests_to_concurrency_limit=true. Please "
+             "follow this guide to disable this. "
+             "https://www.internalfb.com/wiki/"
+             "Thrift_how_to_disable_sync_max_requests_to_concurrency_limit/";
+      setMaxRequestsCallbackHandle =
+          detail::getThriftServerConfig(*this)
+              .getMaxRequests()
+              .getObserver()
+              .addCallback([this](const folly::observer::Snapshot<uint32_t>&
+                                      snapshot) {
+                auto maxRequests = *snapshot;
+                if (auto cc =
+                        resourcePoolSet()
+                            .resourcePool(ResourcePoolHandle::defaultAsync())
+                            .concurrencyController()) {
+                  if (folly::test_once(
+                          cancelSetMaxRequestsCallbackHandleFlag_)) {
+                    if (THRIFT_FLAG(do_not_clobber_S532283)) {
+                      return;
                     }
-                    (cc.value().get())
-                        .setExecutionLimitRequests(
-                            maxRequests != 0
-                                ? maxRequests
-                                : std::numeric_limits<
-                                      decltype(maxRequests)>::max());
+                    THRIFT_SERVER_EVENT(concurrencyLimitClobberedS532283);
                   }
-                });
+                  cc.value().get().setExecutionLimitRequests(
+                      maxRequests != 0
+                          ? maxRequests
+                          : std::numeric_limits<decltype(maxRequests)>::max());
+                }
+              });
+    }
     setExecutionRateCallbackHandle =
         detail::getThriftServerConfig(*this)
             .getExecutionRate()

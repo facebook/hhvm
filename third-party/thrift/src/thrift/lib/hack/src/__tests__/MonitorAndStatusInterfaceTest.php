@@ -28,11 +28,15 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
   <<__Override>>
   public static async function createData(): Awaitable<void> {
     self::mockFunction(
-      meth_caller(FacebookAsyncBase::class, 'getStatusDetails'),
+      meth_caller(DeprecatedFacebookAsyncBase::class, 'getStatusDetails'),
     )->mockYield(self::$fb303StatusDetails);
-    self::mockFunction(meth_caller(FacebookAsyncBase::class, 'getCounters'))
+    self::mockFunction(
+      meth_caller(DeprecatedFacebookAsyncBase::class, 'getCounters'),
+    )
       ->mockYield(self::$fb303Counter);
-    self::mockFunction(meth_caller(FacebookAsyncBase::class, 'getLoad'))
+    self::mockFunction(
+      meth_caller(DeprecatedFacebookAsyncBase::class, 'getLoad'),
+    )
       ->mockYield(self::$fb303Load);
 
     self::mockFunction(meth_caller(DefaultStatus::class, 'getStatusDetails'))

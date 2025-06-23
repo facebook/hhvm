@@ -31,7 +31,7 @@ final class TestDummyServiceWithReservedMethodNameHandler
 // TEST CASE : Service which inherits from FacebookService
 <<Oncalls('thrift_hack')>>
 final class TestExtendsFacebookServiceHandler
-  extends FacebookAsyncBase
+  extends DeprecatedFacebookAsyncBase
   implements TestExtendsFacebookServiceAsyncIf {}
 
 // TEST CASE : Service which inherits from FacebookService and overrides some methods
@@ -39,7 +39,7 @@ final class TestExtendsFacebookServiceHandler
 // and provides its own implementation for all the methods
 <<Oncalls('thrift_hack')>>
 final class TestExtendsFacebookServiceHandlerWithOverrides
-  extends FacebookAsyncBase
+  extends DeprecatedFacebookAsyncBase
   implements TestExtendsFacebookServiceAsyncIf {
 
   <<__Override>>
@@ -52,14 +52,14 @@ final class TestExtendsFacebookServiceHandlerWithOverrides
 //              but extends FacebookAsyncBase in handler.
 <<Oncalls('thrift_hack')>>
 final class TestExtendsFacebookServiceInHandlerImpl
-  extends FacebookAsyncBase
+  extends DeprecatedFacebookAsyncBase
   implements TestExtendsFacebookServiceInHandlerAsyncIf {}
 
 // TEST CASE : Service which doesn't inherit from FacebookService in IDL
 //              but extends FacebookAsyncBase in handler and has overrides.
 <<Oncalls('thrift_hack')>>
 final class TestExtendsFacebookServiceInHandlerImplWithOverrides
-  extends FacebookAsyncBase
+  extends DeprecatedFacebookAsyncBase
   implements TestExtendsFacebookServiceInHandlerAsyncIf {
 
   <<__Override>>

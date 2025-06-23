@@ -23,7 +23,6 @@
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
-#include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 

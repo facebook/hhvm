@@ -387,6 +387,17 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 }),
                 Visibility::Protected,
             ) => CeVisibility::Protected(*cls),
+            (
+                Some(FoldedElement {
+                    visibility: CeVisibility::ProtectedInternal(cls, _),
+                    ..
+                }),
+                Visibility::ProtectedInternal,
+            ) => self.visibility(
+                *cls,
+                self.child.module.as_ref().map(Positioned::id),
+                sm.visibility,
+            ),
             (_, v) => self.visibility(cls, self.child.module.as_ref().map(Positioned::id), v),
         };
 

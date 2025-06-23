@@ -142,7 +142,7 @@ class WebTransportImpl : public WebTransport {
     return it->second.resetStream(error);
   }
   folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
-      uint64_t id, uint8_t level, uint64_t order, bool incremental) override {
+      uint64_t id, uint8_t level, uint32_t order, bool incremental) override {
     auto it = wtEgressStreams_.find(id);
     if (it == wtEgressStreams_.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::INVALID_STREAM_ID);
@@ -203,7 +203,7 @@ class WebTransportImpl : public WebTransport {
     }
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
-        uint8_t level, uint64_t order, bool incremental) override {
+        uint8_t level, uint32_t order, bool incremental) override {
       return impl_.tp_.setWebTransportStreamPriority(
           getID(), {level, incremental, order});
     }

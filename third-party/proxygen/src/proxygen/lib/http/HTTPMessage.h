@@ -42,7 +42,7 @@ constexpr int8_t kMaxPriority = 7;
 struct HTTPPriority {
   uint8_t urgency : 3;
   bool incremental : 1;
-  uint64_t orderId : 57;
+  uint32_t orderId;
   bool paused : 1;
 
   HTTPPriority()
@@ -54,7 +54,7 @@ struct HTTPPriority {
 
   HTTPPriority(uint8_t urgencyIn,
                bool incrementalIn,
-               uint64_t orderIdIn = kDefaultOrderId,
+               uint32_t orderIdIn = kDefaultOrderId,
                bool pausedIn = kDefaultPaused)
       : urgency(std::min(urgencyIn, static_cast<uint8_t>(kMaxPriority))),
         incremental(incrementalIn),

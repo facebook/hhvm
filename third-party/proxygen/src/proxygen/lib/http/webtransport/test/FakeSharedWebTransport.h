@@ -128,7 +128,7 @@ class FakeStreamHandle
     return folly::unit;
   }
   GenericApiRet setPriority(uint8_t urgency,
-                            uint64_t order,
+                            uint32_t order,
                             bool inc) override {
     pri.emplace(std::forward_as_tuple(urgency, order, inc));
     return folly::unit;
@@ -261,7 +261,7 @@ class FakeSharedWebTransport : public WebTransport {
   folly::Expected<folly::Unit, ErrorCode> setPriority(
       uint64_t streamId,
       uint8_t level,
-      uint64_t order,
+      uint32_t order,
       bool incremental) override {
     auto h = writeHandles.find(streamId);
     if (h == writeHandles.end()) {

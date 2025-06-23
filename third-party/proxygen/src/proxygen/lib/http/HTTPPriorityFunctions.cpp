@@ -77,7 +77,7 @@ folly::Optional<HTTPPriority> httpPriorityFromString(
   }
   return HTTPPriority(static_cast<uint8_t>(urgency),
                       incremental,
-                      static_cast<uint64_t>(orderId),
+                      static_cast<uint32_t>(orderId),
                       paused);
 }
 

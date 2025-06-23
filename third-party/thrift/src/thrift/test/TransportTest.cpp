@@ -112,7 +112,7 @@ class GenericSizeGenerator : public SizeGenerator {
 template <class Transport_>
 class CoupledTransports {
  public:
-  typedef Transport_ TransportType;
+  using TransportType = Transport_;
 
   CoupledTransports() : in(), out() {}
 
@@ -163,8 +163,8 @@ template <class InnerTransport_>
 class CoupledBufferedTransportsT
     : public CoupledWrapperTransportsT<TBufferedTransport, InnerTransport_> {};
 
-typedef CoupledBufferedTransportsT<CoupledMemoryBuffers>
-    CoupledBufferedTransports;
+using CoupledBufferedTransports =
+    CoupledBufferedTransportsT<CoupledMemoryBuffers>;
 
 /**
  * Coupled TFramedTransports.
@@ -173,7 +173,7 @@ template <class InnerTransport_>
 class CoupledFramedTransportsT
     : public CoupledWrapperTransportsT<TFramedTransport, InnerTransport_> {};
 
-typedef CoupledFramedTransportsT<CoupledMemoryBuffers> CoupledFramedTransports;
+using CoupledFramedTransports = CoupledFramedTransportsT<CoupledMemoryBuffers>;
 
 /**
  * Coupled TZlibTransports.
@@ -182,7 +182,7 @@ template <class InnerTransport_>
 class CoupledZlibTransportsT
     : public CoupledWrapperTransportsT<TZlibTransport, InnerTransport_> {};
 
-typedef CoupledZlibTransportsT<CoupledMemoryBuffers> CoupledZlibTransports;
+using CoupledZlibTransports = CoupledZlibTransportsT<CoupledMemoryBuffers>;
 
 /**
  * Coupled TFDTransports.

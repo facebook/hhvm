@@ -154,18 +154,14 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
     ];
   }
 
-  private async function genExecGetStatusDetailsRPC(
+  private async function genExecRequests(
     ThriftAsyncProcessor $processor,
     self::TTestReturnValues $result,
-    bool $use_injected_infra_rpcs,
   ): Awaitable<void> {
-    MockJustKnobs::setBool(
-      'thrift/hack:fb303_FacebookService_deprecation',
-      $use_injected_infra_rpcs,
-    );
-    self::mockFunction(
-      meth_caller(MonitorAndStatusInterfaceTestServer::class, 'getProcessor'),
-    )->mockReturn($processor);
+    // Reset the event handler after every request
+    // to avoid any side effects from previous request
+    $event_handler = new TProcessorEventHandler();
+    $processor->setEventHandler($event_handler);
     if (Shapes::keyExists($result, 'statusDetails')) {
       expect(await $this->statusClient->getStatusDetails())->toEqual(
         $result['statusDetails'],
@@ -177,42 +173,7 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
           'Function getStatusDetails is not found in the service',
         );
     }
-  }
-
-  <<DataProvider('provideTestProcessors')>>
-  public async function testGetStatusDetailsRPC(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $result,
-    self::TTestReturnValues $_result_with_infra_rpc,
-  ): Awaitable<void> {
-    await $this->genExecGetStatusDetailsRPC($processor, $result, false);
-  }
-
-  <<DataProvider('provideTestProcessors')>>
-  public async function testGetStatusDetailsRPCWithInfraRPCs(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $_result,
-    self::TTestReturnValues $result_with_infra_rpc,
-  ): Awaitable<void> {
-    await $this->genExecGetStatusDetailsRPC(
-      $processor,
-      $result_with_infra_rpc,
-      true,
-    );
-  }
-
-  private async function genExecGetLoadRPC(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $result,
-    bool $use_injected_infra_rpcs,
-  ): Awaitable<void> {
-    MockJustKnobs::setBool(
-      'thrift/hack:fb303_FacebookService_deprecation',
-      $use_injected_infra_rpcs,
-    );
-    self::mockFunction(
-      meth_caller(MonitorAndStatusInterfaceTestServer::class, 'getProcessor'),
-    )->mockReturn($processor);
+    $processor->setEventHandler($event_handler);
     if (Shapes::keyExists($result, 'load')) {
       expect(await $this->statusClient->getLoad())->toEqual($result['load']);
     } else {
@@ -222,38 +183,7 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
           'Function getLoad is not found in the service',
         );
     }
-  }
-
-  <<DataProvider('provideTestProcessors')>>
-  public async function testGetLoadRPC(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $result,
-    self::TTestReturnValues $_result_with_infra_rpc,
-  ): Awaitable<void> {
-    await $this->genExecGetLoadRPC($processor, $result, false);
-  }
-
-  <<DataProvider('provideTestProcessors')>>
-  public async function testGetLoadRPCWithInfraRPCs(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $_result,
-    self::TTestReturnValues $result_with_infra_rpc,
-  ): Awaitable<void> {
-    await $this->genExecGetLoadRPC($processor, $result_with_infra_rpc, true);
-  }
-
-  private async function genExecGetCountersRPC(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $result,
-    bool $use_injected_infra_rpcs,
-  ): Awaitable<void> {
-    MockJustKnobs::setBool(
-      'thrift/hack:fb303_FacebookService_deprecation',
-      $use_injected_infra_rpcs,
-    );
-    self::mockFunction(
-      meth_caller(MonitorAndStatusInterfaceTestServer::class, 'getProcessor'),
-    )->mockReturn($processor);
+    $processor->setEventHandler($event_handler);
     if (Shapes::keyExists($result, 'counters')) {
       expect(await $this->monitorClient->getCounters())->toEqual(
         $result['counters'],
@@ -268,24 +198,25 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
   }
 
   <<DataProvider('provideTestProcessors')>>
-  public async function testGetCountersRPC(
+  public async function testInfraRPCs(
     ThriftAsyncProcessor $processor,
     self::TTestReturnValues $result,
-    self::TTestReturnValues $_result_with_infra_rpc,
-  ): Awaitable<void> {
-    await $this->genExecGetCountersRPC($processor, $result, false);
-  }
-
-  <<DataProvider('provideTestProcessors')>>
-  public async function testGetCountersRPCWithInfraRPCs(
-    ThriftAsyncProcessor $processor,
-    self::TTestReturnValues $_result,
     self::TTestReturnValues $result_with_infra_rpc,
   ): Awaitable<void> {
-    await $this->genExecGetCountersRPC(
-      $processor,
-      $result_with_infra_rpc,
+    self::mockFunction(
+      meth_caller(MonitorAndStatusInterfaceTestServer::class, 'getProcessor'),
+    )->mockReturn($processor);
+
+    MockJustKnobs::setBool(
+      'thrift/hack:fb303_FacebookService_deprecation',
+      false,
+    );
+    await $this->genExecRequests($processor, $result);
+
+    MockJustKnobs::setBool(
+      'thrift/hack:fb303_FacebookService_deprecation',
       true,
     );
+    await $this->genExecRequests($processor, $result_with_infra_rpc);
   }
 }

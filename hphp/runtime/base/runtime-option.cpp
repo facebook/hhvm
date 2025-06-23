@@ -1440,8 +1440,6 @@ void RuntimeOption::Load(
       Config::GetBool(ini, config, "Eval.UseTHPUponHugeTLBFailure",
                       g_useTHPUponHugeTLBFailure);
 #endif
-    s_enable_static_arena =
-      Config::GetBool(ini, config, "Eval.UseTLStaticArena", true);
 
     if (!jit::mcgen::retranslateAllEnabled()) {
       Cfg::Jit::WorkerThreads = 0;

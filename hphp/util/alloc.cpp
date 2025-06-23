@@ -60,9 +60,6 @@ const size_t s_pageSize = sysconf(_SC_PAGESIZE);
 __thread MemBlock s_tlSpace;
 __thread MemBlock s_hugeRange;
 
-__thread TLStaticArena* tl_static_arena;
-bool s_enable_static_arena = false;
-
 static NEVER_INLINE uintptr_t get_stack_top() {
   using ActRec = char;
   DECLARE_FRAME_POINTER(fp);
@@ -426,15 +423,6 @@ void arenas_thread_init() {
         MALLOCX_ARENA(local_arena) | MALLOCX_TCACHE(local_arena_tcache);
     }
   }
-  if (s_enable_static_arena) {
-    assertx(!tl_static_arena);
-    constexpr size_t kStaticArenaChunkSize = 256 * 1024;
-    static TaggedSlabList s_static_pool;
-    tl_static_arena = new TLStaticArena(
-      kStaticArenaChunkSize,
-      ServiceData::createCounter("admin.tl-static-roarena-cap"),
-      &s_static_pool);
-  }
 }
 
 void arenas_thread_flush() {
@@ -457,10 +445,6 @@ void arenas_thread_exit() {
     local_arena_tcache = -1;
     // Ideally we shouldn't read local_arena_flags any more, but just in case.
     local_arena_flags = MALLOCX_ARENA(local_arena) | MALLOCX_TCACHE_NONE;
-  }
-  if (tl_static_arena) {
-    delete tl_static_arena;
-    tl_static_arena = nullptr;
   }
 }
 

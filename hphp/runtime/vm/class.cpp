@@ -331,8 +331,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class + prefix_sz
                     + sizeof(m_classVec[0]) * classVecLen;
 
-  auto const mem = Cfg::Repo::Authoritative ? static_alloc(size)
-                                         : lower_malloc(size);
+  auto const mem = lower_malloc(size);
   MemoryStats::LogAlloc(AllocKind::Class, size);
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
@@ -341,8 +340,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    if (Cfg::Repo::Authoritative) static_try_free(mem, size);
-    else lower_sized_free(mem, size);
+    lower_sized_free(mem, size);
     throw;
   }
 }

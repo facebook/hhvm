@@ -37,7 +37,6 @@ HPHP::high_arena_flags
 HPHP::local_arena
 HPHP::local_arena_flags
 HPHP::local_arena_tcache
-HPHP::tl_static_arena
 HPHP::ImagickExtension::s_ini_setting
 HPHP::XboxRequestHandler::s_accessLogThreadData
 HPHP::HttpRequestHandler::s_accessLogThreadData

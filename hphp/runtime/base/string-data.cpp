@@ -134,7 +134,7 @@ MemBlock StringData::AllocateShared(folly::StringPiece sl) {
 
   auto const extra = trueStatic ? sizeof(SymbolPrefix) : 0;
   auto const bytes = sl.size() + kStringOverhead + extra;
-  auto const ptr = trueStatic ? static_alloc(bytes) : AllocUncounted(bytes);
+  auto const ptr = trueStatic ? lower_malloc(bytes) : AllocUncounted(bytes);
   return MemBlock{ptr, bytes};
 }
 
@@ -196,10 +196,10 @@ StringData* StringData::MakeEmpty() {
 void StringData::destructStatic() {
   assertx(checkSane() && isStatic());
   if (isSymbol()) {
-    static_try_free(reinterpret_cast<SymbolPrefix*>(this) - 1,
+    lower_sized_free(reinterpret_cast<SymbolPrefix*>(this) - 1,
                     size() + kStringOverhead + sizeof(SymbolPrefix));
   } else {
-    static_try_free(this, size() + kStringOverhead);
+    lower_sized_free(this, size() + kStringOverhead);
   }
 }
 

@@ -444,27 +444,10 @@ template<typename T> using APCAllocator =
 template<typename T> using LocalAllocator =
   WrapAllocator<local_malloc, local_sized_free, T>;
 
-// Per-thread buffer for global data, using a bump allocator.
-using TLStaticArena = ReadOnlyArena<LowerAllocator<char>, true, 8>;
-extern __thread TLStaticArena* tl_static_arena;
-extern bool s_enable_static_arena;
-
-inline void* static_alloc(size_t size) {
-  if (tl_static_arena) return tl_static_arena->allocate(size);
-  return lower_malloc(size);
-}
-
-// This can only free the memory allocated using static_alloc(), immediately
-// after allocation, and it must happen in the same thread where allocation
-// happens.
-inline void static_try_free(void* ptr, size_t size) {
-  if (tl_static_arena) return tl_static_arena->deallocate(ptr, size);
-  return lower_sized_free(ptr, size);
-}
 
 template<typename T, typename... Args>
 inline LowPtr<T> static_new(Args&&... args) {
-  void* p = static_alloc(sizeof(T));
+  void* p = lower_malloc(sizeof(T));
   return new (p) T(std::forward<Args>(args)...);
 }
 

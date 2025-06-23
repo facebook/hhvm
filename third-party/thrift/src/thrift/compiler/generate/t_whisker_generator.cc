@@ -148,7 +148,7 @@ object resolve_derived_t_type(
         return object(proto.create<t_struct>(*struct_));
       }
       throw std::logic_error("Unknown t_structured subtype");
-    } break;
+    }
     case t_type::type::t_service:
       // This is tech debt from a time before t_interaction was moved out of
       // t_type (for return types). This case should no longer happen in

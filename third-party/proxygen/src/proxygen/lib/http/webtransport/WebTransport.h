@@ -13,7 +13,6 @@
 #include <folly/Optional.h>
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
-#include <proxygen/lib/http/HTTPMessage.h>
 #include <quic/api/QuicCallbacks.h>
 
 namespace proxygen {
@@ -45,14 +44,6 @@ class WebTransport {
     SEND_ERROR,
     STOP_SENDING
   };
-
-  static bool isConnectMessage(const proxygen::HTTPMessage& msg) {
-    constexpr std::string_view kWebTransport{"webtransport"};
-    return msg.isRequest() &&
-           msg.getMethod() == proxygen::HTTPMethod::CONNECT &&
-           msg.getUpgradeProtocol() &&
-           *msg.getUpgradeProtocol() == kWebTransport;
-  }
 
   static constexpr uint64_t kFirstErrorCode = 0x52e4a40fa8db;
   static constexpr uint64_t kLastErrorCode = 0x52e5ac983162;

@@ -16,6 +16,7 @@
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/RFC2616.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
+#include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 #include <sstream>
 
 using folly::IOBuf;
@@ -227,7 +228,7 @@ void HTTPTransaction::onIngressHeadersComplete(
     auto method = msg->getMethod();
     headRequest_ = (method == HTTPMethod::HEAD);
     upgraded_ = (method == HTTPMethod::CONNECT);
-    wtConnectStream_ = WebTransport::isConnectMessage(*msg);
+    wtConnectStream_ = HTTPWebTransport::isConnectMessage(*msg);
   }
 
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
@@ -1059,7 +1060,7 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   }
   if (headers.isRequest()) {
     headRequest_ = (headers.getMethod() == HTTPMethod::HEAD);
-    wtConnectStream_ = WebTransport::isConnectMessage(headers);
+    wtConnectStream_ = HTTPWebTransport::isConnectMessage(headers);
   } else {
     has1xxResponse_ = headers.is1xxResponse();
   }

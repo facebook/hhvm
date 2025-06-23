@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/session/HTTPSession.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 
 #include <folly/CppAttributes.h>
 #include <folly/ScopeGuard.h>
@@ -2592,7 +2593,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
             observer->requestStarted(observed, event);
           });
     }
-    if (WebTransport::isConnectMessage(*msg)) {
+    if (HTTPWebTransport::isConnectMessage(*msg)) {
       VLOG(3) << "Peer sent WT Connect";
       session_.supportsWebTransport_.set(
           folly::to_underlying(SettingEnabled::PEER));

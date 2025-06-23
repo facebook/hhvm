@@ -424,7 +424,8 @@ let fun_def tenv fd =
 
 let enum_opt env =
   let f { e_base; e_constraint; _ } =
-    hint env e_base @ hint_opt env e_constraint
+    hint ~should_check_package_boundary:`No env e_base
+    @ hint_opt ~should_check_package_boundary:`No env e_constraint
   in
   Option.value_map ~default:[] ~f
 

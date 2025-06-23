@@ -16,9 +16,8 @@
 
 import unittest
 
-from apache.thrift.metadata.types_auto_migrated import (  # @manual=//thrift/lib/thrift:metadata-py3-is-auto-migrated
-    _fbthrift__is_py3_auto_migrated,
-)
+# @manual=//thrift/lib/thrift:metadata-py3-is-auto-migrated
+from apache.thrift.metadata.types_auto_migrated import _fbthrift__is_py3_auto_migrated
 
 
 # By convention, srcs in `py3/test/auto_migrate/` are used by two different test targets:

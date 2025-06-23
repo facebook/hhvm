@@ -2,7 +2,7 @@
 
 // @lint-ignore-every GEN_PREFIX method name need to match the location_transparency thrift method names
 <<Oncalls('thrift_hack')>>
-final class MonitorAndStatusInterfaceTestServer extends METAThriftServer {
+class MonitorAndStatusInterfaceTestServer extends METAThriftServer {
   const type TProcessor = ThriftAsyncProcessor;
   const string SERVICE_ID = 'MonitorAndStatusInterfaceServer';
   // Mock this method to customize the processor
@@ -14,6 +14,23 @@ final class MonitorAndStatusInterfaceTestServer extends METAThriftServer {
   <<__Override>>
   public static function getService(): string {
     return self::SERVICE_ID;
+  }
+}
+
+<<Oncalls('thrift_hack')>>
+// TEST CASE : Server that provides custom status and monitoring interface
+final class MonitorAndStatusInterfaceTestServerWithOverrides
+  extends MonitorAndStatusInterfaceTestServer {
+  <<__Override>>
+  protected static function getStatusInterface(
+  )[]: Facebook\Thrift\StatusAsyncIf {
+    return new DefaultStatus();
+  }
+
+  <<__Override>>
+  protected static function getMonitorInterface(
+  )[]: Facebook\Thrift\MonitorAsyncIf {
+    return new DefaultMonitor();
   }
 }
 

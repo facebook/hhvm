@@ -22,8 +22,18 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
     dict['mocked_counter_DefaultMonitor' => 1];
   private static float $defaultStatusLoad = 2.0;
 
+  private static string $customStatusDetails =
+    'mocked_status_details_from_custom_status';
+  private static dict<string, int> $customMonitorCounter =
+    dict['mocked_status_details_from_custom_monitor' => 1];
+  private static float $customStatusLoad = 5.0;
+
   <<__LateInit>> private Facebook\Thrift\StatusAsyncClient $statusClient;
   <<__LateInit>> private Facebook\Thrift\MonitorAsyncClient $monitorClient;
+  <<__LateInit>>
+  private Facebook\Thrift\StatusAsyncClient $statusClientWithOverride;
+  <<__LateInit>>
+  private Facebook\Thrift\MonitorAsyncClient $monitorClientWithOverride;
 
   <<__Override>>
   public static async function createData(): Awaitable<void> {
@@ -45,6 +55,19 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
       ->mockYield(self::$defaultStatusLoad);
     self::mockFunction(meth_caller(DefaultMonitor::class, 'getCounters'))
       ->mockYield(self::$defaultMonitorCounter);
+
+    $mocked_status = mock(DefaultStatus::class)
+      ->mockYield('getStatusDetails', self::$customStatusDetails)
+      ->mockYield('getLoad', self::$customStatusLoad);
+    $mocked_monitor = mock(DefaultMonitor::class)
+      ->mockYield('getCounters', self::$customMonitorCounter);
+
+    self::mockFunctionStaticUNSAFE(
+      "MonitorAndStatusInterfaceTestServerWithOverrides::getStatusInterface",
+    )->mockReturn($mocked_status);
+    self::mockFunctionStaticUNSAFE(
+      "MonitorAndStatusInterfaceTestServerWithOverrides::getMonitorInterface",
+    )->mockReturn($mocked_monitor);
   }
 
   <<__Override>>
@@ -57,12 +80,21 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
       Facebook\Thrift\MonitorAsyncClient,
       MonitorAndStatusInterfaceTestServer,
     >();
+    list($this->statusClientWithOverride, $_) = LocalThriftConnection::setup<
+      Facebook\Thrift\StatusAsyncClient,
+      MonitorAndStatusInterfaceTestServerWithOverrides,
+    >();
+    list($this->monitorClientWithOverride, $_) = LocalThriftConnection::setup<
+      Facebook\Thrift\MonitorAsyncClient,
+      MonitorAndStatusInterfaceTestServerWithOverrides,
+    >();
   }
 
   public static function provideTestProcessors(): dict<string, shape(
     'processor' => ThriftAsyncProcessor,
     'result' => self::TTestReturnValues,
     'result_with_infra_rpc' => self::TTestReturnValues,
+    'result_with_overrides' => self::TTestReturnValues,
   )> {
     $old_return_values = shape(
       'statusDetails' => self::$fb303StatusDetails,
@@ -78,6 +110,11 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
       $result['load'] = 3.0;
       return $result;
     };
+    $custom_return_values = shape(
+      'statusDetails' => self::$customStatusDetails,
+      'counters' => self::$customMonitorCounter,
+      'load' => self::$customStatusLoad,
+    );
 
     return dict[
       'Inherits Fb303 in IDL and Handler' => shape(
@@ -90,6 +127,7 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
          * it until the IDL is updated to remove inheritance from FacebookService
          */
         'result_with_infra_rpc' => $old_return_values,
+        'result_with_overrides' => $old_return_values,
       ),
       'Inherits Fb303 in IDL and Handler with overrides' => shape(
         'processor' => new TestExtendsFacebookServiceAsyncProcessor(
@@ -101,6 +139,7 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
          * it until the IDL is updated to remove inheritance from FacebookService
          */
         'result_with_infra_rpc' => $use_custom_load($old_return_values),
+        'result_with_overrides' => $use_custom_load($old_return_values),
       ),
       'Inherits Fb303 only in Handler' => shape(
         'processor' => new TestExtendsFacebookServiceInHandlerAsyncProcessor(
@@ -116,6 +155,8 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
          * After the infra RPCs are injected, DefaultStatus and DefaultMonitor will be used.
          */
         'result_with_infra_rpc' => $new_return_values,
+        // Uses the custom implementation
+        'result_with_overrides' => $custom_return_values,
       ),
       'Inherits Fb303 only in Handler with overrides' => shape(
         'processor' => new TestExtendsFacebookServiceInHandlerAsyncProcessor(
@@ -128,12 +169,16 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
          *
          */
         'result_with_infra_rpc' => $new_return_values,
+        // Uses the custom implementation
+        'result_with_overrides' => $custom_return_values,
       ),
       'Doesn\'t Inherit from Fb303 ' => shape(
         'processor' =>
           new TestDummyServiceAsyncProcessor(new TestDummyServiceHandler()),
         'result' => shape(),
         'result_with_infra_rpc' => $new_return_values,
+        // Uses the custom implementation
+        'result_with_overrides' => $custom_return_values,
       ),
       'Has similar methods like infra RPCs ' => shape(
         'processor' => new TestDummyServiceWithReservedMethodNameAsyncProcessor(
@@ -150,6 +195,8 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
          */
         'result' => $use_custom_load(shape()),
         'result_with_infra_rpc' => $use_custom_load($new_return_values),
+        // Uses the custom implementation
+        'result_with_overrides' => $use_custom_load($custom_return_values),
       ),
     ];
   }
@@ -157,17 +204,25 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
   private async function genExecRequests(
     ThriftAsyncProcessor $processor,
     self::TTestReturnValues $result,
+    bool $use_server_with_overrides,
   ): Awaitable<void> {
     // Reset the event handler after every request
     // to avoid any side effects from previous request
     $event_handler = new TProcessorEventHandler();
     $processor->setEventHandler($event_handler);
+    if ($use_server_with_overrides) {
+      $status_client = $this->statusClientWithOverride;
+      $monitor_client = $this->monitorClientWithOverride;
+    } else {
+      $status_client = $this->statusClient;
+      $monitor_client = $this->monitorClient;
+    }
     if (Shapes::keyExists($result, 'statusDetails')) {
-      expect(await $this->statusClient->getStatusDetails())->toEqual(
+      expect(await $status_client->getStatusDetails())->toEqual(
         $result['statusDetails'],
       );
     } else {
-      expect(async () ==> await $this->statusClient->getStatusDetails())
+      expect(async () ==> await $status_client->getStatusDetails())
         ->toThrow(
           TApplicationException::class,
           'Function getStatusDetails is not found in the service',
@@ -175,9 +230,9 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
     }
     $processor->setEventHandler($event_handler);
     if (Shapes::keyExists($result, 'load')) {
-      expect(await $this->statusClient->getLoad())->toEqual($result['load']);
+      expect(await $status_client->getLoad())->toEqual($result['load']);
     } else {
-      expect(async () ==> await $this->statusClient->getLoad())
+      expect(async () ==> await $status_client->getLoad())
         ->toThrow(
           TApplicationException::class,
           'Function getLoad is not found in the service',
@@ -185,11 +240,11 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
     }
     $processor->setEventHandler($event_handler);
     if (Shapes::keyExists($result, 'counters')) {
-      expect(await $this->monitorClient->getCounters())->toEqual(
+      expect(await $monitor_client->getCounters())->toEqual(
         $result['counters'],
       );
     } else {
-      expect(async () ==> await $this->monitorClient->getCounters())
+      expect(async () ==> await $monitor_client->getCounters())
         ->toThrow(
           TApplicationException::class,
           'Function getCounters is not found in the service',
@@ -202,6 +257,7 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
     ThriftAsyncProcessor $processor,
     self::TTestReturnValues $result,
     self::TTestReturnValues $result_with_infra_rpc,
+    self::TTestReturnValues $result_with_overrides,
   ): Awaitable<void> {
     self::mockFunction(
       meth_caller(MonitorAndStatusInterfaceTestServer::class, 'getProcessor'),
@@ -211,12 +267,14 @@ final class MonitorAndStatusInterfaceTest extends WWWTest {
       'thrift/hack:fb303_FacebookService_deprecation',
       false,
     );
-    await $this->genExecRequests($processor, $result);
+    await $this->genExecRequests($processor, $result, false);
+    await $this->genExecRequests($processor, $result, true);
 
     MockJustKnobs::setBool(
       'thrift/hack:fb303_FacebookService_deprecation',
       true,
     );
-    await $this->genExecRequests($processor, $result_with_infra_rpc);
+    await $this->genExecRequests($processor, $result_with_infra_rpc, false);
+    await $this->genExecRequests($processor, $result_with_overrides, true);
   }
 }

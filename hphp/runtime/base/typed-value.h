@@ -396,22 +396,7 @@ typename std::enable_if<
 }
 
 ALWAYS_INLINE TypedValue make_tv_of_type(Value value, DataType dt) {
-  // GCC does all sorts of unnecessary spills if we attempt to construct a
-  // TypedValue here with an unknown DataType. Explicitly initializing the
-  // AuxUnion doesn't help, either: https://godbolt.org/z/MbG48c
-  //
-  // This C++ code is the only code we've found that results in reasonable
-  // codegen on GCC and that avoids undefined behavior. It simply moves the
-  // value and movzbl's the type.
-  //
-  // GCC issue tracker: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98335
-  static_assert(sizeof(TypedValue) == 16);
-  static_assert(offsetof(TypedValue, m_data) == 0);
-  static_assert(offsetof(TypedValue, m_type) == 8);
-  __attribute__((__may_alias__)) int64_t raw[2];
-  raw[0] = value.num;
-  raw[1] = int64_t(uint8_t(dt));
-  return *reinterpret_cast<const TypedValue*>(raw);
+  return TypedValue { value, dt, {0} };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

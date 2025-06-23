@@ -1,26 +1,52 @@
-ERROR: File "module_protected_internal_visibility.php--C.php", line 8, characters 16-18:
+ERROR: File "module_protected_internal_visibility.php--C.php", line 8, characters 8-18:
 Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 22-24:
+  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
   This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--C.php", line 10, characters 23-25:
+ERROR: File "module_protected_internal_visibility.php--C.php", line 10, characters 8-17:
 Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 31-33:
+  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
   This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--D.php", line 8, characters 12-14:
+ERROR: File "module_protected_internal_visibility.php--C.php", line 12, characters 16-18:
+Cannot access this protected member, you don't extend A (Typing[4112])
+  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
+  This member is protected internal
+ERROR: File "module_protected_internal_visibility.php--C.php", line 14, characters 23-25:
+Cannot access this protected member, you don't extend A (Typing[4112])
+  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
+  This member is protected internal
+ERROR: File "module_protected_internal_visibility.php--D.php", line 8, characters 8-18:
 You cannot access internal members from module `M1` in module `M2` (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 22-24:
+  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
   This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--D.php", line 10, characters 19-21:
+ERROR: File "module_protected_internal_visibility.php--D.php", line 10, characters 8-17:
 You cannot access internal members from module `M1` in module `M2` (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 31-33:
+  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
   This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--E.php", line 8, characters 16-18:
+ERROR: File "module_protected_internal_visibility.php--D.php", line 12, characters 12-14:
+You cannot access internal members from module `M1` in module `M2` (Typing[4112])
+  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
+  This member is protected internal
+ERROR: File "module_protected_internal_visibility.php--D.php", line 14, characters 19-21:
+You cannot access internal members from module `M1` in module `M2` (Typing[4112])
+  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
+  This member is protected internal
+ERROR: File "module_protected_internal_visibility.php--E.php", line 8, characters 8-18:
 Cannot access this protected member, you don't extend A
 You cannot access internal members from module `M1` in module `M2` (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 22-24:
+  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
   This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--E.php", line 10, characters 23-25:
+ERROR: File "module_protected_internal_visibility.php--E.php", line 10, characters 8-17:
 Cannot access this protected member, you don't extend A
 You cannot access internal members from module `M1` in module `M2` (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 31-33:
+  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
+  This member is protected internal
+ERROR: File "module_protected_internal_visibility.php--E.php", line 12, characters 16-18:
+Cannot access this protected member, you don't extend A
+You cannot access internal members from module `M1` in module `M2` (Typing[4112])
+  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
+  This member is protected internal
+ERROR: File "module_protected_internal_visibility.php--E.php", line 14, characters 23-25:
+Cannot access this protected member, you don't extend A
+You cannot access internal members from module `M1` in module `M2` (Typing[4112])
+  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
   This member is protected internal

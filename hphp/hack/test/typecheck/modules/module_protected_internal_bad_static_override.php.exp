@@ -1,0 +1,52 @@
+ERROR: File "module_protected_internal_bad_static_override.php--B.php", line 9, characters 27-31:
+This member visibility is: `private` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 11, characters 37-41:
+  `protected internal` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 11, characters 38-40:
+This member visibility is: `protected internal` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 8, characters 27-29:
+  `internal` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 13, characters 38-40:
+This member visibility is: `protected internal` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 9, characters 28-30:
+  `protected` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 15, characters 38-41:
+This member visibility is: `protected internal` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 10, characters 25-28:
+  `public` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 21, characters 29-31:
+This member visibility is: `protected internal` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 14, characters 18-20:
+  `internal` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 23, characters 29-31:
+This member visibility is: `protected internal` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 15, characters 19-21:
+  `protected` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 25, characters 29-31:
+This member visibility is: `protected internal` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 16, characters 16-18:
+  `public` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 7, characters 38-40:
+Cannot override this member in module `M2` (Typing[4444])
+  File "module_protected_internal_bad_static_override.php--A.php", line 6, characters 37-39:
+  This member is internal to module `M1`
+ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 9, characters 28-30:
+Cannot override this member in module `M2` (Typing[4444])
+  File "module_protected_internal_bad_static_override.php--A.php", line 7, characters 37-39:
+  This member is internal to module `M1`
+ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 11, characters 27-31:
+This member visibility is: `private` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 11, characters 37-41:
+  `protected internal` was expected
+ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 13, characters 29-31:
+Cannot override this member in module `M2` (Typing[4444])
+  File "module_protected_internal_bad_static_override.php--A.php", line 12, characters 28-30:
+  This member is internal to module `M1`
+ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 15, characters 19-21:
+Cannot override this member in module `M2` (Typing[4444])
+  File "module_protected_internal_bad_static_override.php--A.php", line 13, characters 28-30:
+  This member is internal to module `M1`
+ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 17, characters 18-20:
+This member visibility is: `private` (Typing[4113])
+  File "module_protected_internal_bad_static_override.php--A.php", line 17, characters 28-30:
+  `protected internal` was expected

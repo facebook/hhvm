@@ -312,13 +312,19 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         else:
             super().start_hh_server(changed_files, saved_state_path, args)
 
-    def commitAllChanges(self, message: str = "test commit") -> str:
+    def commitAllChanges(
+        self, message: str = "test commit", allow_empty: bool = True
+    ) -> str:
         (_, _, retcode) = self.proc_call(["hg", "add", "-R", self.eden_mount_point])
         self.assertEqual(retcode, 0)
         (_, _, retcode) = self.proc_call(
             ["hg", "commit", "--addremove", "-m", message, "-R", self.eden_mount_point]
         )
-        self.assertEqual(retcode, 0)
+        if allow_empty:
+            # hg commit --help states that 1 is the exit code used when nothing changed
+            self.assertTrue(retcode == 0 or retcode == 1)
+        else:
+            self.assertEqual(retcode, 0)
 
         # Get the revision hash of the commit we just created
         (stdout, _, retcode) = self.proc_call(
@@ -334,6 +340,23 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
             args.append("--merge")
         (_, _, retcode) = self.proc_call(args)
         self.assertEqual(retcode, 0)
+
+    @classmethod
+    def isMountPointIgnored(cls) -> bool:
+        """Returns True if cls.eden_mount_point is not watched directly
+
+        We always have one of the following:
+        1. cls.repo_dir is identical to cls.eden_mount_point or
+        2. cls.repo_dir is different from, but an ancestor of, cls.eden_mount_point
+
+        In the second case, changes that happen within cls.eden_mount_point, but outside
+        cls.repo_dir, are ignored.
+
+        Note that this check is identical to asking if a test is running with
+        EdenfsWatcherTestDriver or EdenfsWatcherNonMountPointRepoTests._Driver
+        """
+
+        return Path(cls.eden_mount_point).absolute() != Path(cls.repo_dir).absolute()
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):
@@ -624,6 +647,19 @@ function rename_test_fun(): int {
         ignored_file2 = os.path.join(self.test_driver.repo_dir, "almost.hhconfig")
         with open(ignored_file2, "w") as f:
             f.write("should be ignored")
+        # devious: we create a folder whose name ends with .php
+        os.makedirs(os.path.join(self.test_driver.repo_dir, "folder.php"))
+        ignored_file3 = os.path.join(
+            self.test_driver.repo_dir, "folder.php", "ignored_file.txt"
+        )
+        with open(ignored_file3, "w") as f:
+            f.write("should be ignored")
+        if self.test_driver.isMountPointIgnored():
+            ignored_file4 = os.path.join(
+                self.test_driver.eden_mount_point, "ignored_file.php"
+            )
+            with open(ignored_file4, "w") as f:
+                f.write("should be ignored")
         assertServerNotifierChangesNo(self.test_driver)
         self.test_driver.check_cmd(["No errors!"])
 
@@ -637,6 +673,64 @@ function rename_test_fun(): int {
             [
                 "ERROR: {root}invalid_file.hhi:1:5,5: A semicolon `;` is expected here. (Parsing[1002])"
             ]
+        )
+
+    def test_hg_update_filter(self) -> None:
+        """Tests that we correctly filter out changes we get due to changing commits"""
+
+        # We use three commits:
+        # rev0: baseline, state of testing repo set up by test harness
+        # rev1: contains files that should be ignored
+        # rev2: contains .hhconfig change
+        # all three commits are built on top of each other
+
+        rev0 = self.test_driver.commitAllChanges(allow_empty=True)
+
+        ignored_file1 = os.path.join(
+            self.test_driver.repo_dir, "randomfileweshouldignore"
+        )
+        with open(ignored_file1, "w") as f:
+            f.write("should be ignored")
+        ignored_file2 = os.path.join(self.test_driver.repo_dir, "almost.hhconfig")
+        with open(ignored_file2, "w") as f:
+            f.write("should be ignored")
+        # devious: we create a folder whose name ends with .php
+        os.makedirs(os.path.join(self.test_driver.repo_dir, "folder.php"))
+        ignored_file3 = os.path.join(
+            self.test_driver.repo_dir, "folder.php", "ignored_file.txt"
+        )
+        with open(ignored_file3, "w") as f:
+            f.write("should be ignored")
+        if self.test_driver.isMountPointIgnored():
+            ignored_file4 = os.path.join(
+                self.test_driver.eden_mount_point, "ignored_file.php"
+            )
+            with open(ignored_file4, "w") as f:
+                f.write("should be ignored")
+        rev1 = self.test_driver.commitAllChanges()
+
+        hhconfig_file = os.path.join(self.test_driver.repo_dir, ".hhconfig")
+        with open(hhconfig_file, "a") as f:
+            f.write("# a comment to change hhconfig")
+
+        rev2 = self.test_driver.commitAllChanges()
+
+        # We start the server on rev0, effectively hiding all changes we've made so far
+        self.test_driver.gotoRev(rev0)
+        self.test_driver.start_hh_server()
+
+        # We go to rev1. The server shouldn't see any of these changes
+        self.test_driver.gotoRev(rev1)
+        self.test_driver.check_cmd(["No errors!"])
+        assertServerNotifierChangesNo(self.test_driver)
+
+        # We go to rev2. The server should see the hhconfig change and restart
+        self.test_driver.gotoRev(rev2)
+        time.sleep(2)  # give server some time to initiate restart
+        self.test_driver.check_cmd(["No errors!"])  # wait until server ready again
+        assertMonitorLogContains(
+            self.test_driver,
+            "Exit_status.Hhconfig_changed",
         )
 
     # Note that we inherit all tests from CommonTests and run them,

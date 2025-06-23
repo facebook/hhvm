@@ -1129,6 +1129,12 @@ module Primary = struct
         req_constraint_kind: [ `class_ | `this_as ];
         trait_pos: Pos_or_decl.t;
       }
+    | Static_prop_on_trait of {
+        pos: Pos.t;
+        meth_name: string;
+        trait_name: string;
+        trait_pos: Pos_or_decl.t;
+      }
     | Isset_in_strict of Pos.t
     | Isset_inout_arg of Pos.t
     | Unpacking_disallowed_builtin_function of {

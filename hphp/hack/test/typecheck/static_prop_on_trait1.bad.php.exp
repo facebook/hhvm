@@ -1,0 +1,8 @@
+ERROR: File "static_prop_on_trait1.bad.php", line 7, characters 14-18:
+Static property access on a trait: `MyTrait::$ints` (Typing[4497])
+  File "static_prop_on_trait1.bad.php", line 3, characters 7-13:
+  MyTrait is defined here
+ERROR: File "static_prop_on_trait1.bad.php", line 19, characters 22-26:
+Static property access on a trait: `MyTrait::$ints` (Typing[4497])
+  File "static_prop_on_trait1.bad.php", line 3, characters 7-13:
+  MyTrait is defined here

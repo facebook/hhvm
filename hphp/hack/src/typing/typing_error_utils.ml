@@ -4085,6 +4085,22 @@ end = struct
           (lazy [(trait_pos, Printf.sprintf "%s is defined here" trait_name)])
         ()
 
+  let static_prop_on_trait call_pos prop_name trait_name trait_pos =
+    let trait_name = Render.strip_ns trait_name in
+    let trait_prop =
+      Printf.sprintf "%s::%s" (Utils.strip_ns trait_name) prop_name
+      |> Markdown_lite.md_codify
+    in
+    create
+      ~code:Error_code.StaticPropOnTrait
+      ~claim:
+        (lazy
+          ( call_pos,
+            Printf.sprintf "Static property access on a trait: %s" trait_prop ))
+      ~reasons:
+        (lazy [(trait_pos, Printf.sprintf "%s is defined here" trait_name)])
+      ()
+
   let isset_in_strict pos =
     create
       ~code:Error_code.IssetEmptyInStrict
@@ -5319,6 +5335,8 @@ end = struct
         req_constraint_name
         req_constraint_kind
         trait_pos
+    | Static_prop_on_trait { pos; meth_name; trait_name; trait_pos } ->
+      static_prop_on_trait pos meth_name trait_name trait_pos
     | Isset_in_strict pos -> isset_in_strict pos
     | Isset_inout_arg pos -> isset_inout_arg pos
     | Unpacking_disallowed_builtin_function { pos; fn_name } ->

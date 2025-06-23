@@ -2,3 +2,7 @@ WARN: File "call_on_trait1.bad.php", line 18, characters 12-17:
 Static method call on a trait: `MyTrait::addInt` (Warn[12020])
   File "call_on_trait1.bad.php", line 3, characters 7-13:
   `MyTrait` is defined here
+ERROR: File "call_on_trait1.bad.php", line 20, characters 22-26:
+Static property access on a trait: `MyTrait::$ints` (Typing[4497])
+  File "call_on_trait1.bad.php", line 3, characters 7-13:
+  MyTrait is defined here

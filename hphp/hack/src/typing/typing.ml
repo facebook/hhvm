@@ -1274,56 +1274,72 @@ let check_class_get
                         decl_pos = def_pos;
                         via = `Id;
                       }))
-  | CI (_, class_name) when is_method ->
+  | CI (_, class_name) ->
     (match Env.get_class env class_name with
     | Decl_entry.NotYetAvailable
     | Decl_entry.DoesNotExist ->
       ()
     | Decl_entry.Found cd ->
-      let req_non_strict = Cls.all_ancestor_req_constraints_requirements cd in
       if Ast_defs.is_c_trait (Cls.kind cd) then begin
-        if not (List.is_empty req_non_strict) then begin
-          let elab ty =
-            match TUtils.try_unwrap_class_type ty with
-            | None -> None
-            | Some (_r, (_p, req_name), _paraml) -> Some req_name
+        if is_method then
+          let req_non_strict =
+            Cls.all_ancestor_req_constraints_requirements cd
           in
-          let ty_kind =
-            match List.hd req_non_strict with
-            | Some (CR_Equal (_, ty)) -> (elab ty, `class_)
-            | Some (CR_Subtype (_, ty)) -> (elab ty, `this_as)
-            | None ->
-              (* cannot happen *)
-              (None, `class_)
-          in
-          match ty_kind with
-          | (Some req_constraint_name, req_constraint_kind) ->
-            Typing_error_utils.add_typing_error
-              ~env
-              Typing_error.(
-                primary
-                @@ Primary.Static_call_on_trait_require_non_strict
-                     {
-                       trait_name = class_name;
-                       meth_name = mid;
-                       req_constraint_name;
-                       req_constraint_kind;
-                       pos = p;
-                       trait_pos = Cls.pos cd;
-                     })
-          | _ -> ()
-        end else begin
-          Typing_warning_utils.add
-            env
-            Typing_warning.
-              ( p,
-                Static_call_on_trait,
-                Static_call_on_trait.
-                  {
-                    trait_name = class_name;
-                    meth_name = mid;
-                    trait_pos = Cls.pos cd;
-                  } )
+          if not (List.is_empty req_non_strict) then begin
+            let elab ty =
+              match TUtils.try_unwrap_class_type ty with
+              | None -> None
+              | Some (_r, (_p, req_name), _paraml) -> Some req_name
+            in
+            let ty_kind =
+              match List.hd req_non_strict with
+              | Some (CR_Equal (_, ty)) -> (elab ty, `class_)
+              | Some (CR_Subtype (_, ty)) -> (elab ty, `this_as)
+              | None ->
+                (* cannot happen *)
+                (None, `class_)
+            in
+            match ty_kind with
+            | (Some req_constraint_name, req_constraint_kind) ->
+              Typing_error_utils.add_typing_error
+                ~env
+                Typing_error.(
+                  primary
+                  @@ Primary.Static_call_on_trait_require_non_strict
+                       {
+                         trait_name = class_name;
+                         meth_name = mid;
+                         req_constraint_name;
+                         req_constraint_kind;
+                         pos = p;
+                         trait_pos = Cls.pos cd;
+                       })
+            | _ -> ()
+          end else begin
+            Typing_warning_utils.add
+              env
+              Typing_warning.
+                ( p,
+                  Static_call_on_trait,
+                  Static_call_on_trait.
+                    {
+                      trait_name = class_name;
+                      meth_name = mid;
+                      trait_pos = Cls.pos cd;
+                    } )
+          end
+        else begin
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Static_prop_on_trait
+                   {
+                     trait_name = class_name;
+                     meth_name = mid;
+                     pos = p;
+                     trait_pos = Cls.pos cd;
+                   })
         end
       end)
   | CIself -> check_needs_concrete_call `Self
@@ -1352,7 +1368,7 @@ let check_class_get
                  member_name = mid;
                  decl_pos = def_pos;
                })
-  | _ -> ()
+  | CIexpr _ -> ()
 
 module Fun_id : sig
   (** Synthesize the type of a function identifier. If no type arguments are

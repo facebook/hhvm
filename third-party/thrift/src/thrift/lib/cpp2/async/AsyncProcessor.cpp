@@ -1228,10 +1228,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
-    FOLLY_PUSH_WARNING
-    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
     co_yield folly::coro::co_error(TApplicationException(message));
-    FOLLY_POP_WARNING
   }
 }
 
@@ -1281,10 +1278,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
-    FOLLY_PUSH_WARNING
-    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
     co_yield folly::coro::co_error(TApplicationException(message));
-    FOLLY_POP_WARNING
   }
 }
 

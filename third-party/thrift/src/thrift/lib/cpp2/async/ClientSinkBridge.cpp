@@ -105,10 +105,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
       if (clientCancelToken.isCancellationRequested()) {
         clientPush(folly::Try<apache::thrift::StreamPayload>(
             rocket::RocketException(rocket::ErrorCode::CANCELED)));
-        FOLLY_PUSH_WARNING
-        FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
         co_yield folly::coro::co_cancelled;
-        FOLLY_POP_WARNING
       }
     }
 
@@ -121,10 +118,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
     if (clientCancelToken.isCancellationRequested()) {
       clientPush(folly::Try<apache::thrift::StreamPayload>(
           rocket::RocketException(rocket::ErrorCode::CANCELED)));
-      FOLLY_PUSH_WARNING
-      FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
       co_yield folly::coro::co_cancelled;
-      FOLLY_POP_WARNING
     }
 
     if (item.has_value()) {

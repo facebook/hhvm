@@ -379,9 +379,13 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
                              TKnown callKnown, TUnknown callUnknown,
                              const jit::vector<CallTargetProfile::Choice> &choices,
                              size_t attempts, const size_t maxAttempts) {
+  auto remainingProb = 1.0;
+  for (auto i = 0; i < attempts; i++) {
+    remainingProb -= choices[i].probability;
+  }
+
   auto indirectCall = [&] {
-    auto const unlikely = !choices.empty() && choices[0].probability * 100 >=
-      Cfg::Jit::PGOCalledFuncExitThreshold;
+    auto const unlikely = remainingProb <= Cfg::Jit::PGOCalledFuncExitThreshold;
     if (unlikely) {
       hint(env, Block::Hint::Unlikely);
       IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
@@ -393,10 +397,6 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
 
   if (attempts >= choices.size() || attempts == maxAttempts) {
     return indirectCall();
-  }
-  auto remainingProb = 1.0;
-  for (auto i = 0; i < attempts; i++) {
-    remainingProb -= choices[i].probability;
   }
   const Func* profiledFunc = choices[attempts].func;
   double probability = choices[attempts].probability / remainingProb;

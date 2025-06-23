@@ -12,6 +12,7 @@ use md5::Md5;
 use regex::Regex;
 
 use crate::cxx_ffi;
+use crate::file::format_path;
 
 /// A config.hdf rule that matched an input
 // Temporarily allow this to compile, we're actually logging this for now.
@@ -37,7 +38,7 @@ impl fmt::Display for TracedRule {
             "Rule".magenta(),
             self.rule_name.yellow().bold(),
             "File".magenta(),
-            self.file_name.yellow().bold(),
+            format_path(&self.file_name).yellow().bold(),
             "Body".purple(),
             if self.rule_name == "Root" {
                 "Root {\n ... \n}".to_string()

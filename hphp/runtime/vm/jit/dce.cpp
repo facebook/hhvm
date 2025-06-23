@@ -939,17 +939,53 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
   // Mark reachable, essential, instructions live and enqueue them.
   WorkList wl;
   wl.reserve(unit.numInsts());
-  forEachInst(blocks, [&] (IRInstruction* inst) {
-    // Instructions that cannot be removed are automatically live. The
-    // exception is DefLabels and Jmps that feed a DefLabel. There
-    // aren't normally DCEable, but will be dealt with specially.
-    if (!canDCE(*inst) &&
-        !inst->is(DefLabel) &&
-        !(inst->is(Jmp) && inst->numSrcs() > 0)) {
-      state[inst].setLive();
-      wl.push_back(std::make_pair(inst, 0));
+  for (auto const block : blocks) {
+    std::vector<IRInstruction*> enterInlineFrames;
+
+    for (auto& inst : *block) {
+      auto const setLive = [&] (IRInstruction* inst) {
+        state[inst].setLive();
+        wl.push_back(std::make_pair(inst, 0));
+      };
+
+      switch (inst.op()) {
+        case EnterInlineFrame:
+          // Defer decision in case there is a matching LeaveInlineFrame.
+          enterInlineFrames.push_back(&inst);
+          continue;
+        case LeaveInlineFrame:
+          if (enterInlineFrames.empty()) {
+            setLive(&inst);
+          } else {
+            // Kill the empty pair of EnterInlineFrame and LeaveInlineFrame.
+            assertx(enterInlineFrames.back()->src(0) == inst.src(0));
+            enterInlineFrames.pop_back();
+          }
+          continue;
+        case DefLabel:
+          // DefLabel is handled specially.
+          break;
+        case Jmp:
+          // Jmps that feed a DefLabel is handled specially.
+          if (inst.numSrcs() == 0) setLive(&inst);
+          break;
+        default:
+          // All other instructions that cannot be removed are automatically
+          // live.
+          if (!canDCE(inst)) setLive(&inst);
+          break;
+      }
+
+      // All open EnterInlineFrames are non-empty, set them live.
+      while (!enterInlineFrames.empty()) {
+        setLive(enterInlineFrames.back());
+        enterInlineFrames.pop_back();
+      }
     }
-  });
+
+    // Block's last instruction can't be EnterInlineFrame or LeaveInlineFrame.
+    assertx(enterInlineFrames.empty());
+  }
   TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
   return wl;
 }
@@ -1467,7 +1503,7 @@ void fullDCE(IRUnit& unit) {
     auto& info = pair.second;
     auto const trackedUses =
       info.decs.size() + info.aux.size() + info.stores.size() + info.passthroughs.size();
-    FTRACE(5, "Instr {}; uses = {} trackedUses = {}\n", 
+    FTRACE(5, "Instr {}; uses = {} trackedUses = {}\n",
       pair.first->toString(), uses[pair.first->dst()], trackedUses
     );
     if (uses[pair.first->dst()] != trackedUses) continue;

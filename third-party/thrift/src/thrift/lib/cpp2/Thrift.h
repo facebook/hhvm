@@ -39,7 +39,7 @@ struct invoke_reffer;
 
 template <class List, FieldOrdinal>
 struct at_impl {
-  static_assert(sizeof(List) < 0);
+  static_assert(folly::always_false<List>);
 };
 
 template <class... Args, FieldOrdinal Ord>
@@ -531,7 +531,7 @@ constexpr std::bool_constant<std::is_invocable_v<F&&, T&>> callable(F&&) {
  */
 template <typename T, bool IsEnum = std::is_enum_v<T>>
 struct TSchemaAssociation {
-  static_assert(sizeof(T) == ~0ull, "invalid use of base template");
+  static_assert(folly::always_false<T>, "invalid use of base template");
 };
 
 } // namespace detail

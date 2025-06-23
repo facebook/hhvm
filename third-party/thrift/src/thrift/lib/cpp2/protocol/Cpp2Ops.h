@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include <folly/Traits.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/Thrift.h>
 
@@ -40,7 +41,8 @@ namespace apache::thrift {
 template <class T, class = void>
 class Cpp2Ops {
   static_assert(
-      sizeof(T) == ~0ull, "(only Thrift-generated classes are serializable)");
+      folly::always_false<T>,
+      "Only Thrift-generated classes are serializable.");
   //  When instantiated with a type T, includes:
   //
   //      template <class P>

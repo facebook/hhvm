@@ -57,7 +57,7 @@ FOLLY_CONSTEVAL type::Ordinal findOrdinal(
 
 template <class T, class List>
 class FindOrdinal {
-  static_assert(sizeof(T) < 0);
+  static_assert(folly::always_false<T>);
 };
 
 template <class T, class... Args>
@@ -533,7 +533,7 @@ struct Get<void, void> {
 // Helper to get adapter type from Thrift type tag.
 template <typename Tag>
 struct get_adapter {
-  static_assert(sizeof(Tag) == 0, "Not adapter.");
+  static_assert(folly::always_false<Tag>, "Not adapter.");
 };
 template <typename UTag, typename Context>
 struct get_adapter<type::field<UTag, Context>> : get_adapter<UTag> {};

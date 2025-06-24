@@ -1146,8 +1146,10 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
   }
   while (!m_stopped) {
     DebuggerCommandPtr cmd;
-    if (DebuggerCommand::Receive(m_machine->m_read_thrift, cmd, caller, m_stream_status != StreamStatus::ONGOING)) {
-      if (!cmd) {
+    // Only timeout when expectedCmd is KindOfNone to check if server is down.
+    // Otherwise, the buffer may contain unread messages.
+    if (DebuggerCommand::Receive(m_machine->m_read_thrift, cmd, caller, m_stream_status != StreamStatus::ONGOING, expectedCmd == DebuggerCommand::KindOfNone)) {
+      if (!cmd ) {
         if (m_stopped) {
           throw DebuggerClientExitException();
         }

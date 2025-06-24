@@ -75,7 +75,8 @@ void DebuggerCommand::recvImpl(DebuggerThriftBuffer& thrift) {
 // didn't form a usable command. Is there is no usable command, cmd is null.
 bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
                               DebuggerCommandPtr& cmd, const char* caller,
-                              bool should_flush) {
+                              bool should_flush,
+                              bool should_timeout) {
   TRACE(5, "DebuggerCommand::Receive\n");
   cmd.reset();
 
@@ -86,9 +87,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   auto const ret = poll(fds, 1, POLLING_SECONDS * 1000);
 
   // Timeout.
-  if (ret == 0) return false;
+  if (ret == 0 && should_timeout) {
+    return false;
+  }
 
-  if (ret == -1) {
+  if (ret == -1 && should_timeout) {
     auto const errorNumber = errno; // Just in case TRACE_RB changes errno
     TRACE_RB(1, "DebuggerCommand::Receive: error %d\n", errorNumber);
     return errorNumber != EINTR; // Treat signals as timeouts
@@ -97,7 +100,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   // If we don't have any data to read (POLLIN) then we're done. If we
   // do have data we'll attempt to read and decode it below, even if
   // there are other error bits set.
-  if (!(fds[0].revents & POLLIN)) {
+  if (!(fds[0].revents & POLLIN) && should_timeout) {
     TRACE_RB(1, "DebuggerCommand::Receive: revents %d\n", fds[0].revents);
     return true;
   }

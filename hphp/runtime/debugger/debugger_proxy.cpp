@@ -440,7 +440,7 @@ void DebuggerProxy::pollSignal() {
     DebuggerCommandPtr res;
     for (int i = 0; i < 10; i++) {
       if (DebuggerCommand::Receive(m_thrift, res,
-                                   "DebuggerProxy::pollSignal()", true)) break;
+                                   "DebuggerProxy::pollSignal()", true, true)) break;
       if (m_stopped) {
         TRACE_RB(2, "DebuggerProxy::pollSignal: "
                  "signal thread asked to stop while waiting "
@@ -710,7 +710,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   while (true) {
     DebuggerCommandPtr res;
     while (!DebuggerCommand::Receive(m_thrift, res,
-                                     "DebuggerProxy::processInterrupt()", true)) {
+                                     "DebuggerProxy::processInterrupt()", true, true)) {
       // we will wait forever until DebuggerClient sends us something
       checkStop();
     }
@@ -936,7 +936,7 @@ std::string DebuggerProxy::requestAuthToken() {
 
   DebuggerCommandPtr res;
   while (!DebuggerCommand::Receive(m_thrift, res,
-                                   "DebuggerProxy::requestAuthToken()", true)) {
+                                   "DebuggerProxy::requestAuthToken()", true, true)) {
     checkStop();
   }
   if (!res) {
@@ -976,7 +976,7 @@ std::string DebuggerProxy::requestSessionAuth() {
 
   DebuggerCommandPtr res;
   while (!DebuggerCommand::Receive(m_thrift, res,
-                                   "DebuggerProxy::requestSessionAuth()", true)) {
+                                   "DebuggerProxy::requestSessionAuth()", true, true)) {
     checkStop();
   }
   if (!res) {

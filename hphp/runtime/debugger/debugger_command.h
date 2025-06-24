@@ -96,7 +96,7 @@ struct DebuggerCommand {
   };
 
   static bool Receive(DebuggerThriftBuffer &thrift, DebuggerCommandPtr &cmd,
-                      const char *caller, bool should_flush);
+                      const char *caller, bool should_flush, bool should_timeout);
 
 public:
   explicit DebuggerCommand(Type type): m_type(type) {}

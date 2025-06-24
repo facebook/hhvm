@@ -164,7 +164,7 @@ struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          std::unique_ptr<uint8_t[]> readonlyArgs,
-                         BlockId asyncEagerTarget, LSString context)
+                         BlockId asyncEagerTarget, SString context)
     : FCallArgsBase(flags, numArgs, numRets)
     , inoutArgs(std::move(inoutArgs))
     , readonlyArgs(std::move(readonlyArgs))
@@ -173,7 +173,7 @@ struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(FCallArgsBase base,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          std::unique_ptr<uint8_t[]> readonlyArgs,
-                         BlockId asyncEagerTarget, LSString context)
+                         BlockId asyncEagerTarget, SString context)
     : FCallArgsBase(std::move(base))
     , inoutArgs(std::move(inoutArgs))
     , readonlyArgs(std::move(readonlyArgs))
@@ -321,7 +321,7 @@ struct FCallArgsLong : FCallArgsBase {
   std::unique_ptr<uint8_t[]> inoutArgs;
   std::unique_ptr<uint8_t[]> readonlyArgs;
   BlockId asyncEagerTarget;
-  LSString context;
+  SString context;
 
   template <typename SerDe>
   static copy_ptr<FCallArgsLong> makeForSerde(SerDe& sd) {
@@ -329,7 +329,7 @@ struct FCallArgsLong : FCallArgsBase {
 
     auto base = sd.template make<FCallArgsBase>();
     BlockId asyncEagerTarget;
-    LSString context;
+    SString context;
     sd(asyncEagerTarget)(context);
 
     bool hasInout;
@@ -385,7 +385,7 @@ struct FCallArgs {
             std::unique_ptr<uint8_t[]> inoutArgs,
             std::unique_ptr<uint8_t[]> readonlyArgs,
             BlockId asyncEagerTarget,
-            LSString context)
+            SString context)
     : l{flags, numArgs, numRets,
         std::move(inoutArgs), std::move(readonlyArgs),
         asyncEagerTarget, context} {}
@@ -515,7 +515,7 @@ struct FCallArgs {
   Flavor popFlavor(uint32_t i) const {
     return l->template popFlavor<nin,nobj>(i);
   }
-  LSString context() const { return l->context; }
+  SString context() const { return l->context; }
 
   template <typename SerDe> static FCallArgs makeForSerde(SerDe& sd) {
     static_assert(SerDe::deserializing);
@@ -540,7 +540,7 @@ using SwitchTab     = CompactVector<BlockId>;
 
 // The final entry in the SSwitchTab is the default case, it will
 // always have a nullptr for the string.
-using SSwitchTabEnt = std::pair<LSString,BlockId>;
+using SSwitchTabEnt = std::pair<SString,BlockId>;
 using SSwitchTab    = CompactVector<SSwitchTabEnt>;
 
 //////////////////////////////////////////////////////////////////////

@@ -36,8 +36,6 @@ TRACE_SET_MOD(hhbbc_mem)
 
 using Buffer = CompressedBytecode;
 
-static_assert(std::is_same<LSString, LowStringPtr>::value);
-
 constexpr int32_t kNoSrcLoc = -1;
 
 constexpr uint8_t k16BitCode = 0xfe;
@@ -103,7 +101,7 @@ T decode(const Buffer& buffer, size_t& pos) {
   if constexpr (std::is_same<T, FCallArgs>::value) {
     using FCA = FCallArgsBase;
     auto const base     = decode<FCA>(buffer, pos);
-    auto const context  = decode<LSString>(buffer, pos);
+    auto const context  = decode<SString>(buffer, pos);
     auto const aeTarget = decode<BlockId>(buffer, pos) + NoBlockId;
     auto inout = std::unique_ptr<uint8_t[]>();
     if (base.flags & FCallArgsFlags::EnforceInOut) {
@@ -136,14 +134,14 @@ T decode(const Buffer& buffer, size_t& pos) {
     return T{first, count};
   }
 
-  if constexpr (std::is_same<T, LowStringPtr>::value) {
+  if constexpr (std::is_same<T, const StringData*>::value) {
     auto const lo = decode_as_bytes<uint32_t>(buffer, pos);
     if (!(lo & kStringDataFlag)) {
-      return LowStringPtr(reinterpret_cast<const StringData*>(lo));
+      return reinterpret_cast<const StringData*>(lo);
     }
     auto const hi = decode_as_bytes<uint32_t>(buffer, pos);
     auto const both = (uint64_t(hi) << 32) | (uint64_t(lo) & ~kStringDataFlag);
-    return LowStringPtr(reinterpret_cast<const StringData*>(both));
+    return reinterpret_cast<const StringData*>(both);
   }
 
   if constexpr (std::is_same<T, MKey>::value) {
@@ -264,9 +262,9 @@ void encode(Buffer& buffer, const T& data) {
     encode(buffer, data.first);
     encode(buffer, data.count);
 
-  } else if constexpr (std::is_same<T, LowStringPtr>::value) {
+  } else if constexpr (std::is_same<T, const StringData*>::value) {
     static_assert(alignof(StringData) % 2 == 0);
-    auto const raw = uintptr_t(data.get());
+    auto const raw = uintptr_t(data);
     if (raw <= std::numeric_limits<uint32_t>::max()) {
       encode_as_bytes(buffer, safe_cast<uint32_t>(raw));
     } else {

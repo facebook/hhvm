@@ -260,6 +260,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -736,6 +737,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -1131,6 +1133,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -1532,6 +1535,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(

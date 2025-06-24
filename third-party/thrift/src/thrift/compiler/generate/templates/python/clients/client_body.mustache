@@ -122,6 +122,7 @@ class Async({{#service:extends}}{{!
           }}_fbthrift_resp.success{{#function:stream?}}, _fbthrift_stream{{/function:stream?}}
         {{/function:early_client_return?}}
         {{#function:exceptions}}
+        # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `{{> fields/exception_field_name }}`{{!This is an intentionally mangled name.}}
         if (_fbthrift_ex := _fbthrift_resp.{{> fields/exception_field_name }}) is not None:
             raise _fbthrift_ex
         {{/function:exceptions}}
@@ -215,6 +216,7 @@ class Sync({{#service:extends}}{{!
             return _fbthrift_resp.success
         {{/type:void?}}{{/function:return_type}}
         {{#function:exceptions}}
+        # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `{{> fields/exception_field_name }}`{{!This is an intentionally mangled name.}}
         if (_fbthrift_ex := _fbthrift_resp.{{> fields/exception_field_name }}) is not None:
             raise _fbthrift_ex
         {{/function:exceptions}}

@@ -86,10 +86,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
             )
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__b`
             if (_fbthrift_ex := _fbthrift_resp._ex0__b) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex1__f`
             if (_fbthrift_ex := _fbthrift_resp._ex1__f) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex2__s`
             if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
                 raise _fbthrift_ex
     
@@ -132,10 +135,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__f`
             if (_fbthrift_ex := _fbthrift_resp._ex0__f) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex1__b`
             if (_fbthrift_ex := _fbthrift_resp._ex1__b) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex2__s`
             if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -193,10 +199,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
             )
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__b`
             if (_fbthrift_ex := _fbthrift_resp._ex0__b) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex1__f`
             if (_fbthrift_ex := _fbthrift_resp._ex1__f) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex2__s`
             if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
                 raise _fbthrift_ex
     
@@ -237,10 +246,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__f`
             if (_fbthrift_ex := _fbthrift_resp._ex0__f) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex1__b`
             if (_fbthrift_ex := _fbthrift_resp._ex1__b) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex2__s`
             if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(

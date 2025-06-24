@@ -78,6 +78,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -120,6 +121,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -180,6 +182,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -222,6 +225,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(

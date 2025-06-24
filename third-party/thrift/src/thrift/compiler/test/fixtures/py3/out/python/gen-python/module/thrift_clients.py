@@ -304,6 +304,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
             )
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__se`
             if (_fbthrift_ex := _fbthrift_resp._ex0__se) is not None:
                 raise _fbthrift_ex
     
@@ -1388,6 +1389,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
             )
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__se`
             if (_fbthrift_ex := _fbthrift_resp._ex0__se) is not None:
                 raise _fbthrift_ex
     

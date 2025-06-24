@@ -114,6 +114,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__e`
             if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
                 raise _fbthrift_ex
             return _fbthrift_stream
@@ -135,8 +136,10 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__e1`
             if (_fbthrift_ex := _fbthrift_resp._ex0__e1) is not None:
                 raise _fbthrift_ex
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex1__e2`
             if (_fbthrift_ex := _fbthrift_resp._ex1__e2) is not None:
                 raise _fbthrift_ex
             return _fbthrift_stream
@@ -158,6 +161,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__e`
             if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
                 raise _fbthrift_ex
             return _fbthrift_stream
@@ -207,6 +211,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__e`
             if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -234,6 +239,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__e`
             if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
                 raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(

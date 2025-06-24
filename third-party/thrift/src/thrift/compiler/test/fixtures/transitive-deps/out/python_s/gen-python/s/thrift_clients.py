@@ -73,6 +73,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 uri_or_name="TestService",
                 rpc_options=rpc_options,
             )
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
     
@@ -106,6 +107,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 uri_or_name="TestService",
                 rpc_options=rpc_options,
             )
+            # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
 

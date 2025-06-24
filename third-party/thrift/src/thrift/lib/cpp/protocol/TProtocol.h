@@ -51,13 +51,18 @@ enum TMessageType { T_CALL = 1, T_REPLY = 2, T_EXCEPTION = 3, T_ONEWAY = 4 };
  * Templatized to avoid having to make virtual function calls.
  */
 template <class Protocol_>
-uint32_t skip(Protocol_& prot, TType arg_type) {
+uint32_t skip(Protocol_& prot, TType arg_type, uint32_t depth = 0) {
+  static const uint32_t kMaxSkipDepth = 1000;
+  if (depth > kMaxSkipDepth) {
+    throw TProtocolException(
+        TProtocolException::UNKNOWN, "Maximum skip depth exceeded");
+  }
+
   switch (arg_type) {
     case T_BOOL: {
       bool boolv;
       return prot.readBool(boolv);
     }
-    // case T_I08: // same numeric value as T_BYTE
     case T_BYTE: {
       int8_t bytev = 0;
       return prot.readByte(bytev);
@@ -83,7 +88,6 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       float flt;
       return prot.readFloat(flt);
     }
-    // case T_UTF7: // same numeric value as T_STRING
     case T_UTF8:
     case T_UTF16:
     case T_STRING: {
@@ -101,7 +105,7 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
         if (ftype == T_STOP) {
           break;
         }
-        result += skip(prot, ftype);
+        result += skip(prot, ftype, depth + 1);
         result += prot.readFieldEnd();
       }
       result += prot.readStructEnd();
@@ -116,13 +120,13 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       result += prot.readMapBegin(keyType, valType, size, sizeUnknown);
       if (!sizeUnknown) {
         for (i = 0; i < size; i++) {
-          result += skip(prot, keyType);
-          result += skip(prot, valType);
+          result += skip(prot, keyType, depth + 1);
+          result += skip(prot, valType, depth + 1);
         }
       } else {
         while (prot.peekMap()) {
-          result += skip(prot, keyType);
-          result += skip(prot, valType);
+          result += skip(prot, keyType, depth + 1);
+          result += skip(prot, valType, depth + 1);
         }
       }
       result += prot.readMapEnd();
@@ -136,11 +140,11 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       result += prot.readSetBegin(elemType, size, sizeUnknown);
       if (!sizeUnknown) {
         for (i = 0; i < size; i++) {
-          result += skip(prot, elemType);
+          result += skip(prot, elemType, depth + 1);
         }
       } else {
         while (prot.peekSet()) {
-          result += skip(prot, elemType);
+          result += skip(prot, elemType, depth + 1);
         }
       }
       result += prot.readSetEnd();
@@ -154,11 +158,11 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       result += prot.readListBegin(elemType, size, sizeUnknown);
       if (!sizeUnknown) {
         for (i = 0; i < size; i++) {
-          result += skip(prot, elemType);
+          result += skip(prot, elemType, depth + 1);
         }
       } else {
         while (prot.peekList()) {
-          result += skip(prot, elemType);
+          result += skip(prot, elemType, depth + 1);
         }
       }
       result += prot.readListEnd();
@@ -167,7 +171,6 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
     case T_STOP:
     case T_VOID:
     case T_STREAM:
-      // Unimplemented, fallback to default
       FOLLY_PUSH_WARNING
       FOLLY_CLANG_DISABLE_WARNING("-Wcovered-switch-default")
     default: {

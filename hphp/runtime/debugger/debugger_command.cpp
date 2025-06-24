@@ -74,7 +74,8 @@ void DebuggerCommand::recvImpl(DebuggerThriftBuffer& thrift) {
 // Returns false on timeout, true when data has been read even if that data
 // didn't form a usable command. Is there is no usable command, cmd is null.
 bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
-                              DebuggerCommandPtr& cmd, const char* caller) {
+                              DebuggerCommandPtr& cmd, const char* caller,
+                              bool should_flush) {
   TRACE(5, "DebuggerCommand::Receive\n");
   cmd.reset();
 
@@ -104,7 +105,9 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   int32_t type;
   std::string clsname;
   try {
-    thrift.reset(true);
+    if (should_flush) {
+      thrift.reset(true);
+    }
     thrift.read(type);
     thrift.read(clsname);
   } catch (...) {

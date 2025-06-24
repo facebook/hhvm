@@ -96,7 +96,7 @@ struct DebuggerCommand {
   };
 
   static bool Receive(DebuggerThriftBuffer &thrift, DebuggerCommandPtr &cmd,
-                      const char *caller);
+                      const char *caller, bool should_flush);
 
 public:
   explicit DebuggerCommand(Type type): m_type(type) {}
@@ -154,4 +154,3 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

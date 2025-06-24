@@ -1142,7 +1142,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
   }
   while (!m_stopped) {
     DebuggerCommandPtr cmd;
-    if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, caller)) {
+    if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, caller, m_stream_status != StreamStatus::ONGOING)) {
       if (!cmd) {
         if (m_stopped) {
           throw DebuggerClientExitException();

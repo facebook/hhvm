@@ -809,6 +809,25 @@ function test_deprecated() : void {
             "Exit_status.Hhconfig_changed",
         )
 
+    def test_filter_alternation(self) -> None:
+        """Alternates between making filtered and non-filtered changes
+
+        This is a regression test for a bug where this pattern caused the notification mechanism
+        to (errorenously) fail a consistency check.
+        """
+
+        self.test_driver.start_hh_server()
+
+        for _ in range(5):
+            self.test_driver.createNonHackFile("not_filtered_out.php")
+            self.test_driver.createNonHackFile("filtered_out.txt")
+
+            self.test_driver.check_cmd(
+                [
+                    "ERROR: {root}not_filtered_out.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])"
+                ]
+            )
+
     def test_get_all_files(self) -> None:
         # Let's go to the commit where only hh.conf and .hhconfig existed
         self.test_driver.gotoRev(self.test_driver.clean_slate_commit)

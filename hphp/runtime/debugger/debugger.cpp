@@ -39,6 +39,7 @@ namespace HPHP::Eval {
 TRACE_SET_MOD(debugger)
 
 bool Debugger::s_clientStarted = false;
+bool Debugger::s_disableJit = true;
 
 
 Debugger& Debugger::get() {
@@ -524,6 +525,14 @@ void Debugger::cleanupRetiredProxies() {
                     proxy.get(), e.getMessage().c_str());
     }
   }
+}
+
+bool Debugger::getDisableJit() {
+  return s_disableJit;
+}
+
+void Debugger::setDisableJit(bool disableJit) {
+  s_disableJit = disableJit;
 }
 
 // NB: when this returns, the Debugger class no longer has any references to the

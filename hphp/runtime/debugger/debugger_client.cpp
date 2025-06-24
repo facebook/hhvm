@@ -725,7 +725,7 @@ std::string DebuggerClient::getPrompt() {
   }
   auto name = &m_machine->m_name;
   if (m_inputState == TakingCode ) {
-    if (m_options.is_notebook) {
+    if (m_options.isNotebook) {
       return "";
     }
     std::string prompt = " ";
@@ -753,6 +753,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
 
   loadConfig();
 
+  Debugger::setDisableJit(!m_options.isNotebook);
   if (m_scriptMode) {
     print("running in script mode, pid=%" PRId64 "\n",
           (int64_t)getpid());
@@ -785,6 +786,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
 void DebuggerClient::start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::start\n");
   init(options);
+  Debugger::setDisableJit(!options.isNotebook);
   m_mainThread.start();
 }
 
@@ -2020,7 +2022,7 @@ bool DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  if (m_options.is_notebook) {
+  if (m_options.isNotebook) {
     CmdEvalStream eval;
     eval.onClient(*this);
     return !eval.failed();

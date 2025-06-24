@@ -2250,7 +2250,7 @@ static int execute_program_impl(int argc, char** argv) {
     if (po.mode == ExecutionMode::DEBUG || po.mode == ExecutionMode::NOTEBOOK) {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       Cfg::Debugger::EnableHphpd = true;
-      po.debugger_options.is_notebook = po.mode == ExecutionMode::NOTEBOOK;
+      po.debugger_options.isNotebook = po.mode == ExecutionMode::NOTEBOOK;
       po.debugger_options.fileName = file;
       po.debugger_options.user = po.user;
       Eval::DebuggerProxyPtr localProxy =

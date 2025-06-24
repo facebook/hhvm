@@ -101,6 +101,8 @@ struct Debugger {
     Abnormal
   };
 
+  static bool getDisableJit();
+  static void setDisableJit(bool disableJit);
   static void LogShutdown(ShutdownKind shutdownKind);
 
   // Usage logging
@@ -118,6 +120,7 @@ struct Debugger {
 private:
 
   static bool s_clientStarted;
+  static bool s_disableJit;
 
   static Debugger& get();
 

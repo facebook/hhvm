@@ -125,6 +125,10 @@ DebuggerHook* HphpdHook::GetInstance() {
   return instance;
 }
 
+void HphpdHook::onRequestInit() {
+  RID().setVSDebugDisablesJit(Debugger::getDisableJit());
+}
+
 void HphpdHook::onFileLoad(Unit* unit) {
   DebuggerProxy* proxy = Debugger::GetProxy().get();
   if (proxy == nullptr) return;

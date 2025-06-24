@@ -3393,6 +3393,9 @@ int main(int argc, char** argv) {
     ("source_file",
      po::value<std::string>()->required(),
      "filename to read debug-info from")
+    ("dep",
+      po::value<std::vector<std::string>>(),
+      "just here so we can add dependencies")
     ("output_file",
      po::value<std::string>()->required(),
      "filename of generated scanners")

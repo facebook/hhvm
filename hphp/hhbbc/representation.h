@@ -436,6 +436,11 @@ struct Func : FuncBase {
   TypeIntersectionConstraint retTypeConstraints;
 
   /*
+   * Contains the names of type params defined for this method or function
+   */
+  CompactVector<LowStringPtr> typeParamNames;
+
+  /*
    * Static coeffects in bit encoding
    */
   RuntimeCoeffects requiredCoeffects{RuntimeCoeffects::none()};
@@ -663,6 +668,11 @@ struct Class : ClassBase {
    * The underlying base type, if this is an enum
    */
   TypeConstraint enumBaseTy;
+
+  /*
+   * Contains the names of type params defined for this class
+   */
+  CompactVector<LowStringPtr> typeParamNames;
 
   /*
    * This is a reified class.

@@ -114,7 +114,7 @@ const StaticString s_Traversable("HH\\Traversable");
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
 static_assert(CheckSize<php::Param, use_lowptr ? 56: 88>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 168: 216>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 176: 224>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");

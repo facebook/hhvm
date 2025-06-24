@@ -25,6 +25,7 @@ pub(crate) fn convert_class(cls: Class) -> ir::Class {
         span: cls.span,
         type_constants: cls.type_constants,
         upper_bounds: cls.upper_bounds,
+        tparams: cls.tparams,
         uses: cls.uses,
     }
 }

@@ -96,12 +96,12 @@ use crate::parse::parse_param;
 use crate::parse::parse_prop_id;
 use crate::parse::parse_readonly;
 use crate::parse::parse_set_op_op;
-use crate::parse::parse_shadowed_tparams;
 use crate::parse::parse_silence_op;
 use crate::parse::parse_special_cls_ref;
 use crate::parse::parse_special_cls_ref_opt;
 use crate::parse::parse_src_loc;
 use crate::parse::parse_string_id;
+use crate::parse::parse_tparam_info;
 use crate::parse::parse_type_info;
 use crate::parse::parse_type_struct_enforce_kind;
 use crate::parse::parse_type_struct_resolve_op;
@@ -171,7 +171,10 @@ impl<'b> FunctionParser<'b> {
         mut class_state: Option<&'b mut ClassState>,
     ) -> Result<Function> {
         parse!(tokenizer, <name:parse_func_name>);
-
+        parse!(
+            tokenizer,
+            <tparam_info:parse_tparam_info()>
+        );
         let tparams = if tokenizer.next_is_identifier("<")? {
             let mut tparams = Vec::new();
             parse_comma_list(tokenizer, false, |tokenizer| {
@@ -198,7 +201,7 @@ impl<'b> FunctionParser<'b> {
 
         parse!(
             tokenizer,
-            "(" <params:parse_param(),*> ")" <shadowed_tparams:parse_shadowed_tparams> ":"
+            "(" <params:parse_param(),*> ")" ":"
         );
 
         let return_type = match tokenizer.peek_is_identifier("<")? {
@@ -219,7 +222,7 @@ impl<'b> FunctionParser<'b> {
         let mut builder = FuncBuilder::with_func(Func {
             return_type: return_type.into(),
             upper_bounds: tparams.into(),
-            shadowed_tparams: shadowed_tparams.into(),
+            tparam_info: tparam_info.into(),
             attrs,
             repr: ir_core::IrRepr {
                 params,

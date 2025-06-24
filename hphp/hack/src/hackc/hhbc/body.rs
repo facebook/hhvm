@@ -22,6 +22,16 @@ use crate::UpperBound;
 /// A hhbc bytecode body
 pub type Body = BodyImpl<BcRepr>;
 
+/// Information for template params that are defined for this method.
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct TParamInfo {
+    pub name: ClassName,
+    /// true if this template param shadows a template param from the
+    /// containing class.
+    pub shadows_class_tparam: bool,
+}
+
 /// A BodyImpl represents a body of code. It's used for both Function and Method.
 #[derive(Debug, Default, Clone, Serialize)]
 #[repr(C)]
@@ -33,9 +43,7 @@ pub struct BodyImpl<R> {
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Vector<UpperBound>,
-    /// shadowed_tparams are the set of tparams on a method which shadow a
-    /// tparam on the containing class.
-    pub shadowed_tparams: Vector<ClassName>,
+    pub tparam_info: Vector<TParamInfo>,
     pub return_type: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,
     pub span: Span,

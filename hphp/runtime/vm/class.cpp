@@ -1856,14 +1856,9 @@ void Class::setInstanceBitsIndex(unsigned int bit) {
   m_instanceBitsIndex.store(cast, std::memory_order_release);
 }
 
-namespace {
-const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{{}};
-} // namespace
-
-const ReifiedGenericsInfo& Class::getReifiedGenericsInfo() const {
-  if (!m_allFlags.m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
+const GenericsInfo& Class::getGenericsInfo() const {
   assertx(m_extra);
-  return m_extra.raw()->m_reifiedGenericsInfo;
+  return m_extra.raw()->m_genericsInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3724,8 +3719,19 @@ void Class::setReifiedData() {
     auto const tv = it->second;
     assertx(tvIsVec(tv));
     allocExtraData();
-    m_extra.raw()->m_reifiedGenericsInfo =
-      extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+    m_extra.raw()->m_genericsInfo =
+      extractSizeAndPosFromReifiedAttribute(
+        tv.m_data.parr,
+        m_preClass->typeParamNames()
+      );
+  } else if (!m_preClass->typeParamNames().empty()) {
+    allocExtraData();
+    std::vector<TypeParamInfo> typeParamInfos;
+    for (auto const& name : m_preClass->typeParamNames()) {
+      typeParamInfos.emplace_back(false, false, false, name);
+    }
+    m_extra.raw()->m_genericsInfo
+      = GenericsInfo(std::move(typeParamInfos));
   }
 }
 

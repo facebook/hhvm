@@ -25,6 +25,7 @@ use crate::parse::parse_comma_list;
 use crate::parse::parse_doc_comment;
 use crate::parse::parse_enum;
 use crate::parse::parse_hack_constant;
+use crate::parse::parse_tparams;
 use crate::parse::parse_type_info;
 use crate::parse::parse_typed_value;
 use crate::parse::parse_user_id;
@@ -40,7 +41,7 @@ impl ClassParser {
         tokenizer: &mut Tokenizer<'_>,
         unit_state: &mut crate::assemble::UnitParser,
     ) -> Result<Class> {
-        parse!(tokenizer, <name:parse_user_id> <flags:parse_attr> "{" "\n");
+        parse!(tokenizer, <name:parse_user_id> <flags:parse_attr> <tparams:parse_tparams> "{" "\n");
 
         let name = ClassName::from_utf8(&name.0)?;
 
@@ -64,6 +65,7 @@ impl ClassParser {
                 span,
                 type_constants: Default::default(),
                 upper_bounds: Default::default(),
+                tparams: tparams.into(),
                 uses: Default::default(),
             },
         };

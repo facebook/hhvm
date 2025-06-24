@@ -232,7 +232,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     // If caller forwards identical generics to the callee, we can construct
     // the bitmap from caller's information
     if (caller->hasReifiedGenerics() &&
-        caller->getReifiedGenericsInfo().allGenericsFullyReified() &&
+        caller->getGenericsInfo().allGenericsFullyReified() &&
         generics->inst()->is(LdLoc) &&
         generics->inst()->extra<LdLoc>()->locId ==
           caller->reifiedGenericsLocalId()) {

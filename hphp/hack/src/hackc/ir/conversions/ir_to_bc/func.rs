@@ -75,7 +75,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
         is_memoize_wrapper_lsb: func.is_memoize_wrapper_lsb,
         num_iters: func.num_iters,
         return_type: func.return_type,
-        shadowed_tparams: func.shadowed_tparams,
+        tparam_info: func.tparam_info,
         upper_bounds: func.upper_bounds,
         span: func.span,
         repr: hhbc::BcRepr {

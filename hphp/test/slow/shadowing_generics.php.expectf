@@ -1,0 +1,10 @@
+object(Bar) (1) {
+  ["i"]=>
+  int(1)
+}
+object(Bar) (1) {
+  ["i"]=>
+  int(2)
+}
+
+Catchable fatal error: Argument 1 passed to Foo::__construct() must be upper-bounded by interface IBar, float given in %s

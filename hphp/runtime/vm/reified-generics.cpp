@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/generics-info.h"
 
 namespace HPHP {
 
@@ -69,8 +69,11 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   return tv.m_data.parr;
 }
 
-ReifiedGenericsInfo
-extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
+GenericsInfo
+extractSizeAndPosFromReifiedAttribute(
+  const ArrayData* arr,
+  const folly::Range<const LowStringPtr*>& typeParamNames
+) {
   size_t len = 0, cur = 0;
   bool isReified = false, isSoft = false;
   std::vector<TypeParamInfo> tpList;
@@ -81,34 +84,52 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
       assertx(isIntType(v.m_type));
       if (k.m_data.num == 0) {
         len = (size_t) v.m_data.num;
+        always_assert(len == typeParamNames.size());
       } else {
         if (k.m_data.num % 3 == 1) {
           // This is the reified generic index
           // Insert the non reified ones
           auto const numErased = v.m_data.num - cur;
-          tpList.insert(tpList.end(), numErased, {});
+          for (auto i = 0; i < numErased; ++i) {
+            tpList.emplace_back(
+              false, false, false, typeParamNames[cur + i]
+            );
+          }
           cur = v.m_data.num;
           isReified = true;
         } else if (k.m_data.num % 3 == 2) {
           isSoft = (bool) v.m_data.num;
         } else {
           // k.m_data.num % 3 == 0
+          tpList.emplace_back(
+            isReified,
+            isSoft,
+            (bool) v.m_data.num,
+            typeParamNames[cur]
+          );
           cur++;
-          tpList.push_back({isReified, isSoft, (bool) v.m_data.num});
         }
       }
     }
   );
   // Insert the non reified ones at the end
-  tpList.insert(tpList.end(), len - cur, {});
-  return ReifiedGenericsInfo(std::move(tpList));
+  for (auto i = 0; i < len - cur; ++i) {
+    tpList.emplace_back(
+      false,
+      false,
+      false,
+      typeParamNames[cur + i]
+    );
+  }
+
+  return GenericsInfo(std::move(tpList));
 }
 
 // Raises a runtime error if the location of reified generics of f does not
 // match the location of reified_generics
 template <bool fun>
 void checkReifiedGenericMismatchHelper(
-  const ReifiedGenericsInfo& info,
+  const GenericsInfo& info,
   const StringData* name,
   const ArrayData* reified_generics
 ) {
@@ -155,7 +176,7 @@ void checkFunReifiedGenericMismatch(
   const ArrayData* reified_generics
 ) {
   checkReifiedGenericMismatchHelper<true>(
-    f->getReifiedGenericsInfo(),
+    f->getGenericsInfo(),
     f->fullName(),
     reified_generics
   );
@@ -166,7 +187,7 @@ void checkClassReifiedGenericMismatch(
   const ArrayData* reified_generics
 ) {
   checkReifiedGenericMismatchHelper<false>(
-    c->getReifiedGenericsInfo(),
+    c->getGenericsInfo(),
     c->name(),
     reified_generics
   );
@@ -189,7 +210,7 @@ uint16_t getGenericsBitmap(const ArrayData* generics) {
 uint16_t getGenericsBitmap(const Func* f) {
   assertx(f);
   if (!f->hasReifiedGenerics()) return 0;
-  auto const& info = f->getReifiedGenericsInfo();
+  auto const& info = f->getGenericsInfo();
   if (info.m_typeParamInfo.size() > 15) return 0;
   uint16_t bitmap = 1;
   for (auto const& tinfo : info.m_typeParamInfo) {
@@ -198,7 +219,7 @@ uint16_t getGenericsBitmap(const Func* f) {
   return bitmap;
 }
 
-bool areAllGenericsSoft(const ReifiedGenericsInfo& info) {
+bool areAllGenericsSoft(const GenericsInfo& info) {
   for (auto const& tp : info.m_typeParamInfo) {
     if (!tp.m_isSoft) return false;
   }
@@ -216,7 +237,7 @@ void raise_warning_for_soft_reified(size_t i, bool fun,
 
 void checkClassReifiedGenericsSoft(const Class* cls) {
   assertx(cls->hasReifiedGenerics());
-  if (areAllGenericsSoft(cls->getReifiedGenericsInfo())) {
+  if (areAllGenericsSoft(cls->getGenericsInfo())) {
     raise_warning_for_soft_reified(0, false, cls->name());
   } else {
     raise_error("Cannot create a new instance of a reified class without "
@@ -236,6 +257,36 @@ void tryClassReifiedInit(Class* cls, ArrayData* generics, ObjectData* obj) {
   if (cls->hasReifiedParent()) {
     obj->setReifiedGenerics(cls, generics);
   }
+}
+
+size_t extractSizeFromReifiedAttribute(const ArrayData* arr) {
+  size_t len = 0;
+  IterateKV(
+    arr,
+    [&](TypedValue k, TypedValue v) {
+      assertx(isIntType(k.m_type));
+      assertx(isIntType(v.m_type));
+      if (k.m_data.num == 0) {
+        len = (size_t) v.m_data.num;
+        return true;
+      }
+      return false;
+    }
+  );
+  return len;
+}
+
+bool areAllGenericsSoft(const ArrayData* arr) {
+  bool allSoft = true;
+  IterateKV(
+    arr,
+    [&](TypedValue k, TypedValue v) {
+      if (k.m_data.num % 3 == 2) {
+        allSoft &= (bool) v.m_data.num;
+      }
+    }
+  );
+  return allSoft;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

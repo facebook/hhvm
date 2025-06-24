@@ -298,11 +298,17 @@ fn print_call_async(
 
 fn print_class(w: &mut dyn Write, class: &Class) -> Result {
     print_top_level_loc(w, Some(&SrcLoc::from_span(&class.span)))?;
+    let tparams = class
+        .tparams
+        .iter()
+        .map(|tparam| FmtIdentifierId(tparam.as_bytes_id()))
+        .collect::<Vec<_>>();
     writeln!(
         w,
-        "class {} {} {{",
+        "class {} {}{}{{",
         FmtIdentifierId(class.name.as_bytes_id()),
-        FmtAttr(class.flags, AttrContext::Class)
+        FmtAttr(class.flags, AttrContext::Class),
+        FmtIdentifierIdList(&tparams)
     )?;
 
     if let Maybe::Just(doc_comment) = class.doc_comment.as_ref() {
@@ -624,10 +630,10 @@ fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
     };
     writeln!(
         w,
-        "function {name}{tparams}{params}{shadowed_tparams}:{ret_type} {attr} {{",
+        "function {name}{tparam_names}{upper_bounds}{params}:{ret_type} {attr} {{",
         name = FmtIdentifierId(f.name.as_bytes_id()),
-        tparams = FmtTParams(&f.body.upper_bounds),
-        shadowed_tparams = FmtShadowedTParams(&f.body.shadowed_tparams),
+        tparam_names = FmtTParamInfoVec(&f.body.tparam_info),
+        upper_bounds = FmtTParams(&f.body.upper_bounds),
         params = FmtFuncParams(&f.body),
         attr = FmtAttr(f.body.attrs, AttrContext::Function),
     )?;
@@ -1780,11 +1786,11 @@ fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: b
     };
     writeln!(
         w,
-        "method {clsid}::{method}{tparams}{params}{shadowed_tparams}:{ret_type} {attr} {vis} {{",
+        "method {clsid}::{method}{tparam_names}{upper_bounds}{params}:{ret_type} {attr} {vis} {{",
         clsid = FmtIdentifierId(clsid.as_bytes_id()),
         method = FmtIdentifierId(method.name.as_bytes_id()),
-        tparams = FmtTParams(&method.body.upper_bounds),
-        shadowed_tparams = FmtShadowedTParams(&method.body.shadowed_tparams),
+        tparam_names = FmtTParamInfoVec(&method.body.tparam_info),
+        upper_bounds = FmtTParams(&method.body.upper_bounds),
         params = FmtFuncParams(&method.body),
         vis = FmtVisibility(method.visibility),
         attr = FmtAttr(method.body.attrs, AttrContext::Method),

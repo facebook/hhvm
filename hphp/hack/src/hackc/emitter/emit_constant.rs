@@ -62,7 +62,7 @@ fn emit_constant_cinit<'a, 'd>(
             false,  /* is_memoize_wrapper */
             false,  /* is_memoize_wrapper_lsb */
             vec![], /* upper_bounds */
-            vec![], /* shadowed_params */
+            vec![], /* tparam_info */
             vec![], /* attributes */
             attrs,
             Coeffects::default(),

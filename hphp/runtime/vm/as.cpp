@@ -2344,10 +2344,24 @@ void check_native(AsmState& as) {
   }
 }
 
+std::vector<LowStringPtr> parse_tparam_names(AsmState& as) {
+  std::vector<LowStringPtr> typeNames;
+  as.in.skipSpaceTab();
+  if (as.in.peek() != '[') {
+    return typeNames;
+  }
+  as.in.getc();
+  while (as.in.skipSpaceTab(), as.in.peek() != ']') {
+    typeNames.push_back(makeStaticString(read_litstr(as)));
+  }
+  as.in.getc();
+  return typeNames;
+}
+
 /*
- * directive-function : upper-bound-list attribute-list ?line-range type-info
- *                      identifier
- *                      parameter-list function-flags '{' function-body
+ * directive-function : attribute-list ?line-range tparam-names type-info
+ *                      identifier parameter-list function-flags '{'
+ *                      function-body
  *                    ;
  */
 void parse_function(AsmState& as) {
@@ -2360,6 +2374,8 @@ void parse_function(AsmState& as) {
   int line0;
   int line1;
   parse_line_range(as, line0, line1);
+
+  auto typeParamNames = parse_tparam_names(as);
 
   auto [userType, typeConstraints] = parse_type_info(as);
   std::string name;
@@ -2378,6 +2394,7 @@ void parse_function(AsmState& as) {
     std::move(typeConstraints)
   );
   as.fe->userAttributes = userAttrs;
+  as.fe->typeParamNames = std::move(typeParamNames);
 
   check_native(as);
 
@@ -2393,9 +2410,9 @@ void parse_function(AsmState& as) {
 }
 
 /*
- * directive-method : shadowed-tparam-list upper-bound-list attribute-list
- *                      ?line-range type-info identifier
- *                      parameter-list function-flags '{' function-body
+ * directive-method : attribute-list ?line-range tparam-names type-info
+ *                    identifier parameter-list function-flags '{'
+ *                    function-body
  *                  ;
  */
 void parse_method(AsmState& as) {
@@ -2409,6 +2426,8 @@ void parse_method(AsmState& as) {
   int line0;
   int line1;
   parse_line_range(as, line0, line1);
+
+  auto typeParamNames = parse_tparam_names(as);
 
   auto [userType, typeConstraints] = parse_type_info(as);
   std::string name;
@@ -2430,6 +2449,7 @@ void parse_method(AsmState& as) {
     std::move(typeConstraints)
   );
   as.fe->userAttributes = userAttrs;
+  as.fe->typeParamNames = std::move(typeParamNames);
 
   check_native(as);
 
@@ -2765,9 +2785,8 @@ void parse_class_body(AsmState& as) {
 }
 
 /*
- * directive-class : upper-bound-list ?"top" attribute-list identifier
- *                   ?line-range extension-clause implements-clause '{'
- *                   class-body
+ * directive-class : attribute-list identifier ?line-range tparam-names
+ *                   extension-clause implements-clause '{' class-body
  *                 ;
  *
  * extension-clause : empty
@@ -2808,6 +2827,7 @@ void parse_class(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
+  auto typeParamNames = parse_tparam_names(as);
   std::string parentName;
   if (as.in.tryConsume("extends")) {
     if (!as.in.readname(parentName)) {
@@ -2849,6 +2869,7 @@ void parse_class(AsmState& as) {
     as.pce->addEnumInclude(makeStaticString(enum_include));
   }
   as.pce->setUserAttributes(userAttrs);
+  as.pce->setTypeParamNames(std::move(typeParamNames));
 
   as.in.expectWs('{');
   parse_class_body(as);

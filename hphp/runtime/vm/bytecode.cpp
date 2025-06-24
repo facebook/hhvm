@@ -3961,7 +3961,7 @@ JitResumeAddr fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   assertx(res == LookupResult::MethodFoundWithThis);
 
   if (func->hasReifiedGenerics() && !fca.hasGenerics() &&
-      !func->getReifiedGenericsInfo().allGenericsSoft()) {
+      !func->getGenericsInfo().allGenericsSoft()) {
     throw_call_reified_func_without_generics(func);
   }
 
@@ -4228,7 +4228,7 @@ JitResumeAddr fcallClsMethodImpl(PC origpc, PC& pc,
   }
 
   if (func->hasReifiedGenerics() && !fca.hasGenerics() &&
-      !func->getReifiedGenericsInfo().allGenericsSoft()) {
+      !func->getGenericsInfo().allGenericsSoft()) {
     throw_call_reified_func_without_generics(func);
   }
 

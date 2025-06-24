@@ -116,7 +116,7 @@ fn make_86method<'d>(
         method_is_memoize_wrapper,
         method_is_memoize_wrapper_lsb,
         vec![], // upper_bounds
-        vec![], // shadowed_tparams
+        vec![], // tparam_info
         vec![], // attributes
         attrs,
         coeffects,
@@ -816,6 +816,7 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
         methods: methods.into(),
         enum_type: Maybe::from(enum_type),
         upper_bounds: upper_bounds.into(),
+        tparams: tparams.into_iter().map(ClassName::intern).collect(),
         properties: Vec::from_iter(properties.into_iter().map(|p| p.prop)).into(),
         requirements: requirements.into(),
         type_constants: type_constants.into(),

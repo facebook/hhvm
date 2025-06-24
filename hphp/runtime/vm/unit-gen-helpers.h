@@ -35,7 +35,7 @@ std::vector<TypeConstraint> getRelevantUpperBounds(
   const TypeConstraint& tc,
   const UpperBoundMap& ubs,
   const UpperBoundMap& class_ubs,
-  const TParamNameVec& shadowed_tparams
+  const hphp_fast_set<const StringData*>& shadowed_tparams
 );
 
 }

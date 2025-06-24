@@ -738,6 +738,10 @@ inline void Class::allocExtraData() const {
   m_extra.ensureAllocated();
 }
 
+inline bool Class::hasExtraData() const {
+  return static_cast<bool>(m_extra);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Non-member functions.
 

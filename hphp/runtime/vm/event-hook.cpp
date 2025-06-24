@@ -167,7 +167,7 @@ Array getReifiedClasses(const ActRec* ar) {
   using K = TypeStructure::Kind;
 
   auto const func = ar->func();
-  auto const& tparams = func->getReifiedGenericsInfo();
+  auto const& tparams = func->getGenericsInfo();
   VecInit clist{tparams.m_typeParamInfo.size()};
 
   auto const loc = frame_local(ar, ar->func()->numParams());

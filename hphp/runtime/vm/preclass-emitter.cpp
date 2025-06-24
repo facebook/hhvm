@@ -67,7 +67,7 @@ PreClassEmitter::Prop::~Prop() {
 // PreClassEmitter.
 
 PreClassEmitter::PreClassEmitter(const StringData* n)
-  : m_name(n) {}
+  : m_name(n), m_typeParamNames() {}
 
 void PreClassEmitter::init(int line1, int line2, Attr attrs,
                            const StringData* parent,
@@ -206,6 +206,19 @@ bool PreClassEmitter::addConstant(const StringData* n,
   return true;
 }
 
+void PreClassEmitter::setTypeParamNames(
+  std::vector<LowStringPtr>&& typeParamNames
+) {
+  this->m_typeParamNames = FixedVector(typeParamNames);
+}
+
+folly::Range<const LowStringPtr*> PreClassEmitter::getTypeParamNames() const {
+  return folly::Range<const LowStringPtr*>(
+    m_typeParamNames.begin(),
+    m_typeParamNames.end()
+  );
+}
+
 void PreClassEmitter::addUsedTrait(const StringData* traitName) {
   m_usedTraits.push_back(traitName);
 }
@@ -270,6 +283,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
   pc->m_dynConstructSampleRate = dynConstructSampleRate;
+  pc->m_typeParamNames = FixedVector<LowStringPtr>(m_typeParamNames);
 
   // Set user attributes.
   [&] {
@@ -427,6 +441,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_propMap, [](Prop p) { return p.name(); })
     (m_constMap, [](Const c) { return c.name(); })
     (m_enumBaseTy)
+    (m_typeParamNames)
     ;
 }
 

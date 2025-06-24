@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::result::Result::Ok;
+
 use anyhow::Result;
 use ir_core::AsTypeStructExceptionKind;
 use ir_core::Attr;
@@ -822,7 +824,18 @@ fn parse_var(tokenizer: &mut Tokenizer<'_>) -> Result<StringId> {
 }
 
 pub(crate) fn parse_visibility(tokenizer: &mut Tokenizer<'_>) -> Result<Visibility> {
-    parse_enum(tokenizer, "Visibility", |id| {
+    let vis1 = parse_enum(tokenizer, "Visibility", str_to_visibility_fn())?;
+    let vis2 = parse_opt_enum(tokenizer, str_to_visibility_fn())?;
+    let vis = match (vis1, vis2) {
+        (Visibility::Protected, Some(Visibility::Internal)) => Visibility::ProtectedInternal,
+        (Visibility::Internal, Some(Visibility::Protected)) => Visibility::ProtectedInternal,
+        _ => vis1,
+    };
+    Ok(vis)
+}
+
+fn str_to_visibility_fn() -> impl FnOnce(&str) -> Option<Visibility> {
+    |id| {
         Some(match id {
             "private" => Visibility::Private,
             "public" => Visibility::Public,
@@ -830,5 +843,5 @@ pub(crate) fn parse_visibility(tokenizer: &mut Tokenizer<'_>) -> Result<Visibili
             "internal" => Visibility::Internal,
             _ => return None,
         })
-    })
+    }
 }

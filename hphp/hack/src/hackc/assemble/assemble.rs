@@ -573,6 +573,8 @@ fn assemble_property(token_iter: &mut Lexer<'_>) -> Result<hhbc::Property> {
 fn determine_visibility(attr: &hhvm_types_ffi::ffi::Attr) -> Result<hhbc::Visibility> {
     let v = if attr.is_internal() && attr.is_public() {
         hhbc::Visibility::Internal
+    } else if attr.is_internal() && attr.is_protected() {
+        hhbc::Visibility::ProtectedInternal
     } else if attr.is_public() {
         hhbc::Visibility::Public
     } else if attr.is_private() {

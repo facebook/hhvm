@@ -621,15 +621,67 @@ function rename_test_fun(): int {
     def test_hhconfig_change(self) -> None:
         self.test_driver.start_hh_server()
 
-        hhconfig_file = os.path.join(self.test_driver.repo_dir, ".hhconfig")
-        with open(hhconfig_file, "a") as f:
-            f.write("# a comment to change hhconfig")
+        # Let's create a file that calls a deprecated function and tries to HH_FIXME
+        # that away. With the current .hhconfig, that's not actually allowed.
+        deprecated = os.path.join(self.test_driver.repo_dir, "deprecated.php")
+        with open(deprecated, "a") as f:
+            f.write("""<?hh
+<<__Deprecated("deprecated")>>
+function deprecated() : void {
+}
 
-        # This will make us wait until the new server has come up.
-        # Error message should be the same as before.
+function test_deprecated() : void {
+    /* HH_FIXME[4128] */
+    deprecated();
+}
+""")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}deprecated.php:7:5,24: You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4128 (Typing[4128])",
+                "ERROR: {root}deprecated.php:8:5,14: The function deprecated is deprecated: deprecated (Typing[4128])",
+                "  {root}deprecated.php:3:10,19: Definition is here",
+            ]
+        )
+
+        # Let's make HH_FIXME[4128] legal. There's an `allowed_fixme_codes_strict` line
+        # in the mini repo's .hhconfig already, so we need to patch it :(
+        hhconfig_path = os.path.join(self.test_driver.repo_dir, ".hhconfig")
+        with open(hhconfig_path, "r") as f:
+            hhconfig_content = f.read()
+
+        lines = hhconfig_content.split("\n")
+        found_allowed_fixme_line = False
+
+        for i, line in enumerate(lines):
+            if line.strip().startswith("allowed_fixme_codes_strict"):
+                lines[i] = line + ", 4128"
+                found_allowed_fixme_line = True
+                break
+
+        if not found_allowed_fixme_line:
+            self.fail(
+                "No line starting with 'allowed_fixme_codes_strict' found in .hhconfig"
+            )
+
+        with open(hhconfig_path, "w") as f:
+            f.write("\n".join(lines))
+
+        # We need to wait until the server is back up.
+        # There is one annoyance: If we run `hh check` JUST in the moment that the
+        # server notices the .hhconfig check and restarts, then `hh check` spits out an
+        # error message complaining that the server disconnected unexpectedly (instead
+        # of waiting until it's back).
+        while True:
+            time.sleep(1)
+            (_, _, exit_code) = self.test_driver.run_check()
+            if exit_code == 0:
+                break
+
+        # We've just made the HH_FIXME[4128] legal.
         self.test_driver.check_cmd(["No errors!"])
 
-        # Let's make sure that we did indeed restart due to the hhconfig change
+        # Let's double-check that we did indeed restart due to the .hhconfig change
         assertMonitorLogContains(
             self.test_driver,
             "Exit_status.Hhconfig_changed",

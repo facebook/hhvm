@@ -3307,7 +3307,7 @@ end = struct
         | Valkind.Other -> MakeType.nothing (Reason.witness p)
       in
       make_result env p Aast.Omitted ty
-    | ValCollection (_, th, el) ->
+    | ValCollection ((kind_pos, kind), th, el) ->
       let ( get_expected_kind,
             name,
             subtype_val,
@@ -3315,37 +3315,32 @@ end = struct
             make_ty,
             key_bound,
             pessimisable_builtin ) =
-        match e with
-        | ValCollection ((kind_pos, kind), _, _) ->
-          let class_name = Nast.vc_kind_to_name kind in
-          let (subtype_val, key_bound, pessimisable_builtin) =
-            match kind with
-            | Set
-            | ImmSet ->
-              ( arraykey_value p class_name true,
-                Some (MakeType.arraykey (Reason.witness p)),
-                true )
-            | Keyset ->
-              ( arraykey_value p class_name true,
-                Some (MakeType.arraykey (Reason.witness p)),
-                false )
-            | Vector
-            | ImmVector ->
-              (array_value, None, true)
-            | Vec -> (array_value, None, false)
-          in
-          ( get_vc_inst env p kind,
-            class_name,
-            subtype_val,
-            (fun th elements ->
-              Aast.ValCollection ((kind_pos, kind), th, elements)),
-            (fun value_ty ->
-              MakeType.class_type (Reason.witness p) class_name [value_ty]),
-            key_bound,
-            pessimisable_builtin )
-        | _ ->
-          (* The parent match makes this case impossible *)
-          failwith "impossible match case"
+        let class_name = Nast.vc_kind_to_name kind in
+        let (subtype_val, key_bound, pessimisable_builtin) =
+          match kind with
+          | Set
+          | ImmSet ->
+            ( arraykey_value p class_name true,
+              Some (MakeType.arraykey (Reason.witness p)),
+              true )
+          | Keyset ->
+            ( arraykey_value p class_name true,
+              Some (MakeType.arraykey (Reason.witness p)),
+              false )
+          | Vector
+          | ImmVector ->
+            (array_value, None, true)
+          | Vec -> (array_value, None, false)
+        in
+        ( get_vc_inst env p kind,
+          class_name,
+          subtype_val,
+          (fun th elements ->
+            Aast.ValCollection ((kind_pos, kind), th, elements)),
+          (fun value_ty ->
+            MakeType.class_type (Reason.witness p) class_name [value_ty]),
+          key_bound,
+          pessimisable_builtin )
       in
       (* Use expected type to determine expected element type *)
       let (env, elem_expected, th) =
@@ -3385,23 +3380,16 @@ end = struct
           subtype_val
       in
       make_result env p (make_expr th tel) (make_ty elem_ty)
-    | KeyValCollection (_, th, l) ->
+    | KeyValCollection ((kind_pos, kind), th, l) ->
       let (get_expected_kind, name, make_expr, make_ty, pessimisable_builtin) =
-        match e with
-        | KeyValCollection ((kind_pos, kind), _, _) ->
-          let class_name = Nast.kvc_kind_to_name kind in
-          ( get_kvc_inst env p kind,
-            class_name,
-            (fun th pairs ->
-              Aast.KeyValCollection ((kind_pos, kind), th, pairs)),
-            (fun k v ->
-              MakeType.class_type (Reason.witness p) class_name [k; v]),
-            (match kind with
-            | Dict -> false
-            | _ -> true) )
-        | _ ->
-          (* The parent match makes this case impossible *)
-          failwith "impossible match case"
+        let class_name = Nast.kvc_kind_to_name kind in
+        ( get_kvc_inst env p kind,
+          class_name,
+          (fun th pairs -> Aast.KeyValCollection ((kind_pos, kind), th, pairs)),
+          (fun k v -> MakeType.class_type (Reason.witness p) class_name [k; v]),
+          match kind with
+          | Dict -> false
+          | _ -> true )
       in
       (* Use expected type to determine expected key and value types *)
       let (env, kexpected, vexpected, th) =

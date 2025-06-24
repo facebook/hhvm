@@ -55,7 +55,7 @@ TProcessorBase::TProcessorBase() {
   }
 }
 
-void TProcessorBase::addProcessorEventHandler(
+void TProcessorBase::addProcessorEventHandler_deprecated(
     std::shared_ptr<TProcessorEventHandler> handler) {
   if (!handler) {
     return;

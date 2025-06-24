@@ -122,7 +122,7 @@ TEST_F(TProcessorEventHandlerTest, registerProcessorHandler) {
   auto h = std::make_shared<EventHandler>();
   EXPECT_FALSE(countProcessor(h));
   EXPECT_FALSE(TClientTester::countOf(h));
-  TProcessorBase::addProcessorEventHandler(h);
+  TProcessorBase::addProcessorEventHandler_deprecated(h);
   EXPECT_TRUE(countProcessor(h));
   EXPECT_FALSE(TClientTester::countOf(h));
   TClientBase::addClientEventHandler(h);
@@ -144,17 +144,17 @@ TEST_F(TProcessorEventHandlerTest, registrationActivity) {
   auto h3 = std::make_shared<EventHandler>();
 
   EXPECT_EQ(count(), 0);
-  TProcessorBase::addProcessorEventHandler(h1);
+  TProcessorBase::addProcessorEventHandler_deprecated(h1);
   EXPECT_EQ(count(), 1);
   TProcessorBase::removeProcessorEventHandler(h1);
   EXPECT_EQ(count(), 0);
-  TProcessorBase::addProcessorEventHandler(h1);
+  TProcessorBase::addProcessorEventHandler_deprecated(h1);
   EXPECT_EQ(count(), 1);
-  TProcessorBase::addProcessorEventHandler(h2);
+  TProcessorBase::addProcessorEventHandler_deprecated(h2);
   EXPECT_EQ(count(), 2);
   TProcessorBase::removeProcessorEventHandler(h1);
   EXPECT_EQ(count(), 1);
-  TProcessorBase::addProcessorEventHandler(h3);
+  TProcessorBase::addProcessorEventHandler_deprecated(h3);
   EXPECT_EQ(count(), 2);
   TProcessorBase::removeProcessorEventHandler(h3);
   EXPECT_EQ(count(), 1);

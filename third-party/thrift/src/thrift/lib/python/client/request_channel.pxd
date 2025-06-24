@@ -47,7 +47,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
 cdef extern from "thrift/lib/cpp/EventHandlerBase.h" namespace "::apache::thrift":
     cdef cppclass cTProcessorBase "apache::thrift::TProcessorBase":
         @staticmethod
-        void addProcessorEventHandler(shared_ptr[cTProcessorEventHandler] handler)
+        void addProcessorEventHandler_deprecated(shared_ptr[cTProcessorEventHandler] handler)
         @staticmethod
         void removeProcessorEventHandler(shared_ptr[cTProcessorEventHandler] handler)
 

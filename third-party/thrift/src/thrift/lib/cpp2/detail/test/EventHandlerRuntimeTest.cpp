@@ -83,7 +83,8 @@ class EventHandlerRuntimeTest : public testing::Test {
     clientEvents = std::make_shared<CountingEventHandler>();
     serverEvents = std::make_shared<CountingEventHandler>();
 
-    apache::thrift::TProcessorBase::addProcessorEventHandler(serverEvents);
+    apache::thrift::TProcessorBase::addProcessorEventHandler_deprecated(
+        serverEvents);
     apache::thrift::TClientBase::addClientEventHandler(clientEvents);
   }
 

@@ -408,7 +408,7 @@ class TestServerEventHandler : public server::TServerEventHandler,
 
 TEST_P(SharedServerTests, CallbackOrderingTest) {
   auto serverHandler = std::make_shared<TestServerEventHandler>();
-  TProcessorBase::addProcessorEventHandler(serverHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(serverHandler);
   serverFactory->setServerEventHandler(serverHandler);
 
   init();

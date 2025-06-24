@@ -148,7 +148,8 @@ class AsyncProcessor : public TProcessorBase {
   /**
    * TProcessorEventHandler instances can come from 3 places:
    *   1. ServerModules added to ThriftServer
-   *   2. Globally-registered via TProcessorBase::addProcessorEventHandler
+   *   2. Globally-registered via
+   * TProcessorBase::addProcessorEventHandler_deprecated
    *   3. AsyncProcessor::addEventHandler calls (typically in services that
    *      override getProcessor in their handler)
    *

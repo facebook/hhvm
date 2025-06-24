@@ -132,7 +132,7 @@ class TestHandler : public ServiceHandler<test::Calculator> {
 
 TEST(TProcessorEventHandlerTest, BasicInteraction) {
   auto eventHandler = std::make_shared<TestEventHandler>();
-  TProcessorBase::addProcessorEventHandler(eventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(eventHandler);
   {
     ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
     auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();
@@ -158,7 +158,7 @@ TEST(TProcessorEventHandlerTest, BasicInteraction) {
 
 TEST(TProcessorEventHandlerTest, MultipleInteractions) {
   auto eventHandler = std::make_shared<TestEventHandler>();
-  TProcessorBase::addProcessorEventHandler(eventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(eventHandler);
   {
     ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
     auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();
@@ -182,7 +182,7 @@ TEST(TProcessorEventHandlerTest, MultipleInteractions) {
 
 TEST(TProcessorEventHandlerTest, MultipleConcurrentInteractions) {
   auto eventHandler = std::make_shared<TestEventHandler>();
-  TProcessorBase::addProcessorEventHandler(eventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(eventHandler);
   {
     ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
     auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();
@@ -207,7 +207,7 @@ TEST(TProcessorEventHandlerTest, ConnectionClose) {
   using namespace std::chrono;
 
   auto eventHandler = std::make_shared<TestEventHandler>();
-  TProcessorBase::addProcessorEventHandler(eventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(eventHandler);
 
   // server
   ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
@@ -249,7 +249,7 @@ TEST(TProcessorEventHandlerTest, ConnectionClose) {
 
 TEST(TProcessorEventHandlerTest, RpcKind) {
   auto eventHandler = std::make_shared<TestEventHandler>();
-  TProcessorBase::addProcessorEventHandler(eventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(eventHandler);
   {
     ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
     auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();

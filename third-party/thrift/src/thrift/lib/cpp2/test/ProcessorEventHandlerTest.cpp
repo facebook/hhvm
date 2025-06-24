@@ -68,7 +68,7 @@ const std::vector<std::string> kGetStringRpcOutput{
 
 CO_TEST(TProcessorEventHandlerTest, BasicRead) {
   auto testEventHandler = std::make_shared<TrackingTProcessorEventHandler>();
-  TProcessorBase::addProcessorEventHandler(testEventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(testEventHandler);
 
   TrackingTProcessorEventHandler* scopedTestEventHandler = nullptr;
   ScopedServerInterfaceThread runner(
@@ -86,7 +86,7 @@ CO_TEST(TProcessorEventHandlerTest, BasicRead) {
 
 CO_TEST(TProcessorEventHandlerTest, ClearEventHandlers) {
   auto testEventHandler = std::make_shared<TrackingTProcessorEventHandler>();
-  TProcessorBase::addProcessorEventHandler(testEventHandler);
+  TProcessorBase::addProcessorEventHandler_deprecated(testEventHandler);
 
   class TestHandlerWithClearEventHandlers : public TestHandler {
     std::unique_ptr<AsyncProcessor> getProcessor() override {

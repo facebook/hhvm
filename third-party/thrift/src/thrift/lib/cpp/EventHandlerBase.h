@@ -56,8 +56,8 @@ class TProcessorBase : public EventHandlerBase {
  protected:
   /**
    * This constructor ignores the global registry (see
-   * addProcessorEventHandler). This is useful for "wrapper" implementations
-   * that delegate to underlying processors.
+   * addProcessorEventHandler_deprecated). This is useful for "wrapper"
+   * implementations that delegate to underlying processors.
    */
   struct IgnoreGlobalEventHandlers {};
   explicit TProcessorBase(IgnoreGlobalEventHandlers) {}
@@ -65,7 +65,17 @@ class TProcessorBase : public EventHandlerBase {
  public:
   TProcessorBase();
 
-  static void addProcessorEventHandler(
+  /**
+   * Deprecated: This method is typically used to install TProcessorEventHandler
+   * instances in ServiceFramework modules. It does so by storing a list in a
+   * global variable. This means that all ThriftServer instances will share the
+   * same list of event handlers, thus they are not modular at all. It is
+   * recommeneded to use getLegacyEventHandlers() instead.
+   *
+   * Source:
+   * https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/server/server-modules/#legacy-event-handlers
+   */
+  static void addProcessorEventHandler_deprecated(
       std::shared_ptr<TProcessorEventHandler> handler);
 
   static void removeProcessorEventHandler(

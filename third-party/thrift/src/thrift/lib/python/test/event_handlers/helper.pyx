@@ -34,7 +34,7 @@ cdef class ThrowHelper:
         self.handler_choice = handler
 
     def __enter__(self):
-        cTProcessorBase.addProcessorEventHandler(self.get_handler())
+        cTProcessorBase.addProcessorEventHandler_deprecated(self.get_handler())
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         cTProcessorBase.removeProcessorEventHandler(self.get_handler())

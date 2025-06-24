@@ -54,7 +54,7 @@ impl FeatureName {
             NoDisjointUnion => OngoingRelease,
             SimpliHack => Preview,
             PolymorphicFunctionHints => Preview,
-            ProtectedInternal => Unstable,
+            ProtectedInternal => Preview,
             PolymorphicLambda => Preview,
         }
     }

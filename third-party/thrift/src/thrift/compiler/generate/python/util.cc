@@ -16,7 +16,6 @@
 
 #include <thrift/compiler/generate/python/util.h>
 
-#include <regex>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <thrift/compiler/generate/cpp/util.h>
@@ -89,14 +88,18 @@ void strip_cpp_comments_and_newlines(std::string& s) {
     s.erase(fr, to - fr + 2);
     fr = s.find("/*", fr);
   }
-  // strip cpp-style comments
-  s.replace(
-      s.begin(),
-      s.end(),
-      std::regex_replace(
-          s,
-          std::regex("//.*(?=$|\\n)"), /* simulate multiline regex */
-          ""));
+
+  // strip cpp-style comments - '//' followed by 0+ non-newline characters
+  fr = s.find("//");
+  while (fr != std::string::npos) {
+    auto to = s.find('\n', fr + 2);
+    // Erase from '//' through to the following newline
+    // If to == npos (last line commented without final line break), we erase to
+    // the end of s
+    s.erase(fr, to - fr);
+
+    fr = s.find("//", fr);
+  }
 
   // strip newlines
   boost::algorithm::replace_all(s, "\n", " ");

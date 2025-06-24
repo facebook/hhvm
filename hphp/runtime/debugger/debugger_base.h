@@ -146,7 +146,8 @@ using DSandboxInfoPtr = std::shared_ptr<DSandboxInfo>;
 struct DMachineInfo {
   std::string m_name;
   int m_port{0};
-  DebuggerThriftBuffer m_thrift;
+  DebuggerThriftBuffer m_read_thrift;
+  DebuggerThriftBuffer m_write_thrift;
 
   DSandboxInfoPtr m_sandbox;
   bool m_interrupting{false}; // If the machine is paused at an interrupt

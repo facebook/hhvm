@@ -558,7 +558,8 @@ DebuggerClient::~DebuggerClient() {
 void DebuggerClient::closeAllConnections() {
   TRACE(2, "DebuggerClient::closeAllConnections\n");
   for (unsigned int i = 0; i < m_machines.size(); i++) {
-    m_machines[i]->m_thrift.close();
+    m_machines[i]->m_read_thrift.close();
+    m_machines[i]->m_write_thrift.close();
   }
 }
 
@@ -623,7 +624,8 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   auto machine = std::make_shared<DMachineInfo>();
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
-  machine->m_thrift.create(socket1);
+  machine->m_write_thrift.create(socket1);
+  machine->m_read_thrift.create(socket1);
   assertx(m_machines.empty());
   m_machines.push_back(machine);
   switchMachine(machine);
@@ -654,7 +656,8 @@ bool DebuggerClient::reconnect() {
   }
 
   info("Re-connecting to %s:%d...", host.c_str(), port);
-  m_machine->m_thrift.close(); // Close the old socket, it may still be open.
+  m_machine->m_read_thrift.close(); // Close the old socket, it may still be open.
+  m_machine->m_write_thrift.close(); // Close the old socket, it may still be open.
 
   if (tryConnect(host, port, true)) {
     return true;
@@ -705,7 +708,8 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
       auto machine = std::make_shared<DMachineInfo>();
       machine->m_name = host;
       machine->m_port = port;
-      machine->m_thrift.create(sock);
+      machine->m_read_thrift.create(sock);
+      machine->m_write_thrift.create(sock);
       m_machines.push_back(machine);
       switchMachine(machine);
       return true;
@@ -1142,7 +1146,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
   }
   while (!m_stopped) {
     DebuggerCommandPtr cmd;
-    if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, caller, m_stream_status != StreamStatus::ONGOING)) {
+    if (DebuggerCommand::Receive(m_machine->m_read_thrift, cmd, caller, m_stream_status != StreamStatus::ONGOING)) {
       if (!cmd) {
         if (m_stopped) {
           throw DebuggerClientExitException();
@@ -1941,7 +1945,7 @@ DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd,
 
 void DebuggerClient::sendToServer(DebuggerCommand *cmd) {
   TRACE(2, "DebuggerClient::sendToServer\n");
-  if (!cmd->send(m_machine->m_thrift)) {
+  if (!cmd->send(m_machine->m_write_thrift)) {
     Logger::Error("Send command: unable to communicate with server.");
     throw DebuggerProtocolException();
   }

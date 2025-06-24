@@ -2217,6 +2217,15 @@ impl U11 {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("string", "str"),
+            ("integer", "integer"),
+            ("btreeset", "btreeset"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for U11 {
@@ -2698,6 +2707,14 @@ impl Bar {
             Self::WithoutAnnotation(_) => ::std::option::Option::Some(("WithoutAnnotation", "WithoutAnnotation")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("Annotated", "WithAnnotation"),
+            ("WithoutAnnotation", "WithoutAnnotation"),
+        ]
     }
 }
 

@@ -609,6 +609,26 @@ impl MyUnion {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("bool_field", "bool_field"),
+            ("byte_field", "byte_field"),
+            ("short_field", "short_field"),
+            ("int_field", "int_field"),
+            ("long_field", "long_field"),
+            ("float_field", "float_field"),
+            ("double_field", "double_field"),
+            ("string_field", "string_field"),
+            ("binary_field", "binary_field"),
+            ("enum_field", "enum_field"),
+            ("list_field", "list_field"),
+            ("set_field", "set_field"),
+            ("map_field", "map_field"),
+            ("struct_field", "struct_field"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {

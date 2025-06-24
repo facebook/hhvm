@@ -123,6 +123,15 @@ impl {{struct:rust_name}} {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            {{#struct:fields}}
+            ("{{field:rust_name}}", "{{field:name}}"),
+            {{/struct:fields}}
+        ]
+    }
 }
 {{#program:rust_gen_native_metadata?}}
 {{> lib/metadata/struct}}

@@ -402,6 +402,14 @@ impl U {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("i", "i"),
+            ("s", "s"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for U {

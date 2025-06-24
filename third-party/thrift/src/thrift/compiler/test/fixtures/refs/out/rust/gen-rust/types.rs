@@ -578,6 +578,14 @@ impl MyUnion {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("anInteger", "anInteger"),
+            ("aString", "aString"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
@@ -721,6 +729,13 @@ impl NonTriviallyDestructibleUnion {
             Self::int_field(_) => ::std::option::Option::Some(("int_field", "int_field")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("int_field", "int_field"),
+        ]
     }
 }
 

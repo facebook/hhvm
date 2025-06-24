@@ -215,6 +215,18 @@ impl ComplexUnion {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("intValue", "intValue"),
+            ("stringValue", "stringValue"),
+            ("intListValue", "intListValue"),
+            ("stringListValue", "stringListValue"),
+            ("typedefValue", "typedefValue"),
+            ("stringRef", "stringRef"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
@@ -350,6 +362,14 @@ impl ListUnion {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("intListValue", "intListValue"),
+            ("stringListValue", "stringListValue"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for ListUnion {
@@ -466,6 +486,14 @@ impl DataUnion {
             Self::stringData(_) => ::std::option::Option::Some(("stringData", "stringData")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("binaryData", "binaryData"),
+            ("stringData", "stringData"),
+        ]
     }
 }
 
@@ -705,6 +733,14 @@ impl ValUnion {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("v1", "v1"),
+            ("v2", "v2"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for ValUnion {
@@ -821,6 +857,14 @@ impl VirtualComplexUnion {
             Self::thingTwo(_) => ::std::option::Option::Some(("thingTwo", "thingTwo")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("thingOne", "thingOne"),
+            ("thingTwo", "thingTwo"),
+        ]
     }
 }
 
@@ -1030,6 +1074,13 @@ impl NonCopyableUnion {
             Self::s(_) => ::std::option::Option::Some(("s", "s")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("s", "s"),
+        ]
     }
 }
 

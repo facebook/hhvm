@@ -1629,6 +1629,17 @@ impl Baz {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("intField", "intField"),
+            ("setField", "setField"),
+            ("mapField", "mapField"),
+            ("binaryField", "binaryField"),
+            ("longField", "longField"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for Baz {
@@ -4293,6 +4304,14 @@ impl AdaptTestUnion {
             Self::custom(_) => ::std::option::Option::Some(("custom", "custom")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("delay", "delay"),
+            ("custom", "custom"),
+        ]
     }
 }
 

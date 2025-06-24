@@ -940,6 +940,16 @@ impl MyUnion {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("myEnum", "myEnum"),
+            ("myStruct", "myStruct"),
+            ("myDataItem", "myDataItem"),
+            ("floatSet", "floatSet"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
@@ -1485,6 +1495,13 @@ impl UnionToBeRenamed {
             Self::reserved_field(_) => ::std::option::Option::Some(("reserved_field", "reserved_field")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("reserved_field", "reserved_field"),
+        ]
     }
 }
 

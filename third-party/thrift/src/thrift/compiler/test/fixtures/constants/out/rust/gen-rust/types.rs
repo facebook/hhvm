@@ -1313,6 +1313,14 @@ impl union1 {
             Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("i", "i"),
+            ("d", "d"),
+        ]
+    }
 }
 
 impl ::fbthrift::metadata::ThriftAnnotations for union1 {
@@ -1451,6 +1459,16 @@ impl union2 {
             Self::u(_) => ::std::option::Option::Some(("u", "u")),
             Self::UnknownField(_) => ::std::option::Option::None,
         }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("i", "i"),
+            ("d", "d"),
+            ("s", "s"),
+            ("u", "u"),
+        ]
     }
 }
 

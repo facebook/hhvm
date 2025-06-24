@@ -354,7 +354,9 @@ Array makeVecOfLazyClass(const std::vector<Symbol<SymKind::Type>>& vector) {
   for (auto const& str : vector) {
     ret.append(make_tv<KindOfLazyClass>(LazyClassData::create(str.get())));
   }
-  return ret.toArray();
+  auto arr = ret.toArray();
+  arr.get()->sort(0, true);
+  return arr;
 }
 
 /**

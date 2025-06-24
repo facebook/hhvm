@@ -2,7 +2,7 @@
 
 class C { public function __construct() { echo nameof static."\n"; }}
 class D extends C {}
-// class E extends C {} // TODO(T227568155)
+class E extends C {}
 class F extends D {}
 
 function v($a): void {

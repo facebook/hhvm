@@ -56,11 +56,12 @@ type t =
   | EdenfsFileWatcher of {
       instance: Edenfs_watcher.instance;
       num_workers: int;
-      tmp_watchman_instance: t;
-          (** Currently, the Edenfs_watcher-backed implementation is work in
-          progress and can't actually provide any of the ServerNotifier
-          functionality. In order to be able to do some basic testing, we
-          actually forward all requests to this Watchman instance. *)
+      tmp_watchman_instance: Watchman.watchman_instance ref;
+          (** Currently, the Eden notification API does not support reporting state transitions (e.g.,
+          hg.update, hg.transaction enter/leave events). In the meantime, we use a Watchman instance
+          that just listens to these events. *)
+      root: Path.t;
+      local_config: ServerLocalConfig.t;
     }
   | MockChanges of {
       get_changes_async: unit -> changes;
@@ -181,10 +182,37 @@ let init
       (* HackEventLogger.set_use_edenfs_file_watcher (); *)
 
       (* This is just temporary:
-         For now, we also carry around a nested instance using Watchman. *)
-      let watchman = try_init_watchman () in
-      Option.map watchman ~f:(fun tmp_watchman_instance ->
-          EdenfsFileWatcher { instance; tmp_watchman_instance; num_workers })
+         For now, we also carry around a Watchman instance.
+         This is just used to get hg.update and hg.transaction state change updates. *)
+      let ServerLocalConfig.Watchman.
+            { sockname; init_timeout; debug_logging; _ } =
+        watchman_config
+      in
+      (* This Watchman instance doesn't care about file changes at all. *)
+      let expression_terms =
+        [Hh_json_helpers.AdhocJsonHelpers.strlist ["false"]]
+      in
+      let watchman_env =
+        Watchman.init
+          {
+            Watchman.init_timeout =
+              Watchman.Explicit_timeout (float init_timeout);
+            subscribe_mode = Some Watchman.Defer_changes;
+            expression_terms;
+            debug_logging =
+              ServerArgs.watchman_debug_logging options || debug_logging;
+            sockname;
+            subscription_prefix = "hh_type_check_state_transition_watcher";
+            roots = [root];
+          }
+          ()
+      in
+      Option.map watchman_env ~f:(fun watchman_env ->
+          let tmp_watchman_instance =
+            ref (Watchman.Watchman_alive watchman_env)
+          in
+          EdenfsFileWatcher
+            { instance; tmp_watchman_instance; num_workers; root; local_config })
     end
   in
 
@@ -267,17 +295,54 @@ let convert_watchman_changes
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
     changes
 
-let convert_edenfs_watcher_changes (eden_changes : Edenfs_watcher_types.changes)
-    : SSet.t =
-  match eden_changes with
-  | Edenfs_watcher_types.CommitTransition { file_changes; _ } ->
-    (* TODO(T224461521) Need to inform ServerRevisionTracker about commit
-       transition, similarly to what convert_watchman_changes does *)
-    SSet.of_list file_changes
-  | Edenfs_watcher_types.FileChanges file_changes ->
-    (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
-       similarly to what convert_watchman_changes does *)
-    SSet.of_list file_changes
+let convert_edenfs_watcher_changes
+    local_config (eden_changes : Edenfs_watcher_types.changes) : SSet.t =
+  let changed_files =
+    match eden_changes with
+    | Edenfs_watcher_types.CommitTransition { file_changes; _ } ->
+      (* TODO(T224461521) Need to inform ServerRevisionTracker about commit
+         transition, similarly to what convert_watchman_changes does *)
+      SSet.of_list file_changes
+    | Edenfs_watcher_types.FileChanges file_changes ->
+      (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
+         similarly to what convert_watchman_changes does *)
+      SSet.of_list file_changes
+  in
+  ServerRevisionTracker.files_changed local_config (SSet.cardinal changed_files);
+  changed_files
+
+(** This is only used by the Edenfs_watcher-backed implementation while it uses
+    a dedicated Watchman instance for receiving state transitions. *)
+let process_watchman_state_changes ~sync instance_ref root local_config : unit =
+  let (watchman', changes) =
+    if sync then
+      let watchman_res =
+        Watchman.get_changes_synchronously
+          ~timeout:
+            local_config.ServerLocalConfig.watchman
+              .ServerLocalConfig.Watchman.synchronous_timeout
+          !instance_ref
+      in
+      Tuple2.map_snd watchman_res ~f:(fun changes ->
+          Watchman.Watchman_synchronous changes)
+    else
+      Watchman.get_changes !instance_ref
+  in
+  instance_ref := watchman';
+  let changes =
+    match changes with
+    | Watchman.Watchman_unavailable -> []
+    | Watchman.Watchman_pushed changes -> [changes]
+    | Watchman.Watchman_synchronous changes -> changes
+  in
+  List.iter changes ~f:(fun c ->
+      (* This does the calls to ServerRevisionTracker.on_state_{enter/leave} *)
+      let changed_files = convert_watchman_changes ~root ~local_config c in
+      if not (SSet.is_empty changed_files) then (
+        Hh_logger.log
+          "Got file changes from a Watchman subscription that should never yield any";
+        raise (Exit_status.Exit_with Exit_status.Watchman_invalid_result)
+      ))
 
 let get_changes_sync (t : t) : SSet.t * clock option =
   let (changes, new_clock) =
@@ -311,14 +376,21 @@ let get_changes_sync (t : t) : SSet.t * clock option =
       in
       let clock = Watchman.get_clock !watchman in
       (changes, Some (ServerNotifierTypes.Watchman clock))
-    | EdenfsFileWatcher { instance; _ } ->
+    | EdenfsFileWatcher
+        { instance; root; local_config; tmp_watchman_instance; _ } ->
+      process_watchman_state_changes
+        ~sync:true
+        tmp_watchman_instance
+        root
+        local_config;
+
       (* Note that this will handle all errors by raising Exit_status *)
       let (changes, _clock) =
         handle_edenfs_watcher_result (Edenfs_watcher.get_changes_sync instance)
       in
       let changes_set =
         List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-            SSet.union acc (convert_edenfs_watcher_changes c))
+            SSet.union acc (convert_edenfs_watcher_changes local_config c))
       in
       (* TODO(T215219438) We need to return a proper clock value here *)
       let new_clock = None in
@@ -369,14 +441,21 @@ let get_changes_async (t : t) : changes * clock option =
       let clock = Watchman.get_clock !watchman in
 
       (changes, Some (ServerNotifierTypes.Watchman clock))
-    | EdenfsFileWatcher { instance; _ } ->
+    | EdenfsFileWatcher
+        { instance; tmp_watchman_instance; root; local_config; _ } ->
+      process_watchman_state_changes
+        ~sync:false
+        tmp_watchman_instance
+        root
+        local_config;
+
       (* Note that this will handle all errors by raising Exit_status *)
       let (changes, _clock) =
         handle_edenfs_watcher_result (Edenfs_watcher.get_changes_async instance)
       in
       let changes_set =
         List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-            SSet.union acc (convert_edenfs_watcher_changes c))
+            SSet.union acc (convert_edenfs_watcher_changes local_config c))
       in
       (* TODO(T215219438) We need to return a proper clock value here *)
       let new_clock = None in

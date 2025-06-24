@@ -54,6 +54,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestExceptionCopy as TestExceptionCopyMutable,
     TestStruct as TestStructMutable,
+    TestStructAdaptedTypes as TestStructAdaptedTypesMutable,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructCopy as TestStructCopyMutable,
@@ -70,6 +71,7 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesImmutable,
     TestExceptionCopy as TestExceptionCopyImmutable,
     TestStruct as TestStructImmutable,
+    TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructCopy as TestStructCopyImmutable,
@@ -284,48 +286,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             )
         except Exception as ex:
             self.fail(f"{type(ex)} does not derive from {exception_to_catch}")
-
-    @parameterized.expand(
-        [
-            (
-                "TestStructAdaptedTypesAbstract.unqualified_adapted_i32_to_datetime",
-                TestStructAdaptedTypesAbstract.unqualified_adapted_i32_to_datetime,
-                datetime.datetime,
-            ),
-            (
-                "TestStructAdaptedTypesAbstract.optional_adapted_i32_to_datetime",
-                TestStructAdaptedTypesAbstract.optional_adapted_i32_to_datetime,
-                typing.Optional[datetime.datetime],
-            ),
-            (
-                "TestStructAdaptedTypesAbstract.unqualified_adapted_datetime_to_i32",
-                TestStructAdaptedTypesAbstract.unqualified_adapted_string_to_i32,
-                int,
-            ),
-        ]
-    )
-    def test_property_type_hints(
-        self,
-        test_name: str,
-        # pyre-ignore[2]: Ignore types for tests.
-        interface_property,
-        # pyre-ignore[2]: Ignore types for tests.
-        expected_type,
-    ) -> None:
-        """
-        This test will go away when test_struct_with_adapted_types_property_types
-        implements the test for TestStructAdaptedTypes
-        """
-        # GIVEN
-        expected = expected_type
-
-        # WHEN
-        actual = self._get_property_type(
-            interface_property,
-        )
-
-        # THEN
-        self.assertEqual(expected, actual)
 
     def test_typedef(self) -> None:
         # GIVEN
@@ -1362,4 +1322,74 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         )
         struct_field: thrift.test.thrift_python.union_test.thrift_abstract_types.TestStruct = (  # noqa F841
             struct_union.struct_field
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructAdaptedTypesImmutable(
+                    unqualified_adapted_i32_to_datetime=datetime.datetime(
+                        day=1, month=1, year=2025
+                    ),
+                    optional_adapted_i32_to_datetime=datetime.datetime(
+                        day=1, month=1, year=2025
+                    ),
+                    unqualified_adapted_string_to_i32=42,
+                ),
+            ),
+            (
+                "mutable",
+                TestStructAdaptedTypesMutable(
+                    unqualified_adapted_i32_to_datetime=datetime.datetime(
+                        day=1, month=1, year=2025
+                    ),
+                    optional_adapted_i32_to_datetime=datetime.datetime(
+                        day=1, month=1, year=2025
+                    ),
+                    unqualified_adapted_string_to_i32=42,
+                ),
+            ),
+        ]
+    )
+    def test_adapted_types(
+        self,
+        test_case: str,
+        test_struct_adapted_types: TestStructAdaptedTypesAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignoress will flag these as unused.
+        # pyre-ignore[9]: unqualified_adapted_i32_to_datetime_incorrect_type has type `incorrect_type`;
+        #  used as `datetime`.
+        unqualified_adapted_i32_to_datetime_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_adapted_types.unqualified_adapted_i32_to_datetime
+        )
+        unqualified_adapted_i32_to_datetime: datetime.datetime = (  # noqa F841
+            test_struct_adapted_types.unqualified_adapted_i32_to_datetime
+        )
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignoress will flag these as unused.
+        # pyre-ignore[9]: optional_adapted_i32_to_datetime_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[datetime]`.
+        optional_adapted_i32_to_datetime_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_adapted_types.optional_adapted_i32_to_datetime
+        )
+        optional_adapted_i32_to_datetime: typing.Optional[datetime.datetime] = (  # noqa F841
+            test_struct_adapted_types.optional_adapted_i32_to_datetime
+        )
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignoress will flag these as unused.
+        # pyre-ignore[9]: unqualified_adapted_string_to_i32_incorrect_type is declared to have type `incorrect_type`
+        # but is used as type `int`
+        unqualified_adapted_string_to_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_adapted_types.unqualified_adapted_string_to_i32
+        )
+        unqualified_adapted_string_to_i32: int = (  # noqa F841
+            test_struct_adapted_types.unqualified_adapted_string_to_i32
         )

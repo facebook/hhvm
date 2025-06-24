@@ -231,39 +231,26 @@ uint16_t inlineDepth(const IRGS& env) {
   return env.inlineState.frames.size();
 }
 
-SSATmp* genCalleeFP(IRGS& env, const Func* callee, int argc) {
-  auto sk = curSrcKey(env);
-  if (!sk.prologue()) sk.advance(curFunc(env));
-  assertx(env.lastDefFramePtr || sk.prologue());
+SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
+  assertx(env.lastDefFramePtr);
 
-  if (env.irb->inUnreachableState()) return cns(env, TBottom);
-
-  auto const spOff = sk.prologue()
-    ? IRSPRelOffset { 0 }
-    : spOffBCFromIRSP(env) + argc;
-
+  auto const block = env.lastDefFramePtr->block();
   auto const def = env.unit.gen(
     DefCalleeFP,
     env.irb->nextBCContext(),
     DefCalleeFPData{
-      spOff,                                                   // spOff
+      {}, // calleeAROff
       callee,
       static_cast<uint32_t>(inlineDepth(env) + 1),
-      sk,
-      spOffBCFromIRSP(env) + argc - callee->numSlotsInFrame(), // calleeSBOff
-      spOffBCFromStackBase(env) - argc - kNumActRecCells + 1,  // returnSPOff
+      nextSrcKey(env),
+      {}, // calleeSBOff
+      {}, // returnSPOff
       0   // cost
     },
     sp(env),
     fp(env)
   );
 
-  if (curSrcKey(env).prologue()) {
-    env.irb->optimizeInst(def, IRBuilder::CloneFlag::No, nullptr);
-    return def->dst();
-  }
-
-  auto const block = env.lastDefFramePtr->block();
   block->insert(++block->iteratorTo(env.lastDefFramePtr), def);
   env.lastDefFramePtr = def;
   return def->dst();
@@ -291,36 +278,52 @@ void beginInlining(IRGS& env,
   FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
 
   auto const numTotalInputs = callee->numFuncEntryInputs();
-  jit::vector<SSATmp*> dvs{numTotalInputs};
+
+  jit::vector<SSATmp*> inputs{numTotalInputs};
+  for (auto i = 0; i < numTotalInputs; ++i) {
+    inputs[numTotalInputs - i - 1] = popCU(env);
+  }
 
   while (entry.trivialDVFuncEntry()) {
     auto const param = entry.numEntryArgs();
     assertx(param < numTotalInputs);
     auto const dv = callee->params()[param].defaultValue;
-    dvs[param] = cns(env, dv);
+    inputs[param] = cns(env, dv);
     entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
   }
 
-  auto const extra = calleeFP->inst()->extra<DefCalleeFP>();
-  extra->cost = cost;
+  updateMarker(env);
 
-  always_assert(
-    extra->spOffset - callee->numSlotsInFrame() == spOffBCFromIRSP(env)
-  );
-  always_assert(extra->sbOffset == extra->spOffset - callee->numSlotsInFrame());
+  // NB: Now that we've popped the callee's arguments off the stack
+  // and thus modified the caller's frame state, we're committed to
+  // inlining. If we bail out from now on, the caller's frame state
+  // will be as if the arguments don't exist on the stack (even though
+  // they do).
+
+  // The top of the stack now points to the space for ActRec.
+  auto const extra   = calleeFP->inst()->extra<DefCalleeFP>();
+  extra->spOffset    = spOffBCFromIRSP(env);
+  extra->sbOffset    = extra->spOffset - callee->numSlotsInFrame();
+  extra->returnSPOff = spOffBCFromStackBase(env) - kNumActRecCells + 1;
+  extra->cost        = cost;
+
+  // Make the new FramePtr live (marking the caller stack below the frame as
+  // killed).
+  gen(env, EnterInlineFrame, calleeFP);
 
   env.inlineState.frames.emplace_back(frame);
   env.inlineState.cost += cost;
   env.inlineState.stackDepth += callee->maxStackCells();
   env.bcState = entry;
 
+  // We have entered a new frame.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   for (auto i = 0; i < numTotalInputs; ++i) {
-    if (dvs[i]) stLocRaw(env, i, calleeFP, dvs[i]);
+    stLocRaw(env, i, calleeFP, inputs[i]);
   }
 
   assertx(entry.hasThis() == callee->hasThisInBody());
@@ -363,20 +366,16 @@ void conjureBeginInlining(IRGS& env,
   }
 
   allocActRec(env);
+  for (auto const inputType : inputs) {
+    push(env, conjure(inputType));
+  }
 
   // beginInlining() assumes synced state.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const fp = genCalleeFP(env, callee, 0);
-  gen(env, EnterInlineFrame, EnterInlineFrameData::NoCopy(), fp);
-
-  for (uint32_t i = 0; i < inputs.size(); ++i) {
-    gen(env, AssertLoc, inputs[i], LocalId(i), fp);
-  }
-
   beginInlining(env, entry, ctx, kInvalidOffset /* asyncEagerOffset */,
-                9 /* cost */, fp);
+                9 /* cost */, genCalleeFP(env, callee));
   // Set the prof count on the return block.
   // FIXME: Why is this needed? Should it be set for other blocks as well, e.g.
   // suspendRetBlock? Is something similar needed for real translations?

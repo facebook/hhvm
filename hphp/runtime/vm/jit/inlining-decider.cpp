@@ -725,13 +725,10 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, SrcKey entry,
 }
 }
 
-irgen::RegionAndLazyUnit selectCalleeRegion(
-  const irgen::IRGS& irgs,
-  SrcKey entry,
-  Type ctxType,
-  SrcKey callerSk,
-  std::vector<Type> inputTypes
-) {
+irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
+                                            SrcKey entry,
+                                            Type ctxType,
+                                            SrcKey callerSk) {
   assertx(entry.funcEntry());
   auto const callee = entry.func();
 
@@ -781,13 +778,20 @@ irgen::RegionAndLazyUnit selectCalleeRegion(
   }
 
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
-  assertx(inputTypes.size() == callee->numFuncEntryInputs());
+  auto const firstInputPos = callee->numFuncEntryInputs() - 1;
+  std::vector<Type> inputTypes;
+  for (uint32_t i = 0; i < callee->numFuncEntryInputs(); ++i) {
+    // DataTypeGeneric is used because we're just passing the locals into the
+    // callee.  It's up to the callee to constrain further if needed.
+    auto const offset = BCSPRelOffset{safe_cast<int32_t>(firstInputPos - i)};
+    auto const type = irgen::publicTopType(irgs, offset);
+    assertx(type <= TCell);
 
-  for (int i = 0; i < inputTypes.size(); ++i) {
     // If we don't have sufficient type information to inline the region return
     // early
-    if (inputTypes[i] == TBottom) return {callerSk, nullptr};
-    FTRACE(2, "input {}: {}\n", i + 1, inputTypes[i]);
+    if (type == TBottom) return {callerSk, nullptr};
+    FTRACE(2, "input {}: {}\n", i + 1, type);
+    inputTypes.push_back(type);
   }
 
   while (entry.trivialDVFuncEntry()) {

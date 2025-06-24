@@ -160,14 +160,7 @@ void ProfData::addTransProfile(TransID transID,
 
 void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs,
                                     uint32_t asmSize) {
-  auto [it, ins] = m_proflogueDB.emplace(
-    PrologueID{sk.funcID(), nArgs}, transID);
-  always_assert_flog(
-    ins,
-    "Attempting to insert ProfPrologue {} (func: {}, args: {}) but found "
-    "ProfPrologue {}",
-    transID, sk.func()->fullName()->data(), nArgs, it->second
-  );
+  m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
   std::unique_lock lock{m_transLock};
   m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));

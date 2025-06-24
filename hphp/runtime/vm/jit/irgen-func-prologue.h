@@ -59,12 +59,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
 
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee);
 
-void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc,
-                        SSATmp* fp);
-
-void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t argc,
-                              SSATmp* fp);
-
+void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);
 
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID);

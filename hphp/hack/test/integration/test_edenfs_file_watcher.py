@@ -64,18 +64,15 @@ min_log_level=Debug
     return config
 
 
-def runAndCheckSetupCommand(args: List[str]) -> None:
+def runAndCheckSetupCommand(args: List[str]) -> str:
     # Not using CommonTestDriver.proc_call here, because it relies on some
     # global state seems to be used for commands denoting the actual test.
-    subprocess.run(args, check=True)
-
-
-def createHgRepo(path: str) -> None:
-    "Runs hg init in the given directory and creates a commit containing everything currently in there"
-
-    runAndCheckSetupCommand(["hg", "init", path])
-    runAndCheckSetupCommand(["hg", "add", "-R", path])
-    runAndCheckSetupCommand(["hg", "commit", "-m", "initial", "-R", path])
+    proc = subprocess.run(args, capture_output=True, text=True)
+    if proc.returncode != 0:
+        print("Failed setup command stdout", proc.stdout)
+        print("Failed setup command stderr", proc.stderr)
+        proc.check_returncode()
+    return proc.stdout
 
 
 def createEdenInstance(eden_base_dir: str) -> EdenFS:
@@ -198,6 +195,9 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
     eden_instance: ClassVar[EdenFS]
     watchman_instance: ClassVar[WatchmanInstance.Instance]
 
+    # This is a commit in the testing repo at which point we only added the .hhconfig and hh.conf files
+    clean_slate_commit: ClassVar[str]
+
     @classmethod
     def setUpClassImpl(
         cls, template_repo: str, repo_subdirectory_path: Optional[str]
@@ -250,7 +250,50 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         # CommonTestDriver.setUpClass already did this, but we changed the value of repo_dir
         cls.test_env["HH_LOCALCONF_PATH"] = cls.repo_dir
 
-        createHgRepo(cls.hg_repo_root)
+        runAndCheckSetupCommand(["hg", "init", cls.hg_repo_root])
+        runAndCheckSetupCommand(
+            [
+                "hg",
+                "add",
+                "-R",
+                cls.hg_repo_root,
+                os.path.join(template_repo_destination, ".hhconfig"),
+                os.path.join(template_repo_destination, "hh.conf"),
+            ]
+        )
+        # Create the clean slate commit for those tests that don't want the full template repo
+        runAndCheckSetupCommand(
+            [
+                "hg",
+                "commit",
+                "--message",
+                "clean slate commit",
+                "-R",
+                cls.hg_repo_root,
+            ]
+        )
+
+        cls.clean_slate_commit = runAndCheckSetupCommand(
+            [
+                "hg",
+                "whereami",
+                "-R",
+                cls.hg_repo_root,
+            ]
+        )
+
+        # Commit everything else. This is the commit that all tests start on.
+        runAndCheckSetupCommand(
+            [
+                "hg",
+                "commit",
+                "--addremove",
+                "--message",
+                "test repo finished",
+                "-R",
+                cls.hg_repo_root,
+            ]
+        )
 
     @classmethod
     def setUpClass(cls, template_repo: str) -> None:
@@ -357,6 +400,27 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         """
 
         return Path(cls.eden_mount_point).absolute() != Path(cls.repo_dir).absolute()
+
+    @classmethod
+    def createNonHackFile(cls, path: str, base: Optional[str] = None) -> None:
+        """Creates a file that won't type-check"""
+
+        base = base or cls.repo_dir
+        full_path = os.path.join(base, path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        with open(full_path, "w") as f:
+            f.write("Not a valid hack file")
+
+    @classmethod
+    def createIgnoredFiles(cls) -> None:
+        cls.createNonHackFile("randomfileweshouldignore")
+        cls.createNonHackFile("almost.hhconfig")
+        cls.createNonHackFile(".php")
+        cls.createNonHackFile("folder.php/ignored_file.txt")
+        cls.createNonHackFile(".hg/ignored.php", base=cls.eden_mount_point)
+        if cls.isMountPointIgnored():
+            cls.createNonHackFile("ignored.php", base=cls.eden_mount_point)
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):
@@ -691,27 +755,8 @@ function test_deprecated() : void {
         self.test_driver.start_hh_server()
 
         # Let's check that changes to random files are not picked up:
-        ignored_file1 = os.path.join(
-            self.test_driver.repo_dir, "randomfileweshouldignore"
-        )
-        with open(ignored_file1, "w") as f:
-            f.write("should be ignored")
-        ignored_file2 = os.path.join(self.test_driver.repo_dir, "almost.hhconfig")
-        with open(ignored_file2, "w") as f:
-            f.write("should be ignored")
-        # devious: we create a folder whose name ends with .php
-        os.makedirs(os.path.join(self.test_driver.repo_dir, "folder.php"))
-        ignored_file3 = os.path.join(
-            self.test_driver.repo_dir, "folder.php", "ignored_file.txt"
-        )
-        with open(ignored_file3, "w") as f:
-            f.write("should be ignored")
-        if self.test_driver.isMountPointIgnored():
-            ignored_file4 = os.path.join(
-                self.test_driver.eden_mount_point, "ignored_file.php"
-            )
-            with open(ignored_file4, "w") as f:
-                f.write("should be ignored")
+        self.test_driver.createIgnoredFiles()
+
         assertServerNotifierChangesNo(self.test_driver)
         self.test_driver.check_cmd(["No errors!"])
 
@@ -737,28 +782,7 @@ function test_deprecated() : void {
         # all three commits are built on top of each other
 
         rev0 = self.test_driver.commitAllChanges(allow_empty=True)
-
-        ignored_file1 = os.path.join(
-            self.test_driver.repo_dir, "randomfileweshouldignore"
-        )
-        with open(ignored_file1, "w") as f:
-            f.write("should be ignored")
-        ignored_file2 = os.path.join(self.test_driver.repo_dir, "almost.hhconfig")
-        with open(ignored_file2, "w") as f:
-            f.write("should be ignored")
-        # devious: we create a folder whose name ends with .php
-        os.makedirs(os.path.join(self.test_driver.repo_dir, "folder.php"))
-        ignored_file3 = os.path.join(
-            self.test_driver.repo_dir, "folder.php", "ignored_file.txt"
-        )
-        with open(ignored_file3, "w") as f:
-            f.write("should be ignored")
-        if self.test_driver.isMountPointIgnored():
-            ignored_file4 = os.path.join(
-                self.test_driver.eden_mount_point, "ignored_file.php"
-            )
-            with open(ignored_file4, "w") as f:
-                f.write("should be ignored")
+        self.test_driver.createIgnoredFiles()
         rev1 = self.test_driver.commitAllChanges()
 
         hhconfig_file = os.path.join(self.test_driver.repo_dir, ".hhconfig")
@@ -783,6 +807,61 @@ function test_deprecated() : void {
         assertMonitorLogContains(
             self.test_driver,
             "Exit_status.Hhconfig_changed",
+        )
+
+    def test_get_all_files(self) -> None:
+        # Let's go to the commit where only hh.conf and .hhconfig existed
+        self.test_driver.gotoRev(self.test_driver.clean_slate_commit)
+
+        # Let's double-check that we really just have the files we are expecting:
+        hhconfig_count = 0
+        hh_conf_count = 0
+        for _root, dirs, files in os.walk(self.test_driver.repo_dir):
+            # Modifying dirs is the documented way to prevent os.walk from traversing into a subdirectory
+            if ".hg" in dirs:
+                dirs.remove(".hg")
+            if ".eden" in dirs:
+                dirs.remove(".eden")
+
+            for file in files:
+                if file == ".hhconfig":
+                    hhconfig_count += 1
+                elif file == "hh.conf":
+                    hh_conf_count += 1
+                else:
+                    self.fail("unexpected file in repo at clean slate commit")
+
+        if hhconfig_count != 1 or hh_conf_count != 1:
+            self.fail("unexpected file in repo at clean slate commit")
+
+        # Let's add a bunch of files, all of which should be ignored
+        self.test_driver.createIgnoredFiles()
+
+        # Let's create some files that should be picked up:
+        self.test_driver.createNonHackFile("file.php")
+        self.test_driver.createNonHackFile("subfolder/file.php")
+        self.test_driver.createNonHackFile("subfolder/.hg/file.php")
+
+        # Let's check that extensions other than .php are included
+        hhi_file = os.path.join(self.test_driver.repo_dir, "invalid_file.hhi")
+        with open(hhi_file, "w") as f:
+            f.write("not a valid hhi file")
+
+        # The .hhconfig file + the 4 non-ignored files we created above, none of the files added
+        # by createIgnoredFiles
+        exected_file_count = 5
+        self.test_driver.start_hh_server()
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}invalid_file.hhi:1:5,5: A semicolon `;` is expected here. (Parsing[1002])",
+                "ERROR: {root}subfolder/.hg/file.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}subfolder/file.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+        assertCurrentServerLogContains(
+            self.test_driver,
+            f"Edenfs_watcher.get_all_files returned {exected_file_count} files",
         )
 
     # Note that we inherit all tests from CommonTests and run them,

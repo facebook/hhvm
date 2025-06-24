@@ -37,3 +37,7 @@ let get_changes_async (_instance : instance) :
 let get_notification_fd (_instance : instance) :
     (Caml_unix.file_descr, edenfs_watcher_error) result =
   failwith "not implemented"
+
+let get_all_files (_instance : instance) :
+    (string list, edenfs_watcher_error) result =
+  failwith "not implemented"

@@ -23,6 +23,20 @@ type clock = ServerNotifierTypes.clock = Watchman of Watchman.clock
 let watchman_clock_of_clock = function
   | ServerNotifierTypes.Watchman clock -> clock
 
+let handle_edenfs_watcher_result
+    (result : ('t, Edenfs_watcher_types.edenfs_watcher_error) result) : 't =
+  match result with
+  | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
+    Hh_logger.log "Edenfs_watcher failed with message: %s" msg;
+    raise Exit_status.(Exit_with Edenfs_watcher_failed)
+  | Result.Error Edenfs_watcher_types.NonEdenWWW ->
+    Hh_logger.log "Edenfs_watcher failed, www repo is not on Eden";
+    raise Exit_status.(Exit_with Edenfs_watcher_failed)
+  | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
+    Hh_logger.log "Edenfs_watcher has lost track of changes, reason: %s" reason;
+    raise Exit_status.(Exit_with Edenfs_watcher_lost_changes)
+  | Result.Ok value -> value
+
 type t =
   | IndexOnly of { root: Path.t }
   | Dfind of {
@@ -41,6 +55,7 @@ type t =
     }
   | EdenfsFileWatcher of {
       instance: Edenfs_watcher.instance;
+      num_workers: int;
       tmp_watchman_instance: t;
           (** Currently, the Edenfs_watcher-backed implementation is work in
           progress and can't actually provide any of the ServerNotifier
@@ -56,7 +71,7 @@ type indexer = (string -> bool) -> unit -> string list
 
 (** This returns an "indexer", i.e. unit -> string list, which when invoked
 will return all files under root. *)
-let rec indexer (t : t) (filter : string -> bool) : unit -> string list =
+let indexer (t : t) (filter : string -> bool) : unit -> string list =
   match t with
   | Dfind { root; _ }
   | IndexOnly { root; _ } ->
@@ -65,9 +80,14 @@ let rec indexer (t : t) (filter : string -> bool) : unit -> string list =
   | Watchman { wenv; num_workers; _ } ->
     let files = Watchman.get_all_files wenv in
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
-  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
-    (* TODO(T225695144) Implement this in Edenfs_watcher *)
-    indexer tmp_watchman_instance filter
+  | EdenfsFileWatcher { instance; num_workers; _ } ->
+    let files =
+      Edenfs_watcher.get_all_files instance |> handle_edenfs_watcher_result
+    in
+    Hh_logger.debug
+      "Edenfs_watcher.get_all_files returned %d files"
+      (List.length files);
+    Bucket.make_list ~num_workers (List.filter ~f:filter files)
 
 let init
     (options : ServerArgs.options)
@@ -164,7 +184,7 @@ let init
          For now, we also carry around a nested instance using Watchman. *)
       let watchman = try_init_watchman () in
       Option.map watchman ~f:(fun tmp_watchman_instance ->
-          EdenfsFileWatcher { instance; tmp_watchman_instance })
+          EdenfsFileWatcher { instance; tmp_watchman_instance; num_workers })
     end
   in
 
@@ -258,20 +278,6 @@ let convert_edenfs_watcher_changes (eden_changes : Edenfs_watcher_types.changes)
     (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
        similarly to what convert_watchman_changes does *)
     SSet.of_list file_changes
-
-let handle_edenfs_watcher_result
-    (result : ('t, Edenfs_watcher_types.edenfs_watcher_error) result) : 't =
-  match result with
-  | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
-    Hh_logger.log "Edenfs_watcher failed with message: %s" msg;
-    raise Exit_status.(Exit_with Edenfs_watcher_failed)
-  | Result.Error Edenfs_watcher_types.NonEdenWWW ->
-    Hh_logger.log "Edenfs_watcher failed, www repo is not on Eden";
-    raise Exit_status.(Exit_with Edenfs_watcher_failed)
-  | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
-    Hh_logger.log "Edenfs_watcher has lost track of changes, reason: %s" reason;
-    raise Exit_status.(Exit_with Edenfs_watcher_lost_changes)
-  | Result.Ok value -> value
 
 let get_changes_sync (t : t) : SSet.t * clock option =
   let (changes, new_clock) =

@@ -353,9 +353,5 @@ class MessageQueue {
   std::shared_ptr<folly::EventBase::LoopCallback> queueDrainCallback_;
 };
 
-// Static member definition
-template <class T>
-constexpr int64_t MessageQueue<T>::kWakeupEveryMs;
-
 } // namespace memcache
 } // namespace facebook

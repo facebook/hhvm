@@ -39,11 +39,6 @@ struct CallDispatcherImplExpanded<List<Ms...>, MaxId, Proc, Args...> {
       {DispatchImpl<Ms, Proc, Args...>::func...}};
 };
 
-/* Array needs definition outside of the class */
-template <class... Ms, size_t MaxId, class Proc, class... Args>
-constexpr std::array<DispatchFunc<Proc, Args...>, MaxId + 1>
-    CallDispatcherImplExpanded<List<Ms...>, MaxId, Proc, Args...>::array_;
-
 // Sort List<Ms...> by M::typeId, expand to fill 0s, call ImplExpanded
 template <class... Ms, class Proc, class... Args>
 struct CallDispatcherImpl<List<Ms...>, Proc, Args...>

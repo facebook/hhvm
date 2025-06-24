@@ -178,13 +178,4 @@ class Stats {
   RateStats rateStats_;
 };
 
-template <class RouterInfo>
-constexpr std::array<folly::StringPiece, Stats<RouterInfo>::SumStats::kNumStats>
-    Stats<RouterInfo>::SumStats::kStatNames;
-
-template <class RouterInfo>
-constexpr std::
-    array<folly::StringPiece, Stats<RouterInfo>::RateStats::kNumStats>
-        Stats<RouterInfo>::RateStats::kStatNames;
-
 } // namespace carbon

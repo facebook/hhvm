@@ -329,11 +329,6 @@ class LoadBalancerRoute {
 };
 
 template <class RouterInfo>
-constexpr folly::StringPiece LoadBalancerRoute<RouterInfo>::kWeightedHashing;
-template <class RouterInfo>
-constexpr folly::StringPiece LoadBalancerRoute<RouterInfo>::kTwoRandomChoices;
-
-template <class RouterInfo>
 struct LoadBalancerRouteOptions {
   folly::StringPiece salt;
   std::chrono::microseconds loadTtl{100 * 1000}; // 100 milliseconds

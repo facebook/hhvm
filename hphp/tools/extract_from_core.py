@@ -24,7 +24,7 @@ parser.add_argument("hhvm_binary", help="the binary corresponding to the core fi
 parser.add_argument("hhvm_core", help="the core file we want to extract data from")
 parser.add_argument(
     "type",
-    choices=["jitprof", "stacktrace"],
+    choices=["jitprof", "stacktrace", "perfmap"],
     help="the type of data we want to extract",
 )
 parser.add_argument("outfile", help="the file to store the extracted data in")

@@ -22,6 +22,10 @@
 
 #include <string_view>
 
+namespace apache::thrift::type {
+class AnyStruct;
+} // namespace apache::thrift::type
+
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
 namespace apache::thrift::type_system {
@@ -73,5 +77,76 @@ class TypeIds final {
 };
 
 std::ostream& operator<<(std::ostream&, const TypeId&);
+
+// Convert a type-tag into a TypeId
+template <typename Tag>
+TypeId tagToTypeId(Tag);
+
+namespace detail {
+struct TagToTypeId {
+  TypeId operator()(type::byte_t) const noexcept { return TypeIds::Byte; }
+  TypeId operator()(type::bool_t) const noexcept { return TypeIds::Bool; }
+  TypeId operator()(type::i16_t) const noexcept { return TypeIds::I16; }
+  TypeId operator()(type::i32_t) const noexcept { return TypeIds::I32; }
+  TypeId operator()(type::i64_t) const noexcept { return TypeIds::I64; }
+  TypeId operator()(type::float_t) const noexcept { return TypeIds::Float; }
+  TypeId operator()(type::double_t) const noexcept { return TypeIds::Double; }
+  TypeId operator()(type::string_t) const noexcept { return TypeIds::String; }
+  TypeId operator()(type::binary_t) const noexcept { return TypeIds::Binary; }
+
+  template <typename E>
+  TypeId operator()(type::list<E>) const {
+    return TypeIds::list((*this)(E{}));
+  }
+
+  template <typename E>
+  TypeId operator()(type::set<E>) const {
+    return TypeIds::set((*this)(E{}));
+  }
+
+  template <typename K, typename V>
+  TypeId operator()(type::map<K, V>) const {
+    return TypeIds::map((*this)(K{}), (*this)(V{}));
+  }
+
+  template <typename T>
+  TypeId operator()(type::struct_t<T>) const {
+    return TypeIds::uri(uri<T>());
+  }
+
+  template <typename T>
+  TypeId operator()(type::union_t<T>) const {
+    return TypeIds::uri(uri<T>());
+  }
+
+  template <typename E>
+  TypeId operator()(type::enum_t<E>) const {
+    return TypeIds::uri(uri<E>());
+  }
+
+  TypeId operator()(type::struct_t<type::AnyStruct>) const noexcept {
+    return TypeIds::Any;
+  }
+
+  // TypeId doesn't change for adapted types.
+  template <typename Adapter, typename Tag>
+  TypeId operator()(type::adapted<Adapter, Tag>) const noexcept {
+    return (*this)(Tag{});
+  }
+
+  // Catch All for invalid tags (e.g. type::struct_c)
+  template <typename Tag>
+  void operator()(Tag) const {
+    static_assert(
+        (int)sizeof(Tag) == -1,
+        "Tag resolution not supported for abstract tags");
+  }
+};
+} // namespace detail
+
+template <typename Tag>
+TypeId tagToTypeId(Tag) {
+  return detail::TagToTypeId{}(Tag{});
+}
 
 } // namespace apache::thrift::type_system

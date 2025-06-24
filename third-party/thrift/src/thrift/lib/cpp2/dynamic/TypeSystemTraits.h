@@ -22,6 +22,16 @@ namespace apache::thrift::type_system {
 
 // Callable that converts a TypeRef (or one of its variants) into the wire-type
 // for Binary and Compact protocols (TType)
+struct ToTTypeFn;
+
+// Resolves a concrete cpp2 Tag-type into a TypeRef.
+// NOTE: This API will statically reject abstract tags (e.g. type::struct_c>)
+template <typename Tag>
+TypeRef resolveTag(const TypeSystem& ts, Tag);
+
+///
+// API IMPLEMENTATION FOLLOWS
+///
 struct ToTTypeFn {
   constexpr TType operator()(const TypeRef::Bool&) const noexcept {
     return TType::T_BOOL;
@@ -79,4 +89,99 @@ struct ToTTypeFn {
   }
 };
 
+namespace detail {
+struct TagResolver {
+  const TypeSystem& ts;
+
+  auto operator()(const type::bool_t&) const noexcept {
+    return TypeRef::Bool{};
+  }
+
+  auto operator()(const type::byte_t&) const noexcept {
+    return TypeRef::Byte{};
+  }
+
+  auto operator()(const type::i16_t&) const noexcept { return TypeRef::I16{}; }
+
+  auto operator()(const type::i32_t&) const noexcept { return TypeRef::I32{}; }
+
+  auto operator()(const type::i64_t&) const noexcept { return TypeRef::I64{}; }
+
+  auto operator()(const type::float_t&) const noexcept {
+    return TypeRef::Float{};
+  }
+
+  auto operator()(const type::double_t&) const noexcept {
+    return TypeRef::Double{};
+  }
+
+  auto operator()(const type::string_t&) const noexcept {
+    return TypeRef::String{};
+  }
+
+  auto operator()(const type::binary_t&) const noexcept {
+    return TypeRef::Binary{};
+  }
+
+  template <typename Tag>
+  auto operator()(const type::list<Tag>&) const {
+    return TypeRef::List(resolveTag(ts, Tag{}));
+  }
+
+  template <typename Tag>
+  auto operator()(const type::set<Tag>&) const {
+    return TypeRef::Set(resolveTag(ts, Tag{}));
+  }
+
+  template <typename KTag, typename VTag>
+  auto operator()(const type::map<KTag, VTag>&) const {
+    return TypeRef::Map(resolveTag(ts, KTag{}), resolveTag(ts, VTag{}));
+  }
+
+  template <typename T>
+  auto operator()(const type::struct_t<T>&) const {
+    return resolveUri(uri<T>());
+  }
+
+  template <typename T>
+  auto operator()(const type::union_t<T>&) const {
+    return resolveUri(uri<T>());
+  }
+
+  template <typename T>
+  auto operator()(const type::enum_t<T>&) const {
+    return resolveUri(uri<T>());
+  }
+
+  auto operator()(type::struct_t<type::AnyStruct>) const noexcept {
+    return TypeRef::Any{};
+  }
+
+  // Adapter doesn't change the resolution of the underlying type.
+  template <typename Adapter, typename Tag>
+  auto operator()(type::adapted<Adapter, Tag>) const {
+    return (*this)(Tag{});
+  }
+
+  // Catch All for invalid tags (e.g. type::struct_c)
+  template <typename Tag>
+  void operator()(Tag) const {
+    static_assert(
+        (int)sizeof(Tag) == -1,
+        "Tag resolution not supported for abstract tags");
+  }
+
+ private:
+  TypeRef resolveUri(std::string_view uri) const {
+    CHECK(!uri.empty());
+    return TypeRef::fromDefinition(ts.getUserDefinedTypeOrThrow(uri));
+  }
+};
+
+} // namespace detail
+
+template <typename Tag>
+TypeRef resolveTag(const TypeSystem& ts, Tag) {
+  return TypeRef(detail::TagResolver{ts}(Tag{}));
+}
 } // namespace apache::thrift::type_system

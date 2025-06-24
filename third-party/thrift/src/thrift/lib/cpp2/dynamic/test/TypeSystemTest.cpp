@@ -1030,4 +1030,28 @@ TEST(TypeSystemTest, TypeResolution) {
       TypeIds::set(TypeIds::uri(kEmptyStructUri)),
       TypeIds::map(TypeIds::I32, TypeIds::uri(kEmptyEnumUri)));
 }
+
+TEST(TypeSystemTest, TagResolution) {
+  auto ts = typeSystemWithEmpties();
+
+  auto testFn = [&](const auto& expectedRef, auto tag) {
+    EXPECT_TRUE(TypeRef(expectedRef).isEqualIdentityTo(resolveTag(*ts, tag)));
+  };
+
+  testFn(TypeRef::Bool{}, type::bool_t{});
+  testFn(TypeRef::Byte{}, type::byte_t{});
+  testFn(TypeRef::I16{}, type::i16_t{});
+  testFn(TypeRef::I32{}, type::i32_t{});
+  testFn(TypeRef::I64{}, type::i64_t{});
+  testFn(TypeRef::Double{}, type::double_t{});
+  testFn(TypeRef::Float{}, type::float_t{});
+  testFn(TypeRef::String{}, type::string_t{});
+  testFn(TypeRef::Binary{}, type::binary_t{});
+
+  testFn(TypeRef::List::of(TypeRef::I32{}), type::list<type::i32_t>{});
+  testFn(TypeRef::Set::of(TypeRef::I64{}), type::set<type::i64_t>{});
+  testFn(
+      TypeRef::Map::of(TypeRef::I32{}, TypeRef::String{}),
+      type::map<type::i32_t, type::string_t>{});
+}
 } // namespace apache::thrift::type_system

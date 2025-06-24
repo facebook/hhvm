@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/dynamic/TypeId.h>
+#include <thrift/lib/cpp2/type/Any.h>
 
 #include <type_traits>
 
@@ -147,4 +148,22 @@ TEST(TypeIdTest, Names) {
       "map<i32, example.com/thrift/AnotherExample>");
 }
 
+TEST(TypeIdTest, TagToTypeId) {
+  EXPECT_EQ(t::Bool, tagToTypeId(type::bool_t{}));
+  EXPECT_EQ(t::Byte, tagToTypeId(type::byte_t{}));
+  EXPECT_EQ(t::I16, tagToTypeId(type::i16_t{}));
+  EXPECT_EQ(t::I32, tagToTypeId(type::i32_t{}));
+  EXPECT_EQ(t::I64, tagToTypeId(type::i64_t{}));
+  EXPECT_EQ(t::Float, tagToTypeId(type::float_t{}));
+  EXPECT_EQ(t::Double, tagToTypeId(type::double_t{}));
+  EXPECT_EQ(t::String, tagToTypeId(type::string_t{}));
+  EXPECT_EQ(t::Binary, tagToTypeId(type::binary_t{}));
+  EXPECT_EQ(t::Any, tagToTypeId(type::infer_tag<type::AnyStruct>{}));
+  EXPECT_EQ(t::Any, tagToTypeId(type::infer_tag<type::AnyData>{}));
+  EXPECT_EQ(t::list(t::Bool), tagToTypeId(type::list<type::bool_t>{}));
+  EXPECT_EQ(t::set(t::I32), tagToTypeId(type::set<type::i32_t>{}));
+  EXPECT_EQ(
+      t::map(t::String, t::I64),
+      tagToTypeId(type::map<type::string_t, type::i64_t>{}));
+}
 } // namespace apache::thrift::type_system

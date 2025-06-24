@@ -59,7 +59,7 @@ class ClientInterceptorBase {
     /**
      * RpcOptions that were applied to this request
      */
-    const RpcOptions* rpcOptions = nullptr;
+    RpcOptions* rpcOptions = nullptr;
   };
   virtual void internal_onRequest(RequestInfo) = 0;
 

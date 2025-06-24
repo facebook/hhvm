@@ -133,7 +133,7 @@ class RpcOptions {
   const std::string& getShardId() const;
 
   RpcOptions& setOperationMask(int32_t operationMask);
-  int32_t getOperationMask() const;
+  const int32_t& getOperationMask() const;
 
   void setWriteHeader(std::string_view key, std::string value);
   const transport::THeader::StringToStringMap& getWriteHeaders() const;

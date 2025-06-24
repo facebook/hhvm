@@ -164,7 +164,7 @@ RpcOptions& RpcOptions::setOperationMask(int32_t operationMask) {
   return *this;
 }
 
-int32_t RpcOptions::getOperationMask() const {
+const int32_t& RpcOptions::getOperationMask() const {
   return operationMask_;
 }
 

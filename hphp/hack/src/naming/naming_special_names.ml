@@ -1407,8 +1407,6 @@ module ExpressionTrees = struct
 
   let stringType = "stringType"
 
-  let nullType = "nullType"
-
   let voidType = "voidType"
 
   let symbolType = "symbolType"

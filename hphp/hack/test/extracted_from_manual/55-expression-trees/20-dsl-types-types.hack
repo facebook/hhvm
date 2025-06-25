@@ -15,11 +15,6 @@ class MyDsl {
     throw new Exception();
   }
 
-  // Visitors can use the normal Hack types if they wish.
-  // This is particularly common for null and void.
-  public static function nullType(): null {
-    throw new Exception();
-  }
   public static function voidType(): void {
     throw new Exception();
   }

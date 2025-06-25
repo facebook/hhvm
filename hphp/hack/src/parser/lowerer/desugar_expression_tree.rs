@@ -848,10 +848,10 @@ impl RewriteState {
                 }
             }
             // Source: MyDsl`null`
-            // Virtualized: MyDsl::nullType()
+            // Virtualized: null
             // Desugared: $0v->visitNull(new ExprPos(...))
             Null => {
-                let virtual_expr = static_meth_call(visitor_name, et::NULL_TYPE, vec![], &pos);
+                let virtual_expr = null_literal(pos.clone());
                 let desugar_expr = v_meth_call(et::VISIT_NULL, vec![pos_expr], &pos);
                 RewriteResult {
                     virtual_expr,
@@ -2480,7 +2480,7 @@ fn handle_shapes_idx(
         rewrite_and_fixup_for_shape_op(state, visitor_name, pos, args, true);
     if virtual_args.len() == 2 {
         // We need the null type as additional argument
-        virtual_args.push(static_meth_call(visitor_name, et::NULL_TYPE, vec![], pos));
+        virtual_args.push(null_literal(pos.clone()));
     }
     let virtual_expr = static_meth_call("Shapes", "idx", virtual_args, pos);
     (virtual_expr, desugar_args)

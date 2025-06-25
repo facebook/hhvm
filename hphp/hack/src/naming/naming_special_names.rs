@@ -1171,7 +1171,6 @@ pub mod expression_trees {
     pub const FLOAT_TYPE: &str = "floatType";
     pub const BOOL_TYPE: &str = "boolType";
     pub const STRING_TYPE: &str = "stringType";
-    pub const NULL_TYPE: &str = "nullType";
     pub const VOID_TYPE: &str = "voidType";
     pub const SYMBOL_TYPE: &str = "symbolType";
     pub const LAMBDA_TYPE: &str = "lambdaType";

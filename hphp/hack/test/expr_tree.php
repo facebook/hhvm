@@ -92,9 +92,6 @@ class ExampleDsl {
   public static function stringType(): ExampleString {
     throw new Exception();
   }
-  public static function nullType(): null {
-    throw new Exception();
-  }
   public static function voidType(): ExampleVoid {
     throw new Exception();
   }

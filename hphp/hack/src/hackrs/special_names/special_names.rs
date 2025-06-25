@@ -696,7 +696,6 @@ pub mod expression_trees {
     pub static floatType: Lazy<MethodName> = lazy!(sn::expression_trees::FLOAT_TYPE);
     pub static boolType: Lazy<MethodName> = lazy!(sn::expression_trees::BOOL_TYPE);
     pub static stringType: Lazy<MethodName> = lazy!(sn::expression_trees::STRING_TYPE);
-    pub static nullType: Lazy<MethodName> = lazy!(sn::expression_trees::NULL_TYPE);
     pub static voidType: Lazy<MethodName> = lazy!(sn::expression_trees::VOID_TYPE);
     pub static symbolType: Lazy<MethodName> = lazy!(sn::expression_trees::SYMBOL_TYPE);
     pub static visitInt: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_INT);

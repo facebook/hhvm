@@ -2413,7 +2413,7 @@ fn rewrite_and_fixup_for_shape_op(
     };
     let (mut virtual_args, desugar_args) = state.rewrite_exprs(args, visitor_name);
     if !virtual_args.is_empty() {
-        let mut a = Expr((), Pos::NONE, Expr_::Null);
+        let mut a = null_literal(Pos::NONE);
         std::mem::swap(&mut virtual_args[0], &mut a);
         virtual_args[0] = _virtualize_call(a, nullsafe, pos);
     }

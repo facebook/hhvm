@@ -16,7 +16,6 @@
 
 #include <fizz/experimental/ktls/AsyncKTLSSocket.h>
 #include <glog/logging.h>
-#include <system_error>
 
 namespace fizz {
 folly::AsyncSocket::ReadResult AsyncKTLSSocket::performReadMsg(

@@ -15,7 +15,6 @@
 #include <proxygen/lib/http/codec/compress/HPACKEncoder.h>
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
 #include <proxygen/lib/http/codec/compress/HeaderIndexingStrategy.h>
-#include <string>
 #include <vector>
 
 namespace folly::io {

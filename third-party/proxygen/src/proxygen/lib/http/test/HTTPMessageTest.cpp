@@ -8,13 +8,10 @@
 
 #include <proxygen/lib/http/HTTPMessage.h>
 
-#include <fcntl.h>
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/HTTPPriorityFunctions.h>
 #include <proxygen/lib/utils/TestUtils.h>
-#include <signal.h>
 #include <string.h>
-#include <sys/types.h>
 
 using namespace proxygen;
 using namespace std;

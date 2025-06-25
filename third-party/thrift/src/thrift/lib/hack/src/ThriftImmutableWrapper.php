@@ -58,7 +58,7 @@ abstract class ThriftImmutableWrapper
     SignalsPipeSerializationProtocol $protocol =
       SignalsPipeSerializationProtocol::JSON,
   ): string {
-    return SignalsPipeUtils::serializeThrift($this->data, $protocol) ?? '';
+    return SignalsPipeUtils::serializeThrift($this->data, $protocol);
   }
 
   public function toString(): string {

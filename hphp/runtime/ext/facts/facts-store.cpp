@@ -1116,7 +1116,7 @@ struct FactsStoreImpl final
     // merge base can be more expensive than clock based queries.
     if (!isFresh && alteredPathsAndHashes.empty() && deletedPaths.empty() &&
         !lastClock.m_clock.empty()) {
-      XLOG(INFO) << "Finished: it's a a no-op incremental update.";
+      XLOG(INFO) << "Finished: it's a no-op incremental update.";
       return {};
     }
 

@@ -15,5 +15,5 @@ bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 regex = "1.11.1"
-serde_json = { version = "1.0.140", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "unbounded_depth"] }
 sha1 = "0.10.5"

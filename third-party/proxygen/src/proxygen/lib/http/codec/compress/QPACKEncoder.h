@@ -14,7 +14,6 @@
 #include <proxygen/lib/http/codec/compress/HPACKEncodeBuffer.h>
 #include <proxygen/lib/http/codec/compress/HPACKEncoderBase.h>
 #include <proxygen/lib/http/codec/compress/QPACKContext.h>
-#include <set>
 #include <unordered_map>
 #include <vector>
 

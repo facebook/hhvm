@@ -218,20 +218,10 @@ where
     }
 }
 
-impl<P> Deserialize<P> for Vec<u8>
-where
-    P: ProtocolReader,
-{
-    #[inline]
-    fn rs_thrift_read(p: &mut P) -> Result<Self> {
-        p.read_binary()
-    }
-}
-
 impl<P, T> Deserialize<P> for BTreeSet<T>
 where
     P: ProtocolReader,
-    T: Deserialize<P> + Ord,
+    T: Deserialize<P> + Ord + GetTType,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
         // Unchecked: must not use `len` for preallocation (`with_capacity`)
@@ -299,8 +289,8 @@ where
 impl<P, K, V> Deserialize<P> for BTreeMap<K, V>
 where
     P: ProtocolReader,
-    K: Deserialize<P> + Ord,
-    V: Deserialize<P>,
+    K: Deserialize<P> + GetTType + Ord,
+    V: Deserialize<P> + GetTType,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
         // Unchecked: must not use `len` for preallocation (`with_capacity`)
@@ -401,5 +391,226 @@ where
         }
         p.read_list_end()?;
         Ok(list)
+    }
+}
+
+// Special case collections for u8 since it doesn't implement GetTType
+impl<P> Deserialize<P> for Vec<u8>
+where
+    P: ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        p.read_binary()
+    }
+}
+
+impl<P> Deserialize<P> for BTreeSet<u8>
+where
+    P: ProtocolReader,
+{
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Unchecked: must not use `len` for preallocation (`with_capacity`)
+        let (_elem_ty, len) = p.read_set_begin_unchecked()?;
+        let mut bset = BTreeSet::new();
+
+        if let Some(0) = len {
+            return Ok(bset);
+        }
+
+        let mut idx = 0;
+        loop {
+            let more = p.read_set_value_begin()?;
+            if !more {
+                break;
+            }
+            let item = Deserialize::rs_thrift_read(p)?;
+            p.read_set_value_end()?;
+            bset.insert(item);
+
+            idx += 1;
+            if should_break(len, more, idx) {
+                break;
+            }
+        }
+        p.read_set_end()?;
+        Ok(bset)
+    }
+}
+
+impl<P, S> Deserialize<P> for HashSet<u8, S>
+where
+    P: ProtocolReader,
+    S: std::hash::BuildHasher + Default,
+{
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        let (_elem_ty, len) = p.read_set_begin(P::min_size::<i8>())?;
+        let mut hset = HashSet::with_capacity_and_hasher(len.unwrap_or(0), S::default());
+
+        if let Some(0) = len {
+            return Ok(hset);
+        }
+
+        let mut idx = 0;
+        loop {
+            let more = p.read_set_value_begin()?;
+            if !more {
+                break;
+            }
+            let item = Deserialize::rs_thrift_read(p)?;
+            p.read_set_value_end()?;
+            hset.insert(item);
+
+            idx += 1;
+            if should_break(len, more, idx) {
+                break;
+            }
+        }
+        p.read_set_end()?;
+        Ok(hset)
+    }
+}
+
+impl<P, V> Deserialize<P> for BTreeMap<u8, V>
+where
+    P: ProtocolReader,
+    V: Deserialize<P> + GetTType,
+{
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Unchecked: must not use `len` for preallocation (`with_capacity`)
+        let (_key_ty, _val_ty, len) = p.read_map_begin_unchecked()?;
+        let mut btree = BTreeMap::new();
+
+        if let Some(0) = len {
+            return Ok(btree);
+        }
+
+        let mut idx = 0;
+        loop {
+            let more = p.read_map_key_begin()?;
+            if !more {
+                break;
+            }
+            let key = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_begin()?;
+            let val = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_end()?;
+            btree.insert(key, val);
+
+            idx += 1;
+            if should_break(len, more, idx) {
+                break;
+            }
+        }
+        p.read_map_end()?;
+        Ok(btree)
+    }
+}
+
+impl<P, K> Deserialize<P> for BTreeMap<K, u8>
+where
+    P: ProtocolReader,
+    K: Deserialize<P> + GetTType + Ord,
+{
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Unchecked: must not use `len` for preallocation (`with_capacity`)
+        let (_key_ty, _val_ty, len) = p.read_map_begin_unchecked()?;
+        let mut btree = BTreeMap::new();
+
+        if let Some(0) = len {
+            return Ok(btree);
+        }
+
+        let mut idx = 0;
+        loop {
+            let more = p.read_map_key_begin()?;
+            if !more {
+                break;
+            }
+            let key = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_begin()?;
+            let val = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_end()?;
+            btree.insert(key, val);
+
+            idx += 1;
+            if should_break(len, more, idx) {
+                break;
+            }
+        }
+        p.read_map_end()?;
+        Ok(btree)
+    }
+}
+
+impl<P, V, S> Deserialize<P> for HashMap<u8, V, S>
+where
+    P: ProtocolReader,
+    V: Deserialize<P> + GetTType,
+    S: std::hash::BuildHasher + Default,
+{
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<i8>() + P::min_size::<V>())?;
+        let mut hmap = HashMap::with_capacity_and_hasher(len.unwrap_or(0), S::default());
+
+        if let Some(0) = len {
+            return Ok(hmap);
+        }
+
+        let mut idx = 0;
+        loop {
+            let more = p.read_map_key_begin()?;
+            if !more {
+                break;
+            }
+            let key = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_begin()?;
+            let val = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_end()?;
+            hmap.insert(key, val);
+
+            idx += 1;
+            if should_break(len, more, idx) {
+                break;
+            }
+        }
+        p.read_map_end()?;
+        Ok(hmap)
+    }
+}
+
+impl<P, K, S> Deserialize<P> for HashMap<K, u8, S>
+where
+    P: ProtocolReader,
+    K: Deserialize<P> + GetTType + Hash + Eq,
+    S: std::hash::BuildHasher + Default,
+{
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<K>() + P::min_size::<i8>())?;
+        let mut hmap = HashMap::with_capacity_and_hasher(len.unwrap_or(0), S::default());
+
+        if let Some(0) = len {
+            return Ok(hmap);
+        }
+
+        let mut idx = 0;
+        loop {
+            let more = p.read_map_key_begin()?;
+            if !more {
+                break;
+            }
+            let key = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_begin()?;
+            let val = Deserialize::rs_thrift_read(p)?;
+            p.read_map_value_end()?;
+            hmap.insert(key, val);
+
+            idx += 1;
+            if should_break(len, more, idx) {
+                break;
+            }
+        }
+        p.read_map_end()?;
+        Ok(hmap)
     }
 }

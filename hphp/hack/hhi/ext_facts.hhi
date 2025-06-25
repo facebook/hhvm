@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures('class_type')>>
 namespace HH\Facts {
 
   /**
@@ -178,7 +178,7 @@ namespace HH\Facts {
   function subtypes<T>(
     classname<T> $base_type,
     ?DeriveFilters $filters = null,
-  )[]: vec<classname<T>>;
+  )[]: vec<class<T>>;
 
  /**
   * Get the transitive types which extend, implement, or use the given base type.
@@ -189,7 +189,7 @@ namespace HH\Facts {
     classname<T> $base_type,
     ?DeriveFilters $filters = null,
     bool $include_interface_require_extends = false,
-   )[]: vec<string>;
+   )[]: vec<class<T>>;
 
   /**
    * Get all types which the given type extends, implements, or uses.
@@ -199,7 +199,7 @@ namespace HH\Facts {
   function supertypes(
     classname<mixed> $derived_type,
     ?DeriveFilters $filters = null,
-  )[]: vec<classname<mixed>>;
+  )[]: vec<class<mixed>>;
 
   /**
    * Get all types matching the given filters.

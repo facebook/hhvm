@@ -19,10 +19,6 @@
 final class ThriftPolicyEnforcer extends PolicyEnforcer {
   const PolicyEnforcerAssetClass ASSET_CLASS =
     PolicyEnforcerAssetClass::THRIFT_CLIENT;
-  const classname<TrustedAPIEnforcerModule> TAE_MODULE =
-    ThriftTrustedAPIEnforcerModule::class;
-  const classname<PolicyZoneModule> POLICY_ZONE_MODULE =
-    ThriftPolicyZoneModule::class;
 
   const bool IS_THRIFT = true;
   const int ODS_ONE_IN = 100;
@@ -103,67 +99,6 @@ final class ThriftPolicyEnforcer extends PolicyEnforcer {
   }
 
   <<__Override>>
-  protected static function logODSStats(
-    PolicyEnforcerAssetClass $asset_class,
-    string $asset_type, // This is actually the service name in this context
-    string $api,
-    TPolicyEnforcerResultInternal $res,
-    ?string $_underlying_thrift_api = null,
-  )[zoned_shallow]: void {
-    // Subsample to reduce cost of ODS logging
-    if (!coinflip(self::ODS_ONE_IN)) {
-      return;
-    }
-
-    // We bump every 1/ODS_ONE_IN, so adjust the bump value to compensate
-    // e.g. 1/100 => bump by 100
-    $adjusted_bump = self::ODS_ONE_IN;
-
-    $prefix = Str\format('%s.%s', $asset_type, $api);
-
-    CategorizedOBC::typedGet(ODSCategoryID::ODS_POLICY_ENFORCER)
-      ->bumpEntityKey(
-        $asset_class,
-        $prefix.'.access.safe.'.(int)$res['is_privacy_safe'],
-        $adjusted_bump,
-      )
-      ->bumpEntityKey(
-        $asset_class,
-        $prefix.'.access.allowed.'.(int)$res['allow'],
-        $adjusted_bump,
-      )
-      ->bumpEntityKey(
-        $asset_class,
-        $prefix.
-        '.access.conditionally_allowed_unsafe.'.
-        (int)$res['conditionally_allow_unsafe'],
-        $adjusted_bump,
-      )
-      ->bumpEntityKey(
-        $asset_class,
-        $prefix.
-        '.access.safe_or_conditionally_allowed_unsafe.'.
-        (int)($res['conditionally_allow_unsafe'] || $res['is_privacy_safe']),
-        $adjusted_bump,
-      )
-      ->bumpEntityKey(
-        $asset_class,
-        $prefix.'.access.enforced.'.(int)$res['is_enforced'],
-        $adjusted_bump,
-      )
-      ->bumpEntityKey(
-        $asset_class,
-        $prefix.'.configured.'.(int)$res['is_configured'],
-        $adjusted_bump,
-      );
-  }
-
-  <<__Override>>
-  final protected static function useCache()[leak_safe]: bool {
-    return true;
-  }
-
-  <<__Override>>
   public static function getAssetTypeConfig(
     string $asset_type,
   )[leak_safe]: ?privacy_enforcer_AssetTypeConfig::TShape {
@@ -187,30 +122,4 @@ final class ThriftPolicyEnforcer extends PolicyEnforcer {
     );
   }
 
-  <<__Override>>
-  protected static function getException(
-    string $asset_type,
-    string $api,
-  )[]: Exception {
-    return new ThriftPolicyEnforcerException($asset_type, $api);
-  }
-}
-
-final class ThriftPolicyEnforcerException extends ExceptionWithPureGetMessage {
-
-  public function __construct(
-    private string $serviceName,
-    private string $funcName,
-  )[] {
-    parent::__construct();
-  }
-
-  <<__Override>>
-  public function getMessage()[]: string {
-    return Str\format(
-      'Thrift call to %s::%s is blocked because it\'s from untrusted call-site',
-      $this->serviceName,
-      $this->funcName,
-    );
-  }
 }

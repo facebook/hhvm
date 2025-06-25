@@ -71,10 +71,6 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     return keyset[];
   }
 
-  public static function shouldKillConsolidation()[zoned_local]: bool {
-    return PrivacyLibKS::isKilled(PLKS::PAAL_CONSOLIDATION_THRIFT_ROLLOUT);
-  }
-
   public static async function genEnforcePolicyEnforcerAndPolicyZone(
     string $asset_type,
     string $policy_enforcer_api,
@@ -82,47 +78,15 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     PolicyEnforcerContext $context,
   )[zoned_shallow]: Awaitable<TPolicyEnforcerResult> {
     $exception = null;
-    $result = PolicyEnforcer::DEFAULT_POLICY_ENFORCER_RESULT;
 
-    if (self::shouldKillConsolidation()) {
-      try {
-        $result = await self::genPolicyEnforcerResults(
-          $asset_type,
-          $policy_enforcer_api,
-          $caller,
-          $context,
-        );
-      } catch (Exception $e) {
-        $exception = $e;
-      }
-    } else {
-      if (
-        IsItFaster::shouldExperiment(
-          'privacylib_consolidation_thrift',
-          OncallShortName\www_privacy_frameworks,
-        )
-      ) {
-        list($result, $pl_failure) = await self::genPrivacyLibResults(
-          $asset_type,
-          $policy_enforcer_api,
-          $caller,
-          $context,
-        );
-        if ($pl_failure) {
-          $exception = $pl_failure->getException();
-        }
-      } else {
-        try {
-          $result = await self::genPolicyEnforcerResults(
-            $asset_type,
-            $policy_enforcer_api,
-            $caller,
-            $context,
-          );
-        } catch (Exception $e) {
-          $exception = $e;
-        }
-      }
+    list($result, $pl_failure) = await self::genPrivacyLibResults(
+      $asset_type,
+      $policy_enforcer_api,
+      $caller,
+      $context,
+    );
+    if ($pl_failure) {
+      $exception = $pl_failure->getException();
     }
 
     if ($exception is nonnull) {
@@ -189,23 +153,6 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     );
   }
 
-  <<StringMetadataExtractor>>
-  private static async function genPolicyEnforcerResults(
-    string $asset_type,
-    string $policy_enforcer_api,
-    PolicyEnforcerCallerIdentity $caller,
-    PolicyEnforcerContext $context,
-  )[zoned_local]: Awaitable<TPolicyEnforcerResult> {
-    HH\set_frame_metadata('PAALC_OLD:THRIFT');
-    // This may throw exceptions
-    return await ThriftPolicyEnforcer::genEnforcePolicyEnforcerAndPolicyZone(
-      $asset_type,
-      $policy_enforcer_api,
-      $caller,
-      $context,
-    );
-  }
-
   public static async function genProcessResponse(
     string $asset_type,
     string $policy_enforcer_api,
@@ -239,5 +186,21 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
       ),
       $context,
     );
+  }
+}
+
+final class ThriftPolicyZoneModuleContext
+  implements IPolicyEnforcerModuleContext {
+  public function __construct(
+    private ThriftServiceMethodNameAssetXID $xid,
+    private string $smcServiceName,
+  )[] {}
+
+  public function getXID()[]: ThriftServiceMethodNameAssetXID {
+    return $this->xid;
+  }
+
+  public function getSmcServiceName()[]: string {
+    return $this->smcServiceName;
   }
 }

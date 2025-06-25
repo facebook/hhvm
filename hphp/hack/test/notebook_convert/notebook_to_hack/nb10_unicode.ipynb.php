@@ -8,7 +8,3 @@
 I am a *markdown* **cell with unicode: –**
 */
 //@bento-cell-end
-
-async function gen_n1234_notebook_main(): Awaitable<void> {
-
-}

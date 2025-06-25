@@ -139,13 +139,18 @@ let hack_of_ipynb_exn
   in
   let non_stmts_code = String.concat non_stmts ~sep:"\n" in
   let main_fn_code =
-    stmts
-    |> List.bind ~f:(fun block ->
-           block |> String.split_lines |> List.map ~f:(Printf.sprintf "    %s"))
-    |> String.concat ~sep:"\n"
-    |> Printf.sprintf
-         "async function %s(): Awaitable<void> {\n%s\n}"
-         Notebook_convert_constants.main_function_prefix
+    if List.is_empty stmts then
+      ""
+    else
+      stmts
+      |> List.bind ~f:(fun block ->
+             block
+             |> String.split_lines
+             |> List.map ~f:(Printf.sprintf "    %s"))
+      |> String.concat ~sep:"\n"
+      |> Printf.sprintf
+           "async function %s(): Awaitable<void> {\n%s\n}\n"
+           Notebook_convert_constants.main_function_prefix
   in
   let unformatted =
     let notebook_metadata_comment =
@@ -153,7 +158,7 @@ let hack_of_ipynb_exn
         to_comment { notebook_number = raw_notebook_number; kernelspec })
     in
     Printf.sprintf
-      "<?hh\n%s\n%s\n%s\n\n%s\n"
+      "<?hh\n%s\n%s\n%s\n\n%s"
       header
       notebook_metadata_comment
       non_stmts_code

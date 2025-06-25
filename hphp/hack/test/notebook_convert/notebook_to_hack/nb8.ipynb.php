@@ -8,7 +8,3 @@ final class N1234MyClass {
   const int METADATA_ID = 219481;
 }
 //@bento-cell-end
-
-async function gen_n1234_notebook_main(): Awaitable<void> {
-
-}

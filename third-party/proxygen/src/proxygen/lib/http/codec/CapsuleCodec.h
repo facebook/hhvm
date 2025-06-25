@@ -11,8 +11,6 @@
 #include <folly/Optional.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
-#include <iomanip>
-#include <iostream>
 
 namespace proxygen {
 

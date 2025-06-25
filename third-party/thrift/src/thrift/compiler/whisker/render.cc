@@ -483,7 +483,7 @@ class virtual_machine {
   lookup_result lookup_variable(const ast::variable_lookup& variable_lookup) {
     auto undefined_diag_level = opts_.strict_undefined_variables;
     return whisker::visit(
-        current_frame().context.lookup_object(variable_lookup),
+        current_frame().context.look_up_object(variable_lookup),
         [](const lookup_result& value) -> lookup_result { return value; },
         [&](const eval_scope_lookup_error& err) -> lookup_result {
           diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {

@@ -267,7 +267,7 @@ class eval_context {
    *   - eval_property_lookup_error if any subsequent identifier is not found in
    *     the chain of resolved whisker::objects.
    */
-  expected<lookup_result, lookup_error> lookup_object(
+  expected<lookup_result, lookup_error> look_up_object(
       const ast::variable_lookup& path);
 
   /**

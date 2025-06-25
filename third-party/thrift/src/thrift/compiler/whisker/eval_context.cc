@@ -163,7 +163,7 @@ eval_context::bind_local(std::string name, object value) {
 }
 
 expected<eval_context::lookup_result, eval_context::lookup_error>
-eval_context::lookup_object(const ast::variable_lookup& lookup) {
+eval_context::look_up_object(const ast::variable_lookup& lookup) {
   assert(!stack_.empty());
   using result = expected<lookup_result, lookup_error>;
 

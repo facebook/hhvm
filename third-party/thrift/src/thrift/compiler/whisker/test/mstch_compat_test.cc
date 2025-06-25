@@ -99,19 +99,19 @@ TEST_F(MstchCompatTest, map_lookups) {
       "╰─ 'key2' → null\n");
 
   auto ctx = eval_context::with_root_scope(diags(), converted);
-  EXPECT_EQ(**ctx.lookup_object({}), converted);
-  EXPECT_TRUE((*ctx.lookup_object(path("key")))->is_map());
-  EXPECT_FALSE((*ctx.lookup_object(path("key")))->is_array());
+  EXPECT_EQ(**ctx.look_up_object({}), converted);
+  EXPECT_TRUE((*ctx.look_up_object(path("key")))->is_map());
+  EXPECT_FALSE((*ctx.look_up_object(path("key")))->is_array());
 
-  EXPECT_EQ(**ctx.lookup_object(path("key", "nested")), i64(1));
-  EXPECT_EQ(**ctx.lookup_object(path("key", "bool")), true);
-  EXPECT_EQ(**ctx.lookup_object(path("key", "float")), f64(2.0));
-  EXPECT_EQ(**ctx.lookup_object(path("key2")), w::null);
+  EXPECT_EQ(**ctx.look_up_object(path("key", "nested")), i64(1));
+  EXPECT_EQ(**ctx.look_up_object(path("key", "bool")), true);
+  EXPECT_EQ(**ctx.look_up_object(path("key", "float")), f64(2.0));
+  EXPECT_EQ(**ctx.look_up_object(path("key2")), w::null);
 
   EXPECT_TRUE(
-      has_error<eval_scope_lookup_error>(ctx.lookup_object(path("unknown"))));
+      has_error<eval_scope_lookup_error>(ctx.look_up_object(path("unknown"))));
   EXPECT_TRUE(has_error<eval_property_lookup_error>(
-      ctx.lookup_object(path("key", "unknown"))));
+      ctx.look_up_object(path("key", "unknown"))));
 }
 
 TEST_F(MstchCompatTest, array_iteration) {
@@ -165,8 +165,8 @@ TEST_F(MstchCompatTest, array_iteration) {
 
   {
     auto ctx = eval_context::with_root_scope(diags(), converted);
-    EXPECT_FALSE((*ctx.lookup_object(path("key")))->is_map());
-    EXPECT_TRUE((*ctx.lookup_object(path("key")))->is_array());
+    EXPECT_FALSE((*ctx.look_up_object(path("key")))->is_map());
+    EXPECT_TRUE((*ctx.look_up_object(path("key")))->is_array());
   }
   {
     strict_printable_types(diagnostic_level::debug);
@@ -248,8 +248,8 @@ TEST_F(MstchCompatTest, mstch_object) {
 
   {
     auto ctx = eval_context::with_root_scope(diags(), converted);
-    EXPECT_TRUE((*ctx.lookup_object({}))->is_map());
-    EXPECT_FALSE((*ctx.lookup_object({}))->is_array());
+    EXPECT_TRUE((*ctx.look_up_object({}))->is_map());
+    EXPECT_FALSE((*ctx.look_up_object({}))->is_array());
   }
   {
     auto result = render("{{foo:bar.key}}", converted);

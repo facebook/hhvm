@@ -102,12 +102,12 @@ TEST_F(EvalContextTest, basic_name_resolution) {
   auto root =
       w::map({{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})}});
   auto ctx = eval_context::with_root_scope(diags(), root);
-  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), i64(3));
-  EXPECT_EQ(**ctx.lookup_object(path("foo", "baz")), i64(4));
+  EXPECT_EQ(**ctx.look_up_object(path("foo", "bar")), i64(3));
+  EXPECT_EQ(**ctx.look_up_object(path("foo", "baz")), i64(4));
   EXPECT_EQ(
-      **ctx.lookup_object(path("foo")),
+      **ctx.look_up_object(path("foo")),
       w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}}));
-  EXPECT_EQ(**ctx.lookup_object(path()), root);
+  EXPECT_EQ(**ctx.look_up_object(path()), root);
 }
 
 TEST_F(EvalContextTest, parent_scope) {
@@ -123,38 +123,38 @@ TEST_F(EvalContextTest, parent_scope) {
   // Unknown top-level name should fail
   {
     auto err = get_error<eval_scope_lookup_error>(
-        ctx.lookup_object(path("unknown", "bar")));
+        ctx.look_up_object(path("unknown", "bar")));
     EXPECT_EQ(err.property_name(), "unknown");
     EXPECT_EQ(
         err.searched_scopes(),
         std::vector<object>({child_2, child_1, root, ctx.global_scope()}));
   }
 
-  EXPECT_EQ(**ctx.lookup_object(path()), child_2);
-  EXPECT_EQ(**ctx.lookup_object(path("foo", "abc")), i64(5));
+  EXPECT_EQ(**ctx.look_up_object(path()), child_2);
+  EXPECT_EQ(**ctx.look_up_object(path("foo", "abc")), i64(5));
   // child_1 should shadow `foo` from root
   {
     auto err = get_error<eval_property_lookup_error>(
-        ctx.lookup_object(path("foo", "bar")));
+        ctx.look_up_object(path("foo", "bar")));
     EXPECT_EQ(err.missing_from(), w::map({{"abc", w::i64(5)}}));
     EXPECT_EQ(err.property_name(), "bar");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
   }
   // Unshadowed names from root should still be accessible
-  EXPECT_EQ(**ctx.lookup_object(path("parent")), "works");
+  EXPECT_EQ(**ctx.look_up_object(path("parent")), "works");
   // Subobjects from shadowed names should be accessible
-  EXPECT_EQ(**ctx.lookup_object(path("bar", "baz")), true);
+  EXPECT_EQ(**ctx.look_up_object(path("bar", "baz")), true);
 
   // Should still be shadowing after popping unrelated scope
   ctx.pop_scope();
-  EXPECT_EQ(**ctx.lookup_object(path()), child_1);
+  EXPECT_EQ(**ctx.look_up_object(path()), child_1);
   EXPECT_TRUE(has_error<eval_property_lookup_error>(
-      ctx.lookup_object(path("foo", "bar"))));
+      ctx.look_up_object(path("foo", "bar"))));
 
   // Shadowing should stop
   ctx.pop_scope();
-  EXPECT_EQ(**ctx.lookup_object(path()), root);
-  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), i64(3));
+  EXPECT_EQ(**ctx.look_up_object(path()), root);
+  EXPECT_EQ(**ctx.look_up_object(path("foo", "bar")), i64(3));
 }
 
 TEST_F(EvalContextTest, locals) {
@@ -166,21 +166,21 @@ TEST_F(EvalContextTest, locals) {
   auto ctx = eval_context::with_root_scope(diags(), root);
   ctx.push_scope(child_1);
 
-  EXPECT_EQ(**ctx.lookup_object(path("foo-2")), "shadowed");
+  EXPECT_EQ(**ctx.look_up_object(path("foo-2")), "shadowed");
   // Locals shadow objects in current scope.
   ctx.bind_local("foo-2", manage_owned<object>(w::string("local"))).value();
-  EXPECT_EQ(**ctx.lookup_object(path("foo-2")), "local");
+  EXPECT_EQ(**ctx.look_up_object(path("foo-2")), "local");
 
   // Locals shadow objects in parent scopes.
   ctx.bind_local("foo", manage_owned<object>(w::string("local"))).value();
-  EXPECT_EQ(**ctx.lookup_object(path("foo")), "local");
+  EXPECT_EQ(**ctx.look_up_object(path("foo")), "local");
 
   // Locals are unbound when the current scope is popped.
   ctx.pop_scope();
   EXPECT_EQ(
-      **ctx.lookup_object(path("foo")),
+      **ctx.look_up_object(path("foo")),
       w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}}));
-  EXPECT_EQ(**ctx.lookup_object(path("foo-2")), 2.0);
+  EXPECT_EQ(**ctx.look_up_object(path("foo-2")), 2.0);
 }
 
 TEST_F(EvalContextTest, self_reference) {
@@ -196,15 +196,15 @@ TEST_F(EvalContextTest, self_reference) {
 
   for (const auto& obj : objects) {
     auto ctx = eval_context::with_root_scope(diags(), obj);
-    EXPECT_EQ(**ctx.lookup_object(path()), obj);
+    EXPECT_EQ(**ctx.look_up_object(path()), obj);
   }
 }
 
 TEST_F(EvalContextTest, custom_map_basic) {
   auto o = w::make_map<double_property_name>();
   auto ctx = eval_context::with_root_scope(diags(), o);
-  EXPECT_EQ(**ctx.lookup_object(path("foo")), string("foofoo"));
-  EXPECT_EQ(**ctx.lookup_object(path("bar")), string("barbar"));
+  EXPECT_EQ(**ctx.look_up_object(path("foo")), string("foofoo"));
+  EXPECT_EQ(**ctx.look_up_object(path("bar")), string("barbar"));
 }
 
 TEST_F(EvalContextTest, custom_map_delegator) {
@@ -214,15 +214,15 @@ TEST_F(EvalContextTest, custom_map_delegator) {
   object delegator = w::make_map<delegate_to>(doubler);
 
   auto ctx = eval_context::with_root_scope(diags(), delegator);
-  EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
-  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
+  EXPECT_EQ(**ctx.look_up_object(path("foo")), doubler);
+  EXPECT_EQ(**ctx.look_up_object(path("foo", "bar")), string("barbar"));
 
   ctx.push_scope(delegator);
-  EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
-  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
+  EXPECT_EQ(**ctx.look_up_object(path("foo")), doubler);
+  EXPECT_EQ(**ctx.look_up_object(path("foo", "bar")), string("barbar"));
 
   ctx.push_scope(doubler);
-  EXPECT_EQ(**ctx.lookup_object(path("foo")), "foofoo");
+  EXPECT_EQ(**ctx.look_up_object(path("foo")), "foofoo");
 }
 
 TEST_F(EvalContextTest, custom_map_lookup_throws) {
@@ -237,7 +237,7 @@ TEST_F(EvalContextTest, custom_map_lookup_throws) {
   {
     auto ctx = eval_context::with_root_scope(diags(), thrower);
     auto err = get_error<eval_scope_lookup_error>(
-        ctx.lookup_object(path("will-throw")));
+        ctx.look_up_object(path("will-throw")));
     EXPECT_EQ(err.property_name(), "will-throw");
     EXPECT_EQ(err.cause(), "I always throw!");
   }
@@ -246,7 +246,7 @@ TEST_F(EvalContextTest, custom_map_lookup_throws) {
     auto ctx =
         eval_context::with_root_scope(diags(), w::map({{"foo", thrower}}));
     auto err = get_error<eval_property_lookup_error>(
-        ctx.lookup_object(path("foo", "will-throw")));
+        ctx.look_up_object(path("foo", "will-throw")));
     EXPECT_EQ(err.missing_from(), thrower);
     EXPECT_EQ(err.property_name(), "will-throw");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
@@ -259,14 +259,14 @@ TEST_F(EvalContextTest, globals) {
   object root;
 
   auto ctx = eval_context::with_root_scope(diags(), root, globals);
-  EXPECT_EQ(**ctx.lookup_object(path("global")), i64(1));
+  EXPECT_EQ(**ctx.look_up_object(path("global")), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});
   ctx.push_scope(shadowing);
-  EXPECT_EQ(**ctx.lookup_object(path("global")), i64(2));
+  EXPECT_EQ(**ctx.look_up_object(path("global")), i64(2));
 
   ctx.pop_scope();
-  EXPECT_EQ(**ctx.lookup_object(path("global")), i64(1));
+  EXPECT_EQ(**ctx.look_up_object(path("global")), i64(1));
 }
 
 } // namespace whisker

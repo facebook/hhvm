@@ -132,7 +132,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "{{service:parent_service_name}}",
     /* .methodName =*/ "{{> common/function_name}}",
-    /* .qualifiedMethodName =*/ "{{service:name}}.{{> common/function_name}}"};
+    /* .qualifiedMethodName =*/ "{{#if service:self.interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:self.interaction?}}.{{> common/function_name}}"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -161,7 +161,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "{{service:parent_service_name}}",
     /* .methodName =*/ "{{> common/function_name}}",
-    /* .qualifiedMethodName =*/ "{{service:name}}.{{> common/function_name}}"};
+    /* .qualifiedMethodName =*/ "{{#if service:self.interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:self.interaction?}}.{{> common/function_name}}"};
   auto callback = apache::thrift::HandlerCallbackPtr<{{> types/return_type_server}}>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

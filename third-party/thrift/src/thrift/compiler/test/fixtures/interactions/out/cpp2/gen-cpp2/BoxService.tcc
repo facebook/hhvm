@@ -186,7 +186,7 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(apache::t
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "BoxService",
     /* .methodName =*/ "BoxedInteraction.getABox",
-    /* .qualifiedMethodName =*/ "BoxedInteraction.BoxedInteraction.getABox"};
+    /* .qualifiedMethodName =*/ "BoxService.BoxedInteraction.getABox"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

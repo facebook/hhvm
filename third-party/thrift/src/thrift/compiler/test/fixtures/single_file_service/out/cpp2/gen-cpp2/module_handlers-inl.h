@@ -182,7 +182,7 @@ void AAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "A",
     /* .methodName =*/ "I.interact",
-    /* .qualifiedMethodName =*/ "I.I.interact"};
+    /* .qualifiedMethodName =*/ "A.I.interact"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -669,7 +669,7 @@ void CAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "C",
     /* .methodName =*/ "I.interact",
-    /* .qualifiedMethodName =*/ "I.I.interact"};
+    /* .qualifiedMethodName =*/ "C.I.interact"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

@@ -72,7 +72,7 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_init(apache
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractLocally",
     /* .methodName =*/ "SharedInteraction.init",
-    /* .qualifiedMethodName =*/ "SharedInteraction.SharedInteraction.init"};
+    /* .qualifiedMethodName =*/ "InteractLocally.SharedInteraction.init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -186,7 +186,7 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_do_somethin
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractLocally",
     /* .methodName =*/ "SharedInteraction.do_something",
-    /* .qualifiedMethodName =*/ "SharedInteraction.SharedInteraction.do_something"};
+    /* .qualifiedMethodName =*/ "InteractLocally.SharedInteraction.do_something"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -300,7 +300,7 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_tear_down(a
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractLocally",
     /* .methodName =*/ "SharedInteraction.tear_down",
-    /* .qualifiedMethodName =*/ "SharedInteraction.SharedInteraction.tear_down"};
+    /* .qualifiedMethodName =*/ "InteractLocally.SharedInteraction.tear_down"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

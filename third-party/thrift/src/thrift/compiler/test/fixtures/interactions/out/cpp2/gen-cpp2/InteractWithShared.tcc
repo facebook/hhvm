@@ -194,7 +194,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(a
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "MyInteraction.frobnicate",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.frobnicate"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -320,7 +320,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(apache:
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "MyInteraction.ping",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.ping"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.ping"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -411,7 +411,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(apa
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "MyInteraction.truthify",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.truthify"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.truthify"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -528,7 +528,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(apach
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "MyInteraction.encode",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.encode"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.encode"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -662,7 +662,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(apa
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "SharedInteraction.init",
-    /* .qualifiedMethodName =*/ "SharedInteraction.SharedInteraction.init"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.SharedInteraction.init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -776,7 +776,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "SharedInteraction.do_something",
-    /* .qualifiedMethodName =*/ "SharedInteraction.SharedInteraction.do_something"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.SharedInteraction.do_something"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -890,7 +890,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "InteractWithShared",
     /* .methodName =*/ "SharedInteraction.tear_down",
-    /* .qualifiedMethodName =*/ "SharedInteraction.SharedInteraction.tear_down"};
+    /* .qualifiedMethodName =*/ "InteractWithShared.SharedInteraction.tear_down"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

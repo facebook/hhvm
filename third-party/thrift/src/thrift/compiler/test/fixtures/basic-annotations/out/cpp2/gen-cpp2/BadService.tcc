@@ -182,7 +182,7 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "BadService",
     /* .methodName =*/ "BadInteraction.foo",
-    /* .qualifiedMethodName =*/ "BadInteraction.BadInteraction.foo"};
+    /* .qualifiedMethodName =*/ "BadService.BadInteraction.foo"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

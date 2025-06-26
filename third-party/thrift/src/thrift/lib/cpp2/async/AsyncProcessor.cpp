@@ -1201,6 +1201,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         methodNameInfo_.serviceName,
         methodNameInfo_.definingServiceName,
         methodNameInfo_.methodName,
+        methodNameInfo_.qualifiedMethodName,
         reqCtx_->getInterceptorFrameworkMetadata()};
     try {
       co_await serviceInterceptors[i]->internal_onRequest(

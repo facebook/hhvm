@@ -546,7 +546,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteraction.frobnicate",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.frobnicate"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteraction.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -672,7 +672,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteraction.ping",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.ping"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteraction.ping"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -763,7 +763,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteraction.truthify",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.truthify"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteraction.truthify"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -880,7 +880,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteraction.encode",
-    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.encode"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteraction.encode"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1020,7 +1020,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteractionFast.frobnicate",
-    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.frobnicate"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1127,7 +1127,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thri
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteractionFast.ping",
-    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.ping"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.ping"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1216,7 +1216,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteractionFast.truthify",
-    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.truthify"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.truthify"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1331,7 +1331,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "MyInteractionFast.encode",
-    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.encode"};
+    /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.encode"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1461,7 +1461,7 @@ void FactoriesAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Factories",
     /* .methodName =*/ "SerialInteraction.frobnicate",
-    /* .qualifiedMethodName =*/ "SerialInteraction.SerialInteraction.frobnicate"};
+    /* .qualifiedMethodName =*/ "Factories.SerialInteraction.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

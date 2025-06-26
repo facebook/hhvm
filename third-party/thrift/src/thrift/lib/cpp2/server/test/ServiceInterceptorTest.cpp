@@ -1371,20 +1371,30 @@ struct ServiceNameInfo {
   std::string serviceName;
   std::string definingServiceName;
   std::string methodName;
+  std::string qualifiedMethodName;
 
   [[maybe_unused]] friend bool operator==(
       const ServiceNameInfo& lhs, const ServiceNameInfo& rhs) {
-    return std::tie(lhs.serviceName, lhs.definingServiceName, lhs.methodName) ==
-        std::tie(rhs.serviceName, rhs.definingServiceName, rhs.methodName);
+    return std::tie(
+               lhs.serviceName,
+               lhs.definingServiceName,
+               lhs.methodName,
+               lhs.qualifiedMethodName) ==
+        std::tie(
+               rhs.serviceName,
+               rhs.definingServiceName,
+               rhs.methodName,
+               rhs.qualifiedMethodName);
   }
 
   [[maybe_unused]] friend std::ostream& operator<<(
       std::ostream& out, const ServiceNameInfo& info) {
     return out << fmt::format(
-               "[{}, {}, {}]",
+               "[{}, {}, {}, {}]",
                info.serviceName,
                info.definingServiceName,
-               info.methodName);
+               info.methodName,
+               info.qualifiedMethodName);
   }
 };
 
@@ -1402,7 +1412,8 @@ struct ServiceInterceptorCheckingServiceAndMethodNames
     names.emplace_back(
         std::string(requestInfo.serviceName),
         std::string(requestInfo.definingServiceName),
-        std::string(requestInfo.methodName));
+        std::string(requestInfo.methodName),
+        std::string(requestInfo.qualifiedMethodName));
     co_return std::nullopt;
   }
 
@@ -1424,8 +1435,14 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNamesBasic) {
   co_await client->co_noop();
 
   std::vector<ServiceNameInfo> expectedNames = {
-      {"ServiceInterceptorTest", "ServiceInterceptorTest", "echo"},
-      {"ServiceInterceptorTest", "ServiceInterceptorTestBase", "noop"},
+      {"ServiceInterceptorTest",
+       "ServiceInterceptorTest",
+       "echo",
+       "ServiceInterceptorTest.echo"},
+      {"ServiceInterceptorTest",
+       "ServiceInterceptorTestBase",
+       "noop",
+       "ServiceInterceptorTestBase.noop"},
   };
 
   if (transportType() == TransportType::ROCKET) {
@@ -1435,11 +1452,13 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNamesBasic) {
     expectedNames.emplace_back(
         "ServiceInterceptorTest",
         "ServiceInterceptorTest",
-        "createInteraction");
+        "createInteraction",
+        "ServiceInterceptorTest.createInteraction");
     expectedNames.emplace_back(
         "ServiceInterceptorTest",
         "ServiceInterceptorTest",
-        "SampleInteraction.echo");
+        "SampleInteraction.echo",
+        "ServiceInterceptorTest.SampleInteraction.echo");
   }
 
   EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
@@ -1485,10 +1504,10 @@ CO_TEST_P(
   EXPECT_EQ(co_await client3->co_six(), 6);
 
   std::vector<ServiceNameInfo> expectedNames = {
-      {"Second", "Second", "three"},
-      {"Second", "Second", "four"},
-      {"Conflicts", "Conflicts", "five"},
-      {"Third", "Third", "six"},
+      {"Second", "Second", "three", "Second.three"},
+      {"Second", "Second", "four", "Second.four"},
+      {"Conflicts", "Conflicts", "five", "Conflicts.five"},
+      {"Third", "Third", "six", "Third.six"},
   };
 
   EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
@@ -1549,7 +1568,10 @@ CO_TEST_P(
     EXPECT_THROW(co_await thing2.co_bar(), TApplicationException);
 
     std::vector<ServiceNameInfo> expectedNames = {
-        {"Interaction1", "Interaction1", "Thing1.foo"},
+        {"Interaction1",
+         "Interaction1",
+         "Thing1.foo",
+         "Interaction1.Thing1.foo"},
     };
 
     EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));

@@ -61,12 +61,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(apa
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "do_some_similar_things"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "do_some_similar_things"
+    , std::move(methodNameInfo)
     , return_do_some_similar_things<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_some_similar_things<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -187,12 +189,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(a
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "MyInteraction.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "MyInteraction.frobnicate"
+    , std::move(methodNameInfo)
     , return_MyInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_frobnicate<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -310,12 +314,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "MyInteraction.ping"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "MyInteraction.ping"
+    , std::move(methodNameInfo)
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
@@ -398,12 +404,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(apa
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "MyInteraction.truthify"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "MyInteraction.truthify"
+    , std::move(methodNameInfo)
     , return_MyInteraction_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_truthify<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -512,12 +520,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "MyInteraction.encode"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "MyInteraction.encode"
+    , std::move(methodNameInfo)
     , return_MyInteraction_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_encode<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -643,12 +653,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(apa
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "SharedInteraction.init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "SharedInteraction.init"
+    , std::move(methodNameInfo)
     , return_SharedInteraction_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_init<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -754,12 +766,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "SharedInteraction.do_something"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "SharedInteraction.do_something"
+    , std::move(methodNameInfo)
     , return_SharedInteraction_do_something<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_do_something<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -865,12 +879,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractWithShared",
+    /* .methodName =*/ "SharedInteraction.tear_down"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractWithShared"
-    , "SharedInteraction.tear_down"
+    , std::move(methodNameInfo)
     , return_SharedInteraction_tear_down<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_tear_down<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

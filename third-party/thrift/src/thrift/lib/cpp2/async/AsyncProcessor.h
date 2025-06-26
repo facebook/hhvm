@@ -1029,14 +1029,22 @@ class HandlerCallbackBase {
   }
 
  public:
+  struct MethodNameInfo {
+    // The "leaf" or most derived service name
+    std::string_view serviceName;
+    // The service name where the incoming method name is defined (could be
+    // different if inherited service)
+    std::string_view definingServiceName;
+    // Self explanatory
+    std::string_view methodName;
+  };
+
   HandlerCallbackBase() : eb_(nullptr), reqCtx_(nullptr), protoSeqId_(0) {}
 
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      std::string_view serviceName,
-      std::string_view definingServiceName,
-      std::string_view methodName,
+      MethodNameInfo methodNameInfo,
       exnw_ptr ewp,
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
@@ -1045,9 +1053,7 @@ class HandlerCallbackBase {
       : req_(std::move(req)),
         ctx_(std::move(ctx)),
         interaction_(std::move(interaction)),
-        serviceName_(serviceName),
-        definingServiceName_(definingServiceName),
-        methodName_(methodName),
+        methodNameInfo_(std::move(methodNameInfo)),
         ewp_(ewp),
         eb_(eb),
         executor_(
@@ -1062,9 +1068,7 @@ class HandlerCallbackBase {
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      std::string_view serviceName,
-      std::string_view definingServiceName,
-      std::string_view methodName,
+      MethodNameInfo methodNameInfo,
       exnw_ptr ewp,
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
@@ -1076,9 +1080,7 @@ class HandlerCallbackBase {
       : req_(std::move(req)),
         ctx_(std::move(ctx)),
         interaction_(std::move(interaction)),
-        serviceName_(serviceName),
-        definingServiceName_(definingServiceName),
-        methodName_(methodName),
+        methodNameInfo_(std::move(methodNameInfo)),
         ewp_(ewp),
         eb_(eb),
         executor_(std::move(executor)),
@@ -1284,12 +1286,8 @@ class HandlerCallbackBase {
   ResponseChannelRequest::UniquePtr req_;
   ContextStack::UniquePtr ctx_;
   TilePtr interaction_;
-  // The "leaf" or most derived service name
-  const std::string_view serviceName_ = "";
-  // The service name where the incoming method name is defined (could be
-  // different if inherited service)
-  const std::string_view definingServiceName_ = "";
-  const std::string_view methodName_ = "";
+
+  MethodNameInfo methodNameInfo_;
 
   // May be null in a oneway call
   exnw_ptr ewp_;
@@ -1388,9 +1386,7 @@ class HandlerCallback : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      std::string_view serviceName,
-      std::string_view definingServiceName,
-      std::string_view methodName,
+      MethodNameInfo methodNameInfo,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1402,9 +1398,7 @@ class HandlerCallback : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      std::string_view serviceName,
-      std::string_view definingServiceName,
-      std::string_view methodName,
+      MethodNameInfo methodNameInfo,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1480,9 +1474,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      std::string_view serviceName,
-      std::string_view definingServiceName,
-      std::string_view methodName,
+      MethodNameInfo methodNameInfo,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1494,9 +1486,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
-      std::string_view serviceName,
-      std::string_view definingServiceName,
-      std::string_view methodName,
+      MethodNameInfo methodNameInfo,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1844,9 +1834,7 @@ template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    std::string_view serviceName,
-    std::string_view definingServiceName,
-    std::string_view methodName,
+    MethodNameInfo methodNameInfo,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1857,9 +1845,7 @@ HandlerCallback<T>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
-          serviceName,
-          definingServiceName,
-          methodName,
+          std::move(methodNameInfo),
           ewp,
           eb,
           tm,
@@ -1873,9 +1859,7 @@ template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    std::string_view serviceName,
-    std::string_view definingServiceName,
-    std::string_view methodName,
+    MethodNameInfo methodNameInfo,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1889,9 +1873,7 @@ HandlerCallback<T>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
-          serviceName,
-          definingServiceName,
-          methodName,
+          std::move(methodNameInfo),
           ewp,
           eb,
           std::move(executor),

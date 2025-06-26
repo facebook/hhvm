@@ -78,12 +78,14 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "ping"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "ping"
+    , std::move(methodNameInfo)
     , return_ping<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_ping<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -185,12 +187,14 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "getRandomData"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "getRandomData"
+    , std::move(methodNameInfo)
     , return_getRandomData<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getRandomData<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -297,12 +301,14 @@ void MyServiceAsyncProcessor::executeRequest_sink(apache::thrift::ServerRequest&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "sink"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "sink"
+    , std::move(methodNameInfo)
     , return_sink<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sink<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -410,12 +416,14 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "putDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "putDataById"
+    , std::move(methodNameInfo)
     , return_putDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -520,12 +528,14 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "hasDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "hasDataById"
+    , std::move(methodNameInfo)
     , return_hasDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -632,12 +642,14 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "getDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "getDataById"
+    , std::move(methodNameInfo)
     , return_getDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -744,12 +756,14 @@ void MyServiceAsyncProcessor::executeRequest_deleteDataById(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "deleteDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "deleteDataById"
+    , std::move(methodNameInfo)
     , return_deleteDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_deleteDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -852,12 +866,14 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "lobDataById"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "lobDataById"
+    , std::move(methodNameInfo)
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
@@ -938,12 +954,14 @@ void MyServiceAsyncProcessor::executeRequest_invalid_return_for_hack(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "invalid_return_for_hack"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<float>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "invalid_return_for_hack"
+    , std::move(methodNameInfo)
     , return_invalid_return_for_hack<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_invalid_return_for_hack<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1047,12 +1065,14 @@ void MyServiceAsyncProcessor::executeRequest_rpc_skipped_codegen(apache::thrift:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "rpc_skipped_codegen"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "rpc_skipped_codegen"
+    , std::move(methodNameInfo)
     , return_rpc_skipped_codegen<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_rpc_skipped_codegen<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

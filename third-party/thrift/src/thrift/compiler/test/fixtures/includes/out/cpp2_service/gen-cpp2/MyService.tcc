@@ -69,12 +69,14 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "query"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "query"
+    , std::move(methodNameInfo)
     , return_query<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_query<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -182,12 +184,14 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(apache::thrift::Server
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyService",
+    /* .methodName =*/ "has_arg_docs"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyService"
-    , "has_arg_docs"
+    , std::move(methodNameInfo)
     , return_has_arg_docs<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_has_arg_docs<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

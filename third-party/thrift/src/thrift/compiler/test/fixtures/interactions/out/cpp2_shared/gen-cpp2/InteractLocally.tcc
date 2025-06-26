@@ -68,12 +68,14 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_init(apache
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractLocally",
+    /* .methodName =*/ "SharedInteraction.init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractLocally"
-    , "SharedInteraction.init"
+    , std::move(methodNameInfo)
     , return_SharedInteraction_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_init<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -179,12 +181,14 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_do_somethin
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractLocally",
+    /* .methodName =*/ "SharedInteraction.do_something"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractLocally"
-    , "SharedInteraction.do_something"
+    , std::move(methodNameInfo)
     , return_SharedInteraction_do_something<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_do_something<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -290,12 +294,14 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_tear_down(a
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "InteractLocally",
+    /* .methodName =*/ "SharedInteraction.tear_down"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "InteractLocally"
-    , "SharedInteraction.tear_down"
+    , std::move(methodNameInfo)
     , return_SharedInteraction_tear_down<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_tear_down<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

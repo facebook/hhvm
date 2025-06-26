@@ -61,12 +61,14 @@ void GoodServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "BadService",
+    /* .methodName =*/ "bar"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "BadService"
-    , "bar"
+    , std::move(methodNameInfo)
     , return_bar<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bar<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,12 +177,14 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "BadService",
+    /* .methodName =*/ "BadInteraction.foo"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "BadService"
-    , "BadInteraction.foo"
+    , std::move(methodNameInfo)
     , return_BadInteraction_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_BadInteraction_foo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

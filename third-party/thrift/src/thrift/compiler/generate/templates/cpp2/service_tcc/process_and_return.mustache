@@ -128,12 +128,14 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "{{service:parent_service_name}}",
+    /* .methodName =*/ "{{> common/function_name}}"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "{{service:parent_service_name}}"
-    , "{{> common/function_name}}"
+    , std::move(methodNameInfo)
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
@@ -154,12 +156,14 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "{{service:parent_service_name}}",
+    /* .methodName =*/ "{{> common/function_name}}"};
   auto callback = apache::thrift::HandlerCallbackPtr<{{> types/return_type_server}}>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "{{service:parent_service_name}}"
-    , "{{> common/function_name}}"
+    , std::move(methodNameInfo)
     , return_{{function:prefixed_name}}<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:self.cpp_name}}<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

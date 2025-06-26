@@ -501,9 +501,10 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
       auto callback = apache::thrift::HandlerCallbackBase::Ptr::make(
           std::move(req),
           std::move(ctxStack),
-          serviceName,
-          serviceName, /* definingServiceName */
-          methodName,
+          apache::thrift::HandlerCallbackBase::MethodNameInfo{
+              .serviceName = serviceName,
+              .definingServiceName = serviceName,
+              .methodName = methodName},
           nullptr,
           eb,
           executor,
@@ -534,9 +535,10 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
           make(
               std::move(req),
               std::move(ctxStack),
-              serviceName,
-              serviceName, /* definingServiceName */
-              methodName,
+              apache::thrift::HandlerCallbackBase::MethodNameInfo{
+                  .serviceName = serviceName,
+                  .definingServiceName = serviceName,
+                  .methodName = methodName},
               return_streaming,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),
@@ -566,9 +568,10 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
           HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr::make(
               std::move(req),
               std::move(ctxStack),
-              serviceName,
-              serviceName, /* definingServiceName */
-              methodName,
+              apache::thrift::HandlerCallbackBase::MethodNameInfo{
+                  .serviceName = serviceName,
+                  .definingServiceName = serviceName,
+                  .methodName = methodName},
               return_serialized,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),

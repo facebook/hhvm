@@ -72,12 +72,14 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "NestedContainers",
+    /* .methodName =*/ "mapList"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "NestedContainers"
-    , "mapList"
+    , std::move(methodNameInfo)
     , return_mapList<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapList<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -182,12 +184,14 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "NestedContainers",
+    /* .methodName =*/ "mapSet"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "NestedContainers"
-    , "mapSet"
+    , std::move(methodNameInfo)
     , return_mapSet<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapSet<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -292,12 +296,14 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "NestedContainers",
+    /* .methodName =*/ "listMap"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "NestedContainers"
-    , "listMap"
+    , std::move(methodNameInfo)
     , return_listMap<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listMap<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -402,12 +408,14 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "NestedContainers",
+    /* .methodName =*/ "listSet"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "NestedContainers"
-    , "listSet"
+    , std::move(methodNameInfo)
     , return_listSet<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listSet<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -512,12 +520,14 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "NestedContainers",
+    /* .methodName =*/ "turtles"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "NestedContainers"
-    , "turtles"
+    , std::move(methodNameInfo)
     , return_turtles<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_turtles<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

@@ -105,12 +105,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "returnstream"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "returnstream"
+    , std::move(methodNameInfo)
     , return_returnstream<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_returnstream<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -220,12 +222,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "streamthrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "streamthrows"
+    , std::move(methodNameInfo)
     , return_streamthrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_streamthrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -345,12 +349,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "servicethrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "servicethrows"
+    , std::move(methodNameInfo)
     , return_servicethrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_servicethrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -477,12 +483,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "servicethrows2"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "servicethrows2"
+    , std::move(methodNameInfo)
     , return_servicethrows2<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_servicethrows2<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -619,12 +627,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "boththrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "boththrows"
+    , std::move(methodNameInfo)
     , return_boththrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_boththrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -761,12 +771,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "responseandstreamstreamthrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "responseandstreamstreamthrows"
+    , std::move(methodNameInfo)
     , return_responseandstreamstreamthrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamstreamthrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -888,12 +900,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "responseandstreamservicethrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "responseandstreamservicethrows"
+    , std::move(methodNameInfo)
     , return_responseandstreamservicethrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamservicethrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1022,12 +1036,14 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PubSubStreamingService",
+    /* .methodName =*/ "responseandstreamboththrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PubSubStreamingService"
-    , "responseandstreamboththrows"
+    , std::move(methodNameInfo)
     , return_responseandstreamboththrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamboththrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

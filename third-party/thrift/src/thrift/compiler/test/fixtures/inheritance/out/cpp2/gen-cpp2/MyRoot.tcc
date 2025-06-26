@@ -61,12 +61,14 @@ void MyRootAsyncProcessor::executeRequest_do_root(apache::thrift::ServerRequest&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyRoot",
+    /* .methodName =*/ "do_root"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyRoot"
-    , "do_root"
+    , std::move(methodNameInfo)
     , return_do_root<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_root<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

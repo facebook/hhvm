@@ -123,12 +123,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_i16_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_i16_param"
+    , std::move(methodNameInfo)
     , return_void_ret_i16_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_i16_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -236,12 +238,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_byte_i16_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_byte_i16_param"
+    , std::move(methodNameInfo)
     , return_void_ret_byte_i16_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_byte_i16_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -346,12 +350,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_map_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_map_param"
+    , std::move(methodNameInfo)
     , return_void_ret_map_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_map_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -459,12 +465,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_map_setlist_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_map_setlist_param"
+    , std::move(methodNameInfo)
     , return_void_ret_map_setlist_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_map_setlist_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -569,12 +577,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_map_typedef_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_map_typedef_param"
+    , std::move(methodNameInfo)
     , return_void_ret_map_typedef_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_map_typedef_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -679,12 +689,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_enum_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_enum_param"
+    , std::move(methodNameInfo)
     , return_void_ret_enum_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_enum_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -789,12 +801,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_struct_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_struct_param"
+    , std::move(methodNameInfo)
     , return_void_ret_struct_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_struct_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -899,12 +913,14 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "void_ret_listunion_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "void_ret_listunion_param"
+    , std::move(methodNameInfo)
     , return_void_ret_listunion_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_void_ret_listunion_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1012,12 +1028,14 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "bool_ret_i32_i64_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "bool_ret_i32_i64_param"
+    , std::move(methodNameInfo)
     , return_bool_ret_i32_i64_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bool_ret_i32_i64_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1124,12 +1142,14 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "bool_ret_map_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "bool_ret_map_param"
+    , std::move(methodNameInfo)
     , return_bool_ret_map_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bool_ret_map_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1236,12 +1256,14 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "bool_ret_union_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "bool_ret_union_param"
+    , std::move(methodNameInfo)
     , return_bool_ret_union_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bool_ret_union_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1351,12 +1373,14 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "i64_ret_float_double_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "i64_ret_float_double_param"
+    , std::move(methodNameInfo)
     , return_i64_ret_float_double_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i64_ret_float_double_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1466,12 +1490,14 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(apa
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "i64_ret_string_typedef_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "i64_ret_string_typedef_param"
+    , std::move(methodNameInfo)
     , return_i64_ret_string_typedef_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i64_ret_string_typedef_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1593,12 +1619,14 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "i64_ret_i32_i32_i32_i32_i32_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "i64_ret_i32_i32_i32_i32_i32_param"
+    , std::move(methodNameInfo)
     , return_i64_ret_i32_i32_i32_i32_i32_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i64_ret_i32_i32_i32_i32_i32_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1705,12 +1733,14 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "double_ret_setstruct_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<double>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "double_ret_setstruct_param"
+    , std::move(methodNameInfo)
     , return_double_ret_setstruct_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_double_ret_setstruct_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1817,12 +1847,14 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "string_ret_string_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "string_ret_string_param"
+    , std::move(methodNameInfo)
     , return_string_ret_string_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_string_ret_string_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1929,12 +1961,14 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "binary_ret_binary_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "binary_ret_binary_param"
+    , std::move(methodNameInfo)
     , return_binary_ret_binary_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_binary_ret_binary_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2041,12 +2075,14 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "map_ret_bool_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "map_ret_bool_param"
+    , std::move(methodNameInfo)
     , return_map_ret_bool_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_map_ret_bool_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2156,12 +2192,14 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "list_ret_map_setlist_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<bool>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "list_ret_map_setlist_param"
+    , std::move(methodNameInfo)
     , return_list_ret_map_setlist_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_ret_map_setlist_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2268,12 +2306,14 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "mapsetlistmapliststring_ret_listlistlist_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "mapsetlistmapliststring_ret_listlistlist_param"
+    , std::move(methodNameInfo)
     , return_mapsetlistmapliststring_ret_listlistlist_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapsetlistmapliststring_ret_listlistlist_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2380,12 +2420,14 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "typedef_ret_i32_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::simpleTypeDef>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "typedef_ret_i32_param"
+    , std::move(methodNameInfo)
     , return_typedef_ret_i32_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_typedef_ret_i32_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2495,12 +2537,14 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(ap
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "listtypedef_ret_typedef_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "listtypedef_ret_typedef_param"
+    , std::move(methodNameInfo)
     , return_listtypedef_ret_typedef_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listtypedef_ret_typedef_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2607,12 +2651,14 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "enum_ret_double_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "enum_ret_double_param"
+    , std::move(methodNameInfo)
     , return_enum_ret_double_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_enum_ret_double_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2722,12 +2768,14 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "enum_ret_double_enum_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "enum_ret_double_enum_param"
+    , std::move(methodNameInfo)
     , return_enum_ret_double_enum_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_enum_ret_double_enum_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2834,12 +2882,14 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "listenum_ret_map_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "listenum_ret_map_param"
+    , std::move(methodNameInfo)
     , return_listenum_ret_map_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listenum_ret_map_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2949,12 +2999,14 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "struct_ret_i16_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::MyStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "struct_ret_i16_param"
+    , std::move(methodNameInfo)
     , return_struct_ret_i16_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_struct_ret_i16_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -3061,12 +3113,14 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "setstruct_ret_set_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "setstruct_ret_set_param"
+    , std::move(methodNameInfo)
     , return_setstruct_ret_set_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_setstruct_ret_set_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -3176,12 +3230,14 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "union_ret_i32_i32_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::ComplexUnion>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "union_ret_i32_i32_param"
+    , std::move(methodNameInfo)
     , return_union_ret_i32_i32_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_union_ret_i32_i32_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -3288,12 +3344,14 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "ParamService",
+    /* .methodName =*/ "listunion_string_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "ParamService"
-    , "listunion_string_param"
+    , std::move(methodNameInfo)
     , return_listunion_string_param<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listunion_string_param<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

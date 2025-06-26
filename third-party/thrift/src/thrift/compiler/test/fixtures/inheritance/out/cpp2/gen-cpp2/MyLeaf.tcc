@@ -61,12 +61,14 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(apache::thrift::ServerRequest&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyLeaf",
+    /* .methodName =*/ "do_leaf"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyLeaf"
-    , "do_leaf"
+    , std::move(methodNameInfo)
     , return_do_leaf<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_leaf<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

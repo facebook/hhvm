@@ -61,12 +61,14 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "FooService",
+    /* .methodName =*/ "simple_rpc"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "FooService"
-    , "simple_rpc"
+    , std::move(methodNameInfo)
     , return_simple_rpc<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simple_rpc<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

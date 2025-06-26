@@ -61,12 +61,14 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(apache::thrift::Se
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "RederivedService",
+    /* .methodName =*/ "get_seven"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "RederivedService"
-    , "get_seven"
+    , std::move(methodNameInfo)
     , return_get_seven<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_seven<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

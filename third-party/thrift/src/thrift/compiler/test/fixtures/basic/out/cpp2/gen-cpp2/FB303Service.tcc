@@ -64,12 +64,14 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "FB303Service",
+    /* .methodName =*/ "simple_rpc"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "FB303Service"
-    , "simple_rpc"
+    , std::move(methodNameInfo)
     , return_simple_rpc<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simple_rpc<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

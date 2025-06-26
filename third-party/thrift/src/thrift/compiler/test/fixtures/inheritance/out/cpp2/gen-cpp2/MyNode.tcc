@@ -61,12 +61,14 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(apache::thrift::ServerRequest&&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyNode",
+    /* .methodName =*/ "do_mid"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyNode"
-    , "do_mid"
+    , std::move(methodNameInfo)
     , return_do_mid<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_mid<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

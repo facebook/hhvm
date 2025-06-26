@@ -1060,9 +1060,7 @@ void HandlerCallbackBase::breakTilePromise() {
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    std::string_view serviceName,
-    std::string_view definingServiceName,
-    std::string_view methodName,
+    MethodNameInfo methodNameInfo,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1073,9 +1071,7 @@ HandlerCallback<void>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
-          serviceName,
-          definingServiceName,
-          methodName,
+          std::move(methodNameInfo),
           ewp,
           eb,
           tm,
@@ -1088,9 +1084,7 @@ HandlerCallback<void>::HandlerCallback(
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
-    std::string_view serviceName,
-    std::string_view definingServiceName,
-    std::string_view methodName,
+    MethodNameInfo methodNameInfo,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1104,9 +1098,7 @@ HandlerCallback<void>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
-          serviceName,
-          definingServiceName,
-          methodName,
+          std::move(methodNameInfo),
           ewp,
           eb,
           std::move(executor),
@@ -1206,9 +1198,9 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         reqCtx_,
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
         arguments,
-        serviceName_,
-        definingServiceName_,
-        methodName_,
+        methodNameInfo_.serviceName,
+        methodNameInfo_.definingServiceName,
+        methodNameInfo_.methodName,
         reqCtx_->getInterceptorFrameworkMetadata()};
     try {
       co_await serviceInterceptors[i]->internal_onRequest(
@@ -1254,9 +1246,9 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         reqCtx_,
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
         resultOrActiveException,
-        serviceName_,
-        definingServiceName_,
-        methodName_};
+        methodNameInfo_.serviceName,
+        methodNameInfo_.definingServiceName,
+        methodNameInfo_.methodName};
     try {
       co_await serviceInterceptors[i]->internal_onResponse(
           connectionInfo,

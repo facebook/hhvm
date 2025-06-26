@@ -71,12 +71,14 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PrimitivesService",
+    /* .methodName =*/ "init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PrimitivesService"
-    , "init"
+    , std::move(methodNameInfo)
     , return_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_init<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -180,12 +182,14 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PrimitivesService",
+    /* .methodName =*/ "method_that_throws"};
   auto callback = apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PrimitivesService"
-    , "method_that_throws"
+    , std::move(methodNameInfo)
     , return_method_that_throws<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_method_that_throws<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -312,12 +316,14 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "PrimitivesService",
+    /* .methodName =*/ "return_void_method"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "PrimitivesService"
-    , "return_void_method"
+    , std::move(methodNameInfo)
     , return_return_void_method<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_return_void_method<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

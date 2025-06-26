@@ -70,12 +70,14 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "Service",
+    /* .methodName =*/ "func"};
   auto callback = apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::MyI32_4873>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "Service"
-    , "func"
+    , std::move(methodNameInfo)
     , return_func<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_func<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

@@ -71,12 +71,14 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService",
+    /* .methodName =*/ "noop"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService"
-    , "noop"
+    , std::move(methodNameInfo)
     , return_noop<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_noop<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -181,12 +183,14 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService",
+    /* .methodName =*/ "echo"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService"
-    , "echo"
+    , std::move(methodNameInfo)
     , return_echo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_echo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -293,12 +297,14 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(apache::thrift::Se
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService",
+    /* .methodName =*/ "increment"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService"
-    , "increment"
+    , std::move(methodNameInfo)
     , return_increment<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_increment<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -405,12 +411,14 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(apache::thrift::ServerRe
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService",
+    /* .methodName =*/ "sum"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService"
-    , "sum"
+    , std::move(methodNameInfo)
     , return_sum<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -517,12 +525,14 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(apache::thrift::S
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService",
+    /* .methodName =*/ "withStruct"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService"
-    , "withStruct"
+    , std::move(methodNameInfo)
     , return_withStruct<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_withStruct<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -635,12 +645,14 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(apache::thrift::S
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService",
+    /* .methodName =*/ "multiParam"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService"
-    , "multiParam"
+    , std::move(methodNameInfo)
     , return_multiParam<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_multiParam<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -760,12 +772,14 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService",
+    /* .methodName =*/ "noop"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService"
-    , "noop"
+    , std::move(methodNameInfo)
     , return_noop<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_noop<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -870,12 +884,14 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService",
+    /* .methodName =*/ "echo"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService"
-    , "echo"
+    , std::move(methodNameInfo)
     , return_echo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_echo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -982,12 +998,14 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(apache::thrift::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService",
+    /* .methodName =*/ "increment"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService"
-    , "increment"
+    , std::move(methodNameInfo)
     , return_increment<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_increment<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1094,12 +1112,14 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(apache::thrift::Server
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService",
+    /* .methodName =*/ "sum"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService"
-    , "sum"
+    , std::move(methodNameInfo)
     , return_sum<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1206,12 +1226,14 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(apache::thrift:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService",
+    /* .methodName =*/ "withStruct"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService"
-    , "withStruct"
+    , std::move(methodNameInfo)
     , return_withStruct<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_withStruct<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1324,12 +1346,14 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(apache::thrift:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService",
+    /* .methodName =*/ "multiParam"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService"
-    , "multiParam"
+    , std::move(methodNameInfo)
     , return_multiParam<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_multiParam<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1439,12 +1463,14 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService_ExtendsUndecoratedService",
+    /* .methodName =*/ "extension"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService_ExtendsUndecoratedService"
-    , "extension"
+    , std::move(methodNameInfo)
     , return_extension<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_extension<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1552,12 +1578,14 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService_ExtendsDecoratedService",
+    /* .methodName =*/ "extension"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService_ExtendsDecoratedService"
-    , "extension"
+    , std::move(methodNameInfo)
     , return_extension<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_extension<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1665,12 +1693,14 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "UndecoratedService_ExtendsDecoratedService",
+    /* .methodName =*/ "extension"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "UndecoratedService_ExtendsDecoratedService"
-    , "extension"
+    , std::move(methodNameInfo)
     , return_extension<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_extension<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1781,12 +1811,14 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService",
+    /* .methodName =*/ "secondExtension"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService"
-    , "secondExtension"
+    , std::move(methodNameInfo)
     , return_secondExtension<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_secondExtension<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

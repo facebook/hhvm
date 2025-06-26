@@ -63,12 +63,14 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "AdapterService",
+    /* .methodName =*/ "count"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "AdapterService"
-    , "count"
+    , std::move(methodNameInfo)
     , return_count<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_count<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,12 +177,14 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "AdapterService",
+    /* .methodName =*/ "adaptedTypes"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "AdapterService"
-    , "adaptedTypes"
+    , std::move(methodNameInfo)
     , return_adaptedTypes<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_adaptedTypes<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

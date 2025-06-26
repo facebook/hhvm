@@ -68,12 +68,14 @@ void CAsyncProcessor::executeRequest_f(apache::thrift::ServerRequest&& serverReq
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "C",
+    /* .methodName =*/ "f"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "C"
-    , "f"
+    , std::move(methodNameInfo)
     , return_f<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_f<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,12 +177,14 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "C",
+    /* .methodName =*/ "numbers"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::number>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "C"
-    , "numbers"
+    , std::move(methodNameInfo)
     , return_numbers<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_numbers<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -296,12 +300,14 @@ void CAsyncProcessor::executeRequest_thing(apache::thrift::ServerRequest&& serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "C",
+    /* .methodName =*/ "thing"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "C"
-    , "thing"
+    , std::move(methodNameInfo)
     , return_thing<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_thing<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

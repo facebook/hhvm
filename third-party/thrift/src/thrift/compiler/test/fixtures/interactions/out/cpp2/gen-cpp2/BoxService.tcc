@@ -65,12 +65,14 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(apache::thrift::Ser
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "BoxService",
+    /* .methodName =*/ "getABoxSession"};
   auto callback = apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "BoxService"
-    , "getABoxSession"
+    , std::move(methodNameInfo)
     , return_getABoxSession<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getABoxSession<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -179,12 +181,14 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "BoxService",
+    /* .methodName =*/ "BoxedInteraction.getABox"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "BoxService"
-    , "BoxedInteraction.getABox"
+    , std::move(methodNameInfo)
     , return_BoxedInteraction_getABox<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_BoxedInteraction_getABox<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

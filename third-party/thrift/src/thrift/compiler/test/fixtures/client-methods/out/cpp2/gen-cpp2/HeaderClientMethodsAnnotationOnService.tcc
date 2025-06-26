@@ -66,12 +66,14 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo(a
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "HeaderClientMethodsAnnotationOnService",
+    /* .methodName =*/ "echo"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::EchoResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "HeaderClientMethodsAnnotationOnService"
-    , "echo"
+    , std::move(methodNameInfo)
     , return_echo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_echo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -178,12 +180,14 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo_2
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "HeaderClientMethodsAnnotationOnService",
+    /* .methodName =*/ "echo_2"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::EchoResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "HeaderClientMethodsAnnotationOnService"
-    , "echo_2"
+    , std::move(methodNameInfo)
     , return_echo_2<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_echo_2<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

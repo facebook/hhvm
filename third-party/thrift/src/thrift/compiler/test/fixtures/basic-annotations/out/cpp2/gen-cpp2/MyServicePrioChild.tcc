@@ -61,12 +61,14 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+    /* .serviceName =*/ this->getServiceName(),
+    /* .definingServiceName =*/ "MyServicePrioChild",
+    /* .methodName =*/ "pang"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , this->getServiceName()
-    , "MyServicePrioChild"
-    , "pang"
+    , std::move(methodNameInfo)
     , return_pang<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_pang<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

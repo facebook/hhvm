@@ -28,9 +28,6 @@
 
 namespace whisker {
 
-// This macro greatly simplifies the SFINAE tricks required by expected<T, E>.
-#define WHISKER_EXPECTED_REQUIRES(...) std::enable_if_t<__VA_ARGS__>* = nullptr
-
 /**
  * A type that mimics std::expected<T, E>:
  *   https://en.cppreference.com/w/cpp/utility/expected
@@ -143,17 +140,17 @@ class unexpected {
   // https://en.cppreference.com/w/cpp/utility/expected/unexpected#ctor
   template <
       typename Err = E,
-      WHISKER_EXPECTED_REQUIRES(
-          !std::is_same_v<detail::remove_cvref_t<Err>, unexpected>),
-      WHISKER_EXPECTED_REQUIRES(
-          !std::is_same_v<detail::remove_cvref_t<Err>, std::in_place_t>),
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, Err>)>
+      std::enable_if_t<
+          !std::is_same_v<detail::remove_cvref_t<Err>, unexpected> &&
+              !std::is_same_v<detail::remove_cvref_t<Err>, std::in_place_t> &&
+              std::is_constructible_v<E, Err>,
+          int> = 0>
   explicit unexpected(Err&& e) noexcept(std::is_nothrow_constructible_v<E, Err>)
       : error_(std::forward<Err>(e)) {}
 
   template <
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, Args...>)>
+      std::enable_if_t<std::is_constructible_v<E, Args...>, int> = 0>
   explicit unexpected(std::in_place_t, Args&&... args) noexcept(
       std::is_nothrow_constructible_v<E, Args...>)
       : error_(std::forward<Args>(args)...) {}
@@ -161,8 +158,9 @@ class unexpected {
   template <
       typename U,
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(
-          std::is_constructible_v<E, std::initializer_list<U>&, Args...>)>
+      std::enable_if_t<
+          std::is_constructible_v<E, std::initializer_list<U>&, Args...>,
+          int> = 0>
   explicit unexpected(
       std::in_place_t,
       std::initializer_list<U> ilist,
@@ -275,7 +273,7 @@ class expected {
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_1
   template <
       typename U = T,
-      WHISKER_EXPECTED_REQUIRES(std::is_default_constructible_v<U>)>
+      std::enable_if_t<std::is_default_constructible_v<U>, int> = 0>
   expected() noexcept(std::is_nothrow_default_constructible_v<T>)
       : storage_() {}
 
@@ -305,11 +303,11 @@ class expected {
   template <
       class U,
       class G,
-      WHISKER_EXPECTED_REQUIRES(
-          (std::is_convertible_v<const U&, T> &&
-           std::is_convertible_v<const G&, E>)),
-      WHISKER_EXPECTED_REQUIRES(
-          is_constructible_from_other<U, G, const U&, const G&>)>
+      std::enable_if_t<
+          std::is_convertible_v<const U&, T> &&
+              std::is_convertible_v<const G&, E> &&
+              is_constructible_from_other<U, G, const U&, const G&>,
+          int> = 0>
   /* implicit */ expected(const expected<U, G>& other) noexcept(
       std::is_nothrow_constructible_v<T, const U&> &&
       std::is_nothrow_constructible_v<E, const G&>)
@@ -320,11 +318,11 @@ class expected {
   template <
       class U,
       class G,
-      WHISKER_EXPECTED_REQUIRES(
+      std::enable_if_t<
           !(std::is_convertible_v<const U&, T> &&
-            std::is_convertible_v<const G&, E>)),
-      WHISKER_EXPECTED_REQUIRES(
-          is_constructible_from_other<U, G, const U&, const G&>)>
+            std::is_convertible_v<const G&, E>) &&
+              is_constructible_from_other<U, G, const U&, const G&>,
+          int> = 0>
   explicit expected(const expected<U, G>& other) noexcept(
       std::is_nothrow_constructible_v<T, const U&> &&
       std::is_nothrow_constructible_v<E, const G&>)
@@ -335,9 +333,10 @@ class expected {
   template <
       class U,
       class G,
-      WHISKER_EXPECTED_REQUIRES(
-          (std::is_convertible_v<U, T> && std::is_convertible_v<G, E>)),
-      WHISKER_EXPECTED_REQUIRES(is_constructible_from_other<U, G, U, G>)>
+      std::enable_if_t<
+          std::is_convertible_v<U, T> && std::is_convertible_v<G, E> &&
+              is_constructible_from_other<U, G, U, G>,
+          int> = 0>
   /* implicit */ expected(expected<U, G>&& other) noexcept(
       std::is_nothrow_constructible_v<T, U> &&
       std::is_nothrow_constructible_v<E, G>)
@@ -348,9 +347,10 @@ class expected {
   template <
       class U,
       class G,
-      WHISKER_EXPECTED_REQUIRES(
-          !(std::is_convertible_v<U, T> && std::is_convertible_v<G, E>)),
-      WHISKER_EXPECTED_REQUIRES(is_constructible_from_other<U, G, U, G>)>
+      std::enable_if_t<
+          !(std::is_convertible_v<U, T> && std::is_convertible_v<G, E>) &&
+              is_constructible_from_other<U, G, U, G>,
+          int> = 0>
   explicit expected(expected<U, G>&& other) noexcept(
       std::is_nothrow_constructible_v<T, U> &&
       std::is_nothrow_constructible_v<E, G>)
@@ -360,8 +360,9 @@ class expected {
   // (implicit)
   template <
       typename U,
-      WHISKER_EXPECTED_REQUIRES(std::is_convertible_v<U, T>),
-      WHISKER_EXPECTED_REQUIRES(is_forward_constructible_from<U>)>
+      std::enable_if_t<
+          std::is_convertible_v<U, T> && is_forward_constructible_from<U>,
+          int> = 0>
   /* implicit */ expected(U&& value) noexcept(
       std::is_nothrow_constructible_v<T, U>)
       : expected(std::in_place, std::forward<U>(value)) {}
@@ -370,8 +371,9 @@ class expected {
   // (explicit)
   template <
       typename U = T,
-      WHISKER_EXPECTED_REQUIRES(!std::is_convertible_v<U, T>),
-      WHISKER_EXPECTED_REQUIRES(is_forward_constructible_from<U>)>
+      std::enable_if_t<
+          !std::is_convertible_v<U, T> && is_forward_constructible_from<U>,
+          int> = 0>
   explicit expected(U&& value) noexcept(std::is_nothrow_constructible_v<T, U>)
       : expected(std::in_place, std::forward<U>(value)) {}
 
@@ -379,8 +381,10 @@ class expected {
   // (implicit)
   template <
       typename G,
-      WHISKER_EXPECTED_REQUIRES(std::is_convertible_v<const G&, E>),
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, const G&>)>
+      std::enable_if_t<
+          std::is_convertible_v<const G&, E> &&
+              std::is_constructible_v<E, const G&>,
+          int> = 0>
   /* implicit */ expected(const unexpected<G>& error) noexcept(
       std::is_nothrow_constructible_v<E, const G&>)
       : storage_(std::in_place_type<unexpected<E>>, error.error()) {}
@@ -389,8 +393,10 @@ class expected {
   // (explicit)
   template <
       typename G,
-      WHISKER_EXPECTED_REQUIRES(!std::is_convertible_v<const G&, E>),
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, const G&>)>
+      std::enable_if_t<
+          !std::is_convertible_v<const G&, E> &&
+              std::is_constructible_v<E, const G&>,
+          int> = 0>
   explicit expected(const unexpected<G>& error) noexcept(
       std::is_nothrow_constructible_v<E, const G&>)
       : storage_(std::in_place_type<unexpected<E>>, error.error()) {}
@@ -399,8 +405,9 @@ class expected {
   // (implicit)
   template <
       typename G,
-      WHISKER_EXPECTED_REQUIRES(std::is_convertible_v<G, E>),
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, G>)>
+      std::enable_if_t<
+          std::is_convertible_v<G, E> && std::is_constructible_v<E, G>,
+          int> = 0>
   /* implicit */ expected(unexpected<G>&& error) noexcept(
       std::is_nothrow_constructible_v<E, G>)
       : storage_(std::in_place_type<unexpected<E>>, std::move(error).error()) {}
@@ -409,8 +416,9 @@ class expected {
   // (explicit)
   template <
       typename G,
-      WHISKER_EXPECTED_REQUIRES(!std::is_convertible_v<G, E>),
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, G>)>
+      std::enable_if_t<
+          !std::is_convertible_v<G, E> && std::is_constructible_v<E, G>,
+          int> = 0>
   explicit expected(unexpected<G>&& error) noexcept(
       std::is_nothrow_constructible_v<E, G>)
       : storage_(std::in_place_type<unexpected<E>>, std::move(error).error()) {}
@@ -424,7 +432,7 @@ class expected {
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_9
   template <
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<T, Args...>)>
+      std::enable_if_t<std::is_constructible_v<T, Args...>, int> = 0>
   explicit expected(std::in_place_t, Args&&... args) noexcept(
       std::is_nothrow_constructible_v<T, Args...>)
       : storage_(std::in_place_type<T>, std::forward<Args>(args)...) {}
@@ -433,8 +441,9 @@ class expected {
   template <
       typename U,
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(
-          std::is_constructible_v<T, std::initializer_list<U>&, Args...>)>
+      std::enable_if_t<
+          std::is_constructible_v<T, std::initializer_list<U>&, Args...>,
+          int> = 0>
   explicit expected(
       std::in_place_t,
       std::initializer_list<U> ilist,
@@ -448,7 +457,7 @@ class expected {
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_11
   template <
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, Args...>)>
+      std::enable_if_t<std::is_constructible_v<E, Args...>, int> = 0>
   explicit expected(unexpect_t, Args&&... args) noexcept(
       std::is_nothrow_constructible_v<E, Args...>)
       : storage_(
@@ -460,8 +469,9 @@ class expected {
   template <
       typename U,
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(
-          std::is_constructible_v<E, std::initializer_list<U>&, Args...>)>
+      std::enable_if_t<
+          std::is_constructible_v<E, std::initializer_list<U>&, Args...>,
+          int> = 0>
   explicit expected(
       unexpect_t,
       std::initializer_list<U> ilist,
@@ -531,7 +541,7 @@ class expected {
 
   template <
       typename U = T,
-      WHISKER_EXPECTED_REQUIRES(is_forward_assignable_from<U>)>
+      std::enable_if_t<is_forward_assignable_from<U>, int> = 0>
   expected& operator=(U&& value) {
     if (has_value()) {
       **this = std::forward<U>(value);
@@ -543,8 +553,8 @@ class expected {
 
   template <
       typename G,
-      WHISKER_EXPECTED_REQUIRES(
-          is_forward_assignable_from_unexpected<const G&>)>
+      std::enable_if_t<is_forward_assignable_from_unexpected<const G&>, int> =
+          0>
   expected& operator=(const unexpected<G>& e) {
     if (has_value()) {
       reinit<unexpected<E>>(e.error());
@@ -556,7 +566,7 @@ class expected {
 
   template <
       typename G,
-      WHISKER_EXPECTED_REQUIRES(is_forward_assignable_from_unexpected<G>)>
+      std::enable_if_t<is_forward_assignable_from_unexpected<G>, int> = 0>
   expected& operator=(unexpected<G>&& e) {
     if (has_value()) {
       reinit<unexpected<E>>(std::move(e).error());
@@ -629,7 +639,7 @@ class expected {
 
   template <
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(std::is_nothrow_constructible_v<T, Args...>)>
+      std::enable_if_t<std::is_nothrow_constructible_v<T, Args...>, int> = 0>
   T& emplace(Args&&... args) noexcept {
     return storage_.template emplace<T>(std::forward<Args>(args)...);
   }
@@ -637,10 +647,10 @@ class expected {
   template <
       typename U,
       typename... Args,
-      WHISKER_EXPECTED_REQUIRES(std::is_nothrow_constructible_v<
-                                T,
-                                std::initializer_list<U>&,
-                                Args...>)>
+      std::enable_if_t<
+          std::
+              is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>,
+          int> = 0>
   T& emplace(std::initializer_list<U> ilist, Args&&... args) noexcept {
     return storage_.template emplace<T>(ilist, std::forward<Args>(args)...);
   }
@@ -662,7 +672,7 @@ class expected {
   template <
       typename T2,
       typename E2,
-      WHISKER_EXPECTED_REQUIRES(!std::is_void_v<T2>)>
+      std::enable_if_t<!std::is_void_v<T2>, int> = 0>
   friend bool operator==(
       const expected<T, E>& lhs, const expected<T2, E2>& rhs) {
     return lhs.has_value() ? (rhs.has_value() && *lhs == *rhs)
@@ -681,7 +691,7 @@ class expected {
   template <
       typename U,
       typename G,
-      WHISKER_EXPECTED_REQUIRES(!std::is_void_v<U>)>
+      std::enable_if_t<!std::is_void_v<U>, int> = 0>
   friend bool operator!=(const expected<T, E>& lhs, const expected<U, G>& rhs) {
     return !(lhs == rhs);
   }
@@ -820,7 +830,5 @@ decltype(auto) visit(
   }
   return std::visit(overloaded, std::move(e).error());
 }
-
-#undef WHISKER_EXPECTED_REQUIRES
 
 } // namespace whisker

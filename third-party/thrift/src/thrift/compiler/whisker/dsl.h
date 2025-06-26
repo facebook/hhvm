@@ -30,10 +30,6 @@
 #include <type_traits>
 
 namespace whisker::dsl {
-
-// This macro greatly simplifies the SFINAE tricks required by dsl.
-#define WHISKER_DSL_REQUIRES(...) std::enable_if_t<__VA_ARGS__>* = nullptr
-
 namespace detail {
 /**
  * Determines the result of trying to access a typed argument via
@@ -476,7 +472,9 @@ constexpr inline bool is_function_returning =
 // However, MSVC fails to compile that.
 template <
     typename F,
-    WHISKER_DSL_REQUIRES(std::is_same_v<detail::function_return_t<F>, object>)>
+    std::enable_if_t< //
+        std::is_same_v<detail::function_return_t<F>, object>,
+        int> = 0>
 class make_function_delegate final : public function {
  public:
   make_function_delegate(std::string name, F&& impl)
@@ -531,7 +529,7 @@ class make_function_delegate final : public function {
  */
 template <
     typename F,
-    WHISKER_DSL_REQUIRES(detail::is_function_returning<F, object>)>
+    std::enable_if_t<detail::is_function_returning<F, object>, int> = 0>
 function::ptr make_function(std::string name, F&& function) {
   return std::make_shared<detail::make_function_delegate<F>>(
       std::move(name), std::forward<F>(function));
@@ -560,8 +558,9 @@ function::ptr make_function(std::string name, F&& function) {
  */
 template <
     typename F,
-    WHISKER_DSL_REQUIRES(
-        whisker::is_any_object_type<detail::function_return_t<F>>)>
+    std::enable_if_t<
+        whisker::is_any_object_type<detail::function_return_t<F>>,
+        int> = 0>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(
       std::move(name),
@@ -635,7 +634,7 @@ class prototype_builder {
 
   template <
       typename Parent,
-      WHISKER_DSL_REQUIRES(std::is_base_of_v<Parent, self_type>)>
+      std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
   explicit prototype_builder(prototype_ptr<Parent> parent)
       : parent_(std::move(parent)) {
     assert(parent_ != nullptr);
@@ -692,7 +691,7 @@ class prototype_builder {
 
   template <
       typename Parent,
-      WHISKER_DSL_REQUIRES(std::is_base_of_v<Parent, self_type>)>
+      std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
   static prototype_builder extends(prototype_ptr<Parent> parent) {
     return prototype_builder{std::move(parent)};
   }
@@ -839,7 +838,4 @@ struct flatten_poly_handle<poly<T...>, poly<U...>, Rest...> {
 };
 
 } // namespace detail
-
-#undef WHISKER_DSL_REQUIRES
-
 } // namespace whisker::dsl

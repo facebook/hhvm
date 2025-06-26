@@ -205,12 +205,6 @@ class ThriftServerStopController final {
 using IsOverloadedFunc = folly::Function<bool(
     const transport::THeader::StringToStringMap&, const std::string&) const>;
 
-using getHandlerFunc = std::function<void(
-    folly::EventBase*,
-    wangle::ConnectionManager*,
-    std::shared_ptr<folly::AsyncTransport>,
-    std::unique_ptr<folly::IOBuf>)>;
-
 using GetHeaderHandlerFunc = std::function<void(
     const apache::thrift::transport::THeader*, const folly::SocketAddress*)>;
 
@@ -519,10 +513,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   const std::shared_ptr<SecurityServerInterface>& getSecurityInterface() const {
     return securityServiceHandler_;
   }
-
-  void setGetHandler(getHandlerFunc func) { getHandler_ = func; }
-
-  getHandlerFunc getGetHandler() { return getHandler_; }
 
   void setGetHeaderHandler(GetHeaderHandlerFunc func) {
     getHeaderHandler_ = func;
@@ -952,7 +942,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::shared_ptr<server::TServerEventHandler> eventHandler_;
   std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
 
-  getHandlerFunc getHandler_;
   GetHeaderHandlerFunc getHeaderHandler_;
 
   // TODO: T176242251 we use unique_ptr and just pass raw pointer / reference in

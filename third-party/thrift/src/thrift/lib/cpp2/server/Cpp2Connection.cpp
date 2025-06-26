@@ -370,44 +370,6 @@ void Cpp2Connection::requestReceived(
     }
   });
 
-  bool useHttpHandler = false;
-  // Any POST not for / should go to the status handler
-  if (hreq->getHeader()->getClientType() == THRIFT_HTTP_SERVER_TYPE) {
-    auto buf = hreq->getBuf();
-    // 7 == length of "POST / " - we are matching on the path
-    if (buf->length() >= 7 &&
-        0 == strncmp(reinterpret_cast<const char*>(buf->data()), "POST", 4) &&
-        buf->data()[6] != ' ') {
-      useHttpHandler = true;
-    }
-
-    // Any GET should use the handler
-    if (buf->length() >= 3 &&
-        0 == strncmp(reinterpret_cast<const char*>(buf->data()), "GET", 3)) {
-      useHttpHandler = true;
-    }
-
-    // Any HEAD should use the handler
-    if (buf->length() >= 4 &&
-        0 == strncmp(reinterpret_cast<const char*>(buf->data()), "HEAD", 4)) {
-      useHttpHandler = true;
-    }
-  }
-
-  if (useHttpHandler && worker_->getServer()->getGetHandler()) {
-    worker_->getServer()->getGetHandler()(
-        worker_->getEventBase(),
-        worker_->getConnectionManager(),
-        transport_,
-        hreq->extractBuf());
-
-    // Close the channel, since the handler now owns the socket.
-    channel_->setCallback(nullptr);
-    channel_->setTransport(nullptr);
-    stop();
-    return;
-  }
-
   if (hreq->getHeader()->getClientType() == THRIFT_HTTP_SERVER_TYPE ||
       hreq->getHeader()->getClientType() == THRIFT_HTTP_CLIENT_TYPE ||
       hreq->getHeader()->getClientType() == THRIFT_HTTP_GET_CLIENT_TYPE) {

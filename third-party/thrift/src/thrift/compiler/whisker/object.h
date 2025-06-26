@@ -699,29 +699,15 @@ class object final : private detail::object_base {
       resolved = resolved->as_proxy().get();
     }
 
-    auto overloaded = detail::overload(std::forward<Visitors>(visitors)...);
-    // This macro could be implemented using variant_match + overload, but that
-    // would require two levels of indirection. That leads to some really ugly
-    // template-related compiler errors.
-#define WHISKER_OBJECT_TRY_VISIT(type)                 \
-  do {                                                 \
-    if (const auto* v = std::get_if<type>(resolved)) { \
-      return overloaded(*v);                           \
-    }                                                  \
-  } while (false)
-    WHISKER_OBJECT_TRY_VISIT(null);
-    WHISKER_OBJECT_TRY_VISIT(i64);
-    WHISKER_OBJECT_TRY_VISIT(f64);
-    WHISKER_OBJECT_TRY_VISIT(string);
-    WHISKER_OBJECT_TRY_VISIT(boolean);
-    WHISKER_OBJECT_TRY_VISIT(native_function::ptr);
-    WHISKER_OBJECT_TRY_VISIT(native_handle<>);
-    WHISKER_OBJECT_TRY_VISIT(map::ptr);
-    WHISKER_OBJECT_TRY_VISIT(array::ptr);
-#undef WHISKER_OBJECT_TRY_VISIT
-    assert(!static_cast<bool>(
-        "There is a missed variant alternative in object::visit() implementation"));
-    throw std::bad_variant_access();
+    return detail::variant_match(
+        resolved->as_variant(),
+        [](managed_ptr<object>) -> decltype(detail::overload(
+                                    std::forward<Visitors>(visitors)...)(
+                                    i64{})) {
+          // Unreachable: unwrapped above.
+          std::terminate();
+        },
+        std::forward<Visitors>(visitors)...);
   }
 
   const i64& as_i64() const { return as<i64>(); }

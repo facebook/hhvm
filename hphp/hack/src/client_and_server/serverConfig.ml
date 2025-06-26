@@ -465,7 +465,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt "allow_all_files_for_module_declarations" config)
     ?tco_populate_dead_unsafe_cast_heap:
       (bool_opt "populate_dead_unsafe_cast_heap" config)
-    ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
     ?warnings_default_all:(bool_opt "warnings_default_all" config)
     ?tco_strict_switch:(bool_opt "strict_switch" config)

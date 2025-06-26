@@ -279,8 +279,6 @@ let set_tco_autocomplete_mode t =
 
 let package_info t = t.GlobalOptions.po.ParserOptions.package_info
 
-let tco_log_exhaustivity_check t = t.GlobalOptions.tco_log_exhaustivity_check
-
 let tco_sticky_quarantine t = t.GlobalOptions.tco_sticky_quarantine
 
 let tco_lsp_invalidation t = t.GlobalOptions.tco_lsp_invalidation

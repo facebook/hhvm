@@ -22,7 +22,7 @@ namespace hack edenfs.service
  * API style guide.
  * ----------------
  *
- * These guides are to ensure we use consistent pratices to make
+ * These guides are to ensure we use consistent practices to make
  * our interface easy to use.
  * 1. Wrap the endpoint arguments in a struct. The name of this argument
  * struct should be the endpointname + "Request". This is Thrift's recommended
@@ -1459,9 +1459,9 @@ struct GlobParams {
   // evaluated, if this is empty then globFiles will fall back to using only
   // the current revision.
   // If eden moves away from commit hashes this may become the tree hash
-  // for the root tree agains which this glob should be evaluated.
+  // for the root tree against which this glob should be evaluated.
   // There should be no duplicates in this list. If there are then
-  // there maybe duplicate machingFile and originHash pairs in the corresponding
+  // there maybe duplicate matchingFile and originHash pairs in the corresponding
   // output Glob.
   7: list<ThriftRootId> revisions;
   // This has no effect.
@@ -1476,7 +1476,7 @@ struct GlobParams {
   11: optional PredictiveFetch predictiveGlob;
   // Normally the returned file list will contain both files and directories.
   // Some clients would like to see only lists of files, this option tells us
-  // wether to filter or not.
+  // whether to filter or not.
   // Note for Eden developers: when this is false the matchingFiles fileList
   // will not actually be the list that is fed into the backing store to prefetch.
   12: bool listOnlyFiles = false;
@@ -1957,7 +1957,7 @@ struct ChangesSinceV2Result {
  *
  * fromPosition - the journal position used as the starting point to
  *   request changes since. Typically, fromPosition is the set to the
- *   toPostiion value returned in ChangesSinceV2Result. However, for
+ *   toPosition value returned in ChangesSinceV2Result. However, for
  *   the initial invocation of changesSinceV2, the caller can obtain
  *   the current journal position by calling getCurrentJournalPosition.
  *
@@ -1969,7 +1969,7 @@ struct ChangesSinceV2Result {
  *   provided or an empty list, all roots will be included in results.
  *   Applied before roots are excluded - see excludedRoots.
  *
- * excludedRoots - optional ist of roots to exclude from results. If not
+ * excludedRoots - optional list of roots to exclude from results. If not
  *   provided or an empty list, no roots will be excluded from results.
  *   Applied after roots are included - see includedRoots.
  *
@@ -1977,7 +1977,7 @@ struct ChangesSinceV2Result {
  *   provided or an empty list, all suffixes will be included in results.
  *   Applied before suffixes are excluded - see excludedSuffixes.
  *
- * excludedSuffixes - optional ist of suffixes to exclude from results. If not
+ * excludedSuffixes - optional list of suffixes to exclude from results. If not
  *   provided or an empty list, no suffixes will be excluded from results.
  *   Applied after suffixes are included - see includedSuffixes.
  */

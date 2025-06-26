@@ -80,7 +80,7 @@ namespace test {
 struct SchemaTest;
 }
 
-class SchemaRegistry {
+class SchemaRegistry : public type_system::TypeSystem {
  public:
   // Access the global registry.
   static SchemaRegistry& get();
@@ -136,9 +136,26 @@ class SchemaRegistry {
   }
 
   explicit SchemaRegistry(BaseSchemaRegistry& base);
-  ~SchemaRegistry();
+  ~SchemaRegistry() override;
 
  private:
+  // TypeSystem API defined as private to encourage use of more specific method
+  // names.
+  std::optional<type_system::DefinitionRef> getUserDefinedType(
+      type_system::UriView uri) const override {
+    return getTypeSystemDefinitionRefByUri(uri);
+  }
+  // Only types defined in a file with the `any` cpp2 compiler option enabled
+  // will be included here.
+  folly::F14FastSet<type_system::Uri> getKnownUris() const override {
+    folly::F14FastSet<type_system::Uri> ret;
+    ret.reserve(base_.rawSchemasByUri_.size());
+    for (const auto& [uri, _] : base_.rawSchemasByUri_) {
+      ret.insert(type_system::Uri(uri));
+    }
+    return ret;
+  }
+
   using Ptr = std::shared_ptr<type::Schema>;
 
   // Access all data registered

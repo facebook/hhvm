@@ -244,6 +244,10 @@ TEST_F(SchemaTest, getTypeSystemDefinitionRef) {
   // Ensure fields with container types pull in schema of the element type.
   registry.getTypeSystemDefinitionRef<
       facebook::thrift::test::schema::NonSchematizedStruct>();
+
+  dynamicDefinitionRef =
+      static_cast<type_system::TypeSystem&>(registry).getUserDefinedType(uri);
+  EXPECT_EQ(uri, dynamicDefinitionRef->asStruct().uri());
 }
 
 } // namespace apache::thrift::test

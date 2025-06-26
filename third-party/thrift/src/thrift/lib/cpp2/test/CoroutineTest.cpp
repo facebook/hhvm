@@ -663,9 +663,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
       apache::thrift::HandlerCallback<std::unique_ptr<SumResponse>>>(
       nullptr,
       nullptr,
-      "" /* serviceName */,
-      "" /* definingServiceName */,
-      "" /* methodName */,
+      apache::thrift::HandlerCallbackBase::MethodNameInfo{"", "", "", ""},
       nullptr,
       nullptr,
       0,
@@ -677,9 +675,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
   auto cb2 = std::make_unique<apache::thrift::HandlerCallback<int32_t>>(
       nullptr,
       nullptr,
-      "" /* serviceName */,
-      "" /* definingServiceName */,
-      "" /* methodName */,
+      apache::thrift::HandlerCallbackBase::MethodNameInfo{"", "", "", ""},
       nullptr,
       nullptr,
       0,
@@ -691,9 +687,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
   auto cb3 = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       nullptr,
       nullptr,
-      "" /* serviceName */,
-      "" /* definingServiceName */,
-      "" /* methodName */,
+      apache::thrift::HandlerCallbackBase::MethodNameInfo{"", "", "", ""},
       nullptr,
       ebt.getEventBase(),
       tm.get(),

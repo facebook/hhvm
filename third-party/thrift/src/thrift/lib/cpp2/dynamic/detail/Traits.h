@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/Traits.h>
+#include <folly/memory/not_null.h>
 
 #include <cstddef>
 #include <variant>
@@ -45,5 +46,14 @@ struct IndexOfImpl<std::variant<Types...>, T> {
  */
 template <typename Variant, typename T>
 inline constexpr std::size_t IndexOf = IndexOfImpl<Variant, T>::value;
+
+template <typename T>
+T& maybe_deref(T& t) {
+  return t;
+}
+template <typename T>
+T& maybe_deref(folly::not_null<T*> t) {
+  return *t;
+}
 
 } // namespace apache::thrift::type_system::detail

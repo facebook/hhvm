@@ -842,25 +842,10 @@ class DefinitionRef final {
 
 template <typename... F>
 decltype(auto) TypeRef::visit(F&&... visitors) const {
-  auto overloaded = folly::overload(std::forward<F>(visitors)...);
-  return folly::variant_match(
-      type_,
-      [&](StructPtr structDef) -> decltype(auto) {
-        return overloaded(*structDef);
-      },
-      [&](UnionPtr unionDef) -> decltype(auto) {
-        return overloaded(*unionDef);
-      },
-      [&](EnumPtr enumDef) -> decltype(auto) { return overloaded(*enumDef); },
-      [&](OpaqueAliasPtr opaqueAliasDef) -> decltype(auto) {
-        return overloaded(*opaqueAliasDef);
-      },
-      [&](const List& list) -> decltype(auto) { return overloaded(list); },
-      [&](const Set& set) -> decltype(auto) { return overloaded(set); },
-      [&](const Map& map) -> decltype(auto) { return overloaded(map); },
-      [&](const auto& primitive) -> decltype(auto) {
-        return overloaded(primitive);
-      });
+  return folly::variant_match(type_, [&](const auto& val) -> decltype(auto) {
+    return folly::overload(std::forward<F>(visitors)...)(
+        detail::maybe_deref(val));
+  });
 }
 
 namespace detail {

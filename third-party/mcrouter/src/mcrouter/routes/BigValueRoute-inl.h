@@ -234,10 +234,8 @@ typename std::enable_if_t<
         typename BigValueRoute<RouterInfo>::ChunksInfo>>
 BigValueRoute<RouterInfo>::chunkUpdateRequests(const Request& req) const {
   const folly::IOBuf& value = *req.value_ref();
-  uint64_t itemSize = value.computeChainDataLength();
-  int numChunks = (itemSize + options_.threshold - 1) / options_.threshold;
-  fiber_local<RouterInfo>::setBigValueContext(
-      BigValueContext(itemSize, numChunks));
+  int numChunks = (value.computeChainDataLength() + options_.threshold - 1) /
+      options_.threshold;
   ChunksInfo info(numChunks, detail::hashBigValue(value));
 
   std::vector<McSetRequest> chunkReqs;

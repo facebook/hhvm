@@ -68,11 +68,6 @@ struct AxonContext {
   std::string poolFilter;
 };
 
-struct BigValueContext {
-  uint64_t originalItemSize{0};
-  uint32_t numChunks{0};
-};
-
 template <class RouterInfo>
 class fiber_local {
  private:
@@ -99,7 +94,6 @@ class fiber_local {
     std::shared_ptr<AxonContext> axonCtx{nullptr};
     int64_t accumulatedBeforeReqInjectedLatencyUs{0};
     int64_t accumulatedAfterReqInjectedLatencyUs{0};
-    std::optional<BigValueContext> bigValueContext{std::nullopt};
   };
 
   static auto makeGuardHelperBase(McrouterFiberContext&& tmp) {
@@ -317,15 +311,6 @@ class fiber_local {
 
   static ServerLoad getServerLoad() {
     return folly::fibers::local<McrouterFiberContext>().load;
-  }
-
-  static std::optional<BigValueContext>& getBigValueContext() {
-    return folly::fibers::local<McrouterFiberContext>().bigValueContext;
-  }
-
-  static void setBigValueContext(BigValueContext bigValueContext) {
-    folly::fibers::local<McrouterFiberContext>().bigValueContext =
-        bigValueContext;
   }
 
   static void incNetworkTransportTimeBy(int64_t duration_us) {

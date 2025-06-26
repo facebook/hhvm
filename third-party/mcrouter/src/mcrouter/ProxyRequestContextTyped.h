@@ -207,8 +207,7 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
         getProductId(request),
         getRegionalizationEntity(request),
         getUsecaseId(request),
-        getReplySourceBitMask(reply),
-        fiber_local<RouterInfo>::getBigValueContext());
+        getReplySourceBitMask(reply));
     assert(logger_.hasValue());
     logger_->template log<Request>(loggerContext);
     assert(additionalLogger_.hasValue());

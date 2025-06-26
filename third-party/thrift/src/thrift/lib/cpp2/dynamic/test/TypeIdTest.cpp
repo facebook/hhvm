@@ -166,4 +166,30 @@ TEST(TypeIdTest, TagToTypeId) {
       t::map(t::String, t::I64),
       tagToTypeId(type::map<type::string_t, type::i64_t>{}));
 }
+
+TEST(TypeIdTest, Hash) {
+  std::unordered_set<TypeId> set;
+
+  auto testFn = [&](auto val) {
+    set.insert(val);
+    EXPECT_EQ(set.count(val), 1);
+    set.erase(val);
+    EXPECT_EQ(set.count(val), 0);
+  };
+
+  testFn(t::Bool);
+  testFn(t::Byte);
+  testFn(t::I16);
+  testFn(t::I32);
+  testFn(t::I64);
+  testFn(t::Float);
+  testFn(t::Double);
+  testFn(t::String);
+  testFn(t::Binary);
+  testFn(t::Any);
+  testFn(t::list(t::Bool));
+  testFn(t::set(t::I32));
+  testFn(t::map(t::String, t::I64));
+  testFn(t::uri("meta.com/thrift/Test"));
+}
 } // namespace apache::thrift::type_system

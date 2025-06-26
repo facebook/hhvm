@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/thrift/gen-cpp2/type_id_types.h>
+#include <thrift/lib/thrift/gen-cpp2/type_id_types_custom_protocol.h>
 
 #include <iosfwd>
 
@@ -150,3 +151,7 @@ TypeId tagToTypeId(Tag) {
 }
 
 } // namespace apache::thrift::type_system
+
+// Make TypeId hashable
+// DISCLAIMER: THIS IS NOT A DETERMINISTIC HASH! DO NOT PERSIST HASH VALUES!
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type_system::TypeId)

@@ -18,6 +18,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/generate/cpp/util.h>
 
 namespace apache::thrift::compiler {
@@ -34,6 +35,53 @@ bool is_patch_program(const t_program* prog) {
   return prog ? (boost::algorithm::starts_with(prog->name(), "gen_patch_") ||
                  boost::algorithm::starts_with(prog->name(), "gen_safe_patch_"))
               : false;
+}
+
+static void get_needed_includes_impl(
+    const t_program* root,
+    const t_type& type,
+    std::unordered_set<const t_type*>& seen,
+    std::unordered_set<const t_program*>& result) {
+  if (!seen.insert(&type).second) {
+    return;
+  }
+  if (type.get_program() && type.get_program() != root) {
+    // If type is not in root, root needs type's program in runtime.
+    result.insert(type.get_program());
+    return;
+  }
+  if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
+    get_needed_includes_impl(root, *asTypedef->get_type(), seen, result);
+  }
+  if (const t_list* asList = type.try_as<t_list>()) {
+    get_needed_includes_impl(root, *asList->get_elem_type(), seen, result);
+  }
+  if (const t_set* asSet = type.try_as<t_set>()) {
+    get_needed_includes_impl(root, *asSet->get_elem_type(), seen, result);
+  }
+  if (const t_map* asMap = type.try_as<t_map>()) {
+    get_needed_includes_impl(root, *asMap->get_key_type(), seen, result);
+    get_needed_includes_impl(root, *asMap->get_val_type(), seen, result);
+  }
+  if (const t_structured* asStructured = type.try_as<t_structured>()) {
+    for (auto& field : asStructured->fields()) {
+      get_needed_includes_impl(root, *field.type().get_type(), seen, result);
+    }
+  }
+}
+
+std::unordered_set<const t_program*> needed_includes_in_runtime(
+    const t_program* root) {
+  std::unordered_set<const t_program*> programs;
+  std::unordered_set<const t_type*> seen;
+  const_ast_visitor visitor;
+  visitor.add_root_definition_visitor([&](const t_named& def) {
+    if (auto type = dynamic_cast<const t_type*>(&def)) {
+      get_needed_includes_impl(root, *type, seen, programs);
+    }
+  });
+  visitor(*root);
+  return programs;
 }
 
 bool type_contains_patch(const t_type* type) {

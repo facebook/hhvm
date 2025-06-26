@@ -56,11 +56,11 @@ import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_t
 {{/if (not program:safe_patch?)}}
 
 {{#program:include_namespaces}}
-{{#if has_types?}}{{#if (not is_patch?)}}
+{{#if has_types?}}{{#if (not is_patch?)}}{{#if needed_in_runtime?}}
 
 import {{included_module_path}}.{{> ../python/types/types_import_path}} as {{included_module_mangle}}__{{> ../python/types/types_import_path}}
 import {{included_module_path}}.thrift_patch
-{{/if (not is_patch?)}}{{/if has_types?}}
+{{/if needed_in_runtime?}}{{/if (not is_patch?)}}{{/if has_types?}}
 {{/program:include_namespaces}}
 
 {{#program:structs}}

@@ -48,6 +48,10 @@ std::string get_py3_namespace_with_name_and_prefix(
     const std::string& prefix,
     const std::string& sep = ".");
 
+// List of programs that `root` needed in runtime
+std::unordered_set<const t_program*> needed_includes_in_runtime(
+    const t_program* root);
+
 inline const std::unordered_set<std::string>& get_python_reserved_names() {
   static const std::unordered_set<std::string> keywords = {
       "False",  "None",    "True",    "and",      "as",       "assert", "async",

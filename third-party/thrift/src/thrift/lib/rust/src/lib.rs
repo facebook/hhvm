@@ -24,7 +24,7 @@ macro_rules! bail_err {
 }
 
 macro_rules! ensure_err {
-    ($cond:expr_2021, $e:expr_2021) => {
+    ($cond:expr_2021, $e:expr_2021 $(,)?) => {
         if !$cond {
             bail_err!($e);
         }

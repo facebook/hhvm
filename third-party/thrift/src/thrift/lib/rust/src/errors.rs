@@ -51,6 +51,8 @@ pub enum ProtocolError {
     TrailingData,
     #[error("Unwanted extra union {0} field ty {1:?} id {2}")]
     UnwantedExtraUnionField(String, TType, i32),
+    #[error("Deserializing collection containing Void element is not supported")]
+    VoidCollectionElement,
 }
 
 /// Error value returned by functions that do not throw any user-defined exceptions.

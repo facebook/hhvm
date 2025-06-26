@@ -2853,6 +2853,12 @@ pub(crate) mod r#impl {
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <::std::string::String as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+                && <::std::primitive::i64 as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+            {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<::std::string::String>() + P::min_size::<::std::primitive::i64>())?;
             let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(len.unwrap_or(0));
 

@@ -549,3 +549,18 @@ fn test_overallocation() {
         Some(&ProtocolError::EOF),
     );
 }
+
+#[test]
+fn test_zst_vector() {
+    let mut malicious = BytesMut::new();
+    malicious.put_u8(TType::Void as u8);
+    malicious.put_i32(1_000_000_000);
+    malicious.put_bytes(0, 10);
+    let malicious = malicious.freeze();
+    let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(malicious.clone()));
+    let err = <Vec<()> as Deserialize<_>>::rs_thrift_read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::VoidCollectionElement),
+    );
+}

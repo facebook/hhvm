@@ -5405,6 +5405,12 @@ pub(crate) mod r#impl {
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+                && <::std::string::String as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+            {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<::std::primitive::i32>() + P::min_size::<::std::string::String>())?;
             let mut map = <::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>>::with_capacity(len.unwrap_or(0));
 
@@ -5458,6 +5464,10 @@ pub(crate) mod r#impl {
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_elem_ty, len) = p.read_set_begin(P::min_size::<::std::primitive::i32>())?;
             let mut set = <::sorted_vector_map::SortedVectorSet<::std::primitive::i32>>::with_capacity(len.unwrap_or(0));
 

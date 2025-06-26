@@ -68,6 +68,10 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}}>())?;
             let mut set = <{{> lib/type}}>::with_capacity(len.unwrap_or(0));
 
@@ -125,6 +129,12 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <{{#type:key_type}}{{> lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+                && <{{#type:value_type}}{{> lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+            {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#type:key_type}}{{> lib/type}}{{/type:key_type}}>() + P::min_size::<{{#type:value_type}}{{> lib/type}}{{/type:value_type}}>())?;
             let mut map = <{{> lib/type}}>::with_capacity(len.unwrap_or(0));
 
@@ -243,6 +253,10 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}}>())?;
             let mut set = <{{> lib/annfieldtype}}>::with_capacity(len.unwrap_or(0));
 
@@ -300,6 +314,12 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+            if <{{#type:key_type}}{{> lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+                && <{{#type:value_type}}{{> lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+            {
+                ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
+            }
+
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#type:key_type}}{{> lib/type}}{{/type:key_type}}>() + P::min_size::<{{#type:value_type}}{{> lib/type}}{{/type:value_type}}>())?;
             let mut map = <{{> lib/annfieldtype}}>::with_capacity(len.unwrap_or(0));
 

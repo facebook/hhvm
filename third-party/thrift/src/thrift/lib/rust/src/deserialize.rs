@@ -25,9 +25,11 @@ use bytes::Bytes;
 use ordered_float::OrderedFloat;
 
 use crate::Result;
+use crate::errors::ProtocolError;
 use crate::protocol::ProtocolReader;
 use crate::protocol::should_break;
 use crate::ttype::GetTType;
+use crate::ttype::TType;
 
 // Read trait. Every type that needs to be deserialized will implement this trait.
 pub trait Deserialize<P>: Sized
@@ -221,9 +223,16 @@ where
 impl<P, T> Deserialize<P> for BTreeSet<T>
 where
     P: ProtocolReader,
-    T: Deserialize<P> + Ord + GetTType,
+    T: Deserialize<P> + GetTType + Ord + GetTType,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Guard against packet-of-death where a small message could cause DoS
+        // by deserializing billions of zero-sized elements.
+        ensure_err!(
+            <T as GetTType>::TTYPE != TType::Void,
+            ProtocolError::VoidCollectionElement,
+        );
+
         // Unchecked: must not use `len` for preallocation (`with_capacity`)
         let (_elem_ty, len) = p.read_set_begin_unchecked()?;
         let mut bset = BTreeSet::new();
@@ -259,6 +268,13 @@ where
     S: std::hash::BuildHasher + Default,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Guard against packet-of-death where a small message could cause DoS
+        // by deserializing billions of zero-sized elements.
+        ensure_err!(
+            <T as GetTType>::TTYPE != TType::Void,
+            ProtocolError::VoidCollectionElement,
+        );
+
         let (_elem_ty, len) = p.read_set_begin(P::min_size::<T>())?;
         let mut hset = HashSet::with_capacity_and_hasher(len.unwrap_or(0), S::default());
 
@@ -293,6 +309,13 @@ where
     V: Deserialize<P> + GetTType,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Guard against packet-of-death where a small message could cause DoS
+        // by deserializing billions of zero-sized elements.
+        ensure_err!(
+            <K as GetTType>::TTYPE != TType::Void || <V as GetTType>::TTYPE != TType::Void,
+            ProtocolError::VoidCollectionElement,
+        );
+
         // Unchecked: must not use `len` for preallocation (`with_capacity`)
         let (_key_ty, _val_ty, len) = p.read_map_begin_unchecked()?;
         let mut btree = BTreeMap::new();
@@ -331,6 +354,13 @@ where
     S: std::hash::BuildHasher + Default,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Guard against packet-of-death where a small message could cause DoS
+        // by deserializing billions of zero-sized elements.
+        ensure_err!(
+            <K as GetTType>::TTYPE != TType::Void || <V as GetTType>::TTYPE != TType::Void,
+            ProtocolError::VoidCollectionElement,
+        );
+
         let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<K>() + P::min_size::<V>())?;
         let mut hmap = HashMap::with_capacity_and_hasher(len.unwrap_or(0), S::default());
 
@@ -367,6 +397,13 @@ where
 {
     /// Vec<T> is Thrift List type
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        // Guard against packet-of-death where a small message could cause DoS
+        // by deserializing billions of zero-sized elements.
+        ensure_err!(
+            <T as GetTType>::TTYPE != TType::Void,
+            ProtocolError::VoidCollectionElement,
+        );
+
         let (_elem_ty, len) = p.read_list_begin(P::min_size::<T>())?;
         let mut list = Vec::with_capacity(len.unwrap_or(0));
 

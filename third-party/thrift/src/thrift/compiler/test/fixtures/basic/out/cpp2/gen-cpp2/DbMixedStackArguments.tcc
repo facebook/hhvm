@@ -69,7 +69,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DbMixedStackArguments",
-    /* .methodName =*/ "getDataByKey0"};
+    /* .methodName =*/ "getDataByKey0",
+    /* .qualifiedMethodName =*/ "DbMixedStackArguments.getDataByKey0"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -183,7 +184,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DbMixedStackArguments",
-    /* .methodName =*/ "getDataByKey1"};
+    /* .methodName =*/ "getDataByKey1",
+    /* .qualifiedMethodName =*/ "DbMixedStackArguments.getDataByKey1"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

@@ -73,7 +73,8 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Service",
-    /* .methodName =*/ "func"};
+    /* .methodName =*/ "func",
+    /* .qualifiedMethodName =*/ "Service.func"};
   auto callback = apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::MyI32_4873>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

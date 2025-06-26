@@ -75,7 +75,8 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "NestedContainers",
-    /* .methodName =*/ "mapList"};
+    /* .methodName =*/ "mapList",
+    /* .qualifiedMethodName =*/ "NestedContainers.mapList"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -187,7 +188,8 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "NestedContainers",
-    /* .methodName =*/ "mapSet"};
+    /* .methodName =*/ "mapSet",
+    /* .qualifiedMethodName =*/ "NestedContainers.mapSet"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -299,7 +301,8 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "NestedContainers",
-    /* .methodName =*/ "listMap"};
+    /* .methodName =*/ "listMap",
+    /* .qualifiedMethodName =*/ "NestedContainers.listMap"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -411,7 +414,8 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "NestedContainers",
-    /* .methodName =*/ "listSet"};
+    /* .methodName =*/ "listSet",
+    /* .qualifiedMethodName =*/ "NestedContainers.listSet"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -523,7 +527,8 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "NestedContainers",
-    /* .methodName =*/ "turtles"};
+    /* .methodName =*/ "turtles",
+    /* .qualifiedMethodName =*/ "NestedContainers.turtles"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

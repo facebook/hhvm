@@ -107,7 +107,8 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "noReturn"};
+    /* .methodName =*/ "noReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.noReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -216,7 +217,8 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "boolReturn"};
+    /* .methodName =*/ "boolReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.boolReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -327,7 +329,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "i16Return"};
+    /* .methodName =*/ "i16Return",
+    /* .qualifiedMethodName =*/ "ReturnService.i16Return"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -438,7 +441,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "i32Return"};
+    /* .methodName =*/ "i32Return",
+    /* .qualifiedMethodName =*/ "ReturnService.i32Return"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -549,7 +553,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "i64Return"};
+    /* .methodName =*/ "i64Return",
+    /* .qualifiedMethodName =*/ "ReturnService.i64Return"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -660,7 +665,8 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(apache::thrift::Ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "floatReturn"};
+    /* .methodName =*/ "floatReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.floatReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<float>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -771,7 +777,8 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "doubleReturn"};
+    /* .methodName =*/ "doubleReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.doubleReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<double>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -885,7 +892,8 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "stringReturn"};
+    /* .methodName =*/ "stringReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.stringReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -996,7 +1004,8 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "binaryReturn"};
+    /* .methodName =*/ "binaryReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.binaryReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1107,7 +1116,8 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "mapReturn"};
+    /* .methodName =*/ "mapReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.mapReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1218,7 +1228,8 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "simpleTypedefReturn"};
+    /* .methodName =*/ "simpleTypedefReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.simpleTypedefReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::simpleTypeDef>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1329,7 +1340,8 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "complexTypedefReturn"};
+    /* .methodName =*/ "complexTypedefReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.complexTypedefReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::complexStructTypeDef>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1440,7 +1452,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(a
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "list_mostComplexTypedefReturn"};
+    /* .methodName =*/ "list_mostComplexTypedefReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.list_mostComplexTypedefReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1554,7 +1567,8 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "enumReturn"};
+    /* .methodName =*/ "enumReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.enumReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1668,7 +1682,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "list_EnumReturn"};
+    /* .methodName =*/ "list_EnumReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.list_EnumReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1779,7 +1794,8 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "structReturn"};
+    /* .methodName =*/ "structReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.structReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::MyStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1890,7 +1906,8 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "set_StructReturn"};
+    /* .methodName =*/ "set_StructReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.set_StructReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2004,7 +2021,8 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(apache::thrift::Ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "unionReturn"};
+    /* .methodName =*/ "unionReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.unionReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::ComplexUnion>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2115,7 +2133,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "list_UnionReturn"};
+    /* .methodName =*/ "list_UnionReturn",
+    /* .qualifiedMethodName =*/ "ReturnService.list_UnionReturn"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2232,7 +2251,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "readDataEb"};
+    /* .methodName =*/ "readDataEb",
+    /* .qualifiedMethodName =*/ "ReturnService.readDataEb"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::IOBuf>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2346,7 +2366,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ReturnService",
-    /* .methodName =*/ "readData"};
+    /* .methodName =*/ "readData",
+    /* .qualifiedMethodName =*/ "ReturnService.readData"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::IOBufPtr>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

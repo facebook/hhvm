@@ -67,7 +67,8 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "TestService",
-    /* .methodName =*/ "init"};
+    /* .methodName =*/ "init",
+    /* .qualifiedMethodName =*/ "TestService.init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

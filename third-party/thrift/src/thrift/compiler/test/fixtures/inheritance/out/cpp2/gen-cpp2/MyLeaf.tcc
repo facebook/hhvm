@@ -64,7 +64,8 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(apache::thrift::ServerRequest&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyLeaf",
-    /* .methodName =*/ "do_leaf"};
+    /* .methodName =*/ "do_leaf",
+    /* .qualifiedMethodName =*/ "MyLeaf.do_leaf"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

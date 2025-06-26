@@ -64,7 +64,8 @@ void MyRootAsyncProcessor::executeRequest_do_root(apache::thrift::ServerRequest&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyRoot",
-    /* .methodName =*/ "do_root"};
+    /* .methodName =*/ "do_root",
+    /* .qualifiedMethodName =*/ "MyRoot.do_root"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

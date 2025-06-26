@@ -104,7 +104,8 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "method"};
+    /* .methodName =*/ "method",
+    /* .qualifiedMethodName =*/ "SinkService.method"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -227,7 +228,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "methodAndReponse"};
+    /* .methodName =*/ "methodAndReponse",
+    /* .qualifiedMethodName =*/ "SinkService.methodAndReponse"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -352,7 +354,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "methodThrow"};
+    /* .methodName =*/ "methodThrow",
+    /* .qualifiedMethodName =*/ "SinkService.methodThrow"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -492,7 +495,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "methodSinkThrow"};
+    /* .methodName =*/ "methodSinkThrow",
+    /* .qualifiedMethodName =*/ "SinkService.methodSinkThrow"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -615,7 +619,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "methodFinalThrow"};
+    /* .methodName =*/ "methodFinalThrow",
+    /* .qualifiedMethodName =*/ "SinkService.methodFinalThrow"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -748,7 +753,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "methodBothThrow"};
+    /* .methodName =*/ "methodBothThrow",
+    /* .qualifiedMethodName =*/ "SinkService.methodBothThrow"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -884,7 +890,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SinkService",
-    /* .methodName =*/ "methodFast"};
+    /* .methodName =*/ "methodFast",
+    /* .qualifiedMethodName =*/ "SinkService.methodFast"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

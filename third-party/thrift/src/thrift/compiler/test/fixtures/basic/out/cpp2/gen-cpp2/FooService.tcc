@@ -64,7 +64,8 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "FooService",
-    /* .methodName =*/ "simple_rpc"};
+    /* .methodName =*/ "simple_rpc",
+    /* .qualifiedMethodName =*/ "FooService.simple_rpc"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

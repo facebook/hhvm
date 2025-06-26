@@ -71,7 +71,8 @@ void CAsyncProcessor::executeRequest_f(apache::thrift::ServerRequest&& serverReq
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "C",
-    /* .methodName =*/ "f"};
+    /* .methodName =*/ "f",
+    /* .qualifiedMethodName =*/ "C.f"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -180,7 +181,8 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "C",
-    /* .methodName =*/ "numbers"};
+    /* .methodName =*/ "numbers",
+    /* .qualifiedMethodName =*/ "C.numbers"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::number>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -303,7 +305,8 @@ void CAsyncProcessor::executeRequest_thing(apache::thrift::ServerRequest&& serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "C",
-    /* .methodName =*/ "thing"};
+    /* .methodName =*/ "thing",
+    /* .qualifiedMethodName =*/ "C.thing"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

@@ -1037,6 +1037,8 @@ class HandlerCallbackBase {
     std::string_view definingServiceName;
     // Self explanatory
     std::string_view methodName;
+    // This is {serviceName}.{methodName}
+    std::string_view qualifiedMethodName;
   };
 
   HandlerCallbackBase() : eb_(nullptr), reqCtx_(nullptr), protoSeqId_(0) {}

@@ -68,7 +68,8 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(apache::thrift::Ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "BoxService",
-    /* .methodName =*/ "getABoxSession"};
+    /* .methodName =*/ "getABoxSession",
+    /* .qualifiedMethodName =*/ "BoxService.getABoxSession"};
   auto callback = apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -184,7 +185,8 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "BoxService",
-    /* .methodName =*/ "BoxedInteraction.getABox"};
+    /* .methodName =*/ "BoxedInteraction.getABox",
+    /* .qualifiedMethodName =*/ "BoxedInteraction.BoxedInteraction.getABox"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

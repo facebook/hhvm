@@ -118,7 +118,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "get"};
+    /* .methodName =*/ "get",
+    /* .qualifiedMethodName =*/ "service_with_special_names.get"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -229,7 +230,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "getter"};
+    /* .methodName =*/ "getter",
+    /* .qualifiedMethodName =*/ "service_with_special_names.getter"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -340,7 +342,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "lists"};
+    /* .methodName =*/ "lists",
+    /* .qualifiedMethodName =*/ "service_with_special_names.lists"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -451,7 +454,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "maps"};
+    /* .methodName =*/ "maps",
+    /* .qualifiedMethodName =*/ "service_with_special_names.maps"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -562,7 +566,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "name"};
+    /* .methodName =*/ "name",
+    /* .qualifiedMethodName =*/ "service_with_special_names.name"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -673,7 +678,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(apac
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "name_to_value"};
+    /* .methodName =*/ "name_to_value",
+    /* .qualifiedMethodName =*/ "service_with_special_names.name_to_value"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -784,7 +790,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "names"};
+    /* .methodName =*/ "names",
+    /* .qualifiedMethodName =*/ "service_with_special_names.names"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -895,7 +902,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(apache
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "prefix_tree"};
+    /* .methodName =*/ "prefix_tree",
+    /* .qualifiedMethodName =*/ "service_with_special_names.prefix_tree"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1006,7 +1014,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "sets"};
+    /* .methodName =*/ "sets",
+    /* .qualifiedMethodName =*/ "service_with_special_names.sets"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1117,7 +1126,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "setter"};
+    /* .methodName =*/ "setter",
+    /* .qualifiedMethodName =*/ "service_with_special_names.setter"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1228,7 +1238,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "str"};
+    /* .methodName =*/ "str",
+    /* .qualifiedMethodName =*/ "service_with_special_names.str"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1339,7 +1350,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "strings"};
+    /* .methodName =*/ "strings",
+    /* .qualifiedMethodName =*/ "service_with_special_names.strings"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1450,7 +1462,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "type"};
+    /* .methodName =*/ "type",
+    /* .qualifiedMethodName =*/ "service_with_special_names.type"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1561,7 +1574,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "value"};
+    /* .methodName =*/ "value",
+    /* .qualifiedMethodName =*/ "service_with_special_names.value"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1672,7 +1686,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(apac
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "value_to_name"};
+    /* .methodName =*/ "value_to_name",
+    /* .qualifiedMethodName =*/ "service_with_special_names.value_to_name"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1783,7 +1798,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "values"};
+    /* .methodName =*/ "values",
+    /* .qualifiedMethodName =*/ "service_with_special_names.values"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1894,7 +1910,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "id"};
+    /* .methodName =*/ "id",
+    /* .qualifiedMethodName =*/ "service_with_special_names.id"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2005,7 +2022,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "ids"};
+    /* .methodName =*/ "ids",
+    /* .qualifiedMethodName =*/ "service_with_special_names.ids"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2116,7 +2134,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(apache:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "descriptor"};
+    /* .methodName =*/ "descriptor",
+    /* .qualifiedMethodName =*/ "service_with_special_names.descriptor"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2227,7 +2246,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(apache
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "descriptors"};
+    /* .methodName =*/ "descriptors",
+    /* .qualifiedMethodName =*/ "service_with_special_names.descriptors"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2338,7 +2358,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "key"};
+    /* .methodName =*/ "key",
+    /* .qualifiedMethodName =*/ "service_with_special_names.key"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2449,7 +2470,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "keys"};
+    /* .methodName =*/ "keys",
+    /* .qualifiedMethodName =*/ "service_with_special_names.keys"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2560,7 +2582,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(apache:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "annotation"};
+    /* .methodName =*/ "annotation",
+    /* .qualifiedMethodName =*/ "service_with_special_names.annotation"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2671,7 +2694,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(apache
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "annotations"};
+    /* .methodName =*/ "annotations",
+    /* .qualifiedMethodName =*/ "service_with_special_names.annotations"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2782,7 +2806,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "member"};
+    /* .methodName =*/ "member",
+    /* .qualifiedMethodName =*/ "service_with_special_names.member"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2893,7 +2918,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "members"};
+    /* .methodName =*/ "members",
+    /* .qualifiedMethodName =*/ "service_with_special_names.members"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3004,7 +3030,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "field"};
+    /* .methodName =*/ "field",
+    /* .qualifiedMethodName =*/ "service_with_special_names.field"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3115,7 +3142,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service_with_special_names",
-    /* .methodName =*/ "fields"};
+    /* .methodName =*/ "fields",
+    /* .qualifiedMethodName =*/ "service_with_special_names.fields"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

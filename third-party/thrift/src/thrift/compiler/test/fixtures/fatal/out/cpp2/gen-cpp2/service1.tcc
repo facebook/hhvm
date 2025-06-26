@@ -74,7 +74,8 @@ void service1AsyncProcessor::executeRequest_method1(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service1",
-    /* .methodName =*/ "method1"};
+    /* .methodName =*/ "method1",
+    /* .qualifiedMethodName =*/ "service1.method1"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -192,7 +193,8 @@ void service1AsyncProcessor::executeRequest_method2(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service1",
-    /* .methodName =*/ "method2"};
+    /* .methodName =*/ "method2",
+    /* .qualifiedMethodName =*/ "service1.method2"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -301,7 +303,8 @@ void service1AsyncProcessor::executeRequest_method3(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service1",
-    /* .methodName =*/ "method3"};
+    /* .methodName =*/ "method3",
+    /* .qualifiedMethodName =*/ "service1.method3"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -421,7 +424,8 @@ void service1AsyncProcessor::executeRequest_method4(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service1",
-    /* .methodName =*/ "method4"};
+    /* .methodName =*/ "method4",
+    /* .qualifiedMethodName =*/ "service1.method4"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -532,7 +536,8 @@ void service1AsyncProcessor::executeRequest_method5(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service1",
-    /* .methodName =*/ "method5"};
+    /* .methodName =*/ "method5",
+    /* .qualifiedMethodName =*/ "service1.method5"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -652,7 +657,8 @@ void service1AsyncProcessor::executeRequest_method6(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "service1",
-    /* .methodName =*/ "method6"};
+    /* .methodName =*/ "method6",
+    /* .qualifiedMethodName =*/ "service1.method6"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

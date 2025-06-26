@@ -504,7 +504,9 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
           apache::thrift::HandlerCallbackBase::MethodNameInfo{
               .serviceName = serviceName,
               .definingServiceName = serviceName,
-              .methodName = methodName},
+              .methodName = methodName,
+              .qualifiedMethodName =
+                  fmt::format("{}.{}", serviceName, methodName)},
           nullptr,
           eb,
           executor,
@@ -538,7 +540,9 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
               apache::thrift::HandlerCallbackBase::MethodNameInfo{
                   .serviceName = serviceName,
                   .definingServiceName = serviceName,
-                  .methodName = methodName},
+                  .methodName = methodName,
+                  .qualifiedMethodName =
+                      fmt::format("{}.{}", serviceName, methodName)},
               return_streaming,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),
@@ -571,7 +575,9 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
               apache::thrift::HandlerCallbackBase::MethodNameInfo{
                   .serviceName = serviceName,
                   .definingServiceName = serviceName,
-                  .methodName = methodName},
+                  .methodName = methodName,
+                  .qualifiedMethodName =
+                      fmt::format("{}.{}", serviceName, methodName)},
               return_serialized,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),

@@ -70,7 +70,8 @@ void RaiserAsyncProcessor::executeRequest_doBland(apache::thrift::ServerRequest&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Raiser",
-    /* .methodName =*/ "doBland"};
+    /* .methodName =*/ "doBland",
+    /* .qualifiedMethodName =*/ "Raiser.doBland"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -179,7 +180,8 @@ void RaiserAsyncProcessor::executeRequest_doRaise(apache::thrift::ServerRequest&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Raiser",
-    /* .methodName =*/ "doRaise"};
+    /* .methodName =*/ "doRaise",
+    /* .qualifiedMethodName =*/ "Raiser.doRaise"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -325,7 +327,8 @@ void RaiserAsyncProcessor::executeRequest_get200(apache::thrift::ServerRequest&&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Raiser",
-    /* .methodName =*/ "get200"};
+    /* .methodName =*/ "get200",
+    /* .qualifiedMethodName =*/ "Raiser.get200"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -436,7 +439,8 @@ void RaiserAsyncProcessor::executeRequest_get500(apache::thrift::ServerRequest&&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Raiser",
-    /* .methodName =*/ "get500"};
+    /* .methodName =*/ "get500",
+    /* .qualifiedMethodName =*/ "Raiser.get500"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

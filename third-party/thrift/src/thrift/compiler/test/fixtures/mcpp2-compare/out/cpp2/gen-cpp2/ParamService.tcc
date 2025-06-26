@@ -126,7 +126,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_i16_param"};
+    /* .methodName =*/ "void_ret_i16_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_i16_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -241,7 +242,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_byte_i16_param"};
+    /* .methodName =*/ "void_ret_byte_i16_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_byte_i16_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -353,7 +355,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_map_param"};
+    /* .methodName =*/ "void_ret_map_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_map_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -468,7 +471,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(apach
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_map_setlist_param"};
+    /* .methodName =*/ "void_ret_map_setlist_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_map_setlist_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -580,7 +584,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(apach
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_map_typedef_param"};
+    /* .methodName =*/ "void_ret_map_typedef_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_map_typedef_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -692,7 +697,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_enum_param"};
+    /* .methodName =*/ "void_ret_enum_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_enum_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -804,7 +810,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_struct_param"};
+    /* .methodName =*/ "void_ret_struct_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_struct_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -916,7 +923,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(apache:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "void_ret_listunion_param"};
+    /* .methodName =*/ "void_ret_listunion_param",
+    /* .qualifiedMethodName =*/ "ParamService.void_ret_listunion_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1031,7 +1039,8 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "bool_ret_i32_i64_param"};
+    /* .methodName =*/ "bool_ret_i32_i64_param",
+    /* .qualifiedMethodName =*/ "ParamService.bool_ret_i32_i64_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1145,7 +1154,8 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "bool_ret_map_param"};
+    /* .methodName =*/ "bool_ret_map_param",
+    /* .qualifiedMethodName =*/ "ParamService.bool_ret_map_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1259,7 +1269,8 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "bool_ret_union_param"};
+    /* .methodName =*/ "bool_ret_union_param",
+    /* .qualifiedMethodName =*/ "ParamService.bool_ret_union_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1376,7 +1387,8 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(apach
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "i64_ret_float_double_param"};
+    /* .methodName =*/ "i64_ret_float_double_param",
+    /* .qualifiedMethodName =*/ "ParamService.i64_ret_float_double_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1493,7 +1505,8 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(apa
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "i64_ret_string_typedef_param"};
+    /* .methodName =*/ "i64_ret_string_typedef_param",
+    /* .qualifiedMethodName =*/ "ParamService.i64_ret_string_typedef_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1622,7 +1635,8 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "i64_ret_i32_i32_i32_i32_i32_param"};
+    /* .methodName =*/ "i64_ret_i32_i32_i32_i32_i32_param",
+    /* .qualifiedMethodName =*/ "ParamService.i64_ret_i32_i32_i32_i32_i32_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1736,7 +1750,8 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(apach
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "double_ret_setstruct_param"};
+    /* .methodName =*/ "double_ret_setstruct_param",
+    /* .qualifiedMethodName =*/ "ParamService.double_ret_setstruct_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<double>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1850,7 +1865,8 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "string_ret_string_param"};
+    /* .methodName =*/ "string_ret_string_param",
+    /* .qualifiedMethodName =*/ "ParamService.string_ret_string_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1964,7 +1980,8 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "binary_ret_binary_param"};
+    /* .methodName =*/ "binary_ret_binary_param",
+    /* .qualifiedMethodName =*/ "ParamService.binary_ret_binary_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2078,7 +2095,8 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "map_ret_bool_param"};
+    /* .methodName =*/ "map_ret_bool_param",
+    /* .qualifiedMethodName =*/ "ParamService.map_ret_bool_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2195,7 +2213,8 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(apach
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "list_ret_map_setlist_param"};
+    /* .methodName =*/ "list_ret_map_setlist_param",
+    /* .qualifiedMethodName =*/ "ParamService.list_ret_map_setlist_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<bool>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2309,7 +2328,8 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "mapsetlistmapliststring_ret_listlistlist_param"};
+    /* .methodName =*/ "mapsetlistmapliststring_ret_listlistlist_param",
+    /* .qualifiedMethodName =*/ "ParamService.mapsetlistmapliststring_ret_listlistlist_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2423,7 +2443,8 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "typedef_ret_i32_param"};
+    /* .methodName =*/ "typedef_ret_i32_param",
+    /* .qualifiedMethodName =*/ "ParamService.typedef_ret_i32_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::simpleTypeDef>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2540,7 +2561,8 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(ap
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "listtypedef_ret_typedef_param"};
+    /* .methodName =*/ "listtypedef_ret_typedef_param",
+    /* .qualifiedMethodName =*/ "ParamService.listtypedef_ret_typedef_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2654,7 +2676,8 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "enum_ret_double_param"};
+    /* .methodName =*/ "enum_ret_double_param",
+    /* .qualifiedMethodName =*/ "ParamService.enum_ret_double_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2771,7 +2794,8 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(apach
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "enum_ret_double_enum_param"};
+    /* .methodName =*/ "enum_ret_double_enum_param",
+    /* .qualifiedMethodName =*/ "ParamService.enum_ret_double_enum_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2885,7 +2909,8 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "listenum_ret_map_param"};
+    /* .methodName =*/ "listenum_ret_map_param",
+    /* .qualifiedMethodName =*/ "ParamService.listenum_ret_map_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3002,7 +3027,8 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "struct_ret_i16_param"};
+    /* .methodName =*/ "struct_ret_i16_param",
+    /* .qualifiedMethodName =*/ "ParamService.struct_ret_i16_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::MyStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3116,7 +3142,8 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "setstruct_ret_set_param"};
+    /* .methodName =*/ "setstruct_ret_set_param",
+    /* .qualifiedMethodName =*/ "ParamService.setstruct_ret_set_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3233,7 +3260,8 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "union_ret_i32_i32_param"};
+    /* .methodName =*/ "union_ret_i32_i32_param",
+    /* .qualifiedMethodName =*/ "ParamService.union_ret_i32_i32_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::ComplexUnion>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3347,7 +3375,8 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ParamService",
-    /* .methodName =*/ "listunion_string_param"};
+    /* .methodName =*/ "listunion_string_param",
+    /* .qualifiedMethodName =*/ "ParamService.listunion_string_param"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

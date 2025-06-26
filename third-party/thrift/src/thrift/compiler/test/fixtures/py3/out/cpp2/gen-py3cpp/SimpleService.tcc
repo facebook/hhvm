@@ -146,7 +146,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_five"};
+    /* .methodName =*/ "get_five",
+    /* .qualifiedMethodName =*/ "SimpleService.get_five"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -260,7 +261,8 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "add_five"};
+    /* .methodName =*/ "add_five",
+    /* .qualifiedMethodName =*/ "SimpleService.add_five"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -371,7 +373,8 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "do_nothing"};
+    /* .methodName =*/ "do_nothing",
+    /* .qualifiedMethodName =*/ "SimpleService.do_nothing"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -486,7 +489,8 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(apache::thrift::ServerRe
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "concat"};
+    /* .methodName =*/ "concat",
+    /* .qualifiedMethodName =*/ "SimpleService.concat"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -600,7 +604,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_value"};
+    /* .methodName =*/ "get_value",
+    /* .qualifiedMethodName =*/ "SimpleService.get_value"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -714,7 +719,8 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(apache::thrift::ServerRe
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "negate"};
+    /* .methodName =*/ "negate",
+    /* .qualifiedMethodName =*/ "SimpleService.negate"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -828,7 +834,8 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(apache::thrift::ServerRequ
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "tiny"};
+    /* .methodName =*/ "tiny",
+    /* .qualifiedMethodName =*/ "SimpleService.tiny"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int8_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -942,7 +949,8 @@ void SimpleServiceAsyncProcessor::executeRequest_small(apache::thrift::ServerReq
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "small"};
+    /* .methodName =*/ "small",
+    /* .qualifiedMethodName =*/ "SimpleService.small"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1056,7 +1064,8 @@ void SimpleServiceAsyncProcessor::executeRequest_big(apache::thrift::ServerReque
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "big"};
+    /* .methodName =*/ "big",
+    /* .qualifiedMethodName =*/ "SimpleService.big"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1170,7 +1179,8 @@ void SimpleServiceAsyncProcessor::executeRequest_two(apache::thrift::ServerReque
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "two"};
+    /* .methodName =*/ "two",
+    /* .qualifiedMethodName =*/ "SimpleService.two"};
   auto callback = apache::thrift::HandlerCallbackPtr<double>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1281,7 +1291,8 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "expected_exception"};
+    /* .methodName =*/ "expected_exception",
+    /* .qualifiedMethodName =*/ "SimpleService.expected_exception"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1407,7 +1418,8 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "unexpected_exception"};
+    /* .methodName =*/ "unexpected_exception",
+    /* .qualifiedMethodName =*/ "SimpleService.unexpected_exception"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1521,7 +1533,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "sum_i16_list"};
+    /* .methodName =*/ "sum_i16_list",
+    /* .qualifiedMethodName =*/ "SimpleService.sum_i16_list"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1635,7 +1648,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "sum_i32_list"};
+    /* .methodName =*/ "sum_i32_list",
+    /* .qualifiedMethodName =*/ "SimpleService.sum_i32_list"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1749,7 +1763,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "sum_i64_list"};
+    /* .methodName =*/ "sum_i64_list",
+    /* .qualifiedMethodName =*/ "SimpleService.sum_i64_list"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1863,7 +1878,8 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(apache::thrift::Ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "concat_many"};
+    /* .methodName =*/ "concat_many",
+    /* .qualifiedMethodName =*/ "SimpleService.concat_many"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1977,7 +1993,8 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "count_structs"};
+    /* .methodName =*/ "count_structs",
+    /* .qualifiedMethodName =*/ "SimpleService.count_structs"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2091,7 +2108,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "sum_set"};
+    /* .methodName =*/ "sum_set",
+    /* .qualifiedMethodName =*/ "SimpleService.sum_set"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2208,7 +2226,8 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "contains_word"};
+    /* .methodName =*/ "contains_word",
+    /* .qualifiedMethodName =*/ "SimpleService.contains_word"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2325,7 +2344,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_map_value"};
+    /* .methodName =*/ "get_map_value",
+    /* .qualifiedMethodName =*/ "SimpleService.get_map_value"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2439,7 +2459,8 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "map_length"};
+    /* .methodName =*/ "map_length",
+    /* .qualifiedMethodName =*/ "SimpleService.map_length"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2553,7 +2574,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "sum_map_values"};
+    /* .methodName =*/ "sum_map_values",
+    /* .qualifiedMethodName =*/ "SimpleService.sum_map_values"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2667,7 +2689,8 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "complex_sum_i32"};
+    /* .methodName =*/ "complex_sum_i32",
+    /* .qualifiedMethodName =*/ "SimpleService.complex_sum_i32"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2781,7 +2804,8 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(apache::thrift::Ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "repeat_name"};
+    /* .methodName =*/ "repeat_name",
+    /* .qualifiedMethodName =*/ "SimpleService.repeat_name"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -2892,7 +2916,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_struct"};
+    /* .methodName =*/ "get_struct",
+    /* .qualifiedMethodName =*/ "SimpleService.get_struct"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::SimpleStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3006,7 +3031,8 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(apache::thrift::ServerReque
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "fib"};
+    /* .methodName =*/ "fib",
+    /* .qualifiedMethodName =*/ "SimpleService.fib"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::std::int32_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3120,7 +3146,8 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "unique_words"};
+    /* .methodName =*/ "unique_words",
+    /* .qualifiedMethodName =*/ "SimpleService.unique_words"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::string>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3234,7 +3261,8 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(apache::thrift::Ser
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "words_count"};
+    /* .methodName =*/ "words_count",
+    /* .qualifiedMethodName =*/ "SimpleService.words_count"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3348,7 +3376,8 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "set_enum"};
+    /* .methodName =*/ "set_enum",
+    /* .qualifiedMethodName =*/ "SimpleService.set_enum"};
   auto callback = apache::thrift::HandlerCallbackPtr<::py3::simple::AnEnum>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3465,7 +3494,8 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "list_of_lists"};
+    /* .methodName =*/ "list_of_lists",
+    /* .qualifiedMethodName =*/ "SimpleService.list_of_lists"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3579,7 +3609,8 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(apache
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "word_character_frequency"};
+    /* .methodName =*/ "word_character_frequency",
+    /* .qualifiedMethodName =*/ "SimpleService.word_character_frequency"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3693,7 +3724,8 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "list_of_sets"};
+    /* .methodName =*/ "list_of_sets",
+    /* .qualifiedMethodName =*/ "SimpleService.list_of_sets"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::std::set<::std::string>>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3807,7 +3839,8 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "nested_map_argument"};
+    /* .methodName =*/ "nested_map_argument",
+    /* .qualifiedMethodName =*/ "SimpleService.nested_map_argument"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -3921,7 +3954,8 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "make_sentence"};
+    /* .methodName =*/ "make_sentence",
+    /* .qualifiedMethodName =*/ "SimpleService.make_sentence"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4035,7 +4069,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_union"};
+    /* .methodName =*/ "get_union",
+    /* .qualifiedMethodName =*/ "SimpleService.get_union"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::int32_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4149,7 +4184,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_keys"};
+    /* .methodName =*/ "get_keys",
+    /* .qualifiedMethodName =*/ "SimpleService.get_keys"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::string>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4263,7 +4299,8 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "lookup_double"};
+    /* .methodName =*/ "lookup_double",
+    /* .qualifiedMethodName =*/ "SimpleService.lookup_double"};
   auto callback = apache::thrift::HandlerCallbackPtr<double>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4377,7 +4414,8 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "retrieve_binary"};
+    /* .methodName =*/ "retrieve_binary",
+    /* .qualifiedMethodName =*/ "SimpleService.retrieve_binary"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4491,7 +4529,8 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "contain_binary"};
+    /* .methodName =*/ "contain_binary",
+    /* .qualifiedMethodName =*/ "SimpleService.contain_binary"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::string>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4605,7 +4644,8 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "contain_enum"};
+    /* .methodName =*/ "contain_enum",
+    /* .qualifiedMethodName =*/ "SimpleService.contain_enum"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4719,7 +4759,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(apache:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_binary_union_struct"};
+    /* .methodName =*/ "get_binary_union_struct",
+    /* .qualifiedMethodName =*/ "SimpleService.get_binary_union_struct"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::BinaryUnionStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -4830,7 +4871,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(apache::thrif
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SimpleService",
-    /* .methodName =*/ "get_struct_hidden"};
+    /* .methodName =*/ "get_struct_hidden",
+    /* .qualifiedMethodName =*/ "SimpleService.get_struct_hidden"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::SimpleStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

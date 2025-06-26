@@ -64,7 +64,8 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyServicePrioChild",
-    /* .methodName =*/ "pang"};
+    /* .methodName =*/ "pang",
+    /* .qualifiedMethodName =*/ "MyServicePrioChild.pang"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

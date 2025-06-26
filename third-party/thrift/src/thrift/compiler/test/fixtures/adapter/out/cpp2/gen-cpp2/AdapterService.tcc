@@ -66,7 +66,8 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "AdapterService",
-    /* .methodName =*/ "count"};
+    /* .methodName =*/ "count",
+    /* .qualifiedMethodName =*/ "AdapterService.count"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -180,7 +181,8 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "AdapterService",
-    /* .methodName =*/ "adaptedTypes"};
+    /* .methodName =*/ "adaptedTypes",
+    /* .qualifiedMethodName =*/ "AdapterService.adaptedTypes"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

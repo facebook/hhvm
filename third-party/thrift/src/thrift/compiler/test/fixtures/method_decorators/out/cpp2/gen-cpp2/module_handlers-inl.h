@@ -74,7 +74,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService",
-    /* .methodName =*/ "noop"};
+    /* .methodName =*/ "noop",
+    /* .qualifiedMethodName =*/ "DecoratedService.noop"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -186,7 +187,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService",
-    /* .methodName =*/ "echo"};
+    /* .methodName =*/ "echo",
+    /* .qualifiedMethodName =*/ "DecoratedService.echo"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -300,7 +302,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService",
-    /* .methodName =*/ "increment"};
+    /* .methodName =*/ "increment",
+    /* .qualifiedMethodName =*/ "DecoratedService.increment"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -414,7 +417,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(apache::thrift::ServerRe
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService",
-    /* .methodName =*/ "sum"};
+    /* .methodName =*/ "sum",
+    /* .qualifiedMethodName =*/ "DecoratedService.sum"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -528,7 +532,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService",
-    /* .methodName =*/ "withStruct"};
+    /* .methodName =*/ "withStruct",
+    /* .qualifiedMethodName =*/ "DecoratedService.withStruct"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -648,7 +653,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(apache::thrift::S
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService",
-    /* .methodName =*/ "multiParam"};
+    /* .methodName =*/ "multiParam",
+    /* .qualifiedMethodName =*/ "DecoratedService.multiParam"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -775,7 +781,8 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService",
-    /* .methodName =*/ "noop"};
+    /* .methodName =*/ "noop",
+    /* .qualifiedMethodName =*/ "UndecoratedService.noop"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -887,7 +894,8 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService",
-    /* .methodName =*/ "echo"};
+    /* .methodName =*/ "echo",
+    /* .qualifiedMethodName =*/ "UndecoratedService.echo"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1001,7 +1009,8 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService",
-    /* .methodName =*/ "increment"};
+    /* .methodName =*/ "increment",
+    /* .qualifiedMethodName =*/ "UndecoratedService.increment"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1115,7 +1124,8 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService",
-    /* .methodName =*/ "sum"};
+    /* .methodName =*/ "sum",
+    /* .qualifiedMethodName =*/ "UndecoratedService.sum"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1229,7 +1239,8 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService",
-    /* .methodName =*/ "withStruct"};
+    /* .methodName =*/ "withStruct",
+    /* .qualifiedMethodName =*/ "UndecoratedService.withStruct"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1349,7 +1360,8 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService",
-    /* .methodName =*/ "multiParam"};
+    /* .methodName =*/ "multiParam",
+    /* .qualifiedMethodName =*/ "UndecoratedService.multiParam"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1466,7 +1478,8 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService_ExtendsUndecoratedService",
-    /* .methodName =*/ "extension"};
+    /* .methodName =*/ "extension",
+    /* .qualifiedMethodName =*/ "DecoratedService_ExtendsUndecoratedService.extension"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1581,7 +1594,8 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService_ExtendsDecoratedService",
-    /* .methodName =*/ "extension"};
+    /* .methodName =*/ "extension",
+    /* .qualifiedMethodName =*/ "DecoratedService_ExtendsDecoratedService.extension"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1696,7 +1710,8 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "UndecoratedService_ExtendsDecoratedService",
-    /* .methodName =*/ "extension"};
+    /* .methodName =*/ "extension",
+    /* .qualifiedMethodName =*/ "UndecoratedService_ExtendsDecoratedService.extension"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1814,7 +1829,8 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService",
-    /* .methodName =*/ "secondExtension"};
+    /* .methodName =*/ "secondExtension",
+    /* .qualifiedMethodName =*/ "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.secondExtension"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

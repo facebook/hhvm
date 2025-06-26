@@ -72,7 +72,8 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "hasDataById"};
+    /* .methodName =*/ "hasDataById",
+    /* .qualifiedMethodName =*/ "MyService.hasDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -186,7 +187,8 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "getDataById"};
+    /* .methodName =*/ "getDataById",
+    /* .qualifiedMethodName =*/ "MyService.getDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::string>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -303,7 +305,8 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "putDataById"};
+    /* .methodName =*/ "putDataById",
+    /* .qualifiedMethodName =*/ "MyService.putDataById"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -413,7 +416,8 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "lobDataById"};
+    /* .methodName =*/ "lobDataById",
+    /* .qualifiedMethodName =*/ "MyService.lobDataById"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

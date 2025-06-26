@@ -64,7 +64,8 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(apache::thrift::ServerRequest&&
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyNode",
-    /* .methodName =*/ "do_mid"};
+    /* .methodName =*/ "do_mid",
+    /* .qualifiedMethodName =*/ "MyNode.do_mid"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

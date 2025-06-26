@@ -66,7 +66,8 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyServicePrioParent",
-    /* .methodName =*/ "ping"};
+    /* .methodName =*/ "ping",
+    /* .qualifiedMethodName =*/ "MyServicePrioParent.ping"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -175,7 +176,8 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(apache::thrift::Serv
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyServicePrioParent",
-    /* .methodName =*/ "pong"};
+    /* .methodName =*/ "pong",
+    /* .qualifiedMethodName =*/ "MyServicePrioParent.pong"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

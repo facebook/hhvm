@@ -64,7 +64,8 @@ void GoodServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "BadService",
-    /* .methodName =*/ "bar"};
+    /* .methodName =*/ "bar",
+    /* .qualifiedMethodName =*/ "BadService.bar"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -180,7 +181,8 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "BadService",
-    /* .methodName =*/ "BadInteraction.foo"};
+    /* .methodName =*/ "BadInteraction.foo",
+    /* .qualifiedMethodName =*/ "BadInteraction.BadInteraction.foo"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

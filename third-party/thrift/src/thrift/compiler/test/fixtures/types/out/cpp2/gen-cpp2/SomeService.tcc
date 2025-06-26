@@ -69,7 +69,8 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SomeService",
-    /* .methodName =*/ "bounce_map"};
+    /* .methodName =*/ "bounce_map",
+    /* .qualifiedMethodName =*/ "SomeService.bounce_map"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -183,7 +184,8 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "SomeService",
-    /* .methodName =*/ "binary_keyed_map"};
+    /* .methodName =*/ "binary_keyed_map",
+    /* .qualifiedMethodName =*/ "SomeService.binary_keyed_map"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

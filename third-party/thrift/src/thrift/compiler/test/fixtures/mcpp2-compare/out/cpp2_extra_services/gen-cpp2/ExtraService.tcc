@@ -75,7 +75,8 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "simple_function"};
+    /* .methodName =*/ "simple_function",
+    /* .qualifiedMethodName =*/ "ExtraService.simple_function"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -189,7 +190,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "throws_function"};
+    /* .methodName =*/ "throws_function",
+    /* .qualifiedMethodName =*/ "ExtraService.throws_function"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -328,7 +330,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "throws_function2"};
+    /* .methodName =*/ "throws_function2",
+    /* .qualifiedMethodName =*/ "ExtraService.throws_function2"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -472,7 +475,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(apache::thrift:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "throws_function3"};
+    /* .methodName =*/ "throws_function3",
+    /* .qualifiedMethodName =*/ "ExtraService.throws_function3"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::map<::std::int32_t, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -605,7 +609,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "oneway_void_ret"};
+    /* .methodName =*/ "oneway_void_ret",
+    /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -703,7 +708,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "oneway_void_ret_i32_i32_i32_i32_i32_param"};
+    /* .methodName =*/ "oneway_void_ret_i32_i32_i32_i32_i32_param",
+    /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_i32_i32_i32_i32_i32_param"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -791,7 +797,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "oneway_void_ret_map_setlist_param"};
+    /* .methodName =*/ "oneway_void_ret_map_setlist_param",
+    /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_map_setlist_param"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -877,7 +884,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(apa
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "oneway_void_ret_struct_param"};
+    /* .methodName =*/ "oneway_void_ret_struct_param",
+    /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_struct_param"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -963,7 +971,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "ExtraService",
-    /* .methodName =*/ "oneway_void_ret_listunion_param"};
+    /* .methodName =*/ "oneway_void_ret_listunion_param",
+    /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_listunion_param"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

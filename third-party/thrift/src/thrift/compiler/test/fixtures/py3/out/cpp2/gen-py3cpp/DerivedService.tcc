@@ -64,7 +64,8 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "DerivedService",
-    /* .methodName =*/ "get_six"};
+    /* .methodName =*/ "get_six",
+    /* .qualifiedMethodName =*/ "DerivedService.get_six"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

@@ -67,7 +67,8 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "FB303Service",
-    /* .methodName =*/ "simple_rpc"};
+    /* .methodName =*/ "simple_rpc",
+    /* .qualifiedMethodName =*/ "FB303Service.simple_rpc"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

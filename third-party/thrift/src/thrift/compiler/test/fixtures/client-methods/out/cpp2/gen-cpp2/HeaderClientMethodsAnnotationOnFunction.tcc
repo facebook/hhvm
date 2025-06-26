@@ -69,7 +69,8 @@ void HeaderClientMethodsAnnotationOnFunctionAsyncProcessor::executeRequest_echo(
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "HeaderClientMethodsAnnotationOnFunction",
-    /* .methodName =*/ "echo"};
+    /* .methodName =*/ "echo",
+    /* .qualifiedMethodName =*/ "HeaderClientMethodsAnnotationOnFunction.echo"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::EchoResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -183,7 +184,8 @@ void HeaderClientMethodsAnnotationOnFunctionAsyncProcessor::executeRequest_echo_
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "HeaderClientMethodsAnnotationOnFunction",
-    /* .methodName =*/ "echo_2"};
+    /* .methodName =*/ "echo_2",
+    /* .qualifiedMethodName =*/ "HeaderClientMethodsAnnotationOnFunction.echo_2"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::EchoResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

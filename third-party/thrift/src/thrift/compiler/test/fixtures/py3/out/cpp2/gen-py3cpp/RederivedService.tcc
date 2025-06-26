@@ -64,7 +64,8 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "RederivedService",
-    /* .methodName =*/ "get_seven"};
+    /* .methodName =*/ "get_seven",
+    /* .qualifiedMethodName =*/ "RederivedService.get_seven"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

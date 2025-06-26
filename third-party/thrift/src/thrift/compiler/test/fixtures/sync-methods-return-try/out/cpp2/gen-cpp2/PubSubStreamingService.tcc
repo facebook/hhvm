@@ -108,7 +108,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "returnstream"};
+    /* .methodName =*/ "returnstream",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.returnstream"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -225,7 +226,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "streamthrows"};
+    /* .methodName =*/ "streamthrows",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.streamthrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -352,7 +354,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "servicethrows"};
+    /* .methodName =*/ "servicethrows",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.servicethrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -486,7 +489,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(apache:
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "servicethrows2"};
+    /* .methodName =*/ "servicethrows2",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.servicethrows2"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -630,7 +634,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "boththrows"};
+    /* .methodName =*/ "boththrows",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.boththrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -774,7 +779,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "responseandstreamstreamthrows"};
+    /* .methodName =*/ "responseandstreamstreamthrows",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.responseandstreamstreamthrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -903,7 +909,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "responseandstreamservicethrows"};
+    /* .methodName =*/ "responseandstreamservicethrows",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.responseandstreamservicethrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1039,7 +1046,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PubSubStreamingService",
-    /* .methodName =*/ "responseandstreamboththrows"};
+    /* .methodName =*/ "responseandstreamboththrows",
+    /* .qualifiedMethodName =*/ "PubSubStreamingService.responseandstreamboththrows"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

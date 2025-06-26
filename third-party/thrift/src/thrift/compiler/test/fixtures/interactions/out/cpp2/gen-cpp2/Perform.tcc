@@ -64,7 +64,8 @@ void PerformAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&& s
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "foo"};
+    /* .methodName =*/ "foo",
+    /* .qualifiedMethodName =*/ "Perform.foo"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -190,7 +191,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteraction.frobnicate"};
+    /* .methodName =*/ "MyInteraction.frobnicate",
+    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -315,7 +317,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::Se
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteraction.ping"};
+    /* .methodName =*/ "MyInteraction.ping",
+    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.ping"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -405,7 +408,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteraction.truthify"};
+    /* .methodName =*/ "MyInteraction.truthify",
+    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.truthify"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -521,7 +525,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteraction.encode"};
+    /* .methodName =*/ "MyInteraction.encode",
+    /* .qualifiedMethodName =*/ "MyInteraction.MyInteraction.encode"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -660,7 +665,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteractionFast.frobnicate"};
+    /* .methodName =*/ "MyInteractionFast.frobnicate",
+    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -766,7 +772,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thrift
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteractionFast.ping"};
+    /* .methodName =*/ "MyInteractionFast.ping",
+    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.ping"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -854,7 +861,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::th
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteractionFast.truthify"};
+    /* .methodName =*/ "MyInteractionFast.truthify",
+    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.truthify"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -968,7 +976,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::thri
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "MyInteractionFast.encode"};
+    /* .methodName =*/ "MyInteractionFast.encode",
+    /* .qualifiedMethodName =*/ "MyInteractionFast.MyInteractionFast.encode"};
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -1097,7 +1106,8 @@ void PerformAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "Perform",
-    /* .methodName =*/ "SerialInteraction.frobnicate"};
+    /* .methodName =*/ "SerialInteraction.frobnicate",
+    /* .qualifiedMethodName =*/ "SerialInteraction.SerialInteraction.frobnicate"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

@@ -72,7 +72,8 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "query"};
+    /* .methodName =*/ "query",
+    /* .qualifiedMethodName =*/ "MyService.query"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -187,7 +188,8 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "has_arg_docs"};
+    /* .methodName =*/ "has_arg_docs",
+    /* .qualifiedMethodName =*/ "MyService.has_arg_docs"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

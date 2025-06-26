@@ -66,7 +66,8 @@ void MyServiceAsyncProcessor::executeRequest_first(apache::thrift::ServerRequest
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "first"};
+    /* .methodName =*/ "first",
+    /* .qualifiedMethodName =*/ "MyService.first"};
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -180,7 +181,8 @@ void MyServiceAsyncProcessor::executeRequest_second(apache::thrift::ServerReques
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "second"};
+    /* .methodName =*/ "second",
+    /* .qualifiedMethodName =*/ "MyService.second"};
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

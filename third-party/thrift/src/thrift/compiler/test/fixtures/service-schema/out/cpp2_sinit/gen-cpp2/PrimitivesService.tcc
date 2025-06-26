@@ -74,7 +74,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PrimitivesService",
-    /* .methodName =*/ "init"};
+    /* .methodName =*/ "init",
+    /* .qualifiedMethodName =*/ "PrimitivesService.init"};
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -185,7 +186,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PrimitivesService",
-    /* .methodName =*/ "method_that_throws"};
+    /* .methodName =*/ "method_that_throws",
+    /* .qualifiedMethodName =*/ "PrimitivesService.method_that_throws"};
   auto callback = apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -319,7 +321,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
     /* .serviceName =*/ this->getServiceName(),
     /* .definingServiceName =*/ "PrimitivesService",
-    /* .methodName =*/ "return_void_method"};
+    /* .methodName =*/ "return_void_method",
+    /* .qualifiedMethodName =*/ "PrimitivesService.return_void_method"};
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

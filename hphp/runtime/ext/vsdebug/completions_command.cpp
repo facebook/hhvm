@@ -512,7 +512,7 @@ void CompletionsCommand::addFuncConstantCompletions(
     "require",
     "require_once",
     "return",
-    "self"
+    "self",
     "static",
     "string",
     "switch",

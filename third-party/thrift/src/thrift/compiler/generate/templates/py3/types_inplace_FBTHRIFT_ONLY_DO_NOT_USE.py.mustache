@@ -48,7 +48,7 @@ import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:n
 
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
-import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 {{#program:hasConstants}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types
 {{/program:hasConstants}}

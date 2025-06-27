@@ -14,7 +14,6 @@
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
-#include "mcrouter/routes/McrouterRouteHandle.h"
 #include "mcrouter/routes/SlowWarmUpRoute.h"
 
 using namespace facebook::memcache;

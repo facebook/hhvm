@@ -17,7 +17,6 @@
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 #include "mcrouter/routes/HashRouteFactory.h"
-#include "mcrouter/routes/McrouterRouteHandle.h"
 #include "mcrouter/routes/OriginalClientHashRoute.h"
 #include "mcrouter/routes/test/RouteHandleTestUtil.h"
 

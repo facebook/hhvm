@@ -18,7 +18,6 @@
 #include <folly/String.h>
 #include <folly/json/dynamic.h>
 #include <gtest/gtest.h>
-#include "folly/fibers/FiberManagerMap.h"
 #include "folly/io/async/EventBase.h"
 #include "folly/json/json.h"
 

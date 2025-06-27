@@ -7,7 +7,6 @@
 
 #include "mcrouter/routes/PrefixSelectorRoute.h"
 
-#include <folly/dynamic.h>
 #include <gtest/gtest.h>
 
 namespace facebook::memcache::mcrouter {

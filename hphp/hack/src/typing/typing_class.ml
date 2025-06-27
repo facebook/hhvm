@@ -1786,6 +1786,7 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
   - __Disposable attribute w.r.t. parents
   - individual member checks:
     - subtyping parent members
+    - not redeclaring class properties
     - __Override attribute check
     - enum inclusions
     - abstract members in concrete class

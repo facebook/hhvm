@@ -1,3 +1,43 @@
+WARN: File "module_protected_internal_bad_static_override.php--B.php", line 3, characters 17-17:
+Static property is overridden: `$bar` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--B.php", line 13, characters 17-19:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--B.php", line 3, characters 17-17:
+Static property is overridden: `$foo` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--B.php", line 11, characters 20-22:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
+Static property is overridden: `$bar` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--C.php", line 19, characters 19-21:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
+Static property is overridden: `$baz` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--C.php", line 21, characters 29-31:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
+Static property is overridden: `$foo` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--C.php", line 17, characters 29-31:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
+Static property is overridden: `$quux` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--C.php", line 25, characters 29-31:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
+Static property is overridden: `$qux` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--C.php", line 23, characters 29-31:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--D.php", line 5, characters 17-17:
+Static property is overridden: `$bar` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--D.php", line 15, characters 19-21:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--D.php", line 5, characters 17-17:
+Static property is overridden: `$corge` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--D.php", line 17, characters 18-20:
+  Overriding static property is here
+WARN: File "module_protected_internal_bad_static_override.php--D.php", line 5, characters 17-17:
+Static property is overridden: `$foo` (Warn[12021])
+  File "module_protected_internal_bad_static_override.php--D.php", line 13, characters 29-31:
+  Overriding static property is here
 ERROR: File "module_protected_internal_bad_static_override.php--B.php", line 9, characters 27-31:
 This member visibility is: `private` (Typing[4113])
   File "module_protected_internal_bad_static_override.php--A.php", line 11, characters 37-41:

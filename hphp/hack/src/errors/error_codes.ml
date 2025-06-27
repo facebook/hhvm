@@ -814,6 +814,7 @@ module Warning = struct
     | SafeAbstractConstAccess [@value 12018]
     | SwitchRedundancy [@value 12019]
     | StaticCallOnTrait [@value 12020]
+    | StaticPropertyOverride [@value 12021]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

@@ -492,6 +492,22 @@ let check_override_final_method env parent_class_elt class_elt on_error =
       Typing_error.(
         apply_reasons ~on_error @@ Secondary.Override_final { pos; parent_pos })
 
+(** Checks that we're not overriding a concrete static property. *)
+let check_override_concrete_static_prop
+    ~parent_pos env member_name parent_class_elt class_elt =
+  if
+    (not (get_ce_abstract parent_class_elt))
+    && not (get_ce_const parent_class_elt)
+  then
+    let child_prop_pos = Lazy.force class_elt.ce_pos in
+    Typing_warning_utils.add
+      env
+      Typing_warning.
+        ( parent_pos,
+          Static_property_override,
+          Static_property_override.{ prop_name = member_name; child_prop_pos }
+        )
+
 (** Checks that methods annotated with __DynamicallyCallable are only overridden with
     dynamically callable method. *)
 let check_dynamically_callable
@@ -981,6 +997,7 @@ let check_override
     ~class_
     ~parent_class
     ~(parent_type : decl_ty)
+    ~parent_pos
     ~(class_elt : class_elt)
     ~parent_class_elt
     on_error =
@@ -993,6 +1010,18 @@ let check_override
     else
       on_error
   in
+
+  begin
+    match member_kind with
+    | MemberKind.Static_property ->
+      check_override_concrete_static_prop
+        ~parent_pos
+        env
+        member_name
+        parent_class_elt
+        class_elt
+    | _ -> ()
+  end;
 
   if MemberKind.is_method member_kind then begin
     (* We first verify that we aren't overriding a final method.  We only check
@@ -1548,6 +1577,7 @@ let check_class_against_parent_class_elt
           ~parent_class
           ~parent_class_elt
           ~parent_type
+          ~parent_pos
           ~class_elt
           (on_error (parent_pos, Cls.name parent_class)) )
   | None ->
@@ -1736,7 +1766,8 @@ let default_constructor_ce class_ =
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env (parent_class, parent_type) class_ psubst on_error =
+let check_constructors
+    ~parent_pos env (parent_class, parent_type) class_ psubst on_error =
   let parent_is_interface = Ast_defs.is_c_interface (Cls.kind parent_class) in
   let parent_is_consistent =
     constructor_is_consistent (snd (Cls.construct parent_class))
@@ -1772,6 +1803,7 @@ let check_constructors env (parent_class, parent_type) class_ psubst on_error =
             ~class_
             ~parent_class
             ~parent_type
+            ~parent_pos
             ~parent_class_elt:parent_cstr
             ~class_elt:cstr
             on_error
@@ -2127,6 +2159,7 @@ let check_typeconst_override
  * message pointing at the class being checked.
  *)
 let check_class_extends_parent_constructors
+    ~parent_pos
     env
     (parent_class : (Pos.t * string) * decl_ty * decl_ty list * Cls.t)
     class_
@@ -2134,7 +2167,13 @@ let check_class_extends_parent_constructors
   let (_, parent_type, parent_tparaml, parent_class) = parent_class in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let env =
-    check_constructors env (parent_class, parent_type) class_ psubst on_error
+    check_constructors
+      ~parent_pos
+      env
+      (parent_class, parent_type)
+      class_
+      psubst
+      on_error
   in
   env
 
@@ -2890,6 +2929,7 @@ let check_implements_extends_uses
       parents
       ~f:(fun env ((parent_name, _, _, _) as parent) ->
         check_class_extends_parent_constructors
+          ~parent_pos:(fst parent_name)
           env
           parent
           class_

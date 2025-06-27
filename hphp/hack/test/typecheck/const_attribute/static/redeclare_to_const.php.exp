@@ -1,3 +1,7 @@
+WARN: File "redeclare_to_const.php", line 5, characters 17-17:
+Static property is overridden: `$p` (Warn[12021])
+  File "redeclare_to_const.php", line 5, characters 47-49:
+  Overriding static property is here
 ERROR: File "redeclare_to_const.php", line 5, characters 47-49:
 This property is `__Const` (Typing[4204])
   File "redeclare_to_const.php", line 4, characters 28-30:

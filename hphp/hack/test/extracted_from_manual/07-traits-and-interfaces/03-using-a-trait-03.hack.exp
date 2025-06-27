@@ -1,2 +1,6 @@
 WARN: File "03-using-a-trait-03.hack", line 20, characters 7-7:
 Duplicated property `x` in `C` (defined in `T1` and `T2`): all instances will be aliased at runtime (Warn[12008])
+WARN: File "03-using-a-trait-03.hack", line 21, characters 7-8:
+Static property is overridden: `$x` (Warn[12021])
+  File "03-using-a-trait-03.hack", line 13, characters 17-19:
+  Overriding static property is here

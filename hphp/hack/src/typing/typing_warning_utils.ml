@@ -587,6 +587,28 @@ module Static_call_on_trait = struct
   let quickfixes _ = []
 end
 
+module Static_property_override = struct
+  open Typing_warning.Static_property_override
+
+  type t = Typing_warning.Static_property_override.t
+
+  let code = Codes.StaticPropertyOverride
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { prop_name; _ } =
+    Printf.sprintf
+      "Static property is overridden: %s"
+      (Markdown_lite.md_codify prop_name)
+
+  let reasons { child_prop_pos; _ } =
+    [(child_prop_pos, "Overriding static property is here")]
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -603,6 +625,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.No_disjoint_union_check -> (module No_disjoint_union_check)
   | Typing_warning.Switch_redundancy -> (module Switch_redundancy)
   | Typing_warning.Static_call_on_trait -> (module Static_call_on_trait)
+  | Typing_warning.Static_property_override -> (module Static_property_override)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

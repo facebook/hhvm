@@ -91,6 +91,8 @@ let timeout t = t.GlobalOptions.tco_timeout
 
 let disallow_invalid_arraykey t = t.GlobalOptions.tco_disallow_invalid_arraykey
 
+let constraint_array_index t = t.GlobalOptions.tco_constraint_array_index
+
 let log_levels t = t.GlobalOptions.log_levels
 
 let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit

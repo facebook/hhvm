@@ -352,6 +352,8 @@ impl HhConfig {
                 "disallow_invalid_arraykey",
                 default.tco_disallow_invalid_arraykey,
             )?,
+            tco_constraint_array_index: hhconfig
+                .get_bool_or("constraint_array_index", default.code_agnostic_fixme)?,
             code_agnostic_fixme: hhconfig
                 .get_bool_or("code_agnostic_fixme", default.code_agnostic_fixme)?,
             allowed_fixme_codes_strict: hhconfig.get_int_set_or(

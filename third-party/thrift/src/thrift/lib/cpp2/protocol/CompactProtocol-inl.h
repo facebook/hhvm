@@ -352,16 +352,7 @@ uint32_t CompactProtocolWriter::writeBinaryImpl(const folly::IOBuf& str) {
   uint32_t result =
       kWriteSize ? apache::thrift::util::writeVarint(out_, (int32_t)size) : 0;
   if (sharing_ != SHARE_EXTERNAL_BUFFER && !str.isManaged()) {
-    const auto growth = size - out_.length();
-    for (folly::ByteRange buf : str) {
-      const auto tailroom = out_.length();
-      if (tailroom < buf.size()) {
-        out_.push(buf.uncheckedSubpiece(0, tailroom));
-        buf.uncheckedAdvance(tailroom);
-        out_.ensure(growth);
-      }
-      out_.push(buf);
-    }
+    out_.push(folly::io::Cursor{&str}, size);
   } else {
     out_.insert(str);
   }

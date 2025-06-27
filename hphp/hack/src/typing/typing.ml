@@ -903,14 +903,6 @@ let localize_targ env ta =
   let (env, targ) = Phase.localize_targ ~check_well_kinded:true env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
-let set_function_pointer env ty =
-  Typing_utils.map_supportdyn env ty (fun env ty ->
-      match get_node ty with
-      | Tfun ft ->
-        let ft = set_ft_is_function_pointer ft true in
-        (env, mk (get_reason ty, Tfun ft))
-      | _ -> (env, ty))
-
 (* Set the function type to be capturing readonly values only *)
 let set_capture_only_readonly env ty =
   Typing_utils.map_supportdyn env ty (fun env ty ->
@@ -8189,55 +8181,361 @@ and Function_pointer : sig
     env ->
     env * Tast.expr * locl_ty
 end = struct
+  let set_function_pointer env ty =
+    Typing_utils.map_supportdyn env ty (fun env ty ->
+        match get_node ty with
+        | Tfun ft ->
+          let ft = set_ft_is_function_pointer ft true in
+          (env, mk (get_reason ty, Tfun ft))
+        | _ -> (env, ty))
+
+  (* -- Static methods ------------------------------------------------------ *)
+
+  (** Given the function type of a static method, synthesize a function type which
+      is abstracted from the class in which it appears. This requires:
+      - quantifying over all class-level generics
+      - quantifying over appearances of [this]
+      - quantifying over any abstract type constants
+
+      In the latter two cases we will need to substitute the generics for
+      their concrete counterparts before localizing the function type
+      *)
+  let synth_polymorphic_static_method_help
+      folded_class class_name method_name fun_ty env =
+    (* Extract the static method by incorporating any class-level generics
+       and transforming abstract type constants into generics and subsituting
+       'concrete' type constants *)
+    let fun_ty =
+      Typing_extract_method.extract_static_method
+        fun_ty
+        ~env
+        ~class_name
+        ~folded_class
+    in
+
+    (* 'Localize' the function type but don't generate fresh type variables in
+        place of type parameters; we have already eliminated occurrences of
+        [Tthis] and [Taccess _] so we don't need to provide any definition for
+        `this` *)
+    let (env, fun_ty) =
+      let ((env, err_opt), fun_ty) =
+        Typing_phase.localize_fun_type_no_subst fun_ty ~env ~ignore_errors:false
+      in
+      let () =
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt
+      in
+      (env, fun_ty)
+    in
+
+    (* Discharge any [where] constraints on the function type parameters *)
+    let fun_ty =
+      let (ft_tparams, err_opt) =
+        Typing_subtype.apply_where_constraints
+          (fst method_name)
+          (fst class_name)
+          fun_ty.ft_tparams
+          fun_ty.ft_where_constraints
+          ~env
+      in
+      let (_ : unit) =
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt
+      in
+      (* If this is not a polymorphic function type, mark as instantiated *)
+      let ft_instantiated = List.is_empty fun_ty.ft_tparams in
+      { fun_ty with ft_tparams; ft_where_constraints = []; ft_instantiated }
+    in
+
+    (env, fun_ty)
+
+  let validate_polymorphic_static_method
+      folded_class class_elt class_name class_id method_name fun_ty env =
+    let { ce_pos = (lazy class_pos); ce_visibility; ce_deprecated; _ } =
+      class_elt
+    and (_, _, class_id_) = class_id
+    and (use_pos, method_name) = method_name in
+    Option.iter
+      ~f:(Typing_error_utils.add_typing_error ~env)
+      (TVis.check_class_access
+         ~is_method:true
+         ~use_pos
+         ~def_pos:class_pos
+         env
+         (ce_visibility, get_ce_lsb class_elt)
+         class_id_
+         folded_class);
+    Option.iter
+      ~f:(Typing_error_utils.add_typing_error ~env)
+      (TVis.check_deprecated ~use_pos ~def_pos:class_pos env ce_deprecated);
+    check_class_get
+      env
+      use_pos
+      class_pos
+      class_name
+      method_name
+      class_elt
+      class_id
+      true
+      true;
+    let is_explicit { ua_name = (_, name); _ } =
+      String.equal name SN.UserAttributes.uaExplicit
+    in
+    List.iter
+      fun_ty.ft_tparams
+      ~f:(fun { tp_user_attributes; tp_name = (decl_pos, param_name); _ } ->
+        if List.exists tp_user_attributes ~f:is_explicit then
+          Typing_error_utils.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Require_generic_explicit
+                   { decl_pos; param_name; pos = use_pos })
+            ~env)
+
+  (** Inspect the type attempting to synthesize a method type for each contained
+     class type then reconstruct the overall method type. This should ultimately
+     be moved to constaint solving but we repeat a bunch of the decomposition work
+     here:
+
+     Base cases:
+     - Tclass: synthesize a funcion type given the class name and method name
+     - Tdynamic: the type of a method accessed through dynamic is dynamic
+     - Tany: the type of a method accessed through any is any
+
+     Recursion cases:
+     - Tgeneric, Tnewtype: recurse on the upper-bound(s)
+     - Tdependent: recurse on the underlying type
+     - Tunion: recurse through the union and construct the union of the synthesized function types
+     - Tintersection: recurse through the intersection and construct the intersection of the synthesized function types
+
+     All other cases are errors
+  *)
+  let rec synth_polymorphic_static_method class_id class_ty method_name env =
+    let (env, class_ty) = Env.expand_type env class_ty in
+    match deref class_ty with
+    (* -- Base cases -------------------------------------------------------- *)
+    | (_, Tclass ((_, class_name), _, _)) -> begin
+      match Env.get_class env class_name with
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        (* A 'naming' error will have been raised for the missing / unloaded class
+           so just return nothing for the class and an 'error' tyvar for the method *)
+        let (env, method_ty) = Env.fresh_type_error env (fst method_name) in
+        (env, method_ty)
+      | Decl_entry.Found folded_class -> begin
+        match Env.get_static_member true env folded_class (snd method_name) with
+        | None ->
+          (* No such method; raise an error and return a fresh type variable *)
+          let (_ : unit) =
+            Typing_error_utils.add_typing_error ~env
+            @@ TOG.smember_not_found
+                 (fst method_name)
+                 ~is_const:false
+                 ~is_method:true
+                 ~is_function_pointer:true
+                 folded_class
+                 (snd method_name)
+                 Typing_error.Callback.unify_error
+          in
+          let (env, method_ty) = Env.fresh_type_error env (fst method_name) in
+          (env, method_ty)
+        | Some class_elt -> begin
+          let { ce_type = (lazy member_decl_ty); ce_pos = (lazy class_pos); _ }
+              =
+            class_elt
+          in
+          match deref member_decl_ty with
+          | (reason, Tfun fun_ty) ->
+            (* Apply pressimization *)
+            let fun_ty =
+              Typing_enforceability.compute_enforced_and_pessimize_fun_type
+                ~this_class:(Some folded_class)
+                env
+                fun_ty
+            in
+            (* Apply the same validation as static method access *)
+            let () =
+              validate_polymorphic_static_method
+                folded_class
+                class_elt
+                class_name
+                class_id
+                method_name
+                fun_ty
+                env
+            in
+            (* Generate a polymorphic type  *)
+            let (env, fun_ty) =
+              synth_polymorphic_static_method_help
+                folded_class
+                (class_pos, class_name)
+                method_name
+                fun_ty
+                env
+            in
+            (* Wrap with supportdyn under SDT *)
+            let ty =
+              let reason = Reason.localize reason in
+              Typing_dynamic.maybe_wrap_with_supportdyn
+                ~should_wrap:
+                  (get_ce_support_dynamic_type class_elt
+                  && TCO.enable_sound_dynamic env.genv.tcopt)
+                reason
+                fun_ty
+            in
+            (env, ty)
+          | _ ->
+            (* If the static method exists it must be a function type so
+               something is wrong *)
+            failwith "Expected a function type"
+        end
+      end
+    end
+    | (_, (Tdynamic | Tany _)) ->
+      (* For [dynamic] ([any]) give the method type as [dynamic] ([any]) *)
+      (* TODO(mjt) record flow *)
+      let method_ty =
+        map_reason class_ty ~f:(fun _class_reason ->
+            Typing_reason.witness (fst method_name))
+      in
+      (env, method_ty)
+    (* -- Recursive cases --------------------------------------------------- *)
+    (* For generics, newtypes and expression dependent types, attempt to access
+       the member via an upper bound *)
+    | (r, Tgeneric _) ->
+      let (env, upper_bounds) =
+        TUtils.get_concrete_supertypes ~abstract_enum:true env class_ty
+      in
+      let (env, has_no_bound) =
+        TUtils.no_upper_bound ~include_sd_mixed:true env upper_bounds
+      in
+      if has_no_bound then begin
+        let (env, method_ty) = Env.fresh_type_error env (fst method_name) in
+        let (_ : unit) =
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Non_class_member
+                   {
+                     elt = `meth;
+                     member_name = snd method_name;
+                     pos = fst method_name;
+                     ty_name = lazy (Typing_print.error env class_ty);
+                     decl_pos = get_pos class_ty;
+                   })
+        in
+        (env, method_ty)
+      end else
+        let (env, class_ty) = Inter.intersect_list env r upper_bounds in
+        synth_polymorphic_static_method class_id class_ty method_name env
+    | (_, Tnewtype (_, _, class_ty))
+    | (_, Tdependent (_, class_ty)) ->
+      synth_polymorphic_static_method class_id class_ty method_name env
+    | (r, Tunion class_tys) ->
+      let (env, member_tys) =
+        List.fold_left
+          class_tys
+          ~init:(env, [])
+          ~f:(fun (env, member_tys) class_ty ->
+            let (env, member_ty) =
+              synth_polymorphic_static_method class_id class_ty method_name env
+            in
+            (env, member_ty :: member_tys))
+      in
+      Union.union_list env r member_tys
+    | (r, Tintersection class_tys) ->
+      let f env class_ty =
+        synth_polymorphic_static_method class_id class_ty method_name env
+      in
+      let (env, member_tys) =
+        Typing_utils.run_on_intersection env ~f class_tys
+      in
+      Inter.intersect_list env r member_tys
+    (* -- Error cases ------------------------------------------------------- *)
+    (* For all other types return a fresh variable indicating an error  *)
+    | ( _,
+        ( Tvar _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
+        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ | Tclass_ptr _ )
+      ) ->
+      let (_ : unit) =
+        if not (TUtils.is_tyvar_error env class_ty) then
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Non_class_member
+                   {
+                     elt = `meth;
+                     member_name = snd method_name;
+                     pos = fst method_name;
+                     ty_name = lazy (Typing_print.error env class_ty);
+                     decl_pos = get_pos class_ty;
+                   })
+        else
+          ()
+      in
+      let (env, ty) = Env.fresh_type_error env (fst method_name) in
+      (env, ty)
+
+  let synth_static_method pos class_id method_name ty_args env =
+    let (env, _, tclass_id, class_ty) =
+      Class_id.class_expr ~is_function_pointer:true env [] class_id
+    in
+    let (env, (method_ty, ty_args)) =
+      match ty_args with
+      | [] ->
+        let (env, method_ty) =
+          synth_polymorphic_static_method class_id class_ty method_name env
+        in
+        (env, (method_ty, []))
+      | _ ->
+        let (env, (method_ty, ty_args)) =
+          Class_get_expr.class_get
+            ~is_method:true
+            ~is_const:false
+            ~transform_fty:None
+            ~incl_tc:false (* What is this? *)
+            ~coerce_from_ty:None (* What is this? *)
+            ~explicit_targs:ty_args
+            ~is_function_pointer:true
+            env
+            class_ty
+            method_name
+            class_id
+        in
+        let env = Env.set_tyvar_variance env method_ty in
+        (env, (method_ty, ty_args))
+    in
+    let (env, method_ty) = set_function_pointer env method_ty in
+    let (env, method_ty) = set_capture_only_readonly env method_ty in
+    let method_ty =
+      make_function_ref ~contains_generics:false env pos method_ty
+    in
+    let expr =
+      FunctionPointer (FP_class_const (tclass_id, method_name), ty_args)
+    in
+    make_result env pos expr method_ty
+
+  (* -- Top-level functions ------------------------------------------------- *)
+
+  (** Synthesize a (possibly polymorphic) function type based on the declared
+         function signature of a top-level function *)
+  let synth_top_level pos fun_id ty_args env =
+    let (env, ty, ty_args) = Fun_id.synth fun_id ty_args env in
+    (* Modify the function type to indicate this is a function pointer *)
+    let (env, ty) = set_function_pointer env ty in
+    (* All function pointers are readonly since they capture no values *)
+    let (env, ty) = set_capture_only_readonly env ty in
+    let ty =
+      let contains_generics = not (List.is_empty ty_args) in
+      make_function_ref ~contains_generics env pos ty
+    and expr = FunctionPointer (FP_id fun_id, ty_args) in
+    make_result env pos expr ty
+
   let synth pos (fpid, args) env =
     match (fpid, args) with
-    | (FP_class_const (cid, meth), targs) ->
-      let (env, _, ce, cty) =
-        Class_id.class_expr ~is_function_pointer:true env [] cid
-      in
-      let (env, (fpty, tal)) =
-        Class_get_expr.class_get
-          ~is_method:true
-          ~is_const:false
-          ~transform_fty:None
-          ~incl_tc:false (* What is this? *)
-          ~coerce_from_ty:None (* What is this? *)
-          ~explicit_targs:targs
-          ~is_function_pointer:true
-          env
-          cty
-          meth
-          cid
-      in
-      let env = Env.set_tyvar_variance env fpty in
-      let (env, fpty) = set_function_pointer env fpty in
-      (* All function pointers are readonly since they don't capture any values *)
-      let (env, fpty) = set_capture_only_readonly env fpty in
-      let fpty =
-        make_function_ref
-          ~contains_generics:(not (List.is_empty tal))
-          env
-          pos
-          fpty
-      in
-      make_result
-        env
-        pos
-        (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
-        fpty
-    | (FP_id fun_id, ty_args) ->
-      let (env, ty, ty_args) = Fun_id.synth fun_id ty_args env in
-      let (env, ty) = set_function_pointer env ty in
-      (* All function pointers are readonly since they capture no values *)
-      let (env, ty) = set_capture_only_readonly env ty in
-      let ty =
-        make_function_ref
-          ~contains_generics:(not (List.is_empty ty_args))
-          env
-          pos
-          ty
-      in
-      make_result env pos (FunctionPointer (FP_id fun_id, ty_args)) ty
+    | (FP_id fun_id, ty_args) -> synth_top_level pos fun_id ty_args env
+    | (FP_class_const (class_id, method_name), ty_args) ->
+      synth_static_method pos class_id method_name ty_args env
 end
 
 and Stmt : sig

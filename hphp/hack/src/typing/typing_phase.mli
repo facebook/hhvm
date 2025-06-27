@@ -74,6 +74,12 @@ val localize_no_subst :
   decl_ty ->
   (env * Typing_error.t option) * locl_ty
 
+val localize_fun_type_no_subst :
+  decl_ty fun_type ->
+  env:env ->
+  ignore_errors:bool ->
+  (env * Typing_error.t option) * locl_ty fun_type
+
 val localize_no_subst_report_cycles :
   env ->
   ignore_errors:bool ->

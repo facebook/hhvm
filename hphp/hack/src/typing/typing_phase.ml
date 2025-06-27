@@ -1686,6 +1686,17 @@ let localize_no_subst env ~ignore_errors ty =
   let ((env, err, _cycles), ty) = localize_no_subst_ env ~ignore_errors ty in
   ((env, err), ty)
 
+let localize_fun_type_no_subst fun_type ~env ~ignore_errors =
+  let (env_err, ty) =
+    localize_no_subst
+      env
+      ~ignore_errors
+      (mk (Typing_reason.none, Tfun fun_type))
+  in
+  match get_node ty with
+  | Tfun fun_type -> (env_err, fun_type)
+  | _ -> failwith "localize_fun_type_no_subst: expected a function type"
+
 let localize_no_subst_report_cycles env ~ignore_errors ~report_cycle ty =
   localize_no_subst_ env ~report_cycle ~ignore_errors ty
 

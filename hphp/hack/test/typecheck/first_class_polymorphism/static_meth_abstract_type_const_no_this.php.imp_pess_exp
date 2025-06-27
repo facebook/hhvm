@@ -1,0 +1,12 @@
+ERROR: File "static_meth_abstract_type_const_no_this.php", line 25, characters 3-135:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "static_meth_abstract_type_const_no_this.php", line 15, characters 63-66:
+  Expected `void`
+  File "static_meth_abstract_type_const_no_this.php", line 28, characters 16-19:
+  But got `dynamic`
+ERROR: File "static_meth_abstract_type_const_no_this.php", line 28, characters 24-25:
+Invalid argument (Typing[4110])
+  File "static_meth_abstract_type_const_no_this.php", line 15, characters 63-66:
+  Expected `void`
+  File "static_meth_abstract_type_const_no_this.php", line 28, characters 16-19:
+  But got `dynamic`

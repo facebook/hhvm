@@ -301,6 +301,7 @@
  (modules
   typing
   typing_class
+  typing_extract_method
   typing_memoize
   typing_toplevel
   typing_typedef

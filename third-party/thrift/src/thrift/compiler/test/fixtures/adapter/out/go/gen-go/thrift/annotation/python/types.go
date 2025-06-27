@@ -828,6 +828,150 @@ func (x *MigrationBlockingAllowInheritance) setDefaults() *MigrationBlockingAllo
     return x
 }
 
+type DeprecatedSortSetOnSerialize struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*DeprecatedSortSetOnSerialize)(nil)
+
+func NewDeprecatedSortSetOnSerialize() *DeprecatedSortSetOnSerialize {
+    return (&DeprecatedSortSetOnSerialize{}).setDefaults()
+}
+
+
+
+func (x *DeprecatedSortSetOnSerialize) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("DeprecatedSortSetOnSerialize"); err != nil {
+        return thrift.PrependError("DeprecatedSortSetOnSerialize write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("DeprecatedSortSetOnSerialize write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("DeprecatedSortSetOnSerialize write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *DeprecatedSortSetOnSerialize) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("DeprecatedSortSetOnSerialize read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("DeprecatedSortSetOnSerialize field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("DeprecatedSortSetOnSerialize read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *DeprecatedSortSetOnSerialize) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *DeprecatedSortSetOnSerialize) setDefaults() *DeprecatedSortSetOnSerialize {
+    return x
+}
+
+type DeprecatedKeySortMapOnSerialize struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*DeprecatedKeySortMapOnSerialize)(nil)
+
+func NewDeprecatedKeySortMapOnSerialize() *DeprecatedKeySortMapOnSerialize {
+    return (&DeprecatedKeySortMapOnSerialize{}).setDefaults()
+}
+
+
+
+func (x *DeprecatedKeySortMapOnSerialize) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("DeprecatedKeySortMapOnSerialize"); err != nil {
+        return thrift.PrependError("DeprecatedKeySortMapOnSerialize write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("DeprecatedKeySortMapOnSerialize write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("DeprecatedKeySortMapOnSerialize write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *DeprecatedKeySortMapOnSerialize) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("DeprecatedKeySortMapOnSerialize read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("DeprecatedKeySortMapOnSerialize field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("DeprecatedKeySortMapOnSerialize read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *DeprecatedKeySortMapOnSerialize) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *DeprecatedKeySortMapOnSerialize) setDefaults() *DeprecatedKeySortMapOnSerialize {
+    return x
+}
+
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
@@ -842,5 +986,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/python/UseCAPI", func() any { return NewUseCAPI() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Py3EnableCppAdapter", func() any { return NewPy3EnableCppAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/python/MigrationBlockingAllowInheritance", func() any { return NewMigrationBlockingAllowInheritance() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/DeprecatedSortSetOnSerialize", func() any { return NewDeprecatedSortSetOnSerialize() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/DeprecatedKeySortMapOnSerialize", func() any { return NewDeprecatedKeySortMapOnSerialize() })
 
 }

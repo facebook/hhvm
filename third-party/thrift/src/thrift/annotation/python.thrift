@@ -112,3 +112,17 @@ struct Py3EnableCppAdapter {}
 @scope.Struct
 @scope.Exception
 struct MigrationBlockingAllowInheritance {}
+
+/// Enables sorted order for a field with `set` type.
+/// Only affects serialization for thrift-python and thrift-py3.
+/// Note that `set` in thrift-python has no stable ordering once deserialized.
+/// DO NOT RELY on this. Brittle tests that rely on this will eventually be disabled.
+@scope.Field
+struct DeprecatedSortSetOnSerialize {}
+
+/// Enables key-sorted order for a field with `map` type.
+/// Only affects thrift-python and thrift-py3.
+/// Note that key sorting only occurs on serialization, and not on deserialization.
+/// DO NOT RELY on this. Brittle tests that rely on this will eventually be disabled.
+@scope.Field
+struct DeprecatedKeySortMapOnSerialize {}

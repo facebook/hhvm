@@ -101,6 +101,24 @@ var (
                 NewFunc:    func() thrift.Struct { return NewMigrationBlockingAllowInheritance() },
             },
     }
+    premadeCodecTypeSpec_python_DeprecatedSortSetOnSerialize = &thrift.TypeSpec{
+        FullName: "python.DeprecatedSortSetOnSerialize",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.DeprecatedSortSetOnSerialize",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewDeprecatedSortSetOnSerialize() },
+            },
+    }
+    premadeCodecTypeSpec_python_DeprecatedKeySortMapOnSerialize = &thrift.TypeSpec{
+        FullName: "python.DeprecatedKeySortMapOnSerialize",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.DeprecatedKeySortMapOnSerialize",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewDeprecatedKeySortMapOnSerialize() },
+            },
+    }
 )
 
 // Premade struct specs
@@ -264,6 +282,32 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
+    premadeStructSpec_DeprecatedSortSetOnSerialize =
+        &thrift.StructSpec{
+            Name:                 "DeprecatedSortSetOnSerialize",
+            ScopedName:           "python.DeprecatedSortSetOnSerialize",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_DeprecatedKeySortMapOnSerialize =
+        &thrift.StructSpec{
+            Name:                 "DeprecatedKeySortMapOnSerialize",
+            ScopedName:           "python.DeprecatedKeySortMapOnSerialize",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -278,6 +322,8 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3EnableCppAdapter.FullName] = premadeCodecTypeSpec_python_Py3EnableCppAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance.FullName] = premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_DeprecatedSortSetOnSerialize.FullName] = premadeCodecTypeSpec_python_DeprecatedSortSetOnSerialize
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_DeprecatedKeySortMapOnSerialize.FullName] = premadeCodecTypeSpec_python_DeprecatedKeySortMapOnSerialize
     return fbthriftTypeSpecsMap
 }()
 

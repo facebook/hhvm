@@ -222,6 +222,42 @@
           "column" : 44
         }
       }
+    },
+    "DeprecatedSortSetOnSerialize" : {
+      "lineno" : 120,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 120,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 121,
+          "column" : 39
+        }
+      }
+    },
+    "DeprecatedKeySortMapOnSerialize" : {
+      "lineno" : 127,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 127,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 128,
+          "column" : 42
+        }
+      }
     }
   }
 }

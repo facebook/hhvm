@@ -90,6 +90,20 @@ inline void reset_field<::facebook::thrift::annotation::python::MigrationBlockin
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::python::DeprecatedSortSetOnSerialize>(
+    ::facebook::thrift::annotation::python::DeprecatedSortSetOnSerialize& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
+inline void reset_field<::facebook::thrift::annotation::python::DeprecatedKeySortMapOnSerialize>(
+    ::facebook::thrift::annotation::python::DeprecatedKeySortMapOnSerialize& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::Py3Hidden>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -162,6 +176,26 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::MigrationBlockingAllowInheritance>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::python::DeprecatedSortSetOnSerialize>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::python::DeprecatedKeySortMapOnSerialize>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

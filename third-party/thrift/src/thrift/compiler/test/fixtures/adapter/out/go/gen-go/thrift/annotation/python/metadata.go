@@ -85,6 +85,20 @@ var (
                     Name: "python.MigrationBlockingAllowInheritance",
                 },
         }
+    premadeThriftType_python_DeprecatedSortSetOnSerialize =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.DeprecatedSortSetOnSerialize",
+                },
+        }
+    premadeThriftType_python_DeprecatedKeySortMapOnSerialize =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.DeprecatedKeySortMapOnSerialize",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
@@ -99,6 +113,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["python.UseCAPI"] = premadeThriftType_python_UseCAPI
     fbthriftThriftTypesMap["python.Py3EnableCppAdapter"] = premadeThriftType_python_Py3EnableCppAdapter
     fbthriftThriftTypesMap["python.MigrationBlockingAllowInheritance"] = premadeThriftType_python_MigrationBlockingAllowInheritance
+    fbthriftThriftTypesMap["python.DeprecatedSortSetOnSerialize"] = premadeThriftType_python_DeprecatedSortSetOnSerialize
+    fbthriftThriftTypesMap["python.DeprecatedKeySortMapOnSerialize"] = premadeThriftType_python_DeprecatedKeySortMapOnSerialize
     return fbthriftThriftTypesMap
 }()
 
@@ -208,6 +224,26 @@ var structMetadatas = func() []*metadata.ThriftStruct {
         fbthriftResults = append(fbthriftResults,
             &metadata.ThriftStruct{
                 Name:    "python.MigrationBlockingAllowInheritance",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.DeprecatedSortSetOnSerialize",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.DeprecatedKeySortMapOnSerialize",
                 IsUnion: false,
                 Fields:  []*metadata.ThriftField{
                 },

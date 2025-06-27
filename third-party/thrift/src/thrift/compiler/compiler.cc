@@ -81,6 +81,8 @@ Options:
   -v[erbose]  Verbose mode
   -r[ecurse]  Also generate included files
   -debug      Parse debug trace to stdout
+  -no-log-metircs
+              Do not log metrics.
   --allow-neg-keys
               Allow negative field keys (IGNORED: always true).
   --allow-neg-enum-vals
@@ -682,6 +684,8 @@ std::string parse_args(
       }
     } else if (flag == "v" || flag == "verbose") {
       dparams.info = true;
+    } else if (flag == "no-log-metrics") {
+      dparams.log_metrics = false;
     } else if (flag == "r" || flag == "recurse") {
       gparams.gen_recurse = true;
     } else if (flag == "allow-neg-keys") {
@@ -954,8 +958,10 @@ compile_result compile_with_options(
           .count();
   ctx.metrics().get(detail::metrics::IntValue::RUNTIME).set(duration);
 
-  detail::pluggable_functions().call<log_metrics_tag>(
-      ctx.metrics(), ctx.params());
+  if (dparams.log_metrics) {
+    detail::pluggable_functions().call<log_metrics_tag>(
+        ctx.metrics(), ctx.params());
+  }
   return result;
 }
 

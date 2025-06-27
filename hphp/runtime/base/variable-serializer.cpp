@@ -1622,9 +1622,14 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(')');
       break;
     case Type::JSON:
-    case Type::Serialize:
       write(StrNR(classToStringHelper(cls, "serialization")));
       break;
+    case Type::Serialize:
+      if (!m_keepClasses) {
+        write(StrNR(classToStringHelper(cls, "serialization")));
+        break;
+      }
+      [[fallthrough]];
     case Type::Internal:
     case Type::APCSerialize: {
       auto cname = cls->name();
@@ -1680,10 +1685,15 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(')');
       break;
     case Type::JSON:
-    case Type::Serialize:
     case Type::DebuggerSerialize:
       write(StrNR(lazyClassToStringHelper(lcls, "serialization")));
       break;
+    case Type::Serialize:
+      if (!m_keepClasses) {
+        write(StrNR(lazyClassToStringHelper(lcls, "serialization")));
+        break;
+      }
+      [[fallthrough]];
     case Type::Internal:
     case Type::APCSerialize: {
       auto cname = lcls.name();

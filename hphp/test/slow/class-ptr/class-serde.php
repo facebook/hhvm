@@ -33,6 +33,17 @@ function json_serde($val) :mixed{
   var_dump($decode);
 }
 
+function serde_keep($val, $keep) :mixed{
+  $kstr = $keep ? "true" : "false";
+  print "* serialize with 'keepClasses' => {$kstr} result:\n";
+  $ser = HH\serialize_with_options($val, shape('keepClasses' => $keep));
+  var_dump($ser);
+
+  print "* unserialize result:\n";
+  $unser = unserialize($ser);
+  var_dump($unser);
+}
+
 <<__EntryPoint>>
 function main() :mixed{
   $cls = HH\classname_to_class('A');
@@ -50,4 +61,6 @@ function main() :mixed{
   serde($cls);
   fb_serde($cls);
   json_serde($cls);
+  serde_keep($cls, true);
+  serde_keep($cls, false);
 }

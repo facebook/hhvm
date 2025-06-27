@@ -448,6 +448,8 @@ struct SerializeOptions {
   bool ignoreLateInit = false;
   bool serializeProvenanceAndLegacy = false;
   bool disallowObjects = false;
+  // When serializing a class or lazy class, do not promote them to strings
+  bool keepClasses = false;
 };
 
 ALWAYS_INLINE String serialize_impl(const Variant& value,
@@ -456,6 +458,20 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   switch (value.getType()) {
     case KindOfClass:
     case KindOfLazyClass:
+      if (opts.keepClasses) {
+        auto const str = isClassType(value.getType())
+          ? value.toClassVal()->name()
+          : value.toLazyClassVal().name();
+        auto const size = str->size();
+        StringBuffer sb;
+        sb.append("l:");
+        sb.append(size);
+        sb.append(":\"");
+        sb.append(str->data(), size);
+        sb.append("\";");
+        return sb.detach();
+      }
+      [[fallthrough]];
     case KindOfPersistentString:
     case KindOfString: {
       auto const op = "serialize()";
@@ -505,7 +521,8 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   if (opts.warnOnPHPArrays)     vs.setPHPWarn();
   if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
   if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
-  if (opts.disallowObjects)      vs.setDisallowObjects();
+  if (opts.disallowObjects)     vs.setDisallowObjects();
+  if (opts.keepClasses)         vs.setKeepClasses();
   if (pure) vs.setPure();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
@@ -528,7 +545,8 @@ const StaticString
   s_warnOnPHPArrays("warnOnPHPArrays"),
   s_ignoreLateInit("ignoreLateInit"),
   s_disallowObjects("disallowObjects"),
-  s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy");
+  s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy"),
+  s_keepClasses("keepClasses");
 
 String HHVM_FUNCTION(HH_serialize_with_options,
                      const Variant& value, const Array& options) {
@@ -548,6 +566,8 @@ String HHVM_FUNCTION(HH_serialize_with_options,
     options[s_serializeProvenanceAndLegacy].toBoolean();
   opts.disallowObjects = options.exists(s_disallowObjects) &&
     options[s_disallowObjects].toBoolean();
+  opts.keepClasses = options.exists(s_keepClasses) &&
+    options[s_keepClasses].toBoolean();
   return serialize_impl(value, opts, false);
 }
 

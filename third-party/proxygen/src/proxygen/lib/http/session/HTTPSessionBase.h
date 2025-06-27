@@ -691,8 +691,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
 
   HTTPCodecFilterChain codec_;
 
-  HTTP2PriorityQueue txnEgressQueue_;
-
   /**
    * Maximum number of ingress body bytes that can be buffered across all
    * transactions for this single session/connection.

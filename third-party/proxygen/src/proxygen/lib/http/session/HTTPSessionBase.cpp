@@ -34,10 +34,6 @@ HTTPSessionBase::HTTPSessionBase(const SocketAddress& localAddr,
     : infoCallback_(infoCallback),
       transportInfo_(tinfo),
       codec_(std::move(codec)),
-      txnEgressQueue_(isHTTP2CodecProtocol(codec_->getProtocol())
-                          ? WheelTimerInstance(wheelTimer)
-                          : WheelTimerInstance(),
-                      rootNodeId),
       localAddr_(localAddr),
       peerAddr_(peerAddr),
       controller_(controller),

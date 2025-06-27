@@ -128,7 +128,6 @@ void HQUpstreamSession::attachThreadLocals(
     HTTPSessionController* controller) {
   // TODO: deal with control streams in h2q
   VLOG(4) << __func__ << " sess=" << *this;
-  txnEgressQueue_.attachThreadLocals(timeout);
   setController(controller);
   setSessionStats(stats);
   auto qEvbWrapper = std::make_shared<quic::FollyQuicEventBase>(eventBase);
@@ -153,7 +152,6 @@ void HQUpstreamSession::detachThreadLocals(bool) {
     sock_->detachEventBase();
   }
 
-  txnEgressQueue_.detachThreadLocals();
   setController(nullptr);
   setSessionStats(nullptr);
   // The codec filters *shouldn't* be accessible while the socket is detached,

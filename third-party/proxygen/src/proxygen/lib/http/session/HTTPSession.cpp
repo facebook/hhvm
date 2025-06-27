@@ -88,6 +88,10 @@ HTTPSession::HTTPSession(const WheelTimerInstance& wheelTimer,
       writeTimeout_(this),
       sock_(std::move(sock)),
       wheelTimer_(wheelTimer),
+      txnEgressQueue_(isHTTP2CodecProtocol(codec_->getProtocol())
+                          ? WheelTimerInstance(wheelTimer)
+                          : WheelTimerInstance(),
+                      HTTPCodec::StreamID(0)),
       draining_(false),
       started_(false),
       writesDraining_(false),

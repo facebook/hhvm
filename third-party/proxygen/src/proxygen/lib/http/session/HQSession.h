@@ -36,6 +36,7 @@
 #include <quic/common/BufUtil.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/priority/HTTPPriorityQueue.h>
+#include <quic/priority/PriorityQueue.h>
 
 namespace proxygen {
 
@@ -687,7 +688,6 @@ class HQSession
     codecStack_.emplace_back(nullptr, nullptr, nullptr);
 
     attachToSessionController();
-    nextEgressResults_.reserve(maxConcurrentIncomingStreams_);
     quicInfo_ = std::make_shared<QuicProtocolInfo>();
     initCodecHeaderIndexingStrategy();
   }
@@ -1360,6 +1360,7 @@ class HQSession
     void detach(HTTPTransaction* /* txn */) noexcept override {
       VLOG(4) << __func__ << " txn=" << txn_;
       detached_ = true;
+      session_.httpPriorityQueue_.erase(queueHandle_.getStreamId());
       session_.scheduleLoopCallback();
     }
     void checkForDetach();
@@ -1516,6 +1517,9 @@ class HQSession
     bool hasPendingEOM() const;
     bool hasPendingEgress() const;
 
+    void setPriority(quic::QuicSocket& sock,
+                     quic::StreamId id,
+                     proxygen::HTTPPriority pri);
     /**
      * Adapter class for managing different enqueued state between
      * HTTPTransaction and HQStreamTransport.  The decouples whether the
@@ -1523,113 +1527,132 @@ class HQSession
      * and whether the HQStreamTransport is enqueued (which impacts the
      * actual egress algorithm).  Note all 4 states are possible.
      */
-    class HQPriHandle : public HTTP2PriorityQueueBase::BaseNode {
+    class HQPriHandle : public HTTP2PriorityQueue::BaseNode {
      public:
-      void init(HTTP2PriorityQueueBase::Handle handle) {
-        egressQueueHandle_ = handle;
-        enqueued_ = handle->isEnqueued();
+      void setStreamId(quic::StreamId streamId) {
+        id_ = quic::PriorityQueue::Identifier::fromStreamID(streamId);
       }
 
-      HTTP2PriorityQueueBase::Handle FOLLY_NULLABLE getHandle() const {
-        return egressQueueHandle_;
-      }
-
-      void clearHandle() {
-        egressQueueHandle_ = nullptr;
+      [[nodiscard]] quic::PriorityQueue::Identifier getStreamId() const {
+        return id_;
       }
 
       // HQStreamTransport is enqueued
       bool isStreamTransportEnqueued() const {
-        return egressQueueHandle_ ? egressQueueHandle_->isEnqueued() : false;
+        return streamTransportEnqueued_;
       }
 
       bool isTransactionEnqueued() const {
-        return isEnqueued();
+        return transactionEnqueued_;
       }
 
-      void setEnqueued(bool enqueued) {
-        enqueued_ = enqueued;
+      void setTransactionEnqueued(bool enqueued) {
+        transactionEnqueued_ = enqueued;
       }
 
-      bool isEnqueued() const override {
-        return enqueued_;
+      void setStreamTransportEnqueued(bool enqueued) {
+        streamTransportEnqueued_ = enqueued;
       }
 
-      uint64_t calculateDepth(bool includeVirtual = true) const override {
-        return egressQueueHandle_->calculateDepth(includeVirtual);
+      [[nodiscard]] bool isEnqueued() const override {
+        return transactionEnqueued_;
+      }
+
+      void setPriority(quic::HTTPPriorityQueue::Priority pri) {
+        pri_ = pri;
+      }
+
+      quic::HTTPPriorityQueue::Priority getPriority() {
+        return pri_;
+      }
+
+      [[nodiscard]] uint64_t calculateDepth(
+          bool /* includeVirtual = true*/) const override {
+        return 0;
       }
 
      private:
-      HTTP2PriorityQueueBase::Handle egressQueueHandle_{nullptr};
-      bool enqueued_;
+      bool transactionEnqueued_{false};
+      bool streamTransportEnqueued_{false};
+      quic::PriorityQueue::Identifier id_;
+      quic::HTTPPriorityQueue::Priority pri_{3, false};
     };
 
-    HTTP2PriorityQueueBase::Handle addTransaction(HTTPCodec::StreamID id,
-                                                  http2::PriorityUpdate pri,
-                                                  HTTPTransaction* txn,
-                                                  bool permanent,
-                                                  uint64_t* depth) override {
-      queueHandle_.init(session_.txnEgressQueue_.addTransaction(
-          id, pri, txn, permanent, depth));
+    HTTP2PriorityQueueBase::Handle addTransaction(
+        HTTPCodec::StreamID id,
+        http2::PriorityUpdate /*pri*/,
+        HTTPTransaction* /*txn*/,
+        bool /*permanent*/,
+        uint64_t* /*depth*/) override {
+      queueHandle_.setStreamId(id);
       return &queueHandle_;
     }
 
-    // update the priority of an existing node
+    // Update the priority of an existing node
     HTTP2PriorityQueueBase::Handle updatePriority(
-        HTTP2PriorityQueueBase::Handle handle,
-        http2::PriorityUpdate pri,
-        uint64_t* depth) override {
-      CHECK_EQ(handle, &queueHandle_);
-      CHECK(queueHandle_.getHandle());
-      return session_.txnEgressQueue_.updatePriority(
-          queueHandle_.getHandle(), pri, depth);
+        HTTP2PriorityQueueBase::Handle /*handle*/,
+        http2::PriorityUpdate /*pri*/,
+        uint64_t* /*depth*/) override {
+      // no-op
+      return nullptr;
     }
 
     // Remove the transaction from the priority tree
-    void removeTransaction(HTTP2PriorityQueueBase::Handle handle) override {
-      CHECK_EQ(handle, &queueHandle_);
-      CHECK(queueHandle_.getHandle());
-      session_.txnEgressQueue_.removeTransaction(queueHandle_.getHandle());
-      queueHandle_.clearHandle();
+    void removeTransaction(HTTP2PriorityQueueBase::Handle /*handle*/) override {
+      if (queueHandle_.isStreamTransportEnqueued() ||
+          queueHandle_.isTransactionEnqueued()) {
+        session_.httpPriorityQueue_.erase(queueHandle_.getStreamId());
+      }
+      queueHandle_.setTransactionEnqueued(false);
+      queueHandle_.setStreamTransportEnqueued(false);
     }
 
     // Notify the queue when a transaction has egress
-    void signalPendingEgress(HTTP2PriorityQueueBase::Handle h) override {
-      CHECK_EQ(h, &queueHandle_);
-      queueHandle_.setEnqueued(true);
-      signalPendingEgressImpl();
+    void signalPendingEgress(HTTP2PriorityQueueBase::Handle /*h*/) override {
+      queueHandle_.setTransactionEnqueued(true);
+      signalPendingEgressStreamTransport();
     }
 
-    void signalPendingEgressImpl() {
+    void signalPendingEgressStreamTransport() {
+      if (queueHandle_.isStreamTransportEnqueued()) {
+        return;
+      }
       auto flowControl =
           session_.sock_->getStreamFlowControl(getEgressStreamId());
       if (!flowControl.hasError() && flowControl->sendWindowAvailable > 0) {
-        session_.txnEgressQueue_.signalPendingEgress(queueHandle_.getHandle());
+        session_.httpPriorityQueue_.insertOrUpdate(queueHandle_.getStreamId(),
+                                                   queueHandle_.getPriority());
+        queueHandle_.setStreamTransportEnqueued(true);
       } else {
         VLOG(4) << "Delay pending egress signal on blocked txn=" << txn_;
       }
     }
 
     // Notify the queue when a transaction no longer has egress
-    void clearPendingEgress(HTTP2PriorityQueueBase::Handle h) override {
-      CHECK_EQ(h, &queueHandle_);
+    void clearPendingEgress(HTTP2PriorityQueueBase::Handle /*h*/) override {
       CHECK(queueHandle_.isTransactionEnqueued());
-      queueHandle_.setEnqueued(false);
+      queueHandle_.setTransactionEnqueued(false);
       if (pendingEOM_ || hasWriteBuffer()) {
         // no-op
         // Only HQSession can clearPendingEgress for these cases
         return;
       }
+      clearPendingEgressStreamTransport();
+    }
+
+    void clearPendingEgressStreamTransport() {
       // The transaction has pending body data, but it decided to remove itself
       // from the egress queue since it's rate-limited
       if (queueHandle_.isStreamTransportEnqueued()) {
-        session_.txnEgressQueue_.clearPendingEgress(queueHandle_.getHandle());
+        session_.httpPriorityQueue_.erase(queueHandle_.getStreamId());
+        queueHandle_.setStreamTransportEnqueued(false);
       }
     }
 
-    void addPriorityNode(HTTPCodec::StreamID id,
-                         HTTPCodec::StreamID parent) override {
-      session_.txnEgressQueue_.addPriorityNode(id, parent);
+    void addPriorityNode(HTTPCodec::StreamID /*id*/,
+                         HTTPCodec::StreamID /*parent*/) override {
+      // no-op
+      return;
     }
 
     /**
@@ -1901,11 +1924,7 @@ class HQSession
     }
   };
   std::vector<CodecStackEntry> codecStack_;
-
-  /**
-   * Container to hold the results of HTTP2PriorityQueue::nextEgress
-   */
-  HTTP2PriorityQueue::NextEgressResult nextEgressResults_;
+  quic::HTTPPriorityQueue httpPriorityQueue_;
 
   // Cleanup all pending streams. Invoked in session timeout
   size_t cleanupPendingStreams();

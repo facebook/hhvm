@@ -93,7 +93,7 @@ quic::QuicErrorCode quicControlStreamError(quic::QuicErrorCode error) {
   folly::assume_unreachable();
 }
 
-quic::PriorityQueue::Priority toQuicPriority(
+quic::HTTPPriorityQueue::Priority toQuicPriority(
     const proxygen::HTTPPriority& pri) {
   return pri.paused ? quic::HTTPPriorityQueue::Priority(
                           quic::HTTPPriorityQueue::Priority::PAUSED)
@@ -603,11 +603,12 @@ bool HQSession::getCurrentStreamTransportInfo(QuicStreamProtocolInfo* qspinfo,
 }
 
 size_t HQSession::sendPriority(HTTPCodec::StreamID id, HTTPPriority priority) {
-  if (streams_.find(id) == streams_.end() && !findPushStream(id)) {
+  auto stream = findStreamImpl(id);
+  if (!stream) {
     return 0;
   }
   if (enableEgressPrioritization_) {
-    sock_->setStreamPriority(id, toQuicPriority(priority));
+    stream->setPriority(*sock_, id, priority);
   }
   // PRIORITY_UPDATE frames are sent by clients on the control stream.
   // Servers do not send PRIORITY_UPDATE
@@ -631,14 +632,15 @@ size_t HQSession::sendPushPriority(hq::PushId pushId, HTTPPriority priority) {
     return 0;
   }
   auto streamId = iter->second;
-  if (!findPushStream(streamId)) {
+  auto stream = findPushStream(streamId);
+  if (!stream) {
     LOG(ERROR) << "Cannot find push streamId=" << streamId
                << " with pushId=" << pushId << " presented in id map";
     return 0;
   }
 
   if (enableEgressPrioritization_) {
-    sock_->setStreamPriority(streamId, toQuicPriority(priority));
+    stream->setPriority(*sock_, streamId, priority);
   }
   auto controlStream = findControlStream(UnidirectionalStreamType::CONTROL);
   if (!controlStream) {
@@ -652,8 +654,15 @@ size_t HQSession::sendPushPriority(hq::PushId pushId, HTTPPriority priority) {
 }
 
 size_t HQSession::HQStreamTransportBase::changePriority(
-    HTTPTransaction* txn, HTTPPriority priority) noexcept {
+    HTTPTransaction* txn, HTTPPriority httpPriority) noexcept {
   CHECK_EQ(txn, &txn_);
+  if (queueHandle_.isStreamTransportEnqueued()) {
+    // If the stream is already enqueued, we need to update the priority
+    auto id = queueHandle_.getStreamId();
+    quic::HTTPPriorityQueue::Priority priority(httpPriority.urgency,
+                                               httpPriority.incremental);
+    session_.httpPriorityQueue_.insertOrUpdate(id, priority);
+  }
   // For a client there is no point in changing priority if the response has
   // been fully received
   if (session_.direction_ == TransportDirection::UPSTREAM &&
@@ -662,9 +671,9 @@ size_t HQSession::HQStreamTransportBase::changePriority(
   }
   if (txn->isPushed()) {
     auto pushId = txn->getID();
-    return session_.sendPushPriority(pushId, priority);
+    return session_.sendPushPriority(pushId, httpPriority);
   }
-  return session_.sendPriority(txn->getID(), priority);
+  return session_.sendPriority(txn->getID(), httpPriority);
 }
 
 size_t HQSession::HQStreamTransportBase::writeBufferSize() const {
@@ -1097,7 +1106,7 @@ void HQSession::runLoopCallback() noexcept {
   auto maxToSendOrig = maxToSend_;
   maxToSend_ -= writeControlStreams(maxToSend_);
   // Then write the request streams
-  if (!txnEgressQueue_.empty() && maxToSend_ > 0) {
+  if (!httpPriorityQueue_.empty() && maxToSend_ > 0) {
     // TODO: we could send FIN only?
     maxToSend_ = writeRequestStreams(maxToSend_);
   }
@@ -1111,13 +1120,13 @@ void HQSession::runLoopCallback() noexcept {
   // onWriteReady call
   maxToSend_ = 0;
 
-  if (!txnEgressQueue_.empty()) {
+  if (!httpPriorityQueue_.empty()) {
     scheduleWrite();
   }
 
   // Maybe schedule the next loop callback
   VLOG(4) << "sess=" << *this << " maybe schedule the next loop callback. "
-          << " pending writes: " << !txnEgressQueue_.empty()
+          << " pending writes: " << !httpPriorityQueue_.empty()
           << " pending processing reads: " << pendingProcessReadSet_.size();
   if (!pendingProcessReadSet_.empty()) {
     scheduleLoopCallback(false);
@@ -1651,7 +1660,7 @@ void HQSession::onPriority(quic::StreamId streamId, const HTTPPriority& pri) {
     return;
   }
   if (enableEgressPrioritization_) {
-    sock_->setStreamPriority(streamId, toQuicPriority(pri));
+    stream->setPriority(*sock_, streamId, pri);
   }
 }
 
@@ -1681,7 +1690,7 @@ void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
     return;
   }
   if (enableEgressPrioritization_) {
-    sock_->setStreamPriority(streamId, toQuicPriority(pri));
+    stream->setPriority(*sock_, streamId, pri);
   }
 }
 
@@ -1736,7 +1745,7 @@ void HQSession::onFlowControlUpdate(quic::StreamId id) noexcept {
               std::chrono::steady_clock::now() - stream->createdTime));
     }
     if (stream->hasPendingEgress()) {
-      txnEgressQueue_.signalPendingEgress(stream->queueHandle_.getHandle());
+      stream->signalPendingEgressStreamTransport();
     }
     if (!stream->detached_ && txn.isEgressPaused()) {
       // txn might be paused
@@ -1892,24 +1901,22 @@ void HQSession::handleSessionError(HQStreamBase* stream,
 
 uint64_t HQSession::writeRequestStreams(uint64_t maxEgress) noexcept {
   // requestStreamWriteImpl may call txn->onWriteReady
-  txnEgressQueue_.nextEgress(nextEgressResults_);
-  for (auto it = nextEgressResults_.begin(); it != nextEgressResults_.end();
-       ++it) {
-    auto& ratio = it->second;
-    auto hqStream =
-        static_cast<HQStreamTransportBase*>(&it->first->getTransport());
-    // TODO: scale maxToSend by ratio?
-    auto sent = requestStreamWriteImpl(hqStream, maxEgress, ratio);
+  while (!httpPriorityQueue_.empty() && maxEgress != 0) {
+    auto id = httpPriorityQueue_.peekNextScheduledID().asStreamID();
+    auto stream = findStream(id);
+    CHECK(stream);
+    auto pri = stream->queueHandle_.getPriority();
+    auto maxStreamEgress = maxEgress;
+    if (pri->incremental && httpPriorityQueue_.getRoundRobinElements() > 1) {
+      maxStreamEgress =
+          std::min(maxEgress, static_cast<uint64_t>(1500)); // cap max egress
+      httpPriorityQueue_.consume(maxStreamEgress);
+    }
+    auto sent = requestStreamWriteImpl(stream, maxStreamEgress, 1);
     DCHECK_LE(sent, maxEgress);
     maxEgress -= sent;
-
-    if (maxEgress == 0 && std::next(it) != nextEgressResults_.end()) {
-      VLOG(3) << __func__ << " sess=" << *this
-              << " got more to send than the transport could take";
-      break;
-    }
   }
-  nextEgressResults_.clear();
+
   return maxEgress;
 }
 
@@ -2103,7 +2110,7 @@ uint64_t HQSession::requestStreamWriteImpl(HQStreamTransportBase* hqStream,
   if (hqStream->queueHandle_.isStreamTransportEnqueued() &&
       (!hqStream->hasPendingEgress() || flowControlBlocked)) {
     VLOG(4) << "clearPendingEgress for " << hqStream->txn_;
-    txnEgressQueue_.clearPendingEgress(hqStream->queueHandle_.getHandle());
+    hqStream->clearPendingEgressStreamTransport();
   }
   if (flowControlBlocked && !hqStream->txn_.isEgressComplete()) {
     VLOG(4) << __func__ << " txn flow control blocked, txn=" << hqStream->txn_;
@@ -2549,6 +2556,16 @@ bool HQSession::HQStreamTransportBase::processReadData() {
   return (readBuf_.chainLength() > 0);
 }
 
+void HQSession::HQStreamTransportBase::setPriority(quic::QuicSocket& sock,
+                                                   quic::StreamId streamId,
+                                                   proxygen::HTTPPriority pri) {
+  auto httpPri = toQuicPriority(pri);
+  sock.setStreamPriority(streamId, httpPri);
+  queueHandle_.setPriority(httpPri);
+  auto id = quic::PriorityQueue::Identifier::fromStreamID(streamId);
+  session_.httpPriorityQueue_.updateIfExist(id, toQuicPriority(pri));
+}
+
 // This method can be invoked via several paths:
 //  - last header in the response has arrived
 //  - triggered by QPACK
@@ -2635,11 +2652,11 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   if (sock && session_.enableEgressPrioritization_) {
     auto itr = session_.priorityUpdatesBuffer_.find(streamId);
     if (itr != session_.priorityUpdatesBuffer_.end()) {
-      sock->setStreamPriority(streamId, toQuicPriority(itr->second));
+      setPriority(*sock, streamId, itr->second);
     } else {
       const auto httpPriority = httpPriorityFromHTTPMessage(*msg);
       if (httpPriority) {
-        sock->setStreamPriority(streamId, toQuicPriority(httpPriority.value()));
+        setPriority(*sock, streamId, httpPriority.value());
       }
     }
   }
@@ -2778,7 +2795,7 @@ void HQSession::HQStreamTransportBase::updatePriority(
   auto streamId = getStreamId();
   auto httpPriority = httpPriorityFromHTTPMessage(headers);
   if (sock && httpPriority && session_.enableEgressPrioritization_) {
-    sock->setStreamPriority(streamId, toQuicPriority(httpPriority.value()));
+    setPriority(*sock, streamId, httpPriority.value());
   }
 }
 
@@ -3063,7 +3080,7 @@ void HQSession::HQStreamTransportBase::abortEgress(bool checkForDetach) {
   pendingEOM_ = false;
   if (queueHandle_.isStreamTransportEnqueued()) {
     VLOG(4) << "clearPendingEgress for " << txn_;
-    session_.txnEgressQueue_.clearPendingEgress(queueHandle_.getHandle());
+    clearPendingEgressStreamTransport();
   }
   if (checkForDetach) {
     HTTPTransaction::DestructorGuard dg(&txn_);
@@ -3187,7 +3204,7 @@ void HQSession::HQStreamTransportBase::onResetStream(HTTP3::ErrorCode errorCode,
 void HQSession::HQStreamTransportBase::notifyPendingEgress() noexcept {
   VLOG(4) << __func__ << " txn=" << txn_;
   CHECK(hasEgressStreamId()) << __func__ << " invoked on stream without egress";
-  signalPendingEgressImpl();
+  signalPendingEgressStreamTransport();
   session_.scheduleWrite();
 }
 

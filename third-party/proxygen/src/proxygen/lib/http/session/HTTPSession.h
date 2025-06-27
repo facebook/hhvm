@@ -741,6 +741,8 @@ class HTTPSession
 
   WheelTimerInstance wheelTimer_;
 
+  HTTP2PriorityQueue txnEgressQueue_;
+
   /**
    * Number of writes submitted to the transport for which we haven't yet
    * received completion or failure callbacks.

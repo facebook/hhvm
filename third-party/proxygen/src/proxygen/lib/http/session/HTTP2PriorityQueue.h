@@ -29,7 +29,8 @@ class HTTP2PriorityQueueBase : public HTTPCodec::PriorityQueue {
     virtual ~BaseNode() {
     }
     virtual bool isEnqueued() const = 0;
-    virtual uint64_t calculateDepth(bool includeVirtual = true) const = 0;
+    [[nodiscard]] virtual uint64_t calculateDepth(
+        bool includeVirtual = true) const = 0;
   };
 
   using Handle = BaseNode*;
@@ -350,7 +351,8 @@ class HTTP2PriorityQueue : public HTTP2PriorityQueueBase {
 
     void convertVirtualNode(HTTPTransaction* txn);
 
-    uint64_t calculateDepth(bool includeVirtual = true) const override;
+    [[nodiscard]] uint64_t calculateDepth(
+        bool includeVirtual = true) const override;
 
     // Internal error recovery
     void flattenSubtree();

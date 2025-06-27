@@ -42,10 +42,6 @@ TRACE_SET_MOD(hhir)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Static member definitions.
-// This section can be safely deleted in C++17.
-constexpr Type::bits_t Type::kBottom;
-constexpr Type::bits_t Type::kTop;
 
 #define IRT(name, ...)       constexpr Type::bits_t Type::k##name;
 #define IRTP(name, ...)

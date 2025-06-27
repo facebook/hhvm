@@ -53,7 +53,6 @@ IMPLEMENT_LOGLEVEL(Verbose)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-constexpr const char* Logger::DEFAULT;
 
 bool Logger::AlwaysEscapeLog = true;
 bool Logger::UseSyslog = false;

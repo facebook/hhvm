@@ -67,7 +67,6 @@ struct AlignImpl {
   }
 };
 
-DEFINE_ALIGN_TABLE(AlignImpl::s_table);
 
 }
 

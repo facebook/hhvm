@@ -22,8 +22,6 @@
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-constexpr int Vframe::Top;
-constexpr int Vframe::Root;
 
 void Vunit::allocFrame(const IRInstruction* origin) {
   assertx(origin->is(DefCalleeFP));

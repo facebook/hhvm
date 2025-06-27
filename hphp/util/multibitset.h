@@ -116,8 +116,6 @@ private:
   size_t m_nwords{0};
 };
 
-template<size_t N>
-constexpr size_t multibitset<N>::npos;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -191,8 +189,6 @@ private:
   size_t m_lowwater{npos};
 };
 
-template<size_t N>
-constexpr size_t chunked_multibitset<N>::npos;
 
 ///////////////////////////////////////////////////////////////////////////////
 

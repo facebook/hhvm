@@ -34,7 +34,6 @@
 #include <thrift/test/terse_write/gen-cpp2/tablebased_terse_write_types.h>
 #include <thrift/test/terse_write/gen-cpp2/tablebased_terse_write_types_custom_protocol.h>
 #include <thrift/test/terse_write/gen-cpp2/terse_write_types.h>
-#include <thrift/test/terse_write/gen-cpp2/terse_write_types_custom_protocol.h>
 
 namespace apache::thrift::test {
 

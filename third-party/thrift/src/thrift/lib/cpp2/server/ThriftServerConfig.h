@@ -348,6 +348,8 @@ class ThriftServerConfig {
   void resetNumIOWorkerThreads(
       AttributeSource source = AttributeSource::OVERRIDE);
 
+  void setDefaultNumIOWorkerThreads(size_t numIOWorkerThreads);
+
   /**
    * Set the number of CPU (pool) threads.
    * Won't be effective if using customized ResourcePool.
@@ -362,6 +364,8 @@ class ThriftServerConfig {
 
   void resetNumCPUWorkerThreads(
       AttributeSource source = AttributeSource::OVERRIDE);
+
+  void setDefaultNumCPUWorkerThreads(size_t numCPUWorkerThreads);
 
   /**
    * Set the maximum memory usage by each debug payload.

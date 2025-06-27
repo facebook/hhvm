@@ -343,6 +343,11 @@ void ThriftServerConfig::resetNumIOWorkerThreads(AttributeSource source) {
   resetStaticAttribute(nWorkers_, source);
 }
 
+void ThriftServerConfig::setDefaultNumIOWorkerThreads(
+    size_t numIOWorkerThreads) {
+  nWorkers_.setDefault(numIOWorkerThreads);
+}
+
 void ThriftServerConfig::setNumCPUWorkerThreads(
     size_t numCPUWorkerThreads, AttributeSource source) {
   setStaticAttribute(nPoolThreads_, std::move(numCPUWorkerThreads), source);
@@ -350,6 +355,11 @@ void ThriftServerConfig::setNumCPUWorkerThreads(
 
 void ThriftServerConfig::resetNumCPUWorkerThreads(AttributeSource source) {
   resetStaticAttribute(nPoolThreads_, source);
+}
+
+void ThriftServerConfig::setDefaultNumCPUWorkerThreads(
+    size_t numCPUWorkerThreads) {
+  nPoolThreads_.setDefault(numCPUWorkerThreads);
 }
 
 void ThriftServerConfig::setListenBacklog(

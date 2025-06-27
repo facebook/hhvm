@@ -14,7 +14,6 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
 
 #include <folly/io/async/EventBase.h>
 

@@ -1403,15 +1403,6 @@ void translateModuleUse(TranslationState& ts, const Optional<ModuleName>& name) 
   ts.ue->m_moduleName = toStaticString(name.value()._0);
 }
 
-void translateRuleName(VMCompactVector<LowStringPtr>& names, StringId name) {
-  std::string name_ = toString(name);
-  std::vector<std::string> str_names;
-  folly::split('.', name_, str_names);
-
-  for (auto& s : str_names) {
-    names.push_back(makeStaticString(s));
-  }
-}
 
 void translateModule(TranslationState& ts, const hhbc::Module& m) {
   UserAttributeMap userAttrs;

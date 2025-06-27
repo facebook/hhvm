@@ -61,7 +61,6 @@ inline void mockFiberContext() {
 template <class RouterInfo = McrouterRouterInfo>
 void setRecordBucketDataContext(
     std::vector<std::pair<std::string, std::string>>& pairs) {
-  using KeyBucketPair = std::pair<std::string, std::string>;
   auto cb = [&pairs](
                 std::string key,
                 const uint64_t bucket,

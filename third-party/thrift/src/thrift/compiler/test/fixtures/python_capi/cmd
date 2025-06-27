@@ -2,6 +2,7 @@ cpp2: mstch_cpp2 src/module.thrift
 cpp2_serialized_dep: mstch_cpp2 src/serialized_dep.thrift
 cpp2_containers: mstch_cpp2 src/containers.thrift
 python: mstch_python src/module.thrift
+python_patch: python_patch src/module.thrift
 python_serialized_dep: mstch_python src/serialized_dep.thrift
 python_containers: mstch_python src/containers.thrift
 python_capi: mstch_python_capi:marshal_python_capi=1 src/module.thrift

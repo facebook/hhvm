@@ -223,7 +223,7 @@ where
 impl<P, T> Deserialize<P> for BTreeSet<T>
 where
     P: ProtocolReader,
-    T: Deserialize<P> + GetTType + Ord + GetTType,
+    T: Deserialize<P> + GetTType + Ord,
 {
     fn rs_thrift_read(p: &mut P) -> Result<Self> {
         // Guard against packet-of-death where a small message could cause DoS

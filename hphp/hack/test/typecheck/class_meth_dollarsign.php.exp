@@ -2,7 +2,7 @@ ERROR: File "class_meth_dollarsign.php", line 7, characters 32-37:
 `meth_caller` cannot be called on strings that contain `$` (Parsing[1002])
 ERROR: File "class_meth_dollarsign.php", line 7, characters 32-37:
 No instance method `bar$` in `Foo` (Typing[4053])
-  File "class_meth_dollarsign.php", line 7, characters 8-38:
+  File "class_meth_dollarsign.php", line 7, characters 20-22:
   This is why I think it is an object of type Foo
   File "class_meth_dollarsign.php", line 3, characters 7-9:
   Declaration of `Foo` is here

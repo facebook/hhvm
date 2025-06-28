@@ -34,12 +34,6 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "function_ref.php", line 5, characters 38-45:
   But got `arraykey`
-ERROR: File "function_ref.php", line 80, characters 17-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 8, characters 19-22:
-  Expected `dynamic` because method or function was called on dynamic or like-type
-  File "function_ref.php", line 35, characters 18-59:
-  Type `(readonly function(C, arraykey): arraykey)` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "function_ref.php", line 85, characters 16-19:
 Invalid argument (Typing[4110])
   File "function_ref.php", line 31, characters 3-57:
@@ -84,10 +78,22 @@ Invalid argument (Typing[4110])
   But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "function_ref.php", line 100, characters 17-19:
 Invalid argument (Typing[4110])
-  File "function_ref.php", line 35, characters 3-60:
-  Expected `HH\FunctionRef<(readonly function(C, arraykey): arraykey)>`
-  File "function_ref.php", line 14, characters 19-30:
-  But got `(readonly function<T>(C, $x): _)`
+  File "function_ref.php", line 14, characters 32-32:
+  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "function_ref.php", line 35, characters 51-58:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 100, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 35, characters 40-47:
+  Expected `arraykey`
+  File "function_ref.php", line 14, characters 32-32:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 100, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 35, characters 40-47:
+  Expected `arraykey`
+  File "function_ref.php", line 14, characters 32-32:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "function_ref.php", line 104, characters 19-38:
 Invalid argument (Typing[4411])
   File "function_ref.php", line 104, characters 19-38:

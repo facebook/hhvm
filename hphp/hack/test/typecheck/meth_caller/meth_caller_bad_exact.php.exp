@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
     where `<expr#11>` is a reference to this expression
   File "meth_caller_bad_exact.php", line 12, characters 21-24:
   But got `Base`
-  File "meth_caller_bad_exact.php", line 11, characters 20-23:
+  File "meth_caller_bad_exact.php", line 10, characters 26-29:
   Since `Base` is not final
   File "meth_caller_bad_exact.php", line 12, characters 21-24:
   this might not be a `Base`

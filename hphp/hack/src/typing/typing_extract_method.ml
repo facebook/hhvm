@@ -1404,3 +1404,23 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
   let fun_ty = drop_unused_generics fun_ty ~names:original_tparam_names in
 
   fun_ty
+
+let extract_instance_method fun_ty ~class_name ~folded_class ~env =
+  let self_param =
+    let fp_flags =
+      let readonly_this = Typing_defs_core.Flags.get_ft_readonly_this fun_ty in
+      Typing_defs_flags.FunParam.(set_readonly readonly_this default)
+    in
+    Typing_defs_core.
+      {
+        fp_pos = fst class_name;
+        fp_type = mk (Typing_reason.witness_from_decl (fst class_name), Tthis);
+        fp_name = None;
+        fp_def_value = None;
+        fp_flags;
+      }
+  in
+  let fun_ty =
+    Typing_defs_core.{ fun_ty with ft_params = self_param :: fun_ty.ft_params }
+  in
+  extract_static_method fun_ty ~class_name ~folded_class ~env

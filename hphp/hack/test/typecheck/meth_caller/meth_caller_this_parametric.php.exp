@@ -1,8 +1,1 @@
-ERROR: File "meth_caller_this_parametric.php", line 20, characters 11-18:
-Invalid argument (Typing[4110])
-  File "meth_caller_this_parametric.php", line 11, characters 18-18:
-  Expected `D`
-  File "meth_caller_this_parametric.php", line 17, characters 8-35:
-  But got `C`
-  File "meth_caller_this_parametric.php", line 4, characters 26-29:
-    via this generic `this`
+No errors

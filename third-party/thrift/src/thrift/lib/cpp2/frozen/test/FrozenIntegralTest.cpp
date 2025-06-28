@@ -18,9 +18,6 @@
 
 #include <thrift/lib/cpp2/frozen/Frozen.h>
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
-#include <thrift/lib/cpp2/frozen/test/gen-cpp2/Example_layouts.h>
-#include <thrift/lib/cpp2/frozen/test/gen-cpp2/Example_types.h>
-#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
 using namespace apache::thrift::frozen;
 

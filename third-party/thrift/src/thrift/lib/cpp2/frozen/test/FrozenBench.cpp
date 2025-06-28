@@ -18,8 +18,6 @@
 #include <folly/Random.h>
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
 #include <thrift/lib/cpp2/frozen/HintTypes.h>
-#include <thrift/lib/cpp2/frozen/test/gen-cpp2/Example_layouts.h>
-#include <thrift/lib/cpp2/frozen/test/gen-cpp2/Example_types.h>
 
 namespace apache::thrift::frozen {
 namespace {

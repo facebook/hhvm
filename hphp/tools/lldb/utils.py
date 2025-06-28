@@ -24,6 +24,7 @@ import lldb
 class LLVMVersion(enum.Enum):
     LLVM15 = "15"
     LLVM17 = "17"
+    LLVM19 = "19"
 
 
 _LLVMVersion: LLVMVersion | None = None
@@ -120,14 +121,17 @@ def get_llvm_version(target: lldb.SBTarget) -> LLVMVersion:
             if re.search("clang version 17", s):
                 found_version = LLVMVersion.LLVM17
                 break
+            if re.search("clang version 19", s):
+                found_version = LLVMVersion.LLVM19
+                break
             i += len(s) + 1
     except Exception as e:
         # We tried our best, let's assume we're on predetermined version
         debug_print(f"Failed in get_llvm_version: {str(e)}")
 
     if found_version is None:
-        found_version = LLVMVersion.LLVM15
-        print(f"Unable to determine LLVM version, assuming it's {LLVMVersion.LLVM15}")
+        found_version = LLVMVersion.LLVM19
+        print(f"Unable to determine LLVM version, assuming it's {LLVMVersion.LLVM19}")
 
     _LLVMVersion = found_version
     return _LLVMVersion

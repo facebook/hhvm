@@ -1954,7 +1954,7 @@ ReqBindJmp and CallFuncEntry.
 
   If S0 is a refcounted type, increment its refcount.
 
-| DecRef<locId>, ND, S(Cell,MMR), NF
+| DecRef<locId>, ND, S(Cell,CR), NF
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -1962,7 +1962,7 @@ ReqBindJmp and CallFuncEntry.
   The locId is just a hint to the runtime indicating which local variable is
   being DecRef'd, if any.
 
-| DecRefNZ<locId>, ND, S(Cell,MMR), NF
+| DecRefNZ<locId>, ND, S(Cell,CR), NF
 
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
@@ -2383,9 +2383,9 @@ ReqBindJmp and CallFuncEntry.
 
 | PrintStr,  ND, S(Str,MMR),  NF
 
-| PrintInt,  ND, S(Int,MMR),  NF
+| PrintInt,  ND, S(Int),  NF
 
-| PrintBool, ND, S(Bool,MMR), NF
+| PrintBool, ND, S(Bool), NF
 
   Print for various types.
 

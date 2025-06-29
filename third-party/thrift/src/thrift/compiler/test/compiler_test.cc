@@ -536,6 +536,11 @@ TEST(CompilerTest, enum_initializer) {
 
     const E e7 = [];
     # expected-error@-1: cannot convert list to `E` in initialization of `e7`
+
+    const E e8 = F.A;
+    # expected-error@-1: const `e8` is defined as enum `E` with a value of another enum `F`
+
+    enum F {A = 1, B = 2}
   )");
 }
 

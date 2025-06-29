@@ -213,6 +213,16 @@ class compatibility_checker {
           name_,
           type->name());
     }
+    if (value->is_enum()) {
+      const t_enum* val_type = value->get_enum();
+      if (val_type != nullptr && val_type != type) {
+        error(
+            "const `{}` is defined as enum `{}` with a value of another enum `{}`",
+            name_,
+            type->name(),
+            val_type->get_name());
+      }
+    }
     return true;
   }
 

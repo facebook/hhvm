@@ -123,15 +123,16 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
   void concurrentRun(const StressTestBase* test) {
     for (auto& client : clients_) {
-      scope_.add(runConcurrentInternal(client.get(), test)
-                     .scheduleOn(thread_->getEventBase()));
+      scope_.add(co_withExecutor(
+          thread_->getEventBase(), runConcurrentInternal(client.get(), test)));
     }
   }
 
   void loadGeneratedRun(const StressTestBase* test) {
     for (auto& client : clients_) {
-      scope_.add(runLoadGeneratorInternal(client.get(), test)
-                     .scheduleOn(thread_->getEventBase()));
+      scope_.add(co_withExecutor(
+          thread_->getEventBase(),
+          runLoadGeneratorInternal(client.get(), test)));
     }
   }
 

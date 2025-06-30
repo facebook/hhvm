@@ -28,7 +28,6 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
         [
             (
                 b"with_resource_pool_single_request_single_response",
-                True,
                 RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE,
                 (
                     b"CreateMethodMetadataResult(MethodMetadataMap(with_resource_pool_single_request_single_response=MethodMetadata("
@@ -44,7 +43,6 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
             ),
             (
                 b"with_resource_pool_single_request_no_response",
-                True,
                 RpcKind.SINGLE_REQUEST_NO_RESPONSE,
                 (
                     b"CreateMethodMetadataResult(MethodMetadataMap(with_resource_pool_single_request_no_response=MethodMetadata("
@@ -60,7 +58,6 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
             ),
             (
                 b"with_resource_pool_single_request_streaming_response",
-                True,
                 RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE,
                 (
                     b"CreateMethodMetadataResult(MethodMetadataMap(with_resource_pool_single_request_streaming_response=MethodMetadata("
@@ -74,60 +71,11 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
                     b")))"
                 ),
             ),
-            (
-                b"without_resource_pool_single_request_single_response",
-                False,
-                RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE,
-                (
-                    b"CreateMethodMetadataResult(MethodMetadataMap(without_resource_pool_single_request_single_response=MethodMetadata("
-                    b"executorType=UNKNOWN "
-                    b"interactionType=UNKNOWN "
-                    b"rpcKind=SINGLE_REQUEST_SINGLE_RESPONSE "
-                    b"priority=NORMAL "
-                    b"interactionName=NONE "
-                    b"createsInteraction=false "
-                    b"isWildcard=false"
-                    b")))"
-                ),
-            ),
-            (
-                b"without_resource_pool_single_request_no_response",
-                False,
-                RpcKind.SINGLE_REQUEST_NO_RESPONSE,
-                (
-                    b"CreateMethodMetadataResult(MethodMetadataMap(without_resource_pool_single_request_no_response=MethodMetadata("
-                    b"executorType=UNKNOWN "
-                    b"interactionType=UNKNOWN "
-                    b"rpcKind=SINGLE_REQUEST_NO_RESPONSE "
-                    b"priority=NORMAL "
-                    b"interactionName=NONE "
-                    b"createsInteraction=false "
-                    b"isWildcard=false"
-                    b")))"
-                ),
-            ),
-            (
-                b"without_resource_pool_single_request_streaming_response",
-                False,
-                RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE,
-                (
-                    b"CreateMethodMetadataResult(MethodMetadataMap(without_resource_pool_single_request_streaming_response=MethodMetadata("
-                    b"executorType=UNKNOWN "
-                    b"interactionType=UNKNOWN "
-                    b"rpcKind=SINGLE_REQUEST_STREAMING_RESPONSE "
-                    b"priority=NORMAL "
-                    b"interactionName=NONE "
-                    b"createsInteraction=false "
-                    b"isWildcard=false"
-                    b")))"
-                ),
-            ),
         ],
     )
     def test_create_method_metadata(
         self,
         function_name: bytes,
-        enable_resource_pools_for_python_flag_value: bool,
         rpc_kind: RpcKind,
         expected: bytes,
     ) -> None:
@@ -139,7 +87,6 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
         """
         CTests(self).test_create_method_metadata(
             function_name,
-            enable_resource_pools_for_python_flag_value,
             rpc_kind,
             expected,
         )

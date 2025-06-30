@@ -48,7 +48,7 @@ from thrift.python.server_impl.request_context import ( # noqa
     ReadHeaders,
     RequestContext,
     SocketAddress,
-    WriteHeaders, 
+    WriteHeaders,
     get_context,
 )
 from thrift.python.server_impl.request_context cimport handleAddressCallback
@@ -102,14 +102,6 @@ cdef class ThriftServer:
             self.server.get().setThreadManagerFromExecutor(get_executor(), b'python_executor')
             if self.factory._cpp_obj:
                 self.server.get().setInterface(self.factory._cpp_obj)
-                # Per the Thrift Resource Pools documentation, to enable resource pools,
-                # use `requireResourcePools()` on the server before it starts.
-                # Provide the opportunity for the handler implementation to
-                # determine whether to enable resource pools.
-                # For example, python servers have a Thrift Flag that gates the use of
-                # resource pools.
-                if self.factory.requireResourcePools():
-                    self.server.get().requireResourcePools()
             else:
                 raise RuntimeError(
                     'The handler is not valid, it has no C++ handler. Maybe its not a '
@@ -250,7 +242,7 @@ cdef class ThriftServer:
 
     def get_socket_queue_timeout(self):
         return self.server.get().getSocketQueueTimeoutMs().count() / 1000
-    
+
     cdef void set_is_overloaded(self, cIsOverloadedFunc is_overloaded):
         self.server.get().setIsOverloaded(cmove(is_overloaded))
 
@@ -296,8 +288,8 @@ cdef class ThriftServer:
     def set_use_client_timeout(self, cbool use_client_timeout):
         self.server.get().setUseClientTimeout(use_client_timeout)
 
-    def add_server_module(self, PythonServerModule module): 
-        # this is a dumb hack around cython not understanding that 
+    def add_server_module(self, PythonServerModule module):
+        # this is a dumb hack around cython not understanding that
         # unique_ptr[Base] = unique_ptr[Derived] is valid and safe
         self.server.get().addModule(
             unique_ptr[[cServerModule]](module._cpp_module.release())

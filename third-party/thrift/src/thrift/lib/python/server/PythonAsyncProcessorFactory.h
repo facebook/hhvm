@@ -64,8 +64,7 @@ class PythonAsyncProcessorFactory
       FunctionMapType functions,
       std::vector<PyObject*> lifecycleFuncs,
       folly::Executor::KeepAlive<> executor,
-      std::string serviceName,
-      bool enableResourcePools);
+      std::string serviceName);
 
  private:
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);

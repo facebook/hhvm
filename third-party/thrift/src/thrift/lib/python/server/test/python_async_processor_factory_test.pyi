@@ -23,7 +23,6 @@ class PythonAsyncProcessorFactoryCTest:
     def test_create_method_metadata(
         self,
         function_name: bytes,
-        enable_resource_pools_for_python_flag_value: bool,
         rpc_kind: RpcKind,
         expected: bytes,
     ) -> None: ...

@@ -22,7 +22,7 @@ import unittest
 import inspect
 import functools
 
-cdef cCreateMethodMetadataResult create(string function_name, cbool enable_resource_pools_for_python_flag_value, RpcKind rpc_kind):
+cdef cCreateMethodMetadataResult create(string function_name, RpcKind rpc_kind):
     cdef cmap[string, pair[RpcKind, PyObjPtr]] funcs
     cdef cvector[PyObjPtr] lifecycle
     cdef object server = None
@@ -35,8 +35,7 @@ cdef cCreateMethodMetadataResult create(string function_name, cbool enable_resou
         cmove(funcs),
         cmove(lifecycle),
         get_executor(),
-        serviceName,
-        enable_resource_pools_for_python_flag_value
+        serviceName
     )
     return deref(obj).createMethodMetadata()
 
@@ -45,8 +44,8 @@ cdef class PythonAsyncProcessorFactoryCTest:
     def __cinit__(self, object unit_test):
         self.ut = unit_test
 
-    def test_create_method_metadata(self, string function_name, cbool enable_resource_pools_for_python_flag_value, RpcKind rpc_kind, string expected) -> None:
-        create_method_metadata_result = create(function_name, enable_resource_pools_for_python_flag_value, rpc_kind)
+    def test_create_method_metadata(self, string function_name, RpcKind rpc_kind, string expected) -> None:
+        create_method_metadata_result = create(function_name, rpc_kind)
         actual = cAsyncProcessorFactory.describe(create_method_metadata_result)
         self.ut.maxDiff = None
         self.ut.assertEqual(expected, actual)

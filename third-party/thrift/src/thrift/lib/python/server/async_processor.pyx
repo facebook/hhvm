@@ -37,22 +37,3 @@ cdef class AsyncProcessorFactory:
 
     async def onStopRequested(self):
         pass
-
-    cdef cbool requireResourcePools(AsyncProcessorFactory self):
-        """
-        Override this method to conditionally call the requireResourcePools
-        method of ThriftServer.
-        NOTE: Once resource pools are the only option, it may be possible
-        to remove this method.
-        """
-        # Tests for some implementations that use py3 servers fail
-        # if this function returns True.
-        # Some py3 tests implementation do not create metadata, which is a
-        # prerequisite to call requireResourcePools() on the ThriftServer.
-        # This function can return False with no adverse effects
-        # in production. The effect is that py3 tests will not run with
-        # resource pools enabled.
-        # This function is still relevant because derived implementations
-        # like thrift-python may enable resource pools
-        # due to better guarantees about the presence of metadata.
-        return False

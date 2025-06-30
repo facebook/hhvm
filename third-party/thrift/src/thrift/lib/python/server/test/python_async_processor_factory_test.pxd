@@ -29,7 +29,7 @@ ctypedef PyObject* PyObjPtr
 cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" namespace "apache::thrift":
     cdef cppclass cCreateMethodMetadataResult "apache::thrift::AsyncProcessorFactory::CreateMethodMetadataResult":
         pass
-    
+
     cdef cppclass cAsyncProcessorFactory "apache::thrift::AsyncProcessorFactory":
         @staticmethod
         string describe(cCreateMethodMetadataResult result) noexcept
@@ -45,7 +45,6 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h":
             cvector[PyObjPtr] lifecycle,
             cAsyncioExecutor* executor,
             string serviceName,
-            cbool enableResourcePools,
         ) except +
 
 cdef class PythonAsyncProcessorFactoryCTest:

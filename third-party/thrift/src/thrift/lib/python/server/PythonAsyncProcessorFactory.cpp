@@ -103,37 +103,23 @@ PythonAsyncProcessorFactory::create(
     FunctionMapType functions,
     std::vector<PyObject*> lifecycleFuncs,
     folly::Executor::KeepAlive<> executor,
-    std::string serviceName,
-    bool enableResourcePools) {
-  // This should not be const because of the eventual
-  // std::move(pythonMetadataForRpcKind) below. A const here would make that
-  // move perform a copy.
-  static auto makePythonMetadataForRpcKind = [](bool enableResourcePools) {
+    std::string serviceName) {
+  static const auto kResourcePoolPythonMetadataForRpcKind = []() {
     PythonMetadataForRpcKind pythonMetadataForRpcKind;
     for (auto rpcKind :
          {apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
           apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
           apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE}) {
-      pythonMetadataForRpcKind[rpcKind] = enableResourcePools
-          ? std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-                PythonAsyncProcessor::PythonMetadata::ExecutorType::ANY,
-                PythonAsyncProcessor::PythonMetadata::InteractionType::NONE,
-                rpcKind)
-          : std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-                PythonAsyncProcessor::PythonMetadata::ExecutorType::UNKNOWN,
-                PythonAsyncProcessor::PythonMetadata::InteractionType::UNKNOWN,
-                rpcKind);
+      pythonMetadataForRpcKind[rpcKind] =
+          std::make_shared<PythonAsyncProcessor::PythonMetadata>(
+              PythonAsyncProcessor::PythonMetadata::ExecutorType::ANY,
+              PythonAsyncProcessor::PythonMetadata::InteractionType::NONE,
+              rpcKind);
     }
     return pythonMetadataForRpcKind;
-  };
-  static auto kThreadManagerPythonMetadataForRpcKind =
-      makePythonMetadataForRpcKind(false);
-  static auto kResourcePoolPythonMetadataForRpcKind =
-      makePythonMetadataForRpcKind(true);
+  }();
 
-  auto pythonMetadataForRpcKind = enableResourcePools
-      ? kResourcePoolPythonMetadataForRpcKind
-      : kThreadManagerPythonMetadataForRpcKind;
+  auto pythonMetadataForRpcKind = kResourcePoolPythonMetadataForRpcKind;
 
   return std::shared_ptr<PythonAsyncProcessorFactory>(
       new PythonAsyncProcessorFactory(

@@ -41,4 +41,3 @@ cdef extern from "thrift/lib/cpp2/util/EmptyAsyncProcessor.h":
 
 cdef class AsyncProcessorFactory:
     cdef shared_ptr[cAsyncProcessorFactory] _cpp_obj
-    cdef cbool requireResourcePools(AsyncProcessorFactory self)

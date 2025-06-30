@@ -56,7 +56,6 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
             cvector[PyObjPtr] lifecycle,
             cAsyncioExecutor* executor,
             string serviceName,
-            cbool enableResourcePools,
         ) except +
 
 cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift":
@@ -66,8 +65,6 @@ cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift"
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     cdef dict funcMap
     cdef list lifecycleFuncs
-
-    cdef cbool requireResourcePools(PythonAsyncProcessorFactory self)
 
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server)

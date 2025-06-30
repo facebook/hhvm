@@ -397,6 +397,5 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
                 cmove(funcs),
                 cmove(lifecycle),
                 get_executor(),
-                <bytes>server.service_name(),
-                True))
+                <bytes>server.service_name()))
         return inst

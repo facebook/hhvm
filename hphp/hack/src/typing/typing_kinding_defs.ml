@@ -35,6 +35,24 @@ let description_of_kind _kind =
 let remove_bounds kind =
   { kind with lower_bounds = TySet.empty; upper_bounds = TySet.empty }
 
+let kind_of_decl_tparam_no_bounds
+    ?(rank = 0) ?(require_dynamic = false) decl_tparam =
+  let { tp_reified = reified; tp_user_attributes; _ } = decl_tparam in
+  let enforceable =
+    Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+  in
+  let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
+
+  {
+    lower_bounds = TySet.empty;
+    upper_bounds = TySet.empty;
+    reified;
+    enforceable;
+    newable;
+    require_dynamic;
+    rank;
+  }
+
 module Simple = struct
   type bounds_for_wildcard =
     | NonLocalized of (Ast_defs.constraint_kind * decl_ty) list

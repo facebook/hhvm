@@ -34,6 +34,10 @@ and named_kind = pos_id * kind [@@deriving hash, show]
   parameter at hand. All error functions must be aware of this and not print the dummy name. *)
 val dummy_name : pos_id
 
+(** Turns a decl_tparam into a kind, throwing away all bounds in the process *)
+val kind_of_decl_tparam_no_bounds :
+  ?rank:int -> ?require_dynamic:bool -> decl_tparam -> kind
+
 (** Simple kinds are used in situations where we want to check well-kindedness, but
   ignore type constraints. Most importantly, this is used in Typing_phase.
   In other words, simple kinds can be seen as kinds that are just built from * and ->,

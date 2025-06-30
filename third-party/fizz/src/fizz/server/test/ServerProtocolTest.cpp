@@ -5708,6 +5708,9 @@ TEST_F(ServerProtocolTest, TestEndOfEarlyDataExtraData) {
 TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
   setUpExpectingFinished();
   Sequence contextSeq;
+  auto ext = std::make_shared<MockServerExtensions>();
+  state_.extensions() = ext;
+
   EXPECT_CALL(
       *mockHandshakeContext_, getFinishedData(RangeMatches("clihandsec")))
       .InSequence(contextSeq)
@@ -5756,7 +5759,13 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
   MockEncryptedReadRecordLayer* rrl;
   expectAeadCreation(&raead, nullptr);
   expectEncryptedReadRecordLayerCreation(
-      &rrl, &raead, folly::StringPiece("cat"));
+      &rrl,
+      &raead,
+      folly::StringPiece("cat"),
+      folly::none,
+      nullptr,
+      false,
+      true);
   EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));

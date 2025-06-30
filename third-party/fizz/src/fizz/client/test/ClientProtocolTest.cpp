@@ -4904,6 +4904,9 @@ TEST_F(ClientProtocolTest, TestFinishedEarlyFlowOmitEarlyRecord) {
   state_.earlyDataType() = EarlyDataType::Accepted;
   context_->setOmitEarlyRecordLayer(true);
 
+  auto ext = std::make_shared<MockClientExtensions>();
+  state_.extensions() = ext;
+
   Sequence contextSeq;
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("sht")))
       .InSequence(contextSeq)
@@ -4984,9 +4987,15 @@ TEST_F(ClientProtocolTest, TestFinishedEarlyFlowOmitEarlyRecord) {
   MockEncryptedWriteRecordLayer* wrl;
   expectAeadCreation(&waead, &raead);
   expectEncryptedReadRecordLayerCreation(
-      &rrl, &raead, folly::StringPiece("sat"));
+      &rrl,
+      &raead,
+      folly::StringPiece("sat"),
+      folly::none,
+      nullptr,
+      true,
+      false);
   expectEncryptedWriteRecordLayerCreation(
-      &wrl, &waead, folly::StringPiece("cat"));
+      &wrl, &waead, folly::StringPiece("cat"), nullptr, nullptr, true, false);
   EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret());
 
   fizz::Param param(TestMessages::finished());

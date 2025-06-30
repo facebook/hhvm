@@ -28,6 +28,13 @@ class MultiServerExtensions : public ServerExtensions {
    */
   std::vector<Extension> getExtensions(const ClientHello& chlo) override;
 
+  /**
+   * Get the underlying extensions.
+   */
+  const std::vector<std::shared_ptr<ServerExtensions>>& getExtensions() const {
+    return extensions_;
+  }
+
  private:
   std::vector<std::shared_ptr<ServerExtensions>> extensions_;
 };

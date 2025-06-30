@@ -181,7 +181,9 @@ class ProtocolTest : public testing::Test {
       MockAead** readAead,
       folly::ByteRange expectedBaseSecret,
       folly::Optional<bool> skipFailedDecryption = folly::none,
-      Sequence* s = nullptr) {
+      Sequence* s = nullptr,
+      bool expectConfigureClientRecordLayer = false,
+      bool expectConfigureServerRecordLayer = false) {
     EXPECT_CALL(*factory_, makeEncryptedReadRecordLayer(_))
         .InSequence(s ? *s : Sequence())
         .WillOnce(Invoke([=](EncryptionLevel encryptionLevel) {
@@ -197,6 +199,15 @@ class ProtocolTest : public testing::Test {
             EXPECT_CALL(
                 *ret, setSkipFailedDecryption(skipFailedDecryption.value()));
           }
+
+          if (expectConfigureClientRecordLayer &&
+              encryptionLevel == EncryptionLevel::AppTraffic) {
+            EXPECT_CALL(*ret, configureClientRecordLayer(_));
+          }
+          if (expectConfigureServerRecordLayer &&
+              encryptionLevel == EncryptionLevel::AppTraffic) {
+            EXPECT_CALL(*ret, configureServerRecordLayer(_));
+          }
           return ret;
         }));
   }
@@ -207,7 +218,9 @@ class ProtocolTest : public testing::Test {
       folly::ByteRange expectedBaseSecret,
       std::function<TLSContent(TLSMessage&, MockEncryptedWriteRecordLayer*)>
           expectedWrite = nullptr,
-      Sequence* s = nullptr) {
+      Sequence* s = nullptr,
+      bool expectConfigureClientRecordLayer = false,
+      bool expectConfigureServerRecordLayer = false) {
     EXPECT_CALL(*factory_, makeEncryptedWriteRecordLayer(_))
         .InSequence(s ? *s : Sequence())
         .WillOnce(Invoke([=](EncryptionLevel encryptionLevel) {
@@ -220,6 +233,14 @@ class ProtocolTest : public testing::Test {
                 EXPECT_TRUE(baseSecret == expectedBaseSecret);
                 EXPECT_EQ(aead, *writeAead);
               }));
+          if (expectConfigureClientRecordLayer &&
+              encryptionLevel == EncryptionLevel::AppTraffic) {
+            EXPECT_CALL(*ret, configureClientRecordLayer(_));
+          }
+          if (expectConfigureServerRecordLayer &&
+              encryptionLevel == EncryptionLevel::AppTraffic) {
+            EXPECT_CALL(*ret, configureServerRecordLayer(_));
+          }
           if (expectedWrite) {
             EXPECT_CALL(*ret, _write(_, _))
                 .WillOnce(

@@ -2246,6 +2246,9 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
   writeRecordLayer->setProtocolVersion(*state.version());
+  if (state.extensions()) {
+    writeRecordLayer->configureClientRecordLayer(state.extensions());
+  }
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   Protocol::setAead(
@@ -2259,6 +2262,9 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
   readRecordLayer->setProtocolVersion(*state.version());
+  if (state.extensions()) {
+    readRecordLayer->configureClientRecordLayer(state.extensions());
+  }
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
   Protocol::setAead(

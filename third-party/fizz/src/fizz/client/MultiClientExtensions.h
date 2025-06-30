@@ -33,6 +33,13 @@ class MultiClientExtensions : public ClientExtensions {
    */
   void onEncryptedExtensions(const std::vector<Extension>& extensions) override;
 
+  /**
+   * Get the underlying extensions.
+   */
+  const std::vector<std::shared_ptr<ClientExtensions>>& getExtensions() const {
+    return extensions_;
+  }
+
  private:
   std::vector<std::shared_ptr<ClientExtensions>> extensions_;
 };

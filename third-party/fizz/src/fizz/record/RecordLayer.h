@@ -15,6 +15,8 @@
 #include <folly/io/IOBufQueue.h>
 
 namespace fizz {
+class ClientExtensions;
+class ServerExtensions;
 
 struct TLSContent {
   Buf data;
@@ -132,6 +134,22 @@ class ReadRecordLayer {
 
   static folly::Optional<Param> decodeHandshakeMessage(folly::IOBufQueue& buf);
 
+  /**
+   * Configure the record layer for client-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureClientRecordLayer(const ClientExtensions*) {}
+
+  /**
+   * Configure the record layer for server-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureServerRecordLayer(const ServerExtensions*) {}
+
  private:
   folly::IOBufQueue unparsedHandshakeData_{
       folly::IOBufQueue::cacheChainLength()};
@@ -191,6 +209,22 @@ class WriteRecordLayer {
   virtual RecordLayerState getRecordLayerState() const {
     return RecordLayerState{};
   }
+
+  /**
+   * Configure the record layer for client-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureClientRecordLayer(const ClientExtensions*) {}
+
+  /**
+   * Configure the record layer for server-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureServerRecordLayer(const ServerExtensions*) {}
 
  protected:
   mutable bool useAdditionalData_{true};

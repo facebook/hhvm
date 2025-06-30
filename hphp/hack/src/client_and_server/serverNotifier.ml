@@ -165,18 +165,27 @@ let init
       Hh_logger.log
         "Failed to initialize EdenFS watcher, failed with message:\n%s"
         msg;
+      HackEventLogger.edenfs_watcher_fallback ~msg;
       None
     | Result.Error Edenfs_watcher_types.NonEdenWWW ->
-      Hh_logger.log
-        "Failed to initialize EdenFS watcher, www repo %s is not on Eden"
-        (Path.to_string root);
+      let msg =
+        Printf.sprintf
+          "Failed to initialize EdenFS watcher, www repo %s is not on Eden"
+          (Path.to_string root)
+      in
+      Hh_logger.log "%s" msg;
+      HackEventLogger.edenfs_watcher_fallback ~msg;
       None
     | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
-      Hh_logger.log
-        "Failed to initialize EdenFS watcher with lost changes message, reason %s"
-        reason;
+      let msg =
+        Printf.sprintf
+          "Failed to initialize EdenFS watcher with lost changes message, reason %s"
+          reason
+      in
+      Hh_logger.log "%s" msg;
+      HackEventLogger.edenfs_watcher_fallback ~msg;
       None
-    | Result.Ok instance -> begin
+    | Result.Ok instance ->
       (* TODO(frankemrich): Add use_edenfs_file_watcher to hh_server_events
          table and HackEventLogger *)
       (* HackEventLogger.set_use_edenfs_file_watcher (); *)
@@ -207,39 +216,53 @@ let init
           }
           ()
       in
-      Option.map watchman_env ~f:(fun watchman_env ->
-          let tmp_watchman_instance =
-            ref (Watchman.Watchman_alive watchman_env)
-          in
-          EdenfsFileWatcher
-            { instance; tmp_watchman_instance; num_workers; root; local_config })
-    end
+      (match watchman_env with
+      | Some watchman_env ->
+        let tmp_watchman_instance =
+          ref (Watchman.Watchman_alive watchman_env)
+        in
+        Some
+          (EdenfsFileWatcher
+             {
+               instance;
+               tmp_watchman_instance;
+               num_workers;
+               root;
+               local_config;
+             })
+      | None ->
+        let msg = "Failed to initialize Watchman event watching instance" in
+        HackEventLogger.edenfs_watcher_fallback ~msg;
+        None)
   in
 
+  if edenfs_watcher_enabled && watchman_enabled then
+    Hh_logger.warn
+      "Both Watchman and EdenFS file watching enabled in server config, will prefer the latter";
+
+  (* We just use these lazy values to make the initialization logic less branchy. *)
+  let lazy_edenfs_watcher = lazy (try_init_edenfs_watcher ()) in
+  let lazy_watchman = lazy (try_init_watchman ()) in
+
   let notifier =
-    match
-      (ServerArgs.check_mode options, edenfs_watcher_enabled, watchman_enabled)
-    with
-    | (true, _, _) ->
+    if ServerArgs.check_mode options then (
       (* check_mode *)
       Hh_logger.log "Not using any file watching mechanism";
       IndexOnly { root }
-    | (false, true, _) ->
-      (* Whenever EdenFS file watching is requested it takes precedence
-         over Watchman, but there is no fallback *)
-      if watchman_enabled then
-        Hh_logger.warn
-          "Both Watchman and EdenFS file watching enabled in server config";
-      (match try_init_edenfs_watcher () with
-      | Some t -> t
-      | None ->
-        failwith "EdenFS file watching enabled, but failed to initialize.")
-    | (false, false, true) ->
-      (match try_init_watchman () with
-      | Some t -> t
-      | None -> init_dfind ())
-    | (false, false, false) -> init_dfind ()
+    ) else if
+        edenfs_watcher_enabled
+        && (Option.is_some @@ Lazy.force lazy_edenfs_watcher)
+      then
+      (* This value_exn cannot fail, we just checked that this is Some in the previous line *)
+      Option.value_exn @@ Lazy.force lazy_edenfs_watcher
+    else if watchman_enabled && (Option.is_some @@ Lazy.force lazy_watchman)
+    then
+      (* This value_exn cannot fail, we just checked that this is Some in the previous line *)
+      Option.value_exn @@ Lazy.force lazy_watchman
+    else
+      init_dfind ()
   in
+
   (notifier, indexer notifier)
 
 let init_mock

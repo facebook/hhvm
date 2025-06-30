@@ -441,6 +441,8 @@ let edenfs_watcher_lost_changes ~msg:_ ~backtrace:_ = ()
 
 let edenfs_watcher_error ~msg:_ ~backtrace:_ = ()
 
+let edenfs_watcher_fallback ~msg:_ = ()
+
 (* Typing service events. *)
 
 module ProfileTypeCheck = struct

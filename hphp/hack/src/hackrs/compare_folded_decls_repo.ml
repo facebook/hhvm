@@ -62,12 +62,7 @@ let init (root : Path.t) (naming_table_path : string option) :
     ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
   in
   let popt = ServerConfig.parser_options server_config in
-  let tcopt =
-    {
-      (ServerConfig.typechecker_options server_config) with
-      GlobalOptions.tco_higher_kinded_types = true;
-    }
-  in
+  let tcopt = ServerConfig.typechecker_options server_config in
   let ctx =
     Provider_context.empty_for_tool
       ~popt

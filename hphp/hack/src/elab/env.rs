@@ -20,7 +20,7 @@ bitflags! {
     #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u16 {
         const SOFT_AS_LIKE = 1 << 0;
-        const HKT_ENABLED = 1 << 1;
+        // No longer in use: const HKT_ENABLED = 1 << 1;
         const IS_HHI = 1 << 2;
         const IS_SYSTEMLIB = 1 << 3;
         const CONST_ATTRIBUTE = 1 << 5;
@@ -44,7 +44,6 @@ impl Flags {
             tco.po.interpret_soft_types_as_like_types,
         );
 
-        flags.set(Self::HKT_ENABLED, tco.tco_higher_kinded_types);
         flags.set(Self::IS_SYSTEMLIB, tco.po.is_systemlib);
         flags.set(
             Self::NO_AUTO_DYNAMIC_ENABLED,
@@ -128,10 +127,6 @@ impl Env {
 
     pub fn allow_ignore_readonly(&self) -> bool {
         self.flags.contains(Flags::ALLOW_IGNORE_READONLY)
-    }
-
-    pub fn hkt_enabled(&self) -> bool {
-        self.flags.contains(Flags::HKT_ENABLED)
     }
 
     pub fn is_systemlib(&self) -> bool {

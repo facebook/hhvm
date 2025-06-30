@@ -50,7 +50,6 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
     SharedMem.init ~num_workers:0 sharedmem_config
   in
   let popt = tcopt.GlobalOptions.po in
-  let tcopt = { tcopt with GlobalOptions.tco_higher_kinded_types = true } in
   if rust_provider_backend then
     let backend =
       Hh_server_provider_backend.make
@@ -510,7 +509,6 @@ let () =
       ignored_flag "--disallow-invalid-arraykey-constraint";
       ignored_flag "--disallow-php-lambdas";
       ignored_flag "--disallow-silence";
-      ignored_flag "--enable-higher-kinded-types";
       ignored_flag "--forbid_nullable_cast";
       ( "--hh-log-level",
         Arg.Tuple [Arg.String (fun _ -> ()); Arg.String (fun _ -> ())],

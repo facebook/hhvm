@@ -167,8 +167,6 @@ type t = {
       (** Flag to report an error on php style anonymous functions *)
   tco_disallow_discarded_nullable_awaitables: bool;
       (** Flag to error on using discarded nullable awaitables *)
-  tco_higher_kinded_types: bool;
-      (** Controls if higher-kinded types are supported *)
   tco_typecheck_sample_rate: float;
       (** Type check this proportion of all files. Default is 1.0.
         DO NOT set to any other value except for testing purposes. *)
@@ -363,7 +361,6 @@ val set :
   ?symbol_write_sym_hash_out:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
-  ?tco_higher_kinded_types:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
   ?tco_pessimise_builtins:bool ->

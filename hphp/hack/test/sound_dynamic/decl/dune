@@ -39,7 +39,6 @@
    --flags
    --error-format
    plain
-   --enable-higher-kinded-types
    --enable-supportdyn-hint)))
 
 (alias

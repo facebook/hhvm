@@ -273,7 +273,6 @@ let parse_options () =
   let enable_xhp_class_modifier = ref false in
   let disable_hh_ignore_error = ref 0 in
   let is_systemlib = ref false in
-  let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
   let report_pos_from_reason = ref false in
@@ -644,9 +643,6 @@ let parse_options () =
       ( "--is-systemlib",
         Arg.Set is_systemlib,
         " Enable systemlib annotations and other internal-only features" );
-      ( "--enable-higher-kinded-types",
-        Arg.Set enable_higher_kinded_types,
-        " Enable support for higher-kinded types" );
       ( "--allowed-fixme-codes-strict",
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
@@ -943,7 +939,6 @@ let parse_options () =
       ~tco_disallow_discarded_nullable_awaitables:
         !disallow_discarded_nullable_awaitables
       ~glean_reponame:!glean_reponame
-      ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~tco_enable_sound_dynamic:true
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check

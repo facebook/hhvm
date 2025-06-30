@@ -140,7 +140,6 @@ type t = {
   symbol_write_sym_hash_out: bool;
   tco_error_php_lambdas: bool;
   tco_disallow_discarded_nullable_awaitables: bool;
-  tco_higher_kinded_types: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
   tco_pessimise_builtins: bool;
@@ -262,7 +261,6 @@ let default =
     symbol_write_sym_hash_out = false;
     tco_error_php_lambdas = false;
     tco_disallow_discarded_nullable_awaitables = false;
-    tco_higher_kinded_types = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
     tco_pessimise_builtins = false;
@@ -383,7 +381,6 @@ let set
     ?symbol_write_sym_hash_out
     ?tco_error_php_lambdas
     ?tco_disallow_discarded_nullable_awaitables
-    ?tco_higher_kinded_types
     ?tco_typecheck_sample_rate
     ?tco_enable_sound_dynamic
     ?tco_pessimise_builtins
@@ -587,8 +584,6 @@ let set
       setting
         tco_disallow_discarded_nullable_awaitables
         options.tco_disallow_discarded_nullable_awaitables;
-    tco_higher_kinded_types =
-      setting tco_higher_kinded_types options.tco_higher_kinded_types;
     tco_typecheck_sample_rate =
       setting tco_typecheck_sample_rate options.tco_typecheck_sample_rate;
     tco_enable_sound_dynamic =

@@ -33,7 +33,6 @@ let init tcopt : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
-  let tcopt = GlobalOptions.{ tcopt with tco_higher_kinded_types = true } in
   let popt = tcopt.GlobalOptions.po in
   let ctx =
     Provider_context.empty_for_tool
@@ -236,7 +235,6 @@ let () =
       ignored_flag "--disallow-php-lambdas";
       ignored_flag "--disallow-silence";
       ignored_flag "--disallow-trait-reuse";
-      ignored_flag "--enable-higher-kinded-types";
       ignored_flag "--forbid_nullable_cast";
       ( "--hh-log-level",
         Arg.Tuple [Arg.String (fun _ -> ()); Arg.String (fun _ -> ())],

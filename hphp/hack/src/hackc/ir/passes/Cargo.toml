@@ -14,7 +14,7 @@ path = "lib.rs"
 analysis = { version = "0.0.0", path = "../analysis" }
 ir_core = { version = "0.0.0", path = "../ir_core" }
 itertools = "0.14.0"
-log = { version = "0.4.22", features = ["kv_unstable"] }
+log = { version = "0.4.22", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 print = { version = "0.0.0", path = "../print" }
 

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <variant>
+
 namespace apache::thrift {
 
 struct AppClientException;

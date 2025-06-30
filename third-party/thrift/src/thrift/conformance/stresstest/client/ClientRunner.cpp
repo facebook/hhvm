@@ -227,11 +227,13 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 ClientRunner::ClientRunner(const ClientConfig& config)
     : continuous_(config.continuous),
       useLoadGenerator_(config.useLoadGenerator),
-      loadGenerator_(config.targetQps, config.gen_load_interval),
       clientThreads_() {
+  auto targetQpsPerClient = config.targetQps / config.numClientThreads;
   for (size_t i = 0; i < config.numClientThreads; i++) {
+    loadGenerator_.emplace_back(std::make_unique<PoissonLoadGenerator>(
+        targetQpsPerClient, config.gen_load_interval));
     clientThreads_.emplace_back(std::make_unique<ClientThread>(
-        config, i, loadGenerator_, config.useLoadGenerator));
+        config, i, *loadGenerator_[i], config.useLoadGenerator));
   }
 }
 
@@ -248,7 +250,9 @@ void ClientRunner::run(const StressTestBase* test) {
   }
 
   if (useLoadGenerator_) {
-    loadGenerator_.start();
+    for (const auto& generator : loadGenerator_) {
+      generator->start();
+    }
   }
 
   folly::collect(std::move(starts)).get();

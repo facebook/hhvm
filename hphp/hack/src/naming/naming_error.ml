@@ -141,10 +141,6 @@ type t =
       pos: Pos.t;
       tparam_name: string;
     }
-  | Tparam_with_tparam of {
-      pos: Pos.t;
-      tparam_name: string;
-    }
   | Shadowed_tparam of {
       pos: Pos.t;
       tparam_name: string;
@@ -241,35 +237,6 @@ type t =
   | Unexpected_type_arguments of Pos.t
   | Too_many_type_arguments of Pos.t
   | This_as_lexical_variable of Pos.t
-  | HKT_unsupported_feature of {
-      pos: Pos.t;
-      because_nested: bool;
-      var_name: string;
-      feature: unsupported_feature;
-    }
-  | HKT_partial_application of {
-      pos: Pos.t;
-      count: int;
-    }
-  | HKT_wildcard of Pos.t
-  | HKT_implicit_argument of {
-      pos: Pos.t;
-      decl_pos: Pos_or_decl.t;
-      param_name: string;
-    }
-  | HKT_class_with_constraints_used of {
-      pos: Pos.t;
-      class_name: string;
-    }
-  | HKT_alias_with_implicit_constraints of {
-      pos: Pos.t;
-      typedef_pos: Pos_or_decl.t;
-      used_class_in_def_pos: Pos_or_decl.t;
-      typedef_name: string;
-      typedef_tparam_name: string;
-      used_class_in_def_name: string;
-      used_class_tparam_name: string;
-    }
   | Explicit_consistent_constructor of {
       pos: Pos.t;
       classish_kind: Ast_defs.classish_kind;
@@ -287,10 +254,6 @@ type t =
       class_pos: Pos.t;
       class_name: string;
       suggestion: string option;
-    }
-  | Tparam_non_shadowing_reuse of {
-      pos: Pos.t;
-      tparam_name: string;
     }
   | Dynamic_hint_disallowed of Pos.t
   | Illegal_typed_local of {
@@ -890,18 +853,6 @@ let tparam_applied_to_type pos tparam_name =
         tparam_name )
     []
 
-let tparam_with_tparam pos tparam_name =
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      if String.equal tparam_name "_" then
-        "Type parameters cannot themselves have type parameters"
-      else
-        Format.sprintf
-          "%s is a type parameter. Type parameters cannot themselves have type parameters"
-        @@ Markdown_lite.md_codify tparam_name )
-    []
-
 let shadowed_tparam prev_pos tparam_name pos =
   User_error.make_err
     Error_code.(to_enum ShadowedTypeParam)
@@ -1130,119 +1081,6 @@ let this_as_lexical_variable pos =
     (pos, "Cannot use `$this` as lexical variable")
     []
 
-let hkt_unsupported_feature pos because_nested var_name feature =
-  let var_name = Markdown_lite.md_codify var_name in
-  let var_desc =
-    Format.sprintf
-      (if because_nested then
-        {|%s is a generic parameter of another (higher-kinded) generic parameter.|}
-      else
-        {|%s is a higher-kinded type parameter, standing for a type that has type parameters itself.|})
-      var_name
-  in
-  let feature_desc =
-    match feature with
-    | Ft_where_constraints -> "where constraints mentioning"
-    | Ft_constraints -> "constraints on"
-    | Ft_reification -> "reification of"
-    | Ft_user_attrs -> "user attributes on"
-    | Ft_variance -> "variance other than invariant for"
-  in
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      Format.sprintf
-        {|%s We don't support %s parameters like %s.|}
-        var_desc
-        feature_desc
-        var_name )
-    []
-
-let hkt_partial_application pos count =
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      Format.sprintf
-        {|A higher-kinded type is expected here. We do not not support partial applications to yield higher-kinded types, but you are providing %n type argument(s).|}
-        count )
-    []
-
-let hkt_wildcard pos =
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      "You are supplying _ where a higher-kinded type is expected."
-      ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
-    )
-    []
-
-let hkt_implicit_argument decl_pos param_name pos =
-  let param_desc =
-    (* This should be Naming_special_names.Typehints.wildcard, but its not available in this
-       module *)
-    if String.equal param_name "_" then
-      "the anonymous generic parameter"
-    else
-      "the generic parameter " ^ param_name
-  in
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      "You left out the type arguments here such that they may be inferred."
-      ^ " However, a higher-kinded type is expected in place of "
-      ^ param_desc
-      ^ ", meaning that the type arguments cannot be inferred."
-      ^ " Please provide the type arguments explicitly." )
-    [
-      ( decl_pos,
-        Format.sprintf {|%s was declared to be higher-kinded here.|} param_desc
-      );
-    ]
-
-let hkt_class_with_constraints_used pos class_name =
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      Format.sprintf
-        "The class %s imposes constraints on some of its type parameters. Classes that do this cannot be used as higher-kinded types at this time."
-      @@ Render.strip_ns class_name )
-    []
-
-let hkt_alias_with_implicit_constraints
-    typedef_pos
-    typedef_name
-    used_class_in_def_pos
-    used_class_in_def_name
-    used_class_tparam_name
-    typedef_tparam_name
-    pos =
-  let typedef_name = Render.strip_ns typedef_name
-  and used_class_in_def_name = Render.strip_ns used_class_in_def_name
-  and used_class_tparam_name = Render.strip_ns used_class_tparam_name in
-  User_error.make_err
-    Error_code.(to_enum HigherKindedTypesUnsupportedFeature)
-    ( pos,
-      Format.sprintf
-        "The type %s implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
-        typedef_name )
-    [
-      (typedef_pos, "The definition of " ^ typedef_name ^ " is here.");
-      ( used_class_in_def_pos,
-        "The definition of "
-        ^ typedef_name
-        ^ " relies on "
-        ^ used_class_in_def_name
-        ^ " and the constraints that "
-        ^ used_class_in_def_name
-        ^ " imposes on its type parameter "
-        ^ used_class_tparam_name
-        ^ " then become implicit constraints on the type parameter "
-        ^ typedef_tparam_name
-        ^ " of "
-        ^ typedef_name
-        ^ "." );
-    ]
-
 let explicit_consistent_constructor ck pos =
   let classish_kind =
     match ck with
@@ -1304,16 +1142,6 @@ let unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion =
     Error_codes.Typing.(to_enum UnnecessaryAttribute)
     (pos, sprintf "The attribute `%s` is unnecessary" @@ Render.strip_ns attr)
     reason
-
-let tparam_non_shadowing_reuse pos var_name =
-  User_error.make_err
-    Error_codes.Typing.(to_enum TypeParameterNameAlreadyUsedNonShadow)
-    ( pos,
-      "The name "
-      ^ Markdown_lite.md_codify var_name
-      ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
-    )
-    []
 
 let polymorphic_lambda_missing_return_hint pos =
   User_error.make_err
@@ -1381,8 +1209,6 @@ let to_user_error t =
     | Classname_param pos -> classname_param pos
     | Tparam_applied_to_type { pos; tparam_name } ->
       tparam_applied_to_type pos tparam_name
-    | Tparam_with_tparam { pos; tparam_name } ->
-      tparam_with_tparam pos tparam_name
     | Shadowed_tparam { prev_pos; tparam_name; pos } ->
       shadowed_tparam prev_pos tparam_name pos
     | Missing_typehint pos -> missing_typehint pos
@@ -1438,33 +1264,6 @@ let to_user_error t =
     | Unexpected_type_arguments pos -> unexpected_type_arguments pos
     | Too_many_type_arguments pos -> too_many_type_arguments pos
     | This_as_lexical_variable pos -> this_as_lexical_variable pos
-    | HKT_unsupported_feature { pos; because_nested; var_name; feature } ->
-      hkt_unsupported_feature pos because_nested var_name feature
-    | HKT_partial_application { pos; count } ->
-      hkt_partial_application pos count
-    | HKT_wildcard pos -> hkt_wildcard pos
-    | HKT_implicit_argument { decl_pos; param_name; pos } ->
-      hkt_implicit_argument decl_pos param_name pos
-    | HKT_class_with_constraints_used { pos; class_name } ->
-      hkt_class_with_constraints_used pos class_name
-    | HKT_alias_with_implicit_constraints
-        {
-          typedef_pos;
-          typedef_name;
-          used_class_in_def_pos;
-          used_class_in_def_name;
-          used_class_tparam_name;
-          typedef_tparam_name;
-          pos;
-        } ->
-      hkt_alias_with_implicit_constraints
-        typedef_pos
-        typedef_name
-        used_class_in_def_pos
-        used_class_in_def_name
-        used_class_tparam_name
-        typedef_tparam_name
-        pos
     | Explicit_consistent_constructor { pos; classish_kind } ->
       explicit_consistent_constructor classish_kind pos
     | Module_declaration_outside_allowed_files pos ->
@@ -1474,8 +1273,6 @@ let to_user_error t =
     | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name
     | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
       unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
-    | Tparam_non_shadowing_reuse { pos; tparam_name } ->
-      tparam_non_shadowing_reuse pos tparam_name
     | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
       undefined_in_expr_tree pos var_name dsl did_you_mean
     | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos

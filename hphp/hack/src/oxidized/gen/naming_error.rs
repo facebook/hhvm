@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<14ac32c289c7ca37242ad6e182e7c124>>
+// @generated SignedSource<<6a68a25016b3c8407d6d085728c03e38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -235,8 +235,6 @@ pub enum NamingError {
     ClassnameParam(pos::Pos),
     #[rust_to_ocaml(name = "Tparam_applied_to_type")]
     TparamAppliedToType { pos: pos::Pos, tparam_name: String },
-    #[rust_to_ocaml(name = "Tparam_with_tparam")]
-    TparamWithTparam { pos: pos::Pos, tparam_name: String },
     #[rust_to_ocaml(name = "Shadowed_tparam")]
     ShadowedTparam {
         pos: pos::Pos,
@@ -356,35 +354,6 @@ pub enum NamingError {
     TooManyTypeArguments(pos::Pos),
     #[rust_to_ocaml(name = "This_as_lexical_variable")]
     ThisAsLexicalVariable(pos::Pos),
-    #[rust_to_ocaml(name = "HKT_unsupported_feature")]
-    HKTUnsupportedFeature {
-        pos: pos::Pos,
-        because_nested: bool,
-        var_name: String,
-        feature: UnsupportedFeature,
-    },
-    #[rust_to_ocaml(name = "HKT_partial_application")]
-    HKTPartialApplication { pos: pos::Pos, count: isize },
-    #[rust_to_ocaml(name = "HKT_wildcard")]
-    HKTWildcard(pos::Pos),
-    #[rust_to_ocaml(name = "HKT_implicit_argument")]
-    HKTImplicitArgument {
-        pos: pos::Pos,
-        decl_pos: pos_or_decl::PosOrDecl,
-        param_name: String,
-    },
-    #[rust_to_ocaml(name = "HKT_class_with_constraints_used")]
-    HKTClassWithConstraintsUsed { pos: pos::Pos, class_name: String },
-    #[rust_to_ocaml(name = "HKT_alias_with_implicit_constraints")]
-    HKTAliasWithImplicitConstraints {
-        pos: pos::Pos,
-        typedef_pos: pos_or_decl::PosOrDecl,
-        used_class_in_def_pos: pos_or_decl::PosOrDecl,
-        typedef_name: String,
-        typedef_tparam_name: String,
-        used_class_in_def_name: String,
-        used_class_tparam_name: String,
-    },
     #[rust_to_ocaml(name = "Explicit_consistent_constructor")]
     ExplicitConsistentConstructor {
         pos: pos::Pos,
@@ -406,8 +375,6 @@ pub enum NamingError {
         class_name: String,
         suggestion: Option<String>,
     },
-    #[rust_to_ocaml(name = "Tparam_non_shadowing_reuse")]
-    TparamNonShadowingReuse { pos: pos::Pos, tparam_name: String },
     #[rust_to_ocaml(name = "Dynamic_hint_disallowed")]
     DynamicHintDisallowed(pos::Pos),
     #[rust_to_ocaml(name = "Illegal_typed_local")]

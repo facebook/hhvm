@@ -606,21 +606,6 @@ module Primary = struct
         value_pos: Pos_or_decl.t;
         value_ty_name: string Lazy.t;
       }
-    | HKT_alias_with_implicit_constraints of {
-        pos: Pos.t;
-        typedef_pos: Pos_or_decl.t;
-        used_class_in_def_pos: Pos_or_decl.t;
-        typedef_name: string;
-        typedef_tparam_name: string;
-        used_class_in_def_name: string;
-        used_class_tparam_name: string;
-      }
-    | HKT_wildcard of Pos.t
-    | HKT_implicit_argument of {
-        pos: Pos.t;
-        decl_pos: Pos_or_decl.t;
-        param_name: string;
-      }
     | Invalid_substring of {
         pos: Pos.t;
         ty_name: string Lazy.t;

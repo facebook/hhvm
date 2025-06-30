@@ -136,10 +136,6 @@ type t =
       pos: Pos.t;
       tparam_name: string;
     }
-  | Tparam_with_tparam of {
-      pos: Pos.t;
-      tparam_name: string;
-    }
   | Shadowed_tparam of {
       pos: Pos.t;
       tparam_name: string;
@@ -236,35 +232,6 @@ type t =
   | Unexpected_type_arguments of Pos.t
   | Too_many_type_arguments of Pos.t
   | This_as_lexical_variable of Pos.t
-  | HKT_unsupported_feature of {
-      pos: Pos.t;
-      because_nested: bool;
-      var_name: string;
-      feature: unsupported_feature;
-    }
-  | HKT_partial_application of {
-      pos: Pos.t;
-      count: int;
-    }
-  | HKT_wildcard of Pos.t
-  | HKT_implicit_argument of {
-      pos: Pos.t;
-      decl_pos: Pos_or_decl.t;
-      param_name: string;
-    }
-  | HKT_class_with_constraints_used of {
-      pos: Pos.t;
-      class_name: string;
-    }
-  | HKT_alias_with_implicit_constraints of {
-      pos: Pos.t;
-      typedef_pos: Pos_or_decl.t;
-      used_class_in_def_pos: Pos_or_decl.t;
-      typedef_name: string;
-      typedef_tparam_name: string;
-      used_class_in_def_name: string;
-      used_class_tparam_name: string;
-    }
   | Explicit_consistent_constructor of {
       pos: Pos.t;
       classish_kind: Ast_defs.classish_kind;
@@ -282,10 +249,6 @@ type t =
       class_pos: Pos.t;
       class_name: string;
       suggestion: string option;
-    }
-  | Tparam_non_shadowing_reuse of {
-      pos: Pos.t;
-      tparam_name: string;
     }
   | Dynamic_hint_disallowed of Pos.t
   | Illegal_typed_local of {

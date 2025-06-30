@@ -745,7 +745,6 @@ module Typing = struct
     | HHExpectFailure [@value 4453]
     | CallLvalue [@value 4454]
     | UnsafeCastAwait [@value 4455]
-    | HigherKindedTypesUnsupportedFeature [@value 4456]
     | ThisFinal [@value 4457]
     | ExactClassFinal [@value 4458]
     (* | GlobalVariableWriteDEPRECATED [@value 4459] *)

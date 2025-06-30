@@ -2085,89 +2085,6 @@ end = struct
     and claim = lazy (pos, "Set values must be arraykeys") in
     create ~code:Error_code.IndexTypeMismatch ~claim ~reasons ()
 
-  let hkt_alias_with_implicit_constraints
-      pos
-      typedef_name
-      typedef_pos
-      used_class_in_def_pos
-      used_class_in_def_name
-      used_class_tparam_name
-      typedef_tparam_name =
-    let reasons =
-      lazy
-        [
-          ( typedef_pos,
-            "The definition of " ^ Render.strip_ns typedef_name ^ " is here." );
-          ( used_class_in_def_pos,
-            "The definition of "
-            ^ Render.strip_ns typedef_name
-            ^ " relies on "
-            ^ Render.strip_ns used_class_in_def_name
-            ^ " and the constraints that "
-            ^ Render.strip_ns used_class_in_def_name
-            ^ " imposes on its type parameter "
-            ^ Render.strip_ns used_class_tparam_name
-            ^ " then become implicit constraints on the type parameter "
-            ^ typedef_tparam_name
-            ^ " of "
-            ^ Render.strip_ns typedef_name
-            ^ "." );
-        ]
-    and claim =
-      lazy
-        ( pos,
-          Format.sprintf
-            "The type %s implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
-          @@ Render.strip_ns typedef_name )
-    in
-    create
-      ~code:Error_code.HigherKindedTypesUnsupportedFeature
-      ~claim
-      ~reasons
-      ()
-
-  let hkt_wildcard pos =
-    let claim =
-      lazy
-        ( pos,
-          "You are supplying _ where a higher-kinded type is expected."
-          ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
-        )
-    in
-    create ~code:Error_code.HigherKindedTypesUnsupportedFeature ~claim ()
-
-  let hkt_implicit_argument pos decl_pos param_name =
-    let param_desc =
-      (* This should be Naming_special_names.Typehints.wildcard, but its not available in this
-         module *)
-      if String.equal param_name "_" then
-        "the anonymous generic parameter"
-      else
-        "the generic parameter " ^ param_name
-    in
-    let claim =
-      lazy
-        ( pos,
-          "You left out the type arguments here such that they may be inferred."
-          ^ " However, a higher-kinded type is expected in place of "
-          ^ param_desc
-          ^ ", meaning that the type arguments cannot be inferred."
-          ^ " Please provide the type arguments explicitly." )
-    and reasons =
-      lazy
-        [
-          ( decl_pos,
-            Format.sprintf
-              {|%s was declared to be higher-kinded here.|}
-              param_desc );
-        ]
-    in
-    create
-      ~code:Error_code.HigherKindedTypesUnsupportedFeature
-      ~claim
-      ~reasons
-      ()
-
   let invalid_substring pos ty_name =
     let claim =
       lazy
@@ -4937,28 +4854,6 @@ end = struct
         (Lazy.force container_ty_name)
         value_pos
         (Lazy.force value_ty_name)
-    | HKT_alias_with_implicit_constraints
-        {
-          pos;
-          typedef_name;
-          typedef_pos;
-          used_class_in_def_pos;
-          used_class_in_def_name;
-          used_class_tparam_name;
-          typedef_tparam_name;
-          _;
-        } ->
-      hkt_alias_with_implicit_constraints
-        pos
-        typedef_name
-        typedef_pos
-        used_class_in_def_pos
-        used_class_in_def_name
-        used_class_tparam_name
-        typedef_tparam_name
-    | HKT_wildcard pos -> hkt_wildcard pos
-    | HKT_implicit_argument { pos; decl_pos; param_name } ->
-      hkt_implicit_argument pos decl_pos param_name
     | Object_string_deprecated pos -> object_string_deprecated pos
     | Invalid_substring { pos; ty_name } -> invalid_substring pos ty_name
     | Unset_nonidx_in_strict { pos; reason } ->

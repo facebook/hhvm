@@ -24,6 +24,7 @@
 #include <boost/cast.hpp>
 #include <fmt/core.h>
 
+#include <common/services/cpp/security/FizzThriftFactory.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
@@ -2885,6 +2886,44 @@ TEST(ThriftServer, StopTLSDowngrade) {
   client.sync_sendResponse(response, 64);
   EXPECT_EQ(response, "test64");
   base.loopOnce();
+}
+
+TEST(FizzThriftFactory, CreateCompositeReadRecordLayer) {
+  facebook::services::FizzThriftFactory factory;
+
+  auto appTrafficLayer =
+      factory.makeEncryptedReadRecordLayer(fizz::EncryptionLevel::AppTraffic);
+  EXPECT_NE(appTrafficLayer, nullptr);
+
+  auto handshakeLayer =
+      factory.makeEncryptedReadRecordLayer(fizz::EncryptionLevel::Handshake);
+  EXPECT_NE(handshakeLayer, nullptr);
+
+  auto earlyDataLayer =
+      factory.makeEncryptedReadRecordLayer(fizz::EncryptionLevel::EarlyData);
+  EXPECT_NE(earlyDataLayer, nullptr);
+
+  EXPECT_NE(appTrafficLayer.get(), handshakeLayer.get());
+  EXPECT_NE(appTrafficLayer.get(), earlyDataLayer.get());
+}
+
+TEST(FizzThriftFactory, CreateCompositeWriteRecordLayer) {
+  facebook::services::FizzThriftFactory factory;
+
+  auto appTrafficLayer =
+      factory.makeEncryptedWriteRecordLayer(fizz::EncryptionLevel::AppTraffic);
+  EXPECT_NE(appTrafficLayer, nullptr);
+
+  auto handshakeLayer =
+      factory.makeEncryptedWriteRecordLayer(fizz::EncryptionLevel::Handshake);
+  EXPECT_NE(handshakeLayer, nullptr);
+
+  auto earlyDataLayer =
+      factory.makeEncryptedWriteRecordLayer(fizz::EncryptionLevel::EarlyData);
+  EXPECT_NE(earlyDataLayer, nullptr);
+
+  EXPECT_NE(appTrafficLayer.get(), handshakeLayer.get());
+  EXPECT_NE(appTrafficLayer.get(), earlyDataLayer.get());
 }
 
 TEST(ThriftServer, SSLRequiredAllowsLocalPlaintext) {

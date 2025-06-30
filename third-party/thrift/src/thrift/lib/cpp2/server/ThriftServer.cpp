@@ -89,6 +89,7 @@ FOLLY_GFLAGS_DEFINE_bool(
     "Do not register a TransportRoutingHandler that can handle the legacy transports: header, framed, and unframed (default: false)");
 
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
+THRIFT_FLAG_DEFINE_bool(server_enable_stoptlsv2, false);
 
 THRIFT_FLAG_DEFINE_bool(dump_snapshot_on_long_shutdown, true);
 
@@ -2401,6 +2402,10 @@ ThriftServer::defaultNextProtocols() {
 
 folly::observer::Observer<bool> ThriftServer::enableStopTLS() {
   return THRIFT_FLAG_OBSERVE(server_enable_stoptls);
+}
+
+folly::observer::Observer<bool> ThriftServer::enableStopTLSV2() {
+  return THRIFT_FLAG_OBSERVE(server_enable_stoptlsv2);
 }
 
 folly::observer::Observer<bool> ThriftServer::enableReceivingDelegatedCreds() {

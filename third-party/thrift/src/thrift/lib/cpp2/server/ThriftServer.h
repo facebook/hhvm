@@ -150,6 +150,7 @@ class ThriftTlsConfig : public wangle::CustomConfig {
  public:
   bool enableThriftParamsNegotiation{true};
   bool enableStopTLS{false};
+  bool enableStopTLSV2{false};
 };
 
 class TLSCredentialWatcher {
@@ -2666,6 +2667,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   static folly::observer::Observer<bool> enableStopTLS();
+
+  static folly::observer::Observer<bool> enableStopTLSV2();
 
   static folly::observer::Observer<bool> enableReceivingDelegatedCreds();
 

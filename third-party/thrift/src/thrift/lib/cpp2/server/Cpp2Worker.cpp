@@ -396,6 +396,8 @@ std::optional<ThriftParametersContext> Cpp2Worker::getThriftParametersContext(
   thriftParametersContext.setUseStopTLS(
       clientAddr.getFamily() == AF_UNIX || thriftConfig->enableStopTLS ||
       **ThriftServer::enableStopTLS());
+  thriftParametersContext.setUseStopTLSV2(
+      thriftConfig->enableStopTLSV2 || **ThriftServer::enableStopTLSV2());
   return thriftParametersContext;
 }
 

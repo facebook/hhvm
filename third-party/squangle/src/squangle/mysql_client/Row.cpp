@@ -278,7 +278,7 @@ folly::StringPiece RowBlock::getField(size_t row, size_t field_num) const {
       return arg;
     } else if constexpr (
         (std::is_same_v<T, bool>) || (std::is_same_v<T, int64_t>) ||
-        (std::is_same_v<T, uint64_t>) || (std::is_same_v<T, std::string>)) {
+        (std::is_same_v<T, uint64_t>) || (std::is_same_v<T, double>)) {
       const auto& data = string_store_.getString(
           RowColumnKey(row, field_num),
           [&]() { return folly::to<std::string>(arg); });

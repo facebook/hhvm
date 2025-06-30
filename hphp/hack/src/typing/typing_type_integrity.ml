@@ -8,7 +8,6 @@
 open Hh_prelude
 open Common
 open Typing_defs
-open Typing_kinding_defs
 module Env = Typing_env
 module Cls = Folded_class
 module KindDefs = Typing_kinding_defs
@@ -160,25 +159,6 @@ module Simple = struct
      during the localization of declaration site types, everything else should be doing full
      kind-checking (including constraints) *)
 
-  let is_subkind _env ~(sub : Simple.kind) ~(sup : Simple.kind) =
-    let rec is_subk subk superk =
-      let param_compare =
-        List.fold2
-          (Simple.get_named_parameter_kinds subk)
-          (Simple.get_named_parameter_kinds superk)
-          ~init:true
-          ~f:(fun ok (_, param_sub) (_, param_sup) ->
-            (* Treating parameters contravariantly here. For simple subkinding, it doesn't make
-               a difference, though *)
-            ok && is_subk param_sup param_sub)
-      in
-      let open List.Or_unequal_lengths in
-      match param_compare with
-      | Unequal_lengths -> false
-      | Ok r -> r
-    in
-    is_subk sub sup
-
   (** Check for arity mismatch between type params and type arguments
   then check that each type argument is well-kinded. *)
   let rec check_targs_well_kinded
@@ -188,8 +168,8 @@ module Simple = struct
       ~use_pos
       env
       (tyargs : decl_ty list)
-      (nkinds : Simple.named_kind list) =
-    let exp_len = List.length nkinds in
+      (tparams : decl_tparam list) =
+    let exp_len = List.length tparams in
     let act_len = List.length tyargs in
     let arity_mistmatch_okay = Int.equal act_len 0 && allow_missing_targs in
     if Int.( <> ) exp_len act_len && not arity_mistmatch_okay then
@@ -205,18 +185,16 @@ module Simple = struct
                  actual = act_len;
                });
     let length = min exp_len act_len in
-    let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in
-    List.iter2_exn tyargs nkinds ~f:(check_targ_well_kinded ~in_signature env)
+    let (tyargs, tparams) =
+      (List.take tyargs length, List.take tparams length)
+    in
+    List.iter2_exn tyargs tparams ~f:(check_targ_well_kinded ~in_signature env)
 
   (** Checks that a type argument is well-kinded against its corresponding
   type parameter. Also checks that the wildcard type argument is not used
   if the type parameter is higher kinded (i.e. it expected type arguments itself) *)
-  and check_targ_well_kinded ~in_signature env tyarg (nkind : Simple.named_kind)
-      =
-    let kind = snd nkind in
-    let in_reified =
-      not @@ Aast.is_erased (Simple.to_full_kind_without_bounds kind).reified
-    in
+  and check_targ_well_kinded ~in_signature env tyarg (tparam : decl_tparam) =
+    let in_reified = not @@ Aast.is_erased tparam.tp_reified in
     let should_check_package_boundary =
       if
         in_reified && not (Env.package_v2_allow_reified_generics_violations env)
@@ -254,15 +232,14 @@ module Simple = struct
         env
         ty
     in
-    let check_against_tparams def_pos tyargs tparams =
-      let kinds = Simple.named_kinds_of_decl_tparams tparams in
+    let check_targs_well_kinded def_pos tyargs tparams =
       check_targs_well_kinded
         ~allow_missing_targs
         ~def_pos
         ~use_pos
         env
         tyargs
-        kinds
+        tparams
     in
     match ty_ with
     (* Boring recursive cases first---------------------- *)
@@ -328,7 +305,7 @@ module Simple = struct
           cid
         |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
         let tparams = Cls.tparams class_info in
-        check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
+        check_targs_well_kinded ~in_signature (Cls.pos class_info) argl tparams
       | Decl_entry.Found (Env.TypedefResult typedef) ->
         Typing_visibility.check_top_level_access
           ~should_check_package_boundary
@@ -341,7 +318,7 @@ module Simple = struct
           typedef.td_package
           cid
         |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
-        check_against_tparams
+        check_targs_well_kinded
           ~in_signature
           typedef.td_pos
           argl

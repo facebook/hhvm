@@ -49,9 +49,6 @@ val get_lower_bounds : t -> tparam_name -> tparam_bounds
 
 val get_upper_bounds : t -> tparam_name -> tparam_bounds
 
-(** value > 0, indicates higher-kinded type parameter *)
-val get_arity : t -> tparam_name -> int
-
 val get_reified : t -> tparam_name -> Aast.reify_kind
 
 val get_enforceable : t -> tparam_name -> bool
@@ -119,8 +116,6 @@ val add_generic_parameters_with_bounds : t -> Typing_defs.locl_tparam list -> t
 val unbind_generic_parameters : t -> _ Typing_defs.tparam list -> t
 
 val remove : t -> tparam_name -> t
-
-val get_parameter_names : tparam_info -> tparam_name list
 
 val pp : Format.formatter -> t -> unit
 

@@ -63,7 +63,6 @@ let union tpenv1 tpenv2 =
     consistent = tpenv1.consistent && tpenv2.consistent;
   }
 
-(* TODO(T70068435): needs to learn about parameters if higher-kinded? *)
 let size tpenv =
   SMap.fold
     (fun _ (_, tpinfo) count -> tparam_info_size tpinfo + count)
@@ -94,10 +93,6 @@ let get_upper_bounds tpenv name =
   match get name tpenv with
   | None -> empty_bounds
   | Some { upper_bounds; _ } -> upper_bounds
-
-let get_arity _tpenv _name =
-  (* TODO(T222659258) Always 0 now that higher-kinded types are being removed *)
-  0
 
 let get_reified tpenv name =
   match get name tpenv with
@@ -374,11 +369,6 @@ let unbind_generic_parameters t tparams =
     tparams
     ~init:t
     ~f:(fun t Typing_defs_core.{ tp_name = (_, name); _ } -> remove t name)
-
-let get_parameter_names _tpi =
-  (* TODO(T222659258) Always empty now that higher-kinded types are
-     being removed *)
-  []
 
 let force_lazy_values_tparam_info (info : tparam_info) =
   Typing_kinding_defs.force_lazy_values info

@@ -17,7 +17,6 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 from pathlib import Path
 from typing import ClassVar, List, Optional
@@ -808,6 +807,26 @@ function test_deprecated() : void {
             self.test_driver,
             "Exit_status.Hhconfig_changed",
         )
+
+    def test_filter_folder_rename(self) -> None:
+        self.test_driver.start_hh_server()
+
+        folder_path = os.path.join(self.test_driver.repo_dir, "old_folder")
+
+        # create some ignored files
+        self.test_driver.createNonHackFile("old_folder/randomfileweshouldignore")
+        self.test_driver.createNonHackFile("old_folder/.php")
+        self.test_driver.createNonHackFile("old_folder/folder.php/ignored_file.txt")
+
+        self.test_driver.check_cmd(["No errors!"])
+        assertServerNotifierChangesNo(self.test_driver)
+
+        # Rename the folder
+        new_folder_path = os.path.join(self.test_driver.repo_dir, "new_folder")
+        os.rename(folder_path, new_folder_path)
+
+        self.test_driver.check_cmd(["No errors!"])
+        assertServerNotifierChangesNo(self.test_driver)
 
     def test_filter_alternation(self) -> None:
         """Alternates between making filtered and non-filtered changes

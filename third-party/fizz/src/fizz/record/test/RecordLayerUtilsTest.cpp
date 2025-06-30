@@ -140,15 +140,10 @@ TEST_F(RecordLayerUtilsTest, TestParseEncryptedRecord) {
     queue_.append(std::move(header));
 
     auto result = RecordLayerUtils::parseEncryptedRecord(queue_);
-    EXPECT_TRUE(result.has_value());
-    EXPECT_EQ(result->contentType, ContentType::application_data);
-    EXPECT_FALSE(result->continueReading);
-
-    // Verify ciphertext contains 10 'A's
-    expectSame(result->ciphertext, "41414141414141414141");
-
-    // Verify header contains the header data
-    expectSame(result->header, "170303000a");
+    EXPECT_EQ(result.contentType, ContentType::application_data);
+    EXPECT_FALSE(result.continueReading);
+    expectSame(result.ciphertext, "41414141414141414141");
+    expectSame(result.header, "170303000a");
   }
 
   // Test 2: Not enough data for header
@@ -161,8 +156,13 @@ TEST_F(RecordLayerUtilsTest, TestParseEncryptedRecord) {
     headerData[1] = 0x03;
     queue_.append(std::move(partialHeader));
 
-    auto result = RecordLayerUtils::parseEncryptedRecord(queue_);
-    EXPECT_FALSE(result.has_value());
+#ifdef NDEBUG
+    GTEST_SKIP() << "DCHECK tests only run in debug builds";
+#else
+    EXPECT_DEATH(
+        RecordLayerUtils::parseEncryptedRecord(queue_),
+        "parseEncryptedRecord called with insufficient buffer data");
+#endif
   }
 
   // Test 3: Not enough data for full record
@@ -186,8 +186,13 @@ TEST_F(RecordLayerUtilsTest, TestParseEncryptedRecord) {
     header->prependChain(std::move(partialPayload));
     queue_.append(std::move(header));
 
-    auto result = RecordLayerUtils::parseEncryptedRecord(queue_);
-    EXPECT_FALSE(result.has_value());
+#ifdef NDEBUG
+    GTEST_SKIP() << "DCHECK tests only run in debug builds";
+#else
+    EXPECT_DEATH(
+        RecordLayerUtils::parseEncryptedRecord(queue_),
+        "parseEncryptedRecord called with incomplete record data");
+#endif
   }
 }
 
@@ -307,113 +312,167 @@ TEST_F(RecordLayerUtilsTest, TestParseEncryptedRecordMultiple) {
 
   // Parse first record (application_data)
   auto result1 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_TRUE(result1.has_value());
-  EXPECT_EQ(result1->contentType, ContentType::application_data);
-  EXPECT_FALSE(result1->continueReading);
-  expectSame(result1->ciphertext, "4141414141"); // 5 'A's
-  expectSame(result1->header, "1703030005");
+  EXPECT_EQ(result1.contentType, ContentType::application_data);
+  EXPECT_FALSE(result1.continueReading);
+  expectSame(result1.ciphertext, "4141414141"); // 5 'A's
+  expectSame(result1.header, "1703030005");
 
   // Parse second record (handshake)
   auto result2 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_TRUE(result2.has_value());
-  EXPECT_EQ(result2->contentType, ContentType::handshake);
-  EXPECT_FALSE(result2->continueReading);
-  expectSame(result2->ciphertext, "4242424242424242"); // 8 'B's
-  expectSame(result2->header, "1603030008");
+  EXPECT_EQ(result2.contentType, ContentType::handshake);
+  EXPECT_FALSE(result2.continueReading);
+  expectSame(result2.ciphertext, "4242424242424242"); // 8 'B's
+  expectSame(result2.header, "1603030008");
 
   auto result3 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_TRUE(result3.has_value());
-  EXPECT_EQ(result3->contentType, ContentType::change_cipher_spec);
-  EXPECT_TRUE(result3->continueReading); // This should be true for CCS
-  expectSame(result3->ciphertext, "01"); // CCS value
-  expectSame(result3->header, "1403030001");
+  EXPECT_EQ(result3.contentType, ContentType::change_cipher_spec);
+  EXPECT_TRUE(result3.continueReading); // This should be true for CCS
+  expectSame(result3.ciphertext, "01"); // CCS value
+  expectSame(result3.header, "1403030001");
 
   auto result4 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_TRUE(result4.has_value());
-  EXPECT_EQ(result4->contentType, ContentType::alert);
-  EXPECT_FALSE(result4->continueReading);
-  expectSame(result4->ciphertext, "434343"); // 3 'C's
-  expectSame(result4->header, "1503030003");
+  EXPECT_EQ(result4.contentType, ContentType::alert);
+  EXPECT_FALSE(result4.continueReading);
+  expectSame(result4.ciphertext, "434343"); // 3 'C's
+  expectSame(result4.header, "1503030003");
 
   EXPECT_TRUE(queue_.empty());
 }
 
 TEST_F(RecordLayerUtilsTest, TestParseEncryptedRecordPartialMultiple) {
-  // Test with partial records being added incrementally
-  queue_.reset();
+  // Test 1: Incomplete header
+  {
+    queue_.reset();
+    auto partialHeader = IOBuf::create(3);
+    partialHeader->append(3);
+    auto headerData = partialHeader->writableData();
+    headerData[0] = 0x17; // application_data
+    headerData[1] = 0x03;
+    headerData[2] = 0x03;
+    queue_.append(std::move(partialHeader));
 
-  // First, add just a partial header
-  auto partialHeader = IOBuf::create(3);
-  partialHeader->append(3);
-  auto headerData = partialHeader->writableData();
-  headerData[0] = 0x17; // application_data
-  headerData[1] = 0x03;
-  headerData[2] = 0x03;
-  queue_.append(std::move(partialHeader));
+#ifdef NDEBUG
+    GTEST_SKIP() << "DCHECK tests only run in debug builds";
+#else
+    EXPECT_DEATH(
+        RecordLayerUtils::parseEncryptedRecord(queue_),
+        "parseEncryptedRecord called with insufficient buffer data");
+#endif
+  }
 
-  // Try to parse - should fail due to incomplete header
-  auto result1 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_FALSE(result1.has_value());
+  // Test 2: Missing payload
+  {
+    queue_.reset();
+    auto header = IOBuf::create(5);
+    header->append(5);
+    auto headerData = header->writableData();
+    headerData[0] = 0x17; // application_data
+    headerData[1] = 0x03;
+    headerData[2] = 0x03;
+    headerData[3] = 0x00;
+    headerData[4] = 0x06; // length 6
+    queue_.append(std::move(header));
 
-  // Add the rest of the header
-  auto headerRest = IOBuf::create(2);
-  headerRest->append(2);
-  auto headerRestData = headerRest->writableData();
-  headerRestData[0] = 0x00;
-  headerRestData[1] = 0x06; // length 6
-  queue_.append(std::move(headerRest));
+#ifdef NDEBUG
+    GTEST_SKIP() << "DCHECK tests only run in debug builds";
+#else
+    EXPECT_DEATH(
+        RecordLayerUtils::parseEncryptedRecord(queue_),
+        "parseEncryptedRecord called with incomplete record data");
+#endif
+  }
 
-  // Try to parse - should fail due to missing payload
-  auto result2 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_FALSE(result2.has_value());
+  // Test 3: Incomplete payload
+  {
+    queue_.reset();
+    auto header = IOBuf::create(5);
+    header->append(5);
+    auto headerData = header->writableData();
+    headerData[0] = 0x17; // application_data
+    headerData[1] = 0x03;
+    headerData[2] = 0x03;
+    headerData[3] = 0x00;
+    headerData[4] = 0x06; // length 6
 
-  // Add partial payload
-  auto partialPayload = IOBuf::create(3);
-  partialPayload->append(3);
-  memset(partialPayload->writableData(), 'D', 3);
-  queue_.append(std::move(partialPayload));
+    auto partialPayload = IOBuf::create(3);
+    partialPayload->append(3);
+    memset(partialPayload->writableData(), 'D', 3);
 
-  // Try to parse - should fail due to incomplete payload
-  auto result3 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_FALSE(result3.has_value());
+    header->prependChain(std::move(partialPayload));
+    queue_.append(std::move(header));
 
-  // Add rest of payload and start of next record
-  auto restPayloadAndNextHeader = IOBuf::create(8);
-  restPayloadAndNextHeader->append(8);
-  auto mixedData = restPayloadAndNextHeader->writableData();
-  // Rest of first record payload (3 more 'D's)
-  memset(mixedData, 'D', 3);
-  // Start of next record header
-  mixedData[3] = 0x16; // handshake
-  mixedData[4] = 0x03;
-  mixedData[5] = 0x03;
-  mixedData[6] = 0x00;
-  mixedData[7] = 0x04; // length 4
-  queue_.append(std::move(restPayloadAndNextHeader));
+#ifdef NDEBUG
+    GTEST_SKIP() << "DCHECK tests only run in debug builds";
+#else
+    EXPECT_DEATH(
+        RecordLayerUtils::parseEncryptedRecord(queue_),
+        "parseEncryptedRecord called with incomplete record data");
+#endif
+  }
 
-  // Now parse first record - should succeed
-  auto result4 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_TRUE(result4.has_value());
-  EXPECT_EQ(result4->contentType, ContentType::application_data);
-  EXPECT_FALSE(result4->continueReading);
-  expectSame(result4->ciphertext, "444444444444"); // 6 'D's
-  expectSame(result4->header, "1703030006");
+  // Test 4: Successful parsing with partial records being added incrementally
+  {
+    queue_.reset();
 
-  // Add payload for second record
-  auto secondPayload = IOBuf::create(4);
-  secondPayload->append(4);
-  memset(secondPayload->writableData(), 'E', 4);
-  queue_.append(std::move(secondPayload));
+    // First, add just a partial header
+    auto partialHeader = IOBuf::create(3);
+    partialHeader->append(3);
+    auto headerData = partialHeader->writableData();
+    headerData[0] = 0x17; // application_data
+    headerData[1] = 0x03;
+    headerData[2] = 0x03;
+    queue_.append(std::move(partialHeader));
 
-  // Parse second record
-  auto result5 = RecordLayerUtils::parseEncryptedRecord(queue_);
-  EXPECT_TRUE(result5.has_value());
-  EXPECT_EQ(result5->contentType, ContentType::handshake);
-  EXPECT_FALSE(result5->continueReading);
-  expectSame(result5->ciphertext, "45454545"); // 4 'E's
-  expectSame(result5->header, "1603030004");
+    // Add the rest of the header
+    auto headerRest = IOBuf::create(2);
+    headerRest->append(2);
+    auto headerRestData = headerRest->writableData();
+    headerRestData[0] = 0x00;
+    headerRestData[1] = 0x06; // length 6
+    queue_.append(std::move(headerRest));
 
-  EXPECT_TRUE(queue_.empty());
+    // Add partial payload
+    auto partialPayload = IOBuf::create(3);
+    partialPayload->append(3);
+    memset(partialPayload->writableData(), 'D', 3);
+    queue_.append(std::move(partialPayload));
+
+    // Add rest of payload and start of next record
+    auto restPayloadAndNextHeader = IOBuf::create(8);
+    restPayloadAndNextHeader->append(8);
+    auto mixedData = restPayloadAndNextHeader->writableData();
+    // Rest of first record payload (3 more 'D's)
+    memset(mixedData, 'D', 3);
+    // Start of next record header
+    mixedData[3] = 0x16; // handshake
+    mixedData[4] = 0x03;
+    mixedData[5] = 0x03;
+    mixedData[6] = 0x00;
+    mixedData[7] = 0x04; // length 4
+    queue_.append(std::move(restPayloadAndNextHeader));
+
+    // Now parse first record - should succeed
+    auto result4 = RecordLayerUtils::parseEncryptedRecord(queue_);
+    EXPECT_EQ(result4.contentType, ContentType::application_data);
+    EXPECT_FALSE(result4.continueReading);
+    expectSame(result4.ciphertext, "444444444444"); // 6 'D's
+    expectSame(result4.header, "1703030006");
+
+    // Add payload for second record
+    auto secondPayload = IOBuf::create(4);
+    secondPayload->append(4);
+    memset(secondPayload->writableData(), 'E', 4);
+    queue_.append(std::move(secondPayload));
+
+    // Parse second record
+    auto result5 = RecordLayerUtils::parseEncryptedRecord(queue_);
+    EXPECT_EQ(result5.contentType, ContentType::handshake);
+    EXPECT_FALSE(result5.continueReading);
+    expectSame(result5.ciphertext, "45454545"); // 4 'E's
+    expectSame(result5.header, "1603030004");
+
+    EXPECT_TRUE(queue_.empty());
+  }
 }
 
 TEST_F(RecordLayerUtilsTest, TestPrepareBufferWithPaddingEmptyBuffer) {

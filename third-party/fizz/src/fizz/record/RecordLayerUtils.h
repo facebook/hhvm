@@ -55,17 +55,15 @@ class RecordLayerUtils {
   };
 
   /**
-   * Parse an encrypted TLS record from the given buffer.
-   * This function handles all the parsing logic up to but excluding the
-   * decryption step.
+   * PRECONDITIONS:
+   * - Buffer must contain at least kEncryptedHeaderSize bytes
+   * - Buffer must contain the complete record (header + payload)
+   * Caller is responsible for validating these conditions.
    *
-   * @param buf The input buffer containing the encrypted record
-   * @return An Optional containing the parsed record, or folly::none if
-   *         more data is needed
-   * @throws std::runtime_error if the record is invalid
+   * @return The parsed record data
+   * @throws std::runtime_error if the record contains invalid protocol data
    */
-  static folly::Optional<ParsedEncryptedRecord> parseEncryptedRecord(
-      folly::IOBufQueue& buf);
+  static ParsedEncryptedRecord parseEncryptedRecord(folly::IOBufQueue& buf);
 };
 
 /**

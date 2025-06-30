@@ -51,7 +51,7 @@ EncryptedReadRecordLayer::getDecryptedBuf(
     auto parsedRecord = RecordLayerUtils::parseEncryptedRecord(buf);
 
     // If this is a change_cipher_spec record, continue to the next record
-    if (parsedRecord->continueReading) {
+    if (parsedRecord.continueReading) {
       continue;
     }
 
@@ -63,8 +63,8 @@ EncryptedReadRecordLayer::getDecryptedBuf(
     // Handle decryption with support for skipping failed decryption
     if (skipFailedDecryption_) {
       auto decryptAttempt = aead_->tryDecrypt(
-          std::move(parsedRecord->ciphertext),
-          useAdditionalData_ ? parsedRecord->header.get() : nullptr,
+          std::move(parsedRecord.ciphertext),
+          useAdditionalData_ ? parsedRecord.header.get() : nullptr,
           seqNum_,
           options);
       if (decryptAttempt) {
@@ -76,8 +76,8 @@ EncryptedReadRecordLayer::getDecryptedBuf(
       }
     } else {
       return ReadResult<Buf>::from(aead_->decrypt(
-          std::move(parsedRecord->ciphertext),
-          useAdditionalData_ ? parsedRecord->header.get() : nullptr,
+          std::move(parsedRecord.ciphertext),
+          useAdditionalData_ ? parsedRecord.header.get() : nullptr,
           seqNum_++,
           options));
     }

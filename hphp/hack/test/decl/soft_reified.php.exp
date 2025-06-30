@@ -7,8 +7,8 @@
         (Tfun
            { ft_tparams =
              [{ Typing_defs_core.tp_variance = Invariant;
-                tp_name = ([3:32-33], "T"); tp_tparams = [];
-                tp_constraints = []; tp_reified = SoftReified;
+                tp_name = ([3:32-33], "T"); tp_constraints = [];
+                tp_reified = SoftReified;
                 tp_user_attributes =
                 [{ Typing_defs_core.ua_name = ([3:17-23], "__Soft");
                    ua_params = []; ua_raw_val = None }

@@ -492,7 +492,6 @@ fn get_typed_params(arr: &[&Tparam<'_>]) -> Vec<ExtDeclTparam> {
         .map(|t| ExtDeclTparam {
             variance: enum_variance(t.variance),
             name: fmt_type(t.name.1),
-            tparams: get_typed_params(t.tparams),
             constraints: (t.constraints.iter())
                 .map(|c| ExtDeclTypeConstraint {
                     kind: enum_constraint_kind(c.0),

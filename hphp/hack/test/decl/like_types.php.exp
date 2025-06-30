@@ -36,7 +36,7 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([7:12-13], "T"); tp_tparams = [];
+                 tp_name = ([7:12-13], "T");
                  tp_constraints =
                  [(Constraint_as,
                    (Rhint ([7:17-21]),

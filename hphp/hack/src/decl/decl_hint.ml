@@ -86,8 +86,6 @@ and aast_tparam_to_decl_tparam env t =
   {
     tp_variance = t.Aast.tp_variance;
     tp_name = Decl_env.make_decl_posed env t.Aast.tp_name;
-    tp_tparams =
-      List.map ~f:(aast_tparam_to_decl_tparam env) t.Aast.tp_parameters;
     tp_constraints =
       List.map ~f:(Tuple.T2.map_snd ~f:(hint env)) t.Aast.tp_constraints;
     tp_reified = t.Aast.tp_reified;
@@ -242,7 +240,6 @@ and hint_ p env = function
             {
               tp_variance = Ast_defs.Invariant (* Meaningless here *);
               tp_name;
-              tp_tparams = [];
               tp_constraints;
               tp_reified = Erased;
               tp_user_attributes;

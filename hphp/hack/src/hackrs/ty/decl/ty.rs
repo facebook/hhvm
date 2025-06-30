@@ -192,13 +192,12 @@ walkable!(impl<R: Reason> for DeclConstraintRequirement<R> => {
 pub struct Tparam<R: Reason, TY> {
     pub variance: ast_defs::Variance,
     pub name: Positioned<TypeName, R::Pos>,
-    pub tparams: Box<[Tparam<R, TY>]>,
     pub constraints: Box<[(ConstraintKind, TY)]>,
     pub reified: ReifyKind,
     pub user_attributes: Box<[UserAttribute<R::Pos>]>,
 }
 
-walkable!(impl<R: Reason, TY> for Tparam<R, TY> => [tparams, constraints]);
+walkable!(impl<R: Reason, TY> for Tparam<R, TY> => [constraints]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]

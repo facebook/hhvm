@@ -107,7 +107,6 @@ impl<R: Reason> From<&obr::typing_defs::Tparam<'_>> for ty::Tparam<R, Ty<R>> {
         Self {
             variance: tparam.variance,
             name: tparam.name.into(),
-            tparams: slice(tparam.tparams),
             constraints: (tparam.constraints.iter())
                 .map(|(kind, ty)| (*kind, (*ty).into()))
                 .collect(),

@@ -201,28 +201,19 @@ class ['env] deep_type_mapper =
       let {
         tp_variance;
         tp_name;
-        tp_tparams;
         tp_constraints;
         tp_reified;
         tp_user_attributes;
       } =
         tparam
       in
-      let (env, tp_tparams) = List.map_env env tp_tparams ~f:this#on_tparam in
       let (env, tp_constraints) =
         List.map_env env tp_constraints ~f:(fun env (cstr, ty) ->
             let (env, ty) = this#on_type env ty in
             (env, (cstr, ty)))
       in
       let tparam =
-        {
-          tp_variance;
-          tp_name;
-          tp_tparams;
-          tp_constraints;
-          tp_reified;
-          tp_user_attributes;
-        }
+        { tp_variance; tp_name; tp_constraints; tp_reified; tp_user_attributes }
       in
       (env, tparam)
 

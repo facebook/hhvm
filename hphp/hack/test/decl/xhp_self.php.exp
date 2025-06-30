@@ -3,7 +3,7 @@
      { Typing_defs.td_module = None; td_pos = [3:6-19];
        td_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
-          tp_name = ([3:21-22], "T"); tp_tparams = []; tp_constraints = [];
+          tp_name = ([3:21-22], "T"); tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_as_constraint = None; td_super_constraint = None;

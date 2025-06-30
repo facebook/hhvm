@@ -6,7 +6,7 @@
        sc_module = None; sc_name = ([3:7-10], "\\Cov");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
-          tp_name = ([3:12-14], "Tc"); tp_tparams = []; tp_constraints = [];
+          tp_name = ([3:12-14], "Tc"); tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
@@ -39,7 +39,7 @@
         sc_module = None; sc_name = ([6:7-11], "\\Base");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([6:12-14], "Tb"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([6:12-14], "Tb"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
@@ -55,7 +55,7 @@
             (Tfun
                { ft_tparams =
                  [{ Typing_defs_core.tp_variance = Invariant;
-                    tp_name = ([7:23-25], "Tf"); tp_tparams = [];
+                    tp_name = ([7:23-25], "Tf");
                     tp_constraints =
                     [(Constraint_as,
                       (Rhint ([7:29-30]), (Tapply (([7:29-30], "\\A"), []))))
@@ -97,9 +97,8 @@
         sc_module = None; sc_name = ([10:7-14], "\\Derived");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([10:15-17], "Td"); tp_tparams = [];
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           }
+           tp_name = ([10:15-17], "Td"); tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends =
         [(Rhint ([10:27-40]),
@@ -123,7 +122,7 @@
             (Tfun
                { ft_tparams =
                  [{ Typing_defs_core.tp_variance = Invariant;
-                    tp_name = ([11:23-25], "Tf"); tp_tparams = [];
+                    tp_name = ([11:23-25], "Tf");
                     tp_constraints =
                     [(Constraint_as,
                       (Rhint ([11:29-30]), (Tapply (([11:29-30], "\\A"), []))))

@@ -110,9 +110,8 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([15:24-25], "T"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
+                 tp_name = ([15:24-25], "T"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =

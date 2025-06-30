@@ -186,7 +186,6 @@ type user_attribute = {
 type 'ty tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: pos_id;
-  tp_tparams: 'ty tparam list;
   tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
   tp_reified: Ast_defs.reify_kind;
   tp_user_attributes: user_attribute list;
@@ -1130,7 +1129,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       (* Type parameters on functions are always marked invariant *)
       tp_variance = _;
       tp_name = name1;
-      tp_tparams = tparams1;
       tp_constraints = constraints1;
       tp_reified = reified1;
       tp_user_attributes = user_attributes1;
@@ -1140,7 +1138,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     let {
       tp_variance = _;
       tp_name = name2;
-      tp_tparams = tparams2;
       tp_constraints = constraints2;
       tp_reified = reified2;
       tp_user_attributes = user_attributes2;
@@ -1149,14 +1146,10 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     in
     match String.compare (snd name1) (snd name2) with
     | 0 -> begin
-      match tparams_compare tparams1 tparams2 with
+      match constraints_compare constraints1 constraints2 with
       | 0 -> begin
-        match constraints_compare constraints1 constraints2 with
-        | 0 -> begin
-          match user_attributes_compare user_attributes1 user_attributes2 with
-          | 0 -> Aast_defs.compare_reify_kind reified1 reified2
-          | n -> n
-        end
+        match user_attributes_compare user_attributes1 user_attributes2 with
+        | 0 -> Aast_defs.compare_reify_kind reified1 reified2
         | n -> n
       end
       | n -> n

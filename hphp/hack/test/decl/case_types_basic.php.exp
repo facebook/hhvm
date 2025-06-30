@@ -3,15 +3,15 @@
      { Typing_defs.td_module = None; td_pos = [4:11-14];
        td_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
-          tp_name = ([4:16-18], "T1"); tp_tparams = [];
+          tp_name = ([4:16-18], "T1");
           tp_constraints =
           [(Constraint_as, (Rhint ([4:22-30]), (Tprim Tarraykey)))];
           tp_reified = Erased; tp_user_attributes = [] };
          { Typing_defs_core.tp_variance = Contravariant;
-           tp_name = ([4:33-35], "T2"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([4:33-35], "T2"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] };
          { Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([4:37-38], "T"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([4:37-38], "T"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_as_constraint = (Some (Rhint ([4:43-50]), Tnonnull));

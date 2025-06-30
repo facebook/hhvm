@@ -939,50 +939,34 @@ and localize_ft
   in
   let ety_env = { ety_env with substs } in
   (* Localize the constraints for a type parameter declaration *)
-  let rec localize_tparam ~nested (env, cycles) t =
-    let (((env, cycles), e1), cstrl) =
-      (* TODO(T70068435)
-         For nested type parameters (i.e., type parameters of type parameters),
-         we do not support constraints, yet. If nested type parameters do have
-         constraints, this is reported earlier. We just throw them away here. *)
-      if nested then
-        (((env, cycles), None), [])
-      else
-        List.map_env_ty_err_opt
-          (env, cycles)
-          t.tp_constraints
-          ~combine_ty_errs:Typing_error.multiple_opt
-          ~f:(fun (env, cycles_acc) (ck, ty) ->
-            let ((env, ty_err_opt, cycles), ty) =
-              localize_cstr_ty ~ety_env env ty t.tp_name
-            in
-            let name_str = snd t.tp_name in
-            (* In order to access type constants on generics on where clauses,
-               we need to add the constraints from the type parameters into the
-               environment before localizing the where clauses with them. Temporarily
-               add them to the environment here, and reset the environment later. *)
-            let env =
-              match ck with
-              | Ast_defs.Constraint_as -> Env.add_upper_bound env name_str ty
-              | Ast_defs.Constraint_super -> Env.add_lower_bound env name_str ty
-              | Ast_defs.Constraint_eq ->
-                Env.add_upper_bound
-                  (Env.add_lower_bound env name_str ty)
-                  name_str
-                  ty
-            in
-            (((env, cycles @ cycles_acc), ty_err_opt), (ck, ty)))
-    in
-    let (((env, cycles), e2), tparams) =
+  let localize_tparam (env, cycles) t =
+    let (((env, cycles), ty_err_opt), cstrl) =
       List.map_env_ty_err_opt
         (env, cycles)
-        t.tp_tparams
-        ~f:(localize_tparam ~nested:true)
+        t.tp_constraints
         ~combine_ty_errs:Typing_error.multiple_opt
+        ~f:(fun (env, cycles_acc) (ck, ty) ->
+          let ((env, ty_err_opt, cycles), ty) =
+            localize_cstr_ty ~ety_env env ty t.tp_name
+          in
+          let name_str = snd t.tp_name in
+          (* In order to access type constants on generics on where clauses,
+             we need to add the constraints from the type parameters into the
+             environment before localizing the where clauses with them. Temporarily
+             add them to the environment here, and reset the environment later. *)
+          let env =
+            match ck with
+            | Ast_defs.Constraint_as -> Env.add_upper_bound env name_str ty
+            | Ast_defs.Constraint_super -> Env.add_lower_bound env name_str ty
+            | Ast_defs.Constraint_eq ->
+              Env.add_upper_bound
+                (Env.add_lower_bound env name_str ty)
+                name_str
+                ty
+          in
+          (((env, cycles @ cycles_acc), ty_err_opt), (ck, ty)))
     in
-    let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-    ( ((env, cycles), ty_err_opt),
-      { t with tp_constraints = cstrl; tp_tparams = tparams } )
+    (((env, cycles), ty_err_opt), { t with tp_constraints = cstrl })
   in
   let localize_where_constraint (env, cycles) (ty1, ck, ty2) =
     let ((env, e1, cycles1), ty1) = localize ~ety_env env ty1 in
@@ -998,7 +982,7 @@ and localize_ft
     List.map_env_ty_err_opt
       (env, [])
       ft.ft_tparams
-      ~f:(localize_tparam ~nested:false)
+      ~f:localize_tparam
       ~combine_ty_errs:Typing_error.multiple_opt
   in
   (* Localize the 'where' constraints *)

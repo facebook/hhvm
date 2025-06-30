@@ -29,19 +29,17 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([8:16-17], "T/[ctx $f]"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] };
+                 tp_name = ([8:16-17], "T/[ctx $f]"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([9:5-7], "T/$v"); tp_tparams = [];
+                  tp_name = ([9:5-7], "T/$v");
                   tp_constraints =
                   [(Constraint_as,
                     (Rhint ([9:3-4]), (Tapply (([9:3-4], "\\P"), []))))];
                   tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([10:11-16], "T/[$v::C]"); tp_tparams = [];
-                  tp_constraints = []; tp_reified = Erased;
-                  tp_user_attributes = [] }
+                  tp_name = ([10:11-16], "T/[$v::C]"); tp_constraints = [];
+                  tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints =
               [((Rhint ([10:11-16]), (Tgeneric "T/[$v::C]")), Constraint_eq,
@@ -111,15 +109,14 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([14:14-16], "T/$v"); tp_tparams = [];
+                 tp_name = ([14:14-16], "T/$v");
                  tp_constraints =
                  [(Constraint_as,
                    (Rhint ([14:12-13]), (Tapply (([14:12-13], "\\P"), []))))];
                  tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([14:18-23], "T/[$v::C]"); tp_tparams = [];
-                  tp_constraints = []; tp_reified = Erased;
-                  tp_user_attributes = [] }
+                  tp_name = ([14:18-23], "T/[$v::C]"); tp_constraints = [];
+                  tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints =
               [((Rhint ([14:18-23]), (Tgeneric "T/[$v::C]")), Constraint_eq,
@@ -160,19 +157,17 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([19:17-18], "T/[ctx $f]"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] };
+                 tp_name = ([19:17-18], "T/[ctx $f]"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([20:6-8], "T/$v"); tp_tparams = [];
+                  tp_name = ([20:6-8], "T/$v");
                   tp_constraints =
                   [(Constraint_as,
                     (Rhint ([20:4-5]), (Tapply (([20:4-5], "\\P"), []))))];
                   tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([21:11-16], "T/[$v::C]"); tp_tparams = [];
-                  tp_constraints = []; tp_reified = Erased;
-                  tp_user_attributes = [] }
+                  tp_name = ([21:11-16], "T/[$v::C]"); tp_constraints = [];
+                  tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints =
               [((Rhint ([21:11-16]), (Tgeneric "T/[$v::C]")), Constraint_eq,

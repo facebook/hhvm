@@ -6,7 +6,7 @@
        sc_module = None; sc_name = ([3:7-10], "\\Bag");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([3:11-12], "T"); tp_tparams = []; tp_constraints = [];
+          tp_name = ([3:11-12], "T"); tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
@@ -95,7 +95,7 @@
         sc_module = None; sc_name = ([15:7-23], "\\ContravariantBag");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Contravariant;
-           tp_name = ([15:25-26], "T"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([15:25-26], "T"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
@@ -162,7 +162,7 @@
         sc_module = None; sc_name = ([23:7-19], "\\CovariantBag");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Covariant;
-           tp_name = ([23:21-22], "T"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([23:21-22], "T"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];

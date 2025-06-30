@@ -63,7 +63,6 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for Tparam<R, Ty<R>> {
         arena.alloc(obr::typing_defs::Tparam {
             variance: self.variance,
             name: self.name.to_oxidized_by_ref(arena),
-            tparams: self.tparams.to_oxidized_by_ref(arena),
             constraints: arena.alloc_slice_fill_iter(
                 self.constraints
                     .iter()

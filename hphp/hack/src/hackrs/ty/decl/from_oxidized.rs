@@ -124,7 +124,6 @@ impl<R: Reason> From<o::typing_defs::Tparam> for ty::Tparam<R, Ty<R>> {
         Self {
             variance: tparam.variance,
             name: tparam.name.into(),
-            tparams: slice(tparam.tparams),
             constraints: tparam
                 .constraints
                 .into_iter()

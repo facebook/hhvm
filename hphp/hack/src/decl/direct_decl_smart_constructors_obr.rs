@@ -819,12 +819,14 @@ pub struct RequireClauseConstraint<'a> {
     name: Node<'a>,
 }
 
+#[allow(dead_code)] // TODO(T222659258) tparam_params is unused now, remove
 #[derive(Debug)]
 pub struct TypeParameterDecl<'a> {
     name: Node<'a>,
     reified: aast::ReifyKind,
     variance: Variance,
     constraints: &'a [(ConstraintKind, Node<'a>)],
+
     tparam_params: &'a [&'a Tparam<'a>],
     user_attributes: &'a [&'a UserAttributeNode<'a>],
 }
@@ -2658,7 +2660,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 let tparam = self.alloc(Tparam {
                     variance: Variance::Invariant,
                     name: (pos, name),
-                    tparams: &[],
                     constraints: &[],
                     reified: aast::ReifyKind::Erased,
                     user_attributes: &[],
@@ -2725,7 +2726,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             self.alloc(Tparam {
                 variance: Variance::Invariant,
                 name,
-                tparams: &[],
                 constraints,
                 reified: aast::ReifyKind::Erased,
                 user_attributes: &[],
@@ -4059,7 +4059,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 variance,
                 reified,
                 constraints,
-                tparam_params,
+                tparam_params: _,
                 user_attributes,
             } = decl;
             let constraints = self.slice(constraints.iter().filter_map(|constraint| {
@@ -4081,7 +4081,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraints,
                 reified,
                 user_attributes,
-                tparams: tparam_params,
             }));
         }
         Node::TypeParameters(self.alloc(tparams.into_bump_slice()))

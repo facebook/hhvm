@@ -76,7 +76,7 @@ File root|module_hint.php--there.php
         sc_module = (Some ([3:8-13], "there")); sc_name = ([7:16-17], "\\G");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([7:18-19], "T"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([7:18-19], "T"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
@@ -128,9 +128,8 @@ File root|module_hint.php--everywhere.php
         (Tfun
            { ft_tparams =
              [{ Typing_defs_core.tp_variance = Invariant;
-                tp_name = ([3:17-18], "T"); tp_tparams = [];
-                tp_constraints = []; tp_reified = Erased;
-                tp_user_attributes = [] }
+                tp_name = ([3:17-18], "T"); tp_constraints = [];
+                tp_reified = Erased; tp_user_attributes = [] }
                ];
              ft_where_constraints = [];
              ft_params =
@@ -166,7 +165,7 @@ File root|module_hint.php--everywhere.php
         sc_module = None; sc_name = ([5:7-13], "\\MyList");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([5:14-15], "T"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([5:14-15], "T"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];

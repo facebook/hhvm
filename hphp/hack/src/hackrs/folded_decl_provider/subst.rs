@@ -139,7 +139,6 @@ impl<'a, R: Reason> Substitution<'a, R> {
                             .collect::<Box<[_]>>(),
                         variance: tp.variance,
                         name: tp.name.clone(),
-                        tparams: tp.tparams.clone(),
                         reified: tp.reified,
                         user_attributes: tp.user_attributes.clone(),
                     })

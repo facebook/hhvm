@@ -144,9 +144,8 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([18:27-28], "T"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
+                 tp_name = ([18:27-28], "T"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =
@@ -179,12 +178,12 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([22:39-41], "T1"); tp_tparams = [];
+                 tp_name = ([22:39-41], "T1");
                  tp_constraints =
                  [(Constraint_super, (Rhint ([22:48-51]), (Tprim Tint)))];
                  tp_reified = Erased; tp_user_attributes = [] };
                 { Typing_defs_core.tp_variance = Invariant;
-                  tp_name = ([22:53-55], "T2"); tp_tparams = [];
+                  tp_name = ([22:53-55], "T2");
                   tp_constraints =
                   [(Constraint_as, (Rhint ([22:59-65]), (Tprim Tstring)))];
                   tp_reified = Erased; tp_user_attributes = [] }
@@ -310,9 +309,8 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([37:38-40], "Tu"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
+                 tp_name = ([37:38-40], "Tu"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =
@@ -480,7 +478,7 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([52:25-26], "T"); tp_tparams = [];
+                 tp_name = ([52:25-26], "T");
                  tp_constraints =
                  [(Constraint_as, (Rhint ([52:30-37]), (Tunion [])))];
                  tp_reified = Erased; tp_user_attributes = [] }

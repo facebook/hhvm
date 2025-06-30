@@ -24,12 +24,12 @@
         sc_name = ([6:11-12], "\\I");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([7:3-5], "Ta"); tp_tparams = [];
+           tp_name = ([7:3-5], "Ta");
            tp_constraints =
            [(Constraint_as, (Rhint ([7:9-17]), (Tprim Tarraykey)))];
            tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([8:3-5], "Tb"); tp_tparams = [];
+            tp_name = ([8:3-5], "Tb");
             tp_constraints =
             [(Constraint_as,
               (Rhint ([8:9-20]),
@@ -40,7 +40,7 @@
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([9:3-5], "Tc"); tp_tparams = [];
+            tp_name = ([9:3-5], "Tc");
             tp_constraints =
             [(Constraint_as,
               (Rhint ([9:9-22]),
@@ -51,7 +51,7 @@
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([10:3-5], "Td"); tp_tparams = []; tp_constraints = [];
+            tp_name = ([10:3-5], "Td"); tp_constraints = [];
             tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];

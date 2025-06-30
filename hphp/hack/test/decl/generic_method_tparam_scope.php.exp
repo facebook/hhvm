@@ -17,9 +17,8 @@
            (Tfun
               { ft_tparams =
                 [{ Typing_defs_core.tp_variance = Invariant;
-                   tp_name = ([4:21-23], "Ta"); tp_tparams = [];
-                   tp_constraints = []; tp_reified = Erased;
-                   tp_user_attributes = [] }
+                   tp_name = ([4:21-23], "Ta"); tp_constraints = [];
+                   tp_reified = Erased; tp_user_attributes = [] }
                   ];
                 ft_where_constraints = [];
                 ft_params =
@@ -53,9 +52,8 @@
             (Tfun
                { ft_tparams =
                  [{ Typing_defs_core.tp_variance = Invariant;
-                    tp_name = ([8:21-23], "Tb"); tp_tparams = [];
-                    tp_constraints = []; tp_reified = Erased;
-                    tp_user_attributes = [] }
+                    tp_name = ([8:21-23], "Tb"); tp_constraints = [];
+                    tp_reified = Erased; tp_user_attributes = [] }
                    ];
                  ft_where_constraints = [];
                  ft_params =

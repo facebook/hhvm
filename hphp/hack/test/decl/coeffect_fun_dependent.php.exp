@@ -7,9 +7,8 @@
         (Tfun
            { ft_tparams =
              [{ Typing_defs_core.tp_variance = Invariant;
-                tp_name = ([3:25-26], "T/[ctx $f]"); tp_tparams = [];
-                tp_constraints = []; tp_reified = Erased;
-                tp_user_attributes = [] }
+                tp_name = ([3:25-26], "T/[ctx $f]"); tp_constraints = [];
+                tp_reified = Erased; tp_user_attributes = [] }
                ];
              ft_where_constraints = [];
              ft_params =
@@ -61,9 +60,8 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([5:33-34], "T/[ctx $f]"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
+                 tp_name = ([5:33-34], "T/[ctx $f]"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =
@@ -118,9 +116,8 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([7:31-32], "T/[ctx $f]"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
+                 tp_name = ([7:31-32], "T/[ctx $f]"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =
@@ -175,9 +172,8 @@
          (Tfun
             { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([9:39-40], "T/[ctx $f]"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
+                 tp_name = ([9:39-40], "T/[ctx $f]"); tp_constraints = [];
+                 tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =

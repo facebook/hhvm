@@ -308,7 +308,6 @@ Array populateTParams(const rust::Vec<hackc::ExtDeclTparam>& tparams) {
     info.set(s_variance, rustToString(tp.variance));
     info.set(s_reified, rustToString(tp.reified));
     maybeSet(info, tp.user_attributes, s_attributes, populateAttributes);
-    maybeSet(info, tp.tparams, s_tparams, populateTParams);
     maybeSet(info, tp.constraints, s_constraints, populateTypeConstraints);
     arr.append(info);
   }

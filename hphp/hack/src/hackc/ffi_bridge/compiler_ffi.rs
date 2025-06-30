@@ -244,7 +244,6 @@ mod ffi {
     pub struct ExtDeclTparam {
         variance: String,
         name: String,
-        tparams: Vec<ExtDeclTparam>,
         constraints: Vec<ExtDeclTypeConstraint>,
         reified: String,
         user_attributes: Vec<ExtDeclAttribute>,

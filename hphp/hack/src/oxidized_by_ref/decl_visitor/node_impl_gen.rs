@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<607cc506fd7b8645d1fd9a7dc899b89e>>
+// @generated SignedSource<<37e32a7712a8171d720335196fc06e58>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -451,10 +451,9 @@ impl<'a> Node<'a> for Tparam<'a> {
             Tparam {
                 variance: ref __binding_0,
                 name: ref __binding_1,
-                tparams: ref __binding_2,
-                constraints: ref __binding_3,
-                reified: ref __binding_4,
-                user_attributes: ref __binding_5,
+                constraints: ref __binding_2,
+                reified: ref __binding_3,
+                user_attributes: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -468,10 +467,7 @@ impl<'a> Node<'a> for Tparam<'a> {
                 {
                     __binding_3.accept(v)
                 }
-                {
-                    __binding_4.accept(v)
-                }
-                { __binding_5.accept(v) }
+                { __binding_4.accept(v) }
             }
         }
     }

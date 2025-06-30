@@ -12,7 +12,6 @@ let mk_tparam pos name tp_constraints =
     {
       tp_variance = Ast_defs.Invariant;
       tp_name = (pos, name);
-      tp_tparams = [];
       tp_constraints;
       tp_reified = Ast_defs.Erased;
       tp_user_attributes = [];
@@ -1077,7 +1076,6 @@ end = struct
         {
           tp_variance = Ast_defs.Invariant;
           tp_name = (pos, name);
-          tp_tparams = [];
           tp_constraints;
           tp_reified = Ast_defs.Erased;
           tp_user_attributes = [];

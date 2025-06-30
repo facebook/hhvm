@@ -47,7 +47,7 @@
         sc_module = None; sc_name = ([7:7-8], "\\C");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([7:36-38], "T1"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([7:36-38], "T1"); tp_constraints = [];
            tp_reified = Reified;
            tp_user_attributes =
            [{ Typing_defs_core.ua_name = ([7:26-27], "\\A"); ua_params = [];

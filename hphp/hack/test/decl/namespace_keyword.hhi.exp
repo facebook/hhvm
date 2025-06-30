@@ -6,7 +6,7 @@
        sc_name = ([5:11-22], "\\HH\\Rx\\Traversable");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
-          tp_name = ([5:24-26], "Tv"); tp_tparams = []; tp_constraints = [];
+          tp_name = ([5:24-26], "Tv"); tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        sc_extends =
@@ -29,7 +29,7 @@
         sc_name = ([7:11-19], "\\HH\\Rx\\Iterator");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Covariant;
-           tp_name = ([7:21-23], "Tv"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([7:21-23], "Tv"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_extends =

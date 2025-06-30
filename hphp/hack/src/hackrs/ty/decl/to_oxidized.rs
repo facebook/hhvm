@@ -62,7 +62,6 @@ impl<R: Reason> ToOxidized for Tparam<R, Ty<R>> {
         o::typing_defs::Tparam {
             variance: self.variance,
             name: self.name.to_oxidized(),
-            tparams: self.tparams.to_oxidized(),
             constraints: self
                 .constraints
                 .into_vec()

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3c2865f1da2f2599ed0d9591593217d5>>
+// @generated SignedSource<<a3f5dd3a3e94f23bb77802ece593e841>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -293,8 +293,6 @@ pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, &'a Ty<'a>)],
     pub reified: oxidized::ast_defs::ReifyKind,

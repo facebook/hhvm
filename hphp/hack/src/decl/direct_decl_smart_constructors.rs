@@ -750,6 +750,7 @@ pub struct RequireClauseConstraint {
     name: Node,
 }
 
+#[allow(dead_code)] // TODO(T222659258) tparam_params is unused now, remove
 #[derive(Debug, Clone)]
 pub struct TypeParameterDecl {
     name: Node,
@@ -2509,7 +2510,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 let tparam = Tparam {
                     variance: Variance::Invariant,
                     name: (pos, name.clone()),
-                    tparams: vec![],
                     constraints: vec![],
                     reified: aast::ReifyKind::Erased,
                     user_attributes: vec![],
@@ -2575,7 +2575,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         let tp = |name, constraints| Tparam {
             variance: Variance::Invariant,
             name,
-            tparams: Vec::new(),
             constraints,
             reified: aast::ReifyKind::Erased,
             user_attributes: Vec::new(),
@@ -3851,7 +3850,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 variance,
                 reified,
                 constraints,
-                tparam_params,
+                tparam_params: _,
                 user_attributes,
             } = decl;
             let constraints = constraints
@@ -3874,7 +3873,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 constraints,
                 reified,
                 user_attributes,
-                tparams: tparam_params,
             });
         }
         Node::TypeParameters(tparams)

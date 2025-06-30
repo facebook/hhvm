@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7d483c1f95c5b6ccd78b33a08befef45>>
+// @generated SignedSource<<c6b3687da54a645cd9a50f16647cec27>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -326,7 +326,6 @@ pub struct UserAttribute {
 pub struct Tparam {
     pub variance: ast_defs::Variance,
     pub name: PosId,
-    pub tparams: Vec<Tparam>,
     pub constraints: Vec<(ast_defs::ConstraintKind, Ty)>,
     pub reified: ast_defs::ReifyKind,
     pub user_attributes: Vec<UserAttribute>,

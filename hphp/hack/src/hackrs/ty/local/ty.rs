@@ -29,7 +29,6 @@ use crate::visitor::Walkable;
 pub struct Tparam<R: Reason> {
     pub variance: Variance,
     pub name: Positioned<TypeName, R::Pos>,
-    pub tparams: Vec<Tparam<R>>,
     pub constraints: Vec<(ConstraintKind, Ty<R>)>,
     pub reified: ReifyKind,
     pub user_attributes: Vec<UserAttribute<R::Pos>>,
@@ -514,7 +513,6 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for Tparam<R> {
         let Tparam {
             variance,
             name,
-            tparams,
             constraints,
             reified,
             user_attributes,
@@ -523,7 +521,6 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for Tparam<R> {
         let tp = OTparam {
             variance: variance.clone(),
             name: name.to_oxidized_by_ref(arena),
-            tparams: tparams.to_oxidized_by_ref(arena),
             constraints: &[],
             reified: reified.clone(),
             user_attributes: user_attributes.to_oxidized_by_ref(arena),

@@ -6,7 +6,7 @@
        sc_module = None; sc_name = ([3:22-29], "\\DeclPos");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([3:30-31], "T"); tp_tparams = []; tp_constraints = [];
+          tp_name = ([3:30-31], "T"); tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];

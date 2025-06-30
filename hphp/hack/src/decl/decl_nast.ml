@@ -62,7 +62,6 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
             tp_name;
             tp_constraints;
             tp_user_attributes;
-            tp_tparams = [];
             tp_variance = Ast_defs.Invariant;
             tp_reified = Ast_defs.Erased;
           })

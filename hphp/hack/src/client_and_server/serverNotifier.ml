@@ -160,7 +160,7 @@ let init
     Hh_logger.log "Using EdenFS file watcher";
     let watch_spec = FilesToIgnore.server_watch_spec in
     let init_settings = { Edenfs_watcher.root; watch_spec } in
-    match Edenfs_watcher.init init_settings with
+    match Edenfs_watcher.init init_settings local_config with
     | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
       Hh_logger.log
         "Failed to initialize EdenFS watcher, failed with message:\n%s"

@@ -184,6 +184,6 @@
  (name edenfs_watcher_stubs)
  (wrapped false)
  (modules edenfs_watcher edenfs_watcher_types)
- (libraries sys_utils utils_core ignore)
+ (libraries sys_utils utils_core ignore server_config)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

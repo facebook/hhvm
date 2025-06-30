@@ -24,7 +24,8 @@ type edenfs_watcher_error = Edenfs_watcher_types.edenfs_watcher_error
 
 type changes = Edenfs_watcher_types.changes [@@deriving show]
 
-let init (_settings : init_settings) = failwith "not implemented"
+let init (_settings : init_settings) (_local_config : ServerLocalConfig.t) =
+  failwith "not implemented"
 
 let get_changes_sync (_instance : instance) :
     (changes list * clock, edenfs_watcher_error) result =

@@ -75,10 +75,10 @@ class ClientThread : public folly::HHWheelTimer::Callback {
         continuous_(cfg.continuous),
         numRunsPerClient_(cfg.numRunsPerClient),
         useLoadGenerator_(useLoadGenerator),
-        testDoneTimeout_(testDone_),
-        warmupDoneTimeout_(rpcStats_),
         loadGenerator_(loadGenerator) {
     auto ebm = folly::EventBaseManager::get();
+    warmupDoneTimeout_ = std::make_unique<WarmupDoneTimeout>(rpcStats_);
+    testDoneTimeout_ = std::make_unique<TestDoneTimeout>(testDone_);
     auto factoryFunction = cfg.connConfig.ioUring
         ? folly::EventBaseBackendBase::FactoryFunc(getIOUringBackend)
         : folly::EventBaseBackendBase::FactoryFunc(getDefaultBackend);
@@ -103,13 +103,15 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   ~ClientThread() {
     // destroy clients in event base thread
     thread_->getEventBase()->runInEventBaseThreadAndWait(
-        [clients = std::move(clients_)]() {});
+        [clients = std::move(clients_),
+         warmupDoneTimeout = std::move(warmupDoneTimeout_),
+         testDoneTimeout = std::move(testDoneTimeout_)]() {});
   }
 
   void checkIsContinuous() {
     if (!continuous_ && numRunsPerClient_ == 0) {
       thread_->getEventBase()->timer().scheduleTimeout(
-          &testDoneTimeout_,
+          testDoneTimeout_.get(),
           std::chrono::seconds(FLAGS_warmup_s + FLAGS_runtime_s));
     }
   }
@@ -117,7 +119,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   void warmup() {
     if (FLAGS_warmup_s >= 0) {
       thread_->getEventBase()->timer().scheduleTimeout(
-          &warmupDoneTimeout_, std::chrono::seconds(FLAGS_warmup_s));
+          warmupDoneTimeout_.get(), std::chrono::seconds(FLAGS_warmup_s));
     }
   }
 
@@ -217,8 +219,8 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   uint64_t numRunsPerClient_{0};
   bool useLoadGenerator_{false};
   bool testDone_{false};
-  TestDoneTimeout testDoneTimeout_;
-  WarmupDoneTimeout warmupDoneTimeout_;
+  std::unique_ptr<TestDoneTimeout> testDoneTimeout_;
+  std::unique_ptr<WarmupDoneTimeout> warmupDoneTimeout_;
   BaseLoadGenerator& loadGenerator_;
 };
 

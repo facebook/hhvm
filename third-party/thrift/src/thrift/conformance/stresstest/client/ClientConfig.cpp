@@ -41,6 +41,8 @@ DEFINE_string(
     client_ca_path,
     "folly/io/async/test/certs/ca-cert.pem",
     "Path to client trusted CA file");
+DEFINE_bool(stopTLSv1, false, "Enable stopTLS v1");
+DEFINE_bool(stopTLSv2, false, "Enable stopTLS v2");
 DEFINE_bool(continuous, false, "Runs a single test continuously");
 DEFINE_int64(runs_per_client, 0, "Runs a fixed number of workloads");
 DEFINE_int64(
@@ -145,6 +147,8 @@ std::optional<CompressionConfig> createCompressionConfigFromFlags() {
   connCfg.trustedCertsPath = FLAGS_client_ca_path;
   connCfg.ioUring = FLAGS_io_uring;
   connCfg.useQuic = FLAGS_quic;
+  connCfg.stopTLSv1 = FLAGS_stopTLSv1 && (security == ClientSecurity::FIZZ);
+  connCfg.stopTLSv2 = FLAGS_stopTLSv2 && (security == ClientSecurity::FIZZ);
 
   ClientConfig config{};
 

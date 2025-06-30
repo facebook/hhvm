@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <common/services/cpp/security/SecureThriftUtil.h>
 #include <thrift/conformance/stresstest/server/StressTestHandler.h>
 
 #include <folly/coro/AsyncGenerator.h>
@@ -112,7 +113,9 @@ void StressTestHandler::requestResponseImpl(
   simulateWork(
       *request->processInfo()->processingTimeMs(),
       *request->processInfo()->workSimulationMode());
-  callback->result(makeBasicResponse(*request->processInfo()->responseSize()));
+  callback->result(makeBasicResponse(
+      *request->processInfo()->responseSize(),
+      request->stoptls_payload().has_value()));
 }
 
 void StressTestHandler::simulateWork(
@@ -156,10 +159,22 @@ void StressTestHandler::busyWait(std::chrono::milliseconds duration) const {
   }
 }
 
-BasicResponse StressTestHandler::makeBasicResponse(int64_t payloadSize) const {
+BasicResponse StressTestHandler::makeBasicResponse(
+    int64_t payloadSize, bool stopTLSv2) const {
   BasicResponse chunk;
-  if (payloadSize > 0) {
-    chunk.payload() = std::string('x', payloadSize);
+  if (payloadSize <= 0) {
+    return chunk;
+  }
+  std::string s(payloadSize, 'x');
+  if (stopTLSv2) {
+    folly::ByteRange br(reinterpret_cast<const uint8_t*>(s.data()), s.size());
+    // Create unencrypted buf from the byte range
+    auto buf = facebook::services::SecureThriftUtil::createUnencryptedBuf(
+        br, [](void* /*buf*/, void* /*userData*/) {});
+
+    chunk.stoptls_payload() = std::move(buf);
+  } else {
+    chunk.payload() = s;
   }
   return chunk;
 }

@@ -21,6 +21,7 @@
 #include <wangle/ssl/SSLContextConfig.h>
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
+#include "common/services/cpp/TLSConfig.h"
 
 #include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
@@ -83,6 +84,8 @@ DEFINE_string(
     "Path to client trusted CA file");
 DEFINE_bool(enable_overload_checker, false, "Enable overload checker");
 DEFINE_bool(enable_resource_pools, false, "Enable resource pools");
+DEFINE_bool(stopTLSv1, false, "Enable stopTLS v1");
+DEFINE_bool(stopTLSv2, false, "Enable stopTLS v2");
 DEFINE_bool(
     disable_active_request_tracking, false, "Disabled Active Request Tracking");
 DEFINE_bool(enable_checksum, false, "Enable Server Side Checksum support");
@@ -111,12 +114,18 @@ uint32_t sanitizeNumThreads(int32_t n) {
 std::shared_ptr<wangle::SSLContextConfig> getSSLConfig() {
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
   sslConfig->setCertificate(FLAGS_certPath.c_str(), FLAGS_keyPath.c_str(), "");
-  sslConfig->clientCAFiles = std::vector<std::string>{FLAGS_caPath.c_str()};
-  sslConfig->clientVerification =
-      folly::SSLContext::VerifyClientCertificate::IF_PRESENTED;
-  sslConfig->setNextProtocols(**ThriftServer::defaultNextProtocols());
-  sslConfig->sslCiphers =
-      folly::join(":", folly::ssl::SSLOptions2021::ciphers());
+  if (FLAGS_stopTLSv1) {
+    sslConfig->clientVerification =
+        folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+    sslConfig->setNextProtocols({"rs"});
+  } else {
+    sslConfig->clientCAFiles = std::vector<std::string>{FLAGS_caPath.c_str()};
+    sslConfig->clientVerification =
+        folly::SSLContext::VerifyClientCertificate::IF_PRESENTED;
+    sslConfig->setNextProtocols(**ThriftServer::defaultNextProtocols());
+    sslConfig->sslCiphers =
+        folly::join(":", folly::ssl::SSLOptions2021::ciphers());
+  }
   return sslConfig;
 }
 } // namespace
@@ -183,6 +192,8 @@ std::shared_ptr<ThriftServer> createStressTestServer(
       getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
   server->addModule(std::make_unique<StressTestServerModule>());
+  facebook::services::TLSConfig tlsConfig;
+  tlsConfig.applyToThriftServer(server);
 
   if (FLAGS_enable_checksum) {
     LOG(INFO) << "Checksum support enabled";
@@ -212,6 +223,16 @@ std::shared_ptr<ThriftServer> createStressTestServer(
       !FLAGS_caPath.empty()) {
     LOG(INFO) << "SSL config enabled";
     server->setSSLConfig(getSSLConfig());
+    if (FLAGS_stopTLSv1 || FLAGS_stopTLSv2) {
+      ThriftTlsConfig thriftConfig;
+      thriftConfig.enableThriftParamsNegotiation = true;
+      if (FLAGS_stopTLSv1) {
+        thriftConfig.enableStopTLS = true;
+      } else {
+        thriftConfig.enableStopTLSV2 = true;
+      }
+      server->setThriftConfig(thriftConfig);
+    }
   }
 
   if (FLAGS_io_uring) {

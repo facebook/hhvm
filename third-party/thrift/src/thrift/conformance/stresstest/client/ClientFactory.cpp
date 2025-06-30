@@ -15,20 +15,26 @@
  */
 
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
+#include <thrift/conformance/stresstest/client/FizzStopTLSConnector.h>
+#include "common/services/cpp/security/FizzThriftFactory.h"
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/client/MultiClientExtensions.h>
 #include <folly/FileUtil.h>
 #include <folly/experimental/io/AsyncIoUringSocket.h>
 #include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
 #include <quic/client/QuicClientAsyncTransport.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/common/events/HighResQuicTimer.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::stress {
 
@@ -122,10 +128,20 @@ folly::AsyncTransport::UniquePtr createSocketWithEPoll(
       return createEPollSocket(evb, cfg);
     case ClientSecurity::TLS:
       return createTLSSocket(evb, cfg);
-    case ClientSecurity::FIZZ:
-      return createFizzSocket(evb, cfg);
+    case ClientSecurity::FIZZ: {
+      if (cfg.stopTLSv1) {
+        folly::ScopedEventBaseThread connThread;
+        FizzStopTLSConnector connector;
+        auto fut =
+            connector.connect(cfg.serverHost, connThread.getEventBase(), evb);
+        return std::move(fut).get();
+      } else {
+        return createFizzSocket(evb, cfg);
+      }
+    }
   }
 }
+
 #if FOLLY_HAS_LIBURING
 folly::AsyncTransport::UniquePtr createSocketWithIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
@@ -207,12 +223,39 @@ folly::AsyncTransport::UniquePtr createTLSSocket(
 
 folly::AsyncTransport::UniquePtr createFizzSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
+  auto fizzContext = getFizzContext(cfg);
+  std::shared_ptr<apache::thrift::ThriftParametersClientExtension>
+      thriftExtension{nullptr};
+  if (cfg.stopTLSv2) {
+    auto thriftParametersContext =
+        std::make_shared<apache::thrift::ThriftParametersContext>();
+    thriftParametersContext->setUseStopTLSV2(true);
+    thriftExtension =
+        std::make_shared<apache::thrift::ThriftParametersClientExtension>(
+            thriftParametersContext);
+    fizzContext->setFactory(
+        std::make_shared<facebook::services::FizzThriftFactory>());
+  }
+
+  std::vector<std::shared_ptr<fizz::ClientExtensions>> extensions;
+  if (thriftExtension != nullptr) {
+    extensions.push_back(thriftExtension);
+  }
+
   auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
-      new fizz::client::AsyncFizzClient(evb, getFizzContext(cfg)));
+      new fizz::client::AsyncFizzClient(
+          evb,
+          fizzContext,
+          extensions.empty()
+              ? nullptr
+              : std::make_shared<fizz::client::MultiClientExtensions>(
+                    std::move(extensions))));
+
   fizzClient->connect(
       cfg.serverHost, new ConnectCallback(), getFizzVerifier(cfg), {}, {});
   return fizzClient;
 }
+
 #if FOLLY_HAS_LIBURING
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {

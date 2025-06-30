@@ -19,6 +19,9 @@ namespace hack thrift_stress
 
 include "thrift/annotation/cpp.thrift"
 
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
+
 enum ProcessingMode {
   Default = 0, // execute inline in handler (synchronously)
   Async = 1, // execute asynchronously in handler
@@ -38,11 +41,13 @@ struct ProcessInfo {
 
 struct BasicRequest {
   1: ProcessInfo processInfo;
-  2: binary payload;
+  2: optional binary payload;
+  3: optional IOBufPtr stoptls_payload;
 }
 
 struct BasicResponse {
-  1: binary payload;
+  1: optional binary payload;
+  2: optional IOBufPtr stoptls_payload;
 }
 
 struct StreamProcessInfo {

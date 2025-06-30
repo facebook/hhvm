@@ -60,6 +60,8 @@ struct ClientConnectionConfig {
   std::string trustedCertsPath;
   bool ioUring{false};
   bool useQuic{false};
+  bool stopTLSv1{false};
+  bool stopTLSv2{false};
 };
 
 struct ClientConfig {

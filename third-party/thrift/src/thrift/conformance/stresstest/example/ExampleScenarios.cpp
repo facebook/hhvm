@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <common/services/cpp/security/SecureThriftUtil.h>
 #include <thrift/conformance/stresstest/StressTest.h>
 
 using namespace apache::thrift::stress;
@@ -68,6 +69,38 @@ THRIFT_STRESS_TEST(Echo4M) {
 THRIFT_STRESS_TEST(Echo4M_eb) {
   static std::string const s(4096000, '?');
   co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(RequestResponseTm_32k_unencrypted) {
+  size_t const payloadSize = 1 << 15;
+  BasicRequest req;
+  req.processInfo()->processingTimeMs() = 0;
+  req.processInfo()->responseSize() = payloadSize;
+  req.processInfo()->workSimulationMode() = WorkSimulationMode::Sleep;
+
+  static std::string const s(payloadSize, '?');
+  folly::ByteRange br(reinterpret_cast<const uint8_t*>(s.data()), payloadSize);
+  // Create unencrypted buf from the byte range
+  auto buf = facebook::services::SecureThriftUtil::createUnencryptedBuf(
+      br, [](void* /*buf*/, void* /*userData*/) {});
+  if (!buf) {
+    co_return;
+  }
+
+  req.stoptls_payload() = std::move(buf);
+  co_await client->co_requestResponseTm(req);
+}
+
+THRIFT_STRESS_TEST(RequestResponseTm_32k) {
+  size_t const payloadSize = 1 << 15;
+  BasicRequest req;
+  req.processInfo()->processingTimeMs() = 0;
+  req.processInfo()->responseSize() = payloadSize;
+  req.processInfo()->workSimulationMode() = WorkSimulationMode::Sleep;
+
+  static std::string const s(payloadSize, '?');
+  req.payload() = s;
+  co_await client->co_requestResponseTm(req);
 }
 
 /**

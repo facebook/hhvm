@@ -66,7 +66,8 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
 
   void busyWait(std::chrono::milliseconds duration) const;
 
-  BasicResponse makeBasicResponse(int64_t payloadSize) const;
+  BasicResponse makeBasicResponse(
+      int64_t payloadSize, bool stopTLSv2 = false) const;
 };
 
 } // namespace apache::thrift::stress

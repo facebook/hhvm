@@ -221,9 +221,9 @@ TEST_F(RecordLayerUtilsTest, TestWriteEncryptedRecord) {
   auto result = RecordLayerUtils::writeEncryptedRecord(
       std::move(plaintext),
       &aead,
-      &header,
+      &header, // header for on-wire framing
+      &header, // aad for integrity protection
       42, // seqNum
-      true, // useAdditionalData
       Aead::AeadOptions());
 
   // Verify result is not null

@@ -54,23 +54,22 @@ inline folly::Optional<ContentType> RecordLayerUtils::parseAndRemoveContentType(
 inline std::unique_ptr<folly::IOBuf> RecordLayerUtils::writeEncryptedRecord(
     std::unique_ptr<folly::IOBuf> plaintext,
     Aead* aead,
-    folly::IOBuf* header,
+    const folly::IOBuf* header,
+    const folly::IOBuf* aad,
     uint64_t seqNum,
-    bool useAdditionalData,
     Aead::AeadOptions options) {
-  // Encrypt the data
-  auto cipherText = aead->encrypt(
-      std::move(plaintext),
-      useAdditionalData ? header : nullptr,
-      seqNum,
-      options);
+  // Encrypt the data using the provided AAD for integrity protection
+  auto cipherText = aead->encrypt(std::move(plaintext), aad, seqNum, options);
 
-  // Construct the final record
+  // Construct the final record with the header for on-wire framing
+  // Header is always required in StopTLSV2
+  DCHECK(header != nullptr);
+  DCHECK_GT(header->length(), 0);
+
   std::unique_ptr<folly::IOBuf> record;
-  if (!cipherText->isShared() &&
-      cipherText->headroom() >= kEncryptedHeaderSize) {
+  if (!cipherText->isShared() && cipherText->headroom() >= header->length()) {
     // Prepend the header to the ciphertext
-    cipherText->prepend(kEncryptedHeaderSize);
+    cipherText->prepend(header->length());
     memcpy(cipherText->writableData(), header->data(), header->length());
     record = std::move(cipherText);
   } else {

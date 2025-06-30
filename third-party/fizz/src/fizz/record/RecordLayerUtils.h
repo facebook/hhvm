@@ -32,14 +32,23 @@ class RecordLayerUtils {
    * Write an encrypted record with the given parameters.
    * This function handles encrypting the data and assembling the final TLS
    * record.
+   *
+   * @param plaintext The plaintext data to encrypt
+   * @param aead The AEAD implementation to use for encryption
+   * @param header The wire-format record header. Must not be null.
+   * @param aad Optional. Used for AEAD integrity protection but not written to
+   * wire.
+   * @param seqNum The sequence number for the AEAD
+   * @param options Additional options for the AEAD
+   * @return The final encrypted record
    */
   static std::unique_ptr<folly::IOBuf> writeEncryptedRecord(
       std::unique_ptr<folly::IOBuf> plaintext,
       Aead* aead,
-      folly::IOBuf* header,
+      const folly::IOBuf* header,
+      const folly::IOBuf* aad,
       uint64_t seqNum,
-      bool useAdditionalData,
-      Aead::AeadOptions options);
+      Aead::AeadOptions options = {});
 
   /**
    * Structure to hold parsed encrypted record data before decryption.

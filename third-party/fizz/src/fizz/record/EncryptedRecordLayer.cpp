@@ -163,8 +163,8 @@ TLSContent EncryptedWriteRecordLayer::write(
         std::move(dataBuf),
         aead_.get(),
         &header,
+        useAdditionalData_ ? &header : nullptr,
         seqNum_++,
-        useAdditionalData_,
         options);
 
     if (!outBuf) {

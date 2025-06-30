@@ -340,7 +340,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
     fn visit_tparam(&mut self, env: &mut Env, tparam: &mut Tparam) -> Result<(), ()> {
         let env = &mut env.clone();
-        env.extend_tparams(&tparam.parameters);
         tparam.recurse(env, self.object())
     }
 

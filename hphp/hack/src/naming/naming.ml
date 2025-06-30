@@ -100,8 +100,6 @@ let passes =
         representation: `CIparent`, `CIself`, `CIstatic`, `CI` _or_
        `CIexpr (_,_, Lvar _ | This )` *)
     Naming_elab_class_id.pass on_error;
-    (* Strip type parameters from type parameters when HKTs are not enabled *)
-    Naming_elab_hkt.pass on_error;
     (* Elaborate `Collection` to `ValCollection` or `KeyValCollection` *)
     Naming_elab_collection.pass on_error;
     (* Check that user attributes are well-formed *)

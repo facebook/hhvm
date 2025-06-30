@@ -26,8 +26,7 @@
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([5:35-36], "T"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([5:35-36], (Happly (([5:35-36], "\\HH\\supportdyn"), [([5:35-36], Hmixed)]))))]; 
+       [{ tp_variance = Invariant; tp_name = ([5:35-36], "T"); tp_constraints = [(Constraint_as, ([5:35-36], (Happly (([5:35-36], "\\HH\\supportdyn"), [([5:35-36], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = [(([5:52-53], (Habstr "T")), Constraint_as, ([5:57-58], (Happly (([5:57-58], "\\C"), []))))]; 
@@ -46,7 +45,7 @@
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([7:29-30], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([7:29-30], "T");
           tp_constraints = [(Constraint_as, ([7:29-30], (Happly (([7:29-30], "\\HH\\supportdyn"), [([7:29-30], Hmixed)])))); (Constraint_as, ([7:34-35], (Happly (([7:34-35], "\\C"), []))))];
           tp_reified = Erased; tp_user_attributes = [] }
          ];

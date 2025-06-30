@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d918a43ab01061d782a87dc129f54c98>>
+// @generated SignedSource<<2db4e5a753820f898a648cd8e551b3a3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1310,9 +1310,8 @@ impl Transform for Tparam {
         match self {
             Tparam {
                 name: ref mut __binding_1,
-                parameters: ref mut __binding_2,
-                constraints: ref mut __binding_3,
-                user_attributes: ref mut __binding_5,
+                constraints: ref mut __binding_2,
+                user_attributes: ref mut __binding_4,
                 ..
             } => {
                 {
@@ -1321,10 +1320,7 @@ impl Transform for Tparam {
                 {
                     __binding_2.transform(env, &mut pass.clone())
                 }
-                {
-                    __binding_3.transform(env, &mut pass.clone())
-                }
-                { __binding_5.transform(env, &mut pass.clone()) }
+                { __binding_4.transform(env, &mut pass.clone()) }
             }
         }
     }

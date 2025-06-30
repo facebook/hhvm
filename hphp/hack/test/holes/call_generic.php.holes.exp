@@ -22,7 +22,7 @@
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None;
       fd_tparams =
-      [{ tp_variance = Invariant; tp_name = ([3:26-27], "T"); tp_parameters = [];
+      [{ tp_variance = Invariant; tp_name = ([3:26-27], "T");
          tp_constraints = [(Constraint_as, ([3:26-27], (Happly (([3:26-27], "\\HH\\supportdyn"), [([3:26-27], Hmixed)])))); (Constraint_as, ([3:31-34], (Hprim Tnum)))]; 
          tp_reified = Erased; tp_user_attributes = [] }
         ];
@@ -128,7 +128,7 @@
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([3:26-27], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([3:26-27], "T");
           tp_constraints = [(Constraint_as, ([3:26-27], (Happly (([3:26-27], "\\HH\\supportdyn"), [([3:26-27], Hmixed)])))); (Constraint_as, ([3:31-34], (Hprim Tnum)))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];

@@ -17,8 +17,7 @@
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([4:13-18], "\\BBBBB");
        c_tparams =
-       [{ tp_variance = Covariant; tp_name = ([4:20-21], "T"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([4:20-21], (Happly (([4:20-21], "\\HH\\supportdyn"), [([4:20-21], Hmixed)]))))]; 
+       [{ tp_variance = Covariant; tp_name = ([4:20-21], "T"); tp_constraints = [(Constraint_as, ([4:20-21], (Happly (([4:20-21], "\\HH\\supportdyn"), [([4:20-21], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        c_extends = [([4:31-36], (Happly (([4:31-36], "\\AAAAA"), [])))]; 

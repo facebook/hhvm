@@ -1299,7 +1299,6 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
             fun_tparams.push(Tparam {
                 variance: Variance::Invariant,
                 name: x.name,
-                parameters: vec![],
                 constraints: x.constraints,
                 reified: ReifyKind::Erased,
                 user_attributes: x

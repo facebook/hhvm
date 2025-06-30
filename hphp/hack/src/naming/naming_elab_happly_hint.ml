@@ -256,11 +256,6 @@ let on_method_ m ~ctx =
   let ctx = Env.extend_tparams ctx m.Aast.m_tparams in
   (ctx, Ok m)
 
-let on_tparam tp ~ctx =
-  (* TODO[mjt] do we want to maintain the HKT code? *)
-  let ctx = Env.extend_tparams ctx tp.Aast.tp_parameters in
-  (ctx, Ok tp)
-
 let on_hint on_error hint ~ctx =
   match hint with
   | (hint_pos, Aast.Happly (tycon, hints)) ->
@@ -326,7 +321,6 @@ let pass on_error =
         on_ty_module_def = Some on_module_def;
         on_ty_class_ = Some on_class_;
         on_ty_method_ = Some on_method_;
-        on_ty_tparam = Some on_tparam;
         on_ty_hint = Some (on_hint on_error);
         on_ty_hint_fun = Some (on_hint_fun on_error);
         on_ty_expr_ = Some on_ty_expr_;

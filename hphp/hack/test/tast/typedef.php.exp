@@ -85,8 +85,7 @@
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
        t_tparams =
-       [{ tp_variance = Contravariant; tp_name = ([13:25-26], "T"); tp_parameters = [];
-          tp_constraints = [(Constraint_as, ([13:25-26], (Happly (([13:25-26], "\\HH\\supportdyn"), [([13:25-26], Hmixed)]))))]; 
+       [{ tp_variance = Contravariant; tp_name = ([13:25-26], "T"); tp_constraints = [(Constraint_as, ([13:25-26], (Happly (([13:25-26], "\\HH\\supportdyn"), [([13:25-26], Hmixed)]))))];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        t_as_constraint = None; t_super_constraint = None; t_assignment = (SimpleTypeDef { tvh_vis = Transparent; tvh_hint = ([13:30-36], (Hprim Tstring)) });
@@ -101,8 +100,7 @@
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
        t_tparams =
-       [{ tp_variance = Covariant; tp_name = ([14:21-22], "T"); tp_parameters = [];
-          tp_constraints = [(Constraint_as, ([14:21-22], (Happly (([14:21-22], "\\HH\\supportdyn"), [([14:21-22], Hmixed)]))))]; 
+       [{ tp_variance = Covariant; tp_name = ([14:21-22], "T"); tp_constraints = [(Constraint_as, ([14:21-22], (Happly (([14:21-22], "\\HH\\supportdyn"), [([14:21-22], Hmixed)]))))];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        t_as_constraint = None; t_super_constraint = None; t_assignment = (SimpleTypeDef { tvh_vis = Transparent; tvh_hint = ([14:26-32], (Hprim Tstring)) });

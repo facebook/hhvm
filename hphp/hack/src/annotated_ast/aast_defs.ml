@@ -928,8 +928,6 @@ and ('ex, 'en) file_attribute = {
 and ('ex, 'en) tparam = {
   tp_variance: Ast_defs.variance; [@transform.opaque]
   tp_name: sid;
-  (* TODO(T222659258) Can remove tp_parameters, now that HKTs are removed *)
-  tp_parameters: ('ex, 'en) tparam list;
   tp_constraints: ((Ast_defs.constraint_kind[@transform.opaque]) * hint) list;
   tp_reified: reify_kind; [@transform.opaque]
   tp_user_attributes: ('ex, 'en) user_attributes;
@@ -1460,7 +1458,6 @@ let tparam_of_hint_tparam { htp_name; htp_user_attributes; htp_constraints } =
   {
     tp_variance = Ast_defs.Invariant;
     tp_name = htp_name;
-    tp_parameters = [];
     tp_constraints = htp_constraints;
     tp_reified = Erased;
     tp_user_attributes =

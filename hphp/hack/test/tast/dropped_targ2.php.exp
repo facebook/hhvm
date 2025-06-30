@@ -9,8 +9,7 @@
          m_static = true; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:26-29], "bar");
          m_tparams =
-         [{ tp_variance = Invariant; tp_name = ([4:36-37], "T"); tp_parameters = [];
-            tp_constraints = [(Constraint_as, ([4:36-37], (Happly (([4:36-37], "\\HH\\supportdyn"), [([4:36-37], Hmixed)]))))]; 
+         [{ tp_variance = Invariant; tp_name = ([4:36-37], "T"); tp_constraints = [(Constraint_as, ([4:36-37], (Happly (([4:36-37], "\\HH\\supportdyn"), [([4:36-37], Hmixed)]))))];
             tp_reified = Reified; tp_user_attributes = [] }
            ];
          m_where_constraints = []; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 

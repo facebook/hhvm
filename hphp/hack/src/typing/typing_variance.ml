@@ -885,7 +885,6 @@ let method_tparam : Env.t -> Nast.tparam -> Env.t =
   let {
     Aast.tp_variance = _;
     tp_name;
-    tp_parameters = (* TODO high-kinded generics? T69931993 *) _;
     tp_constraints;
     tp_reified = _;
     tp_user_attributes = _;

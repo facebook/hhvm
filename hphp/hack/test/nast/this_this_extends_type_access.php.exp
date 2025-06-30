@@ -31,7 +31,7 @@
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
        c_name = ([6:16-18], "\\A1");
        c_tparams =
-       [{ tp_variance = Invariant; tp_name = ([6:19-20], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([6:19-20], "T");
           tp_constraints = [(Constraint_as, ([6:19-20], (Happly (([6:19-20], "\\HH\\supportdyn"), [([6:19-20], Hmixed)])))); (Constraint_as, ([6:24-26], (Happly (([6:24-26], "\\I2"), []))))];
           tp_reified = Erased; tp_user_attributes = [] }
          ];

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<df0f1da1f1dcb1080d473bdddbe8e40d>>
+// @generated SignedSource<<f04dc0b669789b3a1bf81e68dbbf1242>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2245,7 +2245,6 @@ impl<P: Params> Node<P> for Tparam<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         self.variance.accept(c, v)?;
         self.name.accept(c, v)?;
-        self.parameters.accept(c, v)?;
         self.constraints.accept(c, v)?;
         self.reified.accept(c, v)?;
         self.user_attributes.accept(c, v)

@@ -23,11 +23,9 @@ Errors:
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None;
       fd_tparams =
-      [{ tp_variance = Invariant; tp_name = ([3:18-19], "T"); tp_parameters = []; 
-         tp_constraints = [(Constraint_as, ([3:18-19], (Happly (([3:18-19], "\\HH\\supportdyn"), [([3:18-19], Hmixed)]))))]; 
+      [{ tp_variance = Invariant; tp_name = ([3:18-19], "T"); tp_constraints = [(Constraint_as, ([3:18-19], (Happly (([3:18-19], "\\HH\\supportdyn"), [([3:18-19], Hmixed)]))))]; 
          tp_reified = Reified; tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([3:21-23], "Tu"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([3:21-23], (Happly (([3:21-23], "\\HH\\supportdyn"), [([3:21-23], Hmixed)]))))]; 
+        { tp_variance = Invariant; tp_name = ([3:21-23], "Tu"); tp_constraints = [(Constraint_as, ([3:21-23], (Happly (([3:21-23], "\\HH\\supportdyn"), [([3:21-23], Hmixed)]))))];
           tp_reified = Erased; tp_user_attributes = [] }
         ];
       fd_where_constraints = []; fd_package = None });
@@ -77,11 +75,9 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([3:18-19], "T"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([3:18-19], (Happly (([3:18-19], "\\HH\\supportdyn"), [([3:18-19], Hmixed)]))))]; 
+       [{ tp_variance = Invariant; tp_name = ([3:18-19], "T"); tp_constraints = [(Constraint_as, ([3:18-19], (Happly (([3:18-19], "\\HH\\supportdyn"), [([3:18-19], Hmixed)]))))];
           tp_reified = Reified; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([3:21-23], "Tu"); tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([3:21-23], (Happly (([3:21-23], "\\HH\\supportdyn"), [([3:21-23], Hmixed)]))))]; 
+         { tp_variance = Invariant; tp_name = ([3:21-23], "Tu"); tp_constraints = [(Constraint_as, ([3:21-23], (Happly (([3:21-23], "\\HH\\supportdyn"), [([3:21-23], Hmixed)]))))];
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = []; fd_package = None })

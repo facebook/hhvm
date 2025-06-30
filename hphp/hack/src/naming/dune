@@ -156,7 +156,6 @@
   naming_elab_func_body
   naming_elab_haccess_hint
   naming_elab_happly_hint
-  naming_elab_hkt
   naming_elab_import
   naming_elab_invariant
   naming_elab_lvar

@@ -13011,19 +13011,17 @@ and Tparam : sig
   val type_param :
     Typing_env_types.env -> Nast.tparam -> Typing_env_types.env * Tast.tparam
 end = struct
-  let rec type_param env (t : Nast.tparam) =
+  let type_param env (t : Nast.tparam) =
     let (env, user_attributes) =
       User_attribute.attributes_check_def
         env
         SN.AttributeKinds.typeparam
         t.tp_user_attributes
     in
-    let (env, tp_parameters) = List.map_env env t.tp_parameters ~f:type_param in
     ( env,
       {
         Aast.tp_variance = t.tp_variance;
         Aast.tp_name = t.tp_name;
-        Aast.tp_parameters;
         Aast.tp_constraints = t.tp_constraints;
         Aast.tp_reified = reify_kind t.tp_reified;
         Aast.tp_user_attributes = user_attributes;

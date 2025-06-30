@@ -22,7 +22,7 @@
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([7:7-8], "\\C");
        c_tparams =
-       [{ tp_variance = Invariant; tp_name = ([7:15-16], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([7:15-16], "T");
           tp_constraints =
           [(Constraint_as, ([7:15-16], (Happly (([7:15-16], "\\HH\\supportdyn"), [([7:15-16], Hmixed)])))); (Constraint_as, ([7:20-32], (Happly (([7:20-32], "\\WithConstant"), []))))];
           tp_reified = Reified; tp_user_attributes = [] }
@@ -36,7 +36,7 @@
           m_name = ([8:19-41], "taccess_tparam_context");
           m_tparams =
           [{ tp_variance = Invariant; tp_name = ([8:44-48], "T/[T::C]"); 
-             tp_parameters = []; tp_constraints = [(Constraint_as, ([8:44-48], (Happly (([8:44-48], "\\HH\\supportdyn"), [([8:44-48], Hmixed)]))))]; 
+             tp_constraints = [(Constraint_as, ([8:44-48], (Happly (([8:44-48], "\\HH\\supportdyn"), [([8:44-48], Hmixed)]))))]; 
              tp_reified = Erased; tp_user_attributes = [] }
             ];
           m_where_constraints = [(([8:44-48], (Habstr "T/[T::C]")), Constraint_eq, ([8:44-48], (Haccess (([8:44-45], (Habstr "T")), [([8:47-48], "C")]))))]; 

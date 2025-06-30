@@ -75,12 +75,11 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([10:17-18], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([10:17-18], "T");
           tp_constraints =
           [(Constraint_as, ([10:17-18], (Happly (([10:17-18], "\\HH\\supportdyn"), [([10:17-18], Hmixed)])))); (Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))];
           tp_reified = Erased; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))]; 
+         { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))];
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = [(([10:63-65], (Habstr "TR")), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr "T")), [([10:71-73], "TX")]))))]; 
@@ -153,12 +152,11 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([14:17-18], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([14:17-18], "T");
           tp_constraints =
           [(Constraint_as, ([14:17-18], (Happly (([14:17-18], "\\HH\\supportdyn"), [([14:17-18], Hmixed)])))); (Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))];
           tp_reified = Erased; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))]; 
+         { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))];
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = [(([16:16-18], (Habstr "TR")), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr "T")), [([16:24-26], "TX")]))))]; 
@@ -286,12 +284,11 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([10:17-18], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([10:17-18], "T");
           tp_constraints =
           [(Constraint_as, ([10:17-18], (Happly (([10:17-18], "\\HH\\supportdyn"), [([10:17-18], Hmixed)])))); (Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))];
           tp_reified = Erased; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))]; 
+         { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))];
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = [(([10:63-65], (Habstr "TR")), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr "T")), [([10:71-73], "TX")]))))]; 
@@ -328,12 +325,11 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([14:17-18], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([14:17-18], "T");
           tp_constraints =
           [(Constraint_as, ([14:17-18], (Happly (([14:17-18], "\\HH\\supportdyn"), [([14:17-18], Hmixed)])))); (Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))];
           tp_reified = Erased; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))]; 
+         { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))];
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = [(([16:16-18], (Habstr "TR")), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr "T")), [([16:24-26], "TX")]))))]; 

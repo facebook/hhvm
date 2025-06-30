@@ -3854,7 +3854,6 @@ fn rewrite_fun_ctx<'a>(
                         tparams.push(ast::Tparam {
                             variance: Variance::Invariant,
                             name: ast::Id(h.0.clone(), format!("T/[ctx {}]", name)),
-                            parameters: vec![],
                             constraints: vec![],
                             reified: ReifyKind::Erased,
                             user_attributes: Default::default(),
@@ -3907,7 +3906,6 @@ fn rewrite_effect_polymorphism<'a>(
     let tp = |name, v| ast::Tparam {
         variance: Variance::Invariant,
         name,
-        parameters: vec![],
         constraints: v,
         reified: ReifyKind::Erased,
         user_attributes: Default::default(),
@@ -4265,11 +4263,9 @@ fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::T
                 (true, false) => ast::ReifyKind::Reified,
                 _ => ast::ReifyKind::Erased,
             };
-            let parameters = vec![];
             Ok(ast::Tparam {
                 variance,
                 name: pos_name(name, env)?,
-                parameters,
                 constraints: could_map(constraints, env, p_tconstraint)?,
                 reified,
                 user_attributes,

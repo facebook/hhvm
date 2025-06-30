@@ -235,13 +235,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       in
       { (super#on_method_ env m) with m_ctxs; m_unsafe_ctxs }
 
-    method! on_tparam env tparam =
-      (* Make sure that the nested tparams are in scope while traversing the rest
-         of the tparam, in particular the constraints.
-         See Naming.type_param for description of nested tparam scoping *)
-      let env_with_nested = extend_tparams env tparam.tp_parameters in
-      super#on_tparam env_with_nested tparam
-
     method! on_gconst env gc =
       let env = { env with namespace = gc.cst_namespace } in
       super#on_gconst env gc

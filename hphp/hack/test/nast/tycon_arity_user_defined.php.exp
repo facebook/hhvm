@@ -3,11 +3,9 @@
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-17], "\\StayClassy");
       c_tparams =
-      [{ tp_variance = Invariant; tp_name = ([3:18-20], "Ta"); tp_parameters = []; 
-         tp_constraints = [(Constraint_as, ([3:18-20], (Happly (([3:18-20], "\\HH\\supportdyn"), [([3:18-20], Hmixed)]))))]; 
+      [{ tp_variance = Invariant; tp_name = ([3:18-20], "Ta"); tp_constraints = [(Constraint_as, ([3:18-20], (Happly (([3:18-20], "\\HH\\supportdyn"), [([3:18-20], Hmixed)]))))]; 
          tp_reified = Erased; tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([3:21-23], "Tb"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([3:21-23], (Happly (([3:21-23], "\\HH\\supportdyn"), [([3:21-23], Hmixed)]))))]; 
+        { tp_variance = Invariant; tp_name = ([3:21-23], "Tb"); tp_constraints = [(Constraint_as, ([3:21-23], (Happly (([3:21-23], "\\HH\\supportdyn"), [([3:21-23], Hmixed)]))))];
           tp_reified = Erased; tp_user_attributes = [] }
         ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 

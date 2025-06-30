@@ -85,7 +85,7 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T");
           tp_constraints =
           [(Constraint_as, ([18:18-19], (Happly (([18:18-19], "\\HH\\supportdyn"), [([18:18-19], Hmixed)])))); (Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))];
           tp_reified = Erased; tp_user_attributes = [] }
@@ -303,7 +303,7 @@ Errors:
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = [];
+       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T");
           tp_constraints =
           [(Constraint_as, ([18:18-19], (Happly (([18:18-19], "\\HH\\supportdyn"), [([18:18-19], Hmixed)])))); (Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))];
           tp_reified = Erased; tp_user_attributes = [] }

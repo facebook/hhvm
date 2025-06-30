@@ -29,6 +29,8 @@ ThriftParametersClientExtension::getClientHelloExtensions() const {
   }
   params.compressionAlgos_ref() = compressionAlgorithms;
   params.useStopTLS_ref() = context_->getUseStopTLS();
+  params.useStopTLSV2_ref() =
+      context_->getUseStopTLSV2(); // Added for StopTLS V2
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
   clientExtensions.push_back(encodeThriftExtension(paramsExt));
@@ -55,8 +57,12 @@ void ThriftParametersClientExtension::onEncryptedExtensions(
   } else {
     VLOG(6) << "Server did not negotiate thrift compression algorithms";
   }
+
   negotiatedStopTLS_ = context_->getUseStopTLS() &&
       serverParams->params.useStopTLS_ref().value_or(false);
+
+  negotiatedStopTLSV2_ = context_->getUseStopTLSV2() &&
+      serverParams->params.useStopTLSV2_ref().value_or(false);
 }
 
 } // namespace apache::thrift

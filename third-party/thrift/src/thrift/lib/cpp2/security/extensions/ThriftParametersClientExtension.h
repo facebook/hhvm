@@ -37,15 +37,19 @@ class ThriftParametersClientExtension : public fizz::ClientExtensions {
    * Return the negotiated compression algorithm that the client will use to
    * compress requests.
    */
-  const folly::Optional<CompressionAlgorithm>& getThriftCompressionAlgorithm() {
+  const folly::Optional<CompressionAlgorithm>& getThriftCompressionAlgorithm()
+      const {
     return negotiatedThriftCompressionAlgo_;
   }
 
   bool getNegotiatedStopTLS() const { return negotiatedStopTLS_; }
 
+  bool getNegotiatedStopTLSV2() const { return negotiatedStopTLSV2_; }
+
  private:
   folly::Optional<CompressionAlgorithm> negotiatedThriftCompressionAlgo_;
   bool negotiatedStopTLS_{false};
+  bool negotiatedStopTLSV2_{false}; // Added for StopTLS V2 support
   std::shared_ptr<ThriftParametersContext> context_;
 };
 } // namespace apache::thrift

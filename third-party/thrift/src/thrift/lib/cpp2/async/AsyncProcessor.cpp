@@ -1249,7 +1249,8 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         resultOrActiveException,
         methodNameInfo_.serviceName,
         methodNameInfo_.definingServiceName,
-        methodNameInfo_.methodName};
+        methodNameInfo_.methodName,
+        methodNameInfo_.qualifiedMethodName};
     try {
       co_await serviceInterceptors[i]->internal_onResponse(
           connectionInfo,

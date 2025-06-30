@@ -139,6 +139,13 @@ class ServiceInterceptorBase {
      * in the format `{interaction_name}.{method_name}`.
      */
     std::string_view methodName = "";
+    /**
+     * The name of the method as specified in Thrift IDL. This includes the
+     * service name, i.e it is in the format `{service_name}.{method_name}`. If
+     * the method is an interaction method, then it will be in the format
+     * `{service_name}.{interaction_name}.{method_name}`.
+     */
+    std::string_view qualifiedMethodName = "";
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo, InterceptorMetricCallback&) = 0;

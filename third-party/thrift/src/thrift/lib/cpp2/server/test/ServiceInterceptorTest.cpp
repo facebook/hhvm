@@ -1409,7 +1409,7 @@ struct ServiceInterceptorCheckingServiceAndMethodNames
 
   folly::coro::Task<std::optional<RequestState>> onRequest(
       ConnectionState*, RequestInfo requestInfo) override {
-    names.emplace_back(
+    namesOnRequest.emplace_back(
         std::string(requestInfo.serviceName),
         std::string(requestInfo.definingServiceName),
         std::string(requestInfo.methodName),
@@ -1417,7 +1417,18 @@ struct ServiceInterceptorCheckingServiceAndMethodNames
     co_return std::nullopt;
   }
 
-  std::vector<ServiceNameInfo> names;
+  folly::coro::Task<void> onResponse(
+      RequestState*, ConnectionState*, ResponseInfo requestInfo) override {
+    namesOnResponse.emplace_back(
+        std::string(requestInfo.serviceName),
+        std::string(requestInfo.definingServiceName),
+        std::string(requestInfo.methodName),
+        std::string(requestInfo.qualifiedMethodName));
+    co_return;
+  }
+
+  std::vector<ServiceNameInfo> namesOnRequest;
+  std::vector<ServiceNameInfo> namesOnResponse;
 };
 } // namespace
 
@@ -1461,7 +1472,8 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNamesBasic) {
         "ServiceInterceptorTest.SampleInteraction.echo");
   }
 
-  EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+  EXPECT_THAT(interceptor->namesOnRequest, ElementsAreArray(expectedNames));
+  EXPECT_THAT(interceptor->namesOnResponse, ElementsAreArray(expectedNames));
 }
 /* Service Authorization Platform depends on ServiceInterceptor multiplex
  * conflict resolution. Breakage in these tests could result in ACL failures.*/
@@ -1510,7 +1522,8 @@ CO_TEST_P(
       {"Third", "Third", "six", "Third.six"},
   };
 
-  EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+  EXPECT_THAT(interceptor->namesOnRequest, ElementsAreArray(expectedNames));
+  EXPECT_THAT(interceptor->namesOnResponse, ElementsAreArray(expectedNames));
 }
 
 CO_TEST_P(
@@ -1574,7 +1587,8 @@ CO_TEST_P(
          "Interaction1.Thing1.foo"},
     };
 
-    EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+    EXPECT_THAT(interceptor->namesOnRequest, ElementsAreArray(expectedNames));
+    EXPECT_THAT(interceptor->namesOnResponse, ElementsAreArray(expectedNames));
   }
 }
 

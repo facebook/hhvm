@@ -196,8 +196,18 @@ let canonicalize_happly tparams hint_pos tycon hints =
     Ok ((hint_pos, hint_), err_opt)
   (* The type constructors corresponds to an in-scope type parameter *)
   | Typaram name ->
-    let hint_ = Aast.Habstr (name, hints) in
-    Ok ((hint_pos, hint_), None)
+    let err =
+      if List.is_empty hints then
+        None
+      else
+        Some
+          (Err.naming
+          @@ Naming_error.Tparam_applied_to_type
+               { pos = hint_pos; tparam_name = name })
+    in
+
+    let hint_ = Aast.Habstr name in
+    Ok ((hint_pos, hint_), err)
   (* The type constructors canonical representation is `Happly` but
      additional elaboration / validation is required *)
   | This pos ->

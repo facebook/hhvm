@@ -51,9 +51,9 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([10:10-16], "\\my_gen");
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((~TR), (Some ([10:54-56], (Habstr ("TR", [])))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((~TR), (Some ([10:54-56], (Habstr "TR"))));
          f_params =
-         [{ param_annotation = (T); param_type_hint = ((T), (Some ([10:44-45], (Habstr ("T", []))))); 
+         [{ param_annotation = (T); param_type_hint = ((T), (Some ([10:44-45], (Habstr "T")))); 
             param_pos = [10:46-51]; param_name = "$left"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -83,7 +83,7 @@ Errors:
            tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))]; 
+       fd_where_constraints = [(([10:63-65], (Habstr "TR")), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr "T")), [([10:71-73], "TX")]))))]; 
        fd_package = None });
   (Fun
      { fd_namespace =
@@ -100,14 +100,14 @@ Errors:
                  (Happly (([14:54-16:9], "\\HH\\supportdyn"),
                     [([14:54-16:9],
                       (Hfun
-                         { hf_is_readonly = None; hf_tparams = []; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))];
+                         { hf_is_readonly = None; hf_tparams = []; hf_param_tys = [([15:3-5], (Habstr "TR"))];
                            hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })]; 
                            hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hlike ([16:4-8], (Hprim Tvoid)))); 
                            hf_is_readonly_return = None }))
                       ]
                     )))));
          f_params =
-         [{ param_annotation = (T); param_type_hint = ((T), (Some ([14:44-45], (Habstr ("T", []))))); 
+         [{ param_annotation = (T); param_type_hint = ((T), (Some ([14:44-45], (Habstr "T")))); 
             param_pos = [14:46-51]; param_name = "$left"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -123,7 +123,7 @@ Errors:
                             f_annotation = (); f_readonly_ret = None; 
                             f_tparams = []; f_ret = ((~void), None);
                             f_params =
-                            [{ param_annotation = (TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr ("TR", []))))); 
+                            [{ param_annotation = (TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr "TR")))); 
                                param_pos = [17:14-16]; param_name = "$x"; 
                                param_info = Param_required; param_readonly = None; 
                                param_splat = None; param_callconv = Pnormal; 
@@ -161,7 +161,7 @@ Errors:
            tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))]; 
+       fd_where_constraints = [(([16:16-18], (Habstr "TR")), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr "T")), [([16:24-26], "TX")]))))]; 
        fd_package = None });
   (Fun
      { fd_namespace =
@@ -263,9 +263,9 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([10:10-16], "\\my_gen");
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([10:54-56], (Habstr ("TR", [])))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([10:54-56], (Habstr "TR"))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([10:44-45], (Habstr ("T", []))))); 
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([10:44-45], (Habstr "T")))); 
             param_pos = [10:46-51]; param_name = "$left"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -294,7 +294,7 @@ Errors:
            tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))]; 
+       fd_where_constraints = [(([10:63-65], (Habstr "TR")), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr "T")), [([10:71-73], "TX")]))))]; 
        fd_package = None });
   (Fun
      { fd_namespace =
@@ -311,14 +311,14 @@ Errors:
                  (Happly (([14:54-16:9], "\\HH\\supportdyn"),
                     [([14:54-16:9],
                       (Hfun
-                         { hf_is_readonly = None; hf_tparams = []; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))];
+                         { hf_is_readonly = None; hf_tparams = []; hf_param_tys = [([15:3-5], (Habstr "TR"))];
                            hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })]; 
                            hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hlike ([16:4-8], (Hprim Tvoid)))); 
                            hf_is_readonly_return = None }))
                       ]
                     )))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([14:44-45], (Habstr ("T", []))))); 
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([14:44-45], (Habstr "T")))); 
             param_pos = [14:46-51]; param_name = "$left"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -336,5 +336,5 @@ Errors:
            tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))]; 
+       fd_where_constraints = [(([16:16-18], (Habstr "TR")), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr "T")), [([16:24-26], "TX")]))))]; 
        fd_package = None })

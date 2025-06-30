@@ -53,12 +53,7 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
       append "@";
       parse ~is_ctx hint
     | Hvar v -> append v
-    | Habstr (name, []) -> append (Typing_print.strip_ns name)
-    | Habstr (name, hints) ->
-      append (Typing_print.strip_ns name);
-      append "<";
-      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
-      append ">"
+    | Habstr name -> append (Typing_print.strip_ns name)
     | Happly ((_, "\\HH\\supportdyn"), [hint]) -> parse ~is_ctx hint
     | Happly ((file_pos, cn), []) ->
       append ~annot:file_pos (Typing_print.strip_ns cn)
@@ -325,5 +320,5 @@ let rec hint_to_angle h =
   | Hfun _
   | Htuple _
   | Haccess (_, _)
-  | Habstr (_, _) ->
+  | Habstr _ ->
     Hint.(Key (Other (Type.Key (hint_to_string ~is_ctx:false h))))

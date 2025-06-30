@@ -140,12 +140,12 @@ and check_tparams ~nested (seen : tparam_info) tparams =
 
 let check_where_constraints (seen : tparam_info) cstrs =
   let visitor =
-    object (this)
+    object
       inherit [_] Aast.iter as super
 
       method! on_hint env (pos, h) =
         match h with
-        | Aast.Habstr (t, args) ->
+        | Aast.Habstr t ->
           (match SMap.find_opt t seen with
           | Some (_, true, true) ->
             Errors.add_error
@@ -160,8 +160,7 @@ let check_where_constraints (seen : tparam_info) cstrs =
                      })
           | Some _
           | None ->
-            ());
-          List.iter args ~f:(this#on_hint env)
+            ())
         | _ -> super#on_hint env (pos, h)
     end
   in

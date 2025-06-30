@@ -29,11 +29,11 @@ Errors:
        { f_span = [7:1-9:13]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([7:45-49], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([7:28-29], (Habstr ("T", []))))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([7:28-29], (Habstr "T")))); 
             param_pos = [7:30-32]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = (); param_type_hint = ((), (Some ([7:34-39], (Haccess (([7:34-35], (Habstr ("T", []))), [([7:37-39], "TA")]))))); 
+           { param_annotation = (); param_type_hint = ((), (Some ([7:34-39], (Haccess (([7:34-35], (Habstr "T")), [([7:37-39], "TA")]))))); 
              param_pos = [7:40-42]; param_name = "$y"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }

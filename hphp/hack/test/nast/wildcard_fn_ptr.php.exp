@@ -6,9 +6,9 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-15], "\\my_id");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:26-27], (Habstr ("T", [])))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:26-27], (Habstr "T"))));
         f_params =
-        [{ param_annotation = (); param_type_hint = ((), (Some ([3:19-20], (Habstr ("T", []))))); 
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:19-20], (Habstr "T")))); 
            param_pos = [3:21-23]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }

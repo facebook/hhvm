@@ -68,7 +68,12 @@ pub fn prim_to_string(prim: &Tprim) -> &'static str {
 pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<String> {
     let Hint(_, h) = hint;
     Ok(match h.as_ref() {
-        Habstr(id, args) | Happly(Id(_, id), args) => {
+        Habstr(id) => {
+            let name = fmt_name_or_prim(tparams, id);
+
+            name.to_string()
+        }
+        Happly(Id(_, id), args) => {
             let name = fmt_name_or_prim(tparams, id);
             if args.is_empty() || strip_tparams {
                 name.to_string()
@@ -178,7 +183,7 @@ fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
         Hthis => typehints::THIS,
         Hdynamic => typehints::DYNAMIC,
         Hnothing => typehints::NOTHING,
-        Habstr(_, _)
+        Habstr(_)
         | Haccess(_, _)
         | Happly(_, _)
         | HclassPtr(_, _)
@@ -219,7 +224,7 @@ fn can_be_nullable(hint: &Hint_) -> bool {
         Happly(Id(_, id), _) => {
             id != "\\HH\\dynamic" && id != "\\HH\\nonnull" && id != "\\HH\\mixed"
         }
-        Habstr(_, _)
+        Habstr(_)
         | HclassPtr(_, _)
         | HfunContext(_)
         | Hintersection(_)
@@ -319,7 +324,7 @@ fn hint_to_type_constraint(
         HclassPtr(_, _) => {
             Constraint::intern(hhbc::BUILTIN_NAME_CLASS, TypeConstraintFlags::NoFlags)
         }
-        Habstr(s, _hs) => type_application_helper(tparams, kind, s)?,
+        Habstr(s) => type_application_helper(tparams, kind, s)?,
         Hrefinement(hint, _) => {
             // NOTE: refinements are already banned in type structures
             // and in other cases they should be invisible to the HHVM, so unpack hint
@@ -357,7 +362,7 @@ fn make_tc_with_flags_if_non_empty_flags(
     })
 }
 
-// Used for nodes that do type application (i.e., Happly and Habstr)
+// Used for nodes that do type application (i.e., Happly)
 fn type_application_helper(tparams: &[&str], kind: &Kind, name: &str) -> Result<Constraint> {
     if tparams.contains(&name) {
         let tc_name = match kind {
@@ -432,7 +437,7 @@ fn param_hint_to_type_info(
                 && s != "\\HH\\mixed"
                 && !tparams.contains(&s.as_str())
         }
-        Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
+        Habstr(s) => !tparams.contains(&s.as_str()),
         Hprim(_)
         | Htuple(_)
         | HclassPtr(_, _)
@@ -574,7 +579,7 @@ fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> Type
         Happly(Id(_, s), _) if tparams.contains(&s.as_str()) => {
             TypeConstraintFlags::TypeVar | flags
         }
-        Habstr(_, _)
+        Habstr(_)
         | Happly(_, _)
         | HclassPtr(_, _)
         | Hdynamic

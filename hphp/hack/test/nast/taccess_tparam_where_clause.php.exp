@@ -29,11 +29,11 @@ Errors:
        { f_span = [7:1-10:18]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([7:61-65], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([7:46-48], (Habstr ("T1", []))))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([7:46-48], (Habstr "T1")))); 
             param_pos = [7:49-51]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = (); param_type_hint = ((), (Some ([7:53-55], (Habstr ("T2", []))))); 
+           { param_annotation = (); param_type_hint = ((), (Some ([7:53-55], (Habstr "T2")))); 
              param_pos = [7:56-58]; param_name = "$y"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -51,7 +51,7 @@ Errors:
            tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints =
-       [(([9:3-5], (Habstr ("T1", []))), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))));
-         (([10:3-5], (Habstr ("T2", []))), Constraint_as, ([10:9-15], (Haccess (([10:9-11], (Habstr ("T1", []))), [([10:13-15], "TA")]))))];
+       [(([9:3-5], (Habstr "T1")), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))));
+         (([10:3-5], (Habstr "T2")), Constraint_as, ([10:9-15], (Haccess (([10:9-11], (Habstr "T1")), [([10:13-15], "TA")]))))];
        fd_package = None })
   ]

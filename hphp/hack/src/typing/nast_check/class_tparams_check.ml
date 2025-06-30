@@ -13,13 +13,13 @@ open Aast
 type ctx = { class_tparams: (Pos.t * string) list }
 
 let visitor =
-  object (this)
+  object
     inherit [ctx] Nast_visitor.iter_with_state as super
 
     method! on_hint (env, state) (pos, h) =
       let state =
         match h with
-        | Habstr (tp_name, args) ->
+        | Habstr tp_name ->
           List.iter state.class_tparams ~f:(fun (c_tp_pos, c_tp_name) ->
               if String.equal c_tp_name tp_name then
                 Errors.add_error
@@ -27,7 +27,6 @@ let visitor =
                     to_user_error
                     @@ Typeconst_depends_on_external_tparam
                          { pos; ext_pos = c_tp_pos; ext_name = c_tp_name }));
-          List.iter args ~f:(this#on_hint (env, state));
           state
         | Hfun { hf_tparams; _ } ->
           {

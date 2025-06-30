@@ -413,7 +413,7 @@ impl TypedLocal {
             | Hint_::Hsoft(_)
             | Hint_::HfunContext(_)
             | Hint_::Hvar(_)
-            | Hint_::Habstr(_, _) => *hint_ = Hint_::Hwildcard,
+            | Hint_::Habstr(_) => *hint_ = Hint_::Hwildcard,
         }
     }
 }

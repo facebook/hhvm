@@ -98,7 +98,7 @@ pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> 
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_) => ReificationLevel::Not,
         // Not found in the original AST
-        Hint_::Habstr(_, _) => panic!("TODO Unimplemented: Not in the original AST"),
+        Hint_::Habstr(_) => panic!("TODO Unimplemented: Not in the original AST"),
     }
 }
 
@@ -131,7 +131,7 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
         | Hint_::Hwildcard => Hint(pos, hint),
         Hint_::Hmixed
         | Hint_::Hnonnull
-        | Hint_::Habstr(_, _)
+        | Hint_::Habstr(_)
         | Hint_::HvecOrDict(_, _)
         | Hint_::Hprim(_)
         | Hint_::Hthis
@@ -250,7 +250,7 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
             h_ @ Hint_::Haccess(_, _) | h_ @ Hint_::Hrefinement(_, _) | h_ @ Hint_::Hwildcard => h_,
             Hint_::Hmixed
             | Hint_::Hnonnull
-            | Hint_::Habstr(_, _)
+            | Hint_::Habstr(_)
             | Hint_::HvecOrDict(_, _)
             | Hint_::Hprim(_)
             | Hint_::Hthis

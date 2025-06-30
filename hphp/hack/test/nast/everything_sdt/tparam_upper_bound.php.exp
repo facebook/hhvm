@@ -30,7 +30,7 @@
           tp_constraints = [(Constraint_as, ([5:35-36], (Happly (([5:35-36], "\\HH\\supportdyn"), [([5:35-36], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([5:52-53], (Habstr ("T", []))), Constraint_as, ([5:57-58], (Happly (([5:57-58], "\\C"), []))))]; 
+       fd_where_constraints = [(([5:52-53], (Habstr "T")), Constraint_as, ([5:57-58], (Happly (([5:57-58], "\\C"), []))))]; 
        fd_package = None });
   (Fun
      { fd_namespace =

@@ -6634,7 +6634,8 @@ pub fn emit_reified_arg<'b, 'd>(
             use ast::Id;
             match h_ {
                 H_::Haccess(_, sids) => Ok(sids.iter().for_each(|Id(_, name)| self.add_name(name))),
-                H_::Habstr(name, h) | H_::Happly(Id(_, name), h) => {
+                H_::Habstr(name) => Ok(self.add_name(name)),
+                H_::Happly(Id(_, name), h) => {
                     self.add_name(name);
                     h.accept(c, self.object())
                 }

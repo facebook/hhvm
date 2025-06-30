@@ -23,7 +23,7 @@ Errors:
             param_pos = [3:33-35]; param_name = "$n"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
-          { param_annotation = (T); param_type_hint = ((T), (Some ([3:37-38], (Habstr ("T", []))))); 
+          { param_annotation = (T); param_type_hint = ((T), (Some ([3:37-38], (Habstr "T")))); 
             param_pos = [3:39-41]; param_name = "$t"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

@@ -6,13 +6,12 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-16], "\\my_idx");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_tparams = []; f_ret = ((~?Tv), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~?Tv), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr "Tv"))))));
         f_params =
         [{ param_annotation = (shape(?'a' => Tv));
            param_type_hint =
            ((shape(?'a' => Tv)),
-            (Some ([4:21-38],
-                   (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr ("Tv", []))); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
+            (Some ([4:21-38], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr "Tv")); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
            param_pos = [4:39-41]; param_name = "$_"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
@@ -76,13 +75,13 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-16], "\\my_idx");
        fd_fun =
        { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr "Tv"))))));
          f_params =
          [{ param_annotation = (dynamic);
             param_type_hint =
             ((dynamic),
              (Some ([4:21-38],
-                    (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr ("Tv", []))); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
+                    (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr "Tv")); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
             param_pos = [4:39-41]; param_name = "$_"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

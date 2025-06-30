@@ -540,15 +540,9 @@ let get_positive_negative_generics ~tracked ~is_mutable env acc ty =
     union acc r
 
 let generic_ :
-    Typing_env_types.env ->
-    Env.type_parameter_env ->
-    variance ->
-    string ->
-    _ ->
-    unit =
- fun tyenv env variance name _targs ->
-  (* TODO(T69931993) Once we support variance for higher-kinded generics, we have to update this.
-     For now, having type arguments implies that the declared must be invariant *)
+    Typing_env_types.env -> Env.type_parameter_env -> variance -> string -> unit
+    =
+ fun tyenv env variance name ->
   let declared_variance = get_tparam_variance env name in
   match (declared_variance, variance) with
   (* Happens if type parameter isn't from class *)
@@ -599,7 +593,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
  fun env variance (pos, h) ->
   let open Aast_defs in
   match h with
-  | Habstr (name, targs) ->
+  | Habstr name ->
     (* This section makes the position more precise.
      * Say we find a return type that is a tuple (int, int, T).
      * The whole tuple is in covariant position, and so the position
@@ -615,7 +609,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
         Vcontravariant ((pos, x, y) :: rest)
       | x -> x
     in
-    generic_ env.Env.env env.Env.tpenv variance name targs
+    generic_ env.Env.env env.Env.tpenv variance name
   | Hmixed
   | Hwildcard
   | Hnonnull

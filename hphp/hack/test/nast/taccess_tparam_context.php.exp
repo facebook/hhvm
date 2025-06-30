@@ -39,9 +39,9 @@
              tp_parameters = []; tp_constraints = [(Constraint_as, ([8:44-48], (Happly (([8:44-48], "\\HH\\supportdyn"), [([8:44-48], Hmixed)]))))]; 
              tp_reified = Erased; tp_user_attributes = [] }
             ];
-          m_where_constraints = [(([8:44-48], (Habstr ("T/[T::C]", []))), Constraint_eq, ([8:44-48], (Haccess (([8:44-45], (Habstr ("T", []))), [([8:47-48], "C")]))))]; 
-          m_params = []; m_ctxs = (Some ([8:43-49], [([8:44-48], (Haccess (([8:44-45], (Habstr ("T", []))), [([8:47-48], "C")])))]));
-          m_unsafe_ctxs = (Some ([8:43-49], [([8:44-48], (Haccess (([8:44-45], (Habstr ("T", []))), [([8:47-48], "C")])))])); 
+          m_where_constraints = [(([8:44-48], (Habstr "T/[T::C]")), Constraint_eq, ([8:44-48], (Haccess (([8:44-45], (Habstr "T")), [([8:47-48], "C")]))))]; 
+          m_params = []; m_ctxs = (Some ([8:43-49], [([8:44-48], (Haccess (([8:44-45], (Habstr "T")), [([8:47-48], "C")])))]));
+          m_unsafe_ctxs = (Some ([8:43-49], [([8:44-48], (Haccess (([8:44-45], (Habstr "T")), [([8:47-48], "C")])))])); 
           m_body = { fb_ast = [([Pos.none], Noop)] }; m_fun_kind = FSync; 
           m_user_attributes = []; m_readonly_ret = None; m_ret = ((), (Some ([8:51-55], (Hprim Tvoid)))); 
           m_external = false; m_doc_comment = None }

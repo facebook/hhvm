@@ -35,7 +35,7 @@ let valid_newable_hint env (tp_pos, tp_name) (pos, hint) =
         (* This case should never happen *)
         Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
     end
-    | Aast.Habstr (name, []) ->
+    | Aast.Habstr name ->
       if not @@ Env.get_newable env name then
         Some (Invalid_newable_type_argument { tp_pos; tp_name; pos })
       else

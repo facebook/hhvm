@@ -105,7 +105,7 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       (khint, vhint)
   | Aast.Happly ((p, name), hs) when is_ctx ->
     pp_hint ~is_ctx:false ppf (pos, Aast.Happly ((p, strip_ns name), hs))
-  | Aast.Habstr (name, [])
+  | Aast.Habstr name
   | Aast.Happly ((_, name), []) ->
     Fmt.string ppf name
   | Aast.Hclass_ptr (kind, h) ->
@@ -115,7 +115,6 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       | Aast.CKenum -> "enum"
     in
     Fmt.(prefix (const string kind) @@ angles @@ pp_hint ~is_ctx:false) ppf h
-  | Aast.Habstr (name, hints)
   | Aast.Happly ((_, name), hints) ->
     Fmt.(
       prefix (const string name)

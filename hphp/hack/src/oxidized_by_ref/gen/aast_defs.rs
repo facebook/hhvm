@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c511659a3dd0c39e324ca4b5f83ad14c>>
+// @generated SignedSource<<7e8eb6b6ea0d956f1cf428153b37f80d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3356,8 +3356,7 @@ pub enum Hint_<'a> {
     Hnonnull,
     /// A type parameter
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Habstr(&'a (&'a str, &'a [&'a Hint<'a>])),
+    Habstr(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Hvec_or_dict")]
     #[rust_to_ocaml(inline_tuple)]

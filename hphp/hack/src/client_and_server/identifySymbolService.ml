@@ -600,7 +600,7 @@ let visitor =
     method! on_hint env h =
       let acc =
         match h with
-        | (pos, Aast.Habstr (name, _)) ->
+        | (pos, Aast.Habstr name) ->
           Result_set.singleton
             { name; type_ = TypeVar; is_declaration = None; pos }
         | (pos, Aast.Hprim prim) ->

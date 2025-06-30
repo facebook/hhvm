@@ -27,7 +27,7 @@ and context_hint env (p, h) =
   match h with
   | Hfun_context n ->
     make_decl_ty env p (Tgeneric (Format.sprintf "T/[ctx %s]" n))
-  | Haccess ((_, (Habstr (n, []) | Hvar n)), ids) ->
+  | Haccess ((_, (Habstr n | Hvar n)), ids) ->
     let name =
       Format.sprintf
         "T/[%s::%s]"
@@ -113,7 +113,7 @@ and hint_ p env = function
     in
     Tvec_or_dict (t1, hint env h2)
   | Hprim p -> Tprim p
-  | Habstr (x, _tyl) -> Tgeneric x
+  | Habstr x -> Tgeneric x
   | Hclass_ptr (k, h) ->
     let h =
       match k with

@@ -11,9 +11,9 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_tparams = []; f_ret = ((~Tu), (Some ([3:33-35], (Habstr ("Tu", [])))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~Tu), (Some ([3:33-35], (Habstr "Tu"))));
         f_params =
-        [{ param_annotation = (Tu); param_type_hint = ((Tu), (Some ([3:25-27], (Habstr ("Tu", []))))); 
+        [{ param_annotation = (Tu); param_type_hint = ((Tu), (Some ([3:25-27], (Habstr "Tu")))); 
            param_pos = [3:28-30]; param_name = "$f"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
@@ -65,9 +65,9 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
        fd_fun =
        { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([3:33-35], (Habstr ("Tu", [])))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([3:33-35], (Habstr "Tu"))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([3:25-27], (Habstr ("Tu", []))))); 
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([3:25-27], (Habstr "Tu")))); 
             param_pos = [3:28-30]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

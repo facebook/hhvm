@@ -46,7 +46,7 @@ let check_is_class env ~require_constraint_check (p, h) =
             @@ Requires_non_class
                  { pos = p; name; kind = Ast_defs.string_of_classish_kind kind })
   end
-  | Aast.Habstr (name, _) ->
+  | Aast.Habstr name ->
     Errors.add_error
       Nast_check_error.(
         to_user_error

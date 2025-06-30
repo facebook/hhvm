@@ -17,7 +17,7 @@ Errors:
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([6:19-20], "f"); m_tparams = []; m_where_constraints = [];
          m_params =
-         [{ param_annotation = (Tc); param_type_hint = ((Tc), (Some ([6:21-28], (Habstr ("Tc", []))))); 
+         [{ param_annotation = (Tc); param_type_hint = ((Tc), (Some ([6:21-28], (Habstr "Tc")))); 
             param_pos = [6:29-31]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -81,7 +81,7 @@ Errors:
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([6:19-20], "f"); m_tparams = []; m_where_constraints = [];
           m_params =
-          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([6:21-28], (Habstr ("Tc", []))))); 
+          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([6:21-28], (Habstr "Tc")))); 
              param_pos = [6:29-31]; param_name = "$x"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }

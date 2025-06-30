@@ -11,20 +11,19 @@ open Aast
 
 let static_method_check env reified_params m =
   let visitor =
-    object (this)
+    object
       inherit [_] Aast.iter as super
 
       method! on_hint env (pos, h) =
         match h with
-        | Aast.Habstr (t, args) ->
+        | Aast.Habstr t ->
           if SSet.mem t reified_params then
             Typing_error_utils.add_typing_error
               ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
                 primary
                 @@ Primary.Static_meth_with_class_reified_generic
-                     { pos = m.m_span; generic_pos = pos });
-          List.iter args ~f:(this#on_hint env)
+                     { pos = m.m_span; generic_pos = pos })
         | _ -> super#on_hint env (pos, h)
     end
   in

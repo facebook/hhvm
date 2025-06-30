@@ -1310,7 +1310,7 @@ and hint_ =
   | Hmixed
   | Hwildcard
   | Hnonnull
-  | Habstr of string * hint list
+  | Habstr of string
       (** A type parameter *)
   | Hvec_or_dict of hint option * hint
   | Hthis

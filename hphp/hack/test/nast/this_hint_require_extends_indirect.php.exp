@@ -27,7 +27,7 @@
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
-       c_reqs = [(([6:19-23], (Happly (([6:19-20], "\\C"), [([6:21-22], (Habstr ("T", [])))]))), RequireExtends)]; 
+       c_reqs = [(([6:19-23], (Happly (([6:19-20], "\\C"), [([6:21-22], (Habstr "T"))]))), RequireExtends)]; 
        c_implements = []; c_consts = []; c_typeconsts = []; c_vars = []; 
        c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

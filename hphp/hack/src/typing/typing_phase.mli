@@ -142,20 +142,6 @@ val localize_targs :
   Aast.hint list ->
   (env * Typing_error.t option) * Tast.targ list
 
-(** Like [localize_targs], but acts on kinds. *)
-val localize_targs_with_kinds :
-  check_well_kinded:bool ->
-  is_method:bool ->
-  def_pos:Pos_or_decl.t ->
-  use_pos:Pos.t ->
-  use_name:string ->
-  ?check_explicit_targs:bool ->
-  ?tparaml:decl_tparam list ->
-  env ->
-  Typing_kinding_defs.Simple.named_kind list ->
-  Aast.hint list ->
-  (env * Typing_error.t option) * Tast.targ list
-
 (** Same as [localize_targs] but also check constraints on type parameters
   (though not `where` constraints) *)
 val localize_targs_and_check_constraints :

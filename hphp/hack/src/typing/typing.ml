@@ -10920,13 +10920,13 @@ end = struct
       make_result env [] Aast.CIself ty
     | CI ((p, id) as c) -> begin
       match Env.get_pos_and_kind_of_generic env id with
-      | Some (def_pos, kind) ->
-        let simple_kind = Typing_kinding_defs.Simple.from_full_kind kind in
-        let param_nkinds =
-          Typing_kinding_defs.Simple.get_named_parameter_kinds simple_kind
-        in
+      | Some (def_pos, _kind) ->
         let ((env, ty_err_opt), tal) =
-          Phase.localize_targs_with_kinds
+          (* Since higher-kinded types are not supported, type parameter id cannot take arguments.
+             The following call performs some error handling if tal is non-empty, but its
+             elements are not actually localized. *)
+          let expected_tparams = [] in
+          Phase.localize_targs
             ~check_well_kinded:check_targs_well_kinded
             ~is_method:true
             ~def_pos
@@ -10934,7 +10934,7 @@ end = struct
             ~use_name:(strip_ns (snd c))
             ~check_explicit_targs
             env
-            param_nkinds
+            expected_tparams
             (List.map ~f:snd tal)
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;

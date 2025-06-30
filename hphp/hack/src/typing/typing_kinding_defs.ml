@@ -108,7 +108,8 @@ module Simple = struct
     (st, NonLocalized [])
 
   (** Returns the type parameters of the kind, more or less. *)
-  let get_named_parameter_kinds (_kind, _) : named_kind list = []
+  let get_named_parameter_kinds (_kind, _) : named_kind list =
+    (* TODO(T222659258) remove this function *) []
 
   let from_full_kind fk =
     let wildcard_bounds =

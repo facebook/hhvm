@@ -1328,27 +1328,18 @@ and localize_refinement ~ety_env env r root decl_cr =
 
 (** Localize an explicit type argument to a constructor or function. We
     support the use of wildcards at the top level only *)
-let localize_targ_with_kind
-    ?tparam ~check_well_kinded env hint (nkind : KindDefs.Simple.named_kind) =
+let localize_targ ?tparam ~check_well_kinded env hint =
   (* For explicit type arguments we support a wildcard syntax `_` for which
    * Hack will generate a fresh type variable *)
-  let kind = snd nkind in
   match hint with
   | (p, Aast.Hwildcard) ->
-    let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
-    if is_higher_kinded then
-      let ty_err = Typing_error.(primary @@ Primary.HKT_wildcard (fst hint)) in
-      let (env, ty) = Env.fresh_type_error env p in
-      ((env, Some ty_err, []), (ty, hint))
-    else
-      let (env, ty) = Env.fresh_type env p in
-      ((env, None, []), (ty, hint))
+    let (env, ty) = Env.fresh_type env p in
+    ((env, None, []), (ty, hint))
   | (hint_pos, _) ->
     let ty = Decl_hint.hint env.decl_env hint in
     let in_reified =
-      not
-      @@ Aast.is_erased
-           (KindDefs.Simple.to_full_kind_without_bounds kind).reified
+      Option.value_map ~default:false tparam ~f:(fun tparam ->
+          not @@ Aast.is_erased tparam.tp_reified)
     in
     let should_check_package_boundary =
       if
@@ -1381,23 +1372,15 @@ let localize_targ_with_kind
     let (env, ty) = localize ~ety_env env ty in
     (env, (ty, hint))
 
-let localize_targ ?tparam ~check_well_kinded env hint =
-  let named_kind =
-    KindDefs.Simple.with_dummy_name (KindDefs.Simple.fully_applied_type ())
-  in
-  localize_targ_with_kind ?tparam ~check_well_kinded env hint named_kind
-
-(* See signature in .mli file for details *)
-let localize_targs_with_kinds
+let localize_targs
     ~check_well_kinded
     ~is_method
     ~def_pos
     ~use_pos
     ~use_name
     ?(check_explicit_targs = true)
-    ?(tparaml = [])
     env
-    named_kinds
+    tparaml
     targl =
   let targ_count = List.length targl in
   let generated_tparam_count =
@@ -1405,11 +1388,7 @@ let localize_targs_with_kinds
       ~f:(fun t -> SN.Coeffects.is_generated_generic (snd t.tp_name))
       tparaml
   in
-  let tparam_count =
-    match List.length tparaml with
-    | 0 -> List.length named_kinds
-    | n -> n
-  in
+  let tparam_count = List.length tparaml in
   let explicit_tparam_count = tparam_count - generated_tparam_count in
 
   let checking_rewritten_call () =
@@ -1459,13 +1438,12 @@ let localize_targs_with_kinds
   (* Declare and localize the explicit type arguments *)
   let (targ_tparaml, _) = List.zip_with_remainder targl tparaml in
   let ((env, ty_errs, _cycles_targs), explicit_targs) =
-    List.map2_env
+    List.map_env
       (env, [], [])
       targ_tparaml
-      (List.take named_kinds targ_count)
-      ~f:(fun (env, ty_errs, cycles_acc) (targ, tparam) y ->
+      ~f:(fun (env, ty_errs, cycles_acc) (targ, tparam) ->
         let ((env, ty_err_opt, cycles), res) =
-          localize_targ_with_kind ~tparam ~check_well_kinded env targ y
+          localize_targ ~tparam ~check_well_kinded env targ
         in
         let ty_errs =
           Option.value_map ty_err_opt ~default:ty_errs ~f:(fun e ->
@@ -1476,41 +1454,21 @@ let localize_targs_with_kinds
   let explicit_targ_ty_err_opt = Typing_error.multiple_opt ty_errs in
   (* Generate fresh type variables for the remainder *)
   let ((env, implicit_targ_ty_err_opt), implicit_targs) =
-    let mk_implicit_targ env (kind_name, kind) =
+    let mk_implicit_targ env tparam =
       let wildcard_hint = (use_pos, Aast.Hwildcard) in
-      if
-        check_well_kinded
-        && KindDefs.Simple.get_arity kind > 0
-        && targ_count = 0
-      then
-        (* We only throw an error if the user didn't provide any type arguments at all.
-           Otherwise, if they provided some, but not all of them, n arity mismatch
-           triggers earlier in this function, independently from higher-kindedness *)
-        let ty_err =
-          Typing_error.(
-            primary
-            @@ Primary.HKT_implicit_argument
-                 {
-                   pos = use_pos;
-                   decl_pos = fst kind_name;
-                   param_name = snd kind_name;
-                 })
-        in
-        let (env, ty) = Env.fresh_type_error env use_pos in
-        ((env, Some ty_err), (ty, wildcard_hint))
-      else
-        let (env, tvar) =
-          Env.fresh_type_reason
-            env
-            use_pos
-            (Reason.type_variable_generics (use_pos, snd kind_name, use_name))
-        in
-        Log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
-        ((env, None), (tvar, wildcard_hint))
+      let name = tparam.tp_name in
+      let (env, tvar) =
+        Env.fresh_type_reason
+          env
+          use_pos
+          (Reason.type_variable_generics (use_pos, snd name, use_name))
+      in
+      Log.log_tparam_instantiation env use_pos (snd name) tvar;
+      ((env, None), (tvar, wildcard_hint))
     in
     List.map_env_ty_err_opt
       env
-      (List.drop named_kinds targ_count)
+      (List.drop tparaml targ_count)
       ~f:mk_implicit_targ
       ~combine_ty_errs:Typing_error.multiple_opt
   in
@@ -1574,29 +1532,6 @@ let localize_disjoint_union ~(ety_env : expand_env) env (dty : decl_ty) =
   | _ ->
     let ((env, err, _cycles), ty) = localize ~ety_env env dty in
     ((env, err), ty)
-
-let localize_targs
-    ~check_well_kinded
-    ~is_method
-    ~def_pos
-    ~use_pos
-    ~use_name
-    ?(check_explicit_targs = true)
-    env
-    tparaml
-    targl =
-  let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparaml in
-  localize_targs_with_kinds
-    ~check_well_kinded
-    ~is_method
-    ~def_pos
-    ~use_pos
-    ~use_name
-    ~tparaml
-    ~check_explicit_targs
-    env
-    nkinds
-    targl
 
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env

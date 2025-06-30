@@ -17,7 +17,6 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
-#include <random>
 
 using namespace proxygen;
 using namespace proxygen::compress;

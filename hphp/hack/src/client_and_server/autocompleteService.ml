@@ -432,7 +432,7 @@ let autocomplete_member
       let ((env, tparam_err_opt), _, explicit_targs) =
         Phase.localize_targs_and_check_constraints
           ~exact:nonexact
-          ~check_well_kinded:false
+          ~check_type_integrity:false
           ~use_pos:Pos.none
           ~def_pos:Pos_or_decl.none
           ~check_explicit_targs:false

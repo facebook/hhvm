@@ -1265,7 +1265,7 @@ and localize_refinement ~ety_env env r root decl_cr =
 
 (** Localize an explicit type argument to a constructor or function. We
     support the use of wildcards at the top level only *)
-let localize_targ ?tparam ~check_well_kinded env hint =
+let localize_targ ?tparam ~check_type_integrity env hint =
   (* For explicit type arguments we support a wildcard syntax `_` for which
    * Hack will generate a fresh type variable *)
   match hint with
@@ -1288,8 +1288,8 @@ let localize_targ ?tparam ~check_well_kinded env hint =
       else
         `No
     in
-    if check_well_kinded then
-      TIntegrity.Simple.check_well_kinded
+    if check_type_integrity then
+      TIntegrity.check_type_integrity
         ~in_signature:false
         ~should_check_package_boundary
         env
@@ -1310,7 +1310,7 @@ let localize_targ ?tparam ~check_well_kinded env hint =
     (env, (ty, hint))
 
 let localize_targs
-    ~check_well_kinded
+    ~check_type_integrity
     ~is_method
     ~def_pos
     ~use_pos
@@ -1380,7 +1380,7 @@ let localize_targs
       targ_tparaml
       ~f:(fun (env, ty_errs, cycles_acc) (targ, tparam) ->
         let ((env, ty_err_opt, cycles), res) =
-          localize_targ ~tparam ~check_well_kinded env targ
+          localize_targ ~tparam ~check_type_integrity env targ
         in
         let ty_errs =
           Option.value_map ty_err_opt ~default:ty_errs ~f:(fun e ->
@@ -1574,7 +1574,7 @@ let localize_no_subst_report_cycles env ~ignore_errors ~report_cycle ty =
 
 let localize_targs_and_check_constraints
     ~exact
-    ~check_well_kinded
+    ~check_type_integrity
     ~def_pos
     ~use_pos
     ?(check_explicit_targs = true)
@@ -1585,7 +1585,7 @@ let localize_targs_and_check_constraints
     hintl =
   let ((env, e1), type_argl) =
     localize_targs
-      ~check_well_kinded
+      ~check_type_integrity
       ~is_method:false
       ~def_pos
       ~use_pos
@@ -1750,8 +1750,8 @@ let localize_ft
     (ft : decl_ty fun_type) =
   ignore_cycles @@ localize_ft ?instantiation ~ety_env ~def_pos env ft
 
-let localize_targ ?tparam ~check_well_kinded env hint =
-  ignore_cycles @@ localize_targ ?tparam ~check_well_kinded env hint
+let localize_targ ?tparam ~check_type_integrity env hint =
+  ignore_cycles @@ localize_targ ?tparam ~check_type_integrity env hint
 
 let check_tparams_constraints ~use_pos ~ety_env env tparams =
   ignore_cycles_ @@ check_tparams_constraints ~use_pos ~ety_env env tparams

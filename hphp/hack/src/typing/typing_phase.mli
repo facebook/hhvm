@@ -131,7 +131,7 @@ val localize_ft :
   Report arity errors using `def_pos` (for the declared parameters), `use_pos`
   (for the use-site) and `use_name` (the name of the constructor or function). *)
 val localize_targs :
-  check_well_kinded:bool ->
+  check_type_integrity:bool ->
   is_method:bool ->
   def_pos:Pos_or_decl.t ->
   use_pos:Pos.t ->
@@ -146,7 +146,7 @@ val localize_targs :
   (though not `where` constraints) *)
 val localize_targs_and_check_constraints :
   exact:exact ->
-  check_well_kinded:bool ->
+  check_type_integrity:bool ->
   def_pos:Pos_or_decl.t ->
   use_pos:Pos.t ->
   ?check_explicit_targs:bool ->
@@ -160,7 +160,7 @@ val localize_targs_and_check_constraints :
 (** Declare and localize a single explicit type argument *)
 val localize_targ :
   ?tparam:decl_tparam ->
-  check_well_kinded:bool ->
+  check_type_integrity:bool ->
   env ->
   Aast.hint ->
   (env * Typing_error.t option) * Tast.targ

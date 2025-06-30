@@ -131,7 +131,7 @@ let subtype_method_decl
   in
   let ((env, ty_err2), explicit_targs) =
     Phase.localize_targs
-      ~check_well_kinded:true
+      ~check_type_integrity:true
       ~is_method:true
       ~def_pos:p_sub
       ~use_pos:Pos.none

@@ -769,7 +769,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
   match explicit_targs with
   | [targ] ->
     let ((env, ty_err_opt), (expected_ty, _)) =
-      Phase.localize_targ ~check_well_kinded:true env (snd targ)
+      Phase.localize_targ ~check_type_integrity:true env (snd targ)
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let right_expected_ty =
@@ -900,7 +900,7 @@ let make_result env p te ty =
 
 let localize_targ env ta =
   let pos = fst ta in
-  let (env, targ) = Phase.localize_targ ~check_well_kinded:true env ta in
+  let (env, targ) = Phase.localize_targ ~check_type_integrity:true env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
 (* Set the function type to be capturing readonly values only *)
@@ -1473,7 +1473,7 @@ end = struct
     let ety_env = empty_expand_env in
     let ((env, tyargs_err_opt), ty_args) =
       Phase.localize_targs
-        ~check_well_kinded:true
+        ~check_type_integrity:true
         ~is_method:true
         ~def_pos
         ~use_pos
@@ -6326,7 +6326,7 @@ end = struct
            * are still a parse error. This is a no-op if ft.ft_tparams is empty. *)
           let ((env, ty_err_opt1), implicit_constructor_targs) =
             Phase.localize_targs
-              ~check_well_kinded:true
+              ~check_type_integrity:true
               ~is_method:true
               ~def_pos
               ~use_pos:p
@@ -10733,7 +10733,7 @@ and Class_id : sig
   *     <expr>  CIexpr expr  expression that evaluates to an object or classname
   *)
   val class_expr :
-    ?check_targs_well_kinded:bool ->
+    ?check_targs_integrity:bool ->
     ?is_attribute_param:bool ->
     ?exact:exact ->
     ?check_explicit_targs:bool ->
@@ -10812,7 +10812,7 @@ and Class_id : sig
     newable_class_info
 end = struct
   let class_expr
-      ?(check_targs_well_kinded = false)
+      ?(check_targs_integrity = false)
       ?(is_attribute_param = false)
       ?(exact = nonexact)
       ?(check_explicit_targs = false)
@@ -10927,7 +10927,7 @@ end = struct
              elements are not actually localized. *)
           let expected_tparams = [] in
           Phase.localize_targs
-            ~check_well_kinded:check_targs_well_kinded
+            ~check_type_integrity:check_targs_integrity
             ~is_method:true
             ~def_pos
             ~use_pos:p
@@ -10990,7 +10990,7 @@ end = struct
             List.map ~f:snd tal
             |> Phase.localize_targs_and_check_constraints
                  ~exact
-                 ~check_well_kinded:check_targs_well_kinded
+                 ~check_type_integrity:check_targs_integrity
                  ~def_pos:(Cls.pos class_)
                  ~use_pos:p
                  ~check_explicit_targs
@@ -11170,7 +11170,7 @@ end = struct
       (explicit_targs : Nast.targ list) : newable_class_info =
     let (env, tal, te, cid_ty) =
       class_expr
-        ~check_targs_well_kinded:true
+        ~check_targs_integrity:true
         ~check_explicit_targs:true
         ~exact
         ~is_attribute
@@ -12879,7 +12879,7 @@ end = struct
 
                 let ((env, ty_err_opt1), explicit_targs) =
                   Phase.localize_targs
-                    ~check_well_kinded:true
+                    ~check_type_integrity:true
                     ~is_method:true
                     ~def_pos
                     ~use_pos:p

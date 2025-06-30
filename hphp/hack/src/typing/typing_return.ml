@@ -64,7 +64,7 @@ let make_wrapped_fresh_type env p r id =
     let ((env, _), ty, _tal) =
       Typing_phase.localize_targs_and_check_constraints
         ~exact:nonexact
-        ~check_well_kinded:false
+        ~check_type_integrity:false
         ~def_pos:(Cls.pos class_)
         ~use_pos:p
         ~check_explicit_targs:false

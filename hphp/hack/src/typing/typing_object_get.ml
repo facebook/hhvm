@@ -694,7 +694,7 @@ and obj_get_concrete_class_with_member_info
        * parameters. *)
       let ((env, lclz_ty_err_opt), explicit_targs) =
         Phase.localize_targs
-          ~check_well_kinded:true
+          ~check_type_integrity:true
           ~is_method:args.is_method
           ~use_pos:id_pos
           ~def_pos:mem_pos

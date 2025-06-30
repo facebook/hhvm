@@ -161,7 +161,7 @@ let check_splat_hint env p h =
   Option.to_list err
 
 let rec context_hint ?(in_signature = true) env (p, h) =
-  Typing_type_integrity.Simple.check_well_kinded_context_hint
+  Typing_type_integrity.check_context_hint_integrity
     ~in_signature
     env.tenv
     (p, h);
@@ -295,7 +295,7 @@ let hint
     env
     (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
-  Typing_type_integrity.Simple.check_well_kinded_hint
+  Typing_type_integrity.check_hint_integrity
     ~in_signature
     ~should_check_package_boundary
     env.tenv
@@ -673,20 +673,20 @@ let typedef tenv (t : (_, _) typedef) =
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
     (* We always check the constraints for internal types, so treat in_signature:true *)
-    (Typing_type_integrity.Simple.check_well_kinded_hint
+    (Typing_type_integrity.check_hint_integrity
        ~in_signature:true
        ~should_check_package_boundary)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
-    (Typing_type_integrity.Simple.check_well_kinded_hint
+    (Typing_type_integrity.check_hint_integrity
        ~in_signature:true
        ~should_check_package_boundary)
     tenv_with_typedef_tparams
     t_super_constraint;
   (* TODO check kinded-ness for constraints too *)
   List.iter hint_constraints_pairs ~f:(fun (hint, _constraints) ->
-      Typing_type_integrity.Simple.check_well_kinded_hint
+      Typing_type_integrity.check_hint_integrity
         ~in_signature:should_check_internal_signature
         ~should_check_package_boundary
         tenv_with_typedef_tparams

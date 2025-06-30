@@ -33,15 +33,15 @@ class PerturbSource {
  public:
   PerturbSource(std::chrono::milliseconds interval = std::chrono::seconds(30)) {
     auto task =
-        updatePerturb(interval).scheduleOn(folly::getGlobalCPUExecutor());
+        co_withExecutor(folly::getGlobalCPUExecutor(), updatePerturb(interval));
     asyncScope_.add(folly::coro::co_withCancellation(
         cancellation_.getToken(), std::move(task)));
   }
 
   ~PerturbSource() {
     cancellation_.requestCancellation();
-    folly::coro::blockingWait(
-        asyncScope_.joinAsync().scheduleOn(folly::getGlobalCPUExecutor()));
+    folly::coro::blockingWait(co_withExecutor(
+        folly::getGlobalCPUExecutor(), asyncScope_.joinAsync()));
   }
 
   std::size_t perturbedId(std::size_t id) {

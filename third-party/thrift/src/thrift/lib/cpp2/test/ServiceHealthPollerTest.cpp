@@ -118,7 +118,7 @@ CO_TEST(ServiceHealthPoller, Basic) {
 
   auto poll = ServiceHealthPoller::poll(std::move(handlers), kDefaultLiveness);
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::OK);
 
@@ -133,7 +133,7 @@ CO_TEST(ServiceHealthPoller, MergeStatusWithoutError) {
 
   auto poll = ServiceHealthPoller::poll(std::move(handlers), kDefaultLiveness);
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::OK);
 
@@ -149,7 +149,7 @@ CO_TEST(ServiceHealthPoller, MergeStatusWithError) {
 
   auto poll = ServiceHealthPoller::poll(std::move(handlers), kDefaultLiveness);
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);
 
@@ -165,7 +165,7 @@ CO_TEST(ServiceHealthPoller, ChangingStatus) {
 
   auto poll = ServiceHealthPoller::poll(std::move(handlers), kDefaultLiveness);
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);
 
@@ -189,7 +189,7 @@ CO_TEST(ServiceHealthPoller, NoChangeBetweenPolls) {
 
   auto poll = ServiceHealthPoller::poll(std::move(handlers), liveness);
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);
 
@@ -215,7 +215,7 @@ CO_TEST(ServiceHealthPoller, Cancellation) {
 
   auto poll = ServiceHealthPoller::poll(std::move(handlers), liveness);
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);
 
@@ -238,7 +238,7 @@ CO_TEST(ServiceHealthPoller, DynamicLiveness) {
   auto poll =
       ServiceHealthPoller::poll(std::move(handlers), liveness.getObserver());
   auto [result, loop] = ServiceHealthResult::createLoop(std::move(poll));
-  scope.add(std::move(loop).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), std::move(loop)));
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);
 

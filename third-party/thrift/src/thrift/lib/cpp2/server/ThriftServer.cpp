@@ -806,7 +806,7 @@ void ThriftServer::setup() {
               }
             });
         asyncScope_->add(
-            std::move(loop).scheduleOn(getHandlerExecutorKeepAlive()));
+            co_withExecutor(getHandlerExecutorKeepAlive(), std::move(loop)));
       }
     }
 #endif

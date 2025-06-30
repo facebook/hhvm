@@ -212,7 +212,8 @@ ServerStream<int32_t> TestStreamMultiPublisherService::range(
     folly::exception_wrapper ew) {
   auto stream = multipub_.addStream([&] { --activeStreams_; });
   if (++activeStreams_ == 5) {
-    getAsyncScope()->add(
+    getAsyncScope()->add(co_withExecutor(
+        getEventBase(),
         folly::coro::co_invoke(
             [=, ew = std::move(ew)]() mutable -> folly::coro::Task<void> {
               for (int i = from; i <= to; i++) {
@@ -228,8 +229,7 @@ ServerStream<int32_t> TestStreamMultiPublisherService::range(
                 std::move(multipub_).complete();
               }
               EXPECT_EQ(0, activeStreams_);
-            })
-            .scheduleOn(getEventBase()));
+            })));
   }
   return stream;
 }
@@ -285,7 +285,8 @@ ServerStream<int32_t> TestStreamMultiPublisherWithHeaderService::range(
     folly::exception_wrapper ew) {
   auto stream = multipub_.addStream([&] { --activeStreams_; });
   if (++activeStreams_ == 5) {
-    getAsyncScope()->add(
+    getAsyncScope()->add(co_withExecutor(
+        getEventBase(),
         folly::coro::co_invoke(
             [=, ew = std::move(ew)]() mutable -> folly::coro::Task<void> {
               for (int i = from; i <= to; i++) {
@@ -304,8 +305,7 @@ ServerStream<int32_t> TestStreamMultiPublisherWithHeaderService::range(
                 std::move(multipub_).complete();
               }
               EXPECT_EQ(0, activeStreams_);
-            })
-            .scheduleOn(getEventBase()));
+            })));
   }
   return stream;
 }

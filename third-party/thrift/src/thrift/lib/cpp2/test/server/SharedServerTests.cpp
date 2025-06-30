@@ -302,6 +302,10 @@ TEST_P(SharedServerTests, LargeSendTest) {
       folly::IOBuf::wrapBuffer(oneMBBuf.data(), hugeSize % oneMB));
   ASSERT_EQ(request->computeChainDataLength(), hugeSize);
 
+  // To keep the serializer from chunking the buffer according to the growth
+  // policy, trigger the copy into a managed buffer ourselves.
+  request->makeManaged();
+
   client->sync_echoIOBuf(response, *request);
   ASSERT_EQ(
       request->computeChainDataLength() + kEchoSuffix.size(),

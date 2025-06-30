@@ -380,48 +380,18 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
   | Tgeneric nm when SSet.mem nm ety_env.no_substs ->
     (* For polymorphic lambda we want to retain generics bound in the lambda signature *)
     ((env, None, []), mk (r, Tgeneric nm))
-  | Tgeneric x ->
-    let localize_tgeneric ?replace_with name r =
-      match (replace_with, Env.get_pos_and_kind_of_generic env name) with
-      | (_, Some (_def_pos, kind)) ->
-        let arg_kinds : KindDefs.Simple.named_kind list =
-          KindDefs.Simple.from_full_kind kind
-          |> KindDefs.Simple.get_named_parameter_kinds
-        in
-        begin
-          match
-            ( localize_targs_by_kind
-                ~ety_env:
-                  {
-                    ety_env with
-                    visibility_behavior = default_visibility_behaviour;
-                  }
-                env
-                []
-                arg_kinds,
-              replace_with )
-          with
-          | ((env, _), Some repl_ty) -> (env, mk (r, repl_ty))
-          | ((env, []), None) -> (env, mk (r, Tgeneric name))
-          | ((_env, _locl_tyargs), None) -> failwith "should be unreachable"
-        end
-      | (None, None) ->
-        (* No info about x, and no replacement. Just return Tgeneric *)
-        ((env, None, []), mk (r, Tgeneric x))
-      | (Some repl_ty, None) -> ((env, None, []), mk (r, repl_ty))
-    in
-    begin
-      match SMap.find_opt x ety_env.substs with
-      | Some x_ty ->
-        let (env, x_ty) = Env.expand_type env x_ty in
-        let r_inst =
-          let rp = get_reason x_ty in
-          Reason.instantiate (rp, x, r)
-        in
-        let ty_ = get_node x_ty in
-        ((env, None, []), mk (r_inst, ty_))
-      | None -> localize_tgeneric x r
-    end
+  | Tgeneric x -> begin
+    match SMap.find_opt x ety_env.substs with
+    | Some x_ty ->
+      let (env, x_ty) = Env.expand_type env x_ty in
+      let r_inst =
+        let rp = get_reason x_ty in
+        Reason.instantiate (rp, x, r)
+      in
+      let ty_ = get_node x_ty in
+      ((env, None, []), mk (r_inst, ty_))
+    | None -> ((env, None, []), mk (r, Tgeneric x))
+  end
   | Toption ty ->
     let ((env, ty_err_opt, cycles), ty) = localize ~ety_env env ty in
     (* Calling into the union module here would cost 2% perf regression on a full init,

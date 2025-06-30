@@ -993,4 +993,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       lsp_invalidation = options.lsp_invalidation;
       autocomplete_sort_text = options.autocomplete_sort_text;
       warnings_default_all = options.warnings_default_all;
+      edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;
     }

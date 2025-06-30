@@ -819,15 +819,12 @@ pub struct RequireClauseConstraint<'a> {
     name: Node<'a>,
 }
 
-#[allow(dead_code)] // TODO(T222659258) tparam_params is unused now, remove
 #[derive(Debug)]
 pub struct TypeParameterDecl<'a> {
     name: Node<'a>,
     reified: aast::ReifyKind,
     variance: Variance,
     constraints: &'a [(ConstraintKind, Node<'a>)],
-
-    tparam_params: &'a [&'a Tparam<'a>],
     user_attributes: &'a [&'a UserAttributeNode<'a>],
 }
 
@@ -3974,7 +3971,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         reify: Self::Output,
         variance: Self::Output,
         name: Self::Output,
-        tparam_params: Self::Output,
         constraints: Self::Output,
     ) -> Self::Output {
         let user_attributes = match user_attributes {
@@ -3991,20 +3987,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             &Node::TypeConstraint(&constraint) => Some(constraint),
             _ => None,
         }));
-
-        // TODO(T70068435) Once we add support for constraints on higher-kinded types
-        // (in particular, constraints on nested type parameters), we need to ensure
-        // that we correctly handle the scoping of nested type parameters.
-        // This includes making sure that the call to convert_type_appl_to_generic
-        // in make_type_parameters handles nested constraints.
-        // For now, we just make sure that the nested type parameters that make_type_parameters
-        // added to the global list of in-scope type parameters are removed immediately:
-        self.pop_type_params(tparam_params);
-
-        let tparam_params = match tparam_params {
-            Node::TypeParameters(&params) => params,
-            _ => &[],
-        };
 
         Node::TypeParameter(self.alloc(TypeParameterDecl {
             name,
@@ -4023,7 +4005,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 aast::ReifyKind::Erased
             },
             constraints,
-            tparam_params,
             user_attributes,
         }))
     }
@@ -4059,7 +4040,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 variance,
                 reified,
                 constraints,
-                tparam_params: _,
                 user_attributes,
             } = decl;
             let constraints = self.slice(constraints.iter().filter_map(|constraint| {

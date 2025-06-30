@@ -907,7 +907,6 @@ module type Syntax_S = sig
         type_reified: t;
         type_variance: t;
         type_name: t;
-        type_param_params: t;
         type_constraints: t;
       }
     | TypeConstraint of {
@@ -1467,7 +1466,7 @@ module type Syntax_S = sig
 
   val make_function_ctx_type_specifier : t -> t -> t
 
-  val make_type_parameter : t -> t -> t -> t -> t -> t -> t
+  val make_type_parameter : t -> t -> t -> t -> t -> t
 
   val make_type_constraint : t -> t -> t
 

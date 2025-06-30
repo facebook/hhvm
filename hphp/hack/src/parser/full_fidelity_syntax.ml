@@ -2295,14 +2295,12 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           } ->
         let acc = f acc type_attribute_spec in
         let acc = f acc type_reified in
         let acc = f acc type_variance in
         let acc = f acc type_name in
-        let acc = f acc type_param_params in
         let acc = f acc type_constraints in
         acc
       | TypeConstraint { constraint_keyword; constraint_type } ->
@@ -4096,7 +4094,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           } ->
         [
@@ -4104,7 +4101,6 @@ module WithToken (Token : TokenType) = struct
           type_reified;
           type_variance;
           type_name;
-          type_param_params;
           type_constraints;
         ]
       | TypeConstraint { constraint_keyword; constraint_type } ->
@@ -5905,7 +5901,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           } ->
         [
@@ -5913,7 +5908,6 @@ module WithToken (Token : TokenType) = struct
           "type_reified";
           "type_variance";
           "type_name";
-          "type_param_params";
           "type_constraints";
         ]
       | TypeConstraint { constraint_keyword; constraint_type } ->
@@ -7922,7 +7916,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           ] ) ->
         TypeParameter
@@ -7931,7 +7924,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           }
       | (SyntaxKind.TypeConstraint, [constraint_keyword; constraint_type]) ->
@@ -10431,7 +10423,6 @@ module WithToken (Token : TokenType) = struct
           type_reified
           type_variance
           type_name
-          type_param_params
           type_constraints =
         let syntax =
           TypeParameter
@@ -10440,7 +10431,6 @@ module WithToken (Token : TokenType) = struct
               type_reified;
               type_variance;
               type_name;
-              type_param_params;
               type_constraints;
             }
         in

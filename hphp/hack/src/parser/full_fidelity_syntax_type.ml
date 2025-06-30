@@ -1042,7 +1042,6 @@ struct
         type_reified: t;
         type_variance: t;
         type_name: t;
-        type_param_params: t;
         type_constraints: t;
       }
     | TypeConstraint of {

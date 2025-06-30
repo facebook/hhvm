@@ -1655,13 +1655,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_type_parameter(_: &C, type_attribute_spec: Self, type_reified: Self, type_variance: Self, type_name: Self, type_param_params: Self, type_constraints: Self) -> Self {
+    fn make_type_parameter(_: &C, type_attribute_spec: Self, type_reified: Self, type_variance: Self, type_name: Self, type_constraints: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
             type_attribute_spec,
             type_reified,
             type_variance,
             type_name,
-            type_param_params,
             type_constraints,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -3242,12 +3241,11 @@ where
                 acc
             },
             SyntaxVariant::TypeParameter(x) => {
-                let TypeParameterChildren { type_attribute_spec, type_reified, type_variance, type_name, type_param_params, type_constraints } = *x;
+                let TypeParameterChildren { type_attribute_spec, type_reified, type_variance, type_name, type_constraints } = *x;
                 let acc = f(type_attribute_spec, acc);
                 let acc = f(type_reified, acc);
                 let acc = f(type_variance, acc);
                 let acc = f(type_name, acc);
-                let acc = f(type_param_params, acc);
                 let acc = f(type_constraints, acc);
                 acc
             },
@@ -4750,9 +4748,8 @@ where
                  function_ctx_type_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::TypeParameter, 6) => SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
+             (SyntaxKind::TypeParameter, 5) => SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
                  type_constraints: ts.pop().unwrap(),
-                 type_param_params: ts.pop().unwrap(),
                  type_name: ts.pop().unwrap(),
                  type_variance: ts.pop().unwrap(),
                  type_reified: ts.pop().unwrap(),
@@ -5146,7 +5143,7 @@ where
             SyntaxVariant::TupleTypeExplicitSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_type_keyword, 4) },
             SyntaxVariant::VarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.varray_keyword, 5) },
             SyntaxVariant::FunctionCtxTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.function_ctx_type_keyword, 2) },
-            SyntaxVariant::TypeParameter(x) => unsafe { std::slice::from_raw_parts(&x.type_attribute_spec, 6) },
+            SyntaxVariant::TypeParameter(x) => unsafe { std::slice::from_raw_parts(&x.type_attribute_spec, 5) },
             SyntaxVariant::TypeConstraint(x) => unsafe { std::slice::from_raw_parts(&x.constraint_keyword, 2) },
             SyntaxVariant::ContextConstraint(x) => unsafe { std::slice::from_raw_parts(&x.ctx_constraint_keyword, 2) },
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.darray_keyword, 7) },
@@ -5337,7 +5334,7 @@ where
             SyntaxVariant::TupleTypeExplicitSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_type_keyword, 4) },
             SyntaxVariant::VarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.varray_keyword, 5) },
             SyntaxVariant::FunctionCtxTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_ctx_type_keyword, 2) },
-            SyntaxVariant::TypeParameter(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_attribute_spec, 6) },
+            SyntaxVariant::TypeParameter(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_attribute_spec, 5) },
             SyntaxVariant::TypeConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constraint_keyword, 2) },
             SyntaxVariant::ContextConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_constraint_keyword, 2) },
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.darray_keyword, 7) },
@@ -6715,7 +6712,6 @@ pub struct TypeParameterChildren<T, V> {
     pub type_reified: Syntax<T, V>,
     pub type_variance: Syntax<T, V>,
     pub type_name: Syntax<T, V>,
-    pub type_param_params: Syntax<T, V>,
     pub type_constraints: Syntax<T, V>,
 }
 
@@ -8711,13 +8707,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             TypeParameter(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.type_attribute_spec),
                     1 => Some(&x.type_reified),
                     2 => Some(&x.type_variance),
                     3 => Some(&x.type_name),
-                    4 => Some(&x.type_param_params),
-                    5 => Some(&x.type_constraints),
+                    4 => Some(&x.type_constraints),
                         _ => None,
                     }
                 })

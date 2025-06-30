@@ -430,7 +430,7 @@ where
     // SPEC
     // generic-type-parameter:
     //   generic-type-parameter-reified-opt  generic-type-parameter-variance-opt
-    //     name type-parameter-list? generic-type-constraint-list-opt
+    //     name generic-type-constraint-list-opt
     //
     // generic-type-parameter-variance:
     //   +
@@ -447,17 +447,10 @@ where
         let reified = self.optional_token(TokenKind::Reify);
         let variance = self.parse_variance_opt();
         let type_name = self.require_name_allow_all_keywords();
-        let param_params = self.parse_generic_type_parameter_list_opt();
         let constraints =
             self.parse_list_until_none(|x: &mut Self| x.parse_generic_type_constraint_opt());
-        self.sc_mut().make_type_parameter(
-            attributes,
-            reified,
-            variance,
-            type_name,
-            param_params,
-            constraints,
-        )
+        self.sc_mut()
+            .make_type_parameter(attributes, reified, variance, type_name, constraints)
     }
 
     pub fn parse_generic_type_parameter_list_opt(&mut self) -> S::Output {

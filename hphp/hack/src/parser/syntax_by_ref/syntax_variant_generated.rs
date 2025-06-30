@@ -1401,7 +1401,6 @@ pub struct TypeParameterChildren<'a, T, V> {
     pub reified: Syntax<'a, T, V>,
     pub variance: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
-    pub param_params: Syntax<'a, T, V>,
     pub constraints: Syntax<'a, T, V>,
 }
 

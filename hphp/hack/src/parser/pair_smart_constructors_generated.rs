@@ -672,8 +672,8 @@ where
         Node(self.0.make_function_ctx_type_specifier(keyword.0, variable.0), self.1.make_function_ctx_type_specifier(keyword.1, variable.1))
     }
 
-    fn make_type_parameter(&mut self, attribute_spec: Self::Output, reified: Self::Output, variance: Self::Output, name: Self::Output, param_params: Self::Output, constraints: Self::Output) -> Self::Output {
-        Node(self.0.make_type_parameter(attribute_spec.0, reified.0, variance.0, name.0, param_params.0, constraints.0), self.1.make_type_parameter(attribute_spec.1, reified.1, variance.1, name.1, param_params.1, constraints.1))
+    fn make_type_parameter(&mut self, attribute_spec: Self::Output, reified: Self::Output, variance: Self::Output, name: Self::Output, constraints: Self::Output) -> Self::Output {
+        Node(self.0.make_type_parameter(attribute_spec.0, reified.0, variance.0, name.0, constraints.0), self.1.make_type_parameter(attribute_spec.1, reified.1, variance.1, name.1, constraints.1))
     }
 
     fn make_type_constraint(&mut self, keyword: Self::Output, type_: Self::Output) -> Self::Output {

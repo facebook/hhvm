@@ -1525,13 +1525,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             TypeParameter(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
                     1 => Some(&x.reified),
                     2 => Some(&x.variance),
                     3 => Some(&x.name),
-                    4 => Some(&x.param_params),
-                    5 => Some(&x.constraints),
+                    4 => Some(&x.constraints),
                         _ => None,
                     }
                 })

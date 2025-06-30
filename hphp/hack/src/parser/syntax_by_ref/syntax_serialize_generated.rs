@@ -1375,14 +1375,13 @@ SyntaxVariant::FunctionCtxTypeSpecifier (FunctionCtxTypeSpecifierChildren{keywor
 ss.serialize_field("function_ctx_type_variable", &self.with(variable))?;
       ss.end()
 } 
-SyntaxVariant::TypeParameter (TypeParameterChildren{attribute_spec,reified,variance,name,param_params,constraints} ) => {
-      let mut ss = s.serialize_struct("", 7)?;
+SyntaxVariant::TypeParameter (TypeParameterChildren{attribute_spec,reified,variance,name,constraints} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "type_parameter")?;
       ss.serialize_field("type_attribute_spec", &self.with(attribute_spec))?;
 ss.serialize_field("type_reified", &self.with(reified))?;
 ss.serialize_field("type_variance", &self.with(variance))?;
 ss.serialize_field("type_name", &self.with(name))?;
-ss.serialize_field("type_param_params", &self.with(param_params))?;
 ss.serialize_field("type_constraints", &self.with(constraints))?;
       ss.end()
 } 

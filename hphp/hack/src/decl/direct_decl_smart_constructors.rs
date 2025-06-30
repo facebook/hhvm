@@ -750,14 +750,12 @@ pub struct RequireClauseConstraint {
     name: Node,
 }
 
-#[allow(dead_code)] // TODO(T222659258) tparam_params is unused now, remove
 #[derive(Debug, Clone)]
 pub struct TypeParameterDecl {
     name: Node,
     reified: aast::ReifyKind,
     variance: Variance,
     constraints: Vec<(ConstraintKind, Node)>,
-    tparam_params: Vec<Tparam>,
     user_attributes: Vec<UserAttributeNode>,
 }
 
@@ -3766,7 +3764,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         reify: Self::Output,
         variance: Self::Output,
         name: Self::Output,
-        tparam_params: Self::Output,
         constraints: Self::Output,
     ) -> Self::Output {
         let user_attributes = match user_attributes {
@@ -3788,15 +3785,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             })
             .collect();
 
-        // TODO(T70068435) Once we add support for constraints on higher-kinded types
-        // (in particular, constraints on nested type parameters), we need to ensure
-        // that we correctly handle the scoping of nested type parameters.
-        // This includes making sure that the call to convert_type_appl_to_generic
-        // in make_type_parameters handles nested constraints.
-        // For now, we just make sure that the nested type parameters that make_type_parameters
-        // added to the global list of in-scope type parameters are removed immediately:
-        let tparam_params = self.pop_type_params(tparam_params);
-
         Node::TypeParameter(Box::new(TypeParameterDecl {
             name,
             variance: match variance.token_kind() {
@@ -3814,7 +3802,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 aast::ReifyKind::Erased
             },
             constraints,
-            tparam_params,
             user_attributes,
         }))
     }
@@ -3850,7 +3837,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 variance,
                 reified,
                 constraints,
-                tparam_params: _,
                 user_attributes,
             } = decl;
             let constraints = constraints

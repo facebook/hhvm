@@ -191,7 +191,6 @@
                       "line_number":6
                     }
                   },
-                  "type_param_params":{"kind":"missing"},
                   "type_constraints":{"kind":"missing"}
                 },
                 "list_separator":{"kind":"missing"}

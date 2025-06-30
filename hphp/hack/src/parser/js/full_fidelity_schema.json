@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2025-05-27-0000",
+  "version" : "2025-06-30-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1927,7 +1927,6 @@
         { "field_name" : "reified" },
         { "field_name" : "variance" },
         { "field_name" : "name" },
-        { "field_name" : "param_params" },
         { "field_name" : "constraints" }
       ] },
     { "kind_name" : "TypeConstraint",

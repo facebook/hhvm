@@ -1661,13 +1661,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_type_parameter(ctx: &C, attribute_spec: Self, reified: Self, variance: Self, name: Self, param_params: Self, constraints: Self) -> Self {
+    fn make_type_parameter(ctx: &C, attribute_spec: Self, reified: Self, variance: Self, name: Self, constraints: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameter(ctx.get_arena().alloc(TypeParameterChildren {
             attribute_spec,
             reified,
             variance,
             name,
-            param_params,
             constraints,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

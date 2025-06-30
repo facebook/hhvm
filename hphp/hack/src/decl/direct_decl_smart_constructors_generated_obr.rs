@@ -658,8 +658,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_function_ctx_type_specifier(self, keyword, variable)
     }
 
-    fn make_type_parameter(&mut self, attribute_spec: Self::Output, reified: Self::Output, variance: Self::Output, name: Self::Output, param_params: Self::Output, constraints: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_type_parameter(self, attribute_spec, reified, variance, name, param_params, constraints)
+    fn make_type_parameter(&mut self, attribute_spec: Self::Output, reified: Self::Output, variance: Self::Output, name: Self::Output, constraints: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_type_parameter(self, attribute_spec, reified, variance, name, constraints)
     }
 
     fn make_type_constraint(&mut self, keyword: Self::Output, type_: Self::Output) -> Self::Output {

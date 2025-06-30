@@ -2285,7 +2285,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           type_reified = reified;
           type_variance = variance;
           type_name = name;
-          type_param_params = params;
           type_constraints = constraints;
         } ->
       Concat
@@ -2296,7 +2295,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present reified space;
           t env variance;
           t env name;
-          t env params;
           when_present constraints space;
           handle_possible_list env constraints ~after_each:(fun is_last ->
               if is_last then

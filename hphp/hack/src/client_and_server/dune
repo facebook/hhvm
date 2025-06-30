@@ -148,6 +148,14 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name meerkat_tracker)
+ (wrapped false)
+ (modules meerkatTracker)
+ (libraries logging sys_utils utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name server_prechecked_files)
  (wrapped false)
  (modules serverPrecheckedFiles)
@@ -334,6 +342,7 @@
  (modules serverNotifier)
  (libraries
    edenfs_watcher_stubs
+   meerkat_tracker
    server_command_types
    server_files
    server_notifier_types

@@ -50,7 +50,16 @@ EventHandlerBase::getEventHandlersSharedPtr() const {
 TProcessorBase::TProcessorBase() {
   std::shared_lock lock{getRWMutex()};
 
-  for (const auto& handler : getHandlers()) {
+  auto& desired = getHandlers();
+  if (desired.empty()) {
+    return;
+  }
+  if (!handlers_) {
+    handlers_ = std::make_shared<
+        std::vector<std::shared_ptr<TProcessorEventHandler>>>();
+  }
+  folly::grow_capacity_by(*handlers_, desired.size());
+  for (const auto& handler : desired) {
     addEventHandler(handler);
   }
 }

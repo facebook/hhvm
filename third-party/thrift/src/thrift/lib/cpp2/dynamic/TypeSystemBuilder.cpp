@@ -21,7 +21,6 @@
 #include <folly/container/MapUtil.h>
 #include <folly/container/span.h>
 #include <folly/lang/Assume.h>
-#include <folly/lang/SafeAssert.h>
 
 #include <functional>
 #include <utility>
@@ -34,8 +33,7 @@ namespace {
 using TSDefinition =
     std::variant<StructNode, UnionNode, EnumNode, OpaqueAliasNode>;
 
-class TypeSystemImpl final : public TypeSystem {
- private:
+class TypeSystemImpl final : public SourceIndexedTypeSystem {
  public:
   using DefinitionsMap = folly::F14NodeMap<
       Uri,
@@ -59,6 +57,43 @@ class TypeSystemImpl final : public TypeSystem {
       result.insert(uri);
     }
     return result;
+  }
+
+  using Location = std::string;
+  using DefinitionName = std::string;
+  // Map of definition name (within one location) to definition
+  using NameToDefinitionsMap = SourceIndexedTypeSystem::NameToDefinitionsMap;
+  // Map of location to all definitions at that location
+  using LocationToDefinitionsMap =
+      folly::F14FastMap<Location, NameToDefinitionsMap>;
+  LocationToDefinitionsMap sourceIndexedDefinitions;
+
+  void tryAddToSourceIndex(
+      SourceIdentifierView sourceIdentifier, DefinitionRef def) {
+    auto [_, inserted] =
+        sourceIndexedDefinitions[sourceIdentifier.location].emplace(
+            sourceIdentifier.name, def);
+    if (!inserted) {
+      throw InvalidTypeError(fmt::format(
+          "Duplicate source identifier name '{}' at location '{}'",
+          sourceIdentifier.name,
+          sourceIdentifier.location));
+    }
+  }
+
+  std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
+      SourceIdentifierView sourceIdentifier) const final {
+    if (const NameToDefinitionsMap* atLocation = folly::get_ptr(
+            sourceIndexedDefinitions, sourceIdentifier.location)) {
+      return folly::get_optional<std::optional>(
+          *atLocation, sourceIdentifier.name);
+    }
+    return std::nullopt;
+  }
+
+  folly::F14FastMap<std::string, DefinitionRef> getUserDefinedTypesAtLocation(
+      std::string_view location) const final {
+    return folly::get_default(sourceIndexedDefinitions, location);
   }
 
   // NOTE: This function should ONLY be called within TypeSystemBuilder::build.
@@ -94,9 +129,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
   auto typeSystem = std::make_unique<TypeSystemImpl>();
 
   // Fill in definitions with uninitialized stubs
-  for (auto& entry : definitions_) {
-    const Uri& uri = entry.first;
-    SerializableTypeDefinition& def = entry.second;
+  for (auto& [uri, entry] : definitions_) {
+    SerializableTypeDefinition& def = entry.definition;
     auto uninitDef = std::invoke([&]() -> TSDefinition {
       switch (def.getType()) {
         case SerializableTypeDefinition::Type::structDef:
@@ -158,28 +192,40 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
     return result;
   };
 
-  for (auto& entry : definitions_) {
-    const Uri& uri = entry.first;
-    SerializableTypeDefinition& def = entry.second;
+  for (auto& [uri, entry] : definitions_) {
+    SerializableTypeDefinition& def = entry.definition;
+    std::optional<SerializableThriftSourceInfo>& sourceInfo = entry.sourceInfo;
     // We created uninitialized stubs above so we can assume they exist
     TSDefinition& uninitDef = typeSystem->definitions.find(uri)->second;
 
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef: {
         SerializableStructDefinition& structDef = *def.structDef_ref();
-        std::get<StructNode>(uninitDef) = StructNode(
+        StructNode& structNode = std::get<StructNode>(uninitDef);
+        structNode = StructNode(
             uri,
             makeFields(std::move(*structDef.fields())),
             *structDef.isSealed(),
             makeAnnots(std::move(*structDef.annotations())));
+        if (sourceInfo.has_value()) {
+          typeSystem->tryAddToSourceIndex(
+              SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+              DefinitionRef(&structNode));
+        }
       } break;
       case SerializableTypeDefinition::Type::unionDef: {
         SerializableUnionDefinition& unionDef = *def.unionDef_ref();
-        std::get<UnionNode>(uninitDef) = UnionNode(
+        UnionNode& unionNode = std::get<UnionNode>(uninitDef);
+        unionNode = UnionNode(
             uri,
             makeFields(std::move(*unionDef.fields())),
             *unionDef.isSealed(),
             makeAnnots(std::move(*unionDef.annotations())));
+        if (sourceInfo.has_value()) {
+          typeSystem->tryAddToSourceIndex(
+              SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+              DefinitionRef(&unionNode));
+        }
       } break;
       case SerializableTypeDefinition::Type::enumDef: {
         SerializableEnumDefinition& enumDef = *def.enumDef_ref();
@@ -191,18 +237,30 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
               *mapping.datum(),
               makeAnnots(std::move(*mapping.annotations()))});
         }
-        std::get<EnumNode>(uninitDef) = EnumNode(
+        EnumNode& enumNode = std::get<EnumNode>(uninitDef);
+        enumNode = EnumNode(
             uri,
             std::move(values),
             makeAnnots(std::move(*enumDef.annotations())));
+        if (sourceInfo.has_value()) {
+          typeSystem->tryAddToSourceIndex(
+              SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+              DefinitionRef(&enumNode));
+        }
       } break;
       case SerializableTypeDefinition::Type::opaqueAliasDef: {
         SerializableOpaqueAliasDefinition& opaqueAliasDef =
             *def.opaqueAliasDef_ref();
-        std::get<OpaqueAliasNode>(uninitDef) = OpaqueAliasNode(
+        OpaqueAliasNode& opaqueAliasNode = std::get<OpaqueAliasNode>(uninitDef);
+        opaqueAliasNode = OpaqueAliasNode(
             uri,
             typeSystem->typeOf(*opaqueAliasDef.targetType()),
             makeAnnots(std::move(*opaqueAliasDef.annotations())));
+        if (sourceInfo.has_value()) {
+          typeSystem->tryAddToSourceIndex(
+              SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+              DefinitionRef(&opaqueAliasNode));
+        }
       } break;
       default:
         break;
@@ -296,55 +354,72 @@ void validateOpaqueAliasIsNotUserDefined(
 } // namespace
 
 void TypeSystemBuilder::addType(
-    Uri uri, SerializableStructDefinition structDef) {
+    Uri uri,
+    SerializableStructDefinition structDef,
+    std::optional<SerializableThriftSourceInfo> sourceInfo) {
   validateIdentitiesAreUnique(uri, *structDef.fields());
 
-  SerializableTypeDefinition def;
-  def.set_structDef(std::move(structDef));
-  tryEmplace(std::move(uri), std::move(def));
-}
-
-void TypeSystemBuilder::addType(Uri uri, SerializableUnionDefinition unionDef) {
-  validateIdentitiesAreUnique(uri, *unionDef.fields());
-  validateFieldsAreOptional(uri, unionDef);
-
-  SerializableTypeDefinition def;
-  def.set_unionDef(std::move(unionDef));
-  tryEmplace(std::move(uri), std::move(def));
-}
-
-void TypeSystemBuilder::addType(Uri uri, SerializableEnumDefinition enumDef) {
-  validateEnumMappingsAreUnique(uri, enumDef);
-
-  SerializableTypeDefinition def;
-  def.set_enumDef(std::move(enumDef));
-  tryEmplace(std::move(uri), std::move(def));
+  DefinitionEntry entry;
+  entry.definition.set_structDef(std::move(structDef));
+  entry.sourceInfo = std::move(sourceInfo);
+  tryEmplace(std::move(uri), std::move(entry));
 }
 
 void TypeSystemBuilder::addType(
-    Uri uri, SerializableOpaqueAliasDefinition opaqueAliasDef) {
+    Uri uri,
+    SerializableUnionDefinition unionDef,
+    std::optional<SerializableThriftSourceInfo> sourceInfo) {
+  validateIdentitiesAreUnique(uri, *unionDef.fields());
+  validateFieldsAreOptional(uri, unionDef);
+
+  DefinitionEntry entry;
+  entry.definition.set_unionDef(std::move(unionDef));
+  entry.sourceInfo = std::move(sourceInfo);
+  tryEmplace(std::move(uri), std::move(entry));
+}
+
+void TypeSystemBuilder::addType(
+    Uri uri,
+    SerializableEnumDefinition enumDef,
+    std::optional<SerializableThriftSourceInfo> sourceInfo) {
+  validateEnumMappingsAreUnique(uri, enumDef);
+
+  DefinitionEntry entry;
+  entry.definition.set_enumDef(std::move(enumDef));
+  entry.sourceInfo = std::move(sourceInfo);
+  tryEmplace(std::move(uri), std::move(entry));
+}
+
+void TypeSystemBuilder::addType(
+    Uri uri,
+    SerializableOpaqueAliasDefinition opaqueAliasDef,
+    std::optional<SerializableThriftSourceInfo> sourceInfo) {
   validateOpaqueAliasIsNotUserDefined(uri, opaqueAliasDef);
 
-  SerializableTypeDefinition def;
-  def.set_opaqueAliasDef(std::move(opaqueAliasDef));
-  tryEmplace(std::move(uri), std::move(def));
+  DefinitionEntry entry;
+  entry.definition.set_opaqueAliasDef(std::move(opaqueAliasDef));
+  entry.sourceInfo = std::move(sourceInfo);
+  tryEmplace(std::move(uri), std::move(entry));
 }
 
 void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
   for (auto& [uri, entry] : *typeSystemDef.types()) {
-    const SerializableTypeDefinition& def = *entry.definition();
+    SerializableTypeDefinition& def = *entry.definition();
+    std::optional<SerializableThriftSourceInfo> sourceInfo =
+        entry.sourceInfo().to_optional();
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef:
-        addType(uri, std::move(*def.structDef_ref()));
+        addType(uri, std::move(*def.structDef_ref()), std::move(sourceInfo));
         break;
       case SerializableTypeDefinition::Type::unionDef:
-        addType(uri, std::move(*def.unionDef_ref()));
+        addType(uri, std::move(*def.unionDef_ref()), std::move(sourceInfo));
         break;
       case SerializableTypeDefinition::Type::enumDef:
-        addType(uri, std::move(*def.enumDef_ref()));
+        addType(uri, std::move(*def.enumDef_ref()), std::move(sourceInfo));
         break;
       case SerializableTypeDefinition::Type::opaqueAliasDef:
-        addType(uri, std::move(*def.opaqueAliasDef_ref()));
+        addType(
+            uri, std::move(*def.opaqueAliasDef_ref()), std::move(sourceInfo));
         break;
       default:
         folly::assume_unreachable();
@@ -353,7 +428,7 @@ void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
   }
 }
 
-void TypeSystemBuilder::tryEmplace(Uri uri, SerializableTypeDefinition&& def) {
+void TypeSystemBuilder::tryEmplace(Uri uri, DefinitionEntry&& def) {
   auto [_, inserted] = definitions_.emplace(uri, std::move(def));
   if (!inserted) {
     throw InvalidTypeError(

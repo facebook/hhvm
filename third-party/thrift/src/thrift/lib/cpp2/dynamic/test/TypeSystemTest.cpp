@@ -113,6 +113,14 @@ SerializableOpaqueAliasDefinition makeOpaqueAlias(
   return def;
 }
 
+SerializableThriftSourceInfo makeSourceInfo(
+    std::string_view location, std::string_view name) {
+  SerializableThriftSourceInfo entry;
+  entry.locator() = std::string(location);
+  entry.name() = std::string(name);
+  return entry;
+}
+
 void expectKnownUris(
     const TypeSystem& typeSystem, std::initializer_list<Uri> uris) {
   folly::F14FastSet<Uri> expectedUris{uris.begin(), uris.end()};
@@ -134,6 +142,9 @@ std::unique_ptr<TypeSystem> typeSystemWithEmpties() {
 }
 
 } // namespace
+
+// DefinitionRef should be a cheap value type
+static_assert(std::is_trivially_copyable_v<DefinitionRef>);
 
 TEST(TypeSystemTest, EmptyStruct) {
   TypeSystemBuilder builder;
@@ -1054,4 +1065,102 @@ TEST(TypeSystemTest, TagResolution) {
       TypeRef::Map::of(TypeRef::I32{}, TypeRef::String{}),
       type::map<type::i32_t, type::string_t>{});
 }
+
+TEST(TypeSystemTest, SourceIndexedTypeSystem) {
+  TypeSystemBuilder builder;
+
+  builder.addType(
+      "meta.com/thrift/test/StructWithI32Field",
+      makeStruct({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      }),
+      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+
+  builder.addType(
+      "meta.com/thrift/test/Enum",
+      makeEnum({{"VALUE1", 1}, {"VALUE2", 2}}),
+      makeSourceInfo("file://foo/bar.thrift", "Enum"));
+
+  builder.addType(
+      "meta.com/thrift/test/UnionWithI32Field",
+      makeUnion({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      }),
+      makeSourceInfo("file://foo/other.thrift", "UnionWithI32Field"));
+
+  builder.addType(
+      "meta.com/thrift/test/OpaqueAlias",
+      makeOpaqueAlias(TypeIds::I32),
+      makeSourceInfo("file://foo/other.thrift", "OpaqueAlias"));
+
+  auto typeSystem = std::move(builder).build();
+  const auto& sym = dynamic_cast<const SourceIndexedTypeSystem&>(*typeSystem);
+
+  EXPECT_EQ(
+      &typeSystem->getUserDefinedType("meta.com/thrift/test/StructWithI32Field")
+           ->asStruct(),
+      &sym.getUserDefinedTypeBySourceIdentifier(
+              {"file://foo/bar.thrift", "StructWithI32Field"})
+           ->asStruct());
+
+  EXPECT_EQ(
+      sym.getUserDefinedTypeBySourceIdentifier(
+          {"file://does-not-exist.thrift", "StructWithI32Field"}),
+      std::nullopt);
+  EXPECT_EQ(
+      sym.getUserDefinedTypeBySourceIdentifier(
+          {"file://foo/bar.thrift", "DoesNotExist"}),
+      std::nullopt);
+
+  {
+    auto types = sym.getUserDefinedTypesAtLocation("file://foo/bar.thrift");
+    EXPECT_EQ(types.size(), 2);
+    EXPECT_EQ(
+        &types.find("StructWithI32Field")->second.asStruct(),
+        &typeSystem
+             ->getUserDefinedType("meta.com/thrift/test/StructWithI32Field")
+             ->asStruct());
+    EXPECT_EQ(
+        &types.find("Enum")->second.asEnum(),
+        &typeSystem->getUserDefinedType("meta.com/thrift/test/Enum")->asEnum());
+  }
+
+  {
+    auto types = sym.getUserDefinedTypesAtLocation("file://foo/other.thrift");
+    EXPECT_EQ(types.size(), 2);
+    EXPECT_EQ(
+        &types.find("UnionWithI32Field")->second.asUnion(),
+        &typeSystem
+             ->getUserDefinedType("meta.com/thrift/test/UnionWithI32Field")
+             ->asUnion());
+    EXPECT_EQ(
+        &types.find("OpaqueAlias")->second.asOpaqueAlias(),
+        &typeSystem->getUserDefinedType("meta.com/thrift/test/OpaqueAlias")
+             ->asOpaqueAlias());
+  }
+}
+
+TEST(TypeSystemTest, SourceIndexedTypeSystemWithDuplicateEntries) {
+  TypeSystemBuilder builder;
+
+  builder.addType(
+      "meta.com/thrift/test/StructWithI32Field",
+      makeStruct({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      }),
+      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+
+  builder.addType(
+      "meta.com/thrift/test/StructWithI32Field2",
+      makeStruct({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      }),
+      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+
+  EXPECT_THAT(
+      [&] { std::move(builder).build(); },
+      testing::ThrowsMessage<InvalidTypeError>(
+          testing::HasSubstr("Duplicate source identifier")));
+}
+
 } // namespace apache::thrift::type_system

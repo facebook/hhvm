@@ -95,6 +95,37 @@ class DefinitionRef;
 class TypeRef;
 
 /**
+ * A non-unique Thrift IDL source-based identifier for a user-defined type in a
+ * Thrift type system.
+ *
+ * Unlike URIs, source names may not be unique, even within a single type
+ * system. Every type must have exactly one source name name, but a single name
+ * may refer to multiple types.
+ *
+ * A SourceIdentifier has two components:
+ *   - location:
+ *       A URI of the resource (typically a file) containing the source Thrift
+ *       IDL for a user-defined type. Examples:
+ *         - "file:///thrift/lib/thrift/standard.thrift"
+ *         - "fbsource://xplat/thrift/lib/thrift/standard.thrift"
+ *   - name:
+ *       The name of the definition within the source Thrift IDL pointed to by
+ *       the location above.
+ */
+struct SourceIdentifierView {
+  std::string_view location;
+  std::string_view name;
+};
+struct SourceIdentifier {
+  std::string location;
+  std::string name;
+
+  /* implicit */ operator SourceIdentifierView() const noexcept {
+    return {location, name};
+  }
+};
+
+/**
  * An interface for a Thrift "type system", which is a store of schema
  * information.
  *
@@ -150,6 +181,47 @@ class TypeSystem {
    * guarantee because it allows the caller to traverse the full `TypeSystem`.
    */
   virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
+};
+
+/**
+ * An interface for a Thrift "type system" that supports looking up types by
+ * source names instead of URIs. Note that unlike URIs, source names do not
+ * uniquely identify types within a type system.
+ *
+ * Typically, source information for a type system is derived from the Thrift
+ * IDL source file that produced it.
+ *
+ * The SourceIndexedTypeSystem interface provides only an alternative lookup
+ * scheme. It does not include any other information regarding the types
+ * contained within the type system.
+ */
+class SourceIndexedTypeSystem : public TypeSystem {
+ public:
+  ~SourceIndexedTypeSystem() noexcept override = default;
+
+  /**
+   * Resolves the defintion of a user-defined type referred to by a source
+   * identifier, if it exists.
+   *
+   * Note that source information is optional — not all user-defined types may
+   * have a source identifier.
+   */
+  virtual std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
+      SourceIdentifierView) const = 0;
+
+  using NameToDefinitionsMap = folly::F14FastMap<std::string, DefinitionRef>;
+  /**
+   * Resolves all definitions of user-defined types at a provided location URI.
+   * Typically, this URI points to a source Thrift IDL file.
+   *
+   * The result is a mapping of definition name to a reference to the
+   * definition.
+   *
+   * For every name in the result, `getUserDefinedTypeBySourceIdentifier` must
+   * also succeed.
+   */
+  virtual NameToDefinitionsMap getUserDefinedTypesAtLocation(
+      std::string_view location) const = 0;
 };
 
 /**

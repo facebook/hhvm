@@ -29,19 +29,38 @@ namespace apache::thrift::type_system {
 
 class TypeSystemBuilder {
  public:
-  void addType(Uri, SerializableStructDefinition);
-  void addType(Uri, SerializableUnionDefinition);
-  void addType(Uri, SerializableEnumDefinition);
-  void addType(Uri, SerializableOpaqueAliasDefinition);
+  void addType(
+      Uri,
+      SerializableStructDefinition,
+      std::optional<SerializableThriftSourceInfo> = std::nullopt);
+
+  void addType(
+      Uri,
+      SerializableUnionDefinition,
+      std::optional<SerializableThriftSourceInfo> = std::nullopt);
+
+  void addType(
+      Uri,
+      SerializableEnumDefinition,
+      std::optional<SerializableThriftSourceInfo> = std::nullopt);
+
+  void addType(
+      Uri,
+      SerializableOpaqueAliasDefinition,
+      std::optional<SerializableThriftSourceInfo> = std::nullopt);
 
   void addTypes(SerializableTypeSystem);
 
   std::unique_ptr<TypeSystem> build() &&;
 
  private:
-  folly::F14FastMap<Uri, SerializableTypeDefinition> definitions_;
+  struct DefinitionEntry {
+    SerializableTypeDefinition definition;
+    std::optional<SerializableThriftSourceInfo> sourceInfo;
+  };
+  folly::F14FastMap<Uri, DefinitionEntry> definitions_;
 
-  void tryEmplace(Uri, SerializableTypeDefinition&&);
+  void tryEmplace(Uri, DefinitionEntry&&);
 };
 
 } // namespace apache::thrift::type_system

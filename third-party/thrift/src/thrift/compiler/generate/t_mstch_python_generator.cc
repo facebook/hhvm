@@ -249,7 +249,7 @@ class python_mstch_program : public mstch_program {
           {"has_services?", it->has_services},
           {"has_types?", it->has_types},
           {"is_patch?", it->is_patch},
-          {"needed_in_runtime?", it->needed_in_runtime}});
+          {"needed_by_patch?", it->needed_by_patch}});
     }
     return a;
   }
@@ -331,11 +331,11 @@ class python_mstch_program : public mstch_program {
     bool has_services;
     bool has_types;
     bool is_patch;
-    bool needed_in_runtime;
+    bool needed_by_patch;
   };
 
   void gather_included_program_namespaces() {
-    auto needed_includes = needed_includes_in_runtime(program_);
+    auto needed_includes = needed_includes_by_patch(program_);
     for (const t_program* included_program :
          program_->get_includes_for_codegen()) {
       bool has_types =
@@ -370,7 +370,7 @@ class python_mstch_program : public mstch_program {
       ns.has_services = false;
       ns.has_types = true;
       ns.is_patch = is_patch_program(prog);
-      ns.needed_in_runtime = true;
+      ns.needed_by_patch = true;
       include_namespaces_[path] = std::move(ns);
     }
   }

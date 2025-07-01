@@ -24,7 +24,7 @@ from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import apache.thrift.fixtures.types.module.thrift_types as _fbthrift__apache__thrift__fixtures__types__module__thrift_types
-import apache.thrift.fixtures.types.module.thrift_metadata
+import apache.thrift.fixtures.types.module.thrift_metadata as _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata
 import apache.thrift.fixtures.types.included.thrift_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
 
 class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync"]):
@@ -45,7 +45,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return apache.thrift.fixtures.types.module.thrift_metadata.gen_metadata_service_SomeService()
+        return _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata.gen_metadata_service_SomeService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -58,7 +58,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return apache.thrift.fixtures.types.module.thrift_metadata.gen_metadata_service_SomeService()
+            return _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata.gen_metadata_service_SomeService()
     
         async def bounce_map(
             self,
@@ -125,7 +125,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return apache.thrift.fixtures.types.module.thrift_metadata.gen_metadata_service_SomeService()
+            return _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata.gen_metadata_service_SomeService()
     
         def bounce_map(
             self,

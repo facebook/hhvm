@@ -24,7 +24,7 @@ from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
-import test.fixtures.basic.module.thrift_metadata
+import test.fixtures.basic.module.thrift_metadata as _fbthrift__test__fixtures__basic__module__thrift_metadata
 
 class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"]):
     annotations = _py_types.MappingProxyType({
@@ -44,7 +44,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
+        return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FooService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -57,7 +57,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FooService()
     
         async def simple_rpc(
             self,
@@ -89,7 +89,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FooService()
     
         def simple_rpc(
             self,
@@ -124,7 +124,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FB303Service()
+        return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FB303Service()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -137,7 +137,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FB303Service()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FB303Service()
     
         async def simple_rpc(
             self,
@@ -178,7 +178,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FB303Service()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FB303Service()
     
         def simple_rpc(
             self,
@@ -222,7 +222,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_MyService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -235,7 +235,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_MyService()
     
         async def ping(
             self,
@@ -464,7 +464,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_MyService()
     
         def ping(
             self,
@@ -669,7 +669,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_DbMixedStackArguments()
+        return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_DbMixedStackArguments()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -682,7 +682,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_DbMixedStackArguments()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_DbMixedStackArguments()
     
         async def getDataByKey0(
             self,
@@ -749,7 +749,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_DbMixedStackArguments()
+            return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_DbMixedStackArguments()
     
         def getDataByKey0(
             self,

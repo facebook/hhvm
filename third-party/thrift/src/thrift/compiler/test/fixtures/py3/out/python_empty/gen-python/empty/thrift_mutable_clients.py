@@ -27,7 +27,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import empty.thrift_mutable_types as _fbthrift__empty__thrift_mutable_types
-import empty.thrift_metadata
+import empty.thrift_metadata as _fbthrift__empty__thrift_metadata
 
 class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync"]):
     annotations = _py_types.MappingProxyType({
@@ -47,7 +47,7 @@ class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return empty.thrift_metadata.gen_metadata_service_NullService()
+        return _fbthrift__empty__thrift_metadata.gen_metadata_service_NullService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -60,7 +60,7 @@ class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return empty.thrift_metadata.gen_metadata_service_NullService()
+            return _fbthrift__empty__thrift_metadata.gen_metadata_service_NullService()
     
     
     
@@ -75,5 +75,5 @@ class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return empty.thrift_metadata.gen_metadata_service_NullService()
+            return _fbthrift__empty__thrift_metadata.gen_metadata_service_NullService()
 

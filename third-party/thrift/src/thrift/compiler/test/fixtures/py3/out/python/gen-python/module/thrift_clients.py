@@ -26,7 +26,7 @@ from fbcode.thrift.python.common import RpcOptions
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 import fbcode.thrift.python.types as _fbthrift_python_types
 import module.thrift_types as _fbthrift__module__thrift_types
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleService.Sync"]):
     annotations = _py_types.MappingProxyType({
@@ -46,7 +46,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_SimpleService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -59,7 +59,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_SimpleService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
     
         async def get_five(
             self,
@@ -1155,7 +1155,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_SimpleService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
     
         def get_five(
             self,
@@ -2128,7 +2128,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_DerivedService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
     
     class Async(SimpleService.Async):
         @staticmethod
@@ -2141,7 +2141,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_DerivedService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
     
         async def get_six(
             self,
@@ -2184,7 +2184,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_DerivedService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
     
         def get_six(
             self,
@@ -2226,7 +2226,7 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_RederivedService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_RederivedService()
     
     class Async(DerivedService.Async):
         @staticmethod
@@ -2239,7 +2239,7 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_RederivedService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_RederivedService()
     
         async def get_seven(
             self,
@@ -2282,7 +2282,7 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_RederivedService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_RederivedService()
     
         def get_seven(
             self,

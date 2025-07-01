@@ -24,7 +24,7 @@ from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_types as python_module_root__my__namespacing__extend__test__extend__thrift_types
-import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
+import python_module_root.my.namespacing.extend.test.extend.thrift_metadata as python_module_root__my__namespacing__extend__test__extend__thrift_metadata
 import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
 import python_module_root.my.namespacing.test.hsmodule.thrift_clients
 
@@ -46,7 +46,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return python_module_root.my.namespacing.extend.test.extend.thrift_metadata.gen_metadata_service_ExtendTestService()
+        return python_module_root__my__namespacing__extend__test__extend__thrift_metadata.gen_metadata_service_ExtendTestService()
     
     class Async(python_module_root.my.namespacing.test.hsmodule.thrift_clients.HsTestService.Async):
         @staticmethod
@@ -59,7 +59,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return python_module_root.my.namespacing.extend.test.extend.thrift_metadata.gen_metadata_service_ExtendTestService()
+            return python_module_root__my__namespacing__extend__test__extend__thrift_metadata.gen_metadata_service_ExtendTestService()
     
         async def check(
             self,
@@ -100,7 +100,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return python_module_root.my.namespacing.extend.test.extend.thrift_metadata.gen_metadata_service_ExtendTestService()
+            return python_module_root__my__namespacing__extend__test__extend__thrift_metadata.gen_metadata_service_ExtendTestService()
     
         def check(
             self,

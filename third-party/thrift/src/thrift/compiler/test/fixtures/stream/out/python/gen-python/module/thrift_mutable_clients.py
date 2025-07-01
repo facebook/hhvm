@@ -27,7 +27,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Async", "PubSubStreamingService.Sync"]):
     annotations = _py_types.MappingProxyType({
@@ -47,7 +47,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_PubSubStreamingService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_PubSubStreamingService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -60,7 +60,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_PubSubStreamingService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_PubSubStreamingService()
     
         async def returnstream(
             self,
@@ -313,5 +313,5 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return module.thrift_metadata.gen_metadata_service_PubSubStreamingService()
+            return _fbthrift__module__thrift_metadata.gen_metadata_service_PubSubStreamingService()
 

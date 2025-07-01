@@ -24,7 +24,7 @@ from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
-import python_module_root.my.namespacing.test.hsmodule.thrift_metadata
+import python_module_root.my.namespacing.test.hsmodule.thrift_metadata as python_module_root__my__namespacing__test__hsmodule__thrift_metadata
 
 class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestService.Sync"]):
     annotations = _py_types.MappingProxyType({
@@ -44,7 +44,7 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return python_module_root.my.namespacing.test.hsmodule.thrift_metadata.gen_metadata_service_HsTestService()
+        return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_service_HsTestService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -57,7 +57,7 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return python_module_root.my.namespacing.test.hsmodule.thrift_metadata.gen_metadata_service_HsTestService()
+            return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_service_HsTestService()
     
         async def init(
             self,
@@ -98,7 +98,7 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return python_module_root.my.namespacing.test.hsmodule.thrift_metadata.gen_metadata_service_HsTestService()
+            return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_service_HsTestService()
     
         def init(
             self,

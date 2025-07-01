@@ -27,7 +27,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
-import test.fixtures.interactions.module.thrift_metadata
+import test.fixtures.interactions.module.thrift_metadata as _fbthrift__test__fixtures__interactions__module__thrift_metadata
 import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
 import test.fixtures.another_interactions.shared.thrift_mutable_clients
 
@@ -49,7 +49,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -62,7 +62,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
     
         async def foo(
             self,
@@ -203,7 +203,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
     
         def foo(
             self,
@@ -236,7 +236,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -249,7 +249,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteraction()
     
         async def frobnicate(
             self,
@@ -336,7 +336,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteraction()
 
 class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteractionFast.Async", "MyService_MyInteractionFast.Sync"]):
     @staticmethod
@@ -354,7 +354,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -367,7 +367,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
     
         async def frobnicate(
             self,
@@ -451,7 +451,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
 
 class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInteraction.Async", "MyService_SerialInteraction.Sync"]):
     @staticmethod
@@ -469,7 +469,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -482,7 +482,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
     
         async def frobnicate(
             self,
@@ -517,7 +517,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
 
 
 class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
@@ -538,7 +538,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -551,7 +551,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories()
     
         async def foo(
             self,
@@ -692,7 +692,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories()
     
         def foo(
             self,
@@ -725,7 +725,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -738,7 +738,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteraction()
     
         async def frobnicate(
             self,
@@ -825,7 +825,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteraction()
 
 class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteractionFast.Async", "Factories_MyInteractionFast.Sync"]):
     @staticmethod
@@ -843,7 +843,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -856,7 +856,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
     
         async def frobnicate(
             self,
@@ -940,7 +940,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
 
 class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInteraction.Async", "Factories_SerialInteraction.Sync"]):
     @staticmethod
@@ -958,7 +958,7 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -971,7 +971,7 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
     
         async def frobnicate(
             self,
@@ -1006,7 +1006,7 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
 
 
 class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
@@ -1027,7 +1027,7 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1040,7 +1040,7 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform()
     
         async def foo(
             self,
@@ -1097,7 +1097,7 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform()
     
         def foo(
             self,
@@ -1130,7 +1130,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1143,7 +1143,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteraction()
     
         async def frobnicate(
             self,
@@ -1230,7 +1230,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteraction()
 
 class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFast.Async", "Perform_MyInteractionFast.Sync"]):
     @staticmethod
@@ -1248,7 +1248,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1261,7 +1261,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
     
         async def frobnicate(
             self,
@@ -1345,7 +1345,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
 
 class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteraction.Async", "Perform_SerialInteraction.Sync"]):
     @staticmethod
@@ -1363,7 +1363,7 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1376,7 +1376,7 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
     
         async def frobnicate(
             self,
@@ -1411,7 +1411,7 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
 
 
 class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "InteractWithShared.Sync"]):
@@ -1432,7 +1432,7 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1445,7 +1445,7 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared()
     
         async def do_some_similar_things(
             self,
@@ -1501,7 +1501,7 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared()
     
         def do_some_similar_things(
             self,
@@ -1541,7 +1541,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1554,7 +1554,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
     
         async def frobnicate(
             self,
@@ -1641,7 +1641,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
 
 class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWithShared_SharedInteraction.Async", "InteractWithShared_SharedInteraction.Sync"]):
     @staticmethod
@@ -1659,7 +1659,7 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1672,7 +1672,7 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
     
         async def init(
             self,
@@ -1761,7 +1761,7 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
 
 
 class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"]):
@@ -1782,7 +1782,7 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1795,7 +1795,7 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService()
     
         async def getABoxSession(
             self,
@@ -1849,7 +1849,7 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService()
 
 class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInteraction.Async", "BoxService_BoxedInteraction.Sync"]):
     @staticmethod
@@ -1867,7 +1867,7 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -1880,7 +1880,7 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
     
         async def getABox(
             self,
@@ -1922,5 +1922,5 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
+            return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
 

@@ -24,7 +24,7 @@ from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import a.thrift_types as _fbthrift__a__thrift_types
-import a.thrift_metadata
+import a.thrift_metadata as _fbthrift__a__thrift_metadata
 import b.thrift_types as _fbthrift__b__thrift_types
 import c.thrift_types as _fbthrift__c__thrift_types
 import three
@@ -52,7 +52,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return a.thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__a__thrift_metadata.gen_metadata_service_MyService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -65,7 +65,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return a.thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__a__thrift_metadata.gen_metadata_service_MyService()
     
         async def adapted_return(
             self,
@@ -123,7 +123,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return a.thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__a__thrift_metadata.gen_metadata_service_MyService()
     
         def adapted_return(
             self,

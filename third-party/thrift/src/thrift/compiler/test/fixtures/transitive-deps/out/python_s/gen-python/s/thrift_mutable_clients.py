@@ -27,7 +27,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import s.thrift_mutable_types as _fbthrift__s__thrift_mutable_types
-import s.thrift_metadata
+import s.thrift_metadata as _fbthrift__s__thrift_metadata
 import b.thrift_mutable_types as _fbthrift__b__thrift_mutable_types
 import c.thrift_mutable_types as _fbthrift__c__thrift_mutable_types
 
@@ -49,7 +49,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return s.thrift_metadata.gen_metadata_service_TestService()
+        return _fbthrift__s__thrift_metadata.gen_metadata_service_TestService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -62,7 +62,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return s.thrift_metadata.gen_metadata_service_TestService()
+            return _fbthrift__s__thrift_metadata.gen_metadata_service_TestService()
     
         async def test(
             self,
@@ -98,7 +98,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return s.thrift_metadata.gen_metadata_service_TestService()
+            return _fbthrift__s__thrift_metadata.gen_metadata_service_TestService()
     
         def test(
             self,

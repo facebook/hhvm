@@ -24,7 +24,7 @@ from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import meta.example.thrift.service.thrift_types as _fbthrift__meta__example__thrift__service__thrift_types
-import meta.example.thrift.service.thrift_metadata
+import meta.example.thrift.service.thrift_metadata as _fbthrift__meta__example__thrift__service__thrift_metadata
 import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
 import test.fixtures.basic.module.thrift_clients
 
@@ -46,7 +46,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_EchoService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_EchoService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -59,7 +59,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_EchoService()
+            return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_EchoService()
     
         async def echo(
             self,
@@ -103,7 +103,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_EchoService()
+            return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_EchoService()
     
         def echo(
             self,
@@ -150,7 +150,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedEchoService()
     
     class Async(EchoService.Async):
         @staticmethod
@@ -163,7 +163,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+            return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedEchoService()
     
         async def echo_2(
             self,
@@ -207,7 +207,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+            return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedEchoService()
     
         def echo_2(
             self,
@@ -254,7 +254,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedMyService()
     
     class Async(test.fixtures.basic.module.thrift_clients.MyService.Async):
         @staticmethod
@@ -267,7 +267,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+            return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedMyService()
     
         async def putDataById_2(
             self,
@@ -303,7 +303,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+            return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedMyService()
     
         def putDataById_2(
             self,

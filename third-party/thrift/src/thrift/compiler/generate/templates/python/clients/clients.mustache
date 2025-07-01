@@ -41,7 +41,7 @@ import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutabl
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
 import {{program:base_library_package}}.types as _fbthrift_python_types
 import {{program:module_path}}.{{> types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}
-import {{program:module_path}}.thrift_metadata
+import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
 {{#program:include_namespaces}}
 {{#has_types?}}
 import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}

@@ -38,12 +38,12 @@ def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str,
 {{^service:interaction?}}
 @staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-    return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+    return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
 {{/service:interaction?}}
 {{#service:interaction?}}
 @staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-    return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
+    return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
 {{/service:interaction?}}
 
 class Async({{#service:extends}}{{!
@@ -63,12 +63,12 @@ class Async({{#service:extends}}{{!
     {{^service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
     {{/service:interaction?}}
     {{#service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
     {{/service:interaction?}}
     {{#service:supported_functions}}
 
@@ -181,12 +181,12 @@ class Sync({{#service:extends}}{{!
     {{^service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
     {{/service:interaction?}}
     {{#service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
     {{/service:interaction?}}
     {{#service:supported_functions}}
     {{^function:async_only?}}

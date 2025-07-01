@@ -6,6 +6,7 @@
 #
 
 from __future__ import annotations
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
@@ -17,11 +18,11 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue1 = 0
     MyValue2 = 1
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyEnum"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/python_capi/MyEnum"
 
     @staticmethod
@@ -44,11 +45,11 @@ class AnnoyingEnum(_fbthrift_python_types.Enum, int):
     FOO = 1
     BAR = 2
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.AnnoyingEnum"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/python_capi/AnnoyingEnum"
 
     @staticmethod

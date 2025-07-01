@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -90,7 +92,7 @@ class FB303ServiceInterface(
 
     async def simple_rpc(
             self,
-            int_parameter: int
+            int_parameter: builtins.int
         ) -> _fbthrift__test__fixtures__basic__module__thrift_types.ReservedKeyword:
         raise NotImplementedError("async def simple_rpc is not implemented")
 
@@ -152,7 +154,7 @@ class MyServiceInterface(
 
     async def getRandomData(
             self
-        ) -> str:
+        ) -> builtins.str:
         raise NotImplementedError("async def getRandomData is not implemented")
 
     async def _fbthrift__handler_getRandomData(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -164,7 +166,7 @@ class MyServiceInterface(
 
     async def sink(
             self,
-            sink: int
+            sink: builtins.int
         ) -> None:
         raise NotImplementedError("async def sink is not implemented")
 
@@ -177,8 +179,8 @@ class MyServiceInterface(
 
     async def putDataById(
             self,
-            id: int,
-            data: str
+            id: builtins.int,
+            data: builtins.str
         ) -> None:
         raise NotImplementedError("async def putDataById is not implemented")
 
@@ -191,8 +193,8 @@ class MyServiceInterface(
 
     async def hasDataById(
             self,
-            id: int
-        ) -> bool:
+            id: builtins.int
+        ) -> builtins.bool:
         raise NotImplementedError("async def hasDataById is not implemented")
 
     async def _fbthrift__handler_hasDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -204,8 +206,8 @@ class MyServiceInterface(
 
     async def getDataById(
             self,
-            id: int
-        ) -> str:
+            id: builtins.int
+        ) -> builtins.str:
         raise NotImplementedError("async def getDataById is not implemented")
 
     async def _fbthrift__handler_getDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -217,7 +219,7 @@ class MyServiceInterface(
 
     async def deleteDataById(
             self,
-            id: int
+            id: builtins.int
         ) -> None:
         raise NotImplementedError("async def deleteDataById is not implemented")
 
@@ -230,8 +232,8 @@ class MyServiceInterface(
 
     async def lobDataById(
             self,
-            id: int,
-            data: str
+            id: builtins.int,
+            data: builtins.str
         ) -> None:
         raise NotImplementedError("async def lobDataById is not implemented")
 
@@ -242,7 +244,7 @@ class MyServiceInterface(
 
     async def invalid_return_for_hack(
             self
-        ) -> _typing.AbstractSet[float]:
+        ) -> _typing.AbstractSet[builtins.float]:
         raise NotImplementedError("async def invalid_return_for_hack is not implemented")
 
     async def _fbthrift__handler_invalid_return_for_hack(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -295,8 +297,8 @@ class DbMixedStackArgumentsInterface(
 
     async def getDataByKey0(
             self,
-            key: str
-        ) -> bytes:
+            key: builtins.str
+        ) -> builtins.bytes:
         raise NotImplementedError("async def getDataByKey0 is not implemented")
 
     async def _fbthrift__handler_getDataByKey0(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -308,8 +310,8 @@ class DbMixedStackArgumentsInterface(
 
     async def getDataByKey1(
             self,
-            key: str
-        ) -> bytes:
+            key: builtins.str
+        ) -> builtins.bytes:
         raise NotImplementedError("async def getDataByKey1 is not implemented")
 
     async def _fbthrift__handler_getDataByKey1(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

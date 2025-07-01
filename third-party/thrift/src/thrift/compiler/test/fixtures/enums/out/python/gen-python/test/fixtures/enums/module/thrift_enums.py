@@ -6,6 +6,7 @@
 #
 
 from __future__ import annotations
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
@@ -19,11 +20,11 @@ class Metasyntactic(_fbthrift_python_types.Enum, int):
     BAZ = 3
     BAX = 4
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.Metasyntactic"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/Metasyntactic"
 
     @staticmethod
@@ -50,11 +51,11 @@ class MyEnum1(_fbthrift_python_types.Enum, int):
     ME1_5 = 5
     ME1_6 = 6
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyEnum1"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyEnum1"
 
     @staticmethod
@@ -78,11 +79,11 @@ class MyEnum2(_fbthrift_python_types.Enum, int):
     ME2_1 = 1
     ME2_2 = 2
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyEnum2"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyEnum2"
 
     @staticmethod
@@ -109,11 +110,11 @@ class MyEnum3(_fbthrift_python_types.Enum, int):
     ME3_9 = 9
     ME3_10 = 10
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyEnum3"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyEnum3"
 
     @staticmethod
@@ -138,11 +139,11 @@ class MyEnum4(_fbthrift_python_types.Enum, int):
     ME4_C = 2147483647
     ME4_D = -2147483648
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyEnum4"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyEnum4"
 
     @staticmethod
@@ -166,11 +167,11 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     TWO = 2
     FOUR = 4
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyBitmaskEnum1"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyBitmaskEnum1"
 
     @staticmethod
@@ -194,11 +195,11 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     TWO = 2
     FOUR = 4
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyBitmaskEnum2"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyBitmaskEnum2"
 
     @staticmethod

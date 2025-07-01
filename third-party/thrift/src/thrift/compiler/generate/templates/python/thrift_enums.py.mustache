@@ -18,6 +18,7 @@
 Generated Python enums for Thrift types
 }}
 {{> common/auto_generated_py}}
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import {{program:base_library_package}}.types as _fbthrift_python_types
@@ -37,11 +38,11 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     {{enum_value:py_name}} = {{enum_value:value}}
     {{/enum:values}}
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "{{program:name}}.{{enum:name}}"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return {{#enum:thrift_uri}}"{{enum:thrift_uri}}"{{/enum:thrift_uri}}{{!
             }}{{^enum:thrift_uri}}None{{/enum:thrift_uri}}
 

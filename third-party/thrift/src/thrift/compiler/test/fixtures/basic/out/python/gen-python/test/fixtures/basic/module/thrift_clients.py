@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -139,7 +141,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
         async def simple_rpc(
             self,
-            int_parameter: int,
+            int_parameter: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift__test__fixtures__basic__module__thrift_types.ReservedKeyword:
@@ -180,7 +182,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
         def simple_rpc(
             self,
-            int_parameter: int,
+            int_parameter: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift__test__fixtures__basic__module__thrift_types.ReservedKeyword:
@@ -254,7 +256,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "getRandomData",
@@ -274,7 +276,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def sink(
             self,
-            sink: int,
+            sink: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -291,8 +293,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def putDataById(
             self,
-            id: int,
-            data: str,
+            id: builtins.int,
+            data: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -310,10 +312,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def hasDataById(
             self,
-            id: int,
+            id: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "hasDataById",
@@ -334,10 +336,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def getDataById(
             self,
-            id: int,
+            id: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "getDataById",
@@ -358,7 +360,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def deleteDataById(
             self,
-            id: int,
+            id: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -375,8 +377,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def lobDataById(
             self,
-            id: int,
-            data: str,
+            id: builtins.int,
+            data: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -396,7 +398,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[float]:
+        ) -> _typing.AbstractSet[builtins.float]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "invalid_return_for_hack",
@@ -482,7 +484,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "getRandomData",
@@ -501,7 +503,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def sink(
             self,
-            sink: int,
+            sink: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -517,8 +519,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def putDataById(
             self,
-            id: int,
-            data: str,
+            id: builtins.int,
+            data: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -535,10 +537,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def hasDataById(
             self,
-            id: int,
+            id: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "hasDataById",
@@ -558,10 +560,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def getDataById(
             self,
-            id: int,
+            id: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "getDataById",
@@ -581,7 +583,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def deleteDataById(
             self,
-            id: int,
+            id: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -597,8 +599,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def lobDataById(
             self,
-            id: int,
-            data: str,
+            id: builtins.int,
+            data: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -617,7 +619,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[float]:
+        ) -> _typing.AbstractSet[builtins.float]:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "invalid_return_for_hack",
@@ -684,10 +686,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         async def getDataByKey0(
             self,
-            key: str,
+            key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bytes:
+        ) -> builtins.bytes:
             _fbthrift_resp = await self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey0",
@@ -708,10 +710,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         async def getDataByKey1(
             self,
-            key: str,
+            key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bytes:
+        ) -> builtins.bytes:
             _fbthrift_resp = await self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey1",
@@ -751,10 +753,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         def getDataByKey0(
             self,
-            key: str,
+            key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bytes:
+        ) -> builtins.bytes:
             _fbthrift_resp = self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey0",
@@ -774,10 +776,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         def getDataByKey1(
             self,
-            key: str,
+            key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bytes:
+        ) -> builtins.bytes:
             _fbthrift_resp = self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey1",

@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -51,9 +53,9 @@ class SomeStruct(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def tags(self) -> _typing.AbstractSet[int]: ...
+    def tags(self) -> _typing.AbstractSet[builtins.int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_Metasyntactic, _fbthrift_Metasyntactic, _fbthrift_Metasyntactic, _typing.AbstractSet[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift_Metasyntactic, _fbthrift_Metasyntactic, _fbthrift_Metasyntactic, _typing.AbstractSet[builtins.int]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.SomeStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -81,7 +83,7 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def me1_t2(self) -> _fbthrift_MyEnum1: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyEnum2, _fbthrift_MyEnum3, _fbthrift_MyEnum1, _fbthrift_MyEnum1]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift_MyEnum2, _fbthrift_MyEnum3, _fbthrift_MyEnum1, _fbthrift_MyEnum1]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod

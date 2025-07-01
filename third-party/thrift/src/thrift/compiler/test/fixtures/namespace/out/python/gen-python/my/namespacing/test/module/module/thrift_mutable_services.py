@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -51,8 +53,8 @@ class TestServiceInterface(
 
     async def init(
             self,
-            int1: int
-        ) -> int:
+            int1: builtins.int
+        ) -> builtins.int:
         raise NotImplementedError("async def init is not implemented")
 
     async def _fbthrift__handler_init(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

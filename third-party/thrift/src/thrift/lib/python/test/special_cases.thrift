@@ -31,6 +31,12 @@ struct TestRegisterAsField {
   1: string register;
 }
 
+struct TestKeywordAsField {
+  # The presence of this field caused a failure due to
+  # the use of a property that has the same name as a keyword.
+  1: string str;
+}
+
 struct TestStruct {
   1: bool placeholder;
 }

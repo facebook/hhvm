@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -269,8 +271,8 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
         async def putDataById_2(
             self,
-            id: int,
-            data: str,
+            id: builtins.int,
+            data: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
@@ -305,8 +307,8 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
         def putDataById_2(
             self,
-            id: int,
-            data: str,
+            id: builtins.int,
+            data: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:

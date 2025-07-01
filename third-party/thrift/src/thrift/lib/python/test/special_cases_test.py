@@ -60,3 +60,12 @@ class SpecialCasesTest(unittest.TestCase):
             # defined in a manner to cause the error above.
             TestRegisterAsField,  # noqa: F401
         )
+
+    def test_field_has_same_name_as_a_keyword(self) -> None:
+        # The purpose of this is to ensure that the Python parses the imported module
+        # below, which will cause the failure below, if not implemented appropriately.
+        from thrift.python.test.special_cases.thrift_types import (  # noqa: F401
+            # Import TestKeywordAsField only to point to the thrift struct that is
+            # defined in a manner to cause the error above.
+            TestKeywordAsField,  # noqa: F401
+        )

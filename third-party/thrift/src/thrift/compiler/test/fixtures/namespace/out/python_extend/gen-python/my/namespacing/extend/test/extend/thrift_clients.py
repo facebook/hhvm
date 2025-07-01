@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -64,7 +66,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
             struct1: python_module_root__my__namespacing__test__hsmodule__thrift_types.HsFoo,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = await self._send_request(
                 "ExtendTestService",
                 "check",
@@ -105,7 +107,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
             struct1: python_module_root__my__namespacing__test__hsmodule__thrift_types.HsFoo,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = self._send_request(
                 "ExtendTestService",
                 "check",

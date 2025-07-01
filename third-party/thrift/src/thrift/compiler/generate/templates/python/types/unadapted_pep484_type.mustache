@@ -21,15 +21,7 @@ This is for pep 484 typing
 This is useful for typing call patterns since it allows python container types OR
 thrift-python specific container types.
 
-}}{{#type:bool?}}bool{{/type:bool?}}{{!
-}}{{#type:byte?}}int{{/type:byte?}}{{!
-}}{{#type:i16?}}int{{/type:i16?}}{{!
-}}{{#type:i32?}}int{{/type:i32?}}{{!
-}}{{#type:i64?}}int{{/type:i64?}}{{!
-}}{{#type:double?}}float{{/type:double?}}{{!
-}}{{#type:float?}}float{{/type:float?}}{{!
-}}{{#type:string?}}str{{/type:string?}}{{!
-}}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
+}}{{> types/unadapted_builtin_pep484_type}}{{!
 }}{{#type:struct}}{{!
     }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{^type:need_module_path?}}{{^struct:has_adapter?}}{{> private/alias_prefix}}{{/struct:has_adapter?}}{{/type:need_module_path?}}{{> structs/unadapted_name}}{{!

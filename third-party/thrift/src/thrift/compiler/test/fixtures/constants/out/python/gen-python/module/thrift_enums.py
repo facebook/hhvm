@@ -6,6 +6,7 @@
 #
 
 from __future__ import annotations
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
@@ -15,11 +16,11 @@ import typing as _std_python_typing
 
 class EmptyEnum(_fbthrift_python_types.Enum, int):
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.EmptyEnum"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod
@@ -44,11 +45,11 @@ class City(_fbthrift_python_types.Enum, int):
     SEA = 2
     LON = 3
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.City"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod
@@ -74,11 +75,11 @@ class Company(_fbthrift_python_types.Enum, int):
     INSTAGRAM = 3
     __FRIEND__FEED = 4
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.Company"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod

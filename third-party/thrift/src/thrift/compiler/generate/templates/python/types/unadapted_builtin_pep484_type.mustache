@@ -15,7 +15,17 @@
   limitations under the License.
 
 }}{{!
-`__iter__()` return type
-}}_typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
-        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
-        }}{{/struct:fields_ordered_by_id}}]]]
+
+This is for pep 484 typing for builtin types.
+
+}}{{#pragma ignore-newlines}}
+{{#type:bool?}}builtins.bool{{/type:bool?}}
+{{#type:byte?}}builtins.int{{/type:byte?}}
+{{#type:i16?}}builtins.int{{/type:i16?}}
+{{#type:i32?}}builtins.int{{/type:i32?}}
+{{#type:i64?}}builtins.int{{/type:i64?}}
+{{#type:double?}}builtins.float{{/type:double?}}
+{{#type:float?}}builtins.float{{/type:float?}}
+{{#type:string?}}builtins.str{{/type:string?}}
+{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}
+{{^type:iobuf?}}builtins.bytes{{/type:iobuf?}}{{/type:binary?}}

@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -62,10 +64,10 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
     
         async def init(
             self,
-            int1: int,
+            int1: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "HsTestService",
                 "init",
@@ -104,10 +106,10 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
     
         def init(
             self,
-            int1: int,
+            int1: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "HsTestService",
                 "init",

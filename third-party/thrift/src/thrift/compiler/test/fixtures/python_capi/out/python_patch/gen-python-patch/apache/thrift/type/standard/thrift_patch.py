@@ -44,7 +44,7 @@ class TypeUriPatch(
     pass
     @property
     def uri(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -57,7 +57,7 @@ class TypeUriPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def typeHashPrefixSha2_256(self) -> OptionalFieldPatch[
-            bytes,
+            builtins.bytes,
             BinaryPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BinaryPatch:
@@ -70,7 +70,7 @@ class TypeUriPatch(
             _fbthrift_python_types.typeinfo_binary)
     @property
     def scopedName(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -83,7 +83,7 @@ class TypeUriPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def definitionKey(self) -> OptionalFieldPatch[
-            bytes,
+            builtins.bytes,
             BinaryPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BinaryPatch:

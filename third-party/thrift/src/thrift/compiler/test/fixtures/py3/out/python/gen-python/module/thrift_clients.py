@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import __static__
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -63,7 +65,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_five",
@@ -83,10 +85,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def add_five(
             self,
-            num: int,
+            num: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "add_five",
@@ -122,11 +124,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def concat(
             self,
-            first: str,
-            second: str,
+            first: builtins.str,
+            second: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "concat",
@@ -151,7 +153,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             simple_struct: _fbthrift__module__thrift_types.SimpleStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_value",
@@ -172,10 +174,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def negate(
             self,
-            input: bool,
+            input: builtins.bool,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "negate",
@@ -196,10 +198,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def tiny(
             self,
-            input: int,
+            input: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "tiny",
@@ -220,10 +222,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def small(
             self,
-            input: int,
+            input: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "small",
@@ -244,10 +246,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def big(
             self,
-            input: int,
+            input: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "big",
@@ -268,10 +270,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def two(
             self,
-            input: float,
+            input: builtins.float,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> float:
+        ) -> builtins.float:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "two",
@@ -312,7 +314,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "unexpected_exception",
@@ -332,10 +334,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_i16_list(
             self,
-            numbers: _typing.Sequence[int],
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i16_list",
@@ -356,10 +358,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_i32_list(
             self,
-            numbers: _typing.Sequence[int],
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i32_list",
@@ -380,10 +382,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_i64_list(
             self,
-            numbers: _typing.Sequence[int],
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i64_list",
@@ -404,10 +406,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def concat_many(
             self,
-            words: _typing.Sequence[str],
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "concat_many",
@@ -431,7 +433,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             items: _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "count_structs",
@@ -452,10 +454,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_set(
             self,
-            numbers: _typing.AbstractSet[int],
+            numbers: _typing.AbstractSet[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_set",
@@ -476,11 +478,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def contains_word(
             self,
-            words: _typing.AbstractSet[str],
-            word: str,
+            words: _typing.AbstractSet[builtins.str],
+            word: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contains_word",
@@ -502,11 +504,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def get_map_value(
             self,
-            words: _typing.Mapping[str, str],
-            key: str,
+            words: _typing.Mapping[builtins.str, builtins.str],
+            key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_map_value",
@@ -528,10 +530,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def map_length(
             self,
-            items: _typing.Mapping[str, _fbthrift__module__thrift_types.SimpleStruct],
+            items: _typing.Mapping[builtins.str, _fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "map_length",
@@ -552,10 +554,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_map_values(
             self,
-            items: _typing.Mapping[str, int],
+            items: _typing.Mapping[builtins.str, builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_map_values",
@@ -579,7 +581,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "complex_sum_i32",
@@ -603,7 +605,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "repeat_name",
@@ -646,10 +648,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def fib(
             self,
-            n: int,
+            n: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Sequence[int]:
+        ) -> _typing.Sequence[builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "fib",
@@ -670,10 +672,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def unique_words(
             self,
-            words: _typing.Sequence[str],
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[str]:
+        ) -> _typing.AbstractSet[builtins.str]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "unique_words",
@@ -694,10 +696,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def words_count(
             self,
-            words: _typing.Sequence[str],
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[str, int]:
+        ) -> _typing.Mapping[builtins.str, builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "words_count",
@@ -742,11 +744,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def list_of_lists(
             self,
-            num_lists: int,
-            num_items: int,
+            num_lists: builtins.int,
+            num_items: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Sequence[_typing.Sequence[int]]:
+        ) -> _typing.Sequence[_typing.Sequence[builtins.int]]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "list_of_lists",
@@ -768,10 +770,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def word_character_frequency(
             self,
-            sentence: str,
+            sentence: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[str, _typing.Mapping[str, int]]:
+        ) -> _typing.Mapping[builtins.str, _typing.Mapping[builtins.str, builtins.int]]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "word_character_frequency",
@@ -792,10 +794,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def list_of_sets(
             self,
-            some_words: str,
+            some_words: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Sequence[_typing.AbstractSet[str]]:
+        ) -> _typing.Sequence[_typing.AbstractSet[builtins.str]]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "list_of_sets",
@@ -816,10 +818,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def nested_map_argument(
             self,
-            struct_map: _typing.Mapping[str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]],
+            struct_map: _typing.Mapping[builtins.str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "nested_map_argument",
@@ -840,10 +842,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def make_sentence(
             self,
-            word_chars: _typing.Sequence[_typing.Sequence[str]],
+            word_chars: _typing.Sequence[_typing.Sequence[builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "make_sentence",
@@ -864,10 +866,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def get_union(
             self,
-            sets: _typing.Sequence[_typing.AbstractSet[int]],
+            sets: _typing.Sequence[_typing.AbstractSet[builtins.int]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[int]:
+        ) -> _typing.AbstractSet[builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_union",
@@ -888,10 +890,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def get_keys(
             self,
-            string_map: _typing.Sequence[_typing.Mapping[str, str]],
+            string_map: _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[str]:
+        ) -> _typing.AbstractSet[builtins.str]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_keys",
@@ -912,10 +914,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def lookup_double(
             self,
-            key: int,
+            key: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> float:
+        ) -> builtins.float:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "lookup_double",
@@ -936,10 +938,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def retrieve_binary(
             self,
-            something: bytes,
+            something: builtins.bytes,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bytes:
+        ) -> builtins.bytes:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "retrieve_binary",
@@ -960,10 +962,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def contain_binary(
             self,
-            binaries: _typing.Sequence[bytes],
+            binaries: _typing.Sequence[builtins.bytes],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[bytes]:
+        ) -> _typing.AbstractSet[builtins.bytes]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contain_binary",
@@ -1159,7 +1161,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_five",
@@ -1178,10 +1180,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def add_five(
             self,
-            num: int,
+            num: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "add_five",
@@ -1215,11 +1217,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def concat(
             self,
-            first: str,
-            second: str,
+            first: builtins.str,
+            second: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "concat",
@@ -1243,7 +1245,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             simple_struct: _fbthrift__module__thrift_types.SimpleStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_value",
@@ -1263,10 +1265,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def negate(
             self,
-            input: bool,
+            input: builtins.bool,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "negate",
@@ -1286,10 +1288,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def tiny(
             self,
-            input: int,
+            input: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "tiny",
@@ -1309,10 +1311,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def small(
             self,
-            input: int,
+            input: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "small",
@@ -1332,10 +1334,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def big(
             self,
-            input: int,
+            input: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "big",
@@ -1355,10 +1357,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def two(
             self,
-            input: float,
+            input: builtins.float,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> float:
+        ) -> builtins.float:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "two",
@@ -1397,7 +1399,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "unexpected_exception",
@@ -1416,10 +1418,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_i16_list(
             self,
-            numbers: _typing.Sequence[int],
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_i16_list",
@@ -1439,10 +1441,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_i32_list(
             self,
-            numbers: _typing.Sequence[int],
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_i32_list",
@@ -1462,10 +1464,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_i64_list(
             self,
-            numbers: _typing.Sequence[int],
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_i64_list",
@@ -1485,10 +1487,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def concat_many(
             self,
-            words: _typing.Sequence[str],
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "concat_many",
@@ -1511,7 +1513,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             items: _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "count_structs",
@@ -1531,10 +1533,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_set(
             self,
-            numbers: _typing.AbstractSet[int],
+            numbers: _typing.AbstractSet[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_set",
@@ -1554,11 +1556,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def contains_word(
             self,
-            words: _typing.AbstractSet[str],
-            word: str,
+            words: _typing.AbstractSet[builtins.str],
+            word: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bool:
+        ) -> builtins.bool:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "contains_word",
@@ -1579,11 +1581,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def get_map_value(
             self,
-            words: _typing.Mapping[str, str],
-            key: str,
+            words: _typing.Mapping[builtins.str, builtins.str],
+            key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_map_value",
@@ -1604,10 +1606,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def map_length(
             self,
-            items: _typing.Mapping[str, _fbthrift__module__thrift_types.SimpleStruct],
+            items: _typing.Mapping[builtins.str, _fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "map_length",
@@ -1627,10 +1629,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_map_values(
             self,
-            items: _typing.Mapping[str, int],
+            items: _typing.Mapping[builtins.str, builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_map_values",
@@ -1653,7 +1655,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "complex_sum_i32",
@@ -1676,7 +1678,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "repeat_name",
@@ -1717,10 +1719,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def fib(
             self,
-            n: int,
+            n: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Sequence[int]:
+        ) -> _typing.Sequence[builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "fib",
@@ -1740,10 +1742,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def unique_words(
             self,
-            words: _typing.Sequence[str],
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[str]:
+        ) -> _typing.AbstractSet[builtins.str]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "unique_words",
@@ -1763,10 +1765,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def words_count(
             self,
-            words: _typing.Sequence[str],
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[str, int]:
+        ) -> _typing.Mapping[builtins.str, builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "words_count",
@@ -1809,11 +1811,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def list_of_lists(
             self,
-            num_lists: int,
-            num_items: int,
+            num_lists: builtins.int,
+            num_items: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Sequence[_typing.Sequence[int]]:
+        ) -> _typing.Sequence[_typing.Sequence[builtins.int]]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "list_of_lists",
@@ -1834,10 +1836,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def word_character_frequency(
             self,
-            sentence: str,
+            sentence: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[str, _typing.Mapping[str, int]]:
+        ) -> _typing.Mapping[builtins.str, _typing.Mapping[builtins.str, builtins.int]]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "word_character_frequency",
@@ -1857,10 +1859,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def list_of_sets(
             self,
-            some_words: str,
+            some_words: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Sequence[_typing.AbstractSet[str]]:
+        ) -> _typing.Sequence[_typing.AbstractSet[builtins.str]]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "list_of_sets",
@@ -1880,10 +1882,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def nested_map_argument(
             self,
-            struct_map: _typing.Mapping[str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]],
+            struct_map: _typing.Mapping[builtins.str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "nested_map_argument",
@@ -1903,10 +1905,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def make_sentence(
             self,
-            word_chars: _typing.Sequence[_typing.Sequence[str]],
+            word_chars: _typing.Sequence[_typing.Sequence[builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "make_sentence",
@@ -1926,10 +1928,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def get_union(
             self,
-            sets: _typing.Sequence[_typing.AbstractSet[int]],
+            sets: _typing.Sequence[_typing.AbstractSet[builtins.int]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[int]:
+        ) -> _typing.AbstractSet[builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_union",
@@ -1949,10 +1951,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def get_keys(
             self,
-            string_map: _typing.Sequence[_typing.Mapping[str, str]],
+            string_map: _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[str]:
+        ) -> _typing.AbstractSet[builtins.str]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_keys",
@@ -1972,10 +1974,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def lookup_double(
             self,
-            key: int,
+            key: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> float:
+        ) -> builtins.float:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "lookup_double",
@@ -1995,10 +1997,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def retrieve_binary(
             self,
-            something: bytes,
+            something: builtins.bytes,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> bytes:
+        ) -> builtins.bytes:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "retrieve_binary",
@@ -2018,10 +2020,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def contain_binary(
             self,
-            binaries: _typing.Sequence[bytes],
+            binaries: _typing.Sequence[builtins.bytes],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AbstractSet[bytes]:
+        ) -> _typing.AbstractSet[builtins.bytes]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "contain_binary",
@@ -2145,7 +2147,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "DerivedService",
                 "get_six",
@@ -2188,7 +2190,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "DerivedService",
                 "get_six",
@@ -2243,7 +2245,7 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "RederivedService",
                 "get_seven",
@@ -2286,7 +2288,7 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "RederivedService",
                 "get_seven",

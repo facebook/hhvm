@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 
 import folly.iobuf as _fbthrift_iobuf

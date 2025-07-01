@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import __static__
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -93,7 +95,7 @@ class SimpleServiceInterface(
 
     async def get_five(
             self
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def get_five is not implemented")
 
     async def _fbthrift__handler_get_five(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -105,8 +107,8 @@ class SimpleServiceInterface(
 
     async def add_five(
             self,
-            num: int
-        ) -> int:
+            num: builtins.int
+        ) -> builtins.int:
         raise NotImplementedError("async def add_five is not implemented")
 
     async def _fbthrift__handler_add_five(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -130,9 +132,9 @@ class SimpleServiceInterface(
 
     async def concat(
             self,
-            first: str,
-            second: str
-        ) -> str:
+            first: builtins.str,
+            second: builtins.str
+        ) -> builtins.str:
         raise NotImplementedError("async def concat is not implemented")
 
     async def _fbthrift__handler_concat(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -145,7 +147,7 @@ class SimpleServiceInterface(
     async def get_value(
             self,
             simple_struct: _fbthrift__module__thrift_types.SimpleStruct
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def get_value is not implemented")
 
     async def _fbthrift__handler_get_value(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -157,8 +159,8 @@ class SimpleServiceInterface(
 
     async def negate(
             self,
-            input: bool
-        ) -> bool:
+            input: builtins.bool
+        ) -> builtins.bool:
         raise NotImplementedError("async def negate is not implemented")
 
     async def _fbthrift__handler_negate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -170,8 +172,8 @@ class SimpleServiceInterface(
 
     async def tiny(
             self,
-            input: int
-        ) -> int:
+            input: builtins.int
+        ) -> builtins.int:
         raise NotImplementedError("async def tiny is not implemented")
 
     async def _fbthrift__handler_tiny(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -183,8 +185,8 @@ class SimpleServiceInterface(
 
     async def small(
             self,
-            input: int
-        ) -> int:
+            input: builtins.int
+        ) -> builtins.int:
         raise NotImplementedError("async def small is not implemented")
 
     async def _fbthrift__handler_small(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -196,8 +198,8 @@ class SimpleServiceInterface(
 
     async def big(
             self,
-            input: int
-        ) -> int:
+            input: builtins.int
+        ) -> builtins.int:
         raise NotImplementedError("async def big is not implemented")
 
     async def _fbthrift__handler_big(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -209,8 +211,8 @@ class SimpleServiceInterface(
 
     async def two(
             self,
-            input: float
-        ) -> float:
+            input: builtins.float
+        ) -> builtins.float:
         raise NotImplementedError("async def two is not implemented")
 
     async def _fbthrift__handler_two(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -240,7 +242,7 @@ class SimpleServiceInterface(
 
     async def unexpected_exception(
             self
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def unexpected_exception is not implemented")
 
     async def _fbthrift__handler_unexpected_exception(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -252,8 +254,8 @@ class SimpleServiceInterface(
 
     async def sum_i16_list(
             self,
-            numbers: _typing.Sequence[int]
-        ) -> int:
+            numbers: _typing.Sequence[builtins.int]
+        ) -> builtins.int:
         raise NotImplementedError("async def sum_i16_list is not implemented")
 
     async def _fbthrift__handler_sum_i16_list(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -265,8 +267,8 @@ class SimpleServiceInterface(
 
     async def sum_i32_list(
             self,
-            numbers: _typing.Sequence[int]
-        ) -> int:
+            numbers: _typing.Sequence[builtins.int]
+        ) -> builtins.int:
         raise NotImplementedError("async def sum_i32_list is not implemented")
 
     async def _fbthrift__handler_sum_i32_list(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -278,8 +280,8 @@ class SimpleServiceInterface(
 
     async def sum_i64_list(
             self,
-            numbers: _typing.Sequence[int]
-        ) -> int:
+            numbers: _typing.Sequence[builtins.int]
+        ) -> builtins.int:
         raise NotImplementedError("async def sum_i64_list is not implemented")
 
     async def _fbthrift__handler_sum_i64_list(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -291,8 +293,8 @@ class SimpleServiceInterface(
 
     async def concat_many(
             self,
-            words: _typing.Sequence[str]
-        ) -> str:
+            words: _typing.Sequence[builtins.str]
+        ) -> builtins.str:
         raise NotImplementedError("async def concat_many is not implemented")
 
     async def _fbthrift__handler_concat_many(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -305,7 +307,7 @@ class SimpleServiceInterface(
     async def count_structs(
             self,
             items: _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def count_structs is not implemented")
 
     async def _fbthrift__handler_count_structs(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -317,8 +319,8 @@ class SimpleServiceInterface(
 
     async def sum_set(
             self,
-            numbers: _typing.AbstractSet[int]
-        ) -> int:
+            numbers: _typing.AbstractSet[builtins.int]
+        ) -> builtins.int:
         raise NotImplementedError("async def sum_set is not implemented")
 
     async def _fbthrift__handler_sum_set(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -330,9 +332,9 @@ class SimpleServiceInterface(
 
     async def contains_word(
             self,
-            words: _typing.AbstractSet[str],
-            word: str
-        ) -> bool:
+            words: _typing.AbstractSet[builtins.str],
+            word: builtins.str
+        ) -> builtins.bool:
         raise NotImplementedError("async def contains_word is not implemented")
 
     async def _fbthrift__handler_contains_word(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -344,9 +346,9 @@ class SimpleServiceInterface(
 
     async def get_map_value(
             self,
-            words: _typing.Mapping[str, str],
-            key: str
-        ) -> str:
+            words: _typing.Mapping[builtins.str, builtins.str],
+            key: builtins.str
+        ) -> builtins.str:
         raise NotImplementedError("async def get_map_value is not implemented")
 
     async def _fbthrift__handler_get_map_value(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -358,8 +360,8 @@ class SimpleServiceInterface(
 
     async def map_length(
             self,
-            items: _typing.Mapping[str, _fbthrift__module__thrift_types.SimpleStruct]
-        ) -> int:
+            items: _typing.Mapping[builtins.str, _fbthrift__module__thrift_types.SimpleStruct]
+        ) -> builtins.int:
         raise NotImplementedError("async def map_length is not implemented")
 
     async def _fbthrift__handler_map_length(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -371,8 +373,8 @@ class SimpleServiceInterface(
 
     async def sum_map_values(
             self,
-            items: _typing.Mapping[str, int]
-        ) -> int:
+            items: _typing.Mapping[builtins.str, builtins.int]
+        ) -> builtins.int:
         raise NotImplementedError("async def sum_map_values is not implemented")
 
     async def _fbthrift__handler_sum_map_values(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -385,7 +387,7 @@ class SimpleServiceInterface(
     async def complex_sum_i32(
             self,
             counter: _fbthrift__module__thrift_types.ComplexStruct
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def complex_sum_i32 is not implemented")
 
     async def _fbthrift__handler_complex_sum_i32(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -398,7 +400,7 @@ class SimpleServiceInterface(
     async def repeat_name(
             self,
             counter: _fbthrift__module__thrift_types.ComplexStruct
-        ) -> str:
+        ) -> builtins.str:
         raise NotImplementedError("async def repeat_name is not implemented")
 
     async def _fbthrift__handler_repeat_name(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -422,8 +424,8 @@ class SimpleServiceInterface(
 
     async def fib(
             self,
-            n: int
-        ) -> _typing.Sequence[int]:
+            n: builtins.int
+        ) -> _typing.Sequence[builtins.int]:
         raise NotImplementedError("async def fib is not implemented")
 
     async def _fbthrift__handler_fib(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -435,8 +437,8 @@ class SimpleServiceInterface(
 
     async def unique_words(
             self,
-            words: _typing.Sequence[str]
-        ) -> _typing.AbstractSet[str]:
+            words: _typing.Sequence[builtins.str]
+        ) -> _typing.AbstractSet[builtins.str]:
         raise NotImplementedError("async def unique_words is not implemented")
 
     async def _fbthrift__handler_unique_words(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -448,8 +450,8 @@ class SimpleServiceInterface(
 
     async def words_count(
             self,
-            words: _typing.Sequence[str]
-        ) -> _typing.Mapping[str, int]:
+            words: _typing.Sequence[builtins.str]
+        ) -> _typing.Mapping[builtins.str, builtins.int]:
         raise NotImplementedError("async def words_count is not implemented")
 
     async def _fbthrift__handler_words_count(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -474,9 +476,9 @@ class SimpleServiceInterface(
 
     async def list_of_lists(
             self,
-            num_lists: int,
-            num_items: int
-        ) -> _typing.Sequence[_typing.Sequence[int]]:
+            num_lists: builtins.int,
+            num_items: builtins.int
+        ) -> _typing.Sequence[_typing.Sequence[builtins.int]]:
         raise NotImplementedError("async def list_of_lists is not implemented")
 
     async def _fbthrift__handler_list_of_lists(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -488,8 +490,8 @@ class SimpleServiceInterface(
 
     async def word_character_frequency(
             self,
-            sentence: str
-        ) -> _typing.Mapping[str, _typing.Mapping[str, int]]:
+            sentence: builtins.str
+        ) -> _typing.Mapping[builtins.str, _typing.Mapping[builtins.str, builtins.int]]:
         raise NotImplementedError("async def word_character_frequency is not implemented")
 
     async def _fbthrift__handler_word_character_frequency(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -501,8 +503,8 @@ class SimpleServiceInterface(
 
     async def list_of_sets(
             self,
-            some_words: str
-        ) -> _typing.Sequence[_typing.AbstractSet[str]]:
+            some_words: builtins.str
+        ) -> _typing.Sequence[_typing.AbstractSet[builtins.str]]:
         raise NotImplementedError("async def list_of_sets is not implemented")
 
     async def _fbthrift__handler_list_of_sets(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -514,8 +516,8 @@ class SimpleServiceInterface(
 
     async def nested_map_argument(
             self,
-            struct_map: _typing.Mapping[str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]]
-        ) -> int:
+            struct_map: _typing.Mapping[builtins.str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]]
+        ) -> builtins.int:
         raise NotImplementedError("async def nested_map_argument is not implemented")
 
     async def _fbthrift__handler_nested_map_argument(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -527,8 +529,8 @@ class SimpleServiceInterface(
 
     async def make_sentence(
             self,
-            word_chars: _typing.Sequence[_typing.Sequence[str]]
-        ) -> str:
+            word_chars: _typing.Sequence[_typing.Sequence[builtins.str]]
+        ) -> builtins.str:
         raise NotImplementedError("async def make_sentence is not implemented")
 
     async def _fbthrift__handler_make_sentence(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -540,8 +542,8 @@ class SimpleServiceInterface(
 
     async def get_union(
             self,
-            sets: _typing.Sequence[_typing.AbstractSet[int]]
-        ) -> _typing.AbstractSet[int]:
+            sets: _typing.Sequence[_typing.AbstractSet[builtins.int]]
+        ) -> _typing.AbstractSet[builtins.int]:
         raise NotImplementedError("async def get_union is not implemented")
 
     async def _fbthrift__handler_get_union(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -553,8 +555,8 @@ class SimpleServiceInterface(
 
     async def get_keys(
             self,
-            string_map: _typing.Sequence[_typing.Mapping[str, str]]
-        ) -> _typing.AbstractSet[str]:
+            string_map: _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]]
+        ) -> _typing.AbstractSet[builtins.str]:
         raise NotImplementedError("async def get_keys is not implemented")
 
     async def _fbthrift__handler_get_keys(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -566,8 +568,8 @@ class SimpleServiceInterface(
 
     async def lookup_double(
             self,
-            key: int
-        ) -> float:
+            key: builtins.int
+        ) -> builtins.float:
         raise NotImplementedError("async def lookup_double is not implemented")
 
     async def _fbthrift__handler_lookup_double(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -579,8 +581,8 @@ class SimpleServiceInterface(
 
     async def retrieve_binary(
             self,
-            something: bytes
-        ) -> bytes:
+            something: builtins.bytes
+        ) -> builtins.bytes:
         raise NotImplementedError("async def retrieve_binary is not implemented")
 
     async def _fbthrift__handler_retrieve_binary(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -592,8 +594,8 @@ class SimpleServiceInterface(
 
     async def contain_binary(
             self,
-            binaries: _typing.Sequence[bytes]
-        ) -> _typing.AbstractSet[bytes]:
+            binaries: _typing.Sequence[builtins.bytes]
+        ) -> _typing.AbstractSet[builtins.bytes]:
         raise NotImplementedError("async def contain_binary is not implemented")
 
     async def _fbthrift__handler_contain_binary(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -671,7 +673,7 @@ SimpleServiceInterface,
 
     async def get_six(
             self
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def get_six is not implemented")
 
     async def _fbthrift__handler_get_six(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -711,7 +713,7 @@ DerivedServiceInterface,
 
     async def get_seven(
             self
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def get_seven is not implemented")
 
     async def _fbthrift__handler_get_seven(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import typing as _typing
+import builtins
+
 
 import folly.iobuf as _fbthrift_iobuf
 import a.thrift_abstract_types as _fbthrift_python_abstract_types
@@ -53,7 +55,7 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
         b: _typing.Optional[typeshed_three.AdapterThreeType[_fbthrift__c__thrift_mutable_types._fbthrift_unadapted_C1]]=...,
         c: _typing.Optional[typeshed_two.AdapterTwoType[_fbthrift__c__thrift_mutable_types.C2]]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B], typeshed_three.AdapterThreeType[_fbthrift__c__thrift_mutable_types._fbthrift_unadapted_C1], typeshed_two.AdapterTwoType[_fbthrift__c__thrift_mutable_types.C2]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B], typeshed_three.AdapterThreeType[_fbthrift__c__thrift_mutable_types._fbthrift_unadapted_C1], typeshed_two.AdapterTwoType[_fbthrift__c__thrift_mutable_types.C2]]]]: ...
     def _to_python(self) -> "a.thrift_types.MyStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "a.types.MyStruct": ...  # type: ignore

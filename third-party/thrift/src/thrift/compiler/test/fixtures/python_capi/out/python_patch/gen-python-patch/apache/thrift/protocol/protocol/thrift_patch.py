@@ -59,7 +59,7 @@ class MaskedDataPatch(
     pass
     @property
     def full(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -72,10 +72,10 @@ class MaskedDataPatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def fields(self) -> OptionalFieldPatch[
-            _typing.Mapping[int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData],
-            MapPatch[int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]]:
+            _typing.Mapping[builtins.int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData],
+            MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> MaskedDataPatch:
                 return MaskedDataPatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -87,10 +87,10 @@ class MaskedDataPatch(
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData)))
     @property
     def values(self) -> OptionalFieldPatch[
-            _typing.Mapping[int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData],
-            MapPatch[int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]]:
+            _typing.Mapping[builtins.int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData],
+            MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__protocol__thrift_types.MaskedData, MaskedDataPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> MaskedDataPatch:
                 return MaskedDataPatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)

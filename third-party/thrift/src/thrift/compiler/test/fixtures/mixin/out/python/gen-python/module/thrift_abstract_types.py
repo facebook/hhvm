@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -22,9 +24,9 @@ class Mixin1(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def field1(self) -> str: ...
+    def field1(self) -> builtins.str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin1": ...  # type: ignore
     @_abc.abstractmethod
@@ -42,9 +44,9 @@ class Mixin2(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def field2(self) -> _typing.Optional[str]: ...
+    def field2(self) -> _typing.Optional[builtins.str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_Mixin1, str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift_Mixin1, builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
     @_abc.abstractmethod
@@ -58,9 +60,9 @@ class Mixin3Base(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def field3(self) -> str: ...
+    def field3(self) -> builtins.str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin3Base": ...  # type: ignore
     @_abc.abstractmethod
@@ -74,7 +76,7 @@ class Foo(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def field4(self) -> str: ...
+    def field4(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -84,7 +86,7 @@ class Foo(_abc.ABC):
     @_abc.abstractmethod
     def m3(self) -> _fbthrift_Mixin3Base: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_Mixin2, _fbthrift_Mixin3Base]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str, _fbthrift_Mixin2, _fbthrift_Mixin3Base]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
     @_abc.abstractmethod

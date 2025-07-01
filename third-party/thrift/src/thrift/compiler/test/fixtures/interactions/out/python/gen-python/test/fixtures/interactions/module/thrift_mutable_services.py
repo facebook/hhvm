@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -68,7 +70,7 @@ class MyServiceInterface(
 
     async def interact(
             self,
-            arg: int
+            arg: builtins.int
         ) -> None:
         raise NotImplementedError("async def interact is not implemented")
 
@@ -81,7 +83,7 @@ class MyServiceInterface(
 
     async def interactFast(
             self
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def interactFast is not implemented")
 
     async def _fbthrift__handler_interactFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -93,10 +95,10 @@ class MyServiceInterface(
 
     async def serialize(
             self
-        ) -> _typing.Tuple[int, _typing.Awaitable[_typing.AsyncIterator[int]] | _typing.AsyncIterator[int]]:
+        ) -> _typing.Tuple[builtins.int, _typing.Awaitable[_typing.AsyncIterator[builtins.int]] | _typing.AsyncIterator[builtins.int]]:
         raise NotImplementedError("async def serialize is not implemented")
 
-    async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+    async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[builtins.int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
             yield serialize_iobuf(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyService_serialize_result_stream(success=item), protocol)
 
@@ -156,7 +158,7 @@ class FactoriesInterface(
 
     async def interact(
             self,
-            arg: int
+            arg: builtins.int
         ) -> None:
         raise NotImplementedError("async def interact is not implemented")
 
@@ -169,7 +171,7 @@ class FactoriesInterface(
 
     async def interactFast(
             self
-        ) -> int:
+        ) -> builtins.int:
         raise NotImplementedError("async def interactFast is not implemented")
 
     async def _fbthrift__handler_interactFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -181,10 +183,10 @@ class FactoriesInterface(
 
     async def serialize(
             self
-        ) -> _typing.Tuple[int, _typing.Awaitable[_typing.AsyncIterator[int]] | _typing.AsyncIterator[int]]:
+        ) -> _typing.Tuple[builtins.int, _typing.Awaitable[_typing.AsyncIterator[builtins.int]] | _typing.AsyncIterator[builtins.int]]:
         raise NotImplementedError("async def serialize is not implemented")
 
-    async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+    async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[builtins.int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
             yield serialize_iobuf(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_Factories_serialize_result_stream(success=item), protocol)
 

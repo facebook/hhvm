@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -147,8 +149,8 @@ class ExtendedMyServiceInterface(
 
     async def putDataById_2(
             self,
-            id: int,
-            data: str
+            id: builtins.int,
+            data: builtins.str
         ) -> None:
         raise NotImplementedError("async def putDataById_2 is not implemented")
 

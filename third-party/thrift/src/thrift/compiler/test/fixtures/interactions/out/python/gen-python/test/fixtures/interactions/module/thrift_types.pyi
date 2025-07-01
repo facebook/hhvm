@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import typing as _typing
+import builtins
+
 
 import folly.iobuf as _fbthrift_iobuf
 import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_python_abstract_types
@@ -18,13 +20,13 @@ import test.fixtures.another_interactions.shared.thrift_types as _fbthrift__test
 
 
 class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.CustomException):
-    message: _typing.Final[str] = ...
+    message: _typing.Final[builtins.str] = ...
     def __init__(
         self, *,
-        message: _typing.Optional[str]=...
+        message: _typing.Optional[builtins.str]=...
     ) -> None: ...
 
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.CustomException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.interactions.module.types.CustomException": ...  # type: ignore
@@ -32,17 +34,17 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_pyth
 _fbthrift_CustomException = CustomException
 
 class ShouldBeBoxed(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.ShouldBeBoxed):
-    sessionId: _typing.Final[str] = ...
+    sessionId: _typing.Final[builtins.str] = ...
     def __init__(
         self, *,
-        sessionId: _typing.Optional[str]=...
+        sessionId: _typing.Optional[builtins.str]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        sessionId: _typing.Optional[str]=...
+        sessionId: _typing.Optional[builtins.str]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.ShouldBeBoxed": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.interactions.module.types.ShouldBeBoxed": ...  # type: ignore
@@ -76,16 +78,16 @@ class _fbthrift_MyService_foo_result(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyService_interact_args(_fbthrift_python_types.Struct):
-    arg: _typing.Final[int] = ...
+    arg: _typing.Final[builtins.int] = ...
 
     def __init__(
         self, *,
-        arg: _typing.Optional[int]=...
+        arg: _typing.Optional[builtins.int]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None, int]]]: ...
+        _typing.Union[None, builtins.int]]]: ...
 
 
 class _fbthrift_MyService_interact_result(_fbthrift_python_types.Struct):
@@ -114,16 +116,16 @@ class _fbthrift_MyService_interactFast_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyService_interactFast_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -139,29 +141,29 @@ class _fbthrift_MyService_serialize_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyService_serialize_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
-class _fbthrift_MyService_serialize_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[int]):
+class _fbthrift_MyService_serialize_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -177,17 +179,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
     ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
+        self, *, success: _typing.Optional[builtins.int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
             _fbthrift_CustomException,
         ]]]: ...
 
@@ -228,16 +230,16 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -253,16 +255,16 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
 
 
 class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -302,16 +304,16 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -366,16 +368,16 @@ class _fbthrift_Factories_foo_result(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_Factories_interact_args(_fbthrift_python_types.Struct):
-    arg: _typing.Final[int] = ...
+    arg: _typing.Final[builtins.int] = ...
 
     def __init__(
         self, *,
-        arg: _typing.Optional[int]=...
+        arg: _typing.Optional[builtins.int]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None, int]]]: ...
+        _typing.Union[None, builtins.int]]]: ...
 
 
 class _fbthrift_Factories_interact_result(_fbthrift_python_types.Struct):
@@ -404,16 +406,16 @@ class _fbthrift_Factories_interactFast_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_Factories_interactFast_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -429,29 +431,29 @@ class _fbthrift_Factories_serialize_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_Factories_serialize_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
-class _fbthrift_Factories_serialize_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[int]):
+class _fbthrift_Factories_serialize_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -467,17 +469,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
     ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
+        self, *, success: _typing.Optional[builtins.int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
             _fbthrift_CustomException,
         ]]]: ...
 
@@ -518,16 +520,16 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -543,16 +545,16 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
 
 
 class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -592,16 +594,16 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -667,17 +669,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
     ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
+        self, *, success: _typing.Optional[builtins.int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
             _fbthrift_CustomException,
         ]]]: ...
 
@@ -718,16 +720,16 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -743,16 +745,16 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
 
 
 class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 
@@ -792,16 +794,16 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -867,17 +869,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
     ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
+        self, *, success: _typing.Optional[builtins.int] = ..., _ex0__ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
             _fbthrift_CustomException,
         ]]]: ...
 
@@ -918,16 +920,16 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
-        self, *, success: _typing.Optional[bool] = ...
+        self, *, success: _typing.Optional[builtins.bool] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            bool,
+            builtins.bool,
         ]]]: ...
 
 
@@ -943,16 +945,16 @@ class _fbthrift_SharedInteraction_init_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_SharedInteraction_init_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[int]
+    success: _typing.Final[builtins.int]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ...
+        self, *, success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            int,
+            builtins.int,
         ]]]: ...
 
 

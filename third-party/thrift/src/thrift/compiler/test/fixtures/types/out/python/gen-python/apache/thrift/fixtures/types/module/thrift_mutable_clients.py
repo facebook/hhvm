@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -63,10 +65,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         async def bounce_map(
             self,
-            m: _fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            m: _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[int, str]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -88,10 +90,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         async def binary_keyed_map(
             self,
-            r: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            r: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[bytes, int]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.bytes, builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "binary_keyed_map",
@@ -132,10 +134,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         def bounce_map(
             self,
-            m: _fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            m: _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[int, str]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -156,10 +158,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         def binary_keyed_map(
             self,
-            r: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            r: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[bytes, int]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.bytes, builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "binary_keyed_map",

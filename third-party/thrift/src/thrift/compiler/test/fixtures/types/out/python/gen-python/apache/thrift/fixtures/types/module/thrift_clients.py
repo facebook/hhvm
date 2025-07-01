@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -60,10 +62,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         async def bounce_map(
             self,
-            m: _typing.Mapping[int, str],
+            m: _typing.Mapping[builtins.int, builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[int, str]:
+        ) -> _typing.Mapping[builtins.int, builtins.str]:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -84,10 +86,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         async def binary_keyed_map(
             self,
-            r: _typing.Sequence[int],
+            r: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[bytes, int]:
+        ) -> _typing.Mapping[builtins.bytes, builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "binary_keyed_map",
@@ -127,10 +129,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         def bounce_map(
             self,
-            m: _typing.Mapping[int, str],
+            m: _typing.Mapping[builtins.int, builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[int, str]:
+        ) -> _typing.Mapping[builtins.int, builtins.str]:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -150,10 +152,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         def binary_keyed_map(
             self,
-            r: _typing.Sequence[int],
+            r: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Mapping[bytes, int]:
+        ) -> _typing.Mapping[builtins.bytes, builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "binary_keyed_map",

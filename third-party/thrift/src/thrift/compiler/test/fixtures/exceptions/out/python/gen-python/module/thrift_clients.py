@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -100,7 +102,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "Raiser",
                 "get200",
@@ -122,7 +124,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "Raiser",
                 "get500",
@@ -213,7 +215,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "get200",
@@ -234,7 +236,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> str:
+        ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "get500",

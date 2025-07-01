@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -23,9 +25,9 @@ class EchoRequest(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def text(self) -> str: ...
+    def text(self) -> builtins.str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "meta.example.thrift.service.thrift_mutable_types.EchoRequest": ...  # type: ignore
     @_abc.abstractmethod
@@ -39,9 +41,9 @@ class EchoResponse(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def text(self) -> str: ...
+    def text(self) -> builtins.str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "meta.example.thrift.service.thrift_mutable_types.EchoResponse": ...  # type: ignore
     @_abc.abstractmethod
@@ -54,8 +56,8 @@ _fbthrift_EchoResponse = EchoResponse
 class WhisperException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
-    def message(self) -> str: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def message(self) -> builtins.str: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
     def _to_mutable_python(self) -> "meta.example.thrift.service.thrift_mutable_types.WhisperException": ...  # type: ignore
     def _to_python(self) -> "meta.example.thrift.service.thrift_types.WhisperException": ...  # type: ignore
     def _to_py3(self) -> "meta.example.thrift.service.types.WhisperException": ...  # type: ignore

@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import typing as _typing
+import builtins
+
 
 import folly.iobuf as _fbthrift_iobuf
 import includes.thrift_abstract_types as _fbthrift_python_abstract_types
@@ -18,20 +20,20 @@ import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 
 class Included(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Included):
-    MyIntField: _typing.Final[int] = ...
+    MyIntField: _typing.Final[builtins.int] = ...
     MyTransitiveField: _typing.Final[_fbthrift__transitive__thrift_types.Foo] = ...
     def __init__(
         self, *,
-        MyIntField: _typing.Optional[int]=...,
+        MyIntField: _typing.Optional[builtins.int]=...,
         MyTransitiveField: _typing.Optional[_fbthrift__transitive__thrift_types._fbthrift_Foo]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        MyIntField: _typing.Optional[int]=...,
+        MyIntField: _typing.Optional[builtins.int]=...,
         MyTransitiveField: _typing.Optional[_fbthrift__transitive__thrift_types._fbthrift_Foo]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift__transitive__thrift_types.Foo]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, _fbthrift__transitive__thrift_types.Foo]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "includes.thrift_mutable_types.Included": ...  # type: ignore
     def _to_py3(self) -> "includes.types.Included": ...  # type: ignore
@@ -41,7 +43,7 @@ _fbthrift_Included = Included
 
 ExampleIncluded: _fbthrift_Included = ...
 
-IncludedConstant: int = ...
+IncludedConstant: builtins.int = ...
 
-IncludedInt64 = int
+IncludedInt64 = builtins.int
 TransitiveFoo = _fbthrift__transitive__thrift_types.Foo

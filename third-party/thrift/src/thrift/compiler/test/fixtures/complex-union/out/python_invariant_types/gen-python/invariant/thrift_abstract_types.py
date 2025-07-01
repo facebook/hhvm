@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 import enum as _enum
 
@@ -24,9 +26,9 @@ class StructForInvariantTypes(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def num(self) -> int: ...
+    def num(self) -> builtins.int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "invariant.thrift_mutable_types.StructForInvariantTypes": ...  # type: ignore
     @_abc.abstractmethod
@@ -40,13 +42,13 @@ class UnionForInvariantTypes(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def num32(self) -> int: ...
+    def num32(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def num64(self) -> int: ...
+    def num64(self) -> builtins.int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "invariant.thrift_mutable_types.UnionForInvariantTypes": ...  # type: ignore
     @_abc.abstractmethod

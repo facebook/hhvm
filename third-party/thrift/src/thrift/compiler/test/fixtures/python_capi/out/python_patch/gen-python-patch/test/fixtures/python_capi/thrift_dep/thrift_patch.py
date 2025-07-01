@@ -44,7 +44,7 @@ class DepStructPatch(
     pass
     @property
     def s(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -57,7 +57,7 @@ class DepStructPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def i(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -89,7 +89,7 @@ class SomeErrorPatch(
     pass
     @property
     def msg(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:

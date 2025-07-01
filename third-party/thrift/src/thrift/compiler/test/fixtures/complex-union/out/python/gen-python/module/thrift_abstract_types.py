@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 import enum as _enum
 
@@ -24,27 +26,27 @@ class ComplexUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def intValue(self) -> int: ...
+    def intValue(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def intListValue(self) -> _typing.Sequence[int]: ...
+    def intListValue(self) -> _typing.Sequence[builtins.int]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def stringListValue(self) -> _typing.Sequence[str]: ...
+    def stringListValue(self) -> _typing.Sequence[builtins.str]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def stringValue(self) -> str: ...
+    def stringValue(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def typedefValue(self) -> _typing.Mapping[int, str]: ...
+    def typedefValue(self) -> _typing.Mapping[builtins.int, builtins.str]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def stringRef(self) -> str: ...
+    def stringRef(self) -> builtins.str: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -67,7 +69,7 @@ class ComplexUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, int, _typing.Sequence[int], _typing.Sequence[str], str, _typing.Mapping[int, str], str]: ...
+    def fbthrift_current_value(self) -> _typing.Union[None, builtins.int, _typing.Sequence[builtins.int], _typing.Sequence[builtins.str], builtins.str, _typing.Mapping[builtins.int, builtins.str], builtins.str]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -78,11 +80,11 @@ class ListUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def intListValue(self) -> _typing.Sequence[int]: ...
+    def intListValue(self) -> _typing.Sequence[builtins.int]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def stringListValue(self) -> _typing.Sequence[str]: ...
+    def stringListValue(self) -> _typing.Sequence[builtins.str]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ListUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -101,7 +103,7 @@ class ListUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, _typing.Sequence[int], _typing.Sequence[str]]: ...
+    def fbthrift_current_value(self) -> _typing.Union[None, _typing.Sequence[builtins.int], _typing.Sequence[builtins.str]]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -112,11 +114,11 @@ class DataUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def binaryData(self) -> bytes: ...
+    def binaryData(self) -> builtins.bytes: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def stringData(self) -> str: ...
+    def stringData(self) -> builtins.str: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.DataUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -135,7 +137,7 @@ class DataUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, bytes, str]: ...
+    def fbthrift_current_value(self) -> _typing.Union[None, builtins.bytes, builtins.str]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -146,17 +148,17 @@ class Val(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def strVal(self) -> str: ...
+    def strVal(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def intVal(self) -> int: ...
+    def intVal(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def typedefValue(self) -> _typing.Mapping[int, str]: ...
+    def typedefValue(self) -> _typing.Mapping[builtins.int, builtins.str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _typing.Mapping[int, str]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str, builtins.int, _typing.Mapping[builtins.int, builtins.str]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Val": ...  # type: ignore
     @_abc.abstractmethod
@@ -204,11 +206,11 @@ class VirtualComplexUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def thingOne(self) -> str: ...
+    def thingOne(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def thingTwo(self) -> str: ...
+    def thingTwo(self) -> builtins.str: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.VirtualComplexUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -227,7 +229,7 @@ class VirtualComplexUnion(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, str, str]: ...
+    def fbthrift_current_value(self) -> _typing.Union[None, builtins.str, builtins.str]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -238,9 +240,9 @@ class NonCopyableStruct(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def num(self) -> int: ...
+    def num(self) -> builtins.int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.NonCopyableStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -280,4 +282,4 @@ class NonCopyableUnion(_abc.ABC):
 
 _fbthrift_NonCopyableUnion = NonCopyableUnion
 
-containerTypedef = _typing.Mapping[int, str]
+containerTypedef = _typing.Mapping[builtins.int, builtins.str]

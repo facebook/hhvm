@@ -47,7 +47,7 @@ class ObjectPatch(
     pass
     @property
     def type(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -60,10 +60,10 @@ class ObjectPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def members(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
-            MapPatch[int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, ValuePatch]]:
+            _typing.Mapping[builtins.int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
+            MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, ValuePatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, ValuePatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, ValuePatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> ValuePatch:
                 return ValuePatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -94,7 +94,7 @@ class ValuePatch(
     pass
     @property
     def boolValue(self) -> OptionalFieldPatch[
-            bool,
+            builtins.bool,
             BoolPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BoolPatch:
@@ -107,7 +107,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_bool)
     @property
     def byteValue(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             BytePatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BytePatch:
@@ -120,7 +120,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_byte)
     @property
     def i16Value(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I16Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I16Patch:
@@ -133,7 +133,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_i16)
     @property
     def i32Value(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -146,7 +146,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_i32)
     @property
     def i64Value(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -159,7 +159,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def floatValue(self) -> OptionalFieldPatch[
-            float,
+            builtins.float,
             FloatPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> FloatPatch:
@@ -172,7 +172,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_float)
     @property
     def doubleValue(self) -> OptionalFieldPatch[
-            float,
+            builtins.float,
             DoublePatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> DoublePatch:
@@ -185,7 +185,7 @@ class ValuePatch(
             _fbthrift_python_types.typeinfo_double)
     @property
     def stringValue(self) -> OptionalFieldPatch[
-            bytes,
+            builtins.bytes,
             BinaryPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BinaryPatch:

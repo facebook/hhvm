@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -23,13 +25,13 @@ class _fbthrift_unadapted_AnnotationWithContainers(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def names(self) -> _typing.Sequence[str]: ...
+    def names(self) -> _typing.Sequence[builtins.str]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def counts(self) -> _typing.Mapping[str, int]: ...
+    def counts(self) -> _typing.Mapping[builtins.str, builtins.int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[str], _typing.Mapping[str, int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_typing.Sequence[builtins.str], _typing.Mapping[builtins.str, builtins.int]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "with_containers.thrift_mutable_types._fbthrift_unadapted_AnnotationWithContainers": ...  # type: ignore
     @_abc.abstractmethod
@@ -47,7 +49,7 @@ class _fbthrift_unadapted_MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def abc(self) -> my.AdaptedType[int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[my.AdaptedType[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[my.AdaptedType[int]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "with_containers.thrift_mutable_types._fbthrift_unadapted_MyStruct": ...  # type: ignore
     @_abc.abstractmethod

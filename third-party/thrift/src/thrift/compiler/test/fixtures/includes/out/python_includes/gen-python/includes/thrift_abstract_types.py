@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -23,13 +25,13 @@ class Included(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def MyIntField(self) -> int: ...
+    def MyIntField(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
     def MyTransitiveField(self) -> _fbthrift__transitive__thrift_abstract_types.Foo: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift__transitive__thrift_abstract_types.Foo]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, _fbthrift__transitive__thrift_abstract_types.Foo]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "includes.thrift_mutable_types.Included": ...  # type: ignore
     @_abc.abstractmethod
@@ -40,5 +42,5 @@ class Included(_abc.ABC):
     def _to_py_deprecated(self) -> "includes.ttypes.Included": ...  # type: ignore
 _fbthrift_Included = Included
 
-IncludedInt64 = int
+IncludedInt64 = builtins.int
 TransitiveFoo = _fbthrift__transitive__thrift_abstract_types.Foo

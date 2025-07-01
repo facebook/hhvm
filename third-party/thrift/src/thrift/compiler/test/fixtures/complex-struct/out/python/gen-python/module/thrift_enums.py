@@ -6,6 +6,7 @@
 #
 
 from __future__ import annotations
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
@@ -20,11 +21,11 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue4 = 4
     MyValue5 = 5
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyEnum"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod

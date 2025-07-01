@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -94,7 +96,7 @@ class RaiserInterface(
 
     async def get200(
             self
-        ) -> str:
+        ) -> builtins.str:
         raise NotImplementedError("async def get200 is not implemented")
 
     async def _fbthrift__handler_get200(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -106,7 +108,7 @@ class RaiserInterface(
 
     async def get500(
             self
-        ) -> str:
+        ) -> builtins.str:
         raise NotImplementedError("async def get500 is not implemented")
 
     async def _fbthrift__handler_get500(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

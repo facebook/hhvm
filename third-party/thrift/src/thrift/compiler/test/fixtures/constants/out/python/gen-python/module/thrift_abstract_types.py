@@ -13,6 +13,8 @@ import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins
 
+import builtins
+
 
 import enum as _enum
 
@@ -33,11 +35,11 @@ class Internship(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def weeks(self) -> int: ...
+    def weeks(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def title(self) -> str: ...
+    def title(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -45,13 +47,13 @@ class Internship(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def compensation(self) -> _typing.Optional[float]: ...
+    def compensation(self) -> _typing.Optional[builtins.float]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def school(self) -> _typing.Optional[str]: ...
+    def school(self) -> _typing.Optional[builtins.str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_Company, float, str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str, _fbthrift_Company, builtins.float, builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Internship": ...  # type: ignore
     @_abc.abstractmethod
@@ -65,13 +67,13 @@ class Range(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def min(self) -> int: ...
+    def min(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def max(self) -> int: ...
+    def max(self) -> builtins.int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Range": ...  # type: ignore
     @_abc.abstractmethod
@@ -85,13 +87,13 @@ class struct1(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def a(self) -> int: ...
+    def a(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def b(self) -> str: ...
+    def b(self) -> builtins.str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct1": ...  # type: ignore
     @_abc.abstractmethod
@@ -105,11 +107,11 @@ class struct2(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def a(self) -> int: ...
+    def a(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def b(self) -> str: ...
+    def b(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -117,9 +119,9 @@ class struct2(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def d(self) -> _typing.Sequence[int]: ...
+    def d(self) -> _typing.Sequence[builtins.int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_struct1, _typing.Sequence[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str, _fbthrift_struct1, _typing.Sequence[builtins.int]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct2": ...  # type: ignore
     @_abc.abstractmethod
@@ -133,17 +135,17 @@ class struct3(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def a(self) -> str: ...
+    def a(self) -> builtins.str: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def b(self) -> int: ...
+    def b(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
     def c(self) -> _fbthrift_struct2: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _fbthrift_struct2]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str, builtins.int, _fbthrift_struct2]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct3": ...  # type: ignore
     @_abc.abstractmethod
@@ -157,17 +159,17 @@ class struct4(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def a(self) -> int: ...
+    def a(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def b(self) -> _typing.Optional[float]: ...
+    def b(self) -> _typing.Optional[builtins.float]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def c(self) -> _typing.Optional[int]: ...
+    def c(self) -> _typing.Optional[builtins.int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, float, int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.float, builtins.int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct4": ...  # type: ignore
     @_abc.abstractmethod
@@ -181,11 +183,11 @@ class union1(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def i(self) -> int: ...
+    def i(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def d(self) -> float: ...
+    def d(self) -> builtins.float: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.union1": ...  # type: ignore
     @_abc.abstractmethod
@@ -204,7 +206,7 @@ class union1(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, int, float]: ...
+    def fbthrift_current_value(self) -> _typing.Union[None, builtins.int, builtins.float]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -215,11 +217,11 @@ class union2(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def i(self) -> int: ...
+    def i(self) -> builtins.int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def d(self) -> float: ...
+    def d(self) -> builtins.float: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -248,7 +250,7 @@ class union2(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, int, float, _fbthrift_struct1, _fbthrift_union1]: ...
+    def fbthrift_current_value(self) -> _typing.Union[None, builtins.int, builtins.float, _fbthrift_struct1, _fbthrift_union1]: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -257,6 +259,6 @@ class union2(_abc.ABC):
 _fbthrift_union2 = union2
 
 MyCompany = _fbthrift_Company
-MyStringIdentifier = str
-MyIntIdentifier = int
-MyMapIdentifier = _typing.Mapping[str, str]
+MyStringIdentifier = builtins.str
+MyIntIdentifier = builtins.int
+MyMapIdentifier = _typing.Mapping[builtins.str, builtins.str]

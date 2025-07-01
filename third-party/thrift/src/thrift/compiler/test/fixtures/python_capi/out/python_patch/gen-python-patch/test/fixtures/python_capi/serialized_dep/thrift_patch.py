@@ -44,7 +44,7 @@ class SerializedStructPatch(
     pass
     @property
     def s(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -57,7 +57,7 @@ class SerializedStructPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def i(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -70,7 +70,7 @@ class SerializedStructPatch(
             _fbthrift_python_types.typeinfo_i32)
     @property
     def os(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -83,7 +83,7 @@ class SerializedStructPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def rs(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -115,7 +115,7 @@ class SerializedUnionPatch(
     pass
     @property
     def s(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -128,7 +128,7 @@ class SerializedUnionPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def i(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -160,7 +160,7 @@ class SerializedErrorPatch(
     pass
     @property
     def msg(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -173,7 +173,7 @@ class SerializedErrorPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def os(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -186,7 +186,7 @@ class SerializedErrorPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def rs(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -218,7 +218,7 @@ class MarshalStructPatch(
     pass
     @property
     def s(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -231,7 +231,7 @@ class MarshalStructPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def i(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -244,7 +244,7 @@ class MarshalStructPatch(
             _fbthrift_python_types.typeinfo_i32)
     @property
     def os(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -257,7 +257,7 @@ class MarshalStructPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def rs(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -289,7 +289,7 @@ class MarshalUnionPatch(
     pass
     @property
     def s(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -302,7 +302,7 @@ class MarshalUnionPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def i(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -334,7 +334,7 @@ class MarshalErrorPatch(
     pass
     @property
     def msg(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -347,7 +347,7 @@ class MarshalErrorPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def os(self) -> OptionalFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -360,7 +360,7 @@ class MarshalErrorPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def rs(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:

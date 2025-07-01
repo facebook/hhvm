@@ -19,6 +19,12 @@ Generated Python classes for Thrift types
 }}
 {{> common/auto_generated_py}}
 
+{{^program:generate_immutable_types}}
+{{^program:generate_mutable_types}}
+import builtins
+
+{{/program:generate_mutable_types}}
+{{/program:generate_immutable_types}}
 import folly.iobuf as _fbthrift_iobuf
 
 {{#program:enable_abstract_types?}}

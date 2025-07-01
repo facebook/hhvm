@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -59,10 +61,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
         async def init(
             self,
-            int1: int,
+            int1: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "TestService",
                 "init",
@@ -100,10 +102,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
         def init(
             self,
-            int1: int,
+            int1: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "TestService",
                 "init",

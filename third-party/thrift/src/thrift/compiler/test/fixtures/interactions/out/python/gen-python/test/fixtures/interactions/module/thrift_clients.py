@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 import typing as _typing
 import types as _py_types
@@ -76,7 +78,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def interact(
             self,
-            arg: int,
+            arg: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> MyService_MyInteraction.Async:
@@ -100,7 +102,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[MyService_MyInteractionFast.Async, int]:
+        ) -> _typing.Tuple[MyService_MyInteractionFast.Async, builtins.int]:
             _fbthrift_interaction = self.createMyInteractionFast()
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -126,7 +128,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[MyService_SerialInteraction.Async, int, _typing.AsyncGenerator[int, None]]:
+        ) -> _typing.Tuple[MyService_SerialInteraction.Async, builtins.int, _typing.AsyncGenerator[builtins.int, None]]:
             _fbthrift_interaction = self.createSerialInteraction()
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -245,7 +247,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.frobnicate",
@@ -289,7 +291,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.truthify",
@@ -360,7 +362,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.frobnicate",
@@ -401,7 +403,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.truthify",
@@ -553,7 +555,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
     
         async def interact(
             self,
-            arg: int,
+            arg: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> Factories_MyInteraction.Async:
@@ -577,7 +579,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[Factories_MyInteractionFast.Async, int]:
+        ) -> _typing.Tuple[Factories_MyInteractionFast.Async, builtins.int]:
             _fbthrift_interaction = self.createMyInteractionFast()
             _fbthrift_resp = await self._send_request(
                 "Factories",
@@ -603,7 +605,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[Factories_SerialInteraction.Async, int, _typing.AsyncGenerator[int, None]]:
+        ) -> _typing.Tuple[Factories_SerialInteraction.Async, builtins.int, _typing.AsyncGenerator[builtins.int, None]]:
             _fbthrift_interaction = self.createSerialInteraction()
             _fbthrift_resp = await self._send_request(
                 "Factories",
@@ -722,7 +724,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteraction.frobnicate",
@@ -766,7 +768,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteraction.truthify",
@@ -837,7 +839,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteractionFast.frobnicate",
@@ -878,7 +880,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteractionFast.truthify",
@@ -1118,7 +1120,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteraction.frobnicate",
@@ -1162,7 +1164,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteraction.truthify",
@@ -1233,7 +1235,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteractionFast.frobnicate",
@@ -1274,7 +1276,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteractionFast.truthify",
@@ -1520,7 +1522,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "InteractWithShared",
                 "MyInteraction.frobnicate",
@@ -1564,7 +1566,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.AsyncGenerator[bool, None]:
+        ) -> _typing.AsyncGenerator[builtins.bool, None]:
             _fbthrift_resp = await self._send_request(
                 "InteractWithShared",
                 "MyInteraction.truthify",
@@ -1635,7 +1637,7 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
+        ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "InteractWithShared",
                 "SharedInteraction.init",

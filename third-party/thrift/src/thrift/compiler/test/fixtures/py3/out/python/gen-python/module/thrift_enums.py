@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import __static__
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import fbcode.thrift.python.types as _fbthrift_python_types
@@ -22,11 +23,11 @@ class AnEnum(_fbthrift_python_types.Enum, int):
     THREE = 3
     FOUR = 4
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.AnEnum"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod
@@ -50,11 +51,11 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     value_ = 1
     renamed_ = 2
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.AnEnumRenamed"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod
@@ -79,11 +80,11 @@ class Flags(_fbthrift_python_types.Flag):
     flag_C = 4
     flag_D = 8
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.Flags"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return None
 
     @staticmethod

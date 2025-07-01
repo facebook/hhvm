@@ -62,10 +62,10 @@ class AnnotationPatch(
     pass
     @property
     def fields(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
-            MapPatch[str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]]:
+            _typing.Mapping[builtins.str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
+            MapPatch[builtins.str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch:
                 return apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -109,10 +109,10 @@ class StructuredAnnotationPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__standard__thrift_types.TypeUri))
     @property
     def fields(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
-            MapPatch[str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]]:
+            _typing.Mapping[builtins.str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
+            MapPatch[builtins.str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch:
                 return apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -143,7 +143,7 @@ class DecodedUriPatch(
     pass
     @property
     def scheme(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -156,10 +156,10 @@ class DecodedUriPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def domain(self) -> UnqualifiedFieldPatch[
-            _typing.Sequence[str],
-            ListPatch[str]]:
+            _typing.Sequence[builtins.str],
+            ListPatch[builtins.str]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[str]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.str]:
             return ListPatch(patch.as_list_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -169,10 +169,10 @@ class DecodedUriPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string))
     @property
     def path(self) -> UnqualifiedFieldPatch[
-            _typing.Sequence[str],
-            ListPatch[str]]:
+            _typing.Sequence[builtins.str],
+            ListPatch[builtins.str]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[str]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.str]:
             return ListPatch(patch.as_list_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -182,10 +182,10 @@ class DecodedUriPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string))
     @property
     def query(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, str],
-            MapPatch[str, str, StringPatch]]:
+            _typing.Mapping[builtins.str, builtins.str],
+            MapPatch[builtins.str, builtins.str, StringPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, str, StringPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, builtins.str, StringPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> StringPatch:
                 return patch.as_string_patch()
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -197,7 +197,7 @@ class DecodedUriPatch(
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string))
     @property
     def fragment(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -229,7 +229,7 @@ class DefinitionAttrsPatch(
     pass
     @property
     def name(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -242,7 +242,7 @@ class DefinitionAttrsPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def uri(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -255,10 +255,10 @@ class DefinitionAttrsPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def structuredAnnotations(self) -> UnqualifiedFieldPatch[
-            _typing.AbstractSet[int],
-            SetPatch[int]]:
+            _typing.AbstractSet[builtins.int],
+            SetPatch[builtins.int]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[int]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[builtins.int]:
             return SetPatch(patch.as_set_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -268,10 +268,10 @@ class DefinitionAttrsPatch(
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64))
     @property
     def unstructuredAnnotations(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, str],
-            MapPatch[str, str, StringPatch]]:
+            _typing.Mapping[builtins.str, builtins.str],
+            MapPatch[builtins.str, builtins.str, StringPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, str, StringPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, builtins.str, StringPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> StringPatch:
                 return patch.as_string_patch()
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -309,10 +309,10 @@ class DefinitionAttrsPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.SourceRange))
     @property
     def annotations(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation],
-            MapPatch[str, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]]:
+            _typing.Mapping[builtins.str, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation],
+            MapPatch[builtins.str, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> AnnotationPatch:
                 return AnnotationPatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -324,10 +324,10 @@ class DefinitionAttrsPatch(
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.Annotation)))
     @property
     def annotationsByKey(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation],
-            MapPatch[bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]]:
+            _typing.Mapping[builtins.bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation],
+            MapPatch[builtins.bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Annotation, AnnotationPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> AnnotationPatch:
                 return AnnotationPatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -358,7 +358,7 @@ class SourceRangePatch(
     pass
     @property
     def programId(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -371,7 +371,7 @@ class SourceRangePatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def beginLine(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -384,7 +384,7 @@ class SourceRangePatch(
             _fbthrift_python_types.typeinfo_i32)
     @property
     def beginColumn(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -397,7 +397,7 @@ class SourceRangePatch(
             _fbthrift_python_types.typeinfo_i32)
     @property
     def endLine(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -410,7 +410,7 @@ class SourceRangePatch(
             _fbthrift_python_types.typeinfo_i32)
     @property
     def endColumn(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -442,7 +442,7 @@ class DocBlockPatch(
     pass
     @property
     def contents(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -532,7 +532,7 @@ class EnumValuePatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.DefinitionAttrs))
     @property
     def value(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -609,7 +609,7 @@ class FieldPatch(
     pass
     @property
     def id(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I16Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I16Patch:
@@ -661,7 +661,7 @@ class FieldPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.DefinitionAttrs))
     @property
     def customDefault(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -1099,7 +1099,7 @@ class ReturnTypePatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.Sink))
     @property
     def interactionType(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -1338,7 +1338,7 @@ class ConstPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__type_rep__thrift_types.TypeStruct))
     @property
     def value(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -1551,7 +1551,7 @@ class ProgramPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.DefinitionAttrs))
     @property
     def id(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -1564,10 +1564,10 @@ class ProgramPatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def includes(self) -> UnqualifiedFieldPatch[
-            _typing.Sequence[int],
-            ListPatch[int]]:
+            _typing.Sequence[builtins.int],
+            ListPatch[builtins.int]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[int]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.int]:
             return ListPatch(patch.as_list_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -1577,10 +1577,10 @@ class ProgramPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64))
     @property
     def definitions(self) -> UnqualifiedFieldPatch[
-            _typing.Sequence[int],
-            ListPatch[int]]:
+            _typing.Sequence[builtins.int],
+            ListPatch[builtins.int]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[int]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.int]:
             return ListPatch(patch.as_list_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -1590,7 +1590,7 @@ class ProgramPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64))
     @property
     def path(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -1603,11 +1603,11 @@ class ProgramPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def languageIncludes(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, _typing.Sequence[str]],
-            MapPatch[str, _typing.Sequence[str], ListPatch[str]]]:
+            _typing.Mapping[builtins.str, _typing.Sequence[builtins.str]],
+            MapPatch[builtins.str, _typing.Sequence[builtins.str], ListPatch[builtins.str]]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, _typing.Sequence[str], ListPatch[str]]:
-            def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> ListPatch[str]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, _typing.Sequence[builtins.str], ListPatch[builtins.str]]:
+            def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.str]:
                 return ListPatch(patch.as_list_patch(), type_info)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
 
@@ -1618,10 +1618,10 @@ class ProgramPatch(
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string)))
     @property
     def namespaces(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, str],
-            MapPatch[str, str, StringPatch]]:
+            _typing.Mapping[builtins.str, builtins.str],
+            MapPatch[builtins.str, builtins.str, StringPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, str, StringPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, builtins.str, StringPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> StringPatch:
                 return patch.as_string_patch()
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -1633,10 +1633,10 @@ class ProgramPatch(
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string))
     @property
     def definitionKeys(self) -> UnqualifiedFieldPatch[
-            _typing.Sequence[bytes],
-            ListPatch[bytes]]:
+            _typing.Sequence[builtins.bytes],
+            ListPatch[builtins.bytes]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[bytes]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.bytes]:
             return ListPatch(patch.as_list_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -1691,10 +1691,10 @@ class SchemaPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value)))
     @property
     def valuesMap(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
-            MapPatch[int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]]:
+            _typing.Mapping[builtins.int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value],
+            MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.int, _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Value, apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch:
                 return apache.thrift.protocol.detail.protocol_detail.thrift_patch.ValuePatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -1719,10 +1719,10 @@ class SchemaPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.Definition)))
     @property
     def sources(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[int, _fbthrift__apache__thrift__type__schema__thrift_types.SourceInfo],
-            MapPatch[int, _fbthrift__apache__thrift__type__schema__thrift_types.SourceInfo, SourceInfoPatch]]:
+            _typing.Mapping[builtins.int, _fbthrift__apache__thrift__type__schema__thrift_types.SourceInfo],
+            MapPatch[builtins.int, _fbthrift__apache__thrift__type__schema__thrift_types.SourceInfo, SourceInfoPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[int, _fbthrift__apache__thrift__type__schema__thrift_types.SourceInfo, SourceInfoPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.int, _fbthrift__apache__thrift__type__schema__thrift_types.SourceInfo, SourceInfoPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> SourceInfoPatch:
                 return SourceInfoPatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -1760,10 +1760,10 @@ class SchemaPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.IncludeRef)))
     @property
     def definitionsMap(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Definition],
-            MapPatch[bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Definition, DefinitionPatch]]:
+            _typing.Mapping[builtins.bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Definition],
+            MapPatch[builtins.bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Definition, DefinitionPatch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Definition, DefinitionPatch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.bytes, _fbthrift__apache__thrift__type__schema__thrift_types.Definition, DefinitionPatch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> DefinitionPatch:
                 return DefinitionPatch(patch)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -1794,7 +1794,7 @@ class SourceInfoPatch(
     pass
     @property
     def fileName(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -1807,11 +1807,11 @@ class SourceInfoPatch(
             _fbthrift_python_types.typeinfo_string)
     @property
     def languageIncludes(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, _typing.Sequence[int]],
-            MapPatch[str, _typing.Sequence[int], ListPatch[int]]]:
+            _typing.Mapping[builtins.str, _typing.Sequence[builtins.int]],
+            MapPatch[builtins.str, _typing.Sequence[builtins.int], ListPatch[builtins.int]]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, _typing.Sequence[int], ListPatch[int]]:
-            def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> ListPatch[int]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, _typing.Sequence[builtins.int], ListPatch[builtins.int]]:
+            def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.int]:
                 return ListPatch(patch.as_list_patch(), type_info)
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
 
@@ -1822,10 +1822,10 @@ class SourceInfoPatch(
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64)))
     @property
     def namespaces(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, int],
-            MapPatch[str, int, I64Patch]]:
+            _typing.Mapping[builtins.str, builtins.int],
+            MapPatch[builtins.str, builtins.int, I64Patch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, int, I64Patch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, builtins.int, I64Patch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> I64Patch:
                 return patch.as_i64_patch()
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -1882,7 +1882,7 @@ class IdentifierRefPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__standard__thrift_types.TypeUri))
     @property
     def enumValue(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -1927,7 +1927,7 @@ class IncludeRefPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.SourceRange))
     @property
     def target(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:

@@ -6,6 +6,8 @@
 #
 
 from __future__ import annotations
+import builtins
+
 
 from abc import ABCMeta
 import typing as _typing
@@ -54,7 +56,7 @@ class ExtendTestServiceInterface(
     async def check(
             self,
             struct1: python_module_root__my__namespacing__test__hsmodule__thrift_mutable_types.HsFoo
-        ) -> bool:
+        ) -> builtins.bool:
         raise NotImplementedError("async def check is not implemented")
 
     async def _fbthrift__handler_check(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

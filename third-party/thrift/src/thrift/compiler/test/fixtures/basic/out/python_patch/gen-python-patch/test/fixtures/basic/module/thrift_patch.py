@@ -44,7 +44,7 @@ class MyStructPatch(
     pass
     @property
     def MyIntField(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -57,7 +57,7 @@ class MyStructPatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def MyStringField(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -96,7 +96,7 @@ class MyStructPatch(
             _fbthrift_python_types.EnumTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyEnum))
     @property
     def oneway(self) -> UnqualifiedFieldPatch[
-            bool,
+            builtins.bool,
             BoolPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BoolPatch:
@@ -109,7 +109,7 @@ class MyStructPatch(
             _fbthrift_python_types.typeinfo_bool)
     @property
     def readonly(self) -> UnqualifiedFieldPatch[
-            bool,
+            builtins.bool,
             BoolPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BoolPatch:
@@ -122,7 +122,7 @@ class MyStructPatch(
             _fbthrift_python_types.typeinfo_bool)
     @property
     def idempotent(self) -> UnqualifiedFieldPatch[
-            bool,
+            builtins.bool,
             BoolPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BoolPatch:
@@ -135,10 +135,10 @@ class MyStructPatch(
             _fbthrift_python_types.typeinfo_bool)
     @property
     def floatSet(self) -> UnqualifiedFieldPatch[
-            _typing.AbstractSet[float],
-            SetPatch[float]]:
+            _typing.AbstractSet[builtins.float],
+            SetPatch[builtins.float]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[float]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[builtins.float]:
             return SetPatch(patch.as_set_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -148,7 +148,7 @@ class MyStructPatch(
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float))
     @property
     def no_hack_codegen_field(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -180,10 +180,10 @@ class ContainersPatch(
     pass
     @property
     def I32List(self) -> UnqualifiedFieldPatch[
-            _typing.Sequence[int],
-            ListPatch[int]]:
+            _typing.Sequence[builtins.int],
+            ListPatch[builtins.int]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[int]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[builtins.int]:
             return ListPatch(patch.as_list_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -193,10 +193,10 @@ class ContainersPatch(
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32))
     @property
     def StringSet(self) -> UnqualifiedFieldPatch[
-            _typing.AbstractSet[str],
-            SetPatch[str]]:
+            _typing.AbstractSet[builtins.str],
+            SetPatch[builtins.str]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[str]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[builtins.str]:
             return SetPatch(patch.as_set_patch(), type_info)
 
         return UnqualifiedFieldPatch(
@@ -206,10 +206,10 @@ class ContainersPatch(
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string))
     @property
     def StringToI64Map(self) -> UnqualifiedFieldPatch[
-            _typing.Mapping[str, int],
-            MapPatch[str, int, I64Patch]]:
+            _typing.Mapping[builtins.str, builtins.int],
+            MapPatch[builtins.str, builtins.int, I64Patch]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[str, int, I64Patch]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> MapPatch[builtins.str, builtins.int, I64Patch]:
             def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) -> I64Patch:
                 return patch.as_i64_patch()
             return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
@@ -298,10 +298,10 @@ class MyUnionPatch(
             _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem))
     @property
     def floatSet(self) -> OptionalFieldPatch[
-            _typing.AbstractSet[float],
-            SetPatch[float]]:
+            _typing.AbstractSet[builtins.float],
+            SetPatch[builtins.float]]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[float]:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> SetPatch[builtins.float]:
             return SetPatch(patch.as_set_patch(), type_info)
 
         return OptionalFieldPatch(
@@ -330,7 +330,7 @@ class MyExceptionPatch(
     pass
     @property
     def MyIntField(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -343,7 +343,7 @@ class MyExceptionPatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def MyStringField(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -401,7 +401,7 @@ class MyExceptionWithMessagePatch(
     pass
     @property
     def MyIntField(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I64Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I64Patch:
@@ -414,7 +414,7 @@ class MyExceptionWithMessagePatch(
             _fbthrift_python_types.typeinfo_i64)
     @property
     def MyStringField(self) -> UnqualifiedFieldPatch[
-            str,
+            builtins.str,
             StringPatch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> StringPatch:
@@ -472,7 +472,7 @@ class ReservedKeywordPatch(
     pass
     @property
     def reserved_field(self) -> UnqualifiedFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:
@@ -504,7 +504,7 @@ class UnionToBeRenamedPatch(
     pass
     @property
     def reserved_field(self) -> OptionalFieldPatch[
-            int,
+            builtins.int,
             I32Patch]:
 
         def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> I32Patch:

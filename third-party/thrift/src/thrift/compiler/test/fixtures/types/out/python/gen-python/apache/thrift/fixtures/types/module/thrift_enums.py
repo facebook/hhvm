@@ -6,6 +6,7 @@
 #
 
 from __future__ import annotations
+import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
@@ -20,11 +21,11 @@ class has_bitwise_ops(_fbthrift_python_types.Enum, int):
     two = 4
     three = 8
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.has_bitwise_ops"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "apache.org/thrift/fixtures/types/has_bitwise_ops"
 
     @staticmethod
@@ -47,11 +48,11 @@ class is_unscoped(_fbthrift_python_types.Enum, int):
     hello = 0
     world = 1
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.is_unscoped"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "apache.org/thrift/fixtures/types/is_unscoped"
 
     @staticmethod
@@ -74,11 +75,11 @@ class MyForwardRefEnum(_fbthrift_python_types.Enum, int):
     ZERO = 0
     NONZERO = 12
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__() -> builtins.str:
         return "module.MyForwardRefEnum"
 
     @staticmethod
-    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "apache.org/thrift/fixtures/types/MyForwardRefEnum"
 
     @staticmethod

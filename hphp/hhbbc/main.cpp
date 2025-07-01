@@ -396,7 +396,7 @@ std::pair<WholeProgramInput, Config> load_repo(TicketExecutor& executor,
   for (size_t i = 0; i < groups.size(); ++i) {
     auto& group = groups[i];
     if (group.empty()) continue;
-    tasks.emplace_back(load(i, std::move(group)).scheduleOn(executor.sticky()));
+    tasks.emplace_back(co_withExecutor(executor.sticky(), load(i, std::move(group))));
   }
   coro::blockingWait(coro::collectAllRange(std::move(tasks)));
   return std::make_pair(std::move(inputs), std::move(config));

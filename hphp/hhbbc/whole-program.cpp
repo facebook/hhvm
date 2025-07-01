@@ -723,8 +723,8 @@ void analyze_constants(Index& index) {
         from(work)
           | move
           | map([&] (AnalysisInput&& input) {
-              return run(std::move(input), latch)
-                .scheduleOn(index.executor().sticky());
+              return co_withExecutor(index.executor().sticky(), run(std::move(input), latch)
+                );
             })
           | as<std::vector>()
       ));

@@ -12576,7 +12576,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       from(assignments)
         | move
         | map([&] (FlattenClassesWork w) {
-            return run(std::move(w)).scheduleOn(index.executor->sticky());
+            return co_withExecutor(index.executor->sticky(), run(std::move(w)));
           })
         | as<std::vector>()
     ));
@@ -15381,8 +15381,8 @@ void build_subclass_lists(IndexData& index,
         from(round)
           | move
           | map([&] (SubclassWork::Bucket&& b) {
-              return run(std::move(b), roundNum)
-                .scheduleOn(index.executor->sticky());
+              return co_withExecutor(index.executor->sticky(), run(std::move(b), roundNum)
+                );
             })
           | as<std::vector>()
       ));
@@ -16306,9 +16306,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   auto subTasks = from(aggregateBuckets)
     | move
     | map([&] (std::vector<SString>&& work) {
-        return runAggregate(
+        return co_withExecutor(index.executor->sticky(), runAggregate(
           std::move(work)
-        ).scheduleOn(index.executor->sticky());
+        ));
       })
     | as<std::vector>();
   tasks.emplace_back(
@@ -17718,7 +17718,7 @@ void make_local(IndexData& index) {
       from(buckets)
         | move
         | map([&] (std::vector<SString> chunks) {
-            return run(std::move(chunks)).scheduleOn(index.executor->sticky());
+            return co_withExecutor(index.executor->sticky(), run(std::move(chunks)));
           })
         | as<std::vector>()
     ));

@@ -229,10 +229,10 @@ TEST(Coro, TicketExecutor) {
     co_return;
   };
 
-  auto a1 = async(1, 10).scheduleOn(exec.sticky());
-  auto a2 = async(2, 20).scheduleOn(exec.sticky());
-  auto a3 = async(3, 30).scheduleOn(exec.sticky());
-  auto a4 = async(4, 40).scheduleOn(exec.sticky());
+  auto a1 =co_withExecutor(exec.sticky(),  async(1, 10));
+  auto a2 =co_withExecutor(exec.sticky(),  async(2, 20));
+  auto a3 =co_withExecutor(exec.sticky(),  async(3, 30));
+  auto a4 =co_withExecutor(exec.sticky(),  async(4, 40));
 
   EXPECT_EQ(exec.getPendingTaskCount(), 0);
 
@@ -269,9 +269,9 @@ TEST(Coro, Latch) {
   };
 
   coro::AsyncScope scope;
-  scope.add(worker(101).scheduleOn(folly::getGlobalCPUExecutor()));
-  scope.add(worker(50).scheduleOn(folly::getGlobalCPUExecutor()));
-  scope.add(worker(60).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), worker(101)));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), worker(50)));
+  scope.add(co_withExecutor(folly::getGlobalCPUExecutor(), worker(60)));
 
   coro::blockingWait(latch1.wait());
   EXPECT_EQ(sum, 211);

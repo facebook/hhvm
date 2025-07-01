@@ -62,7 +62,7 @@ template <typename T> struct CoroAsyncValue {
         co_return;
       }
     );
-    m_scope.add(std::move(work).scheduleOn(std::move(executor)));
+    m_scope.add(co_withExecutor(std::move(executor), std::move(work)));
   }
 
   ~CoroAsyncValue() {

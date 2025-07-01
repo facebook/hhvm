@@ -842,7 +842,7 @@ namespace {
       co_return;
     };
     for (auto const& d: Native::getAllBuiltinDecls()) {
-      tasks.emplace_back(declCallback(d).scheduleOn(executor.sticky()));
+      tasks.emplace_back(co_withExecutor(executor.sticky(), declCallback(d)));
     }
     co_await coro::collectAllRange(std::move(tasks));
     co_return true;

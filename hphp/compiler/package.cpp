@@ -729,7 +729,7 @@ coro::Task<bool> Package::parse(const UnitIndex& index,
     m_client.implName()
   );
 
-  co_await parseAll(callback, index).scheduleOn(m_executor.sticky());
+  co_await co_withExecutor(m_executor.sticky(), parseAll(callback, index));
   co_return !m_failed.load();
 }
 
@@ -1186,7 +1186,7 @@ coro::Task<bool> Package::index(const IndexCallback& callback) {
 
   // TODO: index systemlib. But here is too late; they have already been
   // parsed into UEs at startup, and not yet claimed.
-  co_await indexAll(callback).scheduleOn(m_executor.sticky());
+  co_await co_withExecutor(m_executor.sticky(), indexAll(callback));
   co_return !m_failed.load();
 }
 
@@ -1418,7 +1418,7 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
   std::vector<coro::TaskWithExecutor<void>> tasks;
   if (!localUEs.empty()) {
     auto task = localCallback(std::move(localUEs));
-    tasks.emplace_back(std::move(task).scheduleOn(m_executor.sticky()));
+    tasks.emplace_back(co_withExecutor(m_executor.sticky(), std::move(task)));
   }
   if (Cfg::Eval::PackageV2) {
     tasks.emplace_back(

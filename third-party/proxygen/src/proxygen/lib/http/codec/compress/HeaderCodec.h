@@ -10,11 +10,9 @@
 
 #include <folly/Expected.h>
 #include <folly/FBString.h>
-#include <memory>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/codec/compress/Header.h>
 #include <proxygen/lib/http/codec/compress/HeaderPiece.h>
-#include <vector>
 
 namespace folly {
 class IOBuf;

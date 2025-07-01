@@ -78,13 +78,13 @@ class {{> structs/unadapted_name}}({{!
     }}{{/program:generate_mutable_types}}
     def __init__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{> types/init_and_call_arg_types}}
+        }}{{#struct:fields_ordered_by_id}}{{> types/init_and_call_arg_types}}{{/struct:fields_ordered_by_id}}
     ) -> None: ...
 
     {{#struct:plain?}}
     def __call__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{> types/init_and_call_arg_types}}
+        }}{{#struct:fields_ordered_by_id}}{{> types/init_and_call_arg_types}}{{/struct:fields_ordered_by_id}}
     ) -> _typing.Self: ...
     {{/struct:plain?}}
     {{#struct:union?}}

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <proxygen/lib/http/HTTPException.h>

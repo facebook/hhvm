@@ -1108,7 +1108,7 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.150"
+version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc",
@@ -1121,11 +1121,12 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.150"
+version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc",
  "codespan-reporting",
+ "indexmap 2.9.0",
  "proc-macro2",
  "quote",
  "scratch",
@@ -1134,11 +1135,12 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "1.0.150"
+version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "clap 4.5.38",
  "codespan-reporting",
+ "indexmap 2.9.0",
  "proc-macro2",
  "quote",
  "syn 2.0.101",
@@ -1146,14 +1148,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.150"
+version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.150"
+version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
+ "indexmap 2.9.0",
  "proc-macro2",
  "quote",
  "rustversion",

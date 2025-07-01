@@ -48,7 +48,7 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
     NegotiationParameters negotiatedParams;
     negotiatedParams.compressionAlgos() = compressionAlgorithms;
     negotiatedParams.useStopTLS() = context_->getUseStopTLS();
-    negotiatedParams.useStopTLSV2_ref() =
+    negotiatedParams.useStopTLSV2() =
         context_->getUseStopTLSV2(); // Added for StopTLS V2
     ThriftParametersExt paramsExt;
     paramsExt.params = negotiatedParams;
@@ -82,7 +82,7 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
 
   bool getNegotiatedStopTLSV2() const {
     return context_->getUseStopTLSV2() && clientExtensions_.has_value() &&
-        clientExtensions_->params.useStopTLSV2_ref().value_or(false);
+        clientExtensions_->params.useStopTLSV2().value_or(false);
   }
 
  private:

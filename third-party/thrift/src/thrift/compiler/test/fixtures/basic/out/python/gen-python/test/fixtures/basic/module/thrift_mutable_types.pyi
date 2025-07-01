@@ -76,8 +76,8 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        MyDataField: _typing.Optional[MyDataItem]=...,
-        myEnum: _typing.Optional[MyEnum]=...,
+        MyDataField: _typing.Optional[_fbthrift_MyDataItem]=...,
+        myEnum: _typing.Optional[_fbthrift_MyEnum]=...,
         oneway: _typing.Optional[bool]=...,
         readonly: _typing.Optional[bool]=...,
         idempotent: _typing.Optional[bool]=...,
@@ -89,8 +89,8 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        MyDataField: _typing.Optional[MyDataItem]=...,
-        myEnum: _typing.Optional[MyEnum]=...,
+        MyDataField: _typing.Optional[_fbthrift_MyDataItem]=...,
+        myEnum: _typing.Optional[_fbthrift_MyEnum]=...,
         oneway: _typing.Optional[bool]=...,
         readonly: _typing.Optional[bool]=...,
         idempotent: _typing.Optional[bool]=...,
@@ -178,9 +178,9 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abst
 
     def __init__(
         self, *,
-        myEnum: _typing.Optional[MyEnum]=...,
-        myStruct: _typing.Optional[MyStruct]=...,
-        myDataItem: _typing.Optional[MyDataItem]=...,
+        myEnum: _typing.Optional[_fbthrift_MyEnum]=...,
+        myStruct: _typing.Optional[_fbthrift_MyStruct]=...,
+        myDataItem: _typing.Optional[_fbthrift_MyDataItem]=...,
         floatSet: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[float] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...
     ) -> None: ...
 
@@ -228,8 +228,8 @@ class MyException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fb
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        myStruct: _typing.Optional[MyStruct]=...,
-        myUnion: _typing.Optional[MyUnion]=...
+        myStruct: _typing.Optional[_fbthrift_MyStruct]=...,
+        myUnion: _typing.Optional[_fbthrift_MyUnion]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
@@ -264,8 +264,8 @@ class MyExceptionWithMessage(_fbthrift_python_mutable_exceptions.MutableGenerate
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        myStruct: _typing.Optional[MyStruct]=...,
-        myUnion: _typing.Optional[MyUnion]=...
+        myStruct: _typing.Optional[_fbthrift_MyStruct]=...,
+        myUnion: _typing.Optional[_fbthrift_MyUnion]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...

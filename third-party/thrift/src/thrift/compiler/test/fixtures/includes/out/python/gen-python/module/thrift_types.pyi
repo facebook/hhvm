@@ -23,15 +23,15 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.My
     MyIncludedInt: _typing.Final[int] = ...
     def __init__(
         self, *,
-        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_types.Included]=...,
-        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_types.Included]=...,
+        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_types._fbthrift_Included]=...,
+        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_types._fbthrift_Included]=...,
         MyIncludedInt: _typing.Optional[int]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_types.Included]=...,
-        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_types.Included]=...,
+        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_types._fbthrift_Included]=...,
+        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_types._fbthrift_Included]=...,
         MyIncludedInt: _typing.Optional[int]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift__includes__thrift_types.Included, _fbthrift__includes__thrift_types.Included, int]]]: ...

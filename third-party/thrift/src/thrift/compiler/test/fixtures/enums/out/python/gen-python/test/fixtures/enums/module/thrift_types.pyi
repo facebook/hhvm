@@ -39,17 +39,17 @@ class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.
     tags: _typing.Final[_typing.AbstractSet[int]] = ...
     def __init__(
         self, *,
-        reasonable: _typing.Optional[Metasyntactic]=...,
-        fine: _typing.Optional[Metasyntactic]=...,
-        questionable: _typing.Optional[Metasyntactic]=...,
+        reasonable: _typing.Optional[_fbthrift_Metasyntactic]=...,
+        fine: _typing.Optional[_fbthrift_Metasyntactic]=...,
+        questionable: _typing.Optional[_fbthrift_Metasyntactic]=...,
         tags: _typing.Optional[_typing.AbstractSet[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        reasonable: _typing.Optional[Metasyntactic]=...,
-        fine: _typing.Optional[Metasyntactic]=...,
-        questionable: _typing.Optional[Metasyntactic]=...,
+        reasonable: _typing.Optional[_fbthrift_Metasyntactic]=...,
+        fine: _typing.Optional[_fbthrift_Metasyntactic]=...,
+        questionable: _typing.Optional[_fbthrift_Metasyntactic]=...,
         tags: _typing.Optional[_typing.AbstractSet[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_Metasyntactic, _fbthrift_Metasyntactic, _fbthrift_Metasyntactic, _typing.AbstractSet[int]]]]: ...
@@ -66,18 +66,18 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.My
     me1_t2: _typing.Final[_fbthrift_MyEnum1] = ...
     def __init__(
         self, *,
-        me2_3: _typing.Optional[MyEnum2]=...,
-        me3_n3: _typing.Optional[MyEnum3]=...,
-        me1_t1: _typing.Optional[MyEnum1]=...,
-        me1_t2: _typing.Optional[MyEnum1]=...
+        me2_3: _typing.Optional[_fbthrift_MyEnum2]=...,
+        me3_n3: _typing.Optional[_fbthrift_MyEnum3]=...,
+        me1_t1: _typing.Optional[_fbthrift_MyEnum1]=...,
+        me1_t2: _typing.Optional[_fbthrift_MyEnum1]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        me2_3: _typing.Optional[MyEnum2]=...,
-        me3_n3: _typing.Optional[MyEnum3]=...,
-        me1_t1: _typing.Optional[MyEnum1]=...,
-        me1_t2: _typing.Optional[MyEnum1]=...
+        me2_3: _typing.Optional[_fbthrift_MyEnum2]=...,
+        me3_n3: _typing.Optional[_fbthrift_MyEnum3]=...,
+        me1_t1: _typing.Optional[_fbthrift_MyEnum1]=...,
+        me1_t2: _typing.Optional[_fbthrift_MyEnum1]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyEnum2, _fbthrift_MyEnum3, _fbthrift_MyEnum1, _fbthrift_MyEnum1]]]: ...
     def _to_python(self) -> _typing.Self: ...

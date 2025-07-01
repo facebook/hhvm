@@ -198,8 +198,8 @@ class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abs
 
     def __init__(
         self, *,
-        v1: _typing.Optional[Val]=...,
-        v2: _typing.Optional[Val]=...
+        v1: _typing.Optional[_fbthrift_Val]=...,
+        v2: _typing.Optional[_fbthrift_Val]=...
     ) -> None: ...
 
 
@@ -283,7 +283,7 @@ class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_py
 
     def __init__(
         self, *,
-        s: _typing.Optional[NonCopyableStruct]=...
+        s: _typing.Optional[_fbthrift_NonCopyableStruct]=...
     ) -> None: ...
 
 

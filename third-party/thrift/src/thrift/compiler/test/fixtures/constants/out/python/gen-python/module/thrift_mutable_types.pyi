@@ -58,7 +58,7 @@ class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
         self, *,
         weeks: _typing.Optional[int]=...,
         title: _typing.Optional[str]=...,
-        employer: _typing.Optional[Company]=...,
+        employer: _typing.Optional[_fbthrift_Company]=...,
         compensation: _typing.Optional[float]=...,
         school: _typing.Optional[str]=...
     ) -> None: ...
@@ -67,7 +67,7 @@ class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
         self, *,
         weeks: _typing.Optional[int]=...,
         title: _typing.Optional[str]=...,
-        employer: _typing.Optional[Company]=...,
+        employer: _typing.Optional[_fbthrift_Company]=...,
         compensation: _typing.Optional[float]=...,
         school: _typing.Optional[str]=...
     ) -> _typing.Self: ...
@@ -161,7 +161,7 @@ class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
         self, *,
         a: _typing.Optional[int]=...,
         b: _typing.Optional[str]=...,
-        c: _typing.Optional[struct1]=...,
+        c: _typing.Optional[_fbthrift_struct1]=...,
         d: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> None: ...
 
@@ -169,7 +169,7 @@ class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
         self, *,
         a: _typing.Optional[int]=...,
         b: _typing.Optional[str]=...,
-        c: _typing.Optional[struct1]=...,
+        c: _typing.Optional[_fbthrift_struct1]=...,
         d: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_struct1, _fbthrift_python_mutable_containers.MutableList[int]]]]: ...
@@ -199,14 +199,14 @@ class struct3(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
         self, *,
         a: _typing.Optional[str]=...,
         b: _typing.Optional[int]=...,
-        c: _typing.Optional[struct2]=...
+        c: _typing.Optional[_fbthrift_struct2]=...
     ) -> None: ...
 
     def __call__(
         self, *,
         a: _typing.Optional[str]=...,
         b: _typing.Optional[int]=...,
-        c: _typing.Optional[struct2]=...
+        c: _typing.Optional[_fbthrift_struct2]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _fbthrift_struct2]]]: ...
     def _to_python(self) -> "module.thrift_types.struct3": ...  # type: ignore
@@ -310,8 +310,8 @@ class union2(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstr
         self, *,
         i: _typing.Optional[int]=...,
         d: _typing.Optional[float]=...,
-        s: _typing.Optional[struct1]=...,
-        u: _typing.Optional[union1]=...
+        s: _typing.Optional[_fbthrift_struct1]=...,
+        u: _typing.Optional[_fbthrift_union1]=...
     ) -> None: ...
 
 

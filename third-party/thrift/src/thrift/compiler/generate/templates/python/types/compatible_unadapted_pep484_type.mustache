@@ -32,7 +32,7 @@ thrift-python specific container types.
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
     }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{struct:py_name}}{{!
+  }}{{> private/alias_prefix}}{{struct:py_name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:list?}}{{> types/sequence }}[{{!
     }}{{#type:list_elem_type}}{{> types/compatible_pep484_type}}{{/type:list_elem_type}}{{!
@@ -47,5 +47,5 @@ thrift-python specific container types.
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{enum:name}}{{!
+  }}{{> private/alias_prefix}}{{enum:name}}{{!
 }}{{/type:enum}}

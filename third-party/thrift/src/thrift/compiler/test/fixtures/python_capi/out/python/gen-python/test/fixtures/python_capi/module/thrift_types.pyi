@@ -45,8 +45,8 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.My
         self, *,
         inty: _typing.Optional[int]=...,
         stringy: _typing.Optional[str]=...,
-        myItemy: _typing.Optional[MyDataItem]=...,
-        myEnumy: _typing.Optional[MyEnum]=...,
+        myItemy: _typing.Optional[_fbthrift_MyDataItem]=...,
+        myEnumy: _typing.Optional[_fbthrift_MyEnum]=...,
         booly: _typing.Optional[bool]=...,
         floatListy: _typing.Optional[_typing.Sequence[float]]=...,
         strMappy: _typing.Optional[_typing.Mapping[bytes, str]]=...,
@@ -57,8 +57,8 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.My
         self, *,
         inty: _typing.Optional[int]=...,
         stringy: _typing.Optional[str]=...,
-        myItemy: _typing.Optional[MyDataItem]=...,
-        myEnumy: _typing.Optional[MyEnum]=...,
+        myItemy: _typing.Optional[_fbthrift_MyDataItem]=...,
+        myEnumy: _typing.Optional[_fbthrift_MyEnum]=...,
         booly: _typing.Optional[bool]=...,
         floatListy: _typing.Optional[_typing.Sequence[float]]=...,
         strMappy: _typing.Optional[_typing.Mapping[bytes, str]]=...,
@@ -191,11 +191,11 @@ class PrimitiveStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_t
         bytey: _typing.Optional[bytes]=...,
         buffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         pointbuffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
-        patched_struct: _typing.Optional[MyStruct]=...,
-        empty_struct: _typing.Optional[EmptyStruct]=...,
+        patched_struct: _typing.Optional[_fbthrift_MyStruct]=...,
+        empty_struct: _typing.Optional[_fbthrift_EmptyStruct]=...,
         fbstring: _typing.Optional[bytes]=...,
         managed_string_view: _typing.Optional[str]=...,
-        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.SomeError]=...
+        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_SomeError]=...
     ) -> None: ...
 
     def __call__(
@@ -211,11 +211,11 @@ class PrimitiveStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_t
         bytey: _typing.Optional[bytes]=...,
         buffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         pointbuffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
-        patched_struct: _typing.Optional[MyStruct]=...,
-        empty_struct: _typing.Optional[EmptyStruct]=...,
+        patched_struct: _typing.Optional[_fbthrift_MyStruct]=...,
+        empty_struct: _typing.Optional[_fbthrift_EmptyStruct]=...,
         fbstring: _typing.Optional[bytes]=...,
         managed_string_view: _typing.Optional[str]=...,
-        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.SomeError]=...
+        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_SomeError]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, str, bytes, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, _fbthrift_MyStruct, _fbthrift_EmptyStruct, bytes, str, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.SomeError]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -303,7 +303,7 @@ class SetStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.S
     setz: _typing.Final[_typing.Sequence[_typing.AbstractSet[int]]] = ...
     def __init__(
         self, *,
-        enumz: _typing.Optional[_typing.AbstractSet[MyEnum]]=...,
+        enumz: _typing.Optional[_typing.AbstractSet[_fbthrift_MyEnum]]=...,
         intz: _typing.Optional[_typing.AbstractSet[int]]=...,
         binnaz: _typing.Optional[_typing.AbstractSet[bytes]]=...,
         encoded: _typing.Optional[_typing.AbstractSet[bytes]]=...,
@@ -314,7 +314,7 @@ class SetStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.S
 
     def __call__(
         self, *,
-        enumz: _typing.Optional[_typing.AbstractSet[MyEnum]]=...,
+        enumz: _typing.Optional[_typing.AbstractSet[_fbthrift_MyEnum]]=...,
         intz: _typing.Optional[_typing.AbstractSet[int]]=...,
         binnaz: _typing.Optional[_typing.AbstractSet[bytes]]=...,
         encoded: _typing.Optional[_typing.AbstractSet[bytes]]=...,
@@ -344,7 +344,7 @@ class MapStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.M
         self, *,
         enumz: _typing.Optional[_typing.Mapping[_fbthrift_MyEnum, str]]=...,
         intz: _typing.Optional[_typing.Mapping[int, str]]=...,
-        binnaz: _typing.Optional[_typing.Mapping[bytes, PrimitiveStruct]]=...,
+        binnaz: _typing.Optional[_typing.Mapping[bytes, _fbthrift_PrimitiveStruct]]=...,
         encoded: _typing.Optional[_typing.Mapping[str, float]]=...,
         flotz: _typing.Optional[_typing.Mapping[int, float]]=...,
         map_list: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
@@ -358,7 +358,7 @@ class MapStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.M
         self, *,
         enumz: _typing.Optional[_typing.Mapping[_fbthrift_MyEnum, str]]=...,
         intz: _typing.Optional[_typing.Mapping[int, str]]=...,
-        binnaz: _typing.Optional[_typing.Mapping[bytes, PrimitiveStruct]]=...,
+        binnaz: _typing.Optional[_typing.Mapping[bytes, _fbthrift_PrimitiveStruct]]=...,
         encoded: _typing.Optional[_typing.Mapping[str, float]]=...,
         flotz: _typing.Optional[_typing.Mapping[int, float]]=...,
         map_list: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
@@ -387,30 +387,30 @@ class ComposeStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_typ
     serial_error: _typing.Final[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedError] = ...
     def __init__(
         self, *,
-        enum_: _typing.Optional[MyEnum]=...,
-        renamed_: _typing.Optional[AnnoyingEnum]=...,
-        primitive: _typing.Optional[PrimitiveStruct]=...,
-        aliased: _typing.Optional[ListStruct]=...,
-        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepEnum]=...,
-        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct]=...,
-        friends: _typing.Optional[_typing.Sequence[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct]]=...,
-        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedStruct]=...,
-        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedUnion]=...,
-        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedError]=...
+        enum_: _typing.Optional[_fbthrift_MyEnum]=...,
+        renamed_: _typing.Optional[_fbthrift_AnnoyingEnum]=...,
+        primitive: _typing.Optional[_fbthrift_PrimitiveStruct]=...,
+        aliased: _typing.Optional[_fbthrift_ListStruct]=...,
+        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_DepEnum]=...,
+        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_DepStruct]=...,
+        friends: _typing.Optional[_typing.Sequence[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_DepStruct]]=...,
+        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types._fbthrift_SerializedStruct]=...,
+        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types._fbthrift_SerializedUnion]=...,
+        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types._fbthrift_SerializedError]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        enum_: _typing.Optional[MyEnum]=...,
-        renamed_: _typing.Optional[AnnoyingEnum]=...,
-        primitive: _typing.Optional[PrimitiveStruct]=...,
-        aliased: _typing.Optional[ListStruct]=...,
-        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepEnum]=...,
-        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct]=...,
-        friends: _typing.Optional[_typing.Sequence[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct]]=...,
-        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedStruct]=...,
-        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedUnion]=...,
-        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedError]=...
+        enum_: _typing.Optional[_fbthrift_MyEnum]=...,
+        renamed_: _typing.Optional[_fbthrift_AnnoyingEnum]=...,
+        primitive: _typing.Optional[_fbthrift_PrimitiveStruct]=...,
+        aliased: _typing.Optional[_fbthrift_ListStruct]=...,
+        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_DepEnum]=...,
+        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_DepStruct]=...,
+        friends: _typing.Optional[_typing.Sequence[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types._fbthrift_DepStruct]]=...,
+        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types._fbthrift_SerializedStruct]=...,
+        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types._fbthrift_SerializedUnion]=...,
+        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types._fbthrift_SerializedError]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyEnum, _fbthrift_AnnoyingEnum, _fbthrift_PrimitiveStruct, _fbthrift_ListStruct, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepEnum, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct, _typing.Sequence[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct], _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedStruct, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedUnion, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedError]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -429,8 +429,8 @@ class Onion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.Onion)
     adapted_int: _typing.Final[int] = ...
     def __init__(
         self, *,
-        myEnum: _typing.Optional[MyEnum]=...,
-        myStruct: _typing.Optional[PrimitiveStruct]=...,
+        myEnum: _typing.Optional[_fbthrift_MyEnum]=...,
+        myStruct: _typing.Optional[_fbthrift_PrimitiveStruct]=...,
         myString: _typing.Optional[str]=...,
         intSet: _typing.Optional[_typing.AbstractSet[int]]=...,
         doubleList: _typing.Optional[_typing.Sequence[float]]=...,

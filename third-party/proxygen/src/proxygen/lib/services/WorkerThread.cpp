@@ -10,7 +10,6 @@
 
 #include <folly/io/async/EventBase.h>
 
-#include <folly/Portability.h>
 #include <folly/String.h>
 #include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/EventBaseManager.h>

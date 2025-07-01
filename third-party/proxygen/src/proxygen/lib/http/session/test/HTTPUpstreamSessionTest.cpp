@@ -59,47 +59,6 @@ class TestPriorityAdapter : public HTTPUpstreamSession::PriorityAdapter {
   HTTPMessage::HTTP2Priority loPri_{std::make_tuple(0, false, 0)};
 };
 
-namespace {
-HTTPMessage getUpgradePostRequest(uint32_t bodyLen,
-                                  const std::string& upgradeHeader,
-                                  bool expect100 = false) {
-  HTTPMessage req = getPostRequest(bodyLen);
-  req.getHeaders().set(HTTP_HEADER_UPGRADE, upgradeHeader);
-  if (expect100) {
-    req.getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
-  }
-  return req;
-}
-
-std::unique_ptr<folly::IOBuf> getResponseBuf(CodecProtocol protocol,
-                                             HTTPCodec::StreamID id,
-                                             uint32_t code,
-                                             uint32_t bodyLen,
-                                             bool include100 = false) {
-  auto egressCodec =
-      HTTPCodecFactory::getCodec(protocol, TransportDirection::DOWNSTREAM);
-  folly::IOBufQueue respBufQ{folly::IOBufQueue::cacheChainLength()};
-  egressCodec->generateSettings(respBufQ);
-  if (include100) {
-    HTTPMessage msg;
-    msg.setStatusCode(100);
-    msg.setStatusMessage("continue");
-    egressCodec->generateHeader(respBufQ, id, msg);
-  }
-  HTTPMessage resp = getResponse(code, bodyLen);
-  egressCodec->generateHeader(respBufQ, id, resp);
-  egressCodec->generatePadding(respBufQ, id, 123);
-  if (bodyLen > 0) {
-    auto buf = makeBuf(bodyLen);
-    egressCodec->generateBody(
-        respBufQ, id, std::move(buf), HTTPCodec::NoPadding, true /* eom */);
-    egressCodec->generatePadding(respBufQ, id, 42);
-  }
-  return respBufQ.move();
-}
-
-} // namespace
-
 template <class C>
 class HTTPUpstreamTest
     : public testing::Test
@@ -1522,26 +1481,6 @@ void HTTPUpstreamTest<CodecPair>::testSimpleUpgrade(
   httpSession_->destroy();
 }
 
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradeNativeH2) {
-  testSimpleUpgrade("h2c", "h2c", CodecProtocol::HTTP_2);
-}
-
-// Upgrade to h2 with a non-native proto in the list
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradeNativeUnknown) {
-  testSimpleUpgrade("blarf, h2c", "h2c", CodecProtocol::HTTP_2);
-}
-
-// Upgrade header with extra whitespace
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradeNativeWhitespace) {
-  testSimpleUpgrade("blarf, \th2c\t, xyz", "h2c", CodecProtocol::HTTP_2);
-}
-
-// Upgrade header with random junk
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradeNativeJunk) {
-  testSimpleUpgrade(
-      ",,,,   ,,\t~^%$(*&@(@$^^*(,h2c", "h2c", CodecProtocol::HTTP_2);
-}
-
 TEST_F(HTTPUpstreamSessionTest, HttpUpgrade101Unexpected) {
   InSequence dummy;
   auto handler = openTransaction();
@@ -1566,7 +1505,7 @@ TEST_F(HTTPUpstreamSessionTest, HttpUpgrade101MissingUpgrade) {
   EXPECT_CALL(*handler, _onError(_));
   handler->expectDetachTransaction();
 
-  handler->sendRequest(getUpgradeRequest("h2c"));
+  handler->sendRequest(getUpgradeRequest("test-proto"));
   readAndLoop(
       folly::to<string>("HTTP/1.1 101 Switching Protocols\r\n"
                         "\r\n"));
@@ -1581,7 +1520,7 @@ TEST_F(HTTPUpstreamSessionTest, HttpUpgrade101BogusHeader) {
   EXPECT_CALL(*handler, _onError(_));
   handler->expectDetachTransaction();
 
-  handler->sendRequest(getUpgradeRequest("h2c"));
+  handler->sendRequest(getUpgradeRequest("test-proto"));
   eventBase_.loop();
   readAndLoop(
       folly::to<string>("HTTP/1.1 101 Switching Protocols\r\n"
@@ -1589,104 +1528,6 @@ TEST_F(HTTPUpstreamSessionTest, HttpUpgrade101BogusHeader) {
                         "\r\n"));
   EXPECT_EQ(readCallback_, nullptr);
   EXPECT_TRUE(sessionDestroyed_);
-}
-
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradePost100) {
-  InSequence dummy;
-  auto handler = openTransaction();
-
-  handler->expectHeaders([](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(100, msg->getStatusCode());
-  });
-  handler->expectHeaders([](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(200, msg->getStatusCode());
-  });
-  handler->expectBody();
-  handler->expectEOM();
-  handler->expectDetachTransaction();
-
-  auto txn = handler->txn_;
-  HTTPMessage req = getUpgradePostRequest(100, "h2c", true /* 100 */);
-  txn->sendHeaders(req);
-  auto buf = makeBuf(100);
-  txn->sendBody(std::move(buf));
-  txn->sendEOM();
-  eventBase_.loop();
-  readAndLoop(
-      folly::to<string>("HTTP/1.1 100 Continue\r\n"
-                        "\r\n"
-                        "HTTP/1.1 101 Switching Protocols\r\n"
-                        "Upgrade: h2c\r\n"
-                        "\r\n"));
-  readAndLoop(
-      getResponseBuf(CodecProtocol::HTTP_2, txn->getID(), 200, 100).get());
-  httpSession_->destroy();
-}
-
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradePost100Http2) {
-  InSequence dummy;
-  auto handler = openTransaction();
-
-  handler->expectHeaders([](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(100, msg->getStatusCode());
-  });
-  handler->expectHeaders([](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(200, msg->getStatusCode());
-  });
-  handler->expectBody();
-  handler->expectEOM();
-  handler->expectDetachTransaction();
-
-  auto txn = handler->txn_;
-  HTTPMessage req = getUpgradePostRequest(100, "h2c");
-  txn->sendHeaders(req);
-  auto buf = makeBuf(100);
-  txn->sendBody(std::move(buf));
-  txn->sendEOM();
-  eventBase_.loop();
-  readAndLoop(
-      folly::to<string>("HTTP/1.1 101 Switching Protocols\r\n"
-                        "Upgrade: h2c\r\n"
-                        "\r\n"));
-  readAndLoop(
-      getResponseBuf(CodecProtocol::HTTP_2, txn->getID(), 200, 100, true)
-          .get());
-  httpSession_->destroy();
-}
-
-TEST_F(HTTPUpstreamSessionTest, HttpUpgradeOnTxn2) {
-  InSequence dummy;
-  auto handler1 = openTransaction();
-
-  handler1->expectHeaders([](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(200, msg->getStatusCode());
-  });
-  handler1->expectBody();
-  handler1->expectEOM();
-  handler1->expectDetachTransaction();
-
-  auto txn = handler1->txn_;
-  HTTPMessage req = getUpgradeRequest("h2c");
-  txn->sendHeaders(req);
-  txn->sendEOM();
-  readAndLoop(
-      "HTTP/1.1 200 Ok\r\n"
-      "Content-Length: 10\r\n"
-      "\r\n"
-      "abcdefghij");
-  eventBase_.loop();
-
-  auto handler2 = openTransaction();
-
-  txn = handler2->txn_;
-  txn->sendHeaders(req);
-  txn->sendEOM();
-
-  handler2->expectHeaders();
-  handler2->expectEOM();
-  handler2->expectDetachTransaction();
-  readAndLoop("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n");
-  httpSession_->destroy();
 }
 
 TEST_F(HTTPUpstreamSessionTest, FailedUpgradeDrainsSession) {
@@ -1721,32 +1562,6 @@ class HTTPUpstreamRecvStreamTest : public HTTPUpstreamSessionTest {
   HTTPUpstreamRecvStreamTest() : HTTPUpstreamTest({100000, 105000, 110000}) {
   }
 };
-
-TEST_F(HTTPUpstreamRecvStreamTest, UpgradeFlowControl) {
-  InSequence dummy;
-  testSimpleUpgrade("h2c", "h2c", CodecProtocol::HTTP_2);
-
-  HTTP2Codec serverCodec(TransportDirection::DOWNSTREAM);
-  NiceMock<MockHTTPCodecCallback> callbacks;
-  serverCodec.setCallback(&callbacks);
-  EXPECT_CALL(callbacks, onSettings(_))
-      .WillOnce(Invoke([this](const SettingsList& settings) {
-        if (flowControl_[0] > 0) {
-          for (const auto& setting : settings) {
-            if (setting.id == SettingsId::INITIAL_WINDOW_SIZE) {
-              EXPECT_EQ(flowControl_[0], setting.value);
-            }
-          }
-        }
-      }));
-  EXPECT_CALL(
-      callbacks,
-      onWindowUpdate(0, flowControl_[2] - serverCodec.getDefaultWindowSize()));
-  size_t initWindow = flowControl_[0] > 0 ? flowControl_[0]
-                                          : serverCodec.getDefaultWindowSize();
-  EXPECT_CALL(callbacks, onWindowUpdate(1, flowControl_[1] - initWindow));
-  parseOutput(serverCodec);
-}
 
 class NoFlushUpstreamSessionTest : public HTTPUpstreamTest<HTTP2CodecPair> {
  public:

@@ -153,8 +153,6 @@ class HTTP2Codec
 
   // HTTP2Codec specific API
 
-  static void requestUpgrade(HTTPMessage& request);
-
   static size_t generateDefaultSettings(folly::IOBufQueue& writeBuf);
 
 #ifndef NDEBUG

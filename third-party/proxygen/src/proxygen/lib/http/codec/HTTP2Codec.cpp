@@ -1662,29 +1662,6 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
       0, http2::FrameType::SETTINGS, http2::writeSettings(writeBuf, settings));
 }
 
-void HTTP2Codec::requestUpgrade(HTTPMessage& request) {
-  auto& headers = request.getHeaders();
-  headers.set(HTTP_HEADER_UPGRADE, http2::kProtocolCleartextString);
-  bool addUpgrade =
-      !request.checkForHeaderToken(HTTP_HEADER_CONNECTION, "Upgrade", false);
-  IOBufQueue writeBuf{IOBufQueue::cacheChainLength()};
-  generateDefaultSettings(writeBuf);
-  writeBuf.trimStart(http2::kFrameHeaderSize);
-  auto binarySettings = writeBuf.move()->to<std::string>();
-  headers.set(http2::kProtocolSettingsHeader,
-              folly::base64URLEncode(binarySettings));
-  bool addSettings = !request.checkForHeaderToken(
-      HTTP_HEADER_CONNECTION, http2::kProtocolSettingsHeader.c_str(), false);
-  if (addUpgrade && addSettings) {
-    headers.add(HTTP_HEADER_CONNECTION,
-                folly::to<string>("Upgrade, ", http2::kProtocolSettingsHeader));
-  } else if (addUpgrade) {
-    headers.add(HTTP_HEADER_CONNECTION, "Upgrade");
-  } else if (addSettings) {
-    headers.add(HTTP_HEADER_CONNECTION, http2::kProtocolSettingsHeader);
-  }
-}
-
 size_t HTTP2Codec::generateDefaultSettings(folly::IOBufQueue& writeBuf) {
   static HTTP2Codec defaultCodec{TransportDirection::UPSTREAM};
   return defaultCodec.generateSettings(writeBuf);

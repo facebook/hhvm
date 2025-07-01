@@ -165,9 +165,6 @@ void CurlClient::setupHeaders() {
     request_.setURL(url_.makeRelativeURL());
   }
   request_.setSecure(url_.isSecure());
-  if (h2c_) {
-    HTTP2Codec::requestUpgrade(request_);
-  }
 
   if (!request_.getHeaders().getNumberOfValues(HTTP_HEADER_USER_AGENT)) {
     request_.getHeaders().add(HTTP_HEADER_USER_AGENT, "proxygen_curl");

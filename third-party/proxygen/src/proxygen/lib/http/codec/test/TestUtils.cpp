@@ -150,10 +150,6 @@ HTTPMessage getUpgradeRequest(const std::string& upgradeHeader,
                               uint32_t bodyLen) {
   HTTPMessage req = getGetRequest();
   req.setMethod(method);
-  if (upgradeHeader.find(http2::kProtocolCleartextString) !=
-      std::string::npos) {
-    HTTP2Codec::requestUpgrade(req);
-  }
   req.getHeaders().set(HTTP_HEADER_UPGRADE, upgradeHeader);
   if (bodyLen > 0) {
     req.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH,

@@ -1362,7 +1362,7 @@ class prototype_database {
     if (casted == nullptr) {
       throw std::runtime_error(fmt::format(
           "Prototype for type '{}' is of an unexpected type.",
-          typeid(T).name()));
+          boost::core::demangle(typeid(T).name())));
     }
     return casted;
   }

@@ -128,34 +128,6 @@ void ServerRequestTask::acceptIntoResourcePool(int8_t priority) {
   detail::ServerRequestHelper::resourcePool(req_)->accept(std::move(req_));
 }
 
-std::string_view AsyncProcessor::getServiceName() {
-  return "NoServiceNameSet";
-}
-
-void AsyncProcessor::terminateInteraction(
-    int64_t, Cpp2ConnContext&, folly::EventBase&) noexcept {
-  LOG(DFATAL) << "This processor doesn't support interactions";
-}
-
-void AsyncProcessor::destroyAllInteractions(
-    Cpp2ConnContext&, folly::EventBase&) noexcept {}
-
-void AsyncProcessor::executeRequest(
-    ServerRequest&&, const AsyncProcessorFactory::MethodMetadata&) {
-  LOG(FATAL) << "Unimplemented executeRequest called";
-}
-
-void AsyncProcessor::coalesceWithServerScopedLegacyEventHandlers(
-    const apache::thrift::server::ServerConfigs& server) {
-  const auto& serverScopedEventHandlers = server.getLegacyEventHandlers();
-  if (!serverScopedEventHandlers.empty()) {
-    std::shared_lock lock{getRWMutex()};
-    for (const auto& eventHandler : serverScopedEventHandlers) {
-      addEventHandler(eventHandler);
-    }
-  }
-}
-
 void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
   if (!setUpRequestProcessing(req)) {
     return;

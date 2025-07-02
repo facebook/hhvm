@@ -1,0 +1,9 @@
+Fun qux -> Fun refQux
+SMethod C::foo -> Fun refFoo
+Type C -> Fun refBar, Fun refFoo
+Type HH\Capabilities\WriteProperty -> Fun qux,
+                                      Fun refBar,
+                                      Fun refFoo,
+                                      Fun refQux,
+                                      Type C
+Type HH\supportdyn -> Fun qux, Fun refBar, Fun refFoo, Fun refQux, Type C

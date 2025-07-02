@@ -1,1 +1,2 @@
 --dump-deps --no-builtins
+--config poly_function_pointers=true

@@ -1,4 +1,5 @@
 Fun qux -> Fun refQux
+Method C::bar -> Fun refBar
 SMethod C::foo -> Fun refFoo
 Type C -> Fun refBar, Fun refFoo
 Type HH\Capabilities\WriteProperty -> Fun qux,

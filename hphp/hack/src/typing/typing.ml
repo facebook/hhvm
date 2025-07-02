@@ -8723,7 +8723,7 @@ end = struct
       let expr = ((), pos, expr_) in
       unbound_name env class_name expr
     | Decl_entry.Found folded_class -> begin
-      match Folded_class.get_method folded_class (snd method_name) with
+      match Env.get_member true env folded_class (snd method_name) with
       | None ->
         let () =
           let err = unbound_method class_name method_name folded_class in

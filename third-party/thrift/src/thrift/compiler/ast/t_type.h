@@ -196,10 +196,6 @@ class t_type : public t_named {
   virtual bool is_struct() const { return false; }
   virtual bool is_union() const { return false; }
   virtual bool is_exception() const { return false; }
-  virtual bool is_container() const { return false; }
-  virtual bool is_list() const { return false; }
-  virtual bool is_set() const { return false; }
-  virtual bool is_map() const { return false; }
   virtual bool is_binary() const { return false; }
 
   bool is_string_or_binary() const { return is_string() || is_binary(); }

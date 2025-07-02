@@ -404,7 +404,7 @@ void t_py_generator::generate_json_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_json_struct(out, (t_struct*)type, name, prefix_json);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_json_container(out, (t_container*)type, name, prefix_json);
   } else if (type->is_enum()) {
     generate_json_enum(out, (t_enum*)type, name, prefix_json);
@@ -507,7 +507,7 @@ void t_py_generator::generate_json_container(
     const t_type* ttype,
     const string& prefix_thrift,
     const string& prefix_json) {
-  if (ttype->is_list()) {
+  if (ttype->is<t_list>()) {
     string e = tmp("_tmp_e");
     indent(out) << prefix_thrift << " = []" << endl;
 
@@ -522,7 +522,7 @@ void t_py_generator::generate_json_container(
         ")",
         prefix_json);
     indent_down();
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     string e = tmp("_tmp_e");
     indent(out) << prefix_thrift << " = set_cls()" << endl;
 
@@ -537,7 +537,7 @@ void t_py_generator::generate_json_container(
         ")",
         prefix_json);
     indent_down();
-  } else if (ttype->is_map()) {
+  } else if (ttype->is<t_map>()) {
     string k = tmp("_tmp_k");
     string v = tmp("_tmp_v");
     string kp = tmp("_tmp_kp");
@@ -589,13 +589,13 @@ void t_py_generator::generate_json_collection_element(
   } else if (type->is_enum()) {
     to_parse = elem;
     to_act_on = tmp("_enum");
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     to_parse = elem;
     to_act_on = tmp("_list");
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     to_parse = elem;
     to_act_on = tmp("_map");
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     to_parse = elem;
     to_act_on = tmp("_set");
   } else if (type->is_struct_or_union()) {
@@ -1224,7 +1224,7 @@ string t_py_generator::render_const_value(
     }
     indent_down();
     indent(out) << "})";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     const t_type* ktype = ((t_map*)type)->get_key_type();
     const t_type* vtype = ((t_map*)type)->get_val_type();
     out << "{" << endl;
@@ -1243,14 +1243,14 @@ string t_py_generator::render_const_value(
     }
     indent_down();
     indent(out) << "}";
-  } else if (type->is_list() || type->is_set()) {
+  } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
-    if (type->is_list()) {
+    if (type->is<t_list>()) {
       etype = ((t_list*)type)->get_elem_type();
     } else {
       etype = ((t_set*)type)->get_elem_type();
     }
-    if (type->is_set()) {
+    if (type->is<t_set>()) {
       out << "set(";
     }
     out << "[" << endl;
@@ -1262,7 +1262,7 @@ string t_py_generator::render_const_value(
     }
     indent_down();
     indent(out) << "]";
-    if (type->is_set()) {
+    if (type->is<t_set>()) {
       out << ")";
     }
   } else {
@@ -3249,7 +3249,7 @@ void t_py_generator::generate_deserialize_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
   } else if (type->is_primitive_type() || type->is_enum()) {
     indent(out) << name << " = iprot.";
@@ -3337,15 +3337,15 @@ void t_py_generator::generate_deserialize_container(
   t_field fetype(&t_primitive_type::t_byte(), etype);
 
   // Declare variables, read header
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     out << indent() << prefix << " = {}" << endl
         << indent() << "(" << ktype << ", " << vtype << ", " << size
         << " ) = iprot.readMapBegin() " << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     out << indent() << prefix << " = set()" << endl
         << indent() << "(" << etype << ", " << size
         << ") = iprot.readSetBegin()" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     out << indent() << prefix << " = []" << endl
         << indent() << "(" << etype << ", " << size
         << ") = iprot.readListBegin()" << endl;
@@ -3360,11 +3360,11 @@ void t_py_generator::generate_deserialize_container(
   indent_up();
   indent_up();
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     generate_deserialize_map_element(out, (t_map*)ttype, prefix, ktype, vtype);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_deserialize_list_element(out, (t_list*)ttype, prefix);
   }
 
@@ -3372,22 +3372,22 @@ void t_py_generator::generate_deserialize_container(
   indent_down();
 
   indent(out) << "else: " << endl;
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     out << indent() << "  while iprot.peekMap():" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     out << indent() << "  while iprot.peekSet():" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     out << indent() << "  while iprot.peekList():" << endl;
   }
 
   indent_up();
   indent_up();
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     generate_deserialize_map_element(out, (t_map*)ttype, prefix, ktype, vtype);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_deserialize_list_element(out, (t_list*)ttype, prefix);
   }
 
@@ -3395,11 +3395,11 @@ void t_py_generator::generate_deserialize_container(
   indent_down();
 
   // Read container end
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "iprot.readMapEnd()" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "iprot.readSetEnd()" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "iprot.readListEnd()" << endl;
   }
 }
@@ -3475,7 +3475,7 @@ void t_py_generator::generate_serialize_field(
   }
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_serialize_struct(out, (t_struct*)type, name);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, name);
   } else if (type->is_primitive_type() || type->is_enum()) {
     indent(out) << "oprot.";
@@ -3548,22 +3548,22 @@ void t_py_generator::generate_serialize_struct(
 
 void t_py_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "oprot.writeMapBegin("
                 << type_to_enum(((t_map*)ttype)->get_key_type()) << ", "
                 << type_to_enum(((t_map*)ttype)->get_val_type()) << ", "
                 << "len(" << prefix << "))" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "oprot.writeSetBegin("
                 << type_to_enum(((t_set*)ttype)->get_elem_type()) << ", "
                 << "len(" << prefix << "))" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "oprot.writeListBegin("
                 << type_to_enum(((t_list*)ttype)->get_elem_type()) << ", "
                 << "len(" << prefix << "))" << endl;
   }
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     string kiter = tmp("kiter");
     string viter = tmp("viter");
     if (sort_keys_) {
@@ -3581,7 +3581,7 @@ void t_py_generator::generate_serialize_container(
     indent_up();
     generate_serialize_map_element(out, (t_map*)ttype, kiter, viter);
     indent_down();
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     string iter = tmp("iter");
     if (sort_keys_) {
       indent(out) << "for " << iter << " in sorted(" << prefix << "):" << endl;
@@ -3591,7 +3591,7 @@ void t_py_generator::generate_serialize_container(
     indent_up();
     generate_serialize_set_element(out, (t_set*)ttype, iter);
     indent_down();
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     string iter = tmp("iter");
     indent(out) << "for " << iter << " in " << prefix << ":" << endl;
     indent_up();
@@ -3599,11 +3599,11 @@ void t_py_generator::generate_serialize_container(
     indent_down();
   }
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "oprot.writeMapEnd()" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "oprot.writeSetEnd()" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "oprot.writeListEnd()" << endl;
   }
 }
@@ -3837,11 +3837,11 @@ string t_py_generator::type_to_enum(const t_type* type) {
     return "TType.I32";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "TType.STRUCT";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "TType.MAP";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "TType.SET";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return "TType.LIST";
   }
 
@@ -3874,18 +3874,18 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
       ret += ", " + *adapter;
     }
     return ret + "]";
-  } else if (ttype->is_map()) {
+  } else if (ttype->is<t_map>()) {
     auto tmap = (t_map*)ttype;
     return std::string("(") + type_to_enum(tmap->get_key_type()) + "," +
         type_to_spec_args(tmap->get_key_type()) + "," +
         type_to_enum(tmap->get_val_type()) + "," +
         type_to_spec_args(tmap->get_val_type()) + ")";
 
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     return "(" + type_to_enum(((t_set*)ttype)->get_elem_type()) + "," +
         type_to_spec_args(((t_set*)ttype)->get_elem_type()) + ")";
 
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     return "(" + type_to_enum(((t_list*)ttype)->get_elem_type()) + "," +
         type_to_spec_args(((t_list*)ttype)->get_elem_type()) + ")";
   }

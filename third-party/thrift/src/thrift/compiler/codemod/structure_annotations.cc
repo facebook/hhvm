@@ -30,7 +30,7 @@ using namespace apache::thrift::compiler;
 namespace {
 bool is_container(const t_type& type) {
   auto true_type = type.get_true_type();
-  return true_type && true_type->is_container();
+  return true_type && true_type->is<t_container>();
 }
 
 std::string quote(std::string_view str) {
@@ -62,7 +62,7 @@ class structure_annotations {
       std::map<std::string, std::string>* annotations_for_catch_all) {
     std::set<std::string> to_add;
     if (!type_ref.resolve() || type_ref->is_primitive_type() ||
-        type_ref->is_container() ||
+        type_ref->is<t_container>() ||
         (type_ref->is_typedef() &&
          static_cast<const t_typedef&>(*type_ref).typedef_kind() !=
              t_typedef::kind::defined)) {

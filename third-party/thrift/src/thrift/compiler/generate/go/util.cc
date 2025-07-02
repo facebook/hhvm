@@ -178,15 +178,15 @@ void codegen_data::add_to_thrift_metadata_types(
     auto typedef_ = dynamic_cast<const t_typedef*>(type);
     auto underlying_type = typedef_->get_type();
     add_to_thrift_metadata_types(underlying_type, visited_type_names);
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     auto list_type = dynamic_cast<const t_list*>(type);
     auto elem_type = list_type->elem_type().get_type();
     add_to_thrift_metadata_types(elem_type, visited_type_names);
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     auto set_type = dynamic_cast<const t_set*>(type);
     auto elem_type = set_type->elem_type().get_type();
     add_to_thrift_metadata_types(elem_type, visited_type_names);
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     auto map_type = dynamic_cast<const t_map*>(type);
     auto key_type = map_type->key_type().get_type();
     auto val_type = map_type->val_type().get_type();
@@ -535,7 +535,7 @@ bool is_type_go_nilable(const t_type* type) {
   //   * Thrift struct    - represented by Go struct pointer - nilable
   //   * Thrift union     - represented by Go struct pointer - nilable
   //   * Thrift exception - represented by Go struct pointer - nilable
-  return type->is_list() || type->is_set() || type->is_map() ||
+  return type->is<t_list>() || type->is<t_set>() || type->is<t_map>() ||
       type->is_binary() || is_type_go_struct(type);
 }
 
@@ -556,8 +556,8 @@ bool is_type_go_comparable(
 
   // All of the types below are represented by either slice or a map.
   auto real_type = type->get_true_type();
-  if (real_type->is_list() || real_type->is_map() || real_type->is_set() ||
-      real_type->is_binary()) {
+  if (real_type->is<t_list>() || real_type->is<t_map>() ||
+      real_type->is<t_set>() || real_type->is_binary()) {
     return false;
   }
 

@@ -263,11 +263,11 @@ string t_json_generator::to_string(const t_type* type) {
     return "ENUM";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "STRUCT";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "MAP";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "SET";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return "LIST";
   } else if (type->is_typedef()) {
     return "TYPEDEF";
@@ -300,18 +300,18 @@ string t_json_generator::to_spec_args(const t_type* type) {
       type->is_struct_or_union() || type->is_exception() || type->is_enum() ||
       type->is_typedef()) {
     return to_spec_args_named(type);
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return R"({ "key_type" : { "type_enum" : ")" +
         to_string(((t_map*)type)->get_key_type()) + R"(", "spec_args" : )" +
         to_spec_args(((t_map*)type)->get_key_type()) +
         R"( }, "val_type" : { "type_enum" : ")" +
         to_string(((t_map*)type)->get_val_type()) + R"(", "spec_args" : )" +
         to_spec_args(((t_map*)type)->get_val_type()) + "} } ";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return R"({ "type_enum" : ")" + to_string(((t_set*)type)->get_elem_type()) +
         R"(", "spec_args" : )" + to_spec_args(((t_set*)type)->get_elem_type()) +
         "} ";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return R"({ "type_enum" : ")" +
         to_string(((t_list*)type)->get_elem_type()) + R"(", "spec_args" : )" +
         to_spec_args(((t_list*)type)->get_elem_type()) + "} ";

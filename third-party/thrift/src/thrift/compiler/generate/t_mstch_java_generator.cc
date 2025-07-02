@@ -989,7 +989,7 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node is_container() {
-    return field_->get_type()->get_true_type()->is_container();
+    return field_->get_type()->get_true_type()->is<t_container>();
   }
   mstch::node java_name() { return get_java_swift_name(field_); }
 
@@ -1183,21 +1183,21 @@ class mstch_java_const : public mstch_const {
   mstch::node java_ignore_constant() {
     // we have to ignore constants if they are enums that we handled as ints, as
     // we don't have the constant values to work with.
-    if (const_->type()->is_map()) {
+    if (const_->type()->is<t_map>()) {
       t_map* map = (t_map*)const_->type();
       if (map->get_key_type()->is_enum()) {
         return map->get_key_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
-    if (const_->type()->is_list()) {
+    if (const_->type()->is<t_list>()) {
       t_list* list = (t_list*)const_->type();
       if (list->get_elem_type()->is_enum()) {
         return list->get_elem_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
-    if (const_->type()->is_set()) {
+    if (const_->type()->is<t_set>()) {
       t_set* set = (t_set*)const_->type();
       if (set->get_elem_type()->is_enum()) {
         return set->get_elem_type()->has_unstructured_annotation(
@@ -1311,7 +1311,7 @@ class mstch_java_type : public mstch_type {
   }
 
   mstch::node is_container_type() {
-    return type_->get_true_type()->is_container();
+    return type_->get_true_type()->is<t_container>();
   }
 
   mstch::node java_type() {

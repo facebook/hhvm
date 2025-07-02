@@ -75,7 +75,7 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
 }
 
 bool is_complex_return(const t_type* type) {
-  return type->is_container() || type->is_string_or_binary() ||
+  return type->is<t_container>() || type->is_string_or_binary() ||
       type->is_struct_or_union() || type->is_exception();
 }
 
@@ -198,7 +198,7 @@ bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
 }
 
 bool resolves_to_container_or_struct(const t_type* type) {
-  return type->is_container() || type->is_struct_or_union() ||
+  return type->is<t_container>() || type->is_struct_or_union() ||
       type->is_exception();
 }
 
@@ -1245,13 +1245,15 @@ class cpp_mstch_type : public mstch_type {
   mstch::node resolves_to_base_or_enum() {
     return resolved_type_->is_primitive_type() || resolved_type_->is_enum();
   }
-  mstch::node resolves_to_container() { return resolved_type_->is_container(); }
+  mstch::node resolves_to_container() {
+    return resolved_type_->is<t_container>();
+  }
   mstch::node resolves_to_container_or_struct() {
     return ::apache::thrift::compiler::resolves_to_container_or_struct(
         resolved_type_);
   }
   mstch::node resolves_to_container_or_enum() {
-    return resolved_type_->is_container() || resolved_type_->is_enum();
+    return resolved_type_->is<t_container>() || resolved_type_->is_enum();
   }
   mstch::node resolves_to_complex_return() {
     return is_complex_return(resolved_type_);
@@ -1267,7 +1269,7 @@ class cpp_mstch_type : public mstch_type {
     if (resolved_type_->is_struct_or_union()) {
       return true;
     }
-    if (!resolved_type_->is_container()) {
+    if (!resolved_type_->is<t_container>()) {
       return false;
     }
     // type is a container: traverse (breadthwise, but could be depthwise)
@@ -1279,14 +1281,14 @@ class cpp_mstch_type : public mstch_type {
       if (next->is_struct_or_union()) {
         return true;
       }
-      if (!next->is_container()) {
+      if (!next->is<t_container>()) {
         continue;
       }
-      if (next->is_list()) {
+      if (next->is<t_list>()) {
         queue.push(static_cast<const t_list*>(next)->get_elem_type());
-      } else if (next->is_set()) {
+      } else if (next->is<t_set>()) {
         queue.push(static_cast<const t_set*>(next)->get_elem_type());
-      } else if (next->is_map()) {
+      } else if (next->is<t_map>()) {
         queue.push(static_cast<const t_map*>(next)->get_key_type());
         queue.push(static_cast<const t_map*>(next)->get_val_type());
       } else {
@@ -1450,14 +1452,14 @@ class cpp_mstch_struct : public mstch_struct {
       if (type->is_enum() ||
           (type->is_primitive_type() && !type->is_string_or_binary()) ||
           (type->is_string_or_binary() && field->get_value() != nullptr) ||
-          (type->is_container() && field->get_value() != nullptr &&
+          (type->is<t_container>() && field->get_value() != nullptr &&
            !field->get_value()->is_empty()) ||
           (type->is_struct_or_union() &&
            (struct_ != type->try_as<t_struct>()) &&
            ((field->get_value() && !field->get_value()->is_empty()) ||
             (cpp2::is_explicit_ref(field) &&
              field->get_req() != t_field::e_req::optional))) ||
-          (type->is_container() && cpp2::is_explicit_ref(field) &&
+          (type->is<t_container>() && cpp2::is_explicit_ref(field) &&
            field->get_req() != t_field::e_req::optional) ||
           (type->is_primitive_type() && cpp2::is_explicit_ref(field) &&
            field->get_req() != t_field::e_req::optional)) {
@@ -1683,7 +1685,7 @@ class cpp_mstch_struct : public mstch_struct {
     for (const auto& field : struct_->fields()) {
       const auto* resolved_typedef = field.type()->get_true_type();
       if (cpp2::is_ref(&field) || resolved_typedef->is_string_or_binary() ||
-          resolved_typedef->is_container()) {
+          resolved_typedef->is<t_container>()) {
         return true;
       }
     }

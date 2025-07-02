@@ -537,7 +537,7 @@ void add_annotations_to_node_type(
     return;
   }
 
-  if (node_type->is_container() ||
+  if (node_type->is<t_container>() ||
       (node_type->is_typedef() &&
        static_cast<const t_typedef*>(node_type)->typedef_kind() !=
            t_typedef::kind::defined) ||
@@ -612,7 +612,8 @@ void lower_deprecated_annotations(
         if (inner_type->is_typedef()) {
           ctx.error("Cannot use {} on typedefs of typedefs", annot);
         } else if (
-            !inner_type->is_container() && !inner_type->is_primitive_type()) {
+            !inner_type->is<t_container>() &&
+            !inner_type->is_primitive_type()) {
           ctx.error(
               "Annotation {} is only supported on typedefs of primitive or container types.",
               annot);

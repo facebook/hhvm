@@ -46,10 +46,6 @@ class t_container : public t_type {
   // TODO(afuller): Remove everything below here. It is provided only for
   // backwards compatibility.
  public:
-  bool is_container() const override { return true; }
-  bool is_set() const final { return container_type() == type::t_set; }
-  bool is_list() const final { return container_type() == type::t_list; }
-  bool is_map() const final { return container_type() == type::t_map; }
   t_type::type get_type_value() const override {
     return static_cast<t_type::type>(container_type());
   }

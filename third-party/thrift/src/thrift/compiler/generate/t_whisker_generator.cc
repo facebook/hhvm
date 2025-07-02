@@ -181,10 +181,10 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("struct?",           mem_fn(&t_type::is_struct));
   def.property("union?",            mem_fn(&t_type::is_union));
   def.property("exception?",        mem_fn(&t_type::is_exception));
-  def.property("container?",        mem_fn(&t_type::is_container));
-  def.property("list?",             mem_fn(&t_type::is_list));
-  def.property("set?",              mem_fn(&t_type::is_set));
-  def.property("map?",              mem_fn(&t_type::is_map));
+  def.property("container?",        mem_fn(&t_type::is<t_container>));
+  def.property("list?",             mem_fn(&t_type::is<t_list>));
+  def.property("set?",              mem_fn(&t_type::is<t_set>));
+  def.property("map?",              mem_fn(&t_type::is<t_map>));
   def.property("binary?",           mem_fn(&t_type::is_binary));
   def.property("string_or_binary?", mem_fn(&t_type::is_string_or_binary));
   def.property("any_int?",          mem_fn(&t_type::is_any_int));

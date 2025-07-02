@@ -239,7 +239,7 @@ class t_cocoa_generator : public t_concat_generator {
   bool type_can_be_null(const t_type* ttype) {
     ttype = ttype->get_true_type();
 
-    return ttype->is_container() || ttype->is_struct_or_union() ||
+    return ttype->is<t_container>() || ttype->is_struct_or_union() ||
         ttype->is_exception() || ttype->is_string_or_binary();
   }
 
@@ -535,7 +535,7 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
     std::string name = tconst->name();
     const t_type* type = tconst->type();
     f_impl_ << "static " << type_name(type) << " " << cocoa_prefix_ << name;
-    if (!type->is_container() && !type->is_struct_or_union()) {
+    if (!type->is<t_container>() && !type->is_struct_or_union()) {
       f_impl_ << " = " << render_const_value(f_impl_, type, tconst->value());
     }
     f_impl_ << ";" << std::endl;
@@ -548,14 +548,14 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
   // when the class is initialized
   bool should_have_initialize =
       std::any_of(consts.begin(), consts.end(), [](const t_const* c) {
-        return c->type()->is_container() || c->type()->is_struct_or_union();
+        return c->type()->is<t_container>() || c->type()->is_struct_or_union();
       });
   if (should_have_initialize) {
     f_impl_ << "+ (void) initialize ";
     scope_up(f_impl_);
 
     for (const auto* tconst : consts) {
-      if (tconst->type()->is_container() ||
+      if (tconst->type()->is<t_container>() ||
           tconst->type()->is_struct_or_union()) {
         print_const_value(
             f_impl_,
@@ -1434,7 +1434,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
       // nothing.
     } else if (ttype->is_enum()) {
       // nothing
-    } else if (ttype->is_list() || ttype->is_set()) {
+    } else if (ttype->is<t_list>() || ttype->is<t_set>()) {
       out << indent() << "if (" << field_name << ") {" << std::endl;
       indent_up();
       out << indent() << "for (id item in " << field_name << ") {" << std::endl;
@@ -1451,7 +1451,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
           << std::endl;
       indent_down();
       out << indent() << "}" << std::endl;
-    } else if (ttype->is_map()) {
+    } else if (ttype->is<t_map>()) {
       out << indent() << "if (" << field_name << ") {" << std::endl;
       indent_up();
       out << indent() << "for (NSString* k in " << field_name << ") {"
@@ -1508,7 +1508,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
     }
 
     const bool check_for_null = ttype->is_struct_or_union() ||
-        ttype->is_string_or_binary() || ttype->is_container();
+        ttype->is_string_or_binary() || ttype->is<t_container>();
 
     if (check_for_null) {
       out << indent() << "if (" << field_name << ") {" << std::endl;
@@ -1532,7 +1532,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
             << "ret[@\"" + field.name() + "_str\"] = " << ToStringFunctionName
             << "(" << field_name << ");" << std::endl;
       }
-    } else if (ttype->is_list() || ttype->is_set()) {
+    } else if (ttype->is<t_list>() || ttype->is<t_set>()) {
       out << indent() << "NSMutableArray* a = [NSMutableArray array];"
           << std::endl;
       out << indent() << "for (id item in " << field_name << ") {" << std::endl;
@@ -1544,7 +1544,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
       indent_down();
       out << indent() << "}" << std::endl;
       out << indent() << ret_equals << "[a copy];" << std::endl;
-    } else if (ttype->is_map()) {
+    } else if (ttype->is<t_map>()) {
       out << indent()
           << "NSMutableDictionary* d = [NSMutableDictionary dictionary];"
           << std::endl;
@@ -1594,15 +1594,15 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
     }
 
     const bool check_for_null = ttype->is_struct_or_union() ||
-        ttype->is_string_or_binary() || ttype->is_container();
+        ttype->is_string_or_binary() || ttype->is<t_container>();
 
     if (check_for_null) {
       out << indent() << "if (" << field_name << ") {" << std::endl;
       indent_up();
     }
 
-    if (ttype->is_struct_or_union() || ttype->is_list() || ttype->is_set() ||
-        ttype->is_map()) {
+    if (ttype->is_struct_or_union() || ttype->is<t_list>() ||
+        ttype->is<t_set>() || ttype->is<t_map>()) {
       out << indent() << "newCopy->" << field_name << " = " << "[self->"
           << field_name << " mutableCopyWithZone:zone];" << std::endl;
     } else if (
@@ -2185,7 +2185,7 @@ void t_cocoa_generator::generate_deserialize_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_deserialize_struct(out, type, fieldName);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, fieldName);
   } else if (type->is_primitive_type() || type->is_enum()) {
     indent(out) << type_name(type) << " " << fieldName << " = [inProtocol ";
@@ -2259,20 +2259,20 @@ void t_cocoa_generator::generate_deserialize_container(
   indent(out) << "int " << size << ";" << std::endl;
 
   // Declare variables, read header
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "[inProtocol readMapBeginReturningKeyType: NULL valueType: "
                    "NULL size: &"
                 << size << "];" << std::endl;
     indent(out) << "NSMutableDictionary * " << fieldName
                 << " = [[NSMutableDictionary alloc] initWithCapacity: " << size
                 << "];" << std::endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "[inProtocol readSetBeginReturningElementType: NULL size: &"
                 << size << "];" << std::endl;
     indent(out) << "NSMutableSet * " << fieldName
                 << " = [[NSMutableSet alloc] initWithCapacity: " << size << "];"
                 << std::endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "[inProtocol readListBeginReturningElementType: NULL size: &"
                 << size << "];" << std::endl;
     indent(out) << "NSMutableArray * " << fieldName
@@ -2291,22 +2291,22 @@ void t_cocoa_generator::generate_deserialize_container(
 
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     generate_deserialize_map_element(out, (t_map*)ttype, fieldName);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_deserialize_set_element(out, (t_set*)ttype, fieldName);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_deserialize_list_element(out, (t_list*)ttype, fieldName);
   }
 
   scope_down(out);
 
   // Read container end
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "[inProtocol readMapEnd];" << std::endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "[inProtocol readSetEnd];" << std::endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "[inProtocol readListEnd];" << std::endl;
   }
 }
@@ -2447,7 +2447,7 @@ void t_cocoa_generator::generate_serialize_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_serialize_struct(out, (t_struct*)type, fieldName);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, fieldName);
   } else if (type->is_primitive_type() || type->is_enum()) {
     indent(out) << "[outProtocol ";
@@ -2523,17 +2523,17 @@ void t_cocoa_generator::generate_serialize_container(
     std::ofstream& out, const t_type* ttype, const std::string& fieldName) {
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "[outProtocol writeMapBeginWithKeyType: "
                 << type_to_enum(((t_map*)ttype)->get_key_type())
                 << " valueType: "
                 << type_to_enum(((t_map*)ttype)->get_val_type())
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "[outProtocol writeSetBeginWithElementType: "
                 << type_to_enum(((t_set*)ttype)->get_elem_type())
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "[outProtocol writeListBeginWithElementType: "
                 << type_to_enum(((t_list*)ttype)->get_elem_type())
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
@@ -2541,21 +2541,21 @@ void t_cocoa_generator::generate_serialize_container(
 
   std::string iter = tmp("_iter");
   std::string key;
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     key = tmp("key");
     indent(out) << "NSEnumerator * " << iter << " = [" << fieldName
                 << " keyEnumerator];" << std::endl;
     indent(out) << "id " << key << ";" << std::endl;
     indent(out) << "while ((" << key << " = [" << iter << " nextObject]))"
                 << std::endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     key = tmp("obj");
     indent(out) << "NSEnumerator * " << iter << " = [" << fieldName
                 << " objectEnumerator];" << std::endl;
     indent(out) << "id " << key << ";" << std::endl;
     indent(out) << "while ((" << key << " = [" << iter << " nextObject]))"
                 << std::endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     key = tmp("i");
     indent(out) << "int " << key << ";" << std::endl;
     indent(out) << "for (" << key << " = 0; " << key << " < [" << fieldName
@@ -2564,21 +2564,21 @@ void t_cocoa_generator::generate_serialize_container(
 
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     generate_serialize_map_element(out, (t_map*)ttype, key, fieldName);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_serialize_set_element(out, (t_set*)ttype, key);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_serialize_list_element(out, (t_list*)ttype, key, fieldName);
   }
 
   scope_down(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "[outProtocol writeMapEnd];" << std::endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "[outProtocol writeSetEnd];" << std::endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "[outProtocol writeListEnd];" << std::endl;
   }
 
@@ -2678,11 +2678,11 @@ std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
   std::string result;
   if (ttype->is_primitive_type()) {
     return base_type_name((t_primitive_type*)ttype);
-  } else if (ttype->is_map()) {
+  } else if (ttype->is<t_map>()) {
     result = "TBaseStructDictionary";
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     result = "TBaseStructSet";
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     result = "TBaseStructArray";
   } else {
     // Check for prefix
@@ -2784,7 +2784,7 @@ void t_cocoa_generator::print_const_value(
                   << std::endl;
     }
     out << std::endl;
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     const t_type* ktype = ((t_map*)type)->get_key_type();
     const t_type* vtype = ((t_map*)type)->get_val_type();
     const std::vector<std::pair<t_const_value*, t_const_value*>>& value_list =
@@ -2808,7 +2808,7 @@ void t_cocoa_generator::print_const_value(
                   << "];" << std::endl;
     }
     out << std::endl;
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     const t_type* etype = ((t_list*)type)->get_elem_type();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
@@ -2828,7 +2828,7 @@ void t_cocoa_generator::print_const_value(
       indent(out) << "[" << name << " addObject:" << val << "];" << std::endl;
     }
     out << std::endl;
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     const t_type* etype = ((t_set*)type)->get_elem_type();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
@@ -3013,11 +3013,11 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
     return "TType_I32";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "TType_STRUCT";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "TType_MAP";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "TType_SET";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return "TType_LIST";
   }
 
@@ -3058,11 +3058,11 @@ std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
     return "%i";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "%@";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "%@";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "%@";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return "%@";
   }
 

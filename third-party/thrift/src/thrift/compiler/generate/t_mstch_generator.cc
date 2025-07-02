@@ -122,10 +122,10 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"union?", type.is_union()},
       {"enum?", type.is_enum()},
       {"base?", type.is_primitive_type()},
-      {"container?", type.is_container()},
-      {"list?", type.is_list()},
-      {"set?", type.is_set()},
-      {"map?", type.is_map()},
+      {"container?", type.is<t_container>()},
+      {"list?", type.is<t_list>()},
+      {"set?", type.is<t_set>()},
+      {"map?", type.is<t_map>()},
       {"typedef?", type.is_typedef()},
   };
 
@@ -134,15 +134,15 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
     result.emplace("struct", dump(dynamic_cast<const t_struct&>(type), true));
   } else if (type.is_enum()) {
     result.emplace("enum", dump(dynamic_cast<const t_enum&>(type)));
-  } else if (type.is_list()) {
+  } else if (type.is<t_list>()) {
     result.emplace(
         "list_elem_type",
         dump(*dynamic_cast<const t_list&>(type).get_elem_type()));
-  } else if (type.is_set()) {
+  } else if (type.is<t_set>()) {
     result.emplace(
         "set_elem_type",
         dump(*dynamic_cast<const t_set&>(type).get_elem_type()));
-  } else if (type.is_map()) {
+  } else if (type.is<t_map>()) {
     result.emplace(
         "key_type", dump(*dynamic_cast<const t_map&>(type).get_key_type()));
     result.emplace(

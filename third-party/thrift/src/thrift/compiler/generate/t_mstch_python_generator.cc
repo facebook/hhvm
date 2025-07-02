@@ -127,16 +127,16 @@ bool is_invariant_container_type(const t_type* type) {
   // Then, we recursively verify whether the map's value type, or the element
   // type of a list or set, contains any such mapping incompatibility.
   const t_type* true_type = type->get_true_type();
-  if (true_type->is_map()) {
+  if (true_type->is<t_map>()) {
     const t_map* map_type = dynamic_cast<const t_map*>(true_type);
     const t_type* key_type = map_type->get_key_type()->get_true_type();
     return key_type->is_struct_or_union() || key_type->is_exception() ||
-        key_type->is_container() ||
+        key_type->is<t_container>() ||
         is_invariant_container_type(map_type->get_val_type());
-  } else if (true_type->is_list()) {
+  } else if (true_type->is<t_list>()) {
     return is_invariant_container_type(
         dynamic_cast<const t_list*>(true_type)->get_elem_type());
-  } else if (true_type->is_set()) {
+  } else if (true_type->is<t_set>()) {
     return is_invariant_container_type(
         dynamic_cast<const t_set*>(true_type)->get_elem_type());
   }
@@ -486,13 +486,13 @@ class python_mstch_program : public mstch_program {
     if (is_typedef == TypeDef::HasTypedef) {
       add_typedef_namespace(true_type);
     }
-    if (true_type->is_list()) {
+    if (true_type->is<t_list>()) {
       visit_type_with_typedef(
           dynamic_cast<const t_list&>(*true_type).get_elem_type(), is_typedef);
-    } else if (true_type->is_set()) {
+    } else if (true_type->is<t_set>()) {
       visit_type_with_typedef(
           dynamic_cast<const t_set&>(*true_type).get_elem_type(), is_typedef);
-    } else if (true_type->is_map()) {
+    } else if (true_type->is<t_map>()) {
       visit_type_with_typedef(
           dynamic_cast<const t_map&>(*true_type).get_key_type(), is_typedef);
       visit_type_with_typedef(
@@ -996,11 +996,11 @@ class python_mstch_field : public mstch_field {
     }
     if (value->is_empty()) {
       auto true_type = field_->get_type()->get_true_type();
-      if ((true_type->is_list() || true_type->is_set()) &&
+      if ((true_type->is<t_list>() || true_type->is<t_set>()) &&
           value->kind() != t_const_value::CV_LIST) {
         const_cast<t_const_value*>(value)->convert_empty_map_to_list();
       }
-      if (true_type->is_map() && value->kind() != t_const_value::CV_MAP) {
+      if (true_type->is<t_map>() && value->kind() != t_const_value::CV_MAP) {
         const_cast<t_const_value*>(value)->convert_empty_list_to_map();
       }
     }
@@ -1014,8 +1014,9 @@ class python_mstch_field : public mstch_field {
 
   mstch::node is_container_type() {
     const auto* type = field_->get_type();
-    return type->get_true_type()->is_list() ||
-        type->get_true_type()->is_map() || type->get_true_type()->is_set();
+    return type->get_true_type()->is<t_list>() ||
+        type->get_true_type()->is<t_map>() ||
+        type->get_true_type()->is<t_set>();
   }
 
   mstch::node is_invariant_type() { return field_has_invariant_type(field_); }
@@ -1361,9 +1362,9 @@ class python_mstch_const_value : public mstch_const_value {
     if (auto ttype = const_value_->ttype()) {
       const auto* type = ttype->get_true_type();
       const t_type* elem_type = nullptr;
-      if (type->is_list()) {
+      if (type->is<t_list>()) {
         elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-      } else if (type->is_set()) {
+      } else if (type->is<t_set>()) {
         elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
       } else {
         return {};
@@ -1376,7 +1377,7 @@ class python_mstch_const_value : public mstch_const_value {
 
   mstch::node value_for_set() {
     if (auto ttype = const_value_->ttype()) {
-      return ttype->get_true_type()->is_set();
+      return ttype->get_true_type()->is<t_set>();
     }
     return false;
   }
@@ -1384,7 +1385,7 @@ class python_mstch_const_value : public mstch_const_value {
   mstch::node map_key_type() {
     if (auto ttype = const_value_->ttype()) {
       const auto* type = ttype->get_true_type();
-      if (type->is_map()) {
+      if (type->is<t_map>()) {
         return context_.type_factory->make_mstch_object(
             dynamic_cast<const t_map*>(type)->get_key_type(), context_, pos_);
       }
@@ -1395,7 +1396,7 @@ class python_mstch_const_value : public mstch_const_value {
   mstch::node map_val_type() {
     if (auto ttype = const_value_->ttype()) {
       const auto* type = ttype->get_true_type();
-      if (type->is_map()) {
+      if (type->is<t_map>()) {
         return context_.type_factory->make_mstch_object(
             dynamic_cast<const t_map*>(type)->get_val_type(), context_, pos_);
       }

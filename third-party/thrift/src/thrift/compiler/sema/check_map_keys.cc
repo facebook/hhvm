@@ -246,7 +246,7 @@ void check_key_value(
     for (const t_const_value* elem : value->get_list()) {
       check_key_value(diags, node, elem);
     }
-    if (value->ttype()->get_true_type()->is_set()) {
+    if (value->ttype()->get_true_type()->is<t_set>()) {
       auto duplicates = find_duplicate_keys(value->get_list());
       report_duplicates(duplicates);
     }

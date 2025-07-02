@@ -275,7 +275,7 @@ class adapter_or_wrapper_checker {
             structured_wrapper_annotation);
         typedef_name = inner_typedf->name();
         type = inner_typedf->get_type();
-      } else if (type->is_container()) {
+      } else if (type->is<t_container>()) {
         if (const auto* map = dynamic_cast<const t_map*>(type)) {
           type = map->get_val_type();
         } else if (const auto* list = dynamic_cast<const t_list*>(type)) {
@@ -1389,7 +1389,7 @@ void validate_cpp_type_annotation(sema_context& ctx, const Node& node) {
           node.name());
     }
     if (tmplate) {
-      if (!node.type()->get_true_type()->is_container()) {
+      if (!node.type()->get_true_type()->template is<t_container>()) {
         ctx.error(
             "`@cpp.Type{{template=...}}` can only be used on containers, not on `{}`.",
             node.name());
@@ -1665,7 +1665,7 @@ void validate_cursor_serialization_adapter_in_container(
 void validate_py3_enable_cpp_adapter(sema_context& ctx, const t_typedef& node) {
   if (node.has_structured_annotation(kPythonPy3EnableCppAdapterUri)) {
     const auto& true_type = *node.get_true_type();
-    if (!true_type.is_container() && !true_type.is_string_or_binary()) {
+    if (!true_type.is<t_container>() && !true_type.is_string_or_binary()) {
       ctx.error(
           "The @python.Py3EnableCppAdapter annotation can only be used on containers and strings.");
     }

@@ -410,17 +410,17 @@ std::string get_gen_type_class(t_type const& type) {
     return tc + "string";
   } else if (ttype.is_binary()) {
     return tc + "binary";
-  } else if (ttype.is_list()) {
+  } else if (ttype.is<t_list>()) {
     auto& list = dynamic_cast<t_list const&>(ttype);
     auto& elem = *list.get_elem_type();
     auto elem_tc = get_gen_type_class(elem);
     return tc + "list<" + elem_tc + ">";
-  } else if (ttype.is_set()) {
+  } else if (ttype.is<t_set>()) {
     auto& set = dynamic_cast<t_set const&>(ttype);
     auto& elem = *set.get_elem_type();
     auto elem_tc = get_gen_type_class(elem);
     return tc + "set<" + elem_tc + ">";
-  } else if (ttype.is_map()) {
+  } else if (ttype.is<t_map>()) {
     auto& map = dynamic_cast<t_map const&>(ttype);
     auto& key = *map.get_key_type();
     auto& val = *map.get_val_type();

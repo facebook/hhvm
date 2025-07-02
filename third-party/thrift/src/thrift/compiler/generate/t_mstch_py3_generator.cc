@@ -73,29 +73,29 @@ std::vector<std::string> get_py3_namespace_with_name(const t_program* program) {
 }
 
 const t_type* get_list_elem_type(const t_type& type) {
-  assert(type.is_list());
+  assert(type.is<t_list>());
   return dynamic_cast<const t_list&>(type).get_elem_type();
 }
 
 const t_type* get_set_elem_type(const t_type& type) {
-  assert(type.is_set());
+  assert(type.is<t_set>());
   return dynamic_cast<const t_set&>(type).get_elem_type();
 }
 
 const t_type* get_map_key_type(const t_type& type) {
-  assert(type.is_map());
+  assert(type.is<t_map>());
   return dynamic_cast<const t_map&>(type).get_key_type();
 }
 
 const t_type* get_map_val_type(const t_type& type) {
-  assert(type.is_map());
+  assert(type.is<t_map>());
   return dynamic_cast<const t_map&>(type).get_val_type();
 }
 
 bool type_needs_convert(const t_type* type) {
   // NB: float32 has to be rounded by cython to maintain old py3 behavior
   return type->is_struct_or_union() || type->is_exception() ||
-      type->is_container() || type->is_float();
+      type->is<t_container>() || type->is_float();
 }
 
 bool container_needs_convert(const t_type* type) {
@@ -119,13 +119,13 @@ std::string get_cpp_template(const t_type& type) {
           {"cpp.template", "cpp2.template"})) {
     return *val;
   }
-  if (type.is_list()) {
+  if (type.is<t_list>()) {
     return "std::vector";
   }
-  if (type.is_set()) {
+  if (type.is<t_set>()) {
     return "std::set";
   }
-  if (type.is_map()) {
+  if (type.is<t_map>()) {
     return "std::map";
   }
 
@@ -769,7 +769,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   mstch::node cythonTypeNoneable() {
-    return !(is_number() || type_->is_container());
+    return !(is_number() || type_->is<t_container>());
   }
 
   mstch::node hasCythonType() { return has_cython_type(); }
@@ -788,7 +788,7 @@ class py3_mstch_type : public mstch_type {
   // i.e., structs, unions, exceptions all enclose a C++ type
   mstch::node isSimple() {
     return (type_->is_primitive_type() || type_->is_enum() ||
-            type_->is_container()) &&
+            type_->is<t_container>()) &&
         !is_custom_binary_type();
   }
 
@@ -797,36 +797,36 @@ class py3_mstch_type : public mstch_type {
   mstch::node needs_convert() { return type_needs_convert(type_); }
 
   mstch::node is_container_of_struct() {
-    return type_->is_container() && container_needs_convert(type_);
+    return type_->is<t_container>() && container_needs_convert(type_);
   }
 
   // type:list_elem_type etc. is defined in mstch_objects, so the returned
   // type node doesn't define type:needs_convert
   mstch::node element_needs_convert() {
-    if (type_->is_list()) {
+    if (type_->is<t_list>()) {
       return type_needs_convert(get_list_elem_type(*type_));
-    } else if (type_->is_set()) {
+    } else if (type_->is<t_set>()) {
       return type_needs_convert(get_set_elem_type(*type_));
     }
     return false;
   }
 
   mstch::node map_key_needs_convert() {
-    if (type_->is_map()) {
+    if (type_->is<t_map>()) {
       return type_needs_convert(get_map_key_type(*type_));
     }
     return false;
   }
 
   mstch::node map_value_needs_convert() {
-    if (type_->is_map()) {
+    if (type_->is<t_map>()) {
       return type_needs_convert(get_map_val_type(*type_));
     }
     return false;
   }
 
   mstch::node resolves_to_complex_return() {
-    return resolved_type_->is_container() ||
+    return resolved_type_->is<t_container>() ||
         resolved_type_->is_string_or_binary() ||
         resolved_type_->is_struct_or_union() || resolved_type_->is_exception();
   }
@@ -878,14 +878,14 @@ class py3_mstch_type : public mstch_type {
   bool is_number() const { return is_integer() || type_->is_floating_point(); }
 
   bool is_list_of_string() {
-    if (!type_->is_list()) {
+    if (!type_->is<t_list>()) {
       return false;
     }
     return get_list_elem_type(*type_)->is_string_or_binary();
   }
 
   bool is_set_of_string() {
-    if (!type_->is_set()) {
+    if (!type_->is<t_set>()) {
       return false;
     }
     return get_set_elem_type(*type_)->is_string_or_binary();
@@ -893,8 +893,8 @@ class py3_mstch_type : public mstch_type {
 
   bool has_cython_type() const {
     return has_option("inplace_migrate")
-        ? !(type_->is_container() || type_->is_struct_or_union())
-        : !type_->is_container();
+        ? !(type_->is<t_container>() || type_->is_struct_or_union())
+        : !type_->is<t_container>();
   }
 
   bool is_iobuf() const { return cached_props_.cpp_type() == "folly::IOBuf"; }
@@ -1131,11 +1131,11 @@ class py3_mstch_field : public mstch_field {
     }
     if (value->is_empty()) {
       auto true_type = field_->get_type()->get_true_type();
-      if ((true_type->is_list() || true_type->is_set()) &&
+      if ((true_type->is<t_list>() || true_type->is<t_set>()) &&
           value->kind() != t_const_value::CV_LIST) {
         const_cast<t_const_value*>(value)->convert_empty_map_to_list();
       }
-      if (true_type->is_map() && value->kind() != t_const_value::CV_MAP) {
+      if (true_type->is<t_map>() && value->kind() != t_const_value::CV_MAP) {
         const_cast<t_const_value*>(value)->convert_empty_list_to_map();
       }
     }
@@ -1331,7 +1331,7 @@ class py3_mstch_const_value : public mstch_const_value {
       return {};
     }
     const auto* type = const_value_->ttype()->get_true_type();
-    if (type->is_container()) {
+    if (type->is<t_container>()) {
       return context_.type_factory->make_mstch_object(type, context_);
     }
     return {};
@@ -1380,13 +1380,13 @@ std::string py3_mstch_program::visit_type_impl(
   fromTypeDef = fromTypeDef || orig_type->is_typedef();
   if (flatName.empty()) {
     std::string extra;
-    if (trueType->is_list()) {
+    if (trueType->is<t_list>()) {
       extra = "List__" +
           visit_type_impl(get_list_elem_type(*trueType), fromTypeDef);
-    } else if (trueType->is_set()) {
+    } else if (trueType->is<t_set>()) {
       extra =
           "Set__" + visit_type_impl(get_set_elem_type(*trueType), fromTypeDef);
-    } else if (trueType->is_map()) {
+    } else if (trueType->is<t_map>()) {
       extra = "Map__" +
           visit_type_impl(get_map_key_type(*trueType), fromTypeDef) + "_" +
           visit_type_impl(get_map_val_type(*trueType), fromTypeDef);
@@ -1406,7 +1406,7 @@ std::string py3_mstch_program::visit_type_impl(
   }
   bool inserted = seenTypeNames_.insert(flatName).second;
   if (inserted) {
-    if (trueType->is_container()) {
+    if (trueType->is<t_container>()) {
       containers_.push_back(hasPy3EnableCppAdapterAnnot ? orig_type : trueType);
     }
     if (!type->is_default_template()) {

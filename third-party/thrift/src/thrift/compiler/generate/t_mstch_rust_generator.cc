@@ -149,13 +149,13 @@ bool can_derive_ord(const t_type* type) {
   if (type->has_structured_annotation(kRustOrdUri)) {
     return true;
   }
-  if (type->is_list()) {
+  if (type->is<t_list>()) {
     auto elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
     return elem_type && can_derive_ord(elem_type);
   }
   // We can implement Ord on BTreeMap (the default map type) if both the key and
   // value implement Eq.
-  if (type->is_map() && !has_custom_type_annotation) {
+  if (type->is<t_map>() && !has_custom_type_annotation) {
     auto map_type = dynamic_cast<const t_map*>(type);
     auto key_elem_type = map_type->get_key_type();
     auto val_elem_type = map_type->get_val_type();
@@ -358,19 +358,19 @@ bool type_has_transitive_adapter(
       return type_has_transitive_adapter(
           typedef_type->get_type(), step_through_newtypes);
     }
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     auto list_type = dynamic_cast<const t_list*>(type);
     if (list_type) {
       return type_has_transitive_adapter(
           list_type->get_elem_type(), step_through_newtypes);
     }
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     auto set_type = dynamic_cast<const t_set*>(type);
     if (set_type) {
       return type_has_transitive_adapter(
           set_type->get_elem_type(), step_through_newtypes);
     }
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     auto map_type = dynamic_cast<const t_map*>(type);
     if (map_type) {
       return type_has_transitive_adapter(
@@ -1724,14 +1724,14 @@ class mstch_rust_value : public mstch_base {
     return quote(const_value_->get_string(), false);
   }
   mstch::node is_list() {
-    return underlying_type_->is_list() &&
+    return underlying_type_->is<t_list>() &&
         (const_value_->kind() == value_type::CV_LIST ||
          (const_value_->kind() == value_type::CV_MAP &&
           const_value_->get_map().empty()));
   }
   mstch::node list_elements() {
     const t_type* elem_type;
-    if (underlying_type_->is_set()) {
+    if (underlying_type_->is<t_set>()) {
       auto set_type = dynamic_cast<const t_set*>(underlying_type_);
       if (!set_type) {
         return mstch::node();
@@ -1753,14 +1753,14 @@ class mstch_rust_value : public mstch_base {
     return elements;
   }
   mstch::node is_set() {
-    return underlying_type_->is_set() &&
+    return underlying_type_->is<t_set>() &&
         (const_value_->kind() == value_type::CV_LIST ||
          (const_value_->kind() == value_type::CV_MAP &&
           const_value_->get_map().empty()));
   }
   mstch::node set_members() { return list_elements(); }
   mstch::node is_map() {
-    return underlying_type_->is_map() &&
+    return underlying_type_->is<t_map>() &&
         (const_value_->kind() == value_type::CV_MAP ||
          (const_value_->kind() == value_type::CV_LIST &&
           const_value_->get_list().empty()));
@@ -2083,7 +2083,7 @@ class rust_mstch_const : public mstch_const {
     }
 
     auto type = const_->type()->get_true_type();
-    return type->is_list() || type->is_map() || type->is_set() ||
+    return type->is<t_list>() || type->is<t_map>() || type->is<t_set>() ||
         type->is_struct_or_union();
   }
   mstch::node rust_typed_value() {

@@ -891,10 +891,10 @@ class mstch_type : public mstch_base {
   mstch::node is_union() { return resolved_type_->is_union(); }
   mstch::node is_enum() { return resolved_type_->is_enum(); }
   mstch::node is_base() { return resolved_type_->is_primitive_type(); }
-  mstch::node is_container() { return resolved_type_->is_container(); }
-  mstch::node is_list() { return resolved_type_->is_list(); }
-  mstch::node is_set() { return resolved_type_->is_set(); }
-  mstch::node is_map() { return resolved_type_->is_map(); }
+  mstch::node is_container() { return resolved_type_->is<t_container>(); }
+  mstch::node is_list() { return resolved_type_->is<t_list>(); }
+  mstch::node is_set() { return resolved_type_->is<t_set>(); }
+  mstch::node is_map() { return resolved_type_->is<t_map>(); }
   mstch::node is_typedef() { return type_->is_typedef(); }
   virtual std::string get_type_namespace(const t_program*) { return ""; }
   mstch::node get_struct();

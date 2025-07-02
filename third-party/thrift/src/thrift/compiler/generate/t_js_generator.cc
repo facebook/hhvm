@@ -432,7 +432,7 @@ string t_js_generator::render_const_value(
     }
 
     out << "})";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     const t_type* ktype = ((t_map*)type)->get_key_type();
     const t_type* vtype = ((t_map*)type)->get_val_type();
     out << "{";
@@ -450,9 +450,9 @@ string t_js_generator::render_const_value(
     }
 
     out << endl << "}";
-  } else if (type->is_list() || type->is_set()) {
+  } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
-    if (type->is_list()) {
+    if (type->is<t_list>()) {
       etype = ((t_list*)type)->get_elem_type();
     } else {
       etype = ((t_set*)type)->get_elem_type();
@@ -1238,7 +1238,7 @@ void t_js_generator::generate_deserialize_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
   } else if (type->is_primitive_type() || type->is_enum()) {
     indent(out) << name << " = input.";
@@ -1326,7 +1326,7 @@ void t_js_generator::generate_deserialize_container(
   out << indent() << "var " << rtmp3 << ";" << endl;
 
   // Declare variables, read header
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     out << indent() << prefix << " = {};" << endl
         << indent() << "var " << ktype << " = 0;" << endl
         << indent() << "var " << vtype << " = 0;" << endl;
@@ -1336,14 +1336,14 @@ void t_js_generator::generate_deserialize_container(
     out << indent() << vtype << " = " << rtmp3 << ".vtype;" << endl;
     out << indent() << size << " = " << rtmp3 << ".size;" << endl;
 
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     out << indent() << prefix << " = [];" << endl
         << indent() << "var " << etype << " = 0;" << endl
         << indent() << rtmp3 << " = input.readSetBegin();" << endl
         << indent() << etype << " = " << rtmp3 << ".etype;" << endl
         << indent() << size << " = " << rtmp3 << ".size;" << endl;
 
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     out << indent() << prefix << " = [];" << endl
         << indent() << "var " << etype << " = 0;" << endl
         << indent() << rtmp3 << " = input.readListBegin();" << endl
@@ -1358,7 +1358,7 @@ void t_js_generator::generate_deserialize_container(
 
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     if (!gen_node_) {
       out << indent() << "if (" << i << " > 0 ) {" << endl
           << indent()
@@ -1371,20 +1371,20 @@ void t_js_generator::generate_deserialize_container(
     }
 
     generate_deserialize_map_element(out, (t_map*)ttype, prefix);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_deserialize_list_element(out, (t_list*)ttype, prefix);
   }
 
   scope_down(out);
 
   // Read container end
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "input.readMapEnd();" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "input.readSetEnd();" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "input.readListEnd();" << endl;
   }
 }
@@ -1452,7 +1452,7 @@ void t_js_generator::generate_serialize_field(
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_serialize_struct(
         out, (t_struct*)type, prefix + tfield->get_name());
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
   } else if (type->is_primitive_type() || type->is_enum()) {
     string name = tfield->get_name();
@@ -1529,23 +1529,23 @@ void t_js_generator::generate_serialize_struct(
  */
 void t_js_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "output.writeMapBegin("
                 << type_to_enum(((t_map*)ttype)->get_key_type()) << ", "
                 << type_to_enum(((t_map*)ttype)->get_val_type()) << ", "
                 << "Thrift.objectLength(" << prefix << "));" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "output.writeSetBegin("
                 << type_to_enum(((t_set*)ttype)->get_elem_type()) << ", "
                 << prefix << ".length);" << endl;
 
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "output.writeListBegin("
                 << type_to_enum(((t_list*)ttype)->get_elem_type()) << ", "
                 << prefix << ".length);" << endl;
   }
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     string kiter = tmp("kiter");
     string viter = tmp("viter");
     indent(out) << "for (var " << kiter << " in " << prefix << ")" << endl;
@@ -1559,7 +1559,7 @@ void t_js_generator::generate_serialize_container(
     scope_down(out);
     scope_down(out);
 
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     string iter = tmp("iter");
     indent(out) << "for (var " << iter << " in " << prefix << ")" << endl;
     scope_up(out);
@@ -1571,7 +1571,7 @@ void t_js_generator::generate_serialize_container(
     scope_down(out);
     scope_down(out);
 
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     string iter = tmp("iter");
     indent(out) << "for (var " << iter << " in " << prefix << ")" << endl;
     scope_up(out);
@@ -1584,11 +1584,11 @@ void t_js_generator::generate_serialize_container(
     scope_down(out);
   }
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "output.writeMapEnd();" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "output.writeSetEnd();" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "output.writeListEnd();" << endl;
   }
 }
@@ -1662,9 +1662,9 @@ string t_js_generator::declare_field(
       }
     } else if (type->is_enum()) {
       result += " = null";
-    } else if (type->is_map()) {
+    } else if (type->is<t_map>()) {
       result += " = null";
-    } else if (type->is_container()) {
+    } else if (type->is<t_container>()) {
       result += " = null";
     } else if (type->is_struct_or_union() || type->is_exception()) {
       if (obj) {
@@ -1761,11 +1761,11 @@ string t_js_generator ::type_to_enum(const t_type* type) {
     return "Thrift.Type.I32";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "Thrift.Type.STRUCT";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "Thrift.Type.MAP";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "Thrift.Type.SET";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return "Thrift.Type.LIST";
   }
 

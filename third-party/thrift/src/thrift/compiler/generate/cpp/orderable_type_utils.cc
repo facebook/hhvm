@@ -152,7 +152,7 @@ bool type_is_orderable_walk(
       return result = false;
     }
 
-    if (typedef_true_type.is_set() || typedef_true_type.is_map()) {
+    if (typedef_true_type.is<t_set>() || typedef_true_type.is<t_map>()) {
       return result = !has_disqualifying_annotation;
     } else {
       return result = true;
@@ -200,7 +200,7 @@ bool field_is_orderable_walk(
   // by customizing Adapter::less.
   const bool has_disqualifying_annotation =
       field.has_structured_annotation(kCppTypeUri) && !forceCustomTypeOrderable;
-  if ((field_true_type.is_set() || field_true_type.is_map()) &&
+  if ((field_true_type.is<t_set>() || field_true_type.is<t_map>()) &&
       has_disqualifying_annotation) {
     return false;
   } else {
@@ -252,7 +252,8 @@ bool has_custom_set_or_map(
     return false;
   }
   if (is_custom_type(type) &&
-      (type.get_true_type()->is_set() || type.get_true_type()->is_map())) {
+      (type.get_true_type()->is<t_set>() ||
+       type.get_true_type()->is<t_map>())) {
     // Example:
     // @cpp.Type{template = "std::unordered_map"}
     // 1: map<i32, i32> foo;
@@ -292,7 +293,7 @@ bool structure_has_custom_set_or_map_field(const t_structured& s) {
   for (const t_field& field : s.fields()) {
     const t_type& field_true_type = *field.type().deref().get_true_type();
     if (field.has_structured_annotation(kCppTypeUri) &&
-        (field_true_type.is_set() || field_true_type.is_map())) {
+        (field_true_type.is<t_set>() || field_true_type.is<t_map>())) {
       return true;
     }
     if (has_custom_set_or_map(field.type().deref(), seen)) {

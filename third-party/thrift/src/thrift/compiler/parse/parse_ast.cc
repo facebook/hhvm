@@ -396,7 +396,7 @@ class ast_builder : public parser_actions {
     }
 
     // Containers always use a new type, so should never show up here.
-    assert(!type.is_container());
+    assert(!type.is<t_container>());
     // For all other types, we can just create a dummy typedef node with
     // the same name. Note that this is not a safe assumption as it breaks all
     // dynamic casts and t_type::is_* calls.

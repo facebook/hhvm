@@ -122,7 +122,7 @@ mstch::node mstch_type::get_enum() {
 }
 
 mstch::node mstch_type::get_list_type() {
-  if (resolved_type_->is_list()) {
+  if (resolved_type_->is<t_list>()) {
     return context_.type_factory->make_mstch_object(
         dynamic_cast<const t_list*>(resolved_type_)->get_elem_type(),
         context_,
@@ -132,7 +132,7 @@ mstch::node mstch_type::get_list_type() {
 }
 
 mstch::node mstch_type::get_set_type() {
-  if (resolved_type_->is_set()) {
+  if (resolved_type_->is<t_set>()) {
     return context_.type_factory->make_mstch_object(
         dynamic_cast<const t_set*>(resolved_type_)->get_elem_type(),
         context_,
@@ -142,7 +142,7 @@ mstch::node mstch_type::get_set_type() {
 }
 
 mstch::node mstch_type::get_key_type() {
-  if (resolved_type_->is_map()) {
+  if (resolved_type_->is<t_map>()) {
     return context_.type_factory->make_mstch_object(
         dynamic_cast<const t_map*>(resolved_type_)->get_key_type(),
         context_,
@@ -152,7 +152,7 @@ mstch::node mstch_type::get_key_type() {
 }
 
 mstch::node mstch_type::get_value_type() {
-  if (resolved_type_->is_map()) {
+  if (resolved_type_->is<t_map>()) {
     return context_.type_factory->make_mstch_object(
         dynamic_cast<const t_map*>(resolved_type_)->get_val_type(),
         context_,
@@ -255,10 +255,10 @@ mstch::node mstch_const_value::list_elems() {
   if (type_ == cv::CV_LIST) {
     const t_type* expected_type = nullptr;
     if (expected_type_) {
-      if (expected_type_->is_list()) {
+      if (expected_type_->is<t_list>()) {
         expected_type =
             dynamic_cast<const t_list*>(expected_type_)->get_elem_type();
-      } else if (expected_type_->is_set()) {
+      } else if (expected_type_->is<t_set>()) {
         expected_type =
             dynamic_cast<const t_set*>(expected_type_)->get_elem_type();
       }
@@ -274,7 +274,7 @@ mstch::node mstch_const_value::map_elems() {
     return mstch::node();
   }
   std::pair<const t_type*, const t_type*> expected_types;
-  if (expected_type_ && expected_type_->is_map()) {
+  if (expected_type_ && expected_type_->is<t_map>()) {
     const auto* m = dynamic_cast<const t_map*>(expected_type_);
     expected_types = {m->get_key_type(), m->get_val_type()};
   }

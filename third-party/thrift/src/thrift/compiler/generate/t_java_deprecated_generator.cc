@@ -357,7 +357,7 @@ void t_java_deprecated_generator::print_const_value(
       indent(out) << "}" << endl;
     }
     out << endl;
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     out << name << " = new " << type_name(type, false, true) << "();" << endl;
     if (!in_static) {
       indent(out) << "static {" << endl;
@@ -377,14 +377,14 @@ void t_java_deprecated_generator::print_const_value(
       indent(out) << "}" << endl;
     }
     out << endl;
-  } else if (type->is_list() || type->is_set()) {
+  } else if (type->is<t_list>() || type->is<t_set>()) {
     out << name << " = new " << type_name(type, false, true) << "();" << endl;
     if (!in_static) {
       indent(out) << "static {" << endl;
       indent_up();
     }
     const t_type* etype;
-    if (type->is_list()) {
+    if (type->is<t_list>()) {
       etype = ((t_list*)type)->get_elem_type();
     } else {
       etype = ((t_set*)type)->get_elem_type();
@@ -1907,7 +1907,7 @@ void t_java_deprecated_generator::generate_generic_field_getters_setters(
     const std::string& field_name = field->get_name();
     std::string cap_name = get_cap_name(field_name);
 
-    if (type->is_list() || type->is_map() || type->is_set())
+    if (type->is<t_list>() || type->is<t_map>() || type->is<t_set>())
       needs_suppress_warnings = true;
 
     indent_up();
@@ -2265,11 +2265,11 @@ void t_java_deprecated_generator::generate_java_meta_data_map(
  */
 std::string t_java_deprecated_generator::get_java_type_string(
     const t_type* type) {
-  if (type->is_list()) {
+  if (type->is<t_list>()) {
     return "TType.LIST";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "TType.MAP";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "TType.SET";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "TType.STRUCT";
@@ -2319,12 +2319,12 @@ void t_java_deprecated_generator::generate_field_value_meta_data(
   if (type->is_struct_or_union()) {
     indent(out) << "new StructMetaData(TType.STRUCT, " << type_name(type)
                 << ".class";
-  } else if (type->is_container()) {
-    if (type->is_list()) {
+  } else if (type->is<t_container>()) {
+    if (type->is<t_list>()) {
       indent(out) << "new ListMetaData(TType.LIST, ";
       const t_type* elem_type = ((t_list*)type)->get_elem_type();
       generate_field_value_meta_data(out, elem_type);
-    } else if (type->is_set()) {
+    } else if (type->is<t_set>()) {
       indent(out) << "new SetMetaData(TType.SET, ";
       const t_type* elem_type = ((t_set*)type)->get_elem_type();
       generate_field_value_meta_data(out, elem_type);
@@ -3242,7 +3242,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
 
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_deserialize_struct(out, (t_structured*)type, name);
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
   } else if (type->is_enum()) {
     indent(out) << name << " = "
@@ -3322,20 +3322,20 @@ void t_java_deprecated_generator::generate_deserialize_container(
 
   string obj;
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     obj = tmp("_map");
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     obj = tmp("_set");
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     obj = tmp("_list");
   }
 
   // Declare variables, read header
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "TMap " << obj << " = iprot.readMapBegin();" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "TSet " << obj << " = iprot.readSetBegin();" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "TList " << obj << " = iprot.readListBegin();" << endl;
   }
 
@@ -3347,7 +3347,7 @@ void t_java_deprecated_generator::generate_deserialize_container(
               << type_name(ttype, false, true)
               // size the collection correctly,
               // use initial capacity of 0 if there is no explicit size
-              << "(Math.max(0, " << (ttype->is_list() ? "" : "2*") << obj
+              << "(Math.max(0, " << (ttype->is<t_list>() ? "" : "2*") << obj
               << ".size" << "));" << endl;
 
   // For loop iterates over elements
@@ -3357,11 +3357,11 @@ void t_java_deprecated_generator::generate_deserialize_container(
 
   indent(out) << "     (" << obj << ".size < 0) ? ";
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     out << "iprot.peekMap()";
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     out << "iprot.peekSet()";
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     out << "iprot.peekList()";
   }
 
@@ -3370,22 +3370,22 @@ void t_java_deprecated_generator::generate_deserialize_container(
 
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     generate_deserialize_map_element(out, (t_map*)ttype, prefix);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_deserialize_list_element(out, (t_list*)ttype, prefix);
   }
 
   scope_down(out);
 
   // Read container end
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "iprot.readMapEnd();" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "iprot.readSetEnd();" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "iprot.readListEnd();" << endl;
   }
 
@@ -3461,7 +3461,7 @@ void t_java_deprecated_generator::generate_serialize_field(
   if (type->is_struct_or_union() || type->is_exception()) {
     generate_serialize_struct(
         out, (t_structured*)type, prefix + tfield->get_name());
-  } else if (type->is_container()) {
+  } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
   } else if (type->is_enum()) {
     auto enumName = prefix + tfield->get_name();
@@ -3541,53 +3541,53 @@ void t_java_deprecated_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "oprot.writeMapBegin(new TMap("
                 << type_to_enum(((t_map*)ttype)->get_key_type()) << ", "
                 << type_to_enum(((t_map*)ttype)->get_val_type()) << ", "
                 << prefix << ".size()));" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "oprot.writeSetBegin(new TSet("
                 << type_to_enum(((t_set*)ttype)->get_elem_type()) << ", "
                 << prefix << ".size()));" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "oprot.writeListBegin(new TList("
                 << type_to_enum(((t_list*)ttype)->get_elem_type()) << ", "
                 << prefix << ".size()));" << endl;
   }
 
   string iter = tmp("_iter");
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "for (Map.Entry<"
                 << type_name(((t_map*)ttype)->get_key_type(), true, false)
                 << ", "
                 << type_name(((t_map*)ttype)->get_val_type(), true, false)
                 << "> " << iter << " : " << prefix << ".entrySet())";
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "for (" << type_name(((t_set*)ttype)->get_elem_type()) << " "
                 << iter << " : " << prefix << ")";
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "for (" << type_name(((t_list*)ttype)->get_elem_type())
                 << " " << iter << " : " << prefix << ")";
   }
 
   scope_up(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     generate_serialize_map_element(out, (t_map*)ttype, iter, prefix);
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     generate_serialize_set_element(out, (t_set*)ttype, iter);
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     generate_serialize_list_element(out, (t_list*)ttype, iter);
   }
 
   scope_down(out);
 
-  if (ttype->is_map()) {
+  if (ttype->is<t_map>()) {
     indent(out) << "oprot.writeMapEnd();" << endl;
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     indent(out) << "oprot.writeSetEnd();" << endl;
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     indent(out) << "oprot.writeListEnd();" << endl;
   }
 
@@ -3638,7 +3638,7 @@ string t_java_deprecated_generator::type_name(
 
   if (ttype->is_primitive_type()) {
     return base_type_name((t_primitive_type*)ttype, in_container);
-  } else if (ttype->is_map()) {
+  } else if (ttype->is<t_map>()) {
     const t_map* tmap = (t_map*)ttype;
     if (in_init) {
       prefix = "HashMap";
@@ -3649,7 +3649,7 @@ string t_java_deprecated_generator::type_name(
         (skip_generic ? ""
                       : "<" + type_name(tmap->get_key_type(), true) + "," +
                  type_name(tmap->get_val_type(), true) + ">");
-  } else if (ttype->is_set()) {
+  } else if (ttype->is<t_set>()) {
     const t_set* tset = (t_set*)ttype;
     if (in_init) {
       prefix = "HashSet";
@@ -3659,7 +3659,7 @@ string t_java_deprecated_generator::type_name(
     return prefix +
         (skip_generic ? ""
                       : "<" + type_name(tset->get_elem_type(), true) + ">");
-  } else if (ttype->is_list()) {
+  } else if (ttype->is<t_list>()) {
     const t_list* tlist = (t_list*)ttype;
     if (in_init) {
       prefix = "ArrayList";
@@ -3767,7 +3767,7 @@ string t_java_deprecated_generator::declare_field(
 
     } else if (ttype->is_enum()) {
       result += " = 0";
-    } else if (ttype->is_container()) {
+    } else if (ttype->is<t_container>()) {
       result += " = new " + type_name(ttype, false, true) + "()";
     } else {
       result += " = new " + type_name(ttype, false, true) + "()";
@@ -3918,11 +3918,11 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
     return "TType.I32";
   } else if (type->is_struct_or_union() || type->is_exception()) {
     return "TType.STRUCT";
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return "TType.MAP";
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return "TType.SET";
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return "TType.LIST";
   }
 
@@ -4117,12 +4117,12 @@ bool t_java_deprecated_generator::is_comparable(
     bool ret = struct_has_all_comparable_fields((t_struct*)type, enclosing);
     enclosing->pop_back();
     return ret;
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return is_comparable(((t_map*)type)->get_key_type(), enclosing) &&
         is_comparable(((t_map*)type)->get_val_type(), enclosing);
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return is_comparable(((t_set*)type)->get_elem_type(), enclosing);
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return is_comparable(((t_list*)type)->get_elem_type(), enclosing);
   } else {
     throw std::runtime_error("Don't know how to handle this ttype");
@@ -4151,12 +4151,12 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
     return false;
   } else if (type->is<t_structured>()) {
     return false;
-  } else if (type->is_map()) {
+  } else if (type->is<t_map>()) {
     return type_has_naked_binary(((t_map*)type)->get_key_type()) ||
         type_has_naked_binary(((t_map*)type)->get_val_type());
-  } else if (type->is_set()) {
+  } else if (type->is<t_set>()) {
     return type_has_naked_binary(((t_set*)type)->get_elem_type());
-  } else if (type->is_list()) {
+  } else if (type->is<t_list>()) {
     return type_has_naked_binary(((t_list*)type)->get_elem_type());
   } else {
     throw std::runtime_error("Don't know how to handle this ttype");

@@ -203,10 +203,10 @@ std::string cached_properties::to_cython_type() const {
 
 bool cached_properties::is_default_template(
     const apache::thrift::compiler::t_type* type) const {
-  return (!type->is_container() && cpp_template_ == "") ||
-      (type->is_list() && cpp_template_ == "std::vector") ||
-      (type->is_set() && cpp_template_ == "std::set") ||
-      (type->is_map() && cpp_template_ == "std::map");
+  return (!type->is<t_container>() && cpp_template_ == "") ||
+      (type->is<t_list>() && cpp_template_ == "std::vector") ||
+      (type->is<t_set>() && cpp_template_ == "std::set") ||
+      (type->is<t_map>() && cpp_template_ == "std::map");
 }
 
 void cached_properties::set_flat_name(

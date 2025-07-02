@@ -619,17 +619,17 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     return ns + "string_t";
   } else if (type.is_binary()) {
     return ns + "binary_t";
-  } else if (type.is_list()) {
+  } else if (type.is<t_list>()) {
     auto& list = type.as<t_list>();
     auto& elem = *list.get_elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "list<" + elem_tag + ">";
-  } else if (type.is_set()) {
+  } else if (type.is<t_set>()) {
     auto& set = type.as<t_set>();
     auto& elem = *set.get_elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "set<" + elem_tag + ">";
-  } else if (type.is_map()) {
+  } else if (type.is<t_map>()) {
     auto& map = type.as<t_map>();
     auto& key = *map.get_key_type();
     auto& val = *map.get_val_type();

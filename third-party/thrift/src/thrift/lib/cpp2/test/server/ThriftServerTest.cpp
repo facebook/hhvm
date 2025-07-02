@@ -4052,50 +4052,37 @@ TEST(ThriftServer, GetSetConcurrencyLimit) {
         .getExecutionLimitRequests();
   };
 
-  for (bool flag_value : {true, false}) {
-    THRIFT_FLAG_SET_MOCK(
-        default_sync_max_requests_to_concurrency_limit, flag_value);
-    for (bool flag_value : {true, false}) {
-      THRIFT_FLAG_SET_MOCK(do_not_clobber_S532283, flag_value);
-      for (auto concurrencyLimit : std::array<uint32_t, 2>{1000, 1}) {
-        {
-          // Test set before setupThreadManager
-          ThriftServer server;
-          server.setInterface(std::make_shared<TestHandler>());
-          server.setConcurrencyLimit(concurrencyLimit);
-          EXPECT_EQ(server.getConcurrencyLimit(), concurrencyLimit);
-          // Make the thrift server simple to create
-          server.setThreadManagerType(
-              apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-          server.setNumCPUWorkerThreads(1);
-          server.setupThreadManager();
+  for (auto concurrencyLimit : std::array<uint32_t, 2>{1000, 1}) {
+    {
+      // Test set before setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      server.setConcurrencyLimit(concurrencyLimit);
+      EXPECT_EQ(server.getConcurrencyLimit(), concurrencyLimit);
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
 
-          EXPECT_EQ(concurrencyLimit, server.getConcurrencyLimit());
-          if (server.useResourcePools()) {
-            if (THRIFT_FLAG(do_not_clobber_S532283) ||
-                !THRIFT_FLAG(default_sync_max_requests_to_concurrency_limit)) {
-              EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
-            } else {
-              // S532283 causes this behavior.
-              EXPECT_NE(concurrencyLimit, getExecutionLimitRequests(server));
-            }
-          }
-        }
-        {
-          // Test set after setupThreadManager
-          ThriftServer server;
-          server.setInterface(std::make_shared<TestHandler>());
-          // Make the thrift server simple to create
-          server.setThreadManagerType(
-              apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-          server.setNumCPUWorkerThreads(1);
-          server.setupThreadManager();
-          server.setConcurrencyLimit(concurrencyLimit);
-          EXPECT_EQ(concurrencyLimit, server.getConcurrencyLimit());
-          if (server.useResourcePools()) {
-            EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
-          }
-        }
+      EXPECT_EQ(concurrencyLimit, server.getConcurrencyLimit());
+      if (server.useResourcePools()) {
+        EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
+      }
+    }
+    {
+      // Test set after setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      server.setConcurrencyLimit(concurrencyLimit);
+      EXPECT_EQ(concurrencyLimit, server.getConcurrencyLimit());
+      if (server.useResourcePools()) {
+        EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
       }
     }
   }
@@ -4182,44 +4169,36 @@ TEST(ThriftServer, GetSetExecutionRate) {
         .getQpsLimit();
   };
 
-  for (bool flag_value : {true, false}) {
-    THRIFT_FLAG_SET_MOCK(do_not_clobber_S532283, flag_value);
-    for (auto executionRate : std::array<uint32_t, 2>{1000, 1}) {
-      {
-        // Test set before setupThreadManager
-        ThriftServer server;
-        server.setInterface(std::make_shared<TestHandler>());
-        server.setExecutionRate(executionRate);
-        EXPECT_EQ(server.getExecutionRate(), executionRate);
-        // Make the thrift server simple to create
-        server.setThreadManagerType(
-            apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-        server.setNumCPUWorkerThreads(1);
-        server.setupThreadManager();
-        EXPECT_EQ(executionRate, server.getExecutionRate());
-        if (server.useResourcePools()) {
-          if (THRIFT_FLAG(do_not_clobber_S532283)) {
-            EXPECT_EQ(executionRate, getQpsLimit(server));
-          } else {
-            // S532283 causes this behavior.
-            EXPECT_NE(executionRate, getQpsLimit(server));
-          }
-        }
+  for (auto executionRate : std::array<uint32_t, 2>{1000, 1}) {
+    {
+      // Test set before setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      server.setExecutionRate(executionRate);
+      EXPECT_EQ(server.getExecutionRate(), executionRate);
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      EXPECT_EQ(executionRate, server.getExecutionRate());
+      if (server.useResourcePools()) {
+        EXPECT_EQ(executionRate, getQpsLimit(server));
       }
-      {
-        // Test set after setupThreadManager
-        ThriftServer server;
-        server.setInterface(std::make_shared<TestHandler>());
-        // Make the thrift server simple to create
-        server.setThreadManagerType(
-            apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-        server.setNumCPUWorkerThreads(1);
-        server.setupThreadManager();
-        server.setExecutionRate(executionRate);
-        EXPECT_EQ(executionRate, server.getExecutionRate());
-        if (server.useResourcePools()) {
-          EXPECT_EQ(executionRate, getQpsLimit(server));
-        }
+    }
+    {
+      // Test set after setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestHandler>());
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      server.setExecutionRate(executionRate);
+      EXPECT_EQ(executionRate, server.getExecutionRate());
+      if (server.useResourcePools()) {
+        EXPECT_EQ(executionRate, getQpsLimit(server));
       }
     }
   }

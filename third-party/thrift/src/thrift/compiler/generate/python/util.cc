@@ -45,14 +45,20 @@ static void get_needed_includes_by_patch_impl(
   if (!seen.insert(&type).second) {
     return;
   }
+  if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
+    // We don't generate patch struct for typedef. We need to skip the chain.
+    get_needed_includes_by_patch_impl(
+        root, *asTypedef->get_type(), seen, result);
+    return;
+  }
+  if (type.is_primitive_type() || type.is_enum()) {
+    // We don't need to generate patch structs for primitive types or enum.
+    return;
+  }
   if (type.get_program() && type.get_program() != root) {
     // If type is not in root, root needs type's program in runtime.
     result.insert(type.get_program());
     return;
-  }
-  if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
-    get_needed_includes_by_patch_impl(
-        root, *asTypedef->get_type(), seen, result);
   }
   if (const t_list* asList = type.try_as<t_list>()) {
     get_needed_includes_by_patch_impl(

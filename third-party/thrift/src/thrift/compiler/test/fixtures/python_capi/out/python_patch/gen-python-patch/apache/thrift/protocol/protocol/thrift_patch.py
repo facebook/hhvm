@@ -40,15 +40,6 @@ import apache.thrift.protocol.gen_safe_patch_protocol.thrift_types as _fbthrift_
 import apache.thrift.protocol.detail.protocol_detail.thrift_types as _fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types
 import apache.thrift.protocol.detail.protocol_detail.thrift_patch
 
-import apache.thrift.type.id.thrift_types as _fbthrift__apache__thrift__type__id__thrift_types
-import apache.thrift.type.id.thrift_patch
-
-import apache.thrift.type.standard.thrift_types as _fbthrift__apache__thrift__type__standard__thrift_types
-import apache.thrift.type.standard.thrift_patch
-
-import apache.thrift.type.type.thrift_types as _fbthrift__apache__thrift__type__type__thrift_types
-import apache.thrift.type.type.thrift_patch
-
 import apache.thrift.type.type_rep.thrift_types as _fbthrift__apache__thrift__type__type_rep__thrift_types
 import apache.thrift.type.type_rep.thrift_patch
 

@@ -37,12 +37,6 @@ import test.fixtures.python_capi.module.thrift_types as _fbthrift__test__fixture
 import test.fixtures.python_capi.gen_safe_patch_module.thrift_types as _fbthrift_safe_patch_types
 
 
-import apache.thrift.type.id.thrift_types as _fbthrift__apache__thrift__type__id__thrift_types
-import apache.thrift.type.id.thrift_patch
-
-import apache.thrift.type.schema.thrift_types as _fbthrift__apache__thrift__type__schema__thrift_types
-import apache.thrift.type.schema.thrift_patch
-
 import test.fixtures.python_capi.serialized_dep.thrift_types as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types
 import test.fixtures.python_capi.serialized_dep.thrift_patch
 

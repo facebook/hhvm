@@ -37,9 +37,6 @@ import apache.thrift.protocol.detail.protocol_detail.thrift_types as _fbthrift__
 import apache.thrift.protocol.detail.gen_safe_patch_protocol_detail.thrift_types as _fbthrift_safe_patch_types
 
 
-import apache.thrift.type.standard.thrift_types as _fbthrift__apache__thrift__type__standard__thrift_types
-import apache.thrift.type.standard.thrift_patch
-
 
 class ObjectPatch(
     BaseStructPatch[_fbthrift__apache__thrift__protocol__detail__protocol_detail__thrift_types.Object]

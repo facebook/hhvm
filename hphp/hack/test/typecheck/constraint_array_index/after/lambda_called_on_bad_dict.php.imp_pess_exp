@@ -1,0 +1,12 @@
+ERROR: File "lambda_called_on_bad_dict.php", line 4, characters 6-27:
+Invalid argument (Typing[4110])
+  File "lambda_called_on_bad_dict.php", line 3, characters 9-10:
+  Expected `~_` because a type could not be determined here
+  File "lambda_called_on_bad_dict.php", line 4, characters 6-27:
+  But got `dict<string, int>`
+ERROR: File "lambda_called_on_bad_dict.php", line 4, characters 6-27:
+Invalid argument (Typing[4110])
+  File "lambda_called_on_bad_dict.php", line 4, characters 6-27:
+  Expected `string`
+  File "lambda_called_on_bad_dict.php", line 3, characters 19-19:
+  But got `int`

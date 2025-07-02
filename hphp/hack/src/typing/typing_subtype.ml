@@ -6206,6 +6206,9 @@ end = struct
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
       is_container tk tv
+    | (_, Tclass ((_, n), _, [tk; tv])) when String.equal n SN.Collections.cDict
+      ->
+      is_container tk tv
     | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
     | _ -> invalid ~fail env
 end

@@ -1555,7 +1555,7 @@ class InternalPriorityTest : public testing::Test {
   };
   void SetUp() override {
     if (!FLAGS_thrift_experimental_use_resource_pools) {
-      GTEST_SKIP() << "This test is only relevant when resource pools is used";
+      return;
     }
     auto pile = std::make_unique<TestRequestPile>();
     auto cc = std::make_unique<ParallelConcurrencyController>(
@@ -1577,6 +1577,9 @@ class InternalPriorityTest : public testing::Test {
 };
 
 CO_TEST_F(InternalPriorityTest, FactoryFunction) {
+  if (!FLAGS_thrift_experimental_use_resource_pools) {
+    co_return;
+  }
   auto client = server_->newClient<Client<Calculator>>();
   auto [addition, _] = co_await client->co_initializedAddition(0);
   co_await addition.co_getPrimitive();
@@ -1584,6 +1587,9 @@ CO_TEST_F(InternalPriorityTest, FactoryFunction) {
 }
 
 CO_TEST_F(InternalPriorityTest, Constructor) {
+  if (!FLAGS_thrift_experimental_use_resource_pools) {
+    co_return;
+  }
   auto client = server_->newClient<Client<Calculator>>();
   auto addition = client->createAddition();
   co_await addition.co_getPrimitive();

@@ -220,19 +220,36 @@ std::vector<w_string> Mercurial::getFilesChangedSinceMergeBaseWith(
           key,
           [this, commit = std::move(commitCopy), requestId](
               const std::string&) {
-            auto result = runMercurial(
-                {hgExecutablePath(),
-                 "--traceback",
-                 "status",
-                 "-n",
-                 "--rev",
-                 commit,
-                 // The "" argument at the end causes paths to be printed out
-                 // relative to the cwd (set to root path above).
-                 ""},
-                makeHgOptions(requestId),
-                "query for files changed since merge base");
-
+            MercurialResult result;
+            if (!cfg_get_bool("disable_hg_autopullcommits", false)) {
+              result = runMercurial(
+                  {hgExecutablePath(),
+                   "--traceback",
+                   "status",
+                   "-n",
+                   "--rev",
+                   commit,
+                   // The "" argument at the end causes paths to be printed out
+                   // relative to the cwd (set to root path above).
+                   ""},
+                  makeHgOptions(requestId),
+                  "query for files changed since merge base");
+            } else {
+              result = runMercurial(
+                  {hgExecutablePath(),
+                   "--traceback",
+                   "status",
+                   "-n",
+                   "--rev",
+                   commit,
+                   "--config",
+                   "ui.autopullcommits=false",
+                   // The "" argument at the end causes paths to be printed out
+                   // relative to the cwd (set to root path above).
+                   ""},
+                  makeHgOptions(requestId),
+                  "query for files changed since merge base");
+            }
             std::vector<w_string> lines;
             result.output.piece().split(lines, '\n');
             return folly::makeFuture(lines);

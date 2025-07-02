@@ -73,11 +73,18 @@ struct exception_t : exception_c {};
 
 // Parameterized types.
 template <typename VTag>
-struct list : list_c {};
+struct list : list_c {
+  using value_tag = VTag;
+};
 template <typename KTag>
-struct set : set_c {};
+struct set : set_c {
+  using value_tag = KTag;
+};
 template <typename KTag, typename VTag>
-struct map : map_c {};
+struct map : map_c {
+  using key_tag = KTag;
+  using value_tag = VTag;
+};
 
 // Extra compile-time metadata.
 

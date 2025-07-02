@@ -177,9 +177,10 @@ class BaseCursorReader {
   BaseCursorReader& operator=(const BaseCursorReader&) = delete;
 };
 
+template <typename ProtocolWriter>
 class BaseCursorWriter {
  protected:
-  BinaryProtocolWriter* protocol_;
+  ProtocolWriter* protocol_;
   enum class State {
     Active,
     Child,
@@ -188,7 +189,7 @@ class BaseCursorWriter {
   };
   State state_ = State::Active;
 
-  explicit BaseCursorWriter(BinaryProtocolWriter* p) : protocol_(p) {}
+  explicit BaseCursorWriter(ProtocolWriter* p) : protocol_(p) {}
 
   void checkState(State expected) const {
     if (state_ != expected) {
@@ -330,7 +331,7 @@ inline constexpr FieldId increment(FieldId id) {
 
 /** Supports writing containers whose size is not known until after
  * serialization. */
-class DelayedSizeCursorWriter : public BaseCursorWriter {
+class DelayedSizeCursorWriter : public BaseCursorWriter<BinaryProtocolWriter> {
  protected:
   void* size_;
 

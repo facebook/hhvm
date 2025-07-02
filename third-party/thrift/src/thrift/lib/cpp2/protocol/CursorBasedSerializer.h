@@ -886,7 +886,7 @@ class StringCursorWriter : detail::DelayedSizeCursorWriter {
  * Typically constructed from a CursorSerializationWrapper.
  */
 template <typename Tag>
-class StructuredCursorWriter : detail::BaseCursorWriter {
+class StructuredCursorWriter : detail::BaseCursorWriter<BinaryProtocolWriter> {
   static_assert(
       type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
   using T = type::native_type<Tag>;

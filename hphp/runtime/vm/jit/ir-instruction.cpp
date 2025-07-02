@@ -693,19 +693,6 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
   return inst->src(Idx)->type() | unionReturn(inst, IdxSeq<Rest...>{});
 }
 
-inline Type refineType(Type tparam, Type tsrc) {
-  // While ideally we would intersect the source and parameter types in all
-  // cases but when we have a RAT we fallback to a selection heuristic that may
-  // widen the type. If we have two RAT types we need to assume that the type
-  // being asserted is the one we want to keep. Generally when we assert a RAT
-  // it is because HHBBC statically determined that that information would be
-  // valuable when doing its analysis.
-  if (tsrc.arrSpec().type() && tparam.arrSpec().type()) {
-    tsrc = tsrc.unspecialize().narrowToLayout(tsrc.arrSpec().layout());
-  }
-  return tparam & tsrc;
-}
-
 } // namespace
 
 Type outputType(const IRInstruction* inst, int /*dstId*/) {
@@ -733,8 +720,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
 #define D(type)         return checkLayoutFlags(type);
 #define DofS(n)         return inst->src(n)->type();
-#define DRefineS(n)     return refineType(inst->typeParam(), \
-                                          inst->src(n)->type());
+#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParam(t)       return inst->typeParam();
 #define DEscalateToVanilla return inst->src(0)->type().modified().\
                                narrowToVanilla();

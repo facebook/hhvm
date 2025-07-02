@@ -83,6 +83,23 @@ struct adapter_builder : base_thrift_annotation_builder {
   }
 };
 
+struct type_builder : base_thrift_annotation_builder {
+  explicit type_builder(t_program& p, const std::string& lang)
+      : base_thrift_annotation_builder(p, lang, "Type") {}
+
+  std::unique_ptr<t_const> make(const char* name) {
+    auto map = t_const_value::make_map();
+    map->add_map(make_string("name"), make_string(name));
+    return make_inst(std::move(map));
+  }
+
+  std::unique_ptr<t_const> make_template(const char* name) {
+    auto map = t_const_value::make_map();
+    map->add_map(make_string("template"), make_string(name));
+    return make_inst(std::move(map));
+  }
+};
+
 struct cpp_ref_builder : base_thrift_annotation_builder {
   explicit cpp_ref_builder(t_program& p)
       : base_thrift_annotation_builder(p, "cpp", "Ref") {}

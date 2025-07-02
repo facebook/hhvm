@@ -280,6 +280,30 @@ TEST(UtilTest, is_custom_type) {
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef2));
   }
+
+  {
+    auto typeDef = t_typedef(&p, "Type", i32);
+    auto typeDef2 = t_typedef(&p, "TypeDef", typeDef);
+    EXPECT_FALSE(cpp2::is_custom_type(typeDef));
+    EXPECT_FALSE(cpp2::is_custom_type(typeDef2));
+    auto builder = gen::type_builder(p, "cpp");
+    typeDef.add_structured_annotation(builder.make("MyType"));
+    EXPECT_TRUE(cpp2::is_custom_type(typeDef));
+    EXPECT_TRUE(cpp2::is_custom_type(typeDef2));
+  }
+
+  {
+    const auto& list_i32 = t_list(&i32);
+    auto typeDef = t_typedef(&p, "Type", list_i32);
+    auto typeDef2 = t_typedef(&p, "TypeDef", typeDef);
+    EXPECT_FALSE(cpp2::is_custom_type(list_i32));
+    EXPECT_FALSE(cpp2::is_custom_type(typeDef));
+    EXPECT_FALSE(cpp2::is_custom_type(typeDef2));
+    auto builder = gen::type_builder(p, "cpp");
+    typeDef.add_structured_annotation(builder.make_template("MyContainer"));
+    EXPECT_TRUE(cpp2::is_custom_type(typeDef));
+    EXPECT_TRUE(cpp2::is_custom_type(typeDef2));
+  }
 }
 
 TEST(UtilTest, topological_sort) {

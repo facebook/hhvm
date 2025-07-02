@@ -1195,11 +1195,20 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
         v << pop{r};
       }
     );
+    // Under ROAR, emit a smashable call so that ROAR can patch it later.
+#ifdef __roar__
+    v << calls{
+      TCA(__cxxabiv1::__cxa_rethrow),
+      arg_regs(0) | cross_jit,
+      &us.endCatchHelperPast
+    };
+#else
     v << call{
       TCA(__cxxabiv1::__cxa_rethrow),
       arg_regs(0) | cross_jit,
       &us.endCatchHelperPast
     };
+#endif
     v << trap{TRAP_REASON, Fixup::none()};
   });
   meta.process(nullptr);
@@ -1221,7 +1230,14 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
     // the catch trace (or null) in the first return register, and the new vmfp
     // in the second.
     v << copy{rvmfp(), rarg(0)};
+
+    // Under ROAR, emit a smashable call so that ROAR can patch it later.
+#ifdef __roar__
+    v << calls{TCA(tc_unwind_resume), arg_regs(2)};
+#else
     v << call{TCA(tc_unwind_resume), arg_regs(2)};
+#endif
+
     emitHandleTCUnwindResumeReturn(v, us);
   });
 
@@ -1276,7 +1292,14 @@ TCA emitEndCatchStublogueHelpers(CodeBlock& cb, DataBlock& data,
     // in the first return register, and the new vmfp in the second.
     v << copy{rvmfp(), rarg(0)};
     v << stubunwind{rarg(1)};
+
+    // Under ROAR, emit a smashable call so that ROAR can patch it later.
+#ifdef __roar__
+    v << calls{TCA(tc_unwind_resume_stublogue), arg_regs(2)};
+#else
     v << call{TCA(tc_unwind_resume_stublogue), arg_regs(2)};
+#endif
+
     emitHandleTCUnwindResumeReturn(v, us);
   });
 

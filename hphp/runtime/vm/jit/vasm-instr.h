@@ -649,7 +649,7 @@ struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
 struct call  { CodeAddress target; RegSet args; TCA* watch; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
-struct calls { CodeAddress target; RegSet args; };
+struct calls { CodeAddress target; RegSet args; TCA* watch; };
 
 /*
  * Native function return.

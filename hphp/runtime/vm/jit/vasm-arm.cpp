@@ -847,6 +847,10 @@ void Vgen::emit(const call& i) {
 
 void Vgen::emit(const calls& i) {
   emitSmashableCall(*env.cb, env.meta, i.target);
+  if (i.watch) {
+    *i.watch = a->frontier();
+    env.meta.watchpoints.push_back(i.watch);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

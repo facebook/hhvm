@@ -722,6 +722,10 @@ void Vgen<X64Asm>::emit(const calls& i) {
   // relocated into its final place in the code cache.
   env.meta.nativeCalls[addr] = i.target;
 #endif
+  if (i.watch) {
+    *i.watch = a.frontier();
+    env.meta.watchpoints.push_back(i.watch);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

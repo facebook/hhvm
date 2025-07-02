@@ -25,7 +25,11 @@
 #include <folly/portability/Unistd.h>
 
 #include "llvm/DebugInfo/DWARF/DWARFContext.h"
+#if LLVM_VERSION_MAJOR > 20
+#include "llvm/DebugInfo/DWARF/LowLevel/DWARFExpression.h"
+#else
 #include "llvm/DebugInfo/DWARF/DWARFExpression.h"
+#endif
 #include "llvm/DebugInfo/DWARF/DWARFFormValue.h"
 
 #include "hphp/util/assertions.h"

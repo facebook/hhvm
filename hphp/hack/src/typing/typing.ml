@@ -3947,26 +3947,55 @@ end = struct
       let env = might_throw ~join_pos:p env in
       let is_lvalue = Valkind.is_lvalue valkind in
       let (_, p1, _) = e1 in
-      let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
-        Typing_array_access.array_get
-          ~expr_ty:ty1
-          ~array_pos:p1
-          ~expr_pos:p
-          ~lhs_of_null_coalesce
-          is_lvalue
+      if
+        TypecheckerOptions.constraint_array_index env.genv.tcopt
+        && not lhs_of_null_coalesce
+      then (
+        let (env, res_ty) = Env.fresh_type env p1 in
+        let (env, ty_err_opt) =
+          SubType.sub_type_i
+            env
+            (LoclType ty1)
+            (ConstraintType
+               (mk_constraint_type
+                  ( Reason.witness p,
+                    Tcan_index
+                      {
+                        ci_key = ty2;
+                        ci_shape = None;
+                        ci_val = res_ty;
+                        ci_expr_pos = p;
+                        ci_index_pos = snd3 e2;
+                      } )))
+            (Some (Typing_error.Reasons_callback.unify_error_at p))
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        let (env, pess_res_ty) =
+          Typing_array_access.maybe_pessimise_type env res_ty
+        in
+        make_result env p (Aast.Array_get (te1, Some te2)) pess_res_ty
+      ) else
+        let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
+          Typing_array_access.array_get
+            ~expr_ty:ty1
+            ~array_pos:p1
+            ~expr_pos:p
+            ~lhs_of_null_coalesce
+            is_lvalue
+            env
+            ty1
+            e2
+            ty2
+        in
+        make_result
           env
-          ty1
-          e2
-          ty2
-      in
-      make_result
-        env
-        p
-        (Aast.Array_get
-           ( hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1,
-             Some (hole_on_ty_mismatch ~ty_mismatch_opt:key_ty_mismatch_opt te2)
-           ))
-        ty
+          p
+          (Aast.Array_get
+             ( hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1,
+               Some
+                 (hole_on_ty_mismatch ~ty_mismatch_opt:key_ty_mismatch_opt te2)
+             ))
+          ty
     | Call
         { func = (_, pos_id, Id (_, s)) as e; targs; args; unpacked_arg = None }
       when Hash_set.mem typing_env_pseudofunctions s ->

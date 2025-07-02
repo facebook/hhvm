@@ -1,0 +1,4 @@
+ERROR: File "lambda_vec_arg.php", line 3, characters 22-23:
+Was expecting an array or collection but type is unknown (Typing[4297])
+  File "lambda_vec_arg.php", line 3, characters 10-11:
+  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

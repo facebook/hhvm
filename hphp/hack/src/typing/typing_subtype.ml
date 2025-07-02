@@ -6128,12 +6128,39 @@ end = struct
     can_index: can_index;
   }
 
-  let simplify
+  (* Since array index constraint solving is under development,
+   * it is an experimental feature and will only be turned on
+   * if the flag constraint_array_index is set.
+   *)
+  let rec simplify
       ~subtype_env
-      ~this_ty:_
-      ~lhs:{ ty_sub; _ }
+      ~this_ty
+      ~lhs:({ ty_sub; _ } as lhs)
+      ~rhs:({ reason_super; can_index } as rhs)
+      env =
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    let ty_sub = LoclType ty_sub in
+    let ty_super =
+      ConstraintType (mk_constraint_type (reason_super, Tcan_index can_index))
+    in
+    if Logging.should_log_subtype_i env ~level:2 ty_sub ty_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:"Typing_subtype.Can_index.simplify"
+        env
+        ty_sub
+        ty_super
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_
+      ~subtype_env
+      ~this_ty
+      ~lhs:{ sub_supportdyn; ty_sub }
       ~rhs:{ reason_super; can_index }
       env =
+    let (env, ty_sub) = Env.expand_type env ty_sub in
     let subtype_env =
       Subtype_env.possibly_add_violated_constraint
         subtype_env
@@ -6148,7 +6175,39 @@ end = struct
           (ConstraintType
              (mk_constraint_type (reason_super, Tcan_index can_index)))
     in
-    invalid env ~fail
+    let is_container tk tv =
+      Subtype.simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = can_index.ci_key }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = tk }
+        env
+      &&& Subtype.simplify
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = tv }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super = can_index.ci_val;
+              }
+    in
+    match deref ty_sub with
+    | (_, Tvar _) ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (ConstraintType
+           (mk_constraint_type (reason_super, Tcan_index can_index)))
+    | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVec ->
+      let pos = get_pos ty_sub in
+      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
+      is_container tk tv
+    | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
+    | _ -> invalid ~fail env
 end
 
 and Can_traverse : sig

@@ -1,0 +1,6 @@
+ERROR: File "index_vec_with_string.php", line 4, characters 6-11:
+Invalid argument (Typing[4110])
+  File "index_vec_with_string.php", line 4, characters 6-11:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "index_vec_with_string.php", line 3, characters 19-23:
+  But got `string`

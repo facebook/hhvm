@@ -155,6 +155,7 @@ impl Default for GlobalOptions {
             class_pointer_ban_classname_static_meth: false,
             class_pointer_ban_classname_class_const: false,
             class_pointer_ban_class_array_key: false,
+            tco_poly_function_pointers: false,
         }
     }
 }

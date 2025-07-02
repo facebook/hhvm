@@ -600,6 +600,8 @@ impl HhConfig {
                 "class_pointer_ban_class_array_key",
                 default.class_pointer_ban_class_array_key,
             )?,
+            tco_poly_function_pointers: hhconfig
+                .get_bool_or("poly_function_pointers", default.tco_poly_function_pointers)?,
         };
         let mut c = Self {
             opts,

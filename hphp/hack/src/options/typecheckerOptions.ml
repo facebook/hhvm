@@ -352,3 +352,5 @@ let class_pointer_ban_classname_class_const t =
 
 let class_pointer_ban_class_array_key t =
   t.GlobalOptions.class_pointer_ban_class_array_key
+
+let tco_poly_function_pointers t = t.GlobalOptions.tco_poly_function_pointers

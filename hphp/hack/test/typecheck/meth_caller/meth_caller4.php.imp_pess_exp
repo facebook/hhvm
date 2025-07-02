@@ -1,1 +1,30 @@
-No errors
+ERROR: File "meth_caller4.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+  File "meth_caller4.php", line 18, characters 36-38:
+  Expected `int`
+  File "meth_caller4.php", line 20, characters 30-33:
+  But got `bool`
+  File "meth_caller4.php", line 20, characters 30-33:
+  This type argument to `X` must match exactly (it is invariant)
+ERROR: File "meth_caller4.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+  File "meth_caller4.php", line 20, characters 18-48:
+  Expected `dynamic`
+  File "meth_caller4.php", line 13, characters 19-21:
+  But got `(readonly function(X<_>, $x): ~_)`
+ERROR: File "meth_caller4.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+  File "meth_caller4.php", line 20, characters 18-48:
+  Expected `~(function(X<bool>, bool): ~bool)`
+  File "meth_caller4.php", line 21, characters 13-40:
+  But got `HH\FunctionRef<(readonly function(X<_>, $x): ~_)>`
+ERROR: File "meth_caller4.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+  File "meth_caller4.php", line 20, characters 30-33:
+  Expected `bool`
+  File "meth_caller4.php", line 18, characters 36-38:
+  But got `int`
+  File "meth_caller4.php", line 18, characters 36-38:
+  This type argument to `X` must match exactly (it is invariant)
+  File "meth_caller4.php", line 18, characters 36-38:
+  This type argument to `X` must match exactly (it is invariant)

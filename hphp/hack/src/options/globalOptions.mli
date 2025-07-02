@@ -305,6 +305,7 @@ type t = {
       (** Error on $c::FOO when $c: classname<T>  *)
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
+  tco_poly_function_pointers: bool;
 }
 [@@deriving eq, show]
 
@@ -425,6 +426,7 @@ val set :
   ?class_pointer_ban_classname_static_meth:bool ->
   ?class_pointer_ban_classname_class_const:bool ->
   ?class_pointer_ban_class_array_key:bool ->
+  ?tco_poly_function_pointers:bool ->
   t ->
   t
 

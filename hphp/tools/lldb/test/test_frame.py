@@ -1,6 +1,5 @@
 # pyre-strict
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
-import unittest
 
 import hphp.tools.lldb.frame as frame
 import hphp.tools.lldb.utils as utils
@@ -10,9 +9,6 @@ class FrameTestCase(base.TestHHVMBinary):
     def file(self) -> str:
         return "slow/reified-generics/reified-parent.php"
 
-    @unittest.skip(
-        "This test isn't behaving well with non-lowptr; enable once we're testing in lowptr again"
-    )
     def test_create_native_frame(self) -> None:
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
         ar = utils.reg("fp", self.frame).Cast(

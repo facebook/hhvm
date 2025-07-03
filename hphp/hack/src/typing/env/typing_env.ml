@@ -601,10 +601,10 @@ let env_with_constructor_droot_member env =
 let get_module (env : env) (name : Decl_provider.module_key) :
     module_def_type option =
   let res =
-    Decl_provider.get_module
-      ?tracing_info:(get_tracing_info env)
-      (get_ctx env)
-      name
+    (Decl_provider.get_module
+       ?tracing_info:(get_tracing_info env)
+       (get_ctx env)
+       name [@alert "-dependencies"])
   in
   Deps.make_depend_on_module env name res;
   res
@@ -710,10 +710,10 @@ let with_packages env packages f =
 
 let get_typedef env x =
   let td =
-    Decl_provider.get_typedef
-      ?tracing_info:(get_tracing_info env)
-      (get_ctx env)
-      x
+    (Decl_provider.get_typedef
+       ?tracing_info:(get_tracing_info env)
+       (get_ctx env)
+       x [@alert "-dependencies"])
   in
   Deps.make_depend_on_typedef env x td;
   td
@@ -766,10 +766,10 @@ let is_typedef_visible env ~name td =
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t Decl_entry.t =
   let res =
-    Decl_provider.get_class
-      ?tracing_info:(get_tracing_info env)
-      (get_ctx env)
-      name
+    (Decl_provider.get_class
+       ?tracing_info:(get_tracing_info env)
+       (get_ctx env)
+       name [@alert "-dependencies"])
   in
   Deps.make_depend_on_class env name res;
   res
@@ -800,7 +800,10 @@ let get_class_or_typedef_tparams env x =
 
 let get_fun env x =
   let res =
-    Decl_provider.get_fun ?tracing_info:(get_tracing_info env) (get_ctx env) x
+    (Decl_provider.get_fun
+       ?tracing_info:(get_tracing_info env)
+       (get_ctx env)
+       x [@alert "-dependencies"])
   in
   Deps.make_depend_on_fun env x res;
   res
@@ -835,26 +838,26 @@ let is_enum_class env x =
 
 let get_typeconst env class_ mid =
   Deps.make_depend_on_class_const env class_ mid;
-  Cls.get_typeconst class_ mid
+  Cls.get_typeconst class_ mid [@alert "-dependencies"]
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
   Deps.make_depend_on_class_const env class_ mid;
-  Cls.get_const class_ mid
+  Cls.get_const class_ mid [@alert "-dependencies"]
 
 let consts env class_ =
   Deps.make_depend_on_class env (Cls.name class_) (Decl_entry.Found class_);
-  Cls.consts class_
+  Cls.consts class_ [@alert "-dependencies"]
 
 (* Used to access "global constants". That is constants that were
  * introduced with "const X = ...;" at topelevel, or "define('X', ...);"
  *)
 let get_gconst env cst_name =
   let res =
-    Decl_provider.get_gconst
-      ?tracing_info:(get_tracing_info env)
-      (get_ctx env)
-      cst_name
+    (Decl_provider.get_gconst
+       ?tracing_info:(get_tracing_info env)
+       (get_ctx env)
+       cst_name [@alert "-dependencies"])
   in
   Deps.make_depend_on_gconst env cst_name res;
   res
@@ -866,9 +869,9 @@ let get_static_member is_method env class_ mid =
    *)
   let ce_opt =
     if is_method then
-      Cls.get_smethod class_ mid
+      Cls.get_smethod class_ mid [@alert "-dependencies"]
     else
-      Cls.get_sprop class_ mid
+      Cls.get_sprop class_ mid [@alert "-dependencies"]
   in
   Deps.add_member_dep ~is_method ~is_static:true env class_ mid ce_opt;
   ce_opt
@@ -928,9 +931,9 @@ let get_member is_method env (class_ : Cls.t) mid =
    *)
   let ce_opt =
     if is_method then
-      Cls.get_method class_ mid
+      Cls.get_method class_ mid [@alert "-dependencies"]
     else
-      Cls.get_prop class_ mid
+      Cls.get_prop class_ mid [@alert "-dependencies"]
   in
   Deps.add_member_dep ~is_method ~is_static:false env class_ mid ce_opt;
   ce_opt
@@ -947,7 +950,7 @@ let suggest_member is_method class_ mid =
 
 let get_construct env class_ =
   Deps.make_depend_on_constructor env class_;
-  Cls.construct class_
+  Cls.construct class_ [@alert "-dependencies"]
 
 let get_return env = env.genv.return
 

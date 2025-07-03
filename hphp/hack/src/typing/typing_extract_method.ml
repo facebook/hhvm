@@ -19,11 +19,6 @@ let mk_tparam pos name tp_constraints =
 (* -- This analysis --------------------------------------------------------- *)
 
 module This_variance : sig
-  val of_ty :
-    Typing_defs_core.decl_ty ->
-    env:Typing_env_types.env ->
-    Ast_defs.variance option
-
   val of_fun_ty :
     Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
     env:Typing_env_types.env ->
@@ -162,8 +157,6 @@ end = struct
       let tys = List.map ft_params ~f:(fun { fp_type; _ } -> fp_type) in
       find_list tys ~var ~acc ~env
 
-  let of_ty ty ~env = find ty ~var:Covariant ~acc:None ~env
-
   let of_fun_ty fun_ty ~env = find_fun_ty fun_ty ~var:Covariant ~acc:None ~env
 end
 
@@ -192,6 +185,7 @@ module Typeconst_analysis : sig
 
   (** Pretty print an analysis for debugging *)
   val show : t -> Typing_env_types.env -> string
+    [@@warning "-32"]
 
   module Subst : sig
     type t = {
@@ -548,7 +542,7 @@ end = struct
            corresponding to that root directly - since we are at the root
            we don't need to rewrite `this` to make absolute *)
         let typeconst_opt =
-          Folded_class.get_typeconst analysis.this_folded_class const_name
+          Typing_env.get_typeconst env analysis.this_folded_class const_name
         in
         let (status, tys) =
           Option.value_map
@@ -587,7 +581,7 @@ end = struct
       (* For this use the [folded_class] corresponding to the absolute root
          class for the analysis *)
       let typeconst_opt =
-        Folded_class.get_typeconst analysis.this_folded_class const_name
+        Typing_env.get_typeconst env analysis.this_folded_class const_name
       in
       let (status, tys) =
         Option.value_map
@@ -613,7 +607,7 @@ end = struct
       in
       let typeconst_opt =
         Option.bind folded_class_opt ~f:(fun folded_class ->
-            Folded_class.get_typeconst folded_class const_name)
+            Typing_env.get_typeconst env folded_class const_name)
       in
       let (status, tys) =
         Option.value_map

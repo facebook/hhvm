@@ -67,6 +67,9 @@ val tparams : t -> decl_tparam list
 val upper_bounds_on_this : t -> decl_ty list
 
 val construct : t -> class_elt option * consistent_kind
+  [@@alert
+    dependencies
+      "Direct use of `construct` will not register a dependency. You probably want to use `Typing_env.get_construct` instead"]
 
 val enum_type : t -> enum_type option
 
@@ -111,16 +114,34 @@ val all_ancestor_req_class_requirements : t -> requirement list
 val all_ancestor_req_this_as_requirements : t -> requirement list
 
 val get_const : t -> string -> class_const option
+  [@@alert
+    dependencies
+      "Direct use of `get_const` will not register a dependency. You probably want to use `Typing_env.get_const` instead"]
 
 val get_typeconst : t -> string -> typeconst_type option
+  [@@alert
+    dependencies
+      "Direct use of `get_typeconst` will not register a dependency. You probably want to use `Typing_env.get_typeconst` instead"]
 
 val get_prop : t -> string -> class_elt option
+  [@@alert
+    dependencies
+      "Direct use of `get_prop` will not register a dependency. You probably want to use `Typing_env.get_member` instead"]
 
 val get_sprop : t -> string -> class_elt option
+  [@@alert
+    dependencies
+      "Direct use of `get_sprop` will not register a dependency. You probably want to use `Typing_env.get_static_member` instead"]
 
 val get_method : t -> string -> class_elt option
+  [@@alert
+    dependencies
+      "Direct use of `get_method` will not register a dependency. You probably want to use `Typing_env.get_member` instead"]
 
 val get_smethod : t -> string -> class_elt option
+  [@@alert
+    dependencies
+      "Direct use of `get_smethod` will not register a dependency. You probably want to use `Typing_env.get_static_member` instead"]
 
 val get_any_method : is_static:bool -> t -> string -> class_elt option
 
@@ -137,6 +158,9 @@ val has_method : t -> string -> bool
 val has_smethod : t -> string -> bool
 
 val consts : t -> (string * class_const) list
+  [@@alert
+    dependencies
+      "Direct use of `consts` will not register a dependency. You probably want to use `Typing_env.get_consts` instead"]
 
 val typeconsts : t -> (string * typeconst_type) list
 

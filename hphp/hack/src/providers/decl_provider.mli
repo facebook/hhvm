@@ -31,12 +31,18 @@ val get_fun :
   Provider_context.t ->
   fun_key ->
   fun_decl Decl_entry.t
+  [@@alert
+    dependencies
+      "Direct use of `get_fun` will not register a dependency. You probably want to use `Typing_env.get_fun` instead"]
 
 val get_class :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
   type_key ->
   class_decl Decl_entry.t
+  [@@alert
+    dependencies
+      "Direct use of `get_class` will not register a dependency. You probably want to use `Typing_env.get_class` instead"]
 
 (** Return the shallow declaration of the class with the given name if it is
 present in the cache. Otherwise, compute it, store it in the cache, and
@@ -49,18 +55,27 @@ val get_typedef :
   Provider_context.t ->
   type_key ->
   typedef_decl Decl_entry.t
+  [@@alert
+    dependencies
+      "Direct use of `get_typedef` will not register a dependency. You probably want to use `Typing_env.get_typedef` instead"]
 
 val get_gconst :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
   gconst_key ->
   gconst_decl option
+  [@@alert
+    dependencies
+      "Direct use of `get_class` will not register a dependency. You probably want to use `Typing_env.get_class` instead"]
 
 val get_module :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
   module_key ->
   module_decl option
+  [@@alert
+    dependencies
+      "Direct use of `get_module` will not register a dependency. You probably want to use `Typing_env.get_module` instead"]
 
 (** This assumes that [class_name] defines and overrides [method_name]
   and returns the method from an ancestor or trait of [class_name] that would

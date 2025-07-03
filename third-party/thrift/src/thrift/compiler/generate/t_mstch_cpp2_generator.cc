@@ -436,6 +436,16 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
     auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
 
+    def.property("cpp_return_type", [&](const t_function& f) -> std::string {
+      return cpp_context_->resolver().get_return_type(f);
+    });
+
+    // Specifies if the generated recv_* functions have an additional argument
+    // representing the return value.
+    def.property("cpp_recv_arg?", [&](const t_function& f) {
+      return !f.return_type()->is_void() || f.sink_or_stream();
+    });
+
     return std::move(def).make();
   }
 
@@ -1088,8 +1098,6 @@ class cpp_mstch_function : public mstch_function {
         this,
         {
             {"function:eb", &cpp_mstch_function::event_based},
-            {"function:cpp_return_type", &cpp_mstch_function::cpp_return_type},
-            {"function:cpp_void?", &cpp_mstch_function::is_cpp_void},
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
             {"function:created_interaction",
              &cpp_mstch_function::created_interaction},
@@ -1105,13 +1113,6 @@ class cpp_mstch_function : public mstch_function {
         function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
         interface_->has_unstructured_annotation("process_in_event_base") ||
         interface_->has_structured_annotation(kCppProcessInEbThreadUri);
-  }
-  mstch::node cpp_return_type() {
-    return cpp_context_->resolver().get_return_type(*function_);
-  }
-  // Specifies if the generated C++ function is void.
-  mstch::node is_cpp_void() {
-    return function_->return_type()->is_void() && !function_->sink_or_stream();
   }
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(context_.options, *function_);

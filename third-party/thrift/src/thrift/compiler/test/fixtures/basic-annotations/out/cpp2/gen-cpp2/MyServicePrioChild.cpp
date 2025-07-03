@@ -140,7 +140,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void MyServicePrioChildSvNull::pang() { 
-  return;
 }
 
 

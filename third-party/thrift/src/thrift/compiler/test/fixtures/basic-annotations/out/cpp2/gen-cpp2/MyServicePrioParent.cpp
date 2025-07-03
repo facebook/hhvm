@@ -250,11 +250,9 @@ determineInvocationType:
 namespace cpp2 {
 
 void MyServicePrioParentSvNull::ping() { 
-  return;
 }
 
 void MyServicePrioParentSvNull::pong() { 
-  return;
 }
 
 

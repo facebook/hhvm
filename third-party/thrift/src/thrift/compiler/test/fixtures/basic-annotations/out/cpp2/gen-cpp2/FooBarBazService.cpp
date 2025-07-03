@@ -360,15 +360,12 @@ determineInvocationType:
 namespace cpp2 {
 
 void FooBarBazServiceSvNull::foo() { 
-  return;
 }
 
 void FooBarBazServiceSvNull::bar() { 
-  return;
 }
 
 void FooBarBazServiceSvNull::baz() { 
-  return;
 }
 
 

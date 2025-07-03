@@ -140,7 +140,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void MyLeafSvNull::do_leaf() { 
-  return;
 }
 
 

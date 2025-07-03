@@ -203,26 +203,26 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
 
 {{^function:oneway?}}
 template <class ProtocolIn_, class ProtocolOut_>
-{{#function:cpp_void?}}
+{{^function:self.cpp_recv_arg?}}
 apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx) {
-{{/function:cpp_void?}}
-{{^function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
+{{#function:self.cpp_recv_arg?}}
     {{^function:stream?}}{{^function:sink?}}
-apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}} const& _return) {
+apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:self.cpp_return_type}} const& _return) {
     {{/function:sink?}}{{/function:stream?}}
     {{#function:stream?}}
-apache::thrift::ResponseAndServerStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, {{function:cpp_return_type}}&& _return) {
+apache::thrift::ResponseAndServerStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, {{function:self.cpp_return_type}}&& _return) {
     {{/function:stream?}}
     {{#function:sink?}}
-std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}}&& _return, folly::Executor::KeepAlive<> executor) {
+std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:self.cpp_return_type}}&& _return, folly::Executor::KeepAlive<> executor) {
     {{/function:sink?}}
-{{/function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
   ProtocolOut_ prot;
 {{#function:stream?}}
   {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
   using StreamPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
       {{#function:stream_has_first_response?}}
-  result.get<0>().value = const_cast<{{function:cpp_return_type}}::ResponseType*>(&_return.response);
+  result.get<0>().value = const_cast<{{function:self.cpp_return_type}}::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
       {{/function:stream_has_first_response?}}
@@ -298,7 +298,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
 {{^function:stream?}}{{^function:sink?}}
   ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
 {{^type:void?}}
-  result.get<0>().value = const_cast<{{function:cpp_return_type}}*>(&_return);
+  result.get<0>().value = const_cast<{{function:self.cpp_return_type}}*>(&_return);
   result.setIsSet(0, true);
 {{/type:void?}}
   return serializeResponse("{{> common/function_name}}", &prot, ctx, result);
@@ -320,11 +320,11 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
     }
     ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
     ::apache::thrift::util::appendErrorClassificationToHeader<{{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}>(ew, *reqCtx);
-{{#function:cpp_void?}}
+{{^function:self.cpp_recv_arg?}}
     result.get<{{field:index}}>().ref() = e;
     result.setIsSet({{field:index}}, true);
-{{/function:cpp_void?}}
-{{^function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
+{{#function:self.cpp_recv_arg?}}
   {{^function:stream?}}{{^function:sink?}}
     result.get<{{field:index_plus_one}}>().ref() = e;
     result.setIsSet({{field:index_plus_one}}, true);
@@ -349,7 +349,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
     result.fields.setIsSet({{field:index}}, true);
   {{/function:sink_has_first_response?}}
   {{/function:sink?}}
-{{/function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
   }
   )) {} else
 {{/function:exceptions}}

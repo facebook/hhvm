@@ -22,7 +22,7 @@
   apache::thrift::detail::si::throw_app_exn_unimplemented("{{function:name}}");
 }
 
-{{> service_common/sync_function_return_type_server}} {{> service_common/service_class_name}}::sync_{{function:self.cpp_name}}({{#function:sync_returns_by_outparam?}}{{!}}{{function:cpp_return_type}}& _return{{function:comma}}{{!}}{{/function:sync_returns_by_outparam?}}{{> service_common/function_param_list_server}}) {
+{{> service_common/sync_function_return_type_server}} {{> service_common/service_class_name}}::sync_{{function:self.cpp_name}}({{#function:sync_returns_by_outparam?}}{{!}}{{function:self.cpp_return_type}}& _return{{function:comma}}{{!}}{{/function:sync_returns_by_outparam?}}{{> service_common/function_param_list_server}}) {
   return {{function:self.cpp_name}}({{#function:sync_returns_by_outparam?}}_return{{function:comma}}{{!}}{{/function:sync_returns_by_outparam?}}{{> service_common/param_list_move}});
 }
 

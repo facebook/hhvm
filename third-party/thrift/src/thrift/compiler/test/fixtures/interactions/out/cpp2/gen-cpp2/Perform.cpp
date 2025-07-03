@@ -651,7 +651,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void PerformSvNull::foo() { 
-  return;
 }
 
 

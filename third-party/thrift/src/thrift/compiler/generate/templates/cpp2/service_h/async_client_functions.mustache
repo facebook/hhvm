@@ -42,9 +42,9 @@
 {{/function:sync_returns_by_outparam?}}
 {{#function:sync_returns_by_outparam?}}
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}void sync_{{function:self.cpp_name}}({{function:cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
+  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}void sync_{{function:self.cpp_name}}({{function:self.cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}void sync_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
+  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}void sync_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:self.cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
 {{/function:sync_returns_by_outparam?}}
 
 {{^service:reduced_client?}}{{^function:creates_interaction?}}{{^function:stream?}}
@@ -230,7 +230,7 @@
 #endif // FOLLY_HAS_COROUTINES
 {{/function:sink?}}
 
-{{#function:cpp_void?}}
+{{^function:self.cpp_recv_arg?}}
 {{^function:oneway?}}
 {{> common/fun_docblock}}
   static folly::exception_wrapper recv_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
@@ -244,8 +244,8 @@
   virtual folly::exception_wrapper recv_instance_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
 {{/function:creates_interaction?}}{{/service:reduced_client?}}
 {{/function:oneway?}}
-{{/function:cpp_void?}}
-{{^function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
+{{#function:self.cpp_recv_arg?}}
 {{> common/fun_docblock}}
   static folly::exception_wrapper recv_wrapped_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state);
 {{^function:sync_returns_by_outparam?}}
@@ -269,7 +269,7 @@
 {{> common/fun_docblock}}
   virtual folly::exception_wrapper recv_instance_wrapped_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state);
 {{/function:creates_interaction?}}{{/service:reduced_client?}}
-{{/function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_{{function:self.cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{> service_common/function_param_list_client}});
   template <typename RpcOptions>

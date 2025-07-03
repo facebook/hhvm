@@ -140,7 +140,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void MyNodeSvNull::do_mid() { 
-  return;
 }
 
 

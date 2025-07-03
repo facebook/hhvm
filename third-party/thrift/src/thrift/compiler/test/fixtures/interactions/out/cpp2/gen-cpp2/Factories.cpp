@@ -963,7 +963,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void FactoriesSvNull::foo() { 
-  return;
 }
 
 

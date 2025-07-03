@@ -812,19 +812,15 @@ bool ExtraServiceSvNull::throws_function2(bool /*param1*/) {
 void ExtraServiceSvNull::throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/) {  }
 
 void ExtraServiceSvNull::oneway_void_ret() { 
-  return;
 }
 
 void ExtraServiceSvNull::oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) { 
-  return;
 }
 
 void ExtraServiceSvNull::oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/) { 
-  return;
 }
 
 void ExtraServiceSvNull::oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/) { 
-  return;
 }
 
 

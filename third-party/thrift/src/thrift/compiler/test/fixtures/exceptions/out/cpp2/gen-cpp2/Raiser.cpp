@@ -474,11 +474,9 @@ determineInvocationType:
 namespace cpp2 {
 
 void RaiserSvNull::doBland() { 
-  return;
 }
 
 void RaiserSvNull::doRaise() { 
-  return;
 }
 
 void RaiserSvNull::get200(::std::string& /*_return*/) {  }

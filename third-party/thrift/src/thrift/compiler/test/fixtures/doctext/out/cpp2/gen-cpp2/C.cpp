@@ -360,7 +360,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void CSvNull::f() { 
-  return;
 }
 
 void CSvNull::thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {  }

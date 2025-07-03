@@ -1133,17 +1133,14 @@ determineInvocationType:
 namespace test::fixtures::basic {
 
 void MyServiceSvNull::ping() { 
-  return;
 }
 
 void MyServiceSvNull::getRandomData(::std::string& /*_return*/) {  }
 
 void MyServiceSvNull::sink(::std::int64_t /*sink*/) { 
-  return;
 }
 
 void MyServiceSvNull::putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) { 
-  return;
 }
 
 bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) { 
@@ -1153,17 +1150,14 @@ bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) {
 void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {  }
 
 void MyServiceSvNull::deleteDataById(::std::int64_t /*id*/) { 
-  return;
 }
 
 void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) { 
-  return;
 }
 
 void MyServiceSvNull::invalid_return_for_hack(::std::set<float>& /*_return*/) {  }
 
 void MyServiceSvNull::rpc_skipped_codegen() { 
-  return;
 }
 
 

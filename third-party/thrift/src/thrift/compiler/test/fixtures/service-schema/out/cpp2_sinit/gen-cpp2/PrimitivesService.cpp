@@ -377,7 +377,6 @@ namespace facebook::thrift::test {
 }
 
 void PrimitivesServiceSvNull::return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/) { 
-  return;
 }
 
 

@@ -2796,31 +2796,24 @@ determineInvocationType:
 namespace some::valid::ns {
 
 void ParamServiceSvNull::void_ret_byte_i16_param(::std::int8_t /*param1*/, ::std::int16_t /*param2*/) { 
-  return;
 }
 
 void ParamServiceSvNull::void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) { 
-  return;
 }
 
 void ParamServiceSvNull::void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/, std::unique_ptr<::std::set<::std::vector<::std::string>>> /*param2*/) { 
-  return;
 }
 
 void ParamServiceSvNull::void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef /*param1*/) { 
-  return;
 }
 
 void ParamServiceSvNull::void_ret_enum_param(::some::valid::ns::MyEnumA /*param1*/) { 
-  return;
 }
 
 void ParamServiceSvNull::void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> /*param1*/) { 
-  return;
 }
 
 void ParamServiceSvNull::void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> /*param1*/) { 
-  return;
 }
 
 bool ParamServiceSvNull::bool_ret_i32_i64_param(::std::int32_t /*param1*/, ::std::int64_t /*param2*/) { 

@@ -690,11 +690,9 @@ determineInvocationType:
 namespace test_cpp2::cpp_reflection {
 
 void service1SvNull::method1() { 
-  return;
 }
 
 void service1SvNull::method2(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) { 
-  return;
 }
 
 ::std::int32_t service1SvNull::method3() { 

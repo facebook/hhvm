@@ -14,12 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#function:cpp_void?}}{{!
+}}{{^function:self.cpp_recv_arg?}}{{!
 }}folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state) {
-{{/function:cpp_void?}}
-{{^function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
+{{#function:self.cpp_recv_arg?}}
 folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state) {
-{{/function:cpp_void?}}
+{{/function:self.cpp_recv_arg?}}
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -54,11 +54,11 @@ folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{
       apache::thrift::BinaryProtocolReader reader;
       {{#function:sink?}}
       return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
-          &reader, state{{^function:cpp_void?}}, state.extractSink(), _return{{/function:cpp_void?}});
+          &reader, state{{#function:self.cpp_recv_arg?}}, state.extractSink(), _return{{/function:self.cpp_recv_arg?}});
       {{/function:sink?}}
       {{^function:sink?}}
       return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state{{^function:cpp_void?}}, _return{{/function:cpp_void?}});
+          &reader, state{{#function:self.cpp_recv_arg?}}, _return{{/function:self.cpp_recv_arg?}});
       {{/function:sink?}}
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
@@ -66,11 +66,11 @@ folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{
       apache::thrift::CompactProtocolReader reader;
       {{#function:sink?}}
       return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
-          &reader, state{{^function:cpp_void?}}, state.extractSink(), _return{{/function:cpp_void?}});
+          &reader, state{{#function:self.cpp_recv_arg?}}, state.extractSink(), _return{{/function:self.cpp_recv_arg?}});
       {{/function:sink?}}
       {{^function:sink?}}
       return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state{{^function:cpp_void?}}, _return{{/function:cpp_void?}});
+          &reader, state{{#function:self.cpp_recv_arg?}}, _return{{/function:self.cpp_recv_arg?}});
       {{/function:sink?}}
     }
     default:

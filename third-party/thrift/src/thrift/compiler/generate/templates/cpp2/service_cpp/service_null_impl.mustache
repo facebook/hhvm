@@ -18,9 +18,6 @@
 {{> service_common/sync_function_return_type_server}} {{service:cpp_name}}SvNull::{{function:self.cpp_name}}({{> service_common/sync_function_return_param_server}}{{> service_common/function_param_list_server_commented_out}}) { {{!
 }}{{#type:resolves_to_complex_return?}} }{{/type:resolves_to_complex_return?}}
 {{^type:resolves_to_complex_return?}}
-{{#function:cpp_void?}}
-  return;
-{{/function:cpp_void?}}
 {{#type:enum?}}
   return ({{type:cpp_type}})0;
 {{/type:enum?}}
@@ -30,9 +27,9 @@
 {{#function:sink?}}
   return {};
 {{/function:sink?}}
-{{^function:cpp_void?}}{{^type:enum?}}{{^function:stream?}}{{^function:sink?}}
+{{#function:self.cpp_recv_arg?}}{{^type:enum?}}{{^function:stream?}}{{^function:sink?}}
   return 0;
-{{/function:sink?}}{{/function:stream?}}{{/type:enum?}}{{/function:cpp_void?}}
+{{/function:sink?}}{{/function:stream?}}{{/type:enum?}}{{/function:self.cpp_recv_arg?}}
 }
 {{/type:resolves_to_complex_return?}}
 

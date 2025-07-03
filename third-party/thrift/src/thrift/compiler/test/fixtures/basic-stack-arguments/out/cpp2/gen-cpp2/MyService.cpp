@@ -475,11 +475,9 @@ bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) {
 void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {  }
 
 void MyServiceSvNull::putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) { 
-  return;
 }
 
 void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) { 
-  return;
 }
 
 

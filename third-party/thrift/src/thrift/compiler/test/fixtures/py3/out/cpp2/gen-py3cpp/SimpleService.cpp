@@ -4654,7 +4654,6 @@ namespace py3::simple {
 }
 
 void SimpleServiceSvNull::do_nothing() { 
-  return;
 }
 
 void SimpleServiceSvNull::concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/) {  }
@@ -4684,7 +4683,6 @@ double SimpleServiceSvNull::two(double /*input*/) {
 }
 
 void SimpleServiceSvNull::expected_exception() { 
-  return;
 }
 
 ::std::int32_t SimpleServiceSvNull::unexpected_exception() { 

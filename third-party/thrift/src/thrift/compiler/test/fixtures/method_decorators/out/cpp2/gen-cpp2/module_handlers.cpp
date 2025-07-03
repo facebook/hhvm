@@ -693,7 +693,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void DecoratedServiceSvNull::noop() { 
-  return;
 }
 
 void DecoratedServiceSvNull::echo(::std::string& /*_return*/, std::unique_ptr<::std::string> /*text*/) {  }
@@ -1506,7 +1505,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void UndecoratedServiceSvNull::noop() { 
-  return;
 }
 
 void UndecoratedServiceSvNull::echo(::std::string& /*_return*/, std::unique_ptr<::std::string> /*text*/) {  }
@@ -1767,7 +1765,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void DecoratedService_ExtendsUndecoratedServiceSvNull::extension() { 
-  return;
 }
 
 
@@ -1956,7 +1953,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void DecoratedService_ExtendsDecoratedServiceSvNull::extension() { 
-  return;
 }
 
 
@@ -2145,7 +2141,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void UndecoratedService_ExtendsDecoratedServiceSvNull::extension() { 
-  return;
 }
 
 

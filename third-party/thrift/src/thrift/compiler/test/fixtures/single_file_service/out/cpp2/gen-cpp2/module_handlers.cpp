@@ -669,7 +669,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void BSvNull::bar(std::unique_ptr<::cpp2::Foo> /*foo*/) { 
-  return;
 }
 
 ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> BSvNull::sink_stuff() { 

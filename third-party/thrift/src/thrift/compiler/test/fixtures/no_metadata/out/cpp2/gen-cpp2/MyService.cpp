@@ -691,7 +691,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void MyServiceSvNull::ping() { 
-  return;
 }
 
 void MyServiceSvNull::getRandomData(::std::string& /*_return*/) {  }
@@ -703,11 +702,9 @@ bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) {
 void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {  }
 
 void MyServiceSvNull::putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) { 
-  return;
 }
 
 void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) { 
-  return;
 }
 
 

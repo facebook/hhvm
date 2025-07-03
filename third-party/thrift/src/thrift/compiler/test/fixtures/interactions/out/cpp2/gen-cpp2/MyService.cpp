@@ -975,7 +975,6 @@ determineInvocationType:
 namespace cpp2 {
 
 void MyServiceSvNull::foo() { 
-  return;
 }
 
 

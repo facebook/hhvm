@@ -14,8 +14,10 @@ import com.google.common.collect.*;
 import java.util.*;
 import javax.annotation.Nullable;
 import org.apache.thrift.*;
+import org.apache.thrift.TException;
 import org.apache.thrift.transport.*;
 import org.apache.thrift.protocol.*;
+import org.apache.thrift.protocol.TProtocol;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 

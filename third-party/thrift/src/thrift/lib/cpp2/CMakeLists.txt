@@ -248,6 +248,7 @@ add_library(
   async/ServerGeneratorStream.cpp
   async/ServerRequestData.cpp
   async/ServerSinkBridge.cpp
+  async/processor/AsyncProcessor.cpp
   gen/module_constants_cpp.cpp
   gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp

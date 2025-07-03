@@ -876,7 +876,12 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     loadVmfp(v);
 
     auto const handler = reinterpret_cast<TCA>(svcreq::handleResume);
+    // When using ROAR, emit a smashable call so that ROAR can patch it later.
+#ifdef __roar__
+    v << calls{handler, arg_regs(1)};
+#else
     v << call{handler, arg_regs(1)};
+#endif
     v << fallthru{rret(0) | rret(1)};
   });
 
@@ -957,8 +962,12 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
     auto const handler = reinterpret_cast<TCA>(
       interpOneEntryPoints[static_cast<size_t>(op)]
     );
+    // When using ROAR, emit a smashable call so ROAR can patch it later.
+#ifdef __roar__
+    v << calls{handler, arg_regs(3)};
+#else
     v << call{handler, arg_regs(3)};
-
+#endif
     auto const sf = v.makeReg();
     v << testq{rret(0), rret(0), sf};
     ifThenElse(

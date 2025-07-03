@@ -18,8 +18,6 @@ function apache_note(
 <<__PHPStdLib>>
 function apache_notes(dict<string, string> $notes): void {}
 <<__PHPStdLib>>
-function apache_request_headers(): darray<string, string> {}
-<<__PHPStdLib>>
 function apache_response_headers(): darray<string, string> {}
 <<__PHPStdLib>>
 function apache_setenv(
@@ -27,8 +25,6 @@ function apache_setenv(
   string $value,
   bool $walk_to_top = false,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
-<<__PHPStdLib>>
-function getallheaders()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function virtual(
   HH\FIXME\MISSING_PARAM_TYPE $filename,

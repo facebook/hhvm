@@ -7,12 +7,7 @@
 
 #include "hash.h"
 
-#include <assert.h>
-#include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
 
 /**
  * FurcHash -- a consistent hash function using a binary decision tree.

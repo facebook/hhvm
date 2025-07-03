@@ -38,7 +38,6 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #if __has_include(<thrift/lib/thrift/gen-cpp2/any_rep_types.h>)
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>

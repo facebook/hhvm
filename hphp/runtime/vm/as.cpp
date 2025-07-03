@@ -2704,6 +2704,7 @@ void parse_enum_ty(AsmState& as) {
  * directive-require : 'extends' '<' identifier '>' ';'
  *                   | 'implements' '<' identifier '>' ';'
  *                   | 'class' '<' identifier '>;  ';'
+ *                   | 'this as' '<' identifier '>;  ';'
  *                   ;
  *
  */
@@ -2717,8 +2718,15 @@ void parse_require(AsmState& as) {
       return PreClass::RequirementKind::RequirementExtends;
     } else if (as.in.tryConsume("class")) {
       return PreClass::RequirementKind::RequirementClass;
+    } else if (as.in.tryConsume("this")) {
+      if (as.in.tryConsume("as")) {
+        return PreClass::RequirementKind::RequirementThisAs;
+      } else {
+        as.error(".require this should be followed by as");
+        not_reached();
+      }
     } else {
-      as.error(".require should be extends, implements, or class");
+      as.error(".require should be extends, implements, class, or this as");
       not_reached();
     }
   }();

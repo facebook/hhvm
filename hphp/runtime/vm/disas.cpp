@@ -788,6 +788,7 @@ void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
       case PreClass::RequirementExtends: return "extends";
       case PreClass::RequirementImplements: return "implements";
       case PreClass::RequirementClass: return "class";
+      case PreClass::RequirementThisAs: return "this as";
     }
     not_reached();
   }();

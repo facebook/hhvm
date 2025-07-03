@@ -183,12 +183,14 @@ struct PreClass : AtomicCountable {
   /*
    * Trait and interface requirements.
    *
-   * Represents a `require implements', `require extends', or `require class' declaration.
+   * Represents a `require implements', `require extends', `require class',
+   * or `require this as' declaration.
    */
   enum RequirementKind {
     RequirementImplements = 0,
     RequirementExtends    = 0x1,
     RequirementClass      = 0x2,
+    RequirementThisAs     = 0x3,
   };
 
   struct ClassRequirement {

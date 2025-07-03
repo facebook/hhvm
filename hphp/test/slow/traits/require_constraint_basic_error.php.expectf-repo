@@ -1,2 +1,1 @@
-
-Fatal error: Class 'C' required to extend class 'Super' by trait '<<flattened>>' in %s on line %d
+Fatal error: Class 'C' required to be a strict subclass of class 'Super' by trait '<<flattened>>' in %s on line %d

@@ -26,6 +26,7 @@ pub enum TraitReqKind {
     MustExtend,
     MustImplement,
     MustBeClass,
+    MustBeAs,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]

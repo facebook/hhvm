@@ -603,6 +603,7 @@ void translateRequirements(TranslationState& ts, const hhbc::Requirement& req) {
       case hhbc::TraitReqKind::MustExtend: return PreClass::RequirementExtends;
       case hhbc::TraitReqKind::MustImplement: return PreClass::RequirementImplements;
       case hhbc::TraitReqKind::MustBeClass: return PreClass::RequirementClass;
+      case hhbc::TraitReqKind::MustBeAs: return PreClass::RequirementThisAs;
     }
     not_reached();
   }();

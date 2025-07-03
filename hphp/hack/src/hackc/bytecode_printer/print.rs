@@ -383,6 +383,9 @@ fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement) -> R
         TraitReqKind::MustBeClass => {
             write_bytes!(w, "class <{}>;", r.name)
         }
+        TraitReqKind::MustBeAs => {
+            write_bytes!(w, "this as <{}>;", r.name)
+        }
     }
 }
 

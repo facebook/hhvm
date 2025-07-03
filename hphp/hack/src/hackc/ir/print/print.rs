@@ -368,6 +368,7 @@ fn print_class(w: &mut dyn Write, class: &Class) -> Result {
             TraitReqKind::MustExtend => "extends",
             TraitReqKind::MustImplement => "implements",
             TraitReqKind::MustBeClass => "must_be_class",
+            TraitReqKind::MustBeAs => "must_be_as",
         };
         writeln!(
             w,

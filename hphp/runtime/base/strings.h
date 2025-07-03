@@ -62,7 +62,10 @@ constexpr char TRAITS_UNKNOWN_TRAIT_METHOD[] =
 constexpr char METHOD_IN_MULTIPLE_TRAITS[] =
   "Method '%s' declared in multiple traits (%s)";
 constexpr char TRAIT_REQ_EXTENDS[] =
-  "Class '%s' required to extend class '%s'"
+  "Class '%s' required to be a strict subclass of class '%s'"
+  " by trait '%s'";
+constexpr char TRAIT_REQ_THIS_AS[] =
+  "Class '%s' required to be a subclass of class '%s'"
   " by trait '%s'";
 constexpr char TRAIT_REQ_IMPLEMENTS[] =
   "Class '%s' required to implement interface '%s'"

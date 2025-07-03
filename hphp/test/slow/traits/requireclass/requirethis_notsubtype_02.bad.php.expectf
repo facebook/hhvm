@@ -1,0 +1,1 @@
+Fatal error: Class 'D' required to be a subclass of class 'C' by trait '%s' in %s/requireclass/requirethis_notsubtype_02.bad.php on line 13

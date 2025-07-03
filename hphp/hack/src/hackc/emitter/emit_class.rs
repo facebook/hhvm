@@ -309,9 +309,7 @@ fn from_class_elt_requirements<'a>(class_: &'a ast::Class_) -> Vec<Requirement> 
                 RequireKind::RequireExtends => f(TraitReqKind::MustExtend),
                 RequireKind::RequireImplements => f(TraitReqKind::MustImplement),
                 RequireKind::RequireClass => f(TraitReqKind::MustBeClass),
-                // `require this as C` is an experimental trait constraint
-                // TODO: export to HHVM to perform sanity checks at class load time
-                RequireKind::RequireThisAs => None,
+                RequireKind::RequireThisAs => f(TraitReqKind::MustBeAs),
             }
         })
         .collect()

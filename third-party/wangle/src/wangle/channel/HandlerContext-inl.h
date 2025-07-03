@@ -112,7 +112,7 @@ class ContextImplBase : public PipelineContext {
     if (nextIn) {
       nextIn_ = nextIn;
     } else {
-      throw std::invalid_argument(folly::sformat(
+      throw std::invalid_argument(fmt::format(
           "inbound type mismatch after {}", folly::demangle(typeid(H))));
     }
   }
@@ -126,7 +126,7 @@ class ContextImplBase : public PipelineContext {
     if (nextOut) {
       nextOut_ = nextOut;
     } else {
-      throw std::invalid_argument(folly::sformat(
+      throw std::invalid_argument(fmt::format(
           "outbound type mismatch after {}", folly::demangle(typeid(H))));
     }
   }

@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <fmt/format.h>
+
 #include <wangle/client/persistence/test/TestUtil.h>
 #include <wangle/client/ssl/SSLSessionPersistentCache.h>
 #include <wangle/client/ssl/test/TestUtil.h>
@@ -104,7 +106,7 @@ class SSLSessionPersistentCacheTest : public Test {
 
 TEST_F(SSLSessionPersistentCacheTest, Basic) {
   for (size_t i = 0; i < sessions_.size(); ++i) {
-    auto hostname = folly::sformat("host{}", i);
+    auto hostname = fmt::format("host{}", i);
 
     // The session data does not exist before set.
     ASSERT_EQ(i, cache_->size());
@@ -120,7 +122,7 @@ TEST_F(SSLSessionPersistentCacheTest, Basic) {
   // The previously inserted sessions shouldn't have changed. Then remove them
   // one by one and verify they are not in cache after the removal.
   for (size_t i = 0; i < sessions_.size(); ++i) {
-    auto hostname = folly::sformat("host{}", i);
+    auto hostname = fmt::format("host{}", i);
     verifyEntryInCache(hostname, sessions_[i]);
     cache_->removeSSLSession(hostname);
     verifyEntryInCache(hostname, sessions_[i], false);

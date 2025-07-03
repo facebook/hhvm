@@ -16,6 +16,8 @@
 
 #include <wangle/acceptor/FizzConfigUtil.h>
 
+#include <fmt/format.h>
+
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <folly/Format.h>
@@ -62,7 +64,7 @@ bool FizzConfigUtil::addCertsToManager(
         }
         loadedCert = true;
       } catch (const std::runtime_error& ex) {
-        auto msg = folly::sformat(
+        auto msg = fmt::format(
             "Failed to load cert or key at key path {}, cert path {}",
             cert.keyPath,
             cert.certPath);
@@ -152,7 +154,7 @@ FizzConfigUtil::createFizzContext(
           VerificationContext::Server, combinedCAFiles);
       ctx->setClientCertVerifier(std::move(verifier));
     } catch (const std::runtime_error& ex) {
-      auto msg = folly::sformat(
+      auto msg = fmt::format(
           " Failed to load ca file at {}", folly::join(", ", combinedCAFiles));
       if (strictSSL) {
         throw std::runtime_error(ex.what() + msg);

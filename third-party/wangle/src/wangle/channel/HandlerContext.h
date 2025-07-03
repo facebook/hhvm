@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncTransport.h>

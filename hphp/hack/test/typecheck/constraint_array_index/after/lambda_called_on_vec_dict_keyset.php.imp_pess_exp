@@ -1,0 +1,12 @@
+ERROR: File "lambda_called_on_vec_dict_keyset.php", line 3, characters 16-23:
+Typing error (Typing[4110])
+  File "lambda_called_on_vec_dict_keyset.php", line 3, characters 16-23:
+  Expected an array that can be indexed
+  File "lambda_called_on_vec_dict_keyset.php", line 3, characters 16-17:
+  But got `~_` because a type could not be determined here
+ERROR: File "lambda_called_on_vec_dict_keyset.php", line 3, characters 16-26:
+Typing error (Typing[4110])
+  File "lambda_called_on_vec_dict_keyset.php", line 3, characters 16-26:
+  Expected an array that can be indexed
+  File "lambda_called_on_vec_dict_keyset.php", line 3, characters 16-20:
+  But got `dynamic` because a type could not be determined here

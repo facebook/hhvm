@@ -6209,6 +6209,9 @@ end = struct
     | (_, Tclass ((_, n), _, [tk; tv])) when String.equal n SN.Collections.cDict
       ->
       is_container tk tv
+    | (_, Tclass ((_, n), _, [tkv])) when String.equal n SN.Collections.cKeyset
+      ->
+      is_container tkv tkv
     | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
     | _ -> invalid ~fail env
 end

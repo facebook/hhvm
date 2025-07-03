@@ -1,0 +1,12 @@
+ERROR: File "lambda_access_two_types_bad.php", line 4, characters 6-11:
+Invalid argument (Typing[4110])
+  File "lambda_access_two_types_bad.php", line 3, characters 9-10:
+  Expected `~_` because a type could not be determined here
+  File "lambda_access_two_types_bad.php", line 4, characters 6-11:
+  But got `vec<int>`
+ERROR: File "lambda_access_two_types_bad.php", line 4, characters 6-11:
+Invalid argument (Typing[4110])
+  File "lambda_access_two_types_bad.php", line 4, characters 6-11:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "lambda_access_two_types_bad.php", line 3, characters 27-29:
+  But got `string`

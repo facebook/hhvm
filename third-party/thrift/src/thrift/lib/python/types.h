@@ -21,8 +21,8 @@
 #include <limits>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
+#include <folly/container/F14Map.h>
 
 #include <folly/Conv.h>
 #include <folly/Optional.h>
@@ -732,7 +732,7 @@ class MutableMapTypeInfo {
   const ::apache::thrift::detail::TypeInfo tableBasedSerializerTypeinfo_;
 };
 
-using FieldValueMap = std::unordered_map<int16_t, PyObject*>;
+using FieldValueMap = folly::F14FastMap<int16_t, PyObject*>;
 
 /**
  * Holds the information required to (de)serialize a thrift-python structured

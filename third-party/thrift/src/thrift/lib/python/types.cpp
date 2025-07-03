@@ -21,6 +21,7 @@
 
 #include <folly/Indestructible.h>
 #include <folly/Range.h>
+#include <folly/container/F14Map.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/New.h>
 #include <folly/python/import.h>
@@ -96,7 +97,7 @@ UniquePyObjectPtr getDefaultValueForField(
 
   // 2. Check local cache for an existing default value.
   static folly::Indestructible<
-      std::unordered_map<const detail::TypeInfo*, PyObject*>>
+      folly::F14FastMap<const detail::TypeInfo*, PyObject*>>
       defaultValueCache;
   auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
   if (cachedDefaultValueIt != defaultValueCache->end()) {

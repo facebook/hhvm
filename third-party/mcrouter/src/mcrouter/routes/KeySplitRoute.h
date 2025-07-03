@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <folly/Optional.h>
 #include <folly/fibers/AddTasks.h>
 #include <folly/fibers/FiberManager.h>
@@ -65,7 +67,7 @@ class KeySplitRoute {
 
   std::string routeName() const {
     uint64_t replicaId = getReplicaId();
-    return folly::sformat(
+    return fmt::format(
         "keysplit|replicas={}|all-sync={}|first-hit={}|replicaId={}",
         replicas_,
         allSync_,

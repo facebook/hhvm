@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <boost/filesystem.hpp>
+#include <fmt/format.h>
 
 #include <folly/FileUtil.h>
 #include <folly/Random.h>
@@ -45,8 +46,8 @@ boost::filesystem::path getBackupConfigFileName(
     folly::StringPiece sourcePrefix,
     folly::StringPiece name) {
   sourcePrefix.removeSuffix(':');
-  return boost::filesystem::path(folly::sformat(
-      "{}-{}", sourcePrefix, folly::uriEscape<std::string>(name)));
+  return boost::filesystem::path(
+      fmt::format("{}-{}", sourcePrefix, folly::uriEscape<std::string>(name)));
 }
 
 bool ensureConfigDirectoryExists(boost::filesystem::path directory) {
@@ -498,7 +499,7 @@ void ConfigApi::dumpConfigSourceToDisk(
         logFailureEveryN<DumpFileTag>(
             opts_,
             memcache::failure::Category::kOther,
-            folly::sformat(
+            fmt::format(
                 "Error while dumping last valid config to disk. "
                 "Failed to write file {}.",
                 filePath),
@@ -510,8 +511,7 @@ void ConfigApi::dumpConfigSourceToDisk(
         logFailureEveryN<TouchFileTag>(
             opts_,
             memcache::failure::Category::kOther,
-            folly::sformat(
-                "Error while touching backup config file {}", filePath),
+            fmt::format("Error while touching backup config file {}", filePath),
             1000);
         ensureConfigDirectoryExists(directory);
       }

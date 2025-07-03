@@ -7,6 +7,7 @@
 
 #include "ConnectionFifoProtocol.h"
 
+#include <fmt/format.h>
 #include <glog/logging.h>
 
 #include <folly/Format.h>
@@ -76,7 +77,7 @@ folly::SocketAddress MessageHeader::getPeerAddress() {
     case 4:
       return sizeof(MessageHeader);
     default:
-      throw std::logic_error(folly::sformat("Invalid version {}", v));
+      throw std::logic_error(fmt::format("Invalid version {}", v));
   }
 }
 

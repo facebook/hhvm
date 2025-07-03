@@ -7,6 +7,7 @@
 
 #include <signal.h>
 
+#include <fmt/format.h>
 #include <gflags/gflags.h>
 
 #include <folly/fibers/FiberManagerMap.h>
@@ -211,7 +212,7 @@ int main(int argc, char** argv) {
         FLAGS_num_req_per_client,
         i);
     for (int j = 0; j < FLAGS_num_req_per_client; ++j) {
-      sendHelloRequestSync(clients[i].get(), folly::sformat("key:{}{}", i, j));
+      sendHelloRequestSync(clients[i].get(), fmt::format("key:{}{}", i, j));
     }
   }
 

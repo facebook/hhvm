@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
+
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/network/FBTrace.h"
 #include "mcrouter/lib/network/RpcStatsContext.h"
@@ -24,7 +26,7 @@ ReplyT<Request> AsyncMcClientImpl::sendSync(
   if (maxPending_ != 0 && queue_.getPendingRequestCount() >= maxPending_) {
     return createReply<Request>(
         ErrorReply,
-        folly::sformat(
+        fmt::format(
             "Max pending requests ({}) reached for destination \"{}\".",
             maxPending_,
             connectionOptions_.accessPoint->toHostPortString()));

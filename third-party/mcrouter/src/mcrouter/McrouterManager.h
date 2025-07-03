@@ -64,7 +64,7 @@ class McrouterManager {
       MC_LOG_FAILURE(
           options,
           failure::Category::kBrokenLogic,
-          folly::sformat(
+          fmt::format(
               "mcrouterGetCreate failed to create mcrouter instance with router info {} for persistentId {}",
               RouterInfo::name,
               persistenceId));
@@ -72,7 +72,7 @@ class McrouterManager {
       MC_LOG_FAILURE(
           options,
           failure::Category::kBrokenLogic,
-          folly::sformat(
+          fmt::format(
               "mcrouterGetCreate failed to cast mcrouter instance to router info {} for persistentId {}",
               RouterInfo::name,
               persistenceId));

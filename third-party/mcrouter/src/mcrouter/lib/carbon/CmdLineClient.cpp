@@ -8,6 +8,7 @@
 #include "CmdLineClient.h"
 
 #include <boost/program_options.hpp>
+#include <fmt/format.h>
 
 #include <folly/Format.h>
 
@@ -17,7 +18,7 @@ namespace tools {
 namespace {
 
 std::string getUsage(const char* binaryName) {
-  return folly::sformat(
+  return fmt::format(
       "Usage: {} [OPTIONS]... [REQUEST_NAME] [REQUEST]\n"
       "Parses REQUEST json into the carbon request with name REQUEST_NAME "
       "and sends it to the server.\n",

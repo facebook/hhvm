@@ -14,6 +14,8 @@
 
 #include <limits>
 
+#include <fmt/format.h>
+
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
@@ -818,7 +820,7 @@ McStatsReply stats_reply(ProxyBase* proxy, folly::StringPiece group_str) {
         MC_LOG_FAILURE(
             proxy->router().opts(),
             failure::Category::kOther,
-            folly::sformat("Couldn't serialize Carbon stat {}", k.asString()));
+            fmt::format("Couldn't serialize Carbon stat {}", k.asString()));
       }
     }
   }

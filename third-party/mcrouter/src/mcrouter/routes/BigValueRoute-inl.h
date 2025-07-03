@@ -10,6 +10,8 @@
 #include <iterator>
 #include <type_traits>
 
+#include <fmt/format.h>
+
 #include <folly/Range.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/fibers/WhenN.h>
@@ -373,7 +375,7 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
   }
 
   McLeaseGetReply reply(carbon::Result::REMOTE_ERROR);
-  reply.message_ref() = folly::sformat(
+  reply.message_ref() = fmt::format(
       "BigValueRoute: exhausted retries for lease-get for key {}", key);
   return reply;
 }
@@ -407,7 +409,7 @@ template <class RouterInfo>
 folly::IOBuf BigValueRoute<RouterInfo>::ChunksInfo::toStringType() const {
   return folly::IOBuf(
       folly::IOBuf::COPY_BUFFER,
-      folly::sformat("{}-{}-{}", infoVersion_, numChunks_, suffix_));
+      fmt::format("{}-{}-{}", infoVersion_, numChunks_, suffix_));
 }
 
 template <class RouterInfo>
@@ -440,7 +442,7 @@ folly::IOBuf BigValueRoute<RouterInfo>::createChunkKey(
     uint64_t suffix) const {
   return folly::IOBuf(
       folly::IOBuf::COPY_BUFFER,
-      folly::sformat("{}:{}:{}", baseKey, chunkIndex, suffix));
+      fmt::format("{}:{}:{}", baseKey, chunkIndex, suffix));
 }
 
 template <class RouterInfo>

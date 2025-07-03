@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include <fmt/format.h>
+
 #include <folly/Format.h>
 #include <folly/Optional.h>
 #include <folly/ScopeGuard.h>
@@ -54,7 +56,7 @@ template <class RouterInfo, class Transport>
 class DestinationRoute {
  public:
   std::string routeName() const {
-    return folly::sformat(
+    return fmt::format(
         "host|pool={}|id={}|ap={}|timeout={}ms|keep_routing_prefix={}|msb={}",
         poolName_,
         indexInPool_,

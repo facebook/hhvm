@@ -7,6 +7,8 @@
 
 #include "ZstdCompressionCodec.h"
 
+#include <fmt/format.h>
+
 #if FOLLY_HAVE_LIBZSTD && !defined(DISABLE_COMPRESSION)
 
 namespace facebook {
@@ -65,7 +67,7 @@ std::unique_ptr<folly::IOBuf> ZstdCompressionCodec::compress(
       zstdCDict_.get());
 
   if (ZSTD_isError(compressedSize)) {
-    throw std::runtime_error(folly::sformat(
+    throw std::runtime_error(fmt::format(
         "ZSTD codec: Failed to compress. Error: {}",
         ZSTD_getErrorName(compressedSize)));
   }
@@ -92,7 +94,7 @@ std::unique_ptr<folly::IOBuf> ZstdCompressionCodec::uncompress(
       zstdDDict_.get());
 
   if (ZSTD_isError(bytesWritten)) {
-    throw std::runtime_error(folly::sformat(
+    throw std::runtime_error(fmt::format(
         "ZSTD codec: decompression returned invalid value. Error: {} ",
         ZSTD_getErrorName(bytesWritten)));
   }

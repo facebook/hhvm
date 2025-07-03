@@ -171,7 +171,7 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
   if (options_.script) {
     out.append("{\n", format_.dataOpColor);
     /* always present, makes comma accounting simpler */
-    out.append(folly::sformat("  \"reqid\": {}", msgId));
+    out.append(fmt::format("  \"reqid\": {}", msgId));
   }
 
   if (options_.printTimeFn) {
@@ -179,8 +179,7 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
     gettimeofday(&ts, nullptr);
 
     if (options_.script) {
-      out.append(
-          folly::sformat(",\n  \"ts\": \"{}\"", options_.printTimeFn(ts)));
+      out.append(fmt::format(",\n  \"ts\": \"{}\"", options_.printTimeFn(ts)));
     } else {
       out.append(options_.printTimeFn(ts));
       out.append(" ");
@@ -208,7 +207,7 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
   if (!options_.script) {
     /* Rendered above for script mode */
     out.append("\n  reqid: ", format_.msgAttrColor);
-    out.append(folly::sformat("0x{:x}", msgId), format_.dataValueColor);
+    out.append(fmt::format("0x{:x}", msgId), format_.dataValueColor);
   }
 
   if (latencyUs > 0) { // it is 0 only for requests
@@ -227,7 +226,7 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
       out.append("\n  server load: ", format_.msgAttrColor);
     }
     out.append(
-        folly::sformat("{:.2f}%", serverLoad.percentLoad()),
+        fmt::format("{:.2f}%", serverLoad.percentLoad()),
         format_.dataValueColor);
   }
 
@@ -237,7 +236,7 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
   } else {
     out.append("\n  flags: ", format_.msgAttrColor);
     out.append(
-        folly::sformat("0x{:x}", getFlagsIfExist(message)),
+        fmt::format("0x{:x}", getFlagsIfExist(message)),
         format_.dataValueColor);
   }
   if (!options_.script && getFlagsIfExist(message)) {
@@ -273,14 +272,14 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
         uncompressedSize);
 
     if (options_.script) {
-      out.append(folly::sformat(",\n  \"value_wire_bytes\": {}", value.size()));
-      out.append(folly::sformat(
+      out.append(fmt::format(",\n  \"value_wire_bytes\": {}", value.size()));
+      out.append(fmt::format(
           ",\n  \"value_uncompressed_bytes\": {}", uncompressedSize));
     } else {
       out.append("\n  value size: ", format_.msgAttrColor);
       if (uncompressedSize != value.size()) {
         out.append(
-            folly::sformat(
+            fmt::format(
                 "{} uncompressed, {} compressed, {:.2f}% savings",
                 uncompressedSize,
                 value.size(),

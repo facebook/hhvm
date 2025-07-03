@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include <fmt/format.h>
+
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/Range.h>
@@ -69,7 +71,7 @@ template <class RouteHandleIf, ModifyExptimeAction Action>
 class ModifyExptimeRoute {
  public:
   std::string routeName() const {
-    return folly::sformat(
+    return fmt::format(
         "modify-exptime|{}|exptime={}",
         detail::actionToString(Action),
         exptime_);

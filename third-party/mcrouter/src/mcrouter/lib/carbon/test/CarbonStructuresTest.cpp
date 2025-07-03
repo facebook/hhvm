@@ -10,6 +10,7 @@
 #include <cstring>
 #include <string>
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include "mcrouter/lib/IOBufUtil.h"
@@ -104,12 +105,12 @@ void testEnumCompatibility(bool expectCompatible) {
       struct1,
       serializeAndDeserialize<T2, T1>(struct2),
       expectCompatible,
-      folly::sformat("{} to {}", typeid(T2).name(), typeid(T1).name()));
+      fmt::format("{} to {}", typeid(T2).name(), typeid(T1).name()));
   checkStructWithEnum(
       struct2,
       serializeAndDeserialize<T1, T2>(struct1),
       expectCompatible,
-      folly::sformat("{} to {}", typeid(T1).name(), typeid(T2).name()));
+      fmt::format("{} to {}", typeid(T1).name(), typeid(T2).name()));
 }
 
 template <class T1, class T2>
@@ -124,12 +125,12 @@ void testOptionalEnumCompatibility(bool expectCompatible) {
       struct1,
       serializeAndDeserialize<T2, T1>(struct2),
       expectCompatible,
-      folly::sformat("{} to {}", typeid(T2).name(), typeid(T1).name()));
+      fmt::format("{} to {}", typeid(T2).name(), typeid(T1).name()));
   checkStructWithOptionalEnum(
       struct2,
       serializeAndDeserialize<T1, T2>(struct1),
       expectCompatible,
-      folly::sformat("{} to {}", typeid(T1).name(), typeid(T2).name()));
+      fmt::format("{} to {}", typeid(T1).name(), typeid(T2).name()));
 }
 
 template <class Type>

@@ -9,6 +9,8 @@
 
 #include <type_traits>
 
+#include <fmt/format.h>
+
 #include <folly/Expected.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncSSLSocket.h>
@@ -237,7 +239,7 @@ getSocketAddress(const ConnectionOptions& connectionOptions) {
   } catch (const std::system_error& e) {
     return folly::makeUnexpected(folly::AsyncSocketException(
         folly::AsyncSocketException::NOT_OPEN,
-        folly::sformat(
+        fmt::format(
             "AsyncMcClient",
             failure::Category::kBadEnvironment,
             "{}",

@@ -7,6 +7,7 @@
 
 #include <string>
 
+#include <fmt/format.h>
 #include <folly/json/json.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
@@ -549,7 +550,7 @@ class FromDynamicVisitor {
 
     for (size_t i = 0; i < json.size(); ++i) {
       typename SerializationTraits<T>::inner_type val;
-      if (fromDynamic(folly::sformat("{}[{}]", name, i), json[i], val)) {
+      if (fromDynamic(fmt::format("{}[{}]", name, i), json[i], val)) {
         SerializationTraits<T>::emplace(valRef, std::move(val));
       }
     }

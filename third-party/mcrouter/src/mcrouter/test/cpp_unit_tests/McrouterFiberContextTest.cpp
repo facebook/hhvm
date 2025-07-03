@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include "folly/fibers/FiberManagerMap.h"
@@ -81,7 +82,7 @@ TEST(McrouterFiberContextTest, testExtraDataCallback) {
         return runExtraDataCallbacks(
             fiber_local<RouterInfo>::getExtraDataCallbacks());
       });
-      EXPECT_EQ(ret, folly::sformat("{{\"0\":\"0\",\"{}\":\"{}\"}}", i, i));
+      EXPECT_EQ(ret, fmt::format("{{\"0\":\"0\",\"{}\":\"{}\"}}", i, i));
     }
 
     // Run in new fiber without copying fiber context.
@@ -93,7 +94,7 @@ TEST(McrouterFiberContextTest, testExtraDataCallback) {
         return runExtraDataCallbacks(
             fiber_local<RouterInfo>::getExtraDataCallbacks());
       });
-      EXPECT_EQ(ret, folly::sformat("{{\"{}\":\"{}\"}}", i, i));
+      EXPECT_EQ(ret, fmt::format("{{\"{}\":\"{}\"}}", i, i));
     }
 
     // Loop in the same fiber, similar to failover route. Keep replacing
@@ -113,7 +114,7 @@ TEST(McrouterFiberContextTest, testExtraDataCallback) {
       }
       auto ret = runExtraDataCallbacks(
           fiber_local<RouterInfo>::getExtraDataCallbacks());
-      EXPECT_EQ(ret, folly::sformat("{{\"0\":\"0\",\"{}\":\"{}\"}}", i, i));
+      EXPECT_EQ(ret, fmt::format("{{\"0\":\"0\",\"{}\":\"{}\"}}", i, i));
     }
   });
 }

@@ -80,7 +80,7 @@ TEST(McBucketRouteTest, checkParams) {
   std::string_view total = "100";
   std::string_view keyspace = "testReg:testPool";
 
-  std::string kMcBucketRouteConfig = folly::sformat(
+  std::string kMcBucketRouteConfig = fmt::format(
       R"(
   {{
     "bucketize": true,

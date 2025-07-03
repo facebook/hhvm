@@ -7,6 +7,7 @@
 
 #include "Lz4Immutable.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/lang/Bits.h>
 
@@ -69,7 +70,7 @@ struct iovec getDictionaryIovec(const Lz4ImmutableState& state) noexcept {
 
 void checkInputSize(size_t inputLength) {
   if (inputLength > kMaxInputSize) {
-    throw std::invalid_argument(folly::sformat(
+    throw std::invalid_argument(fmt::format(
         "Data too large to compress. Size: {}. Max size allowed: {}",
         inputLength,
         kMaxInputSize));
@@ -87,10 +88,10 @@ Lz4ImmutableState loadDictionary(std::unique_ptr<folly::IOBuf> dictionary) {
   size_t dicSize = dictionary->length();
   if (dicSize < kHashUnit) {
     throw std::invalid_argument(
-        folly::sformat("Dictionary cannot be smaller than {}.", kHashUnit));
+        fmt::format("Dictionary cannot be smaller than {}.", kHashUnit));
   }
   if (dicSize > kMaxDictionarySize) {
-    throw std::invalid_argument(folly::sformat(
+    throw std::invalid_argument(fmt::format(
         "Dictionary cannot be larger than {}.", kMaxDictionarySize));
   }
 
@@ -270,7 +271,7 @@ size_t Lz4Immutable::compressInto(
   checkInputSize(source.totalLength());
 
   if (FOLLY_UNLIKELY(destSize < compressBound(source.totalLength()))) {
-    throw std::invalid_argument(folly::sformat(
+    throw std::invalid_argument(fmt::format(
         "Destination too small. Size: {}. Required: {}",
         destSize,
         compressBound(source.totalLength())));

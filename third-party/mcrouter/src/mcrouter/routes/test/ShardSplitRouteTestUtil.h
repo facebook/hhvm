@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
@@ -56,7 +57,7 @@ void testShardingForOp(ShardSplitter splitter, uint64_t requestFlags = 0) {
       EXPECT_EQ(std::vector<std::string>{"test:123:"}, handles[0]->saw_keys);
     } else {
       EXPECT_EQ(
-          std::vector<std::string>{folly::sformat(
+          std::vector<std::string>{fmt::format(
               "test:123{}{}:",
               (char)('a' + (i - 1) % 26),
               (char)('a' + (i - 1) / 26))},

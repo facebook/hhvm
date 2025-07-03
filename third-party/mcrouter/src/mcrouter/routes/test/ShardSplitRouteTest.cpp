@@ -9,6 +9,7 @@
 #include <random>
 #include <vector>
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include <folly/json/dynamic.h>
@@ -77,7 +78,7 @@ TEST(shardSplitRoute, simpleSplit_deleteFanout) {
   constexpr size_t kNumSplits = 26 * 26 + 1;
   std::vector<std::string> allKeys{"test:123:"};
   for (size_t i = 0; i < kNumSplits - 1; ++i) {
-    allKeys.emplace_back(folly::sformat(
+    allKeys.emplace_back(fmt::format(
         "test:123{}{}:", (char)('a' + i % 26), (char)('a' + i / 26)));
   }
 

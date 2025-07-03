@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <boost/filesystem/operations.hpp>
+#include <fmt/format.h>
 
 #include <folly/Format.h>
 #include <folly/Singleton.h>
@@ -39,7 +40,7 @@ std::string createMessage(
   auto nowUs = std::chrono::duration_cast<std::chrono::microseconds>(
                    std::chrono::system_clock::now().time_since_epoch())
                    .count();
-  auto result = folly::sformat(
+  auto result = fmt::format(
       "FAILURE {}.{} {} [{}] [{}] [{}] {}:{}] {}\n",
       nowUs / 1000000,
       nowUs % 1000000,
@@ -53,10 +54,10 @@ std::string createMessage(
 
   auto contextIt = contexts.find(service.str());
   if (contextIt != contexts.end()) {
-    result += folly::sformat("\"{}\": {}", contextIt->first, contextIt->second);
+    result += fmt::format("\"{}\": {}", contextIt->first, contextIt->second);
   } else {
     for (const auto& it : contexts) {
-      result += folly::sformat("\"{}\": {}\n", it.first, it.second);
+      result += fmt::format("\"{}\": {}\n", it.first, it.second);
     }
   }
   return result;

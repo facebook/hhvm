@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"
 
@@ -67,7 +69,7 @@ void McClientRequestContext<Request>::replyErrorImpl(
 
 template <class Request>
 std::string McClientRequestContext<Request>::getContextTypeStr() const {
-  return folly::sformat("RequestT is {}", typeid(Request).name());
+  return fmt::format("RequestT is {}", typeid(Request).name());
 }
 
 template <class Request>

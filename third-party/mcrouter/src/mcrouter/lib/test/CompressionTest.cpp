@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include <folly/Format.h>
@@ -53,7 +54,7 @@ std::unique_ptr<folly::IOBuf> getRandomLargeReply() {
   uint32_t size = folly::Random::rand32(1024, 32 * 1024);
   std::string reply;
   reply.reserve(size);
-  reply.append(folly::sformat("VALUE test.aap.f 0 {}\r\n", size));
+  reply.append(fmt::format("VALUE test.aap.f 0 {}\r\n", size));
   for (size_t i = 0; i < size; ++i) {
     reply.push_back(alphabet[folly::Random::rand32(0, sizeof(alphabet))]);
   }

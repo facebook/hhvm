@@ -7,6 +7,7 @@
 
 #include "CarbonRouterInstance.h"
 
+#include <fmt/format.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
 #include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
 
@@ -72,7 +73,7 @@ CpuStatsWorker::CpuStatsWorker(
       startMs_(std::chrono::steady_clock::time_point::min()),
       proxyThreads_(proxyThreads) {
   static std::atomic<int> uniqueId(0);
-  name_ = folly::sformat("{}{}", kCpuStatsWorkerName_, uniqueId++);
+  name_ = fmt::format("{}{}", kCpuStatsWorkerName_, uniqueId++);
 }
 
 void CpuStatsWorker::schedule(bool enable) {

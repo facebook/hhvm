@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <boost/filesystem/operations.hpp>
+#include <fmt/format.h>
 
 #include <folly/MapUtil.h>
 #include <folly/Singleton.h>
@@ -153,7 +154,7 @@ CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
         folly::exceptionStr(std::current_exception()).toStdString());
   }
 
-  result.error() = folly::sformat(
+  result.error() = fmt::format(
       "mcrouter error (router name '{}', flavor '{}',"
       " service '{}'): {}",
       router->opts().router_name,
@@ -235,7 +236,7 @@ CarbonRouterInstance<RouterInfo>::setupProxy(
       proxies_.emplace_back(
           Proxy<RouterInfo>::createProxy(*this, *proxyEvbs_[i], i));
     } catch (...) {
-      return folly::makeUnexpected(folly::sformat(
+      return folly::makeUnexpected(fmt::format(
           "Failed to create proxy: {}",
           folly::exceptionStr(std::current_exception())));
     }
@@ -267,7 +268,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       configuringFromDisk = true;
       builder = createConfigBuilder();
       if (builder.hasError()) {
-        return folly::makeUnexpected(folly::sformat(
+        return folly::makeUnexpected(fmt::format(
             "Failed to configure, initial error '{}', from backup '{}'",
             initialError,
             builder.error()));
@@ -280,7 +281,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
         proxyThreads_ = detail::createProxyThreadsExecutor(opts_);
         embeddedMode_ = true;
       } catch (...) {
-        return folly::makeUnexpected(folly::sformat(
+        return folly::makeUnexpected(fmt::format(
             "Failed to create IOThreadPoolExecutor {}",
             folly::exceptionStr(std::current_exception())));
       }
@@ -294,7 +295,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
 
     auto threadPoolEvbs = extractEvbs(*proxyThreads_);
     if (threadPoolEvbs.size() != opts_.num_proxies) {
-      return folly::makeUnexpected(folly::sformat(
+      return folly::makeUnexpected(fmt::format(
           "IOThreadPoolExecutor size does not match num_proxies sz={} proxies={} {}",
           threadPoolEvbs.size(),
           opts_.num_proxies,
@@ -305,7 +306,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       try {
         setMetadata(mcrouter::gSRInitHook(proxyThreads_, opts_));
       } catch (...) {
-        return folly::makeUnexpected(folly::sformat(
+        return folly::makeUnexpected(fmt::format(
             "Failed to create SR {}",
             folly::exceptionStr(std::current_exception())));
       }
@@ -320,7 +321,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       try {
         mcrouter::gAxonInitHook(*this, proxyThreads_);
       } catch (...) {
-        return folly::makeUnexpected(folly::sformat(
+        return folly::makeUnexpected(fmt::format(
             "Failed to create SR for Axon proxy {}",
             folly::exceptionStr(std::current_exception())));
       }
@@ -347,7 +348,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       } else {
         configApi_->abandonTrackedSources();
         LOG(ERROR) << "Failed to configure proxies";
-        return folly::makeUnexpected(folly::sformat(
+        return folly::makeUnexpected(fmt::format(
             "Failed to configure, initial error '{}', from backup '{}'",
             configResult.error(),
             reconfigResult.error()));
@@ -560,7 +561,7 @@ bool CarbonRouterInstance<RouterInfo>::reconfigurePartially() {
     // Make sure partial config is allow for all updates
     for (const auto& update : partialUpdates) {
       if (!proxyConfig.second.allowPartialConfig(update.tierName)) {
-        VLOG(1) << folly::sformat(
+        VLOG(1) << fmt::format(
             "tier {} not allow partial reconfigure", update.tierName);
         return false;
       }
@@ -572,7 +573,7 @@ bool CarbonRouterInstance<RouterInfo>::reconfigurePartially() {
     for (const auto& update : partialUpdates) {
       auto& tierPartialConfigs = partialConfigs.at(update.tierName).second;
       if (i == 0) {
-        VLOG(1) << folly::sformat(
+        VLOG(1) << fmt::format(
             "partial update: tier={}, oldApString={}, newApString={}, oldFailureDomain={}, newFailureDomain={}",
             update.tierName,
             update.oldApString,
@@ -591,7 +592,7 @@ bool CarbonRouterInstance<RouterInfo>::reconfigurePartially() {
         }
         auto replacedAp = getProxy(i)->replaceAP(*oldAp, newAp);
         if (!replacedAp) {
-          VLOG(2) << folly::sformat(
+          VLOG(2) << fmt::format(
               "could not replace AP for tier={}, proxy={}, protocol={}",
               update.tierName,
               i,
@@ -601,7 +602,7 @@ bool CarbonRouterInstance<RouterInfo>::reconfigurePartially() {
         auto proxyConfig = getProxy(i)->getConfigLocked();
         for (const auto& pool : poolList) {
           if (!proxyConfig.second.updateAccessPoints(pool, replacedAp, newAp)) {
-            VLOG(2) << folly::sformat(
+            VLOG(2) << fmt::format(
                 "could not update AccessPoints for tier={}, pool={}, proxy={}, protocol={}",
                 update.tierName,
                 pool,
@@ -637,7 +638,7 @@ CarbonRouterInstance<RouterInfo>::configure(const ProxyConfigBuilder& builder) {
       newConfigs.push_back(builder.buildConfig<RouterInfo>(*getProxy(i), i));
     }
   } catch (const std::exception& e) {
-    std::string error = folly::sformat("Failed to reconfigure: {}", e.what());
+    std::string error = fmt::format("Failed to reconfigure: {}", e.what());
     MC_LOG_FAILURE(opts(), failure::Category::kInvalidConfig, error);
 
     return folly::makeUnexpected(std::move(error));

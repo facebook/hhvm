@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include <fmt/format.h>
 #include <glog/logging.h>
 
 #include <folly/Format.h>
@@ -49,7 +50,7 @@ std::string printTimeAbsolute(const struct timeval& ts) {
   struct tm t;
   localtime_r((const time_t*)&ts.tv_sec, &t);
 
-  return folly::sformat(
+  return fmt::format(
       "{:02}/{:02}/{:02} {:02}:{:02}:{:02}.{:06}",
       t.tm_year + 1900,
       t.tm_mon + 1,
@@ -74,7 +75,7 @@ std::string printTimeDiff(const struct timeval& ts, struct timeval& prev) {
   prev.tv_sec = ts.tv_sec;
   prev.tv_usec = ts.tv_usec;
 
-  return folly::sformat("+{}.{:06}", secs, usecs);
+  return fmt::format("+{}.{:06}", secs, usecs);
 }
 
 std::string printTimeOffset(const struct timeval& ts, struct timeval& prev) {
@@ -95,7 +96,7 @@ std::string printTimeOffset(const struct timeval& ts, struct timeval& prev) {
     usecs = 0;
   }
 
-  return folly::sformat("+{}.{:06}", secs, usecs);
+  return fmt::format("+{}.{:06}", secs, usecs);
 }
 
 std::unique_ptr<boost::regex> buildRegex(
@@ -105,7 +106,7 @@ std::unique_ptr<boost::regex> buildRegex(
     try {
       return std::make_unique<boost::regex>(pattern, getRegexFlags(ignoreCase));
     } catch (const std::exception& e) {
-      LOG(ERROR) << folly::sformat("Invalid pattern ({}) provided: ", pattern)
+      LOG(ERROR) << fmt::format("Invalid pattern ({}) provided: ", pattern)
                  << e.what();
       exit(1);
     }

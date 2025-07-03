@@ -10,6 +10,8 @@
 #include <cassert>
 #include <chrono>
 
+#include <fmt/format.h>
+
 #include <folly/Format.h>
 #include <folly/fibers/Baton.h>
 
@@ -90,7 +92,7 @@ class LatencyInjectionRoute {
   }
 
   std::string routeName() const {
-    return folly::sformat(
+    return fmt::format(
         "latency-injection|before:{}ms|after:{}ms|total:{}ms|"
         "request_payload:{}|max_request_latency_us:{}",
         beforeLatency_.count(),

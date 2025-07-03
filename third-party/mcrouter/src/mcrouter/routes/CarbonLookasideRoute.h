@@ -10,6 +10,8 @@
 #include <string>
 #include <utility>
 
+#include <fmt/format.h>
+
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
@@ -93,7 +95,7 @@ class CarbonLookasideRoute {
 
  public:
   std::string routeName() const {
-    return folly::sformat(
+    return fmt::format(
         "lookaside-cache|name={}|ttl={}{}s|leases={}",
         carbonLookasideHelper_.name(),
         ttl_,

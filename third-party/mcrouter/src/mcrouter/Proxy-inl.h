@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
 #include <folly/Range.h>
 #include <folly/fibers/EventBaseLoopController.h>
 
@@ -98,7 +99,7 @@ Proxy<RouterInfo>::addRouteTask(
           fiber_local<RouterInfo>::setSharedCtx(std::move(ctx));
           return proute.route(req);
         } catch (const std::exception& e) {
-          auto err = folly::sformat(
+          auto err = fmt::format(
               "Error routing request of type {}!"
               " Exception: {}",
               typeid(Request).name(),
@@ -123,7 +124,7 @@ Proxy<RouterInfo>::addRouteTask(
   ReplyT<Request> reply(carbon::Result::LOCAL_ERROR);
   carbon::setMessageIfPresent(
       reply,
-      folly::sformat(
+      fmt::format(
           "Couldn't route request of type {} "
           "because the operation is not supported by RouteHandles "
           "library!",

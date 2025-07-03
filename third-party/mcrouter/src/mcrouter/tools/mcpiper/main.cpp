@@ -8,6 +8,7 @@
 #include <signal.h>
 
 #include <boost/program_options.hpp>
+#include <fmt/format.h>
 
 #include <folly/Format.h>
 #include <folly/Singleton.h>
@@ -46,7 +47,7 @@ std::unique_ptr<McPiper> gMcpiper;
 }
 
 std::string getUsage(const char* binaryName) {
-  return folly::sformat(
+  return fmt::format(
       "Usage: {} [OPTION]... [PATTERN]\n"
       "Search for PATTERN in each mcrouter debug fifo in FIFO_ROOT "
       "(see options list) directory.\n"

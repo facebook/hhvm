@@ -7,6 +7,8 @@
 
 #include "MessagePrinter.h"
 
+#include <fmt/format.h>
+
 #include <folly/lang/Bits.h>
 
 namespace facebook {
@@ -117,8 +119,7 @@ std::string MessagePrinter::serializeConnectionDetails(
 
   if (!from.empty()) {
     if (options_.script) {
-      out.append(
-          folly::sformat(",\n  \"from\": \"{}\"", describeAddress(from)));
+      out.append(fmt::format(",\n  \"from\": \"{}\"", describeAddress(from)));
     } else {
       out.append(describeAddress(from));
     }
@@ -128,17 +129,17 @@ std::string MessagePrinter::serializeConnectionDetails(
   }
   if (!to.empty()) {
     if (options_.script) {
-      out.append(folly::sformat(",\n  \"to\": \"{}\"", describeAddress(to)));
+      out.append(fmt::format(",\n  \"to\": \"{}\"", describeAddress(to)));
     } else {
       out.append(describeAddress(to));
     }
   }
   if ((!from.empty() || !to.empty()) && protocol != mc_unknown_protocol) {
     if (options_.script) {
-      out.append(folly::sformat(
+      out.append(fmt::format(
           ",\n  \"protocol\": \"{}\"", mc_protocol_to_string(protocol)));
     } else {
-      out.append(folly::sformat(" ({})", mc_protocol_to_string(protocol)));
+      out.append(fmt::format(" ({})", mc_protocol_to_string(protocol)));
     }
   }
 
@@ -152,14 +153,13 @@ std::string MessagePrinter::serializeMessageHeader(
   std::string out;
 
   if (options_.script) {
-    out.append(folly::sformat("\"type\": \"{}\"", messageName.data()));
+    out.append(fmt::format("\"type\": \"{}\"", messageName.data()));
     if (result != carbon::Result::UNKNOWN) {
-      out.append(folly::sformat(
+      out.append(fmt::format(
           ",\n  \"result\": \"{}\"", carbon::resultToString(result)));
     }
     if (!key.empty()) {
-      out.append(
-          folly::sformat(",\n  \"key\": \"{}\"", folly::backslashify(key)));
+      out.append(fmt::format(",\n  \"key\": \"{}\"", folly::backslashify(key)));
     }
   } else {
     out.append(messageName.data());

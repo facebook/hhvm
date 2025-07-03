@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <folly/Format.h>
 #include <folly/Range.h>
 
@@ -69,7 +71,7 @@ class ClientCompatibilityCheckerRoute {
       return createReply<Request>(
           ErrorReply,
           carbon::Result::CLIENT_ERROR,
-          folly::sformat(
+          fmt::format(
               "Requests from newer client with version {} are not supported. "
               "Maximum supported client version is {}",
               static_cast<uint32_t>(*req.clientVersion_ref()),

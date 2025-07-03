@@ -6,6 +6,9 @@
  */
 
 #include "Lz4CompressionCodec.h"
+
+#include <fmt/format.h>
+
 #if FOLLY_HAVE_LIBLZ4 && !defined(DISABLE_COMPRESSION)
 
 namespace facebook {
@@ -32,7 +35,7 @@ Lz4CompressionCodec::Lz4CompressionCodec(
       reinterpret_cast<const char*>(dictionary_->data()),
       dictionary_->length());
   if (res < 0 || static_cast<size_t>(res) != dictionary_->length()) {
-    throw std::runtime_error(folly::sformat(
+    throw std::runtime_error(fmt::format(
         "LZ4 codec: Failed to load dictionary. Return code: {}", res));
   }
 }

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/Ch3HashFunc.h"
@@ -145,7 +147,7 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
         name = jName->stringPiece();
       }
     }
-    return errorOnEmpty ? createErrorRoute<RouterInfo>(folly::sformat(
+    return errorOnEmpty ? createErrorRoute<RouterInfo>(fmt::format(
                               "HashRoute with empty children, name: {}", name))
                         : createNullRoute<typename RouterInfo::RouteHandleIf>();
   }

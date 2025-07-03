@@ -12,6 +12,8 @@
 
 #include <mutex>
 
+#include <fmt/format.h>
+
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 #include <folly/system/ThreadName.h>
@@ -78,7 +80,7 @@ std::shared_ptr<Fifo> FifoManager::fetchThreadLocal(
     return nullptr;
   }
 
-  return fetch(folly::sformat("{0}.{1}", fifoBasePath, gettid()));
+  return fetch(fmt::format("{0}.{1}", fifoBasePath, gettid()));
 }
 
 std::shared_ptr<Fifo> FifoManager::find(const std::string& fifoPath) {

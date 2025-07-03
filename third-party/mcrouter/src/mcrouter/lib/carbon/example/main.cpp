@@ -7,6 +7,7 @@
 
 #include <chrono>
 
+#include <fmt/format.h>
 #include <folly/CppAttributes.h>
 #include <folly/fibers/FiberManagerMap.h>
 #include <folly/init/Init.h>
@@ -146,7 +147,7 @@ AsyncMcServer::Options getOpts(uint16_t port) {
     if (i % 2 == 0) {
       fm.addTask([&client, i]() {
         auto reply =
-            client.sendSync(HelloRequest(folly::sformat("key:{}", i)), 200ms);
+            client.sendSync(HelloRequest(fmt::format("key:{}", i)), 200ms);
         if (*reply.result_ref() != carbon::Result::OK) {
           LOG(ERROR) << "Unexpected result: "
                      << carbon::resultToString(*reply.result_ref());
@@ -155,7 +156,7 @@ AsyncMcServer::Options getOpts(uint16_t port) {
     } else {
       fm.addTask([&client, i]() {
         auto reply =
-            client.sendSync(GoodbyeRequest(folly::sformat("key:{}", i)), 200ms);
+            client.sendSync(GoodbyeRequest(fmt::format("key:{}", i)), 200ms);
         if (*reply.result_ref() != carbon::Result::OK) {
           LOG(ERROR) << "Unexpected result: "
                      << carbon::resultToString(*reply.result_ref());
@@ -243,7 +244,7 @@ void sendHelloRequestSync(
 
   for (int i = 0; i < 10; ++i) {
     auto client = router->createClient(0 /* max_outstanding_requests */);
-    sendHelloRequestSync(client.get(), folly::sformat("key:{}", i));
+    sendHelloRequestSync(client.get(), fmt::format("key:{}", i));
   }
 }
 
@@ -298,11 +299,11 @@ void sendHelloRequestSync(
 
   auto client = router->createClient(0 /* max_outstanding_requests */);
   for (int i = 0; i < 10; ++i) {
-    sendHelloRequestSync(client.get(), folly::sformat("key:{}", i));
+    sendHelloRequestSync(client.get(), fmt::format("key:{}", i));
   }
 
   for (int i = 0; i < 10; ++i) {
-    sendHelloRequestSync(client.get(), folly::sformat("key:{}", i));
+    sendHelloRequestSync(client.get(), fmt::format("key:{}", i));
   }
 }
 
@@ -357,7 +358,7 @@ std::thread startThriftServer(
 
   auto client = router->createClient(0 /* max_outstanding_requests */);
   for (int i = 0; i < 10; ++i) {
-    sendHelloRequestSync(client.get(), folly::sformat("key:{}", i));
+    sendHelloRequestSync(client.get(), fmt::format("key:{}", i));
   }
 
   // stop server 1
@@ -365,7 +366,7 @@ std::thread startThriftServer(
   server1Thread.join();
 
   for (int i = 10; i < 20; ++i) {
-    sendHelloRequestSync(client.get(), folly::sformat("key:{}", i));
+    sendHelloRequestSync(client.get(), fmt::format("key:{}", i));
   }
 
   // start server 1 again.
@@ -374,7 +375,7 @@ std::thread startThriftServer(
   usleep(1000);
 
   for (int i = 20; i < 30; ++i) {
-    sendHelloRequestSync(client.get(), folly::sformat("key:{}", i));
+    sendHelloRequestSync(client.get(), fmt::format("key:{}", i));
   }
 
   router->shutdown();

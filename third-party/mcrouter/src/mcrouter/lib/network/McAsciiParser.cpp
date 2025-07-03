@@ -7,6 +7,8 @@
 
 #include "McAsciiParser.h"
 
+#include <fmt/format.h>
+
 #include <folly/String.h>
 
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"
@@ -62,7 +64,7 @@ void McAsciiParserBase::handleError(folly::IOBuf& buffer) {
   auto length =
       std::min(p_ - start + kProtocolTailContextLength, buffer.length());
 
-  currentErrorDescription_ = folly::sformat(
+  currentErrorDescription_ = fmt::format(
       "Error parsing message '{}' at character {}!",
       folly::cEscape<std::string>(folly::StringPiece(start, start + length)),
       p_ - start);

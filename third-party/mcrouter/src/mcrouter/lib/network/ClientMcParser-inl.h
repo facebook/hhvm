@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/io/Cursor.h>
 
@@ -136,7 +137,7 @@ std::unique_ptr<folly::IOBuf> ClientMcParser<Callback>::decompress(
       ? compressionCodecMap_->get(headerInfo.usedCodecId)
       : nullptr;
   if (!codec) {
-    throw std::runtime_error(folly::sformat(
+    throw std::runtime_error(fmt::format(
         "Failed to get compression codec id {}. Reply is likely corrupted!",
         headerInfo.usedCodecId));
   }
@@ -151,7 +152,7 @@ bool ClientMcParser<Callback>::caretMessageReady(
     const CaretMessageInfo& headerInfo,
     const folly::IOBuf& buffer) {
   if (FOLLY_UNLIKELY(parser_.protocol() != mc_caret_protocol)) {
-    const auto reason = folly::sformat(
+    const auto reason = fmt::format(
         "Expected {} protocol, but received Caret!",
         mc_protocol_to_string(parser_.protocol()));
     callback_.parseError(carbon::Result::LOCAL_ERROR, reason);
@@ -168,7 +169,7 @@ bool ClientMcParser<Callback>::caretMessageReady(
     return true;
   } catch (const std::exception& e) {
     const auto reason =
-        folly::sformat("Error parsing Caret message: {}", e.what());
+        fmt::format("Error parsing Caret message: {}", e.what());
     callback_.parseError(carbon::Result::LOCAL_ERROR, reason);
     return false;
   }
@@ -177,7 +178,7 @@ bool ClientMcParser<Callback>::caretMessageReady(
 template <class Callback>
 void ClientMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
   if (FOLLY_UNLIKELY(parser_.protocol() != mc_ascii_protocol)) {
-    std::string reason(folly::sformat(
+    std::string reason(fmt::format(
         "Expected {} protocol, but received ASCII!",
         mc_protocol_to_string(parser_.protocol())));
     callback_.parseError(carbon::Result::LOCAL_ERROR, reason);
@@ -189,7 +190,7 @@ void ClientMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
       // Ask the client to initialize parser.
       if (!callback_.nextReplyAvailable(0 /* reqId */)) {
         auto data = reinterpret_cast<const char*>(readBuffer.data());
-        std::string reason(folly::sformat(
+        std::string reason(fmt::format(
             "Received unexpected data from remote endpoint: '{}'!",
             folly::cEscape<std::string>(folly::StringPiece(
                 data,

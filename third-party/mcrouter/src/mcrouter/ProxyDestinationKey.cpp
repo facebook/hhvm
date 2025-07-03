@@ -7,6 +7,8 @@
 
 #include "mcrouter/ProxyDestinationKey.h"
 
+#include <fmt/format.h>
+
 #include "folly/Format.h"
 #include "mcrouter/ProxyDestinationBase.h"
 #include "mcrouter/lib/network/AccessPoint.h"
@@ -29,19 +31,18 @@ ProxyDestinationKey::ProxyDestinationKey(
 std::string ProxyDestinationKey::str() const {
   std::string additionalConnectionIdx;
   if (idx > 0) {
-    additionalConnectionIdx = folly::sformat("-{}", idx);
+    additionalConnectionIdx = fmt::format("-{}", idx);
   }
   if (accessPoint.getProtocol() == mc_ascii_protocol) {
     // we cannot send requests with different timeouts for ASCII, since
     // it will break in-order nature of the protocol
-    return folly::sformat(
+    return fmt::format(
         "{}-{}{}",
         accessPoint.toString(),
         timeout.count(),
         additionalConnectionIdx);
   } else {
-    return folly::sformat(
-        "{}{}", accessPoint.toString(), additionalConnectionIdx);
+    return fmt::format("{}{}", accessPoint.toString(), additionalConnectionIdx);
   }
 }
 

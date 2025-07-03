@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/Range.h>
 #include <folly/json/json.h>
@@ -426,7 +427,7 @@ ServiceInfo<RouterInfo>::ServiceInfoImpl::ServiceInfoImpl(
         if (!routeHandlesCommandDispatcher_.dispatch(
                 typeId, ctx, key, proxyRoute_, res)) {
           throw std::runtime_error(
-              folly::sformat("route: unknown request {}", requestName));
+              fmt::format("route: unknown request {}", requestName));
         }
         return res;
       });
@@ -473,7 +474,7 @@ ServiceInfo<RouterInfo>::ServiceInfoImpl::ServiceInfoImpl(
         if (args.size() == 1) {
           auto before = FLAGS_v;
           FLAGS_v = folly::to<int>(args[0]);
-          return folly::sformat("{} -> {}", before, FLAGS_v);
+          return fmt::format("{} -> {}", before, FLAGS_v);
         } else if (args.empty()) {
           return folly::to<std::string>(FLAGS_v);
         }
@@ -649,7 +650,7 @@ void ServiceInfo<RouterInfo>::ServiceInfoImpl::handleRouteCommand(
   if (!routeCommandDispatcher_.dispatch(
           typeId, ctx, key, proxy_, proxyRoute_)) {
     throw std::runtime_error(
-        folly::sformat("route: unknown request {}", requestName));
+        fmt::format("route: unknown request {}", requestName));
   }
 }
 
@@ -671,7 +672,7 @@ void ServiceInfo<RouterInfo>::ServiceInfoImpl::handleGetBucketCommand(
           proxy_,
           proxyRoute_)) {
     throw std::runtime_error(
-        folly::sformat("get_bucket: couldn't find bucket for key {}", key));
+        fmt::format("get_bucket: couldn't find bucket for key {}", key));
   }
 }
 

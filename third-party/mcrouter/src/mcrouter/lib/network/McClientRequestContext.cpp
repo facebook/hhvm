@@ -7,6 +7,8 @@
 
 #include "McClientRequestContext.h"
 
+#include <fmt/format.h>
+
 namespace facebook {
 namespace memcache {
 
@@ -245,7 +247,7 @@ McClientRequestContextQueue::getParserInitializer(uint64_t reqId) {
 }
 
 std::string McClientRequestContextQueue::debugInfo() const {
-  return folly::sformat(
+  return fmt::format(
       "Currently have {} timedout initializers, {} requests in "
       "replied queue, {} requests in pending reply queue, "
       "{} requests in write queue and {} requests in pending queue, "
@@ -288,7 +290,7 @@ std::string McClientRequestContextQueue::getFirstAliveRequestInfo() const {
     dataOffset += toCopy;
   }
 
-  return folly::sformat(
+  return fmt::format(
       "{}, serialized data was: \"{}\"",
       ctx->getContextTypeStr(),
       folly::cEscape<std::string>(

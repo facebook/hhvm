@@ -19,6 +19,8 @@
 #include <thread>
 #include <vector>
 
+#include <fmt/format.h>
+
 #include <folly/Conv.h>
 #include <folly/IPAddress.h>
 #include <folly/SharedMutex.h>
@@ -62,7 +64,7 @@ class ShutdownPipe : public folly::EventHandler {
       throw std::system_error(
           errno,
           std::system_category(),
-          folly::sformat("Unexpected return of write: {}", res));
+          fmt::format("Unexpected return of write: {}", res));
     }
   }
 
@@ -747,7 +749,7 @@ AsyncMcServer::AsyncMcServer(Options opts) : opts_(std::move(opts)) {
     virtualEventBaseMode_ = true;
     if (opts_.numListeningSockets == 0 ||
         opts_.numListeningSockets > opts_.eventBases.size()) {
-      throw std::invalid_argument(folly::sformat(
+      throw std::invalid_argument(fmt::format(
           "Unexpected option: opts_.numListeningSockets={}",
           opts_.numListeningSockets));
     }
@@ -777,7 +779,7 @@ AsyncMcServer::AsyncMcServer(Options opts) : opts_(std::move(opts)) {
     }
   } else {
     if (opts_.numThreads == 0) {
-      throw std::invalid_argument(folly::sformat(
+      throw std::invalid_argument(fmt::format(
           "Unexpected option: opts_.numThreads={}, virtualEventBaseMode={}",
           opts_.numThreads,
           virtualEventBaseMode_));
@@ -785,7 +787,7 @@ AsyncMcServer::AsyncMcServer(Options opts) : opts_(std::move(opts)) {
 
     if (opts_.numListeningSockets == 0 ||
         opts_.numListeningSockets > opts_.numThreads) {
-      throw std::invalid_argument(folly::sformat(
+      throw std::invalid_argument(fmt::format(
           "Unexpected option: opts_.numListeningSockets={}",
           opts_.numListeningSockets));
     }

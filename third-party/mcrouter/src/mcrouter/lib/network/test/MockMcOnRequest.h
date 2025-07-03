@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <folly/Format.h>
 
 #include "mcrouter/lib/Reply.h"
@@ -371,7 +373,7 @@ class MockMcOnRequest {
 
   template <class Context, class Unsupported>
   void onRequest(Context&& ctx, Unsupported&&) {
-    const std::string errorMessage = folly::sformat(
+    const std::string errorMessage = fmt::format(
         "MockMcServer does not support {}", typeid(Unsupported).name());
     LOG(ERROR) << errorMessage;
     ReplyT<Unsupported> reply(carbon::Result::REMOTE_ERROR);

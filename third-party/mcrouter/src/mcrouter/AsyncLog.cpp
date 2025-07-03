@@ -18,6 +18,8 @@
 
 #include <memory>
 
+#include <fmt/format.h>
+
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
@@ -225,7 +227,7 @@ bool AsyncLog::writeDelete(
     json["s"] = options_.service_name;
     json["f"] = options_.flavor_name;
     json["r"] = options_.default_route.getRegion();
-    json["h"] = folly::sformat("[{}]:{}", host, port);
+    json["h"] = fmt::format("[{}]:{}", host, port);
     json["p"] = poolName.str();
     json["k"] = key.str();
     attributes.emplace(AsyncLog::kAsyncLogMarker, 1);
@@ -234,7 +236,7 @@ bool AsyncLog::writeDelete(
     /* ["host", port, escaped_command] */
     json.push_back(host);
     json.push_back(port);
-    json.push_back(folly::sformat("delete {}\r\n", key));
+    json.push_back(fmt::format("delete {}\r\n", key));
   }
 
   if (!openFile()) {

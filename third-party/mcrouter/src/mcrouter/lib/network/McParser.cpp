@@ -11,6 +11,8 @@
 #include <new>
 #include <utility>
 
+#include <fmt/format.h>
+
 #include <folly/Format.h>
 #include <folly/memory/JemallocNodumpAllocator.h>
 #include <glog/logging.h>
@@ -134,7 +136,7 @@ bool McParser::readCaretData() {
     if (parseStatus != ParseStatus::Ok) {
       callback_.parseError(
           carbon::Result::REMOTE_ERROR,
-          folly::sformat(
+          fmt::format(
               "Error parsing {} header", mc_protocol_to_string(protocol_)));
       return false;
     }

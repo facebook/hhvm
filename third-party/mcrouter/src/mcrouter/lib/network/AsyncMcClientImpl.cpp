@@ -11,6 +11,8 @@
 
 #include <memory>
 
+#include <fmt/format.h>
+
 #include <folly/container/EvictingCacheMap.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/EventBase.h>
@@ -540,7 +542,7 @@ void AsyncMcClientImpl::connectErr(
 
   std::string errorMessage;
   if (ex.getType() == folly::AsyncSocketException::SSL_ERROR) {
-    errorMessage = folly::sformat(
+    errorMessage = fmt::format(
         "SSLError: {}. Connect to {} failed.",
         ex.what(),
         connectionOptions_.accessPoint->toHostPortString());
@@ -655,7 +657,7 @@ void AsyncMcClientImpl::readEOF() noexcept {
 void AsyncMcClientImpl::readErr(
     const folly::AsyncSocketException& ex) noexcept {
   assert(connectionState_ == ConnectionState::Up);
-  std::string errorMessage = folly::sformat(
+  std::string errorMessage = fmt::format(
       "Failed to read from socket with remote endpoint \"{}\". Exception: {}",
       connectionOptions_.accessPoint->toString(),
       ex.what());
@@ -690,7 +692,7 @@ void AsyncMcClientImpl::writeErr(
       connectionState_ == ConnectionState::Up ||
       connectionState_ == ConnectionState::Error);
 
-  std::string errorMessage = folly::sformat(
+  std::string errorMessage = fmt::format(
       "Failed to write into socket with remote endpoint \"{}\", "
       "wrote {} bytes. Exception: {}",
       connectionOptions_.accessPoint->toString(),

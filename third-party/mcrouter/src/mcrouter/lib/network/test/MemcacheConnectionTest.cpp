@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -46,12 +47,12 @@ startMockMcThriftServer(const facebook::memcache::ListenSocket& socket) {
   bool started = conn->healthCheck();
   for (int i = 0; !started && i < 5; i++) {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    LOG(INFO) << folly::sformat(
+    LOG(INFO) << fmt::format(
         "health check thrift server on port {}, retry={}", socket.getPort(), i);
     started = conn->healthCheck();
   }
   conn.reset();
-  EXPECT_TRUE(started) << folly::sformat(
+  EXPECT_TRUE(started) << fmt::format(
       "fail to start thrift server on port {} after max retries",
       socket.getPort());
   return std::make_pair(server, std::move(thread));
@@ -186,7 +187,7 @@ TEST(MemcacheInternalConnectionTest, simpleInternalConnection) {
   mcrouterOptions.num_proxies = 1;
   mcrouterOptions.default_route =
       facebook::memcache::mcrouter::RoutingPrefix("/oregon/*/");
-  mcrouterOptions.config_str = folly::sformat(
+  mcrouterOptions.config_str = fmt::format(
       R"(
         {{
           "pools": {{
@@ -244,7 +245,7 @@ TEST(MemcachePooledConnectionTest, PooledInternalConnection) {
   mcrouterOptions.num_proxies = 1;
   mcrouterOptions.default_route =
       facebook::memcache::mcrouter::RoutingPrefix("/oregon/*/");
-  mcrouterOptions.config_str = folly::sformat(
+  mcrouterOptions.config_str = fmt::format(
       R"(
         {{
           "pools": {{

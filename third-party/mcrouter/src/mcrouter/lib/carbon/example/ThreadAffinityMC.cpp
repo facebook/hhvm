@@ -7,6 +7,7 @@
 
 #include <signal.h>
 
+#include <fmt/format.h>
 #include <folly/logging/xlog.h>
 #include <gflags/gflags.h>
 
@@ -166,7 +167,7 @@ int main(int argc, char** argv) {
             FLAGS_num_req_per_client,
             i);
         for (int j = 0; j < FLAGS_num_req_per_client; ++j) {
-          sendGetRequest(clients[i].get(), folly::sformat("key:{}{}", i, j));
+          sendGetRequest(clients[i].get(), fmt::format("key:{}{}", i, j));
         }
       }
     }));

@@ -9,6 +9,7 @@
 #include <random>
 #include <vector>
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
@@ -21,7 +22,7 @@ using namespace facebook::memcache::mcrouter;
 namespace {
 
 std::string makeKey(uint64_t id) {
-  return folly::sformat("test-key:{}", id);
+  return fmt::format("test-key:{}", id);
 }
 
 } // anonymous namespace

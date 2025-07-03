@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include "mcrouter/lib/network/ServerMcParser.h"
@@ -257,7 +258,7 @@ class TestRunner {
         if (!info.empty()) {
           info += ", ";
         }
-        info += folly::sformat(
+        info += fmt::format(
             "\"{}\"", folly::cEscape<std::string>(folly::StringPiece(range)));
       }
       LOG(INFO) << "Test data for failed test: " << info;

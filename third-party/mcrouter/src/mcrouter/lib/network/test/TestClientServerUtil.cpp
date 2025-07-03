@@ -12,6 +12,7 @@
 #include <string>
 #include <thread>
 
+#include <fmt/format.h>
 #include <glog/logging.h>
 
 #include <folly/Conv.h>
@@ -98,7 +99,7 @@ void TestServerOnRequest::onRequest(
       size_t valSize = folly::to<size_t>(key);
       value = std::string(valSize, 'a');
     } else if (req.key_ref()->fullKey() == "trace_id") {
-      value = folly::sformat("{}", req.traceContext());
+      value = fmt::format("{}", req.traceContext());
     } else if (req.key_ref()->fullKey() != "empty") {
       value = req.key_ref()->fullKey().str();
     }

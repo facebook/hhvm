@@ -8,6 +8,7 @@
 #include "OptionsUtil.h"
 
 #include <boost/filesystem/path.hpp>
+#include <fmt/format.h>
 
 #include <folly/Format.h>
 #include <folly/Range.h>
@@ -28,15 +29,14 @@ std::string getDebugFifoFullPath(
   assert(!opts.debug_fifo_root.empty());
   auto directory = fs::path(opts.debug_fifo_root);
   auto file = fs::path(
-      folly::sformat("{}.{}.{}", getStatPrefix(opts), fifoName, "debugfifo"));
+      fmt::format("{}.{}.{}", getStatPrefix(opts), fifoName, "debugfifo"));
   return (directory / file).string();
 }
 
 } // anonymous namespace
 
 std::string getStatPrefix(const McrouterOptions& opts) {
-  return folly::sformat(
-      "libmcrouter.{}.{}", opts.service_name, opts.router_name);
+  return fmt::format("libmcrouter.{}.{}", opts.service_name, opts.router_name);
 }
 
 std::string getClientDebugFifoFullPath(const McrouterOptions& opts) {

@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include <folly/Conv.h>
@@ -75,10 +76,10 @@ void testBigvalueWithFlag() {
   const std::string rand_suffix_get = "123456";
   const size_t num_chunks = 10;
   // initial reply of the form version-num_chunks-rand_suffix for get path
-  const auto init_reply = folly::sformat(
+  const auto init_reply = fmt::format(
       "{}-{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks, rand_suffix_get);
   const auto init_reply_error =
-      folly::sformat("{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks);
+      fmt::format("{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks);
   std::vector<std::shared_ptr<TestHandle>> testHandles{
       std::make_shared<TestHandle>(GetRouteTestData(
           carbon::Result::FOUND, init_reply, MC_MSG_FLAG_BIG_VALUE)),
@@ -112,10 +113,10 @@ void testBigvalueWithoutFlag() {
   const std::string rand_suffix_get = "123456";
   const size_t num_chunks = 10;
   // initial reply of the form version-num_chunks-rand_suffix for get path
-  const auto init_reply = folly::sformat(
+  const auto init_reply = fmt::format(
       "{}-{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks, rand_suffix_get);
   const auto init_reply_error =
-      folly::sformat("{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks);
+      fmt::format("{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks);
   std::vector<std::shared_ptr<TestHandle>> testHandles{
       std::make_shared<TestHandle>(GetRouteTestData(
           carbon::Result::FOUND, init_reply, MC_MSG_FLAG_BIG_VALUE)),
@@ -152,10 +153,10 @@ void testBigvalue() {
   const std::string rand_suffix_get = "123456";
   const size_t num_chunks = 10;
   // initial reply of the form version-num_chunks-rand_suffix for get path
-  const auto init_reply = folly::sformat(
+  const auto init_reply = fmt::format(
       "{}-{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks, rand_suffix_get);
   const auto init_reply_error =
-      folly::sformat("{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks);
+      fmt::format("{}-{}", BIG_VALUE_ROUTE_TEST_VERSION, num_chunks);
   std::vector<std::shared_ptr<TestHandle>> testHandles{
       std::make_shared<TestHandle>(GetRouteTestData(
           carbon::Result::FOUND, init_reply, MC_MSG_FLAG_BIG_VALUE)),
@@ -189,7 +190,7 @@ void testBigvalue() {
       // perform get request on chunk keys
       for (size_t i = 1; i < num_chunks + 1; i++) {
         auto chunk_key =
-            folly::sformat("{}:{}:{}", keyGet, i - 1, rand_suffix_get);
+            fmt::format("{}:{}:{}", keyGet, i - 1, rand_suffix_get);
         EXPECT_EQ(keys_get[i], chunk_key);
         merged_str.append(init_reply);
       }
@@ -234,7 +235,7 @@ void testBigvalue() {
       std::string rand_suffix_set;
       // first set chunk values corresponding to chunk keys
       for (size_t i = 0; i < num_chunks; i++) {
-        auto chunk_key_prefix = folly::sformat("{}:{}:", keySet, i);
+        auto chunk_key_prefix = fmt::format("{}:{}:", keySet, i);
         auto length = chunk_key_prefix.length();
         auto saw_prefix = keys_set[i].substr(0, length);
         EXPECT_EQ(chunk_key_prefix, saw_prefix);
@@ -255,7 +256,7 @@ void testBigvalue() {
       // if set for chunk keys succeed,
       // set original key with chunks info as modified value
       EXPECT_EQ(keySet, keys_set[num_chunks]);
-      auto chunks_info = folly::sformat(
+      auto chunks_info = fmt::format(
           "{}-{}-{}",
           BIG_VALUE_ROUTE_TEST_VERSION,
           num_chunks,
@@ -280,7 +281,7 @@ void testBigvalue() {
       EXPECT_EQ(num_chunks + 1, keys_set.size());
       // first set chunk values corresponding to chunk keys
       for (size_t i = 0; i < num_chunks; i++) {
-        auto chunk_key_prefix = folly::sformat("{}:{}:", keySet, i);
+        auto chunk_key_prefix = fmt::format("{}:{}:", keySet, i);
         auto length = chunk_key_prefix.length();
         auto saw_prefix = keys_set[i].substr(0, length);
         EXPECT_EQ(chunk_key_prefix, saw_prefix);
@@ -314,7 +315,7 @@ void testBigvalue() {
       std::string rand_suffix_set;
       // first set chunk values corresponding to chunk keys
       for (size_t i = 0; i < num_chunks; i++) {
-        auto chunk_key_prefix = folly::sformat("{}:{}:", keySet, i);
+        auto chunk_key_prefix = fmt::format("{}:{}:", keySet, i);
         auto length = chunk_key_prefix.length();
         auto saw_prefix = keys_set[i].substr(0, length);
         EXPECT_EQ(chunk_key_prefix, saw_prefix);
@@ -337,7 +338,7 @@ void testBigvalue() {
       // set original key with chunks info as modified value
       EXPECT_EQ(keySet, keys_set[num_chunks]);
       EXPECT_EQ("add", operations_set[num_chunks]);
-      auto chunks_info = folly::sformat(
+      auto chunks_info = fmt::format(
           "{}-{}-{}",
           BIG_VALUE_ROUTE_TEST_VERSION,
           num_chunks,

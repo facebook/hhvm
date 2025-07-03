@@ -144,6 +144,7 @@ struct Options {
    * Extern-worker config
    */
   std::string ExternWorkerUseCase;
+  std::string ExternWorkerPlatform;
   std::string ExternWorkerWorkingDir;
   bool ExternWorkerForceSubprocess = false;
   bool ExternWorkerUseExecCache = true;

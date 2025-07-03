@@ -110,6 +110,7 @@ struct Option {
 
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
+  static std::string ExternWorkerPlatform;
   static std::string ExternWorkerFeaturesFile;
   static std::string ExternWorkerPath;
   static int ExternWorkerTimeoutSecs;

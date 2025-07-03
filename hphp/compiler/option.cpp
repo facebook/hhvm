@@ -65,6 +65,7 @@ bool Option::ParserOptimisticStore = true;
 bool Option::ForceEnableSymbolRefs = false;
 
 std::string Option::ExternWorkerUseCase;
+std::string Option::ExternWorkerPlatform;
 std::string Option::ExternWorkerFeaturesFile;
 std::string Option::ExternWorkerPath;
 int Option::ExternWorkerTimeoutSecs = 0;
@@ -168,6 +169,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   // If empty, use the builtin Subprocess impl.
   Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
                ExternWorkerUseCase);
+  Config::Bind(ExternWorkerPlatform, ini, config, "ExternWorker.Platform",
+               ExternWorkerPlatform);
   Config::Bind(ExternWorkerFeaturesFile, ini, config,
                "ExternWorker.FeaturesFile", ExternWorkerFeaturesFile);
   // If not set or empty, default to current_executable_path()

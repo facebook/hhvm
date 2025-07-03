@@ -389,6 +389,13 @@ struct Options {
     return *this;
   }
 
+  // Platform allows the HHBBC actions to be constrained to specific
+  // worker pools that increase the affinity of actions across that pool
+  Options& setPlatform(std::string p) {
+    m_platform = std::move(p);
+    return *this;
+  }
+
   Options& setFeaturesFile(std::string f) {
     m_featuresFile = std::move(f);
     return *this;
@@ -468,6 +475,7 @@ struct Options {
   int m_executionConcurrencyLimit{6000};
   int m_acConnectionCount{16};
   std::string m_useCase{""};
+  std::string m_platform{"linux-remote-execution"};
   std::string m_featuresFile{""};
   std::string m_workerPath{""};
 };

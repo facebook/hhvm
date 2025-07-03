@@ -1,0 +1,4 @@
+.class [final trait] T {
+  .require this as <C>;
+}
+

@@ -1,0 +1,11 @@
+# /home/fzn/fzn.php starts here
+
+.filepath "/home/fzn/fzn.php";
+
+
+.module_use "default";
+
+.class [final trait] T {
+  .require this <C>;
+}
+

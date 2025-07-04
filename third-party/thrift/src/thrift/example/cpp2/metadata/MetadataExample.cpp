@@ -59,10 +59,10 @@ void printStructuredAnnotationData() {
       *field.structured_annotations();
 
   // Print "field annotation"
-  LOG(INFO) << *fieldAnnotations[0].fields()->at("data").cv_string_ref();
+  LOG(INFO) << *fieldAnnotations[0].fields()->at("data").cv_string();
 
   // Structured annotation of the typedef
-  const ThriftTypedefType& typeDef = *field.type()->t_typedef_ref();
+  const ThriftTypedefType& typeDef = *field.type()->t_typedef();
   const std::vector<ThriftConstStruct>& typedefAnnotations =
       *typeDef.structured_annotations();
 
@@ -70,7 +70,7 @@ void printStructuredAnnotationData() {
   LOG(INFO) << *typeDef.name();
 
   // Print "typedef annotation"
-  LOG(INFO) << *typedefAnnotations[0].fields()->at("data").cv_string_ref();
+  LOG(INFO) << *typedefAnnotations[0].fields()->at("data").cv_string();
 }
 
 } // namespace apache::thrift::metadata

@@ -51,7 +51,7 @@ val_struct = StringBucket(
 )
 inst = MyStruct(
     val_bool=True,
-    val_i32=42,
+    val_double=42.0,
     val_i64=64,
     val_string="hello world",
     val_binary=b"hello world",
@@ -160,7 +160,7 @@ def benchmark_field_access():
 
     fields = [
         "val_bool",
-        "val_i32",
+        "val_double",
         "val_i64",
         "val_string",
         "val_binary",

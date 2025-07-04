@@ -41,6 +41,7 @@ struct MyStruct {
   18: map<i32, Included> val_map_structs;
   20: StringBucket val_struct;
   22: MyEnum val_enum;
+  24: double val_double;
 }
 
 struct Included {

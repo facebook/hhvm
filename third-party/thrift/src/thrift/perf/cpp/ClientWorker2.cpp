@@ -69,7 +69,7 @@ std::shared_ptr<ClientWorker2::Client> ClientWorker2::createConnection() {
       HeaderClientChannel::newChannel(std::move(socket), std::move(options));
   if (config->zlib()) {
     apache::thrift::CompressionConfig compressionConfig;
-    compressionConfig.codecConfig_ref().ensure().set_zlibConfig();
+    compressionConfig.codecConfig().ensure().set_zlibConfig();
     headerChannel->setDesiredCompressionConfig(compressionConfig);
   }
   headerChannel->setTimeout(kTimeout);
@@ -176,7 +176,7 @@ void ClientWorker2::performThrowError(const std::shared_ptr<Client>& client) {
     client->sync_throwError(code);
     T_ERROR("throwError() didn't throw any exception");
   } catch (const LoadError& error) {
-    DCHECK_EQ(*error.code_ref(), code);
+    DCHECK_EQ(*error.code(), code);
   }
 }
 

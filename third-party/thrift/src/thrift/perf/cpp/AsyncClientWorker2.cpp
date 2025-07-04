@@ -180,7 +180,7 @@ LoadTestClientPtr AsyncClientWorker2::createConnection() {
   // For testing equality, make sure to use binary
   if (config->zlib()) {
     apache::thrift::CompressionConfig compressionConfig;
-    compressionConfig.codecConfig_ref().ensure().set_zlibConfig();
+    compressionConfig.codecConfig().ensure().set_zlibConfig();
     channel->setDesiredCompressionConfig(compressionConfig);
   }
 
@@ -408,7 +408,7 @@ void AsyncRunner2::genericCob(
           client->recv_throwError(rstate);
           T_ERROR("throwError() didn't throw any exception");
         } catch (const LoadError& error) {
-          DCHECK_EQ(*error.code_ref(), opData->code);
+          DCHECK_EQ(*error.code(), opData->code);
         }
         break;
       case apache::thrift::test::ClientLoadConfig::OP_THROW_UNEXPECTED:

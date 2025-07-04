@@ -117,7 +117,7 @@ void AsyncLoadHandler2::async_eb_badBurn(
 void AsyncLoadHandler2::async_eb_throwError(
     HandlerCallbackPtr<void> callback, int32_t code) {
   LoadError error;
-  *error.code_ref() = code;
+  *error.code() = code;
   callback->exception(error);
 }
 
@@ -133,7 +133,7 @@ void AsyncLoadHandler2::async_eb_throwUnexpected(
 void AsyncLoadHandler2::async_eb_onewayThrow(
     HandlerCallbackOneWay::Ptr callback, int32_t code) {
   LoadError error;
-  *error.code_ref() = code;
+  *error.code() = code;
   callback->exception(error);
 }
 
@@ -198,8 +198,8 @@ void AsyncLoadHandler2::async_eb_iterAllFields(
     std::unique_ptr<std::vector<BigStruct>> items) {
   std::string x;
   for (auto& item : *items) {
-    x = *item.stringField_ref();
-    for (auto& i : *item.stringList_ref()) {
+    x = *item.stringField();
+    for (auto& i : *item.stringList()) {
       x = i;
     }
   }

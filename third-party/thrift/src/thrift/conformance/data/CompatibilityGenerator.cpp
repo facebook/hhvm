@@ -453,7 +453,7 @@ template <class TT>
     // deserialization.
     ret.back()
         .test()
-        ->roundTrip_ref()
+        ->roundTrip()
         ->expectedResponse()
         .ensure()
         .value()
@@ -472,7 +472,7 @@ template <class TT>
     // deserialization.
     ret.back()
         .test()
-        ->roundTrip_ref()
+        ->roundTrip()
         ->expectedResponse()
         .ensure()
         .value()

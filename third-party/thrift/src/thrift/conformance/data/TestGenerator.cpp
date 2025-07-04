@@ -52,14 +52,14 @@ Test createRoundTripTest(
 
       auto& testCase = test.testCases()->emplace_back();
       testCase.name() = fmt::format("{}/{}", typeName, value.name);
-      testCase.test()->roundTrip_ref() = roundTrip;
+      testCase.test()->roundTrip() = roundTrip;
     }
 
     auto addTestCase = [&](auto data, auto msg) {
       roundTrip.request()->value() = registry.store(data, protocol);
       auto& testCase = test.testCases()->emplace_back();
       testCase.name() = msg;
-      testCase.test()->roundTrip_ref() = roundTrip;
+      testCase.test()->roundTrip() = roundTrip;
     };
 
     auto addStruct = [&](auto modSet, auto msg) {

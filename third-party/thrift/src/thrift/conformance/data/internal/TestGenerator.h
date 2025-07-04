@@ -98,7 +98,7 @@ template <class Old, class New>
 
   TestCase testCase;
   testCase.name() = std::move(name);
-  testCase.test()->roundTrip_ref() = std::move(roundTrip);
+  testCase.test()->roundTrip() = std::move(roundTrip);
   testCase.description().from_optional(description);
   return testCase;
 }

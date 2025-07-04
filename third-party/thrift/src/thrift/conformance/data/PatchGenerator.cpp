@@ -178,13 +178,13 @@ Test createNumericPatchTest(
     auto& assignCase = test.testCases()->emplace_back();
     assignCase.name() =
         fmt::format("{}/assign.{}", type::getName<TT>(), value.name);
-    auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
+    auto& tascase = assignCase.test().emplace().objectPatch().emplace();
     tascase = makeAssignTest<TT>(value, registry, protocol);
 
     auto& clearCase = test.testCases()->emplace_back();
     clearCase.name() =
         fmt::format("{}/clear.{}", type::getName<TT>(), value.name);
-    auto& tclcase = clearCase.test().emplace().objectPatch_ref().emplace();
+    auto& tclcase = clearCase.test().emplace().objectPatch().emplace();
     tclcase = makeClearTest<TT>(value, registry, protocol);
 
     using ValueType = decltype(value.value);
@@ -192,7 +192,7 @@ Test createNumericPatchTest(
       auto& addCase = test.testCases()->emplace_back();
       addCase.name() =
           fmt::format("{}/add.{}_{}", type::getName<TT>(), value.name, toAdd);
-      auto& tadcase = addCase.test().emplace().objectPatch_ref().emplace();
+      auto& tadcase = addCase.test().emplace().objectPatch().emplace();
       tadcase = makeAddTest<TT>(value, registry, protocol, toAdd);
     };
 
@@ -218,24 +218,24 @@ Test createStringLikePatchTest(
     auto& assignCase = test.testCases()->emplace_back();
     assignCase.name() =
         fmt::format("{}/assign.{}", type::getName<TT>(), value.name);
-    auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
+    auto& tascase = assignCase.test().emplace().objectPatch().emplace();
     tascase = makeAssignTest<TT>(value, registry, protocol);
 
     auto& clearCase = test.testCases()->emplace_back();
     clearCase.name() = fmt::format("{}/clear", type::getName<TT>());
-    auto& tclcase = clearCase.test().emplace().objectPatch_ref().emplace();
+    auto& tclcase = clearCase.test().emplace().objectPatch().emplace();
     tclcase = makeClearTest<TT>(value, registry, protocol);
 
     auto& prependCase = test.testCases()->emplace_back();
     prependCase.name() =
         fmt::format("{}/prepend.{}", type::getName<TT>(), value.name);
-    auto& tprcase = prependCase.test().emplace().objectPatch_ref().emplace();
+    auto& tprcase = prependCase.test().emplace().objectPatch().emplace();
     tprcase = makePrependTest<TT>(value, registry, protocol);
 
     auto& appendCase = test.testCases()->emplace_back();
     appendCase.name() =
         fmt::format("{}/append.{}", type::getName<TT>(), value.name);
-    auto& tapcase = appendCase.test().emplace().objectPatch_ref().emplace();
+    auto& tapcase = appendCase.test().emplace().objectPatch().emplace();
     tapcase = makeAppendTest<TT>(value, registry, protocol);
   }
 
@@ -497,31 +497,31 @@ Test createListSetPatchTest(
       using ContainerTag = container_from_class_t<CC, TT>;
       auto& assignCase = test.testCases()->emplace_back();
       assignCase.name() = makeTestName(value, "assign");
-      assignCase.test().emplace().objectPatch_ref() =
+      assignCase.test().emplace().objectPatch() =
           makeAssignTC<ContainerTag>(registry, protocol, value.value);
 
       auto& clearCase = test.testCases()->emplace_back();
       clearCase.name() = makeTestName(value, "clear");
-      clearCase.test().emplace().objectPatch_ref() =
+      clearCase.test().emplace().objectPatch() =
           makeClearTC<ContainerTag>(registry, protocol, value.value);
 
       if constexpr (std::is_same_v<CC, type::set_c>) {
         auto& removeCase = test.testCases()->emplace_back();
         removeCase.name() = makeTestName(value, "remove");
-        removeCase.test().emplace().objectPatch_ref() =
+        removeCase.test().emplace().objectPatch() =
             makeContainerRemoveTC<ContainerTag, TT>(
                 registry, protocol, value.value, value.value);
 
         auto& prependSetCase = test.testCases()->emplace_back();
         prependSetCase.name() = makeTestName(value, "insert");
-        prependSetCase.test().emplace().objectPatch_ref() =
+        prependSetCase.test().emplace().objectPatch() =
             makeContainerInsertTC<ContainerTag, TT>(registry, protocol, value);
       } else {
         auto patchValue = value.value;
         op::clear<TT>(patchValue);
         auto& appendCase = test.testCases()->emplace_back();
         appendCase.name() = makeTestName(value, "append");
-        appendCase.test().emplace().objectPatch_ref() =
+        appendCase.test().emplace().objectPatch() =
             makeContainerAppendTC<ContainerTag>(
                 registry, protocol, value.value, patchValue);
       }
@@ -561,18 +561,17 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
 
       auto& assignCase = test.testCases()->emplace_back();
       assignCase.name() = makeTestName(key, "assign");
-      assignCase.test().emplace().objectPatch_ref() =
-          makeAssignTC<ContainerTag>(
-              registry, protocol, std::pair{key.value, value});
+      assignCase.test().emplace().objectPatch() = makeAssignTC<ContainerTag>(
+          registry, protocol, std::pair{key.value, value});
 
       auto& clearCase = test.testCases()->emplace_back();
       clearCase.name() = makeTestName(key, "clear");
-      clearCase.test().emplace().objectPatch_ref() = makeClearTC<ContainerTag>(
+      clearCase.test().emplace().objectPatch() = makeClearTC<ContainerTag>(
           registry, protocol, std::pair{key.value, value});
 
       auto& removeCase = test.testCases()->emplace_back();
       removeCase.name() = makeTestName(key, "remove");
-      removeCase.test().emplace().objectPatch_ref() =
+      removeCase.test().emplace().objectPatch() =
           makeContainerRemoveTC<ContainerTag, KK>(
               registry, protocol, std::pair{key.value, value}, key.value);
 
@@ -580,7 +579,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
       op::clear<KK>(patchkey);
       auto& appendCase = test.testCases()->emplace_back();
       appendCase.name() = makeTestName(key, "append");
-      appendCase.test().emplace().objectPatch_ref() =
+      appendCase.test().emplace().objectPatch() =
           makeContainerAppendTC<ContainerTag>(
               registry,
               protocol,
@@ -600,7 +599,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
 
       auto& patchPriorCase = test.testCases()->emplace_back();
       patchPriorCase.name() = makeTestName(key, "patch_prior");
-      patchPriorCase.test().emplace().objectPatch_ref() =
+      patchPriorCase.test().emplace().objectPatch() =
           makePatchXTC<ContainerTag>(
               registry,
               protocol,
@@ -611,7 +610,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
 
       auto& patchCase = test.testCases()->emplace_back();
       patchCase.name() = makeTestName(key, "patch");
-      patchCase.test().emplace().objectPatch_ref() = makePatchXTC<ContainerTag>(
+      patchCase.test().emplace().objectPatch() = makePatchXTC<ContainerTag>(
           registry,
           protocol,
           initial,
@@ -622,7 +621,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
       initial = {};
       auto& ensureCase = test.testCases()->emplace_back();
       ensureCase.name() = makeTestName(key, "ensure");
-      ensureCase.test().emplace().objectPatch_ref() =
+      ensureCase.test().emplace().objectPatch() =
           makeEnsureTC<ContainerTag>(registry, protocol, initial, expected);
     }
   });
@@ -650,12 +649,12 @@ Test createStructPatchTest(
 
   auto& assignCase = test.testCases()->emplace_back();
   assignCase.name() = makeTestName("assign");
-  assignCase.test().emplace().objectPatch_ref() =
+  assignCase.test().emplace().objectPatch() =
       makeAssignTC<type::struct_c>(registry, protocol, initial);
 
   auto& clearCase = test.testCases()->emplace_back();
   clearCase.name() = makeTestName("clear");
-  clearCase.test().emplace().objectPatch_ref() =
+  clearCase.test().emplace().objectPatch() =
       makeClearTC<type::struct_c>(registry, protocol, initial);
 
   Struct expected = initial;
@@ -667,18 +666,17 @@ Test createStructPatchTest(
 
   auto& patchPriorCase = test.testCases()->emplace_back();
   patchPriorCase.name() = makeTestName("patch_prior");
-  patchPriorCase.test().emplace().objectPatch_ref() =
-      makePatchXTC<type::struct_c>(
-          registry,
-          protocol,
-          initial,
-          op::PatchOp::PatchPrior,
-          patchValue,
-          expected);
+  patchPriorCase.test().emplace().objectPatch() = makePatchXTC<type::struct_c>(
+      registry,
+      protocol,
+      initial,
+      op::PatchOp::PatchPrior,
+      patchValue,
+      expected);
 
   auto& patchCase = test.testCases()->emplace_back();
   patchCase.name() = makeTestName("patch");
-  patchCase.test().emplace().objectPatch_ref() = makePatchXTC<type::struct_c>(
+  patchCase.test().emplace().objectPatch() = makePatchXTC<type::struct_c>(
       registry,
       protocol,
       initial,
@@ -694,7 +692,7 @@ Test createStructPatchTest(
   expectedOpt.field_1_ref() = valueToAssign<TT>();
   auto& ensureCase = test.testCases()->emplace_back();
   ensureCase.name() = makeTestName("ensureStruct");
-  ensureCase.test().emplace().objectPatch_ref() =
+  ensureCase.test().emplace().objectPatch() =
       makeEnsureTC<type::struct_c>(registry, protocol, initialOpt, expectedOpt);
 
   using UnionStruct = test::testset::union_with<TT>;
@@ -703,13 +701,12 @@ Test createStructPatchTest(
   expectedUnion.field_1_ref() = valueToAssign<TT>();
   auto& ensureUnionCase = test.testCases()->emplace_back();
   ensureUnionCase.name() = makeTestName("ensureUnion");
-  ensureUnionCase.test().emplace().objectPatch_ref() =
-      makeEnsureTC<type::struct_c>(
-          registry,
-          protocol,
-          initialUnion,
-          expectedUnion,
-          op::PatchOp::EnsureUnion);
+  ensureUnionCase.test().emplace().objectPatch() = makeEnsureTC<type::struct_c>(
+      registry,
+      protocol,
+      initialUnion,
+      expectedUnion,
+      op::PatchOp::EnsureUnion);
 
   return test;
 }

@@ -42,12 +42,12 @@ TEST(TestGeneratorTest, RoundTripSuite) {
   {
     const auto& testCase = test.testCases()->at(0);
     EXPECT_EQ(testCase.name(), "testset.byte/AddField");
-    EXPECT_TRUE(testCase.test()->roundTrip_ref());
+    EXPECT_TRUE(testCase.test()->roundTrip());
   }
   {
     const auto& testCase = test.testCases()->at(1);
     EXPECT_EQ(testCase.name(), "testset.byte/RemoveField/zero");
-    EXPECT_TRUE(testCase.test()->roundTrip_ref());
+    EXPECT_TRUE(testCase.test()->roundTrip());
   }
 }
 

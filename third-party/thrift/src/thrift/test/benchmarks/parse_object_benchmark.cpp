@@ -44,7 +44,7 @@ const auto mixedCompactBuf = getSerializedCoalscedBuf<CompactSerializer>(mixed);
 const auto mixedBinaryBuf = getSerializedCoalscedBuf<BinarySerializer>(mixed);
 const auto mixedBufMask = []() {
   Mask m;
-  m.includes_ref().emplace()[16] = allMask();
+  m.includes().emplace()[16] = allMask();
   return m;
 }();
 

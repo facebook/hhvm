@@ -56,39 +56,37 @@ class ConformanceVerificationServer
   // =================== Request-Response ===================
   void requestResponseBasic(
       Response& res, std::unique_ptr<Request> req) override {
-    res =
-        *testCase_.serverInstruction()->requestResponseBasic_ref()->response();
-    serverResult_.requestResponseBasic_ref().emplace().request() = *req;
+    res = *testCase_.serverInstruction()->requestResponseBasic()->response();
+    serverResult_.requestResponseBasic().emplace().request() = *req;
   }
 
   void requestResponseDeclaredException(std::unique_ptr<Request> req) override {
-    serverResult_.requestResponseDeclaredException_ref().emplace().request() =
-        *req;
+    serverResult_.requestResponseDeclaredException().emplace().request() = *req;
     throw can_throw(*testCase_.serverInstruction()
-                         ->requestResponseDeclaredException_ref()
+                         ->requestResponseDeclaredException()
                          ->userException());
   }
 
   void requestResponseUndeclaredException(
       std::unique_ptr<Request> req) override {
-    serverResult_.requestResponseUndeclaredException_ref().emplace().request() =
+    serverResult_.requestResponseUndeclaredException().emplace().request() =
         *req;
     throw std::runtime_error(*testCase_.serverInstruction()
-                                  ->requestResponseUndeclaredException_ref()
+                                  ->requestResponseUndeclaredException()
                                   ->exceptionMessage());
   }
 
   void requestResponseNoArgVoidResponse() override {
-    serverResult_.requestResponseNoArgVoidResponse_ref().emplace();
+    serverResult_.requestResponseNoArgVoidResponse().emplace();
   }
 
   void requestResponseTimeout(
       Response&, std::unique_ptr<Request> req) override {
-    serverResult_.requestResponseTimeout_ref().emplace().request() = *req;
+    serverResult_.requestResponseTimeout().emplace().request() = *req;
     folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
       co_await folly::coro::sleep(
           std::chrono::milliseconds(*testCase_.serverInstruction()
-                                         ->requestResponseTimeout_ref()
+                                         ->requestResponseTimeout()
                                          ->timeoutMs()));
     }());
   }
@@ -96,34 +94,34 @@ class ConformanceVerificationServer
   // =================== Stream ===================
   apache::thrift::ServerStream<Response> streamBasic(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamBasic_ref().emplace().request() = *req;
+    serverResult_.streamBasic().emplace().request() = *req;
     for (auto payload :
-         *testCase_.serverInstruction()->streamBasic_ref()->streamPayloads()) {
+         *testCase_.serverInstruction()->streamBasic()->streamPayloads()) {
       co_yield std::move(payload);
     }
   }
 
   apache::thrift::ServerStream<Response> streamChunkTimeout(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamChunkTimeout_ref().emplace().request() = *req;
+    serverResult_.streamChunkTimeout().emplace().request() = *req;
     for (auto payload : *testCase_.serverInstruction()
-                             ->streamChunkTimeout_ref()
+                             ->streamChunkTimeout()
                              ->streamPayloads()) {
       co_yield std::move(payload);
     }
     co_await folly::coro::sleep(
         std::chrono::milliseconds(*testCase_.serverInstruction()
-                                       ->streamChunkTimeout_ref()
+                                       ->streamChunkTimeout()
                                        ->chunkTimeoutMs()));
   }
 
   apache::thrift::ResponseAndServerStream<Response, Response>
   streamInitialResponse(std::unique_ptr<Request> req) override {
-    serverResult_.streamInitialResponse_ref().emplace().request() = *req;
+    serverResult_.streamInitialResponse().emplace().request() = *req;
     auto stream = folly::coro::co_invoke(
         [&]() -> folly::coro::AsyncGenerator<Response&&> {
           for (auto payload : *testCase_.serverInstruction()
-                                   ->streamInitialResponse_ref()
+                                   ->streamInitialResponse()
                                    ->streamPayloads()) {
             co_yield std::move(payload);
           }
@@ -131,16 +129,16 @@ class ConformanceVerificationServer
 
     return {
         *testCase_.serverInstruction()
-             ->streamInitialResponse_ref()
+             ->streamInitialResponse()
              ->initialResponse(),
         std::move(stream)};
   }
 
   apache::thrift::ServerStream<Response> streamCreditTimeout(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamCreditTimeout_ref().emplace().request() = *req;
+    serverResult_.streamCreditTimeout().emplace().request() = *req;
     for (auto payload : *testCase_.serverInstruction()
-                             ->streamCreditTimeout_ref()
+                             ->streamCreditTimeout()
                              ->streamPayloads()) {
       co_yield std::move(payload);
     }
@@ -148,97 +146,92 @@ class ConformanceVerificationServer
 
   apache::thrift::ServerStream<Response> streamDeclaredException(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamDeclaredException_ref().emplace().request() = *req;
+    serverResult_.streamDeclaredException().emplace().request() = *req;
     throw *testCase_.serverInstruction()
-        ->streamDeclaredException_ref()
+        ->streamDeclaredException()
         ->userException();
     co_return;
   }
 
   apache::thrift::ServerStream<Response> streamUndeclaredException(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamUndeclaredException_ref().emplace().request() = *req;
+    serverResult_.streamUndeclaredException().emplace().request() = *req;
     throw std::runtime_error(*testCase_.serverInstruction()
-                                  ->streamUndeclaredException_ref()
+                                  ->streamUndeclaredException()
                                   ->exceptionMessage());
     co_return;
   }
 
   apache::thrift::ServerStream<Response> streamInitialDeclaredException(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamInitialDeclaredException_ref().emplace().request() =
-        *req;
+    serverResult_.streamInitialDeclaredException().emplace().request() = *req;
     throw *testCase_.serverInstruction()
-        ->streamInitialDeclaredException_ref()
+        ->streamInitialDeclaredException()
         ->userException();
   }
 
   apache::thrift::ServerStream<Response> streamInitialUndeclaredException(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamInitialUndeclaredException_ref().emplace().request() =
-        *req;
+    serverResult_.streamInitialUndeclaredException().emplace().request() = *req;
     throw std::runtime_error(*testCase_.serverInstruction()
-                                  ->streamInitialUndeclaredException_ref()
+                                  ->streamInitialUndeclaredException()
                                   ->exceptionMessage());
   }
 
   apache::thrift::ServerStream<Response> streamInitialTimeout(
       std::unique_ptr<Request> req) override {
-    serverResult_.streamInitialTimeout_ref().emplace().request() = *req;
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(*testCase_.serverInstruction()
-                                       ->streamInitialTimeout_ref()
-                                       ->timeoutMs()));
+    serverResult_.streamInitialTimeout().emplace().request() = *req;
+    std::this_thread::sleep_for(std::chrono::milliseconds(
+        *testCase_.serverInstruction()->streamInitialTimeout()->timeoutMs()));
     return ServerStream<Response>::createEmpty();
   }
 
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {
-    serverResult_.sinkBasic_ref().emplace().request() = *req;
+    serverResult_.sinkBasic().emplace().request() = *req;
     return apache::thrift::SinkConsumer<Request, Response>{
         [&](folly::coro::AsyncGenerator<Request&&> gen)
             -> folly::coro::Task<Response> {
           while (auto item = co_await gen.next()) {
-            serverResult_.sinkBasic_ref()->sinkPayloads()->push_back(
+            serverResult_.sinkBasic()->sinkPayloads()->push_back(
                 std::move(*item));
           }
           co_return *testCase_.serverInstruction()
-              ->sinkBasic_ref()
+              ->sinkBasic()
               ->finalResponse();
         },
         static_cast<uint64_t>(
-            *testCase_.serverInstruction()->sinkBasic_ref()->bufferSize())};
+            *testCase_.serverInstruction()->sinkBasic()->bufferSize())};
   }
 
   apache::thrift::ResponseAndSinkConsumer<Response, Request, Response>
   sinkInitialResponse(std::unique_ptr<Request> req) override {
-    serverResult_.sinkInitialResponse_ref().emplace().request() = *req;
+    serverResult_.sinkInitialResponse().emplace().request() = *req;
 
     return {
         *testCase_.serverInstruction()
-             ->sinkInitialResponse_ref()
+             ->sinkInitialResponse()
              ->initialResponse(),
         apache::thrift::SinkConsumer<Request, Response>{
             [&](folly::coro::AsyncGenerator<Request&&> gen)
                 -> folly::coro::Task<Response> {
               while (auto item = co_await gen.next()) {
-                serverResult_.sinkInitialResponse_ref()
-                    ->sinkPayloads()
-                    ->push_back(std::move(*item));
+                serverResult_.sinkInitialResponse()->sinkPayloads()->push_back(
+                    std::move(*item));
               }
               co_return *testCase_.serverInstruction()
-                  ->sinkInitialResponse_ref()
+                  ->sinkInitialResponse()
                   ->finalResponse();
             },
             static_cast<uint64_t>(*testCase_.serverInstruction()
-                                       ->sinkInitialResponse_ref()
+                                       ->sinkInitialResponse()
                                        ->bufferSize())}};
   }
 
   apache::thrift::SinkConsumer<Request, Response> sinkDeclaredException(
       std::unique_ptr<Request> req) override {
-    auto& result = serverResult_.sinkDeclaredException_ref().emplace();
+    auto& result = serverResult_.sinkDeclaredException().emplace();
     result.request() = *req;
     return {
         [&](folly::coro::AsyncGenerator<Request&&> gen)
@@ -256,13 +249,13 @@ class ConformanceVerificationServer
           }
         },
         static_cast<uint64_t>(*testCase_.serverInstruction()
-                                   ->sinkDeclaredException_ref()
+                                   ->sinkDeclaredException()
                                    ->bufferSize())};
   }
 
   apache::thrift::SinkConsumer<Request, Response> sinkUndeclaredException(
       std::unique_ptr<Request> req) override {
-    auto& result = serverResult_.sinkUndeclaredException_ref().emplace();
+    auto& result = serverResult_.sinkUndeclaredException().emplace();
     result.request() = *req;
     return {
         [&](folly::coro::AsyncGenerator<Request&&> gen)
@@ -276,7 +269,7 @@ class ConformanceVerificationServer
           }
         },
         static_cast<uint64_t>(*testCase_.serverInstruction()
-                                   ->sinkUndeclaredException_ref()
+                                   ->sinkUndeclaredException()
                                    ->bufferSize())};
   }
   // =================== Interactions ===================
@@ -295,7 +288,7 @@ class ConformanceVerificationServer
     folly::coro::Task<void> co_onTermination() override {
       switch (testCase_.serverInstruction()->getType()) {
         case ServerInstruction::Type::interactionTermination:
-          serverResult_.interactionTermination_ref()
+          serverResult_.interactionTermination()
               .ensure()
               .terminationReceived() = true;
           break;
@@ -313,15 +306,14 @@ class ConformanceVerificationServer
   std::unique_ptr<BasicInteractionIf> createBasicInteraction() override {
     switch (testCase_.serverInstruction()->getType()) {
       case ServerInstruction::Type::interactionConstructor:
-        serverResult_.interactionConstructor_ref()
-            .emplace()
-            .constructorCalled() = true;
+        serverResult_.interactionConstructor().emplace().constructorCalled() =
+            true;
         break;
       case ServerInstruction::Type::interactionPersistsState:
-        serverResult_.interactionPersistsState_ref().emplace();
+        serverResult_.interactionPersistsState().emplace();
         break;
       case ServerInstruction::Type::interactionTermination:
-        serverResult_.interactionTermination_ref().emplace();
+        serverResult_.interactionTermination().emplace();
         break;
       default:
         throw std::runtime_error(
@@ -334,14 +326,14 @@ class ConformanceVerificationServer
   basicInteractionFactoryFunction(int32_t initialSum) override {
     switch (testCase_.serverInstruction()->getType()) {
       case ServerInstruction::Type::interactionFactoryFunction:
-        serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
+        serverResult_.interactionFactoryFunction().emplace().initialSum() =
             initialSum;
         break;
       case ServerInstruction::Type::interactionPersistsState:
-        serverResult_.interactionPersistsState_ref().emplace();
+        serverResult_.interactionPersistsState().emplace();
         break;
       case ServerInstruction::Type::interactionTermination:
-        serverResult_.interactionTermination_ref().emplace();
+        serverResult_.interactionTermination().emplace();
         break;
       default:
         throw std::runtime_error(
@@ -388,8 +380,8 @@ class RPCClientConformanceTest : public testing::Test {
         test_(test),
         testCase_(testCase),
         conforming_(conforming),
-        handler_(std::make_shared<ConformanceVerificationServer>(
-            *testCase_.rpc_ref())),
+        handler_(
+            std::make_shared<ConformanceVerificationServer>(*testCase_.rpc())),
         server_(
             handler_,
             connectViaServer ? get_server_ip_addr_() : "::1",
@@ -403,11 +395,11 @@ class RPCClientConformanceTest : public testing::Test {
         connectViaServer_(connectViaServer) {
     try {
       auto port = folly::to<std::string>(server_.getPort());
-      if (testCase_.rpc_ref()->serverInstruction()->streamCreditTimeout_ref()) {
+      if (testCase_.rpc()->serverInstruction()->streamCreditTimeout()) {
         server_.getThriftServer().setStreamExpireTime(
-            std::chrono::milliseconds{*testCase_.rpc_ref()
+            std::chrono::milliseconds{*testCase_.rpc()
                                            ->serverInstruction()
-                                           ->streamCreditTimeout_ref()
+                                           ->streamCreditTimeout()
                                            ->streamExpireTime()});
       }
       if (connectViaServer_) {
@@ -469,7 +461,7 @@ class RPCClientConformanceTest : public testing::Test {
         return testing::AssertionFailure() << actualClientResult.exception();
       }
 
-      auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();
+      auto& expectedClientResult = *testCase_.rpc()->clientTestResult();
       if (!equal(*actualClientResult, expectedClientResult)) {
         return testing::AssertionFailure()
             << "\nExpected client result: " << jsonify(expectedClientResult)
@@ -477,7 +469,7 @@ class RPCClientConformanceTest : public testing::Test {
       }
 
       auto& actualServerResult = handler_->serverResult();
-      auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
+      auto& expectedServerResult = *testCase_.rpc()->serverTestResult();
       if (!equal(actualServerResult, expectedServerResult)) {
         return testing::AssertionFailure()
             << "\nExpected server result: " << jsonify(expectedServerResult)

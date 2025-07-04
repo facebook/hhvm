@@ -33,25 +33,24 @@ inline bool equal(
         return false;
       }
       return stringContains(
-          *actual.requestResponseUndeclaredException_ref()->exceptionMessage(),
-          *expected.requestResponseUndeclaredException_ref()
-               ->exceptionMessage());
+          *actual.requestResponseUndeclaredException()->exceptionMessage(),
+          *expected.requestResponseUndeclaredException()->exceptionMessage());
     case ClientTestResult::Type::streamUndeclaredException:
       if (actual.getType() !=
           ClientTestResult::Type::streamUndeclaredException) {
         return false;
       }
       return stringContains(
-          *actual.streamUndeclaredException_ref()->exceptionMessage(),
-          *expected.streamUndeclaredException_ref()->exceptionMessage());
+          *actual.streamUndeclaredException()->exceptionMessage(),
+          *expected.streamUndeclaredException()->exceptionMessage());
     case ClientTestResult::Type::streamInitialUndeclaredException:
       if (actual.getType() !=
           ClientTestResult::Type::streamInitialUndeclaredException) {
         return false;
       }
       return stringContains(
-          *actual.streamInitialUndeclaredException_ref()->exceptionMessage(),
-          *expected.streamInitialUndeclaredException_ref()->exceptionMessage());
+          *actual.streamInitialUndeclaredException()->exceptionMessage(),
+          *expected.streamInitialUndeclaredException()->exceptionMessage());
     default:
       return actual == expected;
   }
@@ -64,10 +63,9 @@ inline bool equal(
   }
   switch (expected.getType()) {
     case ServerTestResult::Type::sinkUndeclaredException: {
-      auto& actualMsg =
-          *actual.sinkUndeclaredException_ref()->exceptionMessage();
+      auto& actualMsg = *actual.sinkUndeclaredException()->exceptionMessage();
       auto& expectedMsg =
-          *expected.sinkUndeclaredException_ref()->exceptionMessage();
+          *expected.sinkUndeclaredException()->exceptionMessage();
       return actualMsg.find(expectedMsg) != std::string::npos;
     }
     default:

@@ -218,23 +218,23 @@ TYPED_TEST(MultiProtocolTest, EmptyUnion) {
 TYPED_TEST(MultiProtocolTest, Union) {
   {
     Union oldObject;
-    oldObject.a_field_ref() = makeStructALike<StructA>();
+    oldObject.a_field() = makeStructALike<StructA>();
     tablebased::Union newObject;
-    newObject.a_field_ref() = makeStructALike<tablebased::StructA>();
+    newObject.a_field() = makeStructALike<tablebased::StructA>();
     EXPECT_COMPATIBLE_PROTOCOL(oldObject, newObject, TypeParam);
   }
   {
     Union oldObject;
-    oldObject.b_field_ref() = makeStructBLike<StructB>();
+    oldObject.b_field() = makeStructBLike<StructB>();
     tablebased::Union newObject;
-    newObject.b_field_ref() = makeStructBLike<tablebased::StructB>();
+    newObject.b_field() = makeStructBLike<tablebased::StructB>();
     EXPECT_COMPATIBLE_PROTOCOL(oldObject, newObject, TypeParam);
   }
   {
     Union oldObject;
-    oldObject.str_field_ref() = "test";
+    oldObject.str_field() = "test";
     tablebased::Union newObject;
-    newObject.str_field_ref() = "test";
+    newObject.str_field() = "test";
     EXPECT_COMPATIBLE_PROTOCOL(oldObject, newObject, TypeParam);
   }
 }
@@ -334,13 +334,13 @@ TYPED_TEST(MultiProtocolTest, ReadingUnqualifiedFieldShouldSetIsset) {
 TEST(SerializerTest, UnionValueOffsetIsZero) {
   tablebased::Union u;
   u.set_str_field("test");
-  EXPECT_EQ(static_cast<void*>(&u), &*u.str_field_ref());
+  EXPECT_EQ(static_cast<void*>(&u), &*u.str_field());
 
   u.set_a_field({});
-  EXPECT_EQ(static_cast<void*>(&u), &*u.a_field_ref());
+  EXPECT_EQ(static_cast<void*>(&u), &*u.a_field());
 
   u.set_b_field({});
-  EXPECT_EQ(static_cast<void*>(&u), &*u.b_field_ref());
+  EXPECT_EQ(static_cast<void*>(&u), &*u.b_field());
 }
 
 TEST(SerializerTest, DuplicateUnionData) {

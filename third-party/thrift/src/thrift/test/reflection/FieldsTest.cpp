@@ -44,10 +44,10 @@ TEST(FieldsTest, Get) {
                 decltype(s.fieldA()),
                 decltype(op::get<field_id<2>, Struct>(s))>);
 
-  s.fieldE()->ui_ref() = 10;
-  EXPECT_EQ((op::get<field_id<5>, Struct>(s)->ui_ref()), 10);
-  op::get<field_id<5>, Struct>(s)->us_ref() = "20";
-  EXPECT_EQ(s.fieldE()->us_ref(), "20");
+  s.fieldE()->ui() = 10;
+  EXPECT_EQ((op::get<field_id<5>, Struct>(s)->ui()), 10);
+  op::get<field_id<5>, Struct>(s)->us() = "20";
+  EXPECT_EQ(s.fieldE()->us(), "20");
   static_assert(std::is_same_v<
                 decltype(s.fieldE()),
                 decltype(op::get<field_id<5>, Struct>(s))>);
@@ -63,22 +63,22 @@ TEST(UnionFieldsTest, Get) {
 
   EXPECT_THROW((*op::get<field_id<1>, Union>(u)), bad_field_access);
 
-  u.ui_ref() = 10;
+  u.ui() = 10;
   EXPECT_EQ((op::get<field_id<1>, Union>(u)), 10);
   EXPECT_THROW((*op::get<field_id<2>, Union>(u)), bad_field_access);
   static_assert(std::is_same_v<
-                decltype(u.ui_ref()),
+                decltype(u.ui()),
                 decltype(op::get<field_id<1>, Union>(u))>);
-  EXPECT_EQ(&(*op::get<field_id<1>, Union>(u)), &*u.ui_ref());
+  EXPECT_EQ(&(*op::get<field_id<1>, Union>(u)), &*u.ui());
 
   op::get<field_id<1>, Union>(u) = 20;
-  EXPECT_EQ(u.ui_ref(), 20);
+  EXPECT_EQ(u.ui(), 20);
   EXPECT_EQ((op::get<field_id<1>, Union>(u)), 20);
 
-  u.us_ref() = "foo";
+  u.us() = "foo";
   EXPECT_EQ((*op::get<field_id<3>, Union>(u)), "foo");
   static_assert(std::is_same_v<
-                decltype(u.us_ref()),
+                decltype(u.us()),
                 decltype(op::get<field_id<3>, Union>(u))>);
   EXPECT_THROW((*op::get<field_id<1>, Union>(u)), bad_field_access);
 }

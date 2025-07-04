@@ -53,7 +53,7 @@ TYPED_TEST(MultiProtocolTest, test_structs_populate) {
     ASSERT_EQ(*a.field7(), *b.field7());
     ASSERT_EQ(*a.field8(), *b.field8());
     ASSERT_EQ(*a.field9(), *b.field9());
-    ASSERT_EQ(*(a.field10_ref()), *(b.field10_ref()));
+    ASSERT_EQ(*(a.field10()), *(b.field10()));
 
     auto abuf = a.field11()->coalesce();
     auto bbuf = b.field11()->coalesce();
@@ -62,15 +62,15 @@ TYPED_TEST(MultiProtocolTest, test_structs_populate) {
     ASSERT_EQ(abuf, bbuf);
 
     ASSERT_EQ(*a.field12(), *b.field12());
-    if (a.field13_ref()) {
-      ASSERT_EQ(*(a.field13_ref()), *(b.field13_ref()));
+    if (a.field13()) {
+      ASSERT_EQ(*(a.field13()), *(b.field13()));
     } else {
-      ASSERT_EQ(nullptr, b.field13_ref());
+      ASSERT_EQ(nullptr, b.field13());
     }
-    ASSERT_EQ(*(a.field14_ref()), *(b.field14_ref()));
-    ASSERT_EQ(*(a.field15_ref()), *(b.field15_ref()));
-    ASSERT_EQ(*a.field16_ref(), *b.field16_ref());
-    ASSERT_EQ(*a.field17_ref(), *b.field17_ref());
+    ASSERT_EQ(*(a.field14()), *(b.field14()));
+    ASSERT_EQ(*(a.field15()), *(b.field15()));
+    ASSERT_EQ(*a.field16(), *b.field16());
+    ASSERT_EQ(*a.field17(), *b.field17());
   }
 }
 

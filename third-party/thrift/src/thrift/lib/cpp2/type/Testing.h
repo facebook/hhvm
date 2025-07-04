@@ -97,7 +97,7 @@ struct TestStructWithContext {
 // Creates a custom protocol, skipping validation.
 inline type::Protocol makeProtocol(std::string name) {
   type::ProtocolUnion data;
-  data.custom_ref() = std::move(name);
+  data.custom() = std::move(name);
   return type::Protocol(std::move(data));
 }
 

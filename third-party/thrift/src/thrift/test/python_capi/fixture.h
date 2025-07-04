@@ -66,7 +66,7 @@ PyObject* __shim__serialize_to_iobuf(PyObject* obj) {
 
 PyObject* __shim__gen_SerializedStruct(int64_t len) {
   ::thrift::test::python_capi::SerializedStruct s;
-  s.s_ref() = std::string(len, '1');
+  s.s() = std::string(len, '1');
   return python::capi::Constructor<python::capi::PythonNamespaced<
       ::thrift::test::python_capi::SerializedStruct,
       thrift__test__python_capi__serialized_dep::NamespaceTag>>{}(s);

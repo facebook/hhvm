@@ -34,7 +34,7 @@ python_capi::DepStruct structSource() noexcept {
 
 python_capi::DepUnion unionSource() noexcept {
   python_capi::DepUnion u;
-  u.s_ref() = "World";
+  u.s() = "World";
   return u;
 }
 
@@ -48,10 +48,10 @@ std::string unpackStruct(python_capi::DepStruct&& s) noexcept {
 }
 
 std::string unpackUnion(python_capi::DepUnion&& u) noexcept {
-  if (u.s_ref().has_value()) {
-    return *u.s_ref();
-  } else if (u.i_ref().has_value()) {
-    return std::to_string(*u.i_ref());
+  if (u.s().has_value()) {
+    return *u.s();
+  } else if (u.i().has_value()) {
+    return std::to_string(*u.i());
   }
   return "";
 }

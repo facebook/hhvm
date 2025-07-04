@@ -76,7 +76,7 @@ TYPED_TEST(VisitUnionTest, basic) {
   TestFixture::adapter(a, [&](auto&&, auto&&) { FAIL(); });
 
   static const std::string str = "foo";
-  a.str_ref() = str;
+  a.str() = str;
   TestFixture::adapter(a, [](auto&& meta, auto&& v) {
     EXPECT_EQ(*meta.name_ref(), "str");
     EXPECT_EQ(
@@ -91,7 +91,7 @@ TYPED_TEST(VisitUnionTest, basic) {
   });
 
   static const int64_t int64 = 42LL << 42;
-  a.int64_ref() = int64;
+  a.int64() = int64;
   TestFixture::adapter(a, [](auto&& meta, auto&& v) {
     EXPECT_EQ(*meta.name_ref(), "int64");
     EXPECT_EQ(
@@ -107,7 +107,7 @@ TYPED_TEST(VisitUnionTest, basic) {
   });
 
   static const std::vector<int32_t> list_i32 = {3, 1, 2};
-  a.list_i32_ref() = list_i32;
+  a.list_i32() = list_i32;
   TestFixture::adapter(a, [](auto&& meta, auto&& v) {
     EXPECT_EQ(*meta.name_ref(), "list_i32");
     EXPECT_EQ(meta.type_ref()->getType(), metadata::ThriftType::Type::t_list);
@@ -123,7 +123,7 @@ TYPED_TEST(VisitUnionTest, basic) {
 
 TYPED_TEST(VisitUnionTest, Metadata) {
   Basic a;
-  a.int64_ref() = 42;
+  a.int64() = 42;
   TestFixture::adapter(a, [](auto&& m, auto&&) {
     // ThriftType itself is union, we can visit it like ordinary thrift union
     TestFixture::adapter(*m.type_ref(), [](auto&& meta, std::any value) {
@@ -147,7 +147,7 @@ struct TestPassCallableByValue {
 TYPED_TEST(VisitUnionTest, PassCallableByReference) {
   TestPassCallableByValue f;
   Basic a;
-  a.int64_ref() = 42;
+  a.int64() = 42;
   TestFixture::adapter(a, folly::copy(f));
   EXPECT_EQ(f.i, 0);
   TestFixture::adapter(a, std::ref(f));
@@ -163,7 +163,7 @@ constexpr bool kIsString =
 TEST(VisitUnionTest, CppRef) {
   CppRef r;
   CppRef r2;
-  r2.str_ref() = "42";
+  r2.str() = "42";
   r.set_cppref(r2);
   bool typeMatches = false;
   apache::thrift::visit_union(r, [&typeMatches](auto&&, auto&& r2) {

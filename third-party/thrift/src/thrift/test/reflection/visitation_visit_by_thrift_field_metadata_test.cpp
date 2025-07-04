@@ -50,8 +50,8 @@ TEST(struct1, modify_field) {
     EXPECT_TRUE(ref.has_value());
     run(*ref);
   });
-  EXPECT_EQ(s.field4()->ui_ref(), 20);
-  EXPECT_EQ(s.field5()->us_2_ref(), "bar");
+  EXPECT_EQ(s.field4()->ui(), 20);
+  EXPECT_EQ(s.field5()->us_2(), "bar");
 
   meta.id() = 123456;
   EXPECT_THROW(

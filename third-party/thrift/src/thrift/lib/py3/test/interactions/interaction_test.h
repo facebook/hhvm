@@ -34,8 +34,8 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
     }
     folly::SemiFuture<folly::Unit> semifuture_accumulatePoint(
         std::unique_ptr<::interactions::test::thrift::Point> a) override {
-      *pacc_.x_ref() += *a->x_ref();
-      *pacc_.y_ref() += *a->y_ref();
+      *pacc_.x() += *a->x();
+      *pacc_.y() += *a->y();
       return folly::makeSemiFuture();
     }
     folly::SemiFuture<int32_t> semifuture_getPrimitive() override {

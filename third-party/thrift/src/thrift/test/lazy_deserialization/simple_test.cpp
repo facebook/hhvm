@@ -201,10 +201,10 @@ TYPED_TEST(LazyDeserialization, VirtualProtocol) {
 TYPED_TEST(Serialization, CppRef) {
   {
     LazyCppRef foo;
-    foo.field1_ref() = std::make_unique<std::vector<int32_t>>(10, 10);
-    foo.field2_ref() = std::make_shared<std::vector<int32_t>>(20, 20);
-    foo.field3_ref() = std::make_shared<std::vector<int32_t>>(30, 30);
-    foo.field4_ref() = std::make_unique<std::vector<int32_t>>(40, 40);
+    foo.field1() = std::make_unique<std::vector<int32_t>>(10, 10);
+    foo.field2() = std::make_shared<std::vector<int32_t>>(20, 20);
+    foo.field3() = std::make_shared<std::vector<int32_t>>(30, 30);
+    foo.field4() = std::make_unique<std::vector<int32_t>>(40, 40);
     auto s = TypeParam::template serialize<std::string>(foo);
     auto bar = TypeParam::template deserialize<LazyCppRef>(s);
     EXPECT_EQ(*bar.field1_ref(), std::vector<int32_t>(10, 10));
@@ -225,10 +225,10 @@ TYPED_TEST(Serialization, CppRef) {
 
 TYPED_TEST(Serialization, LazyDeserializeCppRef) {
   LazyCppRef foo;
-  foo.field1_ref() = std::make_unique<std::vector<int32_t>>(10, 10);
-  foo.field2_ref() = std::make_shared<std::vector<int32_t>>(20, 20);
-  foo.field3_ref() = std::make_shared<std::vector<int32_t>>(30, 30);
-  foo.field4_ref() = std::make_unique<std::vector<int32_t>>(40, 40);
+  foo.field1() = std::make_unique<std::vector<int32_t>>(10, 10);
+  foo.field2() = std::make_shared<std::vector<int32_t>>(20, 20);
+  foo.field3() = std::make_shared<std::vector<int32_t>>(30, 30);
+  foo.field4() = std::make_unique<std::vector<int32_t>>(40, 40);
   auto bar = TypeParam::template deserialize<LazyCppRef>(
       TypeParam::template serialize<std::string>(foo));
   auto baz = TypeParam::template deserialize<LazyCppRef>(
@@ -606,21 +606,21 @@ TEST(LazyDeserialization, BoxedLazyFoo) {
   OptionalBoxedLazyFoo lazyFoo;
   CompactSerializer::deserialize(s, lazyFoo);
 
-  EXPECT_EQ(foo.field1_ref().has_value(), lazyFoo.field1_ref().has_value());
-  EXPECT_EQ(foo.field2_ref().has_value(), lazyFoo.field2_ref().has_value());
-  EXPECT_EQ(foo.field3_ref().has_value(), lazyFoo.field3_ref().has_value());
-  EXPECT_EQ(foo.field4_ref().has_value(), lazyFoo.field4_ref().has_value());
-  if (foo.field1_ref()) {
-    EXPECT_EQ(*foo.field1_ref(), lazyFoo.field1_ref());
+  EXPECT_EQ(foo.field1().has_value(), lazyFoo.field1().has_value());
+  EXPECT_EQ(foo.field2().has_value(), lazyFoo.field2().has_value());
+  EXPECT_EQ(foo.field3().has_value(), lazyFoo.field3().has_value());
+  EXPECT_EQ(foo.field4().has_value(), lazyFoo.field4().has_value());
+  if (foo.field1()) {
+    EXPECT_EQ(*foo.field1(), lazyFoo.field1());
   }
-  if (foo.field2_ref()) {
-    EXPECT_EQ(*foo.field2_ref(), lazyFoo.field2_ref());
+  if (foo.field2()) {
+    EXPECT_EQ(*foo.field2(), lazyFoo.field2());
   }
-  if (foo.field3_ref()) {
-    EXPECT_EQ(*foo.field3_ref(), lazyFoo.field3_ref());
+  if (foo.field3()) {
+    EXPECT_EQ(*foo.field3(), lazyFoo.field3());
   }
-  if (foo.field4_ref()) {
-    EXPECT_EQ(*foo.field4_ref(), lazyFoo.field4_ref());
+  if (foo.field4()) {
+    EXPECT_EQ(*foo.field4(), lazyFoo.field4());
   }
 }
 

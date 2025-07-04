@@ -38,8 +38,8 @@ TYPED_TEST_SUITE(Evolution, Serializers);
 TYPED_TEST(Evolution, AddFields) {
   using Serializer = TypeParam;
   StructWithLessFields lessFields;
-  lessFields.field1_ref() = {{"field1"}, {"foo"}};
-  lessFields.field2_ref() = {{"field2"}, {"bar"}};
+  lessFields.field1() = {{"field1"}, {"foo"}};
+  lessFields.field2() = {{"field2"}, {"bar"}};
   auto moreFields = Serializer::template deserialize<StructWithMoreFields>(
       Serializer::template serialize<std::string>(lessFields));
 
@@ -47,25 +47,25 @@ TYPED_TEST(Evolution, AddFields) {
   EXPECT_FALSE(get_field2(moreFields).empty());
   EXPECT_TRUE(get_field3(moreFields).empty());
 
-  EXPECT_EQ(moreFields.field1_ref(), lessFields.field1_ref());
-  EXPECT_EQ(moreFields.field2_ref(), lessFields.field2_ref());
+  EXPECT_EQ(moreFields.field1_ref(), lessFields.field1());
+  EXPECT_EQ(moreFields.field2_ref(), lessFields.field2());
   EXPECT_TRUE(moreFields.field3_ref()->empty());
 }
 
 TYPED_TEST(Evolution, RemoveFields) {
   using Serializer = TypeParam;
   StructWithMoreFields moreFields;
-  moreFields.field1_ref() = {{"field1"}, {"foo"}};
-  moreFields.field2_ref() = {{"field2"}, {"bar"}};
-  moreFields.field3_ref() = {{"field3"}, {"baz"}};
+  moreFields.field1() = {{"field1"}, {"foo"}};
+  moreFields.field2() = {{"field2"}, {"bar"}};
+  moreFields.field3() = {{"field3"}, {"baz"}};
   auto lessFields = Serializer::template deserialize<StructWithLessFields>(
       Serializer::template serialize<std::string>(moreFields));
 
   EXPECT_TRUE(get_field1(lessFields).empty());
   EXPECT_FALSE(get_field2(lessFields).empty());
 
-  EXPECT_EQ(moreFields.field1_ref(), lessFields.field1_ref());
-  EXPECT_EQ(moreFields.field2_ref(), lessFields.field2_ref());
+  EXPECT_EQ(moreFields.field1(), lessFields.field1_ref());
+  EXPECT_EQ(moreFields.field2(), lessFields.field2_ref());
 }
 
 } // namespace apache::thrift::test

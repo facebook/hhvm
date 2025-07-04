@@ -23,7 +23,7 @@ namespace apache::thrift::test {
 
 LazyFoo gen() {
   LazyFoo foo;
-  foo.field4_ref().emplace(10'000, 1'000);
+  foo.field4().emplace(10'000, 1'000);
   return foo;
 }
 

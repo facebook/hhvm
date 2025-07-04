@@ -70,9 +70,9 @@ TYPED_TEST(NestedStruct, Reserialize) {
 
 TEST(NestedStruct, Mixin) {
   OuterWithMixin outer1, outer2;
-  outer1.field_ref() = 42;
+  outer1.field() = 42;
   CompactSerializer::deserialize(
       CompactSerializer::serialize<std::string>(outer1), outer2);
-  EXPECT_EQ(outer2.field_ref(), 42);
+  EXPECT_EQ(outer2.field(), 42);
 }
 } // namespace apache::thrift::test

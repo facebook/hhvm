@@ -52,7 +52,7 @@ BENCHMARK_RELATIVE(list_double_with_index_lazy) {
   CompactSerializer::deserialize<LazyFoo>(&kListDoubleWithIndex);
 }
 BENCHMARK_RELATIVE(list_double_with_index_lazy_then_access_field) {
-  CompactSerializer::deserialize<LazyFoo>(&kListDoubleWithIndex).field3_ref();
+  CompactSerializer::deserialize<LazyFoo>(&kListDoubleWithIndex).field3();
 }
 BENCHMARK(list_i32_with_index_eager) {
   CompactSerializer::deserialize<Foo>(&kListI32WithIndex);
@@ -65,13 +65,13 @@ BENCHMARK_RELATIVE(list_i32_with_index_lazy_without_checksum) {
       &kListI32WithIndexNoChecksum);
 }
 BENCHMARK_RELATIVE(list_i32_with_index_lazy_then_access_field) {
-  CompactSerializer::deserialize<LazyFoo>(&kListI32WithIndex).field4_ref();
+  CompactSerializer::deserialize<LazyFoo>(&kListI32WithIndex).field4();
 }
 BENCHMARK_RELATIVE(
     list_i32_with_index_lazy_then_access_field_without_checksum) {
   CompactSerializer::deserialize<LazyFooNoChecksum>(
       &kListI32WithIndexNoChecksum)
-      .field4_ref();
+      .field4();
 }
 BENCHMARK(list_double_without_index_eager) {
   CompactSerializer::deserialize<Foo>(&kListDoubleWithIndex);
@@ -80,7 +80,7 @@ BENCHMARK_RELATIVE(list_double_without_index_lazy) {
   CompactSerializer::deserialize<LazyFoo>(&kListDoubleWithIndex);
 }
 BENCHMARK_RELATIVE(list_double_without_index_lazy_then_access_field) {
-  CompactSerializer::deserialize<LazyFoo>(&kListDoubleWithIndex).field3_ref();
+  CompactSerializer::deserialize<LazyFoo>(&kListDoubleWithIndex).field3();
 }
 BENCHMARK(list_i32_without_index_eager) {
   CompactSerializer::deserialize<Foo>(&kListI32WithIndex);
@@ -89,7 +89,7 @@ BENCHMARK_RELATIVE(list_i32_without_index_lazy) {
   CompactSerializer::deserialize<LazyFoo>(&kListI32WithIndex);
 }
 BENCHMARK_RELATIVE(list_i32_without_index_lazy_then_access_field) {
-  CompactSerializer::deserialize<LazyFoo>(&kListI32WithIndex).field4_ref();
+  CompactSerializer::deserialize<LazyFoo>(&kListI32WithIndex).field4();
 }
 
 } // namespace apache::thrift::test

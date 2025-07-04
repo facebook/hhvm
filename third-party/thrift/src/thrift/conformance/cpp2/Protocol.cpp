@@ -59,7 +59,7 @@ ProtocolStruct Protocol::asStruct() const noexcept {
       // Leave unset.
       break;
     case StandardProtocol::Custom:
-      result.custom_ref().emplace(custom_);
+      result.custom().emplace(custom_);
       [[fallthrough]];
     default:
       result.standard() = standard_;

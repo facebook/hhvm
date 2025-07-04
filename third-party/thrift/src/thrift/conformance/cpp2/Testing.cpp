@@ -39,10 +39,10 @@ ThriftTypeInfo testThriftType(const std::string& shortName) {
 
 ThriftTypeInfo testThriftType(std::initializer_list<const char*> uris) {
   ThriftTypeInfo type;
-  type.typeHashBytes_ref() = 0;
+  type.typeHashBytes() = 0;
   auto itr = uris.begin();
   if (itr != uris.end()) {
-    type.uri_ref() = thriftType(*itr++);
+    type.uri() = thriftType(*itr++);
   }
   while (itr != uris.end()) {
     type.altUris()->emplace(thriftType(*itr++));
@@ -73,14 +73,14 @@ void MultiSerializer::encode(
 
 ThriftTypeInfo shortThriftType(int ordinal) {
   ThriftTypeInfo type;
-  type.uri_ref() = fmt::format("s.r/t/{}", ordinal);
+  type.uri() = fmt::format("s.r/t/{}", ordinal);
   assert(type.uri().value().size() <= kMinTypeHashBytes);
   return type;
 }
 
 ThriftTypeInfo longThriftType(int ordinal) {
   ThriftTypeInfo type;
-  type.uri_ref() =
+  type.uri() =
       fmt::format("seriously.long.type/seriously/long/type/{}", ordinal);
   assert(
       type.uri().value().size() >

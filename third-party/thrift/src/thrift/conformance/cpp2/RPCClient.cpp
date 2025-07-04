@@ -427,102 +427,100 @@ int main(int argc, char** argv) {
   RpcTestCase testCase;
   auto client = createClient();
   client->sync_getTestCase(testCase);
-  auto& clientInstruction = *testCase.clientInstruction_ref();
+  auto& clientInstruction = *testCase.clientInstruction();
 
   ClientTestResult result;
   switch (clientInstruction.getType()) {
     case ClientInstruction::Type::requestResponseBasic:
-      result.requestResponseBasic_ref() = runRequestResponseBasicTest(
-          *clientInstruction.requestResponseBasic_ref());
+      result.requestResponseBasic() = runRequestResponseBasicTest(
+          *clientInstruction.requestResponseBasic());
       break;
     case ClientInstruction::Type::requestResponseDeclaredException:
-      result.requestResponseDeclaredException_ref() =
+      result.requestResponseDeclaredException() =
           requestResponseDeclaredExceptionTest(
-              *clientInstruction.requestResponseDeclaredException_ref());
+              *clientInstruction.requestResponseDeclaredException());
       break;
     case ClientInstruction::Type::requestResponseUndeclaredException:
-      result.requestResponseUndeclaredException_ref() =
+      result.requestResponseUndeclaredException() =
           requestResponseUndeclaredExceptionTest(
-              *clientInstruction.requestResponseUndeclaredException_ref());
+              *clientInstruction.requestResponseUndeclaredException());
       break;
     case ClientInstruction::Type::requestResponseNoArgVoidResponse:
-      result.requestResponseNoArgVoidResponse_ref() =
+      result.requestResponseNoArgVoidResponse() =
           requestResponseNoArgVoidResponseTest(
-              *clientInstruction.requestResponseNoArgVoidResponse_ref());
+              *clientInstruction.requestResponseNoArgVoidResponse());
       break;
     case ClientInstruction::Type::requestResponseTimeout:
-      result.requestResponseTimeout_ref() = runRequestResponseTimeoutTest(
-          *clientInstruction.requestResponseTimeout_ref());
+      result.requestResponseTimeout() = runRequestResponseTimeoutTest(
+          *clientInstruction.requestResponseTimeout());
       break;
     case ClientInstruction::Type::streamBasic:
-      result.streamBasic_ref() =
-          streamBasicTest(*clientInstruction.streamBasic_ref());
+      result.streamBasic() = streamBasicTest(*clientInstruction.streamBasic());
       break;
     case ClientInstruction::Type::streamChunkTimeout:
-      result.streamChunkTimeout_ref() =
-          streamChunkTimeoutTest(*clientInstruction.streamChunkTimeout_ref());
+      result.streamChunkTimeout() =
+          streamChunkTimeoutTest(*clientInstruction.streamChunkTimeout());
       break;
     case ClientInstruction::Type::streamInitialResponse:
-      result.streamInitialResponse_ref() = streamInitialResponseTest(
-          *clientInstruction.streamInitialResponse_ref());
+      result.streamInitialResponse() =
+          streamInitialResponseTest(*clientInstruction.streamInitialResponse());
       break;
     case ClientInstruction::Type::streamCreditTimeout:
-      result.streamCreditTimeout_ref() =
-          streamCreditTimeoutTest(*clientInstruction.streamCreditTimeout_ref());
+      result.streamCreditTimeout() =
+          streamCreditTimeoutTest(*clientInstruction.streamCreditTimeout());
       break;
     case ClientInstruction::Type::streamDeclaredException:
-      result.streamDeclaredException_ref() = streamDeclaredExceptionTest(
-          *clientInstruction.streamDeclaredException_ref());
+      result.streamDeclaredException() = streamDeclaredExceptionTest(
+          *clientInstruction.streamDeclaredException());
       break;
     case ClientInstruction::Type::streamUndeclaredException:
-      result.streamUndeclaredException_ref() = streamUndeclaredExceptionTest(
-          *clientInstruction.streamUndeclaredException_ref());
+      result.streamUndeclaredException() = streamUndeclaredExceptionTest(
+          *clientInstruction.streamUndeclaredException());
       break;
     case ClientInstruction::Type::streamInitialDeclaredException:
-      result.streamInitialDeclaredException_ref() =
+      result.streamInitialDeclaredException() =
           streamInitialDeclaredExceptionTest(
-              *clientInstruction.streamInitialDeclaredException_ref());
+              *clientInstruction.streamInitialDeclaredException());
       break;
     case ClientInstruction::Type::streamInitialUndeclaredException:
-      result.streamInitialUndeclaredException_ref() =
+      result.streamInitialUndeclaredException() =
           streamInitialUndeclaredExceptionTest(
-              *clientInstruction.streamInitialUndeclaredException_ref());
+              *clientInstruction.streamInitialUndeclaredException());
       break;
     case ClientInstruction::Type::streamInitialTimeout:
-      result.streamInitialTimeout_ref() = streamInitialTimeoutTest(
-          *clientInstruction.streamInitialTimeout_ref());
+      result.streamInitialTimeout() =
+          streamInitialTimeoutTest(*clientInstruction.streamInitialTimeout());
       break;
     case ClientInstruction::Type::sinkBasic:
-      result.sinkBasic_ref() =
-          sinkBasicTest(*clientInstruction.sinkBasic_ref());
+      result.sinkBasic() = sinkBasicTest(*clientInstruction.sinkBasic());
       break;
     case ClientInstruction::Type::sinkInitialResponse:
-      result.sinkInitialResponse_ref() =
-          sinkInitialResponseTest(*clientInstruction.sinkInitialResponse_ref());
+      result.sinkInitialResponse() =
+          sinkInitialResponseTest(*clientInstruction.sinkInitialResponse());
       break;
     case ClientInstruction::Type::sinkDeclaredException:
-      result.sinkDeclaredException_ref() = sinkDeclaredExceptionTest(
-          *clientInstruction.sinkDeclaredException_ref());
+      result.sinkDeclaredException() =
+          sinkDeclaredExceptionTest(*clientInstruction.sinkDeclaredException());
       break;
     case ClientInstruction::Type::sinkUndeclaredException:
-      result.sinkUndeclaredException_ref() = sinkUndeclaredExceptionTest(
-          *clientInstruction.sinkUndeclaredException_ref());
+      result.sinkUndeclaredException() = sinkUndeclaredExceptionTest(
+          *clientInstruction.sinkUndeclaredException());
       break;
     case ClientInstruction::Type::interactionConstructor:
-      result.interactionConstructor_ref() = interactionConstructorTest(
-          *clientInstruction.interactionConstructor_ref());
+      result.interactionConstructor() = interactionConstructorTest(
+          *clientInstruction.interactionConstructor());
       break;
     case ClientInstruction::Type::interactionFactoryFunction:
-      result.interactionFactoryFunction_ref() = interactionFactoryFunctionTest(
-          *clientInstruction.interactionFactoryFunction_ref());
+      result.interactionFactoryFunction() = interactionFactoryFunctionTest(
+          *clientInstruction.interactionFactoryFunction());
       break;
     case ClientInstruction::Type::interactionPersistsState:
-      result.interactionPersistsState_ref() = interactionPersistsStateTest(
-          *clientInstruction.interactionPersistsState_ref());
+      result.interactionPersistsState() = interactionPersistsStateTest(
+          *clientInstruction.interactionPersistsState());
       break;
     case ClientInstruction::Type::interactionTermination:
-      result.interactionTermination_ref() = interactionTerminationTest(
-          *clientInstruction.interactionTermination_ref());
+      result.interactionTermination() = interactionTerminationTest(
+          *clientInstruction.interactionTermination());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

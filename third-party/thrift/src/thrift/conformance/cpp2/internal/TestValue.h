@@ -52,50 +52,50 @@ template <typename W>
 uint32_t invoke(const WriteOp& write, W& writer) {
   switch (write.getType()) {
     case WriteOp::Type::writeBool:
-      return writer.writeBool(*write.writeBool_ref());
+      return writer.writeBool(*write.writeBool());
     case WriteOp::Type::writeByte:
-      return writer.writeByte(*write.writeByte_ref());
+      return writer.writeByte(*write.writeByte());
     case WriteOp::Type::writeI16:
-      return writer.writeI16(*write.writeI16_ref());
+      return writer.writeI16(*write.writeI16());
     case WriteOp::Type::writeI32:
-      return writer.writeI32(*write.writeI32_ref());
+      return writer.writeI32(*write.writeI32());
     case WriteOp::Type::writeI64:
-      return writer.writeI64(*write.writeI64_ref());
+      return writer.writeI64(*write.writeI64());
     case WriteOp::Type::writeFloat:
-      return writer.writeFloat(*write.writeFloat_ref());
+      return writer.writeFloat(*write.writeFloat());
     case WriteOp::Type::writeDouble:
-      return writer.writeDouble(*write.writeDouble_ref());
+      return writer.writeDouble(*write.writeDouble());
     case WriteOp::Type::writeString:
-      return writer.writeString(*write.writeString_ref());
+      return writer.writeString(*write.writeString());
     case WriteOp::Type::writeBinary:
-      return writer.writeBinary(*write.writeBinary_ref());
+      return writer.writeBinary(*write.writeBinary());
 
     case WriteOp::Type::writeToken:
-      return invoke(*write.writeToken_ref(), writer);
+      return invoke(*write.writeToken(), writer);
 
     case WriteOp::Type::writeStructBegin: {
-      const auto& begin = *write.writeStructBegin_ref();
+      const auto& begin = *write.writeStructBegin();
       return writer.writeStructBegin(begin.name()->c_str());
     }
     case WriteOp::Type::writeFieldBegin: {
-      const auto& begin = *write.writeFieldBegin_ref();
+      const auto& begin = *write.writeFieldBegin();
       return writer.writeFieldBegin(
           begin.name()->c_str(), type::toTType(*begin.type()), *begin.id());
     }
     case WriteOp::Type::writeMapBegin: {
-      const auto& begin = *write.writeMapBegin_ref();
+      const auto& begin = *write.writeMapBegin();
       return writer.writeMapBegin(
           type::toTType(*begin.keyType()),
           type::toTType(*begin.valueType()),
           *begin.size());
     }
     case WriteOp::Type::writeListBegin: {
-      const auto& begin = *write.writeListBegin_ref();
+      const auto& begin = *write.writeListBegin();
       return writer.writeListBegin(
           type::toTType(*begin.elemType()), *begin.size());
     }
     case WriteOp::Type::writeSetBegin: {
-      const auto& begin = *write.writeSetBegin_ref();
+      const auto& begin = *write.writeSetBegin();
       return writer.writeSetBegin(
           type::toTType(*begin.elemType()), *begin.size());
     }
@@ -122,7 +122,7 @@ class EncodeValueRecorder {
   constexpr static bool kHasIndexSupport() { return false; }
 
   uint32_t writeStructBegin(const char* name) {
-    next().writeStructBegin_ref().ensure().name() = name;
+    next().writeStructBegin().ensure().name() = name;
     return 0;
   }
 
@@ -132,7 +132,7 @@ class EncodeValueRecorder {
   }
 
   uint32_t writeFieldBegin(const char* name, TType fieldType, int16_t fieldId) {
-    auto& fieldBegin = next().writeFieldBegin_ref().ensure();
+    auto& fieldBegin = next().writeFieldBegin().ensure();
     fieldBegin.name() = name;
     fieldBegin.type() = type::toBaseType(fieldType);
     fieldBegin.id() = fieldId;
@@ -150,7 +150,7 @@ class EncodeValueRecorder {
   }
 
   uint32_t writeMapBegin(TType keyType, TType valType, uint32_t size) {
-    auto& mapBegin = next().writeMapBegin_ref().ensure();
+    auto& mapBegin = next().writeMapBegin().ensure();
     mapBegin.keyType() = type::toBaseType(keyType);
     mapBegin.valueType() = type::toBaseType(valType);
     mapBegin.size() = size;
@@ -163,7 +163,7 @@ class EncodeValueRecorder {
   }
 
   uint32_t writeListBegin(TType elemType, uint32_t size) {
-    auto& listBegin = next().writeListBegin_ref().ensure();
+    auto& listBegin = next().writeListBegin().ensure();
     listBegin.elemType() = type::toBaseType(elemType);
     listBegin.size() = size;
     return 0;
@@ -175,7 +175,7 @@ class EncodeValueRecorder {
   }
 
   uint32_t writeSetBegin(TType elemType, uint32_t size) {
-    auto& setBegin = next().writeSetBegin_ref().ensure();
+    auto& setBegin = next().writeSetBegin().ensure();
     setBegin.elemType() = type::toBaseType(elemType);
     setBegin.size() = size;
     return 0;
@@ -187,52 +187,52 @@ class EncodeValueRecorder {
   }
 
   uint32_t writeBool(bool value) {
-    next().writeBool_ref().ensure() = value;
+    next().writeBool().ensure() = value;
     return 0;
   }
 
   uint32_t writeByte(int8_t byte) {
-    next().writeByte_ref().ensure() = byte;
+    next().writeByte().ensure() = byte;
     return 0;
   }
 
   uint32_t writeI16(int16_t i16) {
-    next().writeI16_ref().ensure() = i16;
+    next().writeI16().ensure() = i16;
     return 0;
   }
 
   uint32_t writeI32(int32_t i32) {
-    next().writeI32_ref().ensure() = i32;
+    next().writeI32().ensure() = i32;
     return 0;
   }
 
   uint32_t writeI64(int64_t i64) {
-    next().writeI64_ref().ensure() = i64;
+    next().writeI64().ensure() = i64;
     return 0;
   }
 
   uint32_t writeDouble(double dub) {
-    next().writeDouble_ref().ensure() = dub;
+    next().writeDouble().ensure() = dub;
     return 0;
   }
 
   uint32_t writeFloat(float flt) {
-    next().writeFloat_ref().ensure() = flt;
+    next().writeFloat().ensure() = flt;
     return 0;
   }
 
   uint32_t writeString(folly::StringPiece str) {
-    next().writeString_ref().ensure() = std::string(str);
+    next().writeString().ensure() = std::string(str);
     return 0;
   }
 
   uint32_t writeBinary(const folly::IOBuf& str) {
-    next().writeBinary_ref().ensure() = str;
+    next().writeBinary().ensure() = str;
     return 0;
   }
 
   uint32_t writeBinary(std::unique_ptr<folly::IOBuf> str) {
-    next().writeBinary_ref().ensure() = std::move(*str);
+    next().writeBinary().ensure() = std::move(*str);
     return 0;
   }
 
@@ -249,7 +249,7 @@ class EncodeValueRecorder {
 
   WriteOp& next() { return output_.writes()->emplace_back(); }
 
-  WriteToken& nextToken() { return next().writeToken_ref().ensure(); }
+  WriteToken& nextToken() { return next().writeToken().ensure(); }
 };
 
 } // namespace apache::thrift::conformance::detail

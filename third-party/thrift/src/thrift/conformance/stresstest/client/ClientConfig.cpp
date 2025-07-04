@@ -115,7 +115,7 @@ std::optional<CompressionConfig> createCompressionConfigFromFlags() {
   }
 
   CompressionConfig compressionConfig;
-  compressionConfig.codecConfig_ref() = codecConfig;
+  compressionConfig.codecConfig() = codecConfig;
 
   return compressionConfig;
 }

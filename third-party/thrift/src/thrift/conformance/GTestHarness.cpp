@@ -436,110 +436,107 @@ ClientTestResult runClientSteps(
   ClientTestResult result;
   switch (clientInstruction.getType()) {
     case ClientInstruction::Type::requestResponseBasic:
-      result.requestResponseBasic_ref() = runRequestResponseBasic(
-          client, *clientInstruction.requestResponseBasic_ref());
+      result.requestResponseBasic() = runRequestResponseBasic(
+          client, *clientInstruction.requestResponseBasic());
       break;
     case ClientInstruction::Type::requestResponseDeclaredException:
-      result.requestResponseDeclaredException_ref() =
+      result.requestResponseDeclaredException() =
           runRequestResponseDeclaredException(
               client,
-              *clientInstruction.requestResponseDeclaredException_ref()
-                   ->request());
+              *clientInstruction.requestResponseDeclaredException()->request());
       break;
     case ClientInstruction::Type::requestResponseUndeclaredException:
-      result.requestResponseUndeclaredException_ref() =
+      result.requestResponseUndeclaredException() =
           runRequestResponseUndeclaredException(
               client,
-              *clientInstruction.requestResponseUndeclaredException_ref()
+              *clientInstruction.requestResponseUndeclaredException()
                    ->request());
       break;
     case ClientInstruction::Type::requestResponseNoArgVoidResponse:
-      result.requestResponseNoArgVoidResponse_ref() =
+      result.requestResponseNoArgVoidResponse() =
           runRequestResponseNoArgVoidResponse(client);
       break;
     case ClientInstruction::Type::streamBasic: {
-      auto instruction = *clientInstruction.streamBasic_ref();
-      result.streamBasic_ref() =
+      auto instruction = *clientInstruction.streamBasic();
+      result.streamBasic() =
           runStreamBasic(client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::streamInitialResponse: {
-      auto instruction = *clientInstruction.streamInitialResponse_ref();
-      result.streamInitialResponse_ref() =
+      auto instruction = *clientInstruction.streamInitialResponse();
+      result.streamInitialResponse() =
           runStreamInitialResponse(client, *instruction.request());
       break;
     }
     case ClientInstruction::Type::streamDeclaredException: {
-      auto instruction = *clientInstruction.streamDeclaredException_ref();
-      result.streamDeclaredException_ref() =
+      auto instruction = *clientInstruction.streamDeclaredException();
+      result.streamDeclaredException() =
           runStreamDeclaredException(client, *instruction.request());
       break;
     }
     case ClientInstruction::Type::streamUndeclaredException: {
-      auto instruction = *clientInstruction.streamUndeclaredException_ref();
-      result.streamUndeclaredException_ref() =
+      auto instruction = *clientInstruction.streamUndeclaredException();
+      result.streamUndeclaredException() =
           runStreamUndeclaredException(client, *instruction.request());
       break;
     }
     case ClientInstruction::Type::streamInitialDeclaredException: {
-      auto instruction =
-          *clientInstruction.streamInitialDeclaredException_ref();
-      result.streamInitialDeclaredException_ref() =
+      auto instruction = *clientInstruction.streamInitialDeclaredException();
+      result.streamInitialDeclaredException() =
           runStreamInitialDeclaredException(client, *instruction.request());
       break;
     }
     case ClientInstruction::Type::streamInitialUndeclaredException: {
-      auto instruction =
-          *clientInstruction.streamInitialUndeclaredException_ref();
-      result.streamInitialUndeclaredException_ref() =
+      auto instruction = *clientInstruction.streamInitialUndeclaredException();
+      result.streamInitialUndeclaredException() =
           runStreamInitialUndeclaredException(client, *instruction.request());
       break;
     }
     case ClientInstruction::Type::sinkBasic: {
-      auto instruction = *clientInstruction.sinkBasic_ref();
-      result.sinkBasic_ref() =
+      auto instruction = *clientInstruction.sinkBasic();
+      result.sinkBasic() =
           runSinkBasic(client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::sinkChunkTimeout: {
-      auto instruction = *clientInstruction.sinkChunkTimeout_ref();
-      result.sinkChunkTimeout_ref() =
+      auto instruction = *clientInstruction.sinkChunkTimeout();
+      result.sinkChunkTimeout() =
           runSinkChunkTimeout(client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::sinkInitialResponse: {
-      auto instruction = *clientInstruction.sinkInitialResponse_ref();
-      result.sinkInitialResponse_ref() =
+      auto instruction = *clientInstruction.sinkInitialResponse();
+      result.sinkInitialResponse() =
           runSinkInitialResponse(client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::sinkDeclaredException: {
-      auto instruction = *clientInstruction.sinkDeclaredException_ref();
-      result.sinkDeclaredException_ref() =
+      auto instruction = *clientInstruction.sinkDeclaredException();
+      result.sinkDeclaredException() =
           runSinkDeclaredException(client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::sinkUndeclaredException: {
-      auto instruction = *clientInstruction.sinkUndeclaredException_ref();
-      result.sinkUndeclaredException_ref() = runSinkUndeclaredException(
+      auto instruction = *clientInstruction.sinkUndeclaredException();
+      result.sinkUndeclaredException() = runSinkUndeclaredException(
           client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::interactionConstructor:
-      result.interactionConstructor_ref() = runInteractionConstructor(
-          client, *clientInstruction.interactionConstructor_ref());
+      result.interactionConstructor() = runInteractionConstructor(
+          client, *clientInstruction.interactionConstructor());
       break;
     case ClientInstruction::Type::interactionFactoryFunction:
-      result.interactionFactoryFunction_ref() = runInteractionFactoryFunction(
-          client, *clientInstruction.interactionFactoryFunction_ref());
+      result.interactionFactoryFunction() = runInteractionFactoryFunction(
+          client, *clientInstruction.interactionFactoryFunction());
       break;
     case ClientInstruction::Type::interactionPersistsState:
-      result.interactionPersistsState_ref() = runInteractionPersistsState(
-          client, *clientInstruction.interactionPersistsState_ref());
+      result.interactionPersistsState() = runInteractionPersistsState(
+          client, *clientInstruction.interactionPersistsState());
       break;
     case ClientInstruction::Type::interactionTermination:
-      result.interactionTermination_ref() = runInteractionTermination(
-          client, *clientInstruction.interactionTermination_ref());
+      result.interactionTermination() = runInteractionTermination(
+          client, *clientInstruction.interactionTermination());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");
@@ -597,7 +594,7 @@ testing::AssertionResult runStatelessRpcTest(
     switch (clientInstruction.getType()) {
       case ClientInstruction::Type::requestResponseBasic:
         actualServerTestResult = runRequestResponseBasic(
-            client, *clientInstruction.requestResponseBasic_ref());
+            client, *clientInstruction.requestResponseBasic());
 
         if (actualServerTestResult != *rpc.serverTestResult()) {
           return testing::AssertionFailure();
@@ -606,82 +603,81 @@ testing::AssertionResult runStatelessRpcTest(
         }
         break;
       case ClientInstruction::Type::requestResponseDeclaredException:
-        result.requestResponseDeclaredException_ref() =
+        result.requestResponseDeclaredException() =
             runRequestResponseDeclaredException(client, serverInstruction);
         break;
       case ClientInstruction::Type::requestResponseUndeclaredException:
-        result.requestResponseUndeclaredException_ref() =
+        result.requestResponseUndeclaredException() =
             runRequestResponseUndeclaredException(client, serverInstruction);
         break;
       case ClientInstruction::Type::requestResponseNoArgVoidResponse:
-        result.requestResponseNoArgVoidResponse_ref() =
+        result.requestResponseNoArgVoidResponse() =
             runRequestResponseNoArgVoidResponse(client);
         break;
       case ClientInstruction::Type::streamBasic: {
-        auto instruction = *clientInstruction.streamBasic_ref();
-        result.streamBasic_ref() =
+        auto instruction = *clientInstruction.streamBasic();
+        result.streamBasic() =
             runStreamBasic(client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::streamInitialResponse: {
-        auto instruction = *clientInstruction.streamInitialResponse_ref();
-        result.streamInitialResponse_ref() =
+        auto instruction = *clientInstruction.streamInitialResponse();
+        result.streamInitialResponse() =
             runStreamInitialResponse(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::streamDeclaredException: {
-        auto instruction = *clientInstruction.streamDeclaredException_ref();
-        result.streamDeclaredException_ref() =
+        auto instruction = *clientInstruction.streamDeclaredException();
+        result.streamDeclaredException() =
             runStreamDeclaredException(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::streamUndeclaredException: {
-        auto instruction = *clientInstruction.streamUndeclaredException_ref();
-        result.streamUndeclaredException_ref() =
+        auto instruction = *clientInstruction.streamUndeclaredException();
+        result.streamUndeclaredException() =
             runStreamUndeclaredException(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::streamInitialDeclaredException: {
-        auto instruction =
-            *clientInstruction.streamInitialDeclaredException_ref();
-        result.streamInitialDeclaredException_ref() =
+        auto instruction = *clientInstruction.streamInitialDeclaredException();
+        result.streamInitialDeclaredException() =
             runStreamInitialDeclaredException(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::streamInitialUndeclaredException: {
         auto instruction =
-            *clientInstruction.streamInitialUndeclaredException_ref();
-        result.streamInitialUndeclaredException_ref() =
+            *clientInstruction.streamInitialUndeclaredException();
+        result.streamInitialUndeclaredException() =
             runStreamInitialUndeclaredException(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::sinkBasic: {
-        auto instruction = *clientInstruction.sinkBasic_ref();
-        result.sinkBasic_ref() =
+        auto instruction = *clientInstruction.sinkBasic();
+        result.sinkBasic() =
             runSinkBasic(client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::sinkChunkTimeout: {
-        auto instruction = *clientInstruction.sinkChunkTimeout_ref();
-        result.sinkChunkTimeout_ref() =
+        auto instruction = *clientInstruction.sinkChunkTimeout();
+        result.sinkChunkTimeout() =
             runSinkChunkTimeout(client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::sinkInitialResponse: {
-        auto instruction = *clientInstruction.sinkInitialResponse_ref();
-        result.sinkInitialResponse_ref() =
+        auto instruction = *clientInstruction.sinkInitialResponse();
+        result.sinkInitialResponse() =
             runSinkInitialResponse(client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::sinkDeclaredException: {
-        auto instruction = *clientInstruction.sinkDeclaredException_ref();
-        result.sinkDeclaredException_ref() =
+        auto instruction = *clientInstruction.sinkDeclaredException();
+        result.sinkDeclaredException() =
             runSinkDeclaredException(client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::sinkUndeclaredException: {
-        auto instruction = *clientInstruction.sinkUndeclaredException_ref();
-        result.sinkUndeclaredException_ref() =
+        auto instruction = *clientInstruction.sinkUndeclaredException();
+        result.sinkUndeclaredException() =
             runSinkUndeclaredException(client, instruction, serverInstruction);
         break;
       }

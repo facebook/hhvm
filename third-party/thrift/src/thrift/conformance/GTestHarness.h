@@ -242,26 +242,26 @@ testing::AssertionResult runTestCase(Client& client, const TestCase& testCase) {
       if constexpr (std::is_same_v<
                         Client,
                         apache::thrift::Client<ConformanceService>>) {
-        return runRoundTripTest(client, *testCase.roundTrip_ref());
+        return runRoundTripTest(client, *testCase.roundTrip());
       }
       return testing::AssertionFailure() << "Invalid test client.";
     case TestCaseUnion::Type::rpc:
       if constexpr (std::is_same_v<
                         Client,
                         apache::thrift::Client<RPCConformanceService>>) {
-        return runRpcTest(client, *testCase.rpc_ref());
+        return runRpcTest(client, *testCase.rpc());
       } else if constexpr (std::is_same_v<
                                Client,
                                apache::thrift::Client<
                                    RPCStatelessConformanceService>>) {
-        return runStatelessRpcTest(client, *testCase.rpc_ref());
+        return runStatelessRpcTest(client, *testCase.rpc());
       }
       return testing::AssertionFailure() << "Invalid test client.";
     case TestCaseUnion::Type::objectPatch:
       if constexpr (std::is_same_v<
                         Client,
                         apache::thrift::Client<ConformanceService>>) {
-        return runPatchTest(client, *testCase.objectPatch_ref());
+        return runPatchTest(client, *testCase.objectPatch());
       }
       return testing::AssertionFailure() << "Invalid test client.";
     default:

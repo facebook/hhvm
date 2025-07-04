@@ -314,20 +314,20 @@ type::Type transformPatchTypeUri(
   };
 
   if (!isUnion) {
-    if (auto structType = name.structType_ref()) {
+    if (auto structType = name.structType()) {
       return handleUri(*structType);
-    } else if (auto unionType = name.unionType_ref();
+    } else if (auto unionType = name.unionType();
                unionType.has_value() && !fromPatchType) {
       // All Thrift SafePatch/Patch are struct type.
       auto temp = std::move(*unionType);
-      name.structType_ref() = std::move(temp);
-      return handleUri(*name.structType_ref());
+      name.structType() = std::move(temp);
+      return handleUri(*name.structType());
     }
   } else {
-    if (auto structType = name.structType_ref()) {
+    if (auto structType = name.structType()) {
       auto temp = std::move(*structType);
-      name.unionType_ref() = std::move(temp);
-      return handleUri(*name.unionType_ref());
+      name.unionType() = std::move(temp);
+      return handleUri(*name.unionType());
     }
   }
 
@@ -1274,14 +1274,14 @@ void DiffVisitorBase::diffField(
 
 void DiffVisitorBase::pushField(FieldId id) {
   auto last = maskInPath_.top();
-  auto next = &last->includes_ref().ensure()[folly::to_underlying(id)];
+  auto next = &last->includes().ensure()[folly::to_underlying(id)];
   *next = allMask();
   maskInPath_.push(next);
 }
 
 void DiffVisitorBase::pushType(type::Type type) {
   auto last = maskInPath_.top();
-  auto next = &last->includes_type_ref().ensure()[std::move(type)];
+  auto next = &last->includes_type().ensure()[std::move(type)];
   *next = allMask();
   maskInPath_.push(next);
 }
@@ -1317,9 +1317,9 @@ void DiffVisitorBase::pushKey(const Value& k) {
   auto last = maskInPath_.top();
   Mask* next = nullptr;
   if (auto i = getIntegral(k)) {
-    next = &last->includes_map_ref().ensure()[*i];
+    next = &last->includes_map().ensure()[*i];
   } else if (k.is_binary()) {
-    next = &last->includes_string_map_ref().ensure()[k.as_binary().toString()];
+    next = &last->includes_string_map().ensure()[k.as_binary().toString()];
   } else {
     // The map key is not integer, nor string
     notImpl();
@@ -1389,11 +1389,9 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
       // granular read/write operation
       // Insert next extracted mask and insert key to read mask if the next
       // extracted mask does not include the key.
-      auto getIncludesMapRef = [](Mask& mask) {
-        return mask.includes_map_ref();
-      };
+      auto getIncludesMapRef = [](Mask& mask) { return mask.includes_map(); };
       auto getIncludesStringMapRef = [](Mask& mask) {
-        return mask.includes_string_map_ref();
+        return mask.includes_string_map();
       };
       if (detail::getArrayKeyFromValue(key) == detail::ArrayKey::Integer) {
         auto id = static_cast<int64_t>(getMapIdFromValue(key));
@@ -1461,7 +1459,7 @@ ExtractedMasksFromPatch DynamicStructPatch::extractMaskFromPatch() const {
       // granular read/write operation
       // Insert next extracted mask and insert field to read mask if the next
       // extracted mask does not include the field.
-      auto getIncludesObjRef = [](Mask& mask) { return mask.includes_ref(); };
+      auto getIncludesObjRef = [](Mask& mask) { return mask.includes(); };
       auto nextMasks = patch.extractMaskFromPatch();
       detail::insertNextMask(
           masks,
@@ -1510,7 +1508,7 @@ ExtractedMasksFromPatch DynamicUnionPatch::extractMaskFromPatch() const {
       // granular read/write operation
       // Insert next extracted mask and insert field to read mask if the next
       // extracted mask does not include the field.
-      auto getIncludesObjRef = [](Mask& mask) { return mask.includes_ref(); };
+      auto getIncludesObjRef = [](Mask& mask) { return mask.includes(); };
       auto nextMasks = patch.extractMaskFromPatch();
       detail::insertNextMask(
           masks,
@@ -1566,7 +1564,7 @@ ExtractedMasksFromPatch DynamicUnknownPatch::extractMaskFromPatch() const {
       // granular read/write operation
       // Insert next extracted mask and insert field to read mask if the next
       // extracted mask does not include the field.
-      auto getIncludesObjRef = [](Mask& mask) { return mask.includes_ref(); };
+      auto getIncludesObjRef = [](Mask& mask) { return mask.includes(); };
       auto nextMasks = patch.extractMaskFromPatch();
       detail::insertNextMask(
           masks,

@@ -231,7 +231,7 @@ protocol::ExtractedMasksFromPatch AnyPatch<Patch>::extractMaskFromPatch()
       // Insert next extracted mask and insert type to read mask if the next
       // extracted mask does not include the type.
       auto getIncludesTypeRef = [](protocol::Mask& mask) {
-        return mask.includes_type_ref();
+        return mask.includes_type();
       };
       auto nextMasks = patch.extractMaskFromPatch();
       protocol::detail::insertNextMask(

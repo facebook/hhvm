@@ -81,59 +81,59 @@ std::string toTypeidName(const MapTypeId& mapType) {
 
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Bool) noexcept {
-  this->data_.boolType_ref() = {};
+  this->data_.boolType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Byte) noexcept {
-  this->data_.byteType_ref() = {};
+  this->data_.byteType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(I16) noexcept {
-  this->data_.i16Type_ref() = {};
+  this->data_.i16Type() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(I32) noexcept {
-  this->data_.i32Type_ref() = {};
+  this->data_.i32Type() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(I64) noexcept {
-  this->data_.i64Type_ref() = {};
+  this->data_.i64Type() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Float) noexcept {
-  this->data_.floatType_ref() = {};
+  this->data_.floatType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Double) noexcept {
-  this->data_.doubleType_ref() = {};
+  this->data_.doubleType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(String) noexcept {
-  this->data_.stringType_ref() = {};
+  this->data_.stringType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Binary) noexcept {
-  this->data_.binaryType_ref() = {};
+  this->data_.binaryType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Any) noexcept {
-  this->data_.anyType_ref() = {};
+  this->data_.anyType() = {};
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Uri uri) noexcept {
-  this->data_.userDefinedType_ref() = std::move(uri);
+  this->data_.userDefinedType() = std::move(uri);
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(List&& list) noexcept {
-  this->data_.listType_ref() = std::move(list);
+  this->data_.listType() = std::move(list);
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Set&& set) noexcept {
-  this->data_.setType_ref() = std::move(set);
+  this->data_.setType() = std::move(set);
 }
 template <>
 TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Map&& map) noexcept {
-  this->data_.mapType_ref() = std::move(map);
+  this->data_.mapType() = std::move(map);
 }
 
 } // namespace apache::thrift::type_system::detail

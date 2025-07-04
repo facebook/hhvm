@@ -115,11 +115,8 @@ bool ParallelConcurrencyControllerBase::trySchedule(bool onEnqueued) {
 
     // This branch only happens when execution is out of limit
     // in that case we would like to increase pendingDequeCalls only
-    if (onEnqueued) {
-      if (!counters_.compare_exchange_weak(countersOld, counters)) {
-        continue;
-      }
-      limitHasBeenEnforced_.store(true);
+    if (onEnqueued && !counters_.compare_exchange_weak(countersOld, counters)) {
+      continue;
     }
 
     return false;

@@ -107,14 +107,9 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase,
   folly::relaxed_atomic<Counters> counters_{};
   folly::relaxed_atomic<uint64_t> executionLimit_{
       std::numeric_limits<uint64_t>::max()};
-  folly::relaxed_atomic<bool> limitHasBeenEnforced_{false};
 
   bool executorSupportPriority{true};
   RequestPileInterface& pile_;
-
-  virtual bool getExecutionLimitRequestsHasBeenEnforced() const override {
-    return limitHasBeenEnforced_.load();
-  }
 
   bool trySchedule(bool onEnqueued = false);
   void executeRequest(std::optional<ServerRequest> req);

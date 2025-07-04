@@ -88,10 +88,6 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
 
  private:
   friend class ConcurrencyControllerInterfaceUnsafeAPI;
-
-  virtual bool getExecutionLimitRequestsHasBeenEnforced() const {
-    return false;
-  }
 };
 
 } // namespace apache::thrift

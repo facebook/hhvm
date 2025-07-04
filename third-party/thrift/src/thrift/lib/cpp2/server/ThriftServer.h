@@ -1895,14 +1895,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // from resource pools, when setConcurrencyLimit is explicitly called.
   folly::once_flag cancelSetMaxRequestsCallbackHandleFlag_;
 
-  // If the service might rely on the synced maxRequests, then we need to log.
-  // Logging only needs to happen once.
-  folly::once_flag serviceMightRelyOnSyncedMaxRequestsFlag_;
-
-  // If the service relies on the synced maxRequests, then we need to log.
-  // Logging only needs to happen once.
-  folly::once_flag serviceReliesOnSyncedMaxRequestsFlag_;
-
   // setMaxQpsCallbackHandle should be cancelled, unsyncing maxQps from resource
   // pools, when setExecutionRate is explicitly called.
   folly::once_flag cancelSetMaxQpsCallbackHandleFlag_;

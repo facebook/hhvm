@@ -26,38 +26,36 @@ namespace apache::thrift::conformance {
 // =================== Request-Response ===================
 void RPCServerConformanceHandler::requestResponseBasic(
     Response& res, std::unique_ptr<Request> req) {
-  result_.requestResponseBasic_ref().emplace().request() = *req;
-  res = *testCase_->serverInstruction_ref()
-             ->requestResponseBasic_ref()
-             ->response();
+  result_.requestResponseBasic().emplace().request() = *req;
+  res = *testCase_->serverInstruction()->requestResponseBasic()->response();
 }
 
 void RPCServerConformanceHandler::requestResponseDeclaredException(
     std::unique_ptr<Request> req) {
-  result_.requestResponseDeclaredException_ref().emplace().request() = *req;
+  result_.requestResponseDeclaredException().emplace().request() = *req;
   throw can_throw(*testCase_->serverInstruction()
-                       ->requestResponseDeclaredException_ref()
+                       ->requestResponseDeclaredException()
                        ->userException());
 }
 
 void RPCServerConformanceHandler::requestResponseUndeclaredException(
     std::unique_ptr<Request> req) {
-  result_.requestResponseUndeclaredException_ref().emplace().request() = *req;
+  result_.requestResponseUndeclaredException().emplace().request() = *req;
   throw std::runtime_error(*testCase_->serverInstruction()
-                                ->requestResponseUndeclaredException_ref()
+                                ->requestResponseUndeclaredException()
                                 ->exceptionMessage());
 }
 
 void RPCServerConformanceHandler::requestResponseNoArgVoidResponse() {
-  result_.requestResponseNoArgVoidResponse_ref().emplace();
+  result_.requestResponseNoArgVoidResponse().emplace();
 }
 
 // =================== Stream ===================
 apache::thrift::ServerStream<Response> RPCServerConformanceHandler::streamBasic(
     std::unique_ptr<Request> req) {
-  result_.streamBasic_ref().emplace().request() = *req;
+  result_.streamBasic().emplace().request() = *req;
   for (auto& payload :
-       *testCase_->serverInstruction()->streamBasic_ref()->streamPayloads()) {
+       *testCase_->serverInstruction()->streamBasic()->streamPayloads()) {
     co_yield std::move(payload);
   }
 }
@@ -65,11 +63,11 @@ apache::thrift::ServerStream<Response> RPCServerConformanceHandler::streamBasic(
 apache::thrift::ResponseAndServerStream<Response, Response>
 RPCServerConformanceHandler::streamInitialResponse(
     std::unique_ptr<Request> req) {
-  result_.streamInitialResponse_ref().emplace().request() = *req;
+  result_.streamInitialResponse().emplace().request() = *req;
   auto stream =
       folly::coro::co_invoke([&]() -> folly::coro::AsyncGenerator<Response&&> {
         for (auto& payload : *testCase_->serverInstruction()
-                                  ->streamInitialResponse_ref()
+                                  ->streamInitialResponse()
                                   ->streamPayloads()) {
           co_yield std::move(payload);
         }
@@ -77,7 +75,7 @@ RPCServerConformanceHandler::streamInitialResponse(
 
   return {
       *testCase_->serverInstruction()
-           ->streamInitialResponse_ref()
+           ->streamInitialResponse()
            ->initialResponse(),
       std::move(stream)};
 }
@@ -85,9 +83,9 @@ RPCServerConformanceHandler::streamInitialResponse(
 apache::thrift::ServerStream<Response>
 RPCServerConformanceHandler::streamDeclaredException(
     std::unique_ptr<Request> req) {
-  result_.streamDeclaredException_ref().emplace().request() = *req;
+  result_.streamDeclaredException().emplace().request() = *req;
   throw *testCase_->serverInstruction()
-      ->streamDeclaredException_ref()
+      ->streamDeclaredException()
       ->userException();
   co_return;
 }
@@ -95,9 +93,9 @@ RPCServerConformanceHandler::streamDeclaredException(
 apache::thrift::ServerStream<Response>
 RPCServerConformanceHandler::streamUndeclaredException(
     std::unique_ptr<Request> req) {
-  result_.streamUndeclaredException_ref().emplace().request() = *req;
+  result_.streamUndeclaredException().emplace().request() = *req;
   throw std::runtime_error(*testCase_->serverInstruction()
-                                ->streamUndeclaredException_ref()
+                                ->streamUndeclaredException()
                                 ->exceptionMessage());
   co_return;
 }
@@ -105,92 +103,88 @@ RPCServerConformanceHandler::streamUndeclaredException(
 apache::thrift::ServerStream<Response>
 RPCServerConformanceHandler::streamInitialDeclaredException(
     std::unique_ptr<Request> req) {
-  result_.streamInitialDeclaredException_ref().emplace().request() = *req;
+  result_.streamInitialDeclaredException().emplace().request() = *req;
   throw *testCase_->serverInstruction()
-      ->streamInitialDeclaredException_ref()
+      ->streamInitialDeclaredException()
       ->userException();
 }
 
 apache::thrift::ServerStream<Response>
 RPCServerConformanceHandler::streamInitialUndeclaredException(
     std::unique_ptr<Request> req) {
-  result_.streamInitialUndeclaredException_ref().emplace().request() = *req;
+  result_.streamInitialUndeclaredException().emplace().request() = *req;
   throw std::runtime_error(*testCase_->serverInstruction()
-                                ->streamInitialUndeclaredException_ref()
+                                ->streamInitialUndeclaredException()
                                 ->exceptionMessage());
 }
 
 // =================== Sink ===================
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkBasic(std::unique_ptr<Request> req) {
-  result_.sinkBasic_ref().emplace().request() = *req;
+  result_.sinkBasic().emplace().request() = *req;
   return apache::thrift::SinkConsumer<Request, Response>{
       [&](folly::coro::AsyncGenerator<Request&&> gen)
           -> folly::coro::Task<Response> {
         while (auto item = co_await gen.next()) {
-          result_.sinkBasic_ref()->sinkPayloads()->push_back(std::move(*item));
+          result_.sinkBasic()->sinkPayloads()->push_back(std::move(*item));
         }
-        co_return *testCase_->serverInstruction()
-            ->sinkBasic_ref()
-            ->finalResponse();
+        co_return *testCase_->serverInstruction()->sinkBasic()->finalResponse();
       },
       static_cast<uint64_t>(
-          *testCase_->serverInstruction()->sinkBasic_ref()->bufferSize())};
+          *testCase_->serverInstruction()->sinkBasic()->bufferSize())};
 }
 
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
-  result_.sinkChunkTimeout_ref().emplace().request() = *req;
+  result_.sinkChunkTimeout().emplace().request() = *req;
   return apache::thrift::SinkConsumer<Request, Response>{
       [&](folly::coro::AsyncGenerator<Request&&> gen)
           -> folly::coro::Task<Response> {
         try {
           while (auto item = co_await gen.next()) {
-            result_.sinkChunkTimeout_ref()->sinkPayloads()->push_back(
+            result_.sinkChunkTimeout()->sinkPayloads()->push_back(
                 std::move(*item));
           }
         } catch (const apache::thrift::TApplicationException& e) {
           if (e.getType() ==
               TApplicationException::TApplicationExceptionType::TIMEOUT) {
-            result_.sinkChunkTimeout_ref()->chunkTimeoutException() = true;
+            result_.sinkChunkTimeout()->chunkTimeoutException() = true;
           }
         }
         co_return *testCase_->serverInstruction()
-            ->sinkChunkTimeout_ref()
+            ->sinkChunkTimeout()
             ->finalResponse();
       }}
       .setChunkTimeout(std::chrono::milliseconds{*testCase_->serverInstruction()
-                                                      ->sinkChunkTimeout_ref()
+                                                      ->sinkChunkTimeout()
                                                       ->chunkTimeoutMs()});
 }
 
 apache::thrift::ResponseAndSinkConsumer<Response, Request, Response>
 RPCServerConformanceHandler::sinkInitialResponse(std::unique_ptr<Request> req) {
-  result_.sinkInitialResponse_ref().emplace().request() = *req;
+  result_.sinkInitialResponse().emplace().request() = *req;
   return {
-      *testCase_->serverInstruction()
-           ->sinkInitialResponse_ref()
-           ->initialResponse(),
+      *testCase_->serverInstruction()->sinkInitialResponse()->initialResponse(),
       apache::thrift::SinkConsumer<Request, Response>{
           [&](folly::coro::AsyncGenerator<Request&&> gen)
               -> folly::coro::Task<Response> {
             while (auto item = co_await gen.next()) {
-              result_.sinkInitialResponse_ref()->sinkPayloads()->push_back(
+              result_.sinkInitialResponse()->sinkPayloads()->push_back(
                   std::move(*item));
             }
             co_return *testCase_->serverInstruction()
-                ->sinkInitialResponse_ref()
+                ->sinkInitialResponse()
                 ->finalResponse();
           },
           static_cast<uint64_t>(*testCase_->serverInstruction()
-                                     ->sinkInitialResponse_ref()
+                                     ->sinkInitialResponse()
                                      ->bufferSize())}};
 }
 
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkDeclaredException(
     std::unique_ptr<Request> req) {
-  auto& result = result_.sinkDeclaredException_ref().emplace();
+  auto& result = result_.sinkDeclaredException().emplace();
   result.request() = *req;
   return {
       [&](folly::coro::AsyncGenerator<Request&&> gen)
@@ -204,14 +198,14 @@ RPCServerConformanceHandler::sinkDeclaredException(
         throw std::logic_error("Publisher didn't throw");
       },
       static_cast<uint64_t>(*testCase_->serverInstruction()
-                                 ->sinkDeclaredException_ref()
+                                 ->sinkDeclaredException()
                                  ->bufferSize())};
 }
 
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkUndeclaredException(
     std::unique_ptr<Request> req) {
-  auto& result = result_.sinkUndeclaredException_ref().emplace();
+  auto& result = result_.sinkUndeclaredException().emplace();
   result.request() = *req;
   return {
       [&](folly::coro::AsyncGenerator<Request&&> gen)
@@ -229,7 +223,7 @@ RPCServerConformanceHandler::sinkUndeclaredException(
         }
       },
       static_cast<uint64_t>(*testCase_->serverInstruction()
-                                 ->sinkUndeclaredException_ref()
+                                 ->sinkUndeclaredException()
                                  ->bufferSize())};
 }
 
@@ -238,13 +232,13 @@ std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {
   switch (testCase_->serverInstruction()->getType()) {
     case ServerInstruction::Type::interactionConstructor:
-      result_.interactionConstructor_ref().emplace().constructorCalled() = true;
+      result_.interactionConstructor().emplace().constructorCalled() = true;
       break;
     case ServerInstruction::Type::interactionPersistsState:
-      result_.interactionPersistsState_ref().emplace();
+      result_.interactionPersistsState().emplace();
       break;
     case ServerInstruction::Type::interactionTermination:
-      result_.interactionTermination_ref().emplace();
+      result_.interactionTermination().emplace();
       break;
     default:
       throw std::runtime_error(
@@ -259,14 +253,13 @@ apache::thrift::
         int32_t initialSum) {
   switch (testCase_->serverInstruction()->getType()) {
     case ServerInstruction::Type::interactionFactoryFunction:
-      result_.interactionFactoryFunction_ref().emplace().initialSum() =
-          initialSum;
+      result_.interactionFactoryFunction().emplace().initialSum() = initialSum;
       break;
     case ServerInstruction::Type::interactionPersistsState:
-      result_.interactionPersistsState_ref().emplace();
+      result_.interactionPersistsState().emplace();
       break;
     case ServerInstruction::Type::interactionTermination:
-      result_.interactionTermination_ref().emplace();
+      result_.interactionTermination().emplace();
       break;
     default:
       throw std::runtime_error(

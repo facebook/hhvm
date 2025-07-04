@@ -85,7 +85,7 @@ TEST_F(SchemaTest, linked) {
     EXPECT_EQ(
         schema.definitionsMap()
             ->at(program.definitionKeys()[0])
-            .structDef_ref()
+            .structDef()
             ->name(),
         "Empty");
 
@@ -147,7 +147,7 @@ TEST_F(SchemaTest, service_schema) {
   EXPECT_EQ(metadata->definitions.size(), 1);
   const auto& service = *metadata->schema.definitionsMap()
                              ->at(metadata->definitions[0])
-                             .serviceDef_ref();
+                             .serviceDef();
   EXPECT_EQ(service.name(), "TestService");
   EXPECT_EQ(service.functions()->size(), 4);
   EXPECT_EQ(service.functions()[0].name(), "noParamsNoReturnNoEx");

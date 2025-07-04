@@ -142,9 +142,9 @@ TEST_F(IOBufPtrTest, Simple) {
 
 TEST(IOBufPtrUnionTest, Union) {
   Union foo;
-  foo.foo_ref() = folly::IOBuf::wrapBufferAsValue("meow", 4);
+  foo.foo() = folly::IOBuf::wrapBufferAsValue("meow", 4);
   Union bar = std::move(foo);
-  EXPECT_EQ(bar.foo_ref()->moveToFbString(), "meow");
+  EXPECT_EQ(bar.foo()->moveToFbString(), "meow");
 }
 
 TEST_F(IOBufPtrTest, ZeroCopyContainers) {
@@ -174,7 +174,7 @@ TEST_F(IOBufPtrTest, ZeroCopyContainers) {
   }
   {
     Containers s;
-    s.bufPtrUnionList().ensure().emplace_back().foo_ref().ensure() =
+    s.bufPtrUnionList().ensure().emplace_back().foo().ensure() =
         *createBuf(10000);
     auto ssize = s.serializedSize(&writer);
     auto szcsize = s.serializedSizeZC(&writer);
@@ -183,7 +183,7 @@ TEST_F(IOBufPtrTest, ZeroCopyContainers) {
   }
   {
     Union u;
-    u.foo_ref() = *createBuf(10000);
+    u.foo() = *createBuf(10000);
     Containers s;
     s.bufPtrUnionSet().ensure().insert(std::move(u));
     auto ssize = s.serializedSize(&writer);
@@ -193,7 +193,7 @@ TEST_F(IOBufPtrTest, ZeroCopyContainers) {
   }
   {
     Union u;
-    u.foo_ref() = *createBuf(10000);
+    u.foo() = *createBuf(10000);
     Containers s;
     s.bufPtrUnionMap().ensure().emplace(42, std::move(u));
     auto ssize = s.serializedSize(&writer);

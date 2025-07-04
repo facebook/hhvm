@@ -179,12 +179,12 @@ TEST_F(TerseUnionTestFixture, SerializeDeserializeTest) {
   serializeDeserialize(u);
 
   I32Stuff i32St;
-  *i32St.a_ref() = 100;
+  *i32St.a() = 100;
   u.set_i32_field(i32St);
   serializeDeserialize(u);
 
   StringStuff stringSt;
-  *stringSt.a_ref() = "str";
+  *stringSt.a() = "str";
   u.set_string_field(stringSt);
   serializeDeserialize(u);
 }
@@ -207,10 +207,10 @@ TEST(NonCopyableUnion, Simple) {
 
 TEST(NonCopyableUnion, NoncopyableMember) {
   NonCopyableStruct s;
-  *s.num_ref() = 42;
+  *s.num() = 42;
   NonCopyableUnion u;
   u.set_ncs(std::move(s));
-  EXPECT_EQ(*u.get_ncs().num_ref(), 42);
+  EXPECT_EQ(*u.get_ncs().num(), 42);
 }
 
 TEST(NoExceptMoveUnion, Constructor) {
@@ -246,11 +246,11 @@ TEST(CppRefContainers, Simple) {
 TEST(Empty, Simple) {
   TestUnion u;
   EXPECT_TRUE(apache::thrift::empty(u));
-  u.i32_field_ref() = 0;
+  u.i32_field() = 0;
   EXPECT_FALSE(apache::thrift::empty(u));
   u = TestUnion{};
   EXPECT_TRUE(apache::thrift::empty(u));
-  u.string_field_ref() = "";
+  u.string_field() = "";
   EXPECT_FALSE(apache::thrift::empty(u));
   apache::thrift::clear(u);
   EXPECT_TRUE(apache::thrift::empty(u));

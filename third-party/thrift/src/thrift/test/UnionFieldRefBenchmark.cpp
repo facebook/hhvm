@@ -28,10 +28,10 @@ BENCHMARK(field_ref_direct, n) {
   Basic a;
   int64_t k = n * (1 + 'a');
   while (n--) {
-    a.int64_ref() = 1;
-    k -= a.int64_ref().value();
-    a.str_ref() = "a";
-    k -= a.str_ref().value()[0];
+    a.int64() = 1;
+    k -= a.int64().value();
+    a.str() = "a";
+    k -= a.str().value()[0];
   }
   CHECK_EQ(k, 0);
   folly::doNotOptimizeAway(k);
@@ -52,7 +52,7 @@ FOLLY_NOINLINE void run(T int64_ref, U str_ref, int n) {
 
 BENCHMARK_RELATIVE(field_ref_indirect, n) {
   Basic a;
-  run(a.int64_ref(), a.str_ref(), n);
+  run(a.int64(), a.str(), n);
 }
 
 BENCHMARK_RELATIVE(unsafe, n) {

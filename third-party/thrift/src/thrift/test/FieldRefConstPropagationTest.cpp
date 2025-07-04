@@ -186,19 +186,19 @@ TEST(FieldRefConstPropagation, TerseWrite) {
 
 TEST(FieldRefConstPropagation, Union) {
   Union foo;
-  foo.msg_ref() = "123";
+  foo.msg() = "123";
 
   // both field_ref and reference are not const
-  auto msg_ref = foo.msg_ref();
+  auto msg_ref = foo.msg();
 
   // reference is const, but field_ref is not
-  const auto cmsg_ref = foo.msg_ref();
+  const auto cmsg_ref = foo.msg();
 
   // field_ref is not const, but reference is const
-  auto msg_cref = std::as_const(foo).msg_ref();
+  auto msg_cref = std::as_const(foo).msg();
 
   // both field_ref and reference are const
-  const auto cmsg_cref = std::as_const(foo).msg_ref();
+  const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
   auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning

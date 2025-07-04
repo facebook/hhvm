@@ -24,13 +24,13 @@ using namespace apache::thrift::test;
 TEST(Recursive, copy) {
   RecList list1;
   *list1.item() = 10;
-  list1.next_ref().reset(new RecList);
-  *list1.next_ref()->item() = 20;
+  list1.next().reset(new RecList);
+  *list1.next()->item() = 20;
   RecList list2{list1};
   EXPECT_EQ(list2, list1);
 
   CoRec c1;
-  c1.other_ref().reset(new CoRec2);
+  c1.other().reset(new CoRec2);
   CoRec c2{c1};
   EXPECT_EQ(c1, c2);
 }
@@ -38,8 +38,8 @@ TEST(Recursive, copy) {
 TEST(Recursive, assign) {
   RecList list1, list2;
   *list1.item() = 11;
-  list2.next_ref().reset(new RecList);
-  *list2.next_ref()->item() = 22;
+  list2.next().reset(new RecList);
+  *list2.next()->item() = 22;
   list2 = list1;
   EXPECT_EQ(list1, list2);
 }
@@ -61,7 +61,7 @@ TEST(Recursive, Tree) {
 TEST(Recursive, list) {
   RecList l;
   std::unique_ptr<RecList> l2(new RecList);
-  l.next_ref() = std::move(l2);
+  l.next() = std::move(l2);
 
   auto serializer = apache::thrift::CompactSerializer();
   folly::IOBufQueue bufq;
@@ -69,16 +69,16 @@ TEST(Recursive, list) {
 
   RecList result;
   serializer.deserialize(bufq.front(), result);
-  EXPECT_TRUE(l.next_ref() != nullptr);
-  EXPECT_TRUE(result.next_ref() != nullptr);
-  EXPECT_TRUE(l.next_ref()->next_ref() == nullptr);
-  EXPECT_TRUE(result.next_ref()->next_ref() == nullptr);
+  EXPECT_TRUE(l.next() != nullptr);
+  EXPECT_TRUE(result.next() != nullptr);
+  EXPECT_TRUE(l.next()->next() == nullptr);
+  EXPECT_TRUE(result.next()->next() == nullptr);
 }
 
 TEST(Recursive, CoRec) {
   CoRec c;
   std::unique_ptr<CoRec2> r(new CoRec2);
-  c.other_ref() = std::move(r);
+  c.other() = std::move(r);
 
   auto serializer = apache::thrift::CompactSerializer();
   folly::IOBufQueue bufq;
@@ -86,14 +86,14 @@ TEST(Recursive, CoRec) {
 
   CoRec result;
   serializer.deserialize(bufq.front(), result);
-  EXPECT_TRUE(result.other_ref() != nullptr);
-  EXPECT_TRUE(result.other_ref()->other()->other_ref() == nullptr);
+  EXPECT_TRUE(result.other() != nullptr);
+  EXPECT_TRUE(result.other()->other()->other() == nullptr);
 }
 
 TEST(Recursive, Roundtrip) {
   MyStruct strct;
   std::unique_ptr<MyField> field(new MyField);
-  strct.field_ref() = std::move(field);
+  strct.field() = std::move(field);
 
   auto serializer = apache::thrift::CompactSerializer();
   folly::IOBufQueue bufq;
@@ -101,13 +101,13 @@ TEST(Recursive, Roundtrip) {
 
   MyStruct result;
   serializer.deserialize(bufq.front(), result);
-  EXPECT_TRUE(result.field_ref() != nullptr);
+  EXPECT_TRUE(result.field() != nullptr);
 }
 
 TEST(Recursive, CoRecJson) {
   CoRec c;
   std::unique_ptr<CoRec2> r(new CoRec2);
-  c.other_ref() = std::move(r);
+  c.other() = std::move(r);
 
   auto serializer = apache::thrift::SimpleJSONSerializer();
   folly::IOBufQueue bufq;
@@ -115,8 +115,8 @@ TEST(Recursive, CoRecJson) {
 
   RecList result;
   serializer.deserialize(bufq.front(), result);
-  EXPECT_TRUE(c.other_ref() != nullptr);
-  EXPECT_TRUE(c.other_ref()->other()->other_ref() == nullptr);
+  EXPECT_TRUE(c.other() != nullptr);
+  EXPECT_TRUE(c.other()->other()->other() == nullptr);
 }
 
 TEST(Recursive, StructUsingAnnotation) {

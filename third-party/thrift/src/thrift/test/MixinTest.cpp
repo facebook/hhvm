@@ -87,13 +87,13 @@ TEST(Mixin, WithRefSuffix) {
   s.m2()->field2() = "2";
   s.m3()->field3() = "3";
   s.field4() = "4";
-  s.u()->field5_ref() = "5";
-  EXPECT_EQ(s.field1_ref().value(), "1");
-  EXPECT_EQ(s.field2_ref().value(), "2");
-  EXPECT_EQ(s.field3_ref().value(), "3");
+  s.u()->field5() = "5";
+  EXPECT_EQ(s.field1().value(), "1");
+  EXPECT_EQ(s.field2().value(), "2");
+  EXPECT_EQ(s.field3().value(), "3");
   EXPECT_EQ(s.field4().value(), "4");
-  EXPECT_EQ(s.field5_ref().value(), "5");
-  EXPECT_FALSE(s.field6_ref().has_value());
+  EXPECT_EQ(s.field5().value(), "5");
+  EXPECT_FALSE(s.field6().has_value());
 }
 
 TEST(Mixin, Type) {

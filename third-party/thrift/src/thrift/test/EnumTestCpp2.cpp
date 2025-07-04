@@ -61,8 +61,8 @@ TEST(EnumTestCpp2, test_enum) {
 
 TEST(EnumTestCpp2, test_enum_constant) {
   MyStruct ms;
-  EXPECT_TRUE(*ms.me2_2_ref() == MyEnum2::ME2_2);
-  EXPECT_TRUE(*ms.me3_n2_ref() == MyEnum3::ME3_N2);
+  EXPECT_TRUE(*ms.me2_2() == MyEnum2::ME2_2);
+  EXPECT_TRUE(*ms.me3_n2() == MyEnum3::ME3_N2);
 }
 
 TEST(EnumTestCpp2, test_enum_names) {
@@ -114,21 +114,21 @@ TEST(EnumTestCpp2, test_unscoped) {
 
 TEST(EnumTestCpp2, test_enum_forward_reference) {
   MyStructWithForwardRefEnum obj;
-  EXPECT_EQ(MyForwardRefEnum::NONZERO, *obj.a_ref());
-  EXPECT_EQ(MyForwardRefEnum::NONZERO, *obj.b_ref());
+  EXPECT_EQ(MyForwardRefEnum::NONZERO, *obj.a());
+  EXPECT_EQ(MyForwardRefEnum::NONZERO, *obj.b());
 }
 
 TEST(EnumTestCpp2, test_enum_invalid) {
   MyStruct ms;
-  ms.me1_t1_ref() = static_cast<MyEnum1>(42); // out of range
-  ms.me1_nodefault_ref() = static_cast<MyEnum1>(42);
-  ms.me1_optional_ref() = static_cast<MyEnum1>(42);
+  ms.me1_t1() = static_cast<MyEnum1>(42); // out of range
+  ms.me1_nodefault() = static_cast<MyEnum1>(42);
+  ms.me1_optional() = static_cast<MyEnum1>(42);
   auto str = apache::thrift::CompactSerializer::serialize<std::string>(ms);
   auto ms2 = apache::thrift::CompactSerializer::deserialize<MyStruct>(str);
-  EXPECT_EQ(*ms2.me1_t1_ref(), static_cast<MyEnum1>(42));
-  EXPECT_EQ(*ms2.me1_nodefault_ref(), static_cast<MyEnum1>(42));
-  EXPECT_TRUE(ms2.me1_optional_ref().has_value());
-  EXPECT_EQ(*ms2.me1_optional_ref(), static_cast<MyEnum1>(42));
+  EXPECT_EQ(*ms2.me1_t1(), static_cast<MyEnum1>(42));
+  EXPECT_EQ(*ms2.me1_nodefault(), static_cast<MyEnum1>(42));
+  EXPECT_TRUE(ms2.me1_optional().has_value());
+  EXPECT_EQ(*ms2.me1_optional(), static_cast<MyEnum1>(42));
 }
 
 namespace {

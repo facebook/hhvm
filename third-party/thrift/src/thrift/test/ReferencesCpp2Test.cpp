@@ -116,14 +116,14 @@ TEST(References, recursive_ref_fields) {
   // (meaning we can't possibly serialize it) or a nullptr (meaning it's in fact
   // optional), but for historical reasons we allow this and default the
   // value to `nullptr`.
-  EXPECT_EQ(nullptr, a.def_field_ref().get());
-  EXPECT_EQ(nullptr, a.req_field_ref().get());
+  EXPECT_EQ(nullptr, a.def_field().get());
+  EXPECT_EQ(nullptr, a.req_field().get());
   // Check that optional fields are absent from a default-constructed object
-  EXPECT_EQ(nullptr, a.opt_field_ref().get());
+  EXPECT_EQ(nullptr, a.opt_field().get());
 
-  EXPECT_EQ(nullptr, a.def_field_ref().get());
-  EXPECT_EQ(nullptr, a.req_field_ref().get());
-  EXPECT_EQ(nullptr, a.opt_field_ref().get());
+  EXPECT_EQ(nullptr, a.def_field().get());
+  EXPECT_EQ(nullptr, a.req_field().get());
+  EXPECT_EQ(nullptr, a.opt_field().get());
 
   // this isn't the correct serialized size, but it's what simple json returns.
   // it is the correct length for a manually inspected, correct serializedSize
@@ -134,14 +134,14 @@ TEST(References, recursive_ref_fields) {
     EXPECT_EQ(0, buff.front()->length());
   }
 
-  a.def_field_ref() = std::make_unique<cpp2::RecursiveStruct>();
-  a.opt_field_ref() = std::make_unique<cpp2::RecursiveStruct>();
+  a.def_field() = std::make_unique<cpp2::RecursiveStruct>();
+  a.opt_field() = std::make_unique<cpp2::RecursiveStruct>();
   EXPECT_EQ(415, a.serializedSize(&writer));
   EXPECT_EQ(415, a.serializedSizeZC(&writer));
 
   cpp2::RecursiveStruct b;
-  b.def_field_ref() = std::make_unique<cpp2::RecursiveStruct>();
-  b.opt_field_ref() = std::make_unique<cpp2::RecursiveStruct>();
+  b.def_field() = std::make_unique<cpp2::RecursiveStruct>();
+  b.opt_field() = std::make_unique<cpp2::RecursiveStruct>();
   EXPECT_EQ(415, b.serializedSize(&writer));
   EXPECT_EQ(415, b.serializedSizeZC(&writer));
 }
@@ -212,23 +212,23 @@ TEST(References, adapter_ref_struct_fields) {
 TEST(References, type_adapter_ref_struct_fields_clear) {
   TypeAdapterRefStruct obj;
   Wrapper<std::string> wrapper{"1"};
-  obj.def_shared_field_ref() = std::make_shared<Wrapper<std::string>>(wrapper);
-  obj.opt_shared_field_ref() = std::make_shared<Wrapper<std::string>>(wrapper);
-  obj.req_shared_field_ref() = std::make_shared<Wrapper<std::string>>(wrapper);
-  obj.def_shared_const_field_ref() =
+  obj.def_shared_field() = std::make_shared<Wrapper<std::string>>(wrapper);
+  obj.opt_shared_field() = std::make_shared<Wrapper<std::string>>(wrapper);
+  obj.req_shared_field() = std::make_shared<Wrapper<std::string>>(wrapper);
+  obj.def_shared_const_field() =
       std::make_shared<Wrapper<std::string>>(wrapper);
-  obj.opt_shared_const_field_ref() =
+  obj.opt_shared_const_field() =
       std::make_shared<Wrapper<std::string>>(wrapper);
-  obj.req_shared_const_field_ref() =
+  obj.req_shared_const_field() =
       std::make_shared<Wrapper<std::string>>(wrapper);
   obj.opt_box_field() = Wrapper<std::string>{wrapper};
 
-  EXPECT_EQ(obj.def_shared_field_ref()->value, "1");
-  EXPECT_EQ(obj.req_shared_field_ref()->value, "1");
-  EXPECT_EQ(obj.opt_shared_field_ref()->value, "1");
-  EXPECT_EQ(obj.def_shared_const_field_ref()->value, "1");
-  EXPECT_EQ(obj.req_shared_const_field_ref()->value, "1");
-  EXPECT_EQ(obj.opt_shared_const_field_ref()->value, "1");
+  EXPECT_EQ(obj.def_shared_field()->value, "1");
+  EXPECT_EQ(obj.req_shared_field()->value, "1");
+  EXPECT_EQ(obj.opt_shared_field()->value, "1");
+  EXPECT_EQ(obj.def_shared_const_field()->value, "1");
+  EXPECT_EQ(obj.req_shared_const_field()->value, "1");
+  EXPECT_EQ(obj.opt_shared_const_field()->value, "1");
   EXPECT_EQ(obj.opt_box_field()->value, "1");
 
   apache::thrift::clear(obj);
@@ -241,35 +241,35 @@ TEST(References, field_adapter_ref_struct_fields_clear) {
 
   // TODO(dokwon): Use Adapter::fromThriftField for explicitly initializing
   // adapted fields.
-  EXPECT_EQ(obj.def_shared_field_ref()->meta, &*obj.meta());
-  EXPECT_FALSE(obj.opt_shared_field_ref());
-  EXPECT_EQ(obj.req_shared_field_ref()->meta, &*obj.meta());
+  EXPECT_EQ(obj.def_shared_field()->meta, &*obj.meta());
+  EXPECT_FALSE(obj.opt_shared_field());
+  EXPECT_EQ(obj.req_shared_field()->meta, &*obj.meta());
   // EXPECT_EQ(obj.def_shared_const_field_ref()->meta, &*obj.meta());
   // EXPECT_EQ(obj.req_shared_const_field_ref()->meta, &*obj.meta());
-  EXPECT_FALSE(obj.opt_shared_const_field_ref());
+  EXPECT_FALSE(obj.opt_shared_const_field());
   EXPECT_FALSE(obj.opt_box_field());
 
-  obj.def_shared_field_ref() = std::make_shared<
+  obj.def_shared_field() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 1>>("1");
-  obj.opt_shared_field_ref() = std::make_shared<
+  obj.opt_shared_field() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 2>>("1");
-  obj.req_shared_field_ref() = std::make_shared<
+  obj.req_shared_field() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 3>>("1");
-  obj.def_shared_const_field_ref() = std::make_shared<
+  obj.def_shared_const_field() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 4>>("1");
-  obj.opt_shared_const_field_ref() = std::make_shared<
+  obj.opt_shared_const_field() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 5>>("1");
-  obj.req_shared_const_field_ref() = std::make_shared<
+  obj.req_shared_const_field() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 6>>("1");
   obj.opt_box_field() =
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 7>{"1"};
 
-  EXPECT_EQ(obj.def_shared_field_ref()->value, "1");
-  EXPECT_EQ(obj.req_shared_field_ref()->value, "1");
-  EXPECT_EQ(obj.opt_shared_field_ref()->value, "1");
-  EXPECT_EQ(obj.def_shared_const_field_ref()->value, "1");
-  EXPECT_EQ(obj.req_shared_const_field_ref()->value, "1");
-  EXPECT_EQ(obj.opt_shared_const_field_ref()->value, "1");
+  EXPECT_EQ(obj.def_shared_field()->value, "1");
+  EXPECT_EQ(obj.req_shared_field()->value, "1");
+  EXPECT_EQ(obj.opt_shared_field()->value, "1");
+  EXPECT_EQ(obj.def_shared_const_field()->value, "1");
+  EXPECT_EQ(obj.req_shared_const_field()->value, "1");
+  EXPECT_EQ(obj.opt_shared_const_field()->value, "1");
   EXPECT_EQ(obj.opt_box_field()->value, "1");
 
   apache::thrift::clear(obj);
@@ -280,55 +280,53 @@ TEST(References, field_adapter_ref_struct_fields_clear) {
 TEST(References, field_ref) {
   cpp2::ReferringStruct a;
 
+  static_assert(
+      std::is_same_v<decltype(a.def_field()), std::unique_ptr<PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(a.def_field_ref()),
-                std::unique_ptr<PlainStruct>&>);
-  static_assert(std::is_same_v<
-                decltype(std::move(a).def_field_ref()),
+                decltype(std::move(a).def_field()),
                 std::unique_ptr<PlainStruct>&&>);
   static_assert(std::is_same_v<
-                decltype(std::as_const(a).def_field_ref()),
+                decltype(std::as_const(a).def_field()),
                 const std::unique_ptr<PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(std::move(std::as_const(a)).def_field_ref()),
+                decltype(std::move(std::as_const(a)).def_field()),
                 const std::unique_ptr<PlainStruct>&&>);
   static_assert(std::is_same_v<
-                decltype(a.def_shared_field_ref()),
+                decltype(a.def_shared_field()),
                 std::shared_ptr<PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(std::move(a).def_shared_field_ref()),
+                decltype(std::move(a).def_shared_field()),
                 std::shared_ptr<PlainStruct>&&>);
   static_assert(std::is_same_v<
-                decltype(std::as_const(a).def_shared_field_ref()),
+                decltype(std::as_const(a).def_shared_field()),
                 const std::shared_ptr<PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(std::move(std::as_const(a)).def_shared_field_ref()),
+                decltype(std::move(std::as_const(a)).def_shared_field()),
                 const std::shared_ptr<PlainStruct>&&>);
   static_assert(std::is_same_v<
-                decltype(a.def_shared_const_field_ref()),
+                decltype(a.def_shared_const_field()),
                 std::shared_ptr<const PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(std::move(a).def_shared_const_field_ref()),
+                decltype(std::move(a).def_shared_const_field()),
                 std::shared_ptr<const PlainStruct>&&>);
   static_assert(std::is_same_v<
-                decltype(std::as_const(a).def_shared_const_field_ref()),
+                decltype(std::as_const(a).def_shared_const_field()),
                 const std::shared_ptr<const PlainStruct>&>);
-  static_assert(
-      std::is_same_v<
-          decltype(std::move(std::as_const(a)).def_shared_const_field_ref()),
-          const std::shared_ptr<const PlainStruct>&&>);
+  static_assert(std::is_same_v<
+                decltype(std::move(std::as_const(a)).def_shared_const_field()),
+                const std::shared_ptr<const PlainStruct>&&>);
 
-  a.def_field_ref() = std::make_unique<PlainStruct>();
-  a.def_field_ref()->field() = 10;
-  auto x = std::move(a).def_field_ref();
+  a.def_field() = std::make_unique<PlainStruct>();
+  a.def_field()->field() = 10;
+  auto x = std::move(a).def_field();
   EXPECT_EQ(x->field(), 10);
-  EXPECT_FALSE(a.def_field_ref());
+  EXPECT_FALSE(a.def_field());
 
-  a.def_field_ref() = std::make_unique<PlainStruct>();
-  a.def_field_ref()->field() = 20;
-  auto y = std::move(a.def_field_ref());
+  a.def_field() = std::make_unique<PlainStruct>();
+  a.def_field()->field() = 20;
+  auto y = std::move(a.def_field());
   EXPECT_EQ(y->field(), 20);
-  EXPECT_FALSE(a.def_field_ref());
+  EXPECT_FALSE(a.def_field());
 }
 
 TEST(References, intern_box_access) {
@@ -378,18 +376,18 @@ TEST(References, intern_box_empty) {
 
 TEST(References, structured_annotation) {
   StructuredAnnotation a;
-  EXPECT_EQ(nullptr, a.opt_unique_field_ref());
-  EXPECT_EQ(nullptr, a.opt_shared_field_ref());
-  EXPECT_EQ(nullptr, a.opt_shared_mutable_field_ref());
+  EXPECT_EQ(nullptr, a.opt_unique_field());
+  EXPECT_EQ(nullptr, a.opt_shared_field());
+  EXPECT_EQ(nullptr, a.opt_shared_mutable_field());
   EXPECT_FALSE(std::as_const(a).intern_box_field().is_set());
   static_assert(std::is_same_v<
-                decltype(a.opt_unique_field_ref()),
+                decltype(a.opt_unique_field()),
                 std::unique_ptr<PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(a.opt_shared_field_ref()),
+                decltype(a.opt_shared_field()),
                 std::shared_ptr<const PlainStruct>&>);
   static_assert(std::is_same_v<
-                decltype(a.opt_shared_mutable_field_ref()),
+                decltype(a.opt_shared_mutable_field()),
                 std::shared_ptr<PlainStruct>&>);
   static_assert(std::is_same_v<
                 decltype(std::as_const(a).intern_box_field()),
@@ -398,17 +396,17 @@ TEST(References, structured_annotation) {
 
   PlainStruct plain;
   plain.field() = 10;
-  a.opt_unique_field_ref() = std::make_unique<PlainStruct>(plain);
+  a.opt_unique_field() = std::make_unique<PlainStruct>(plain);
   plain.field() = 20;
-  a.opt_shared_field_ref() = std::make_shared<const PlainStruct>(plain);
+  a.opt_shared_field() = std::make_shared<const PlainStruct>(plain);
   plain.field() = 30;
-  a.opt_shared_mutable_field_ref() = std::make_shared<PlainStruct>(plain);
+  a.opt_shared_mutable_field() = std::make_shared<PlainStruct>(plain);
   plain.field() = 40;
   a.intern_box_field() = plain;
 
-  EXPECT_EQ(10, a.opt_unique_field_ref()->field());
-  EXPECT_EQ(20, a.opt_shared_field_ref()->field());
-  EXPECT_EQ(30, a.opt_shared_mutable_field_ref()->field());
+  EXPECT_EQ(10, a.opt_unique_field()->field());
+  EXPECT_EQ(20, a.opt_shared_field()->field());
+  EXPECT_EQ(30, a.opt_shared_mutable_field()->field());
   EXPECT_EQ(40, a.intern_box_field()->field());
 
   auto data = CompactSerializer::serialize<std::string>(a);
@@ -420,20 +418,20 @@ TEST(References, structured_annotation) {
 TEST(References, string_ref) {
   StructWithString a;
   static_assert(std::is_same_v<
-                decltype(a.def_unique_string_ref_ref()),
+                decltype(a.def_unique_string_ref()),
                 std::unique_ptr<std::string>&>);
   static_assert(std::is_same_v<
-                decltype(a.def_shared_string_ref_ref()),
+                decltype(a.def_shared_string_ref()),
                 std::shared_ptr<std::string>&>);
   static_assert(std::is_same_v<
-                decltype(a.def_shared_string_const_ref_ref()),
+                decltype(a.def_shared_string_const_ref()),
                 std::shared_ptr<const std::string>&>);
-  EXPECT_EQ("...", *a.def_unique_string_ref_ref());
-  EXPECT_EQ("...", *a.def_shared_string_ref_ref());
-  EXPECT_EQ("...", *a.def_shared_string_const_ref_ref());
+  EXPECT_EQ("...", *a.def_unique_string_ref());
+  EXPECT_EQ("...", *a.def_shared_string_ref());
+  EXPECT_EQ("...", *a.def_shared_string_const_ref());
 
-  *a.def_unique_string_ref_ref() = "a";
-  *a.def_shared_string_ref_ref() = "b";
+  *a.def_unique_string_ref() = "a";
+  *a.def_shared_string_ref() = "b";
 
   auto data = SimpleJSONSerializer::serialize<std::string>(a);
   StructWithString b;
@@ -497,50 +495,49 @@ TEST(References, UnionFieldRef) {
   PlainStruct p;
   p.field() = 42;
 
-  a.box_plain_ref() = p;
+  a.box_plain() = p;
 
-  EXPECT_FALSE(a.box_string_ref());
-  EXPECT_TRUE(a.box_plain_ref());
-  EXPECT_FALSE(a.box_self_ref());
-  EXPECT_EQ(a.box_plain_ref()->field(), 42);
-  EXPECT_THROW(a.box_string_ref().value(), bad_field_access);
+  EXPECT_FALSE(a.box_string());
+  EXPECT_TRUE(a.box_plain());
+  EXPECT_FALSE(a.box_self());
+  EXPECT_EQ(a.box_plain()->field(), 42);
+  EXPECT_THROW(a.box_string().value(), bad_field_access);
 
-  a.box_string_ref().emplace("foo");
+  a.box_string().emplace("foo");
 
-  EXPECT_TRUE(a.box_string_ref());
-  EXPECT_FALSE(a.box_plain_ref());
-  EXPECT_FALSE(a.box_self_ref());
-  EXPECT_EQ(a.box_string_ref(), "foo");
+  EXPECT_TRUE(a.box_string());
+  EXPECT_FALSE(a.box_plain());
+  EXPECT_FALSE(a.box_self());
+  EXPECT_EQ(a.box_string(), "foo");
 
   ReferringUnion b;
 
-  b.box_self_ref() = a;
+  b.box_self() = a;
 
-  EXPECT_FALSE(b.box_string_ref());
-  EXPECT_FALSE(b.box_plain_ref());
-  EXPECT_TRUE(b.box_self_ref());
-  EXPECT_TRUE(b.box_self_ref()->box_string_ref());
-  EXPECT_FALSE(b.box_self_ref()->box_plain_ref());
-  EXPECT_FALSE(b.box_self_ref()->box_self_ref());
-  EXPECT_EQ(b.box_self_ref()->box_string_ref(), "foo");
+  EXPECT_FALSE(b.box_string());
+  EXPECT_FALSE(b.box_plain());
+  EXPECT_TRUE(b.box_self());
+  EXPECT_TRUE(b.box_self()->box_string());
+  EXPECT_FALSE(b.box_self()->box_plain());
+  EXPECT_FALSE(b.box_self()->box_self());
+  EXPECT_EQ(b.box_self()->box_string(), "foo");
 }
 
 TEST(References, UnionLessThan) {
   auto check = [](ReferringUnion& smallerAddress,
                   ReferringUnion& largerAddress) {
-    smallerAddress.box_string_ref() = "2";
-    largerAddress.box_string_ref() = "1";
-    EXPECT_LT(
-        &*smallerAddress.box_string_ref(), &*largerAddress.box_string_ref());
-    EXPECT_GT(smallerAddress.box_string_ref(), largerAddress.box_string_ref());
+    smallerAddress.box_string() = "2";
+    largerAddress.box_string() = "1";
+    EXPECT_LT(&*smallerAddress.box_string(), &*largerAddress.box_string());
+    EXPECT_GT(smallerAddress.box_string(), largerAddress.box_string());
     EXPECT_GT(smallerAddress, largerAddress);
   };
 
   ReferringUnion a;
   ReferringUnion b;
-  a.box_string_ref() = "";
-  b.box_string_ref() = "";
-  if (&*a.box_string_ref() < &*b.box_string_ref()) {
+  a.box_string() = "";
+  b.box_string() = "";
+  if (&*a.box_string() < &*b.box_string()) {
     check(a, b);
   } else {
     check(b, a);
@@ -555,35 +552,35 @@ TEST(References, StructAdapterRefStruct) {
 
   create_adapted_reference_default_test(obj);
 
-  obj.def_shared_field_ref() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
-  obj.opt_shared_field_ref() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
-  obj.req_shared_field_ref() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
-  obj.def_shared_const_field_ref() =
+  obj.def_shared_field() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.opt_shared_field() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.req_shared_field() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.def_shared_const_field() =
       std::make_shared<DirectlyAdaptedStruct>(wrapper);
-  obj.opt_shared_const_field_ref() =
+  obj.opt_shared_const_field() =
       std::make_shared<DirectlyAdaptedStruct>(wrapper);
-  obj.req_shared_const_field_ref() =
+  obj.req_shared_const_field() =
       std::make_shared<DirectlyAdaptedStruct>(wrapper);
   obj.opt_box_field() = DirectlyAdaptedStruct{wrapper};
 
-  EXPECT_EQ(obj.def_shared_field_ref()->value.data(), 1);
-  EXPECT_EQ(obj.req_shared_field_ref()->value.data(), 1);
-  EXPECT_EQ(obj.opt_shared_field_ref()->value.data(), 1);
-  EXPECT_EQ(obj.def_shared_const_field_ref()->value.data(), 1);
-  EXPECT_EQ(obj.req_shared_const_field_ref()->value.data(), 1);
-  EXPECT_EQ(obj.opt_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.def_shared_field()->value.data(), 1);
+  EXPECT_EQ(obj.req_shared_field()->value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_field()->value.data(), 1);
+  EXPECT_EQ(obj.def_shared_const_field()->value.data(), 1);
+  EXPECT_EQ(obj.req_shared_const_field()->value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_const_field()->value.data(), 1);
   EXPECT_EQ(obj.opt_box_field()->value.data(), 1);
 
   auto objs = CompactSerializer::serialize<std::string>(obj);
   StructAdapterRefStruct objd;
   CompactSerializer::deserialize(objs, objd);
 
-  EXPECT_EQ(objd.def_shared_field_ref()->value.data(), 1);
-  EXPECT_EQ(objd.req_shared_field_ref()->value.data(), 1);
-  EXPECT_EQ(objd.opt_shared_field_ref()->value.data(), 1);
-  EXPECT_EQ(objd.def_shared_const_field_ref()->value.data(), 1);
-  EXPECT_EQ(objd.req_shared_const_field_ref()->value.data(), 1);
-  EXPECT_EQ(objd.opt_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.def_shared_field()->value.data(), 1);
+  EXPECT_EQ(objd.req_shared_field()->value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_field()->value.data(), 1);
+  EXPECT_EQ(objd.def_shared_const_field()->value.data(), 1);
+  EXPECT_EQ(objd.req_shared_const_field()->value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_const_field()->value.data(), 1);
   EXPECT_EQ(objd.opt_box_field()->value.data(), 1);
 }
 
@@ -595,44 +592,44 @@ TEST(References, DoubleAdaptedRefStruct) {
 
   create_adapted_reference_default_test(obj);
 
-  obj.def_shared_field_ref() =
+  obj.def_shared_field() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
-  obj.opt_shared_field_ref() =
+  obj.opt_shared_field() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
-  obj.req_shared_field_ref() =
+  obj.req_shared_field() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
-  obj.def_shared_const_field_ref() =
+  obj.def_shared_const_field() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
-  obj.opt_shared_const_field_ref() =
+  obj.opt_shared_const_field() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
-  obj.req_shared_const_field_ref() =
+  obj.req_shared_const_field() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
   obj.opt_box_field() = wrapper;
 
-  EXPECT_EQ(obj.def_shared_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(obj.req_shared_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(obj.opt_shared_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(obj.def_shared_const_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(obj.req_shared_const_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(obj.opt_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.def_shared_field()->value.value.data(), 1);
+  EXPECT_EQ(obj.req_shared_field()->value.value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_field()->value.value.data(), 1);
+  EXPECT_EQ(obj.def_shared_const_field()->value.value.data(), 1);
+  EXPECT_EQ(obj.req_shared_const_field()->value.value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_const_field()->value.value.data(), 1);
   EXPECT_EQ(obj.opt_box_field()->value.value.data(), 1);
 
   auto objs = CompactSerializer::serialize<std::string>(obj);
   DoubleAdaptedRefStruct objd;
   CompactSerializer::deserialize(objs, objd);
 
-  EXPECT_EQ(objd.def_shared_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(objd.req_shared_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(objd.opt_shared_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(objd.def_shared_const_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(objd.req_shared_const_field_ref()->value.value.data(), 1);
-  EXPECT_EQ(objd.opt_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.def_shared_field()->value.value.data(), 1);
+  EXPECT_EQ(objd.req_shared_field()->value.value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_field()->value.value.data(), 1);
+  EXPECT_EQ(objd.def_shared_const_field()->value.value.data(), 1);
+  EXPECT_EQ(objd.req_shared_const_field()->value.value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_const_field()->value.value.data(), 1);
   EXPECT_EQ(objd.opt_box_field()->value.value.data(), 1);
 }
 
 TEST(References, NonTriviallyDestructibleUnion) {
   NonTriviallyDestructibleUnion obj;
-  obj.int_field_ref().ensure() = 1;
+  obj.int_field().ensure() = 1;
   auto objd = CompactSerializer::deserialize<NonTriviallyDestructibleUnion>(
       CompactSerializer::serialize<std::string>(obj));
   EXPECT_EQ(obj, objd);

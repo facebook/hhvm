@@ -101,174 +101,172 @@ TEST_F(AdapterTest, HasInplaceToThrift) {
 namespace basic {
 TEST_F(AdapterTest, StructCodeGen_Empty) {
   AdaptTestStruct obj0a;
-  EXPECT_EQ(obj0a.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.custom_ref()->val, 13); // Defined in Num.
-  EXPECT_EQ(obj0a.timeout_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.indirectionString_ref()->val, "");
+  EXPECT_EQ(obj0a.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.custom()->val, 13); // Defined in Num.
+  EXPECT_EQ(obj0a.timeout(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.indirectionString()->val, "");
 
   auto data0 = CompactSerializer::serialize<std::string>(obj0a);
   AdaptTestStruct obj0b;
   CompactSerializer::deserialize(data0, obj0b);
-  EXPECT_EQ(obj0b.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0b.custom_ref()->val, 13);
-  EXPECT_EQ(obj0b.timeout_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.indirectionString_ref()->val, "");
+  EXPECT_EQ(obj0b.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0b.custom()->val, 13);
+  EXPECT_EQ(obj0b.timeout(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.indirectionString()->val, "");
 
   EXPECT_EQ(obj0b, obj0a);
 }
 
 TEST_F(AdapterTest, StructCodeGen_Zero) {
   AdaptTestStruct obj0a;
-  EXPECT_EQ(obj0a.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.custom_ref()->val, 13); // Defined in Num.
-  obj0a.custom_ref()->val = 0;
-  EXPECT_EQ(obj0a.timeout_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.indirectionString_ref()->val, "");
+  EXPECT_EQ(obj0a.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.custom()->val, 13); // Defined in Num.
+  obj0a.custom()->val = 0;
+  EXPECT_EQ(obj0a.timeout(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.indirectionString()->val, "");
 
   auto data0 = CompactSerializer::serialize<std::string>(obj0a);
   AdaptTestStruct obj0b;
   CompactSerializer::deserialize(data0, obj0b);
-  EXPECT_EQ(obj0b.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0b.custom_ref()->val, 0);
-  EXPECT_EQ(obj0b.timeout_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.indirectionString_ref()->val, "");
+  EXPECT_EQ(obj0b.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0b.custom()->val, 0);
+  EXPECT_EQ(obj0b.timeout(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.indirectionString()->val, "");
 
   EXPECT_EQ(obj0b, obj0a);
 }
 
 TEST_F(AdapterTest, StructCodeGen) {
   AdaptTestStruct obj1a;
-  AssertSameType<decltype(*obj1a.delay_ref()), std::chrono::milliseconds&>();
-  AssertSameType<decltype(*obj1a.custom_ref()), Num&>();
-  AssertSameType<decltype(*obj1a.timeout_ref()), std::chrono::milliseconds&>();
-  AssertSameType<
-      decltype(*obj1a.indirectionString_ref()),
-      IndirectionString&>();
+  AssertSameType<decltype(*obj1a.delay()), std::chrono::milliseconds&>();
+  AssertSameType<decltype(*obj1a.custom()), Num&>();
+  AssertSameType<decltype(*obj1a.timeout()), std::chrono::milliseconds&>();
+  AssertSameType<decltype(*obj1a.indirectionString()), IndirectionString&>();
 
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(0));
-  obj1a.delay_ref() = std::chrono::milliseconds(7);
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(0));
+  obj1a.delay() = std::chrono::milliseconds(7);
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(7));
 
-  EXPECT_EQ(obj1a.custom_ref()->val, 13);
-  obj1a.custom_ref() = Num{std::numeric_limits<int64_t>::min()};
-  EXPECT_EQ(obj1a.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj1a.custom()->val, 13);
+  obj1a.custom() = Num{std::numeric_limits<int64_t>::min()};
+  EXPECT_EQ(obj1a.custom()->val, std::numeric_limits<int64_t>::min());
 
-  EXPECT_EQ(obj1a.timeout_ref(), std::chrono::milliseconds(0));
-  obj1a.timeout_ref() = std::chrono::milliseconds(7);
-  EXPECT_EQ(obj1a.timeout_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1a.timeout(), std::chrono::milliseconds(0));
+  obj1a.timeout() = std::chrono::milliseconds(7);
+  EXPECT_EQ(obj1a.timeout(), std::chrono::milliseconds(7));
 
-  EXPECT_EQ(obj1a.indirectionString_ref()->val, "");
-  obj1a.indirectionString_ref()->val = "hi";
-  EXPECT_EQ(obj1a.indirectionString_ref()->val, "hi");
+  EXPECT_EQ(obj1a.indirectionString()->val, "");
+  obj1a.indirectionString()->val = "hi";
+  EXPECT_EQ(obj1a.indirectionString()->val, "hi");
 
   auto data1 = CompactSerializer::serialize<std::string>(obj1a);
   AdaptTestStruct obj1b;
   CompactSerializer::deserialize(data1, obj1b);
-  EXPECT_EQ(obj1b.delay_ref(), std::chrono::milliseconds(7));
-  EXPECT_EQ(obj1b.custom_ref()->val, std::numeric_limits<int64_t>::min());
-  EXPECT_EQ(obj1b.timeout_ref(), std::chrono::milliseconds(7));
-  EXPECT_EQ(obj1a.indirectionString_ref()->val, "hi");
+  EXPECT_EQ(obj1b.delay(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1b.custom()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj1b.timeout(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1a.indirectionString()->val, "hi");
 
   EXPECT_EQ(obj1b, obj1b);
   EXPECT_FALSE(obj1b < obj1a);
 
-  obj1b.custom_ref()->val = 1;
+  obj1b.custom()->val = 1;
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1a.custom_ref() < obj1b.custom_ref());
-  EXPECT_FALSE(obj1b.custom_ref() < obj1a.custom_ref());
+  EXPECT_TRUE(obj1a.custom() < obj1b.custom());
+  EXPECT_FALSE(obj1b.custom() < obj1a.custom());
   EXPECT_TRUE(obj1a < obj1b);
   EXPECT_FALSE(obj1b < obj1a);
 
-  obj1a.delay_ref() = std::chrono::milliseconds(8);
+  obj1a.delay() = std::chrono::milliseconds(8);
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1b.delay_ref() < obj1a.delay_ref());
-  EXPECT_FALSE(obj1a.delay_ref() < obj1b.delay_ref());
+  EXPECT_TRUE(obj1b.delay() < obj1a.delay());
+  EXPECT_FALSE(obj1a.delay() < obj1b.delay());
   EXPECT_TRUE(obj1b < obj1a);
   EXPECT_FALSE(obj1a < obj1b);
 
-  obj1a.timeout_ref() = std::chrono::milliseconds(8);
+  obj1a.timeout() = std::chrono::milliseconds(8);
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1b.timeout_ref() < obj1a.timeout_ref());
-  EXPECT_FALSE(obj1a.timeout_ref() < obj1b.timeout_ref());
+  EXPECT_TRUE(obj1b.timeout() < obj1a.timeout());
+  EXPECT_FALSE(obj1a.timeout() < obj1b.timeout());
   EXPECT_TRUE(obj1b < obj1a);
   EXPECT_FALSE(obj1a < obj1b);
 
   obj1a = {};
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj1a.custom_ref()->val, 13);
-  EXPECT_EQ(obj1a.timeout_ref(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1a.custom()->val, 13);
+  EXPECT_EQ(obj1a.timeout(), std::chrono::milliseconds(0));
 }
 } // namespace basic
 
 namespace terse {
 TEST_F(AdapterTest, StructCodeGen_Empty_Terse) {
   AdaptTestStruct obj0a;
-  EXPECT_EQ(obj0a.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.custom_ref()->val, 13); // Defined in Num.
+  EXPECT_EQ(obj0a.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.custom()->val, 13); // Defined in Num.
 
   auto data0 = CompactSerializer::serialize<std::string>(obj0a);
   AdaptTestStruct obj0b;
   CompactSerializer::deserialize(data0, obj0b);
-  EXPECT_EQ(obj0b.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0b.custom_ref()->val, 13);
+  EXPECT_EQ(obj0b.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0b.custom()->val, 13);
 
   EXPECT_EQ(obj0b, obj0a);
 }
 
 TEST_F(AdapterTest, StructCodeGen_Zero_Terse) {
   AdaptTestStruct obj0a;
-  EXPECT_EQ(obj0a.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0a.custom_ref()->val, 13); // Defined in Num.
-  obj0a.custom_ref()->val = 0;
+  EXPECT_EQ(obj0a.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0a.custom()->val, 13); // Defined in Num.
+  obj0a.custom()->val = 0;
 
   auto data0 = CompactSerializer::serialize<std::string>(obj0a);
   AdaptTestStruct obj0b;
   CompactSerializer::deserialize(data0, obj0b);
-  EXPECT_EQ(obj0b.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj0b.custom_ref()->val, 0);
+  EXPECT_EQ(obj0b.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj0b.custom()->val, 0);
 
   EXPECT_EQ(obj0b, obj0a);
 }
 
 TEST_F(AdapterTest, StructCodeGen_Terse) {
   AdaptTestStruct obj1a;
-  AssertSameType<decltype(*obj1a.delay_ref()), std::chrono::milliseconds&>();
-  AssertSameType<decltype(*obj1a.custom_ref()), Num&>();
+  AssertSameType<decltype(*obj1a.delay()), std::chrono::milliseconds&>();
+  AssertSameType<decltype(*obj1a.custom()), Num&>();
 
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(0));
-  obj1a.delay_ref() = std::chrono::milliseconds(7);
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(0));
+  obj1a.delay() = std::chrono::milliseconds(7);
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(7));
 
-  EXPECT_EQ(obj1a.custom_ref()->val, 13);
-  obj1a.custom_ref() = Num{std::numeric_limits<int64_t>::min()};
-  EXPECT_EQ(obj1a.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj1a.custom()->val, 13);
+  obj1a.custom() = Num{std::numeric_limits<int64_t>::min()};
+  EXPECT_EQ(obj1a.custom()->val, std::numeric_limits<int64_t>::min());
 
   auto data1 = CompactSerializer::serialize<std::string>(obj1a);
   AdaptTestStruct obj1b;
   CompactSerializer::deserialize(data1, obj1b);
-  EXPECT_EQ(obj1b.delay_ref(), std::chrono::milliseconds(7));
-  EXPECT_EQ(obj1b.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj1b.delay(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1b.custom()->val, std::numeric_limits<int64_t>::min());
 
   EXPECT_EQ(obj1b, obj1b);
   EXPECT_FALSE(obj1b < obj1a);
 
-  obj1b.custom_ref()->val = 1;
+  obj1b.custom()->val = 1;
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1a.custom_ref() < obj1b.custom_ref());
-  EXPECT_FALSE(obj1b.custom_ref() < obj1a.custom_ref());
+  EXPECT_TRUE(obj1a.custom() < obj1b.custom());
+  EXPECT_FALSE(obj1b.custom() < obj1a.custom());
   EXPECT_TRUE(obj1a < obj1b);
   EXPECT_FALSE(obj1b < obj1a);
 
-  obj1a.delay_ref() = std::chrono::milliseconds(8);
+  obj1a.delay() = std::chrono::milliseconds(8);
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1b.delay_ref() < obj1a.delay_ref());
-  EXPECT_FALSE(obj1a.delay_ref() < obj1b.delay_ref());
+  EXPECT_TRUE(obj1b.delay() < obj1a.delay());
+  EXPECT_FALSE(obj1a.delay() < obj1b.delay());
   EXPECT_TRUE(obj1b < obj1a);
   EXPECT_FALSE(obj1a < obj1b);
 
   obj1a = {};
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(0));
-  EXPECT_EQ(obj1a.custom_ref()->val, 13);
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1a.custom()->val, 13);
 }
 } // namespace terse
 
@@ -288,12 +286,12 @@ TEST_F(AdapterTest, UnionCodeGen_Empty) {
 
 TEST_F(AdapterTest, UnionCodeGen_Delay_Default) {
   ThriftAdaptTestUnion obj1a;
-  EXPECT_EQ(obj1a.delay_ref().ensure(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1a.delay().ensure(), std::chrono::milliseconds(0));
 
   auto data1 = CompactSerializer::serialize<std::string>(obj1a);
   ThriftAdaptTestUnion obj1b;
   CompactSerializer::deserialize(data1, obj1b);
-  EXPECT_EQ(obj1b.delay_ref().ensure(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1b.delay().ensure(), std::chrono::milliseconds(0));
 
   EXPECT_EQ(obj1b, obj1a);
   EXPECT_FALSE(obj1b < obj1a);
@@ -301,34 +299,34 @@ TEST_F(AdapterTest, UnionCodeGen_Delay_Default) {
 
 TEST_F(AdapterTest, UnionCodeGen_Delay) {
   ThriftAdaptTestUnion obj1a;
-  EXPECT_EQ(obj1a.delay_ref().ensure(), std::chrono::milliseconds(0));
-  obj1a.delay_ref() = std::chrono::milliseconds(7);
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1a.delay().ensure(), std::chrono::milliseconds(0));
+  obj1a.delay() = std::chrono::milliseconds(7);
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(7));
 
   auto data1 = CompactSerializer::serialize<std::string>(obj1a);
   ThriftAdaptTestUnion obj1b;
   CompactSerializer::deserialize(data1, obj1b);
-  EXPECT_EQ(obj1b.delay_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1b.delay(), std::chrono::milliseconds(7));
 
   EXPECT_EQ(obj1b, obj1a);
   EXPECT_FALSE(obj1b < obj1a);
 
-  obj1a.delay_ref() = std::chrono::milliseconds(8);
+  obj1a.delay() = std::chrono::milliseconds(8);
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1b.delay_ref() < obj1a.delay_ref());
-  EXPECT_FALSE(obj1a.delay_ref() < obj1b.delay_ref());
+  EXPECT_TRUE(obj1b.delay() < obj1a.delay());
+  EXPECT_FALSE(obj1a.delay() < obj1b.delay());
   EXPECT_TRUE(obj1b < obj1a);
   EXPECT_FALSE(obj1a < obj1b);
 }
 
 TEST_F(AdapterTest, UnionCodeGen_Custom_Default) {
   ThriftAdaptTestUnion obj2a;
-  EXPECT_EQ(obj2a.custom_ref().ensure().val, 13); // Defined in Num.
+  EXPECT_EQ(obj2a.custom().ensure().val, 13); // Defined in Num.
 
   auto data2 = CompactSerializer::serialize<std::string>(obj2a);
   ThriftAdaptTestUnion obj2b;
   CompactSerializer::deserialize(data2, obj2b);
-  EXPECT_EQ(obj2b.custom_ref()->val, 13);
+  EXPECT_EQ(obj2b.custom()->val, 13);
 
   EXPECT_EQ(obj2b, obj2a);
   EXPECT_FALSE(obj2b < obj2a);
@@ -336,13 +334,13 @@ TEST_F(AdapterTest, UnionCodeGen_Custom_Default) {
 
 TEST_F(AdapterTest, UnionCodeGen_Custom_Zero) {
   ThriftAdaptTestUnion obj2a;
-  EXPECT_EQ(obj2a.custom_ref().ensure().val, 13); // Defined in Num.
-  obj2a.custom_ref()->val = 0;
+  EXPECT_EQ(obj2a.custom().ensure().val, 13); // Defined in Num.
+  obj2a.custom()->val = 0;
 
   auto data2 = CompactSerializer::serialize<std::string>(obj2a);
   ThriftAdaptTestUnion obj2b;
   CompactSerializer::deserialize(data2, obj2b);
-  EXPECT_EQ(obj2b.custom_ref()->val, 0);
+  EXPECT_EQ(obj2b.custom()->val, 0);
 
   EXPECT_EQ(obj2b, obj2a);
   EXPECT_FALSE(obj2b < obj2a);
@@ -350,22 +348,22 @@ TEST_F(AdapterTest, UnionCodeGen_Custom_Zero) {
 
 TEST_F(AdapterTest, UnionCodeGen_Custom) {
   ThriftAdaptTestUnion obj2a;
-  EXPECT_EQ(obj2a.custom_ref().ensure().val, 13); // Defined in Num.
-  obj2a.custom_ref() = Num{std::numeric_limits<int64_t>::min()};
-  EXPECT_EQ(obj2a.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj2a.custom().ensure().val, 13); // Defined in Num.
+  obj2a.custom() = Num{std::numeric_limits<int64_t>::min()};
+  EXPECT_EQ(obj2a.custom()->val, std::numeric_limits<int64_t>::min());
 
   auto data2 = CompactSerializer::serialize<std::string>(obj2a);
   ThriftAdaptTestUnion obj2b;
   CompactSerializer::deserialize(data2, obj2b);
-  EXPECT_EQ(obj2b.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj2b.custom()->val, std::numeric_limits<int64_t>::min());
 
   EXPECT_EQ(obj2b, obj2a);
   EXPECT_FALSE(obj2b < obj2a);
 
-  obj2b.custom_ref()->val = 1;
+  obj2b.custom()->val = 1;
   EXPECT_NE(obj2b, obj2a);
-  EXPECT_TRUE(obj2a.custom_ref() < obj2b.custom_ref());
-  EXPECT_FALSE(obj2b.custom_ref() < obj2a.custom_ref());
+  EXPECT_TRUE(obj2a.custom() < obj2b.custom());
+  EXPECT_FALSE(obj2b.custom() < obj2a.custom());
   EXPECT_TRUE(obj2a < obj2b);
   EXPECT_FALSE(obj2b < obj2a);
 }
@@ -373,72 +371,72 @@ TEST_F(AdapterTest, UnionCodeGen_Custom) {
 TEST_F(AdapterTest, Setter) {
   ThriftAdaptTestUnion obj1;
   obj1.set_i32_string_field("1");
-  EXPECT_EQ(obj1.i32_string_field_ref(), "1");
+  EXPECT_EQ(obj1.i32_string_field(), "1");
 }
 
 TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedTestStruct) {
   auto obj = AdaptTemplatedTestStruct();
   auto int_map = std::map<int64_t, int64_t>{{1, 1}};
-  EXPECT_EQ(obj.adaptedBoolDefault_ref()->value, true);
-  EXPECT_EQ(obj.adaptedByteDefault_ref()->value, 1);
-  EXPECT_EQ(obj.adaptedShortDefault_ref()->value, 2);
-  EXPECT_EQ(obj.adaptedIntegerDefault_ref()->value, 3);
-  EXPECT_EQ(obj.adaptedLongDefault_ref()->value, 4);
-  EXPECT_EQ(obj.adaptedDoubleDefault_ref()->value, 5);
-  EXPECT_EQ(obj.adaptedStringDefault_ref()->value, "6");
+  EXPECT_EQ(obj.adaptedBoolDefault()->value, true);
+  EXPECT_EQ(obj.adaptedByteDefault()->value, 1);
+  EXPECT_EQ(obj.adaptedShortDefault()->value, 2);
+  EXPECT_EQ(obj.adaptedIntegerDefault()->value, 3);
+  EXPECT_EQ(obj.adaptedLongDefault()->value, 4);
+  EXPECT_EQ(obj.adaptedDoubleDefault()->value, 5);
+  EXPECT_EQ(obj.adaptedStringDefault()->value, "6");
   EXPECT_EQ(obj.adaptedListDefault()->value, std::vector<int64_t>{1});
   EXPECT_EQ(obj.adaptedSetDefault()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedMapDefault()->value, int_map);
 
-  obj.adaptedBool_ref() = Wrapper<bool>{true};
-  obj.adaptedByte_ref() = Wrapper<int8_t>{1};
-  obj.adaptedShort_ref() = Wrapper<int16_t>{2};
-  obj.adaptedInteger_ref() = Wrapper<int32_t>{3};
-  obj.adaptedLong_ref() = Wrapper<int64_t>{1};
-  obj.adaptedDouble_ref() = Wrapper<double>{2};
-  obj.adaptedString_ref() = Wrapper<std::string>{"3"};
+  obj.adaptedBool() = Wrapper<bool>{true};
+  obj.adaptedByte() = Wrapper<int8_t>{1};
+  obj.adaptedShort() = Wrapper<int16_t>{2};
+  obj.adaptedInteger() = Wrapper<int32_t>{3};
+  obj.adaptedLong() = Wrapper<int64_t>{1};
+  obj.adaptedDouble() = Wrapper<double>{2};
+  obj.adaptedString() = Wrapper<std::string>{"3"};
   obj.adaptedList() = Wrapper<std::vector<int64_t>>{{1}};
   obj.adaptedSet() = Wrapper<std::set<int64_t>>{{1}};
   obj.adaptedMap() = Wrapper<std::map<int64_t, int64_t>>{{{1, 1}}};
-  obj.doubleTypedefBool_ref() = Wrapper<bool>{true};
+  obj.doubleTypedefBool() = Wrapper<bool>{true};
 
-  EXPECT_EQ(obj.adaptedBool_ref()->value, true);
-  EXPECT_EQ(obj.adaptedByte_ref()->value, 1);
-  EXPECT_EQ(obj.adaptedShort_ref()->value, 2);
-  EXPECT_EQ(obj.adaptedInteger_ref()->value, 3);
-  EXPECT_EQ(obj.adaptedLong_ref()->value, 1);
-  EXPECT_EQ(obj.adaptedDouble_ref()->value, 2);
-  EXPECT_EQ(obj.adaptedString_ref()->value, "3");
+  EXPECT_EQ(obj.adaptedBool()->value, true);
+  EXPECT_EQ(obj.adaptedByte()->value, 1);
+  EXPECT_EQ(obj.adaptedShort()->value, 2);
+  EXPECT_EQ(obj.adaptedInteger()->value, 3);
+  EXPECT_EQ(obj.adaptedLong()->value, 1);
+  EXPECT_EQ(obj.adaptedDouble()->value, 2);
+  EXPECT_EQ(obj.adaptedString()->value, "3");
   EXPECT_EQ(obj.adaptedList()->value, std::vector<int64_t>{1});
   EXPECT_EQ(obj.adaptedSet()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedMap()->value, int_map);
-  EXPECT_EQ(obj.doubleTypedefBool_ref()->value, true);
+  EXPECT_EQ(obj.doubleTypedefBool()->value, true);
 
   auto objs = CompactSerializer::serialize<std::string>(obj);
   AdaptTemplatedTestStruct objd;
   CompactSerializer::deserialize(objs, objd);
-  EXPECT_EQ(objd.adaptedBool_ref()->value, true);
-  EXPECT_EQ(objd.adaptedByte_ref()->value, 1);
-  EXPECT_EQ(objd.adaptedShort_ref()->value, 2);
-  EXPECT_EQ(objd.adaptedInteger_ref()->value, 3);
-  EXPECT_EQ(objd.adaptedLong_ref()->value, 1);
-  EXPECT_EQ(objd.adaptedDouble_ref()->value, 2);
-  EXPECT_EQ(objd.adaptedString_ref()->value, "3");
+  EXPECT_EQ(objd.adaptedBool()->value, true);
+  EXPECT_EQ(objd.adaptedByte()->value, 1);
+  EXPECT_EQ(objd.adaptedShort()->value, 2);
+  EXPECT_EQ(objd.adaptedInteger()->value, 3);
+  EXPECT_EQ(objd.adaptedLong()->value, 1);
+  EXPECT_EQ(objd.adaptedDouble()->value, 2);
+  EXPECT_EQ(objd.adaptedString()->value, "3");
   EXPECT_EQ(obj.adaptedList()->value, std::vector<int64_t>{1});
   EXPECT_EQ(obj.adaptedSet()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedMap()->value, int_map);
-  EXPECT_EQ(obj.doubleTypedefBool_ref()->value, true);
+  EXPECT_EQ(obj.doubleTypedefBool()->value, true);
   EXPECT_EQ(obj, objd);
 
   // Adapted fields reset to the intrinsic default.
   apache::thrift::clear(obj);
-  EXPECT_EQ(obj.adaptedBoolDefault_ref()->value, false);
-  EXPECT_EQ(obj.adaptedByteDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedShortDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedIntegerDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedLongDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedDoubleDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedStringDefault_ref()->value, "");
+  EXPECT_EQ(obj.adaptedBoolDefault()->value, false);
+  EXPECT_EQ(obj.adaptedByteDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedShortDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedIntegerDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedLongDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedDoubleDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedStringDefault()->value, "");
   EXPECT_TRUE(obj.adaptedListDefault()->value.empty());
   EXPECT_TRUE(obj.adaptedSetDefault()->value.empty());
   EXPECT_TRUE(obj.adaptedMapDefault()->value.empty());
@@ -447,13 +445,13 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedTestStruct) {
 TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
   auto obj = AdaptTemplatedNestedTestStruct();
   auto int_map = std::map<int64_t, int64_t>{{1, 1}};
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedBoolDefault_ref()->value, true);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedByteDefault_ref()->value, 1);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedShortDefault_ref()->value, 2);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedIntegerDefault_ref()->value, 3);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedLongDefault_ref()->value, 4);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedDoubleDefault_ref()->value, 5);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedStringDefault_ref()->value, "6");
+  EXPECT_EQ(obj.adaptedStruct()->adaptedBoolDefault()->value, true);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedByteDefault()->value, 1);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedShortDefault()->value, 2);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedIntegerDefault()->value, 3);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedLongDefault()->value, 4);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedDoubleDefault()->value, 5);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedStringDefault()->value, "6");
   EXPECT_EQ(
       obj.adaptedStruct()->adaptedListDefault()->value,
       std::vector<int64_t>{1});
@@ -461,25 +459,25 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
       obj.adaptedStruct()->adaptedSetDefault()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedStruct()->adaptedMapDefault()->value, int_map);
 
-  obj.adaptedStruct_ref()->adaptedBool_ref() = Wrapper<bool>{true};
-  obj.adaptedStruct_ref()->adaptedByte_ref() = Wrapper<int8_t>{1};
-  obj.adaptedStruct_ref()->adaptedShort_ref() = Wrapper<int16_t>{2};
-  obj.adaptedStruct_ref()->adaptedInteger_ref() = Wrapper<int32_t>{3};
-  obj.adaptedStruct_ref()->adaptedLong_ref() = Wrapper<int64_t>{1};
-  obj.adaptedStruct_ref()->adaptedDouble_ref() = Wrapper<double>{2};
-  obj.adaptedStruct_ref()->adaptedString_ref() = Wrapper<std::string>{"3"};
+  obj.adaptedStruct()->adaptedBool() = Wrapper<bool>{true};
+  obj.adaptedStruct()->adaptedByte() = Wrapper<int8_t>{1};
+  obj.adaptedStruct()->adaptedShort() = Wrapper<int16_t>{2};
+  obj.adaptedStruct()->adaptedInteger() = Wrapper<int32_t>{3};
+  obj.adaptedStruct()->adaptedLong() = Wrapper<int64_t>{1};
+  obj.adaptedStruct()->adaptedDouble() = Wrapper<double>{2};
+  obj.adaptedStruct()->adaptedString() = Wrapper<std::string>{"3"};
   obj.adaptedStruct()->adaptedList() = Wrapper<std::vector<int64_t>>{{1}};
   obj.adaptedStruct()->adaptedSet() = Wrapper<std::set<int64_t>>{{1}};
   obj.adaptedStruct()->adaptedMap() =
       Wrapper<std::map<int64_t, int64_t>>{{{1, 1}}};
 
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedBool_ref()->value, true);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedByte_ref()->value, 1);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedShort_ref()->value, 2);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedInteger_ref()->value, 3);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedLong_ref()->value, 1);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedDouble_ref()->value, 2);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedString_ref()->value, "3");
+  EXPECT_EQ(obj.adaptedStruct()->adaptedBool()->value, true);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedByte()->value, 1);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedShort()->value, 2);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedInteger()->value, 3);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedLong()->value, 1);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedDouble()->value, 2);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedString()->value, "3");
   EXPECT_EQ(obj.adaptedStruct()->adaptedList()->value, std::vector<int64_t>{1});
   EXPECT_EQ(obj.adaptedStruct()->adaptedSet()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedStruct()->adaptedMap()->value, int_map);
@@ -488,13 +486,13 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
   AdaptTemplatedNestedTestStruct objd;
   CompactSerializer::deserialize(objs, objd);
 
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedBoolDefault_ref()->value, true);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedByteDefault_ref()->value, 1);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedShortDefault_ref()->value, 2);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedIntegerDefault_ref()->value, 3);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedLongDefault_ref()->value, 4);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedDoubleDefault_ref()->value, 5);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedStringDefault_ref()->value, "6");
+  EXPECT_EQ(objd.adaptedStruct()->adaptedBoolDefault()->value, true);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedByteDefault()->value, 1);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedShortDefault()->value, 2);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedIntegerDefault()->value, 3);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedLongDefault()->value, 4);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedDoubleDefault()->value, 5);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedStringDefault()->value, "6");
   EXPECT_EQ(
       obj.adaptedStruct()->adaptedListDefault()->value,
       std::vector<int64_t>{1});
@@ -502,13 +500,13 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
       obj.adaptedStruct()->adaptedSetDefault()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedStruct()->adaptedMapDefault()->value, int_map);
 
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedBool_ref()->value, true);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedByte_ref()->value, 1);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedShort_ref()->value, 2);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedInteger_ref()->value, 3);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedLong_ref()->value, 1);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedDouble_ref()->value, 2);
-  EXPECT_EQ(objd.adaptedStruct_ref()->adaptedString_ref()->value, "3");
+  EXPECT_EQ(objd.adaptedStruct()->adaptedBool()->value, true);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedByte()->value, 1);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedShort()->value, 2);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedInteger()->value, 3);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedLong()->value, 1);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedDouble()->value, 2);
+  EXPECT_EQ(objd.adaptedStruct()->adaptedString()->value, "3");
   EXPECT_EQ(obj.adaptedStruct()->adaptedList()->value, std::vector<int64_t>{1});
   EXPECT_EQ(obj.adaptedStruct()->adaptedSet()->value, std::set<int64_t>{1});
   EXPECT_EQ(obj.adaptedStruct()->adaptedMap()->value, int_map);
@@ -516,13 +514,13 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
 
   // Adapted fields reset to the intrinsic default.
   apache::thrift::clear(obj);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedBoolDefault_ref()->value, false);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedByteDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedShortDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedIntegerDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedLongDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedDoubleDefault_ref()->value, 0);
-  EXPECT_EQ(obj.adaptedStruct_ref()->adaptedStringDefault_ref()->value, "");
+  EXPECT_EQ(obj.adaptedStruct()->adaptedBoolDefault()->value, false);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedByteDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedShortDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedIntegerDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedLongDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedDoubleDefault()->value, 0);
+  EXPECT_EQ(obj.adaptedStruct()->adaptedStringDefault()->value, "");
   EXPECT_TRUE(obj.adaptedStruct()->adaptedListDefault()->value.empty());
   EXPECT_TRUE(obj.adaptedStruct()->adaptedSetDefault()->value.empty());
   EXPECT_TRUE(obj.adaptedStruct()->adaptedMapDefault()->value.empty());
@@ -533,25 +531,25 @@ TEST_F(AdapterTest, AdaptedUnion) {
   EXPECT_EQ(obj1.getType(), AdaptedUnion::Type::__EMPTY__);
   auto wrapper = NonComparableWrapper<std::string>();
   wrapper.value = "1";
-  obj1.field1_ref() = wrapper;
-  EXPECT_EQ(obj1.field1_ref()->value, "1");
+  obj1.field1() = wrapper;
+  EXPECT_EQ(obj1.field1()->value, "1");
 }
 
 TEST(AdaptTest, ComparisonTestUnion) {
   auto obj = AdaptedUnion();
   auto wrapper = NonComparableWrapper<std::string>();
   wrapper.value = "1";
-  obj.field1_ref() = std::move(wrapper);
+  obj.field1() = std::move(wrapper);
 
   auto obj1 = AdaptedUnion();
   auto wrapper1 = NonComparableWrapper<std::string>();
   wrapper1.value = "1";
-  obj1.field1_ref() = std::move(wrapper1);
+  obj1.field1() = std::move(wrapper1);
 
   auto obj2 = AdaptedUnion();
   auto wrapper2 = NonComparableWrapper<std::string>();
   wrapper2.value = "2";
-  obj2.field1_ref() = std::move(wrapper2);
+  obj2.field1() = std::move(wrapper2);
   // It uses 'Adapter::toThrift(lhs) == Adapter::toThrift(rhs)' for comparison.
   EXPECT_EQ(obj, obj1);
   EXPECT_FALSE(obj < obj1);
@@ -562,22 +560,22 @@ TEST(AdaptTest, ComparisonTestUnion) {
 
 TEST(AdaptTest, ComparisonFallbackTest) {
   auto obj1a = AdapterEqualsUnion();
-  obj1a.field1_ref() = "1";
+  obj1a.field1() = "1";
 
   auto obj2a = AdapterEqualsUnion();
-  obj2a.field1_ref() = "1";
+  obj2a.field1() = "1";
   // It should use the AdapterEqualsStringAdapter operator== for comparison.
   EXPECT_FALSE(obj1a == obj2a);
 
   auto obj1b = AdaptedEqualsUnion();
   auto string1 = AdaptedEqualsString();
   string1.val = "1";
-  obj1b.field1_ref() = string1;
+  obj1b.field1() = string1;
 
   auto obj2b = AdaptedEqualsUnion();
   auto string2 = AdaptedEqualsString();
   string2.val = "1";
-  obj2b.field1_ref() = string2;
+  obj2b.field1() = string2;
   // It should use the AdaptedEqualsStringAdapter operator== for comparison.
   EXPECT_FALSE(obj1b == obj2b);
 }
@@ -586,56 +584,56 @@ TEST_F(AdapterTest, StructFieldAdaptedStruct) {
   StructFieldAdaptedStruct obj;
   {
     auto wrapper = Wrapper<ThriftAdaptedStruct>();
-    wrapper.value.data_ref() = 42;
-    obj.adaptedStruct_ref() = wrapper;
-    EXPECT_EQ(obj.adaptedStruct_ref()->value.data_ref(), 42);
+    wrapper.value.data() = 42;
+    obj.adaptedStruct() = wrapper;
+    EXPECT_EQ(obj.adaptedStruct()->value.data(), 42);
 
     auto objs = CompactSerializer::serialize<std::string>(obj);
     StructFieldAdaptedStruct objd;
     CompactSerializer::deserialize(objs, objd);
 
-    EXPECT_EQ(objd.adaptedStruct_ref()->value.data_ref(), 42);
+    EXPECT_EQ(objd.adaptedStruct()->value.data(), 42);
     EXPECT_EQ(obj, objd);
 
     // Adapted fields reset to the intrinsic default.
     apache::thrift::clear(obj);
-    EXPECT_EQ(obj.adaptedStruct_ref()->value.data_ref(), 0);
+    EXPECT_EQ(obj.adaptedStruct()->value.data(), 0);
   }
 
   {
     DirectlyAdaptedStruct wrapper;
-    wrapper.value.data_ref() = 42;
-    obj.directlyAdapted_ref() = wrapper;
-    EXPECT_EQ(obj.directlyAdapted_ref()->value.data_ref(), 42);
+    wrapper.value.data() = 42;
+    obj.directlyAdapted() = wrapper;
+    EXPECT_EQ(obj.directlyAdapted()->value.data(), 42);
 
     auto objs = CompactSerializer::serialize<std::string>(obj);
     StructFieldAdaptedStruct objd;
     CompactSerializer::deserialize(objs, objd);
 
-    EXPECT_EQ(objd.directlyAdapted_ref()->value.data_ref(), 42);
+    EXPECT_EQ(objd.directlyAdapted()->value.data(), 42);
     EXPECT_EQ(obj, objd);
 
     // Adapted fields reset to the intrinsic default.
     apache::thrift::clear(obj);
-    EXPECT_EQ(obj.directlyAdapted_ref()->value.data_ref(), 0);
+    EXPECT_EQ(obj.directlyAdapted()->value.data(), 0);
   }
 
   {
     TypedefOfDirect wrapper;
-    wrapper.value.data_ref() = 42;
-    obj.typedefOfAdapted_ref() = wrapper;
-    EXPECT_EQ(obj.typedefOfAdapted_ref()->value.data_ref(), 42);
+    wrapper.value.data() = 42;
+    obj.typedefOfAdapted() = wrapper;
+    EXPECT_EQ(obj.typedefOfAdapted()->value.data(), 42);
 
     auto objs = CompactSerializer::serialize<std::string>(obj);
     StructFieldAdaptedStruct objd;
     CompactSerializer::deserialize(objs, objd);
 
-    EXPECT_EQ(objd.typedefOfAdapted_ref()->value.data_ref(), 42);
+    EXPECT_EQ(objd.typedefOfAdapted()->value.data(), 42);
     EXPECT_EQ(obj, objd);
 
     // Adapted fields reset to the intrinsic default.
     apache::thrift::clear(obj);
-    EXPECT_EQ(obj.typedefOfAdapted_ref()->value.data_ref(), 0);
+    EXPECT_EQ(obj.typedefOfAdapted()->value.data(), 0);
   }
 }
 } // namespace basic
@@ -643,45 +641,45 @@ TEST_F(AdapterTest, StructFieldAdaptedStruct) {
 namespace no_uri {
 TEST(AdaptTest, Union_NoUri) {
   ThriftComparisonUnion obj1;
-  obj1.field1_ref().ensure().value = "1";
-  EXPECT_EQ(obj1.field1_ref()->value, "1");
+  obj1.field1().ensure().value = "1";
+  EXPECT_EQ(obj1.field1()->value, "1");
 
   RefUnion obj2;
-  obj2.field1_ref().ensure().value = "1";
-  EXPECT_EQ(obj2.field1_ref()->value, "1");
+  obj2.field1().ensure().value = "1";
+  EXPECT_EQ(obj2.field1()->value, "1");
 
   auto obj1b = ThriftComparisonUnion();
-  obj1b.field1_ref().ensure().value = "1";
+  obj1b.field1().ensure().value = "1";
 
   auto obj2b = ThriftComparisonUnion();
-  obj2b.field1_ref().ensure().value = "1";
+  obj2b.field1().ensure().value = "1";
   EXPECT_TRUE(obj1b == obj2b);
 }
 
 TEST(AdaptTest, LessThanComparisonFallbackTest) {
   auto obj1a = AdapterComparisonUnion();
-  obj1a.field1_ref() = "1";
+  obj1a.field1() = "1";
 
   auto obj2a = AdapterComparisonUnion();
-  obj2a.field1_ref() = "2";
+  obj2a.field1() = "2";
   // It should use the AdapterComparisonStringAdapter less for comparison.
   EXPECT_TRUE(obj1a > obj2a);
   EXPECT_FALSE(obj1a < obj2a);
 
   auto obj1b = AdaptedComparisonUnion();
-  obj1b.field1_ref().ensure().val = "1";
+  obj1b.field1().ensure().val = "1";
 
   auto obj2b = AdaptedComparisonUnion();
-  obj2b.field1_ref().ensure().val = "2";
+  obj2b.field1().ensure().val = "2";
   // It should use the AdaptedComparisonString operator< for comparison.
   EXPECT_TRUE(obj1b > obj2b);
   EXPECT_FALSE(obj1b < obj2b);
 
   auto obj1c = ThriftComparisonUnion();
-  obj1c.field1_ref().ensure().value = "1";
+  obj1c.field1().ensure().value = "1";
 
   auto obj2c = ThriftComparisonUnion();
-  obj2c.field1_ref().ensure().value = "2";
+  obj2c.field1().ensure().value = "2";
   // It uses 'Adapter::toThrift(lhs) < Adapter::toThrift(rhs)' for comparison.
   EXPECT_FALSE(obj1c > obj2c);
   EXPECT_TRUE(obj1c < obj2c);
@@ -689,10 +687,10 @@ TEST(AdaptTest, LessThanComparisonFallbackTest) {
 
 TEST(AdaptTest, ThreeWayComparisonFallbackTest) {
   auto obj1a = AdapterThreeWayComparisonStruct();
-  obj1a.field1_ref() = "1";
+  obj1a.field1() = "1";
 
   auto obj2a = AdapterThreeWayComparisonStruct();
-  obj2a.field1_ref() = "2";
+  obj2a.field1() = "2";
   // It should use the Adapter3WayCompareStringAdapter compareThreeWay for
   // comparison.
   EXPECT_TRUE(obj1a > obj2a);
@@ -716,12 +714,12 @@ TEST_F(AdapterTest, UnionCodeGen_Empty_Terse) {
 
 TEST_F(AdapterTest, UnionCodeGen_Delay_Default_Terse) {
   AdaptTestUnion obj1a;
-  EXPECT_EQ(obj1a.delay_ref().ensure(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1a.delay().ensure(), std::chrono::milliseconds(0));
 
   auto data1 = CompactSerializer::serialize<std::string>(obj1a);
   AdaptTestUnion obj1b;
   CompactSerializer::deserialize(data1, obj1b);
-  EXPECT_EQ(obj1b.delay_ref().ensure(), std::chrono::milliseconds(0));
+  EXPECT_EQ(obj1b.delay().ensure(), std::chrono::milliseconds(0));
 
   EXPECT_EQ(obj1b, obj1a);
   EXPECT_FALSE(obj1b < obj1a);
@@ -729,34 +727,34 @@ TEST_F(AdapterTest, UnionCodeGen_Delay_Default_Terse) {
 
 TEST_F(AdapterTest, UnionCodeGen_Delay_Terse) {
   AdaptTestUnion obj1a;
-  EXPECT_EQ(obj1a.delay_ref().ensure(), std::chrono::milliseconds(0));
-  obj1a.delay_ref() = std::chrono::milliseconds(7);
-  EXPECT_EQ(obj1a.delay_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1a.delay().ensure(), std::chrono::milliseconds(0));
+  obj1a.delay() = std::chrono::milliseconds(7);
+  EXPECT_EQ(obj1a.delay(), std::chrono::milliseconds(7));
 
   auto data1 = CompactSerializer::serialize<std::string>(obj1a);
   AdaptTestUnion obj1b;
   CompactSerializer::deserialize(data1, obj1b);
-  EXPECT_EQ(obj1b.delay_ref(), std::chrono::milliseconds(7));
+  EXPECT_EQ(obj1b.delay(), std::chrono::milliseconds(7));
 
   EXPECT_EQ(obj1b, obj1a);
   EXPECT_FALSE(obj1b < obj1a);
 
-  obj1a.delay_ref() = std::chrono::milliseconds(8);
+  obj1a.delay() = std::chrono::milliseconds(8);
   EXPECT_NE(obj1b, obj1a);
-  EXPECT_TRUE(obj1b.delay_ref() < obj1a.delay_ref());
-  EXPECT_FALSE(obj1a.delay_ref() < obj1b.delay_ref());
+  EXPECT_TRUE(obj1b.delay() < obj1a.delay());
+  EXPECT_FALSE(obj1a.delay() < obj1b.delay());
   EXPECT_TRUE(obj1b < obj1a);
   EXPECT_FALSE(obj1a < obj1b);
 }
 
 TEST_F(AdapterTest, UnionCodeGen_Custom_Default_Terse) {
   AdaptTestUnion obj2a;
-  EXPECT_EQ(obj2a.custom_ref().ensure().val, 13); // Defined in Num.
+  EXPECT_EQ(obj2a.custom().ensure().val, 13); // Defined in Num.
 
   auto data2 = CompactSerializer::serialize<std::string>(obj2a);
   AdaptTestUnion obj2b;
   CompactSerializer::deserialize(data2, obj2b);
-  EXPECT_EQ(obj2b.custom_ref()->val, 13);
+  EXPECT_EQ(obj2b.custom()->val, 13);
 
   EXPECT_EQ(obj2b, obj2a);
   EXPECT_FALSE(obj2b < obj2a);
@@ -764,13 +762,13 @@ TEST_F(AdapterTest, UnionCodeGen_Custom_Default_Terse) {
 
 TEST_F(AdapterTest, UnionCodeGen_Custom_Zero_Terse) {
   AdaptTestUnion obj2a;
-  EXPECT_EQ(obj2a.custom_ref().ensure().val, 13); // Defined in Num.
-  obj2a.custom_ref()->val = 0;
+  EXPECT_EQ(obj2a.custom().ensure().val, 13); // Defined in Num.
+  obj2a.custom()->val = 0;
 
   auto data2 = CompactSerializer::serialize<std::string>(obj2a);
   AdaptTestUnion obj2b;
   CompactSerializer::deserialize(data2, obj2b);
-  EXPECT_EQ(obj2b.custom_ref()->val, 0);
+  EXPECT_EQ(obj2b.custom()->val, 0);
 
   EXPECT_EQ(obj2b, obj2a);
   EXPECT_FALSE(obj2b < obj2a);
@@ -778,22 +776,22 @@ TEST_F(AdapterTest, UnionCodeGen_Custom_Zero_Terse) {
 
 TEST_F(AdapterTest, UnionCodeGen_Custom_Terse) {
   AdaptTestUnion obj2a;
-  EXPECT_EQ(obj2a.custom_ref().ensure().val, 13); // Defined in Num.
-  obj2a.custom_ref() = Num{std::numeric_limits<int64_t>::min()};
-  EXPECT_EQ(obj2a.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj2a.custom().ensure().val, 13); // Defined in Num.
+  obj2a.custom() = Num{std::numeric_limits<int64_t>::min()};
+  EXPECT_EQ(obj2a.custom()->val, std::numeric_limits<int64_t>::min());
 
   auto data2 = CompactSerializer::serialize<std::string>(obj2a);
   AdaptTestUnion obj2b;
   CompactSerializer::deserialize(data2, obj2b);
-  EXPECT_EQ(obj2b.custom_ref()->val, std::numeric_limits<int64_t>::min());
+  EXPECT_EQ(obj2b.custom()->val, std::numeric_limits<int64_t>::min());
 
   EXPECT_EQ(obj2b, obj2a);
   EXPECT_FALSE(obj2b < obj2a);
 
-  obj2b.custom_ref()->val = 1;
+  obj2b.custom()->val = 1;
   EXPECT_NE(obj2b, obj2a);
-  EXPECT_TRUE(obj2a.custom_ref() < obj2b.custom_ref());
-  EXPECT_FALSE(obj2b.custom_ref() < obj2a.custom_ref());
+  EXPECT_TRUE(obj2a.custom() < obj2b.custom());
+  EXPECT_FALSE(obj2b.custom() < obj2a.custom());
   EXPECT_TRUE(obj2a < obj2b);
   EXPECT_FALSE(obj2b < obj2a);
 }

@@ -38,52 +38,52 @@ TEST_P(RandomTestWithSeed, test) {
     auto s = std::to_string(rng() % 100);
     std::vector<std::function<void()>> methods = {
         [&] {
-          a.field_1_ref() = s;
-          b.field_1_ref() = s;
+          a.field_1() = s;
+          b.field_1() = s;
         },
         [&] {
-          a.field_2_ref() = s;
-          b.field_2_ref() = s;
+          a.field_2() = s;
+          b.field_2() = s;
         },
         [&] {
-          a.field_3_ref().emplace(s);
-          b.field_3_ref() = s;
+          a.field_3().emplace(s);
+          b.field_3() = s;
         },
         [&] {
-          a.field_4_ref() = s;
-          b.field_4_ref() = s;
+          a.field_4() = s;
+          b.field_4() = s;
         },
         [&] {
-          a.field_1_ref().emplace(s);
-          b.field_1_ref().emplace(s);
+          a.field_1().emplace(s);
+          b.field_1().emplace(s);
         },
         [&] {
-          a.field_2_ref().emplace(s);
-          b.field_2_ref().emplace(s);
+          a.field_2().emplace(s);
+          b.field_2().emplace(s);
         },
         [&] {
-          a.field_3_ref().emplace(s);
-          b.field_3_ref().emplace(s);
+          a.field_3().emplace(s);
+          b.field_3().emplace(s);
         },
         [&] {
-          a.field_4_ref().emplace(s);
-          b.field_4_ref().emplace(s);
+          a.field_4().emplace(s);
+          b.field_4().emplace(s);
         },
         [&] {
-          a.field_1_ref().emplace();
-          b.field_1_ref().emplace();
+          a.field_1().emplace();
+          b.field_1().emplace();
         },
         [&] {
-          a.field_2_ref().emplace();
-          b.field_2_ref().emplace();
+          a.field_2().emplace();
+          b.field_2().emplace();
         },
         [&] {
-          a.field_3_ref().emplace();
-          b.field_3_ref().emplace();
+          a.field_3().emplace();
+          b.field_3().emplace();
         },
         [&] {
-          a.field_4_ref().emplace();
-          b.field_4_ref().emplace();
+          a.field_4().emplace();
+          b.field_4().emplace();
         },
     };
 
@@ -99,10 +99,10 @@ TEST_P(RandomTestWithSeed, test) {
 
     EXPECT_EQ(
         folly::to_underlying(a.getType()), folly::to_underlying(b.getType()));
-    expectEq(a.field_1_ref(), b.field_1_ref());
-    expectEq(a.field_2_ref(), b.field_2_ref());
-    expectEq(a.field_3_ref(), b.field_3_ref());
-    expectEq(a.field_4_ref(), b.field_4_ref());
+    expectEq(a.field_1(), b.field_1());
+    expectEq(a.field_2(), b.field_2());
+    expectEq(a.field_3(), b.field_3());
+    expectEq(a.field_4(), b.field_4());
   }
 }
 

@@ -65,15 +65,15 @@ TEST(ClearTest, Struct_Defaults) {
 
 TEST(ClearTest, RefFields) {
   StructWithNoDefaultStruct obj;
-  obj.ref_field_ref()->int_field() = 42;
+  obj.ref_field()->int_field() = 42;
 
   auto obj2 = obj;
-  EXPECT_EQ(*obj.ref_field_ref()->int_field(), 42);
-  EXPECT_EQ(*obj2.ref_field_ref()->int_field(), 42);
+  EXPECT_EQ(*obj.ref_field()->int_field(), 42);
+  EXPECT_EQ(*obj2.ref_field()->int_field(), 42);
 
   apache::thrift::clear(obj);
-  EXPECT_EQ(*obj.ref_field_ref()->int_field(), 0);
-  EXPECT_EQ(*obj2.ref_field_ref()->int_field(), 42);
+  EXPECT_EQ(*obj.ref_field()->int_field(), 0);
+  EXPECT_EQ(*obj2.ref_field()->int_field(), 42);
 }
 
 TEST(AdaptTest, ThriftClearTestStruct) {
@@ -185,13 +185,13 @@ TEST(OpClearTest, OptionalField) {
   OptionalField obj;
   obj.optional_i32() = 10;
   obj.boxed_i32() = 20;
-  obj.shared_i32_ref() = std::make_shared<const std::int32_t>(30);
-  obj.unique_i32_ref() = std::make_unique<std::int32_t>(40);
+  obj.shared_i32() = std::make_shared<const std::int32_t>(30);
+  obj.unique_i32() = std::make_unique<std::int32_t>(40);
   clear_struct(obj);
   EXPECT_FALSE(obj.optional_i32());
   EXPECT_FALSE(obj.boxed_i32());
-  EXPECT_FALSE(obj.shared_i32_ref());
-  EXPECT_FALSE(obj.unique_i32_ref());
+  EXPECT_FALSE(obj.shared_i32());
+  EXPECT_FALSE(obj.unique_i32());
 }
 
 TEST(OpClearTest, TerseWriteField) {

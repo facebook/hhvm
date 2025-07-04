@@ -60,7 +60,7 @@ class TestServiceHandler
   ServerStream<SimpleResponse> nums(int f, int t) override {
     if (t < f) {
       ArithmeticException e;
-      e.msg_ref() = "my_magic_arithmetic_exception";
+      e.msg() = "my_magic_arithmetic_exception";
       throw e;
     }
     return folly::coro::co_invoke(
@@ -74,7 +74,7 @@ class TestServiceHandler
             throw std::logic_error("negative_number_detected");
           }
           ArithmeticException e;
-          e.msg_ref() = "throw_from_inside_stream";
+          e.msg() = "throw_from_inside_stream";
           throw e;
         });
   }
@@ -83,7 +83,7 @@ class TestServiceHandler
       int f, int t) override {
     if (t < f) {
       ArithmeticException e;
-      e.msg_ref() = "my_magic_arithmetic_exception";
+      e.msg() = "my_magic_arithmetic_exception";
       throw e;
     }
     return {
@@ -106,12 +106,12 @@ class TestServiceHandler
         [&](folly::coro::AsyncGenerator<EmptyChunk&&> gen)
             -> folly::coro::Task<SimpleResponse> {
           SimpleResponse response;
-          response.value_ref() = "final";
+          response.value() = "final";
           co_return response;
         },
         1};
     SimpleResponse response;
-    response.value_ref() = "initial";
+    response.value() = "initial";
     return {std::move(response), std::move(consumer)};
   }
 };
@@ -298,8 +298,8 @@ class OmniClientTest : public ::testing::Test {
 
 TEST_F(OmniClientTest, AddTestFailsWithBadEventHandler) {
   AddRequest request;
-  request.num1_ref() = 1;
-  request.num2_ref() = 41;
+  request.num1() = 1;
+  request.num2() = 41;
   addHandler();
   EXPECT_THROW(
       {
@@ -311,8 +311,8 @@ TEST_F(OmniClientTest, AddTestFailsWithBadEventHandler) {
 
 TEST_F(OmniClientTest, AddTestPassesWhenBadEventHandlerIsCleared) {
   AddRequest request;
-  request.num1_ref() = 1;
-  request.num2_ref() = 41;
+  request.num1() = 1;
+  request.num2() = 41;
   addHandler();
   testSend<CompactSerializer>(
       "TestService",
@@ -332,8 +332,8 @@ TEST_F(OmniClientTest, AddTestPassesWhenBadEventHandlerIsCleared) {
 
 TEST_F(OmniClientTest, AddTest) {
   AddRequest request;
-  request.num1_ref() = 1;
-  request.num2_ref() = 41;
+  request.num1() = 1;
+  request.num2() = 41;
 
   testSend<CompactSerializer>("TestService", "add", request, 42);
   testSend<BinarySerializer>("TestService", "add", request, 42);
@@ -360,7 +360,7 @@ TEST_F(OmniClientTest, ReadHeaderTest) {
 TEST_F(OmniClientTest, SinkRequestTest) {
   EmptyRequest request;
   SimpleResponse response;
-  response.value_ref() = "initial";
+  response.value() = "initial";
   testSend("TestService", "dumbSink", request, response, RpcKind::SINK);
 }
 

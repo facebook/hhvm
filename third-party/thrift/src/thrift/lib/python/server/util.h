@@ -72,7 +72,7 @@ class PythonStreamElementEncoder final
       std::unique_ptr<::folly::IOBuf>&& val) override {
     apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
     apache::thrift::PayloadMetadata payloadMetadata;
-    payloadMetadata.responseMetadata_ref().ensure();
+    payloadMetadata.responseMetadata().ensure();
     streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
     return folly::Try<apache::thrift::StreamPayload>(
         {std::move(val), std::move(streamPayloadMetadata)});
@@ -88,7 +88,7 @@ class PythonStreamElementEncoder final
     if (e.with_exception([&](const PythonUserException& py_ex) {
           prot.setOutput(&queue, 0);
           queue.append(*py_ex.buf());
-          exceptionMetadata.declaredException_ref() =
+          exceptionMetadata.declaredException() =
               apache::thrift::PayloadDeclaredExceptionMetadata();
         })) {
     } else {
@@ -100,13 +100,13 @@ class PythonStreamElementEncoder final
       apache::thrift::PayloadAppUnknownExceptionMetdata aue;
       aue.errorClassification().ensure().blame() =
           apache::thrift::ErrorBlame::SERVER;
-      exceptionMetadata.appUnknownException_ref() = std::move(aue);
+      exceptionMetadata.appUnknownException() = std::move(aue);
     }
 
     exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
     apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
     apache::thrift::PayloadMetadata payloadMetadata;
-    payloadMetadata.exceptionMetadata_ref() = std::move(exceptionMetadataBase);
+    payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
     streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
     return folly::Try<apache::thrift::StreamPayload>(
         folly::exception_wrapper(apache::thrift::detail::EncodedStreamError(

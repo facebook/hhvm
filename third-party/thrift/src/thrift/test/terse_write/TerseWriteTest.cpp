@@ -260,9 +260,9 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct) {
 
   EXPECT_TRUE(apache::thrift::empty(obj));
 
-  obj.unique_int_field_ref() = std::make_unique<int32_t>(1);
-  obj.shared_int_field_ref() = std::make_shared<int32_t>(2);
-  obj.shared_const_int_field_ref() = std::make_shared<int32_t>(3);
+  obj.unique_int_field() = std::make_unique<int32_t>(1);
+  obj.shared_int_field() = std::make_shared<int32_t>(2);
+  obj.shared_const_int_field() = std::make_shared<int32_t>(3);
   obj.intern_boxed_field()->field1() = 4;
 
   auto objs = TypeParam::template serialize<std::string>(obj);
@@ -278,16 +278,16 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct_Empty) {
 
   EXPECT_TRUE(apache::thrift::empty(obj));
 
-  obj.unique_int_field_ref() = std::make_unique<int32_t>(1);
-  obj.shared_int_field_ref() = std::make_unique<int32_t>(2);
-  obj.shared_const_int_field_ref() = std::make_unique<int32_t>(3);
+  obj.unique_int_field() = std::make_unique<int32_t>(1);
+  obj.shared_int_field() = std::make_unique<int32_t>(2);
+  obj.shared_const_int_field() = std::make_unique<int32_t>(3);
   obj.intern_boxed_field()->field1() = 4;
 
   EXPECT_FALSE(apache::thrift::empty(obj));
 
-  obj.unique_int_field_ref() = std::make_unique<int32_t>(0);
-  obj.shared_int_field_ref() = std::make_unique<int32_t>(0);
-  obj.shared_const_int_field_ref() = std::make_unique<int32_t>(0);
+  obj.unique_int_field() = std::make_unique<int32_t>(0);
+  obj.shared_int_field() = std::make_unique<int32_t>(0);
+  obj.shared_const_int_field() = std::make_unique<int32_t>(0);
   obj.intern_boxed_field()->field1() = 0;
 
   EXPECT_TRUE(apache::thrift::empty(obj));

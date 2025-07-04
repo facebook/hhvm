@@ -4100,58 +4100,65 @@ TEST(ThriftServer, GetSetMaxQps) {
         .getQpsLimit();
   };
 
-  for (auto target : std::array<uint32_t, 2>{1000, 0}) {
-    {
-      // Test set before setupThreadManager
-      ThriftServer server;
-      server.setInterface(std::make_shared<TestHandler>());
-      server.setMaxQps(target);
-      EXPECT_EQ(server.getMaxQps(), target);
-      // Make the thrift server simple to create
-      server.setThreadManagerType(
-          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-      server.setNumCPUWorkerThreads(1);
-      server.setupThreadManager();
-      EXPECT_EQ(server.getMaxQps(), target);
-      if (server.useResourcePools()) {
-        auto maxQps =
-            target == 0 ? std::numeric_limits<decltype(target)>::max() : target;
-        EXPECT_EQ(maxQps, getQpsLimit(server));
+  for (bool flag_value : {true, false}) {
+    THRIFT_FLAG_SET_MOCK(default_sync_max_qps_to_execution_rate, flag_value);
+    for (auto maxQps : std::array<uint32_t, 2>{1000, 1}) {
+      {
+        // Test set before setupThreadManager
+        ThriftServer server;
+        server.setInterface(std::make_shared<TestHandler>());
+        server.setMaxQps(maxQps);
+        EXPECT_EQ(maxQps, server.getMaxQps());
+        // Make the thrift server simple to create
+        server.setThreadManagerType(
+            apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+        server.setNumCPUWorkerThreads(1);
+        server.setupThreadManager();
+        EXPECT_EQ(maxQps, server.getMaxQps());
+        if (server.useResourcePools()) {
+          if (THRIFT_FLAG(default_sync_max_qps_to_execution_rate)) {
+            EXPECT_EQ(maxQps, getQpsLimit(server));
+          } else {
+            EXPECT_NE(maxQps, getQpsLimit(server));
+          }
 
-        // Also test that setting executionRate unsyncs the resource pool
-        // from maxQps.
-        auto executionRate = target + 1;
-        server.setExecutionRate(executionRate);
-        EXPECT_EQ(executionRate, getQpsLimit(server));
+          // Also test that setting executionRate unsyncs the resource pool
+          // from maxQps.
+          auto executionRate = maxQps + 1;
+          server.setExecutionRate(executionRate);
+          EXPECT_EQ(executionRate, getQpsLimit(server));
 
-        server.setMaxQps(target);
-        EXPECT_NE(maxQps, getQpsLimit(server));
+          server.setMaxQps(maxQps);
+          EXPECT_NE(maxQps, getQpsLimit(server));
+        }
       }
-    }
-    {
-      // Test set after setupThreadManager
-      ThriftServer server;
-      server.setInterface(std::make_shared<TestHandler>());
-      // Make the thrift server simple to create
-      server.setThreadManagerType(
-          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-      server.setNumCPUWorkerThreads(1);
-      server.setupThreadManager();
-      server.setMaxQps(target);
-      EXPECT_EQ(server.getMaxQps(), target);
-      if (server.useResourcePools()) {
-        auto maxQps =
-            target == 0 ? std::numeric_limits<decltype(target)>::max() : target;
-        EXPECT_EQ(maxQps, getQpsLimit(server));
+      {
+        // Test set after setupThreadManager
+        ThriftServer server;
+        server.setInterface(std::make_shared<TestHandler>());
+        // Make the thrift server simple to create
+        server.setThreadManagerType(
+            apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+        server.setNumCPUWorkerThreads(1);
+        server.setupThreadManager();
+        server.setMaxQps(maxQps);
+        EXPECT_EQ(maxQps, server.getMaxQps());
+        if (server.useResourcePools()) {
+          if (THRIFT_FLAG(default_sync_max_qps_to_execution_rate)) {
+            EXPECT_EQ(maxQps, getQpsLimit(server));
+          } else {
+            EXPECT_NE(maxQps, getQpsLimit(server));
+          }
 
-        // Also test that setting executionRate unsyncs the resource pool
-        // from maxQps.
-        auto executionRate = target + 1;
-        server.setExecutionRate(executionRate);
-        EXPECT_EQ(executionRate, getQpsLimit(server));
+          // Also test that setting executionRate unsyncs the resource pool
+          // from maxQps.
+          auto executionRate = maxQps + 1;
+          server.setExecutionRate(executionRate);
+          EXPECT_EQ(executionRate, getQpsLimit(server));
 
-        server.setMaxQps(target);
-        EXPECT_NE(maxQps, getQpsLimit(server));
+          server.setMaxQps(maxQps);
+          EXPECT_NE(maxQps, getQpsLimit(server));
+        }
       }
     }
   }

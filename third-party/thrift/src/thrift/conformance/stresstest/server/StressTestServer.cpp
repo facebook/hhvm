@@ -56,6 +56,10 @@ DEFINE_int32(
     execution_rate,
     -1,
     "Configures execution rate. Special value -1 will skip setting execution rate. Special value 0 will set execution rate to maximum value.");
+DEFINE_bool(
+    default_sync_max_qps_to_execution_rate,
+    false,
+    "Sets Thrift Server's default_sync_max_qps_to_execution_rate flag.");
 DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
 DEFINE_bool(work_stealing_executor, false, "Enable work stealing executor.");
 DEFINE_bool(
@@ -311,6 +315,10 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     LOG(INFO)
         << "Setting THRIFT_FLAG default_sync_max_requests_to_concurrency_limit: true";
     THRIFT_FLAG_SET_MOCK(default_sync_max_requests_to_concurrency_limit, true);
+  }
+  if (FLAGS_default_sync_max_qps_to_execution_rate == true) {
+    LOG(INFO) << "Setting defaultSyncMaxQpsToExecutionRate: true";
+    THRIFT_FLAG_SET_MOCK(default_sync_max_qps_to_execution_rate, true);
   }
 
   return server;

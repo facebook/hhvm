@@ -112,6 +112,7 @@ THRIFT_FLAG_DEFINE_bool(watch_default_ticket_path, true);
 THRIFT_FLAG_DEFINE_bool(
     init_decorated_processor_factory_only_resource_pools_checks, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_requests_to_concurrency_limit, false);
+THRIFT_FLAG_DEFINE_bool(default_sync_max_qps_to_execution_rate, false);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -1054,29 +1055,38 @@ void ThriftServer::setupThreadManagerImpl() {
                         : std::numeric_limits<decltype(executionRate)>::max());
               }
             });
-    // ThriftServer's maxQps was historically synced to ConcurrencyController's
-    // qpsLimit. This syncing behavior will be removed, but for now we sync by
-    // default.
-    setMaxQpsCallbackHandle =
-        detail::getThriftServerConfig(*this)
-            .getMaxQps()
-            .getObserver()
-            .addCallback(
-                [this](const folly::observer::Snapshot<uint32_t>& snapshot) {
-                  auto maxQps = *snapshot;
-                  if (auto cc =
-                          resourcePoolSet()
-                              .resourcePool(ResourcePoolHandle::defaultAsync())
-                              .concurrencyController()) {
-                    if (folly::test_once(cancelSetMaxQpsCallbackHandleFlag_)) {
-                      return;
+    if (THRIFT_FLAG(default_sync_max_qps_to_execution_rate)) {
+      // ThriftServer's maxQps was historically synced to
+      // ConcurrencyController's qpsLimit. This syncing behavior will be
+      // removed, but for now we sync by default. We are migrating away from
+      // this syncing behavior, but gate the functionality behind a flag for
+      // services that still rely on the behavior.
+      XLOG(WARN) << "--default_sync_max_qps_to_execution_rate=true. Please "
+                    "follow this guide to disable this. "
+                    "https://www.internalfb.com/wiki/"
+                    "Thrift_how_to_disable_sync_max_qps_to_execution_rate/";
+      setMaxQpsCallbackHandle =
+          detail::getThriftServerConfig(*this)
+              .getMaxQps()
+              .getObserver()
+              .addCallback(
+                  [this](const folly::observer::Snapshot<uint32_t>& snapshot) {
+                    auto maxQps = *snapshot;
+                    if (auto cc = resourcePoolSet()
+                                      .resourcePool(
+                                          ResourcePoolHandle::defaultAsync())
+                                      .concurrencyController()) {
+                      if (folly::test_once(
+                              cancelSetMaxQpsCallbackHandleFlag_)) {
+                        return;
+                      }
+                      cc.value().get().setQpsLimit(
+                          maxQps != 0
+                              ? maxQps
+                              : std::numeric_limits<decltype(maxQps)>::max());
                     }
-                    cc.value().get().setQpsLimit(
-                        maxQps != 0
-                            ? maxQps
-                            : std::numeric_limits<decltype(maxQps)>::max());
-                  }
-                });
+                  });
+    }
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools
     if (!threadManager_ &&

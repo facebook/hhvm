@@ -1,0 +1,4 @@
+ERROR: File "lambda_called_on_nested_immvector.php", line 3, characters 16-17:
+Was expecting an array or collection but type is unknown (Typing[4297])
+  File "lambda_called_on_nested_immvector.php", line 3, characters 9-10:
+  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

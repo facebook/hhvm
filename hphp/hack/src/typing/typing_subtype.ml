@@ -6202,7 +6202,12 @@ end = struct
         (LoclType ty_sub)
         (ConstraintType
            (mk_constraint_type (reason_super, Tcan_index can_index)))
-    | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVec ->
+    | (_, Tclass ((_, n), _, [tv]))
+      when String.equal n SN.Collections.cVector
+           || String.equal n SN.Collections.cVec
+           || String.equal n SN.Collections.cImmVector
+           || String.equal n SN.Collections.cConstVector
+           || String.equal n SN.Collections.cMutableVector ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
       is_container tk tv

@@ -92,7 +92,6 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   virtual bool getExecutionLimitRequestsHasBeenEnforced() const {
     return false;
   }
-  virtual bool getQpsLimitHasBeenEnforced() const { return false; }
 };
 
 } // namespace apache::thrift

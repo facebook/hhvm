@@ -80,7 +80,7 @@ TEST(TestsetTest, UnionWith) {
 TEST(TestsetTest, CppRef) {
   struct_optional_list_bool_cpp_ref s;
   static_assert(std::is_same_v<
-                folly::remove_cvref_t<decltype(s.field_1_ref())>,
+                folly::remove_cvref_t<decltype(s.field_1())>,
                 std::unique_ptr<std::vector<bool>>>);
 }
 

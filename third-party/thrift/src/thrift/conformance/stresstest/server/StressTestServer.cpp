@@ -17,7 +17,7 @@
 #include <folly/experimental/io/IoUringBackend.h>
 #include <thrift/conformance/stresstest/server/StressTestServer.h>
 
-#include <folly/portability/GFlags.h>
+#include <gflags/gflags.h>
 #include <wangle/ssl/SSLContextConfig.h>
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>

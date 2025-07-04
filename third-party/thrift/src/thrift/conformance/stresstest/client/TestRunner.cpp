@@ -17,7 +17,7 @@
 #include <thrift/conformance/stresstest/client/TestRunner.h>
 
 #include <fmt/core.h>
-#include <folly/portability/GFlags.h>
+#include <gflags/gflags.h>
 
 #include <thrift/conformance/stresstest/client/StressTestRegistry.h>
 #include <thrift/conformance/stresstest/util/Util.h>

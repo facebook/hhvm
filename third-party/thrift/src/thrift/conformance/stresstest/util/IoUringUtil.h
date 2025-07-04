@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include <gflags/gflags.h>
 #include <folly/experimental/io/IoUringBackend.h>
-#include <folly/portability/GFlags.h>
 
 DECLARE_bool(use_iouring_event_eventfd);
 DECLARE_int32(io_capacity);

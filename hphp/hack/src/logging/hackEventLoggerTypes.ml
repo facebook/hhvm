@@ -98,11 +98,13 @@ type rollout_flags = {
           queries using the hackrs implementation. *)
   use_distc: bool;
       (** POC: @bobren, use hh_distc instead of hulk for remote typechecking *)
+  enable_fanout_aware_distc: bool;
+      (** POC: @fzn, use fanout-aware hh_distc if hh_distc_fanout_threshold <= fanout < hh_distc_fanout_full_init_threshold *)
   consume_streaming_errors: bool;
       (** POC: @ljw, hh_client should read errors from errors.bin *)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
-  hh_distc_fanout_aware_threshold: int;
+  hh_distc_fanout_full_init_threshold: int;
       (** POC: @fzn - fanout threshold where we trigger fanout-aware hh_distc *)
   rust_elab: bool;
       (** POC: @mjt, use unified-elaboration rather than hh naming/nast checks *)

@@ -93,10 +93,11 @@ let default =
     remote_old_decls_no_limit = false;
     cache_remote_decls = false;
     disable_naming_table_fallback_loading = false;
-    use_distc = true;
     use_compressed_dep_graph = true;
+    use_distc = true;
+    enable_fanout_aware_distc = false;
     hh_distc_fanout_threshold = 250_000;
-    hh_distc_fanout_aware_threshold = 250_000;
+    hh_distc_fanout_full_init_threshold = 250_000;
     hh_distc_exponential_backoff_num_retries = 10;
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
@@ -758,6 +759,13 @@ let load_
       ~current_version
       config
   in
+  let enable_fanout_aware_distc =
+    bool_if_min_version
+      "enable_fanout_aware_distc"
+      ~default:default.enable_fanout_aware_distc
+      ~current_version
+      config
+  in
   let use_compressed_dep_graph =
     bool_if_min_version
       "use_compressed_dep_graph"
@@ -771,10 +779,10 @@ let load_
       ~default:default.hh_distc_fanout_threshold
       config
   in
-  let hh_distc_fanout_aware_threshold =
+  let hh_distc_fanout_full_init_threshold =
     int_
-      "hh_distc_fanout_aware_threshold"
-      ~default:default.hh_distc_fanout_aware_threshold
+      "hh_distc_fanout_full_init_threshold"
+      ~default:default.hh_distc_fanout_full_init_threshold
       config
   in
   let hh_distc_exponential_backoff_num_retries =
@@ -932,10 +940,11 @@ let load_
     remote_old_decls_no_limit;
     cache_remote_decls;
     disable_naming_table_fallback_loading;
-    use_distc;
     use_compressed_dep_graph;
+    use_distc;
+    enable_fanout_aware_distc;
     hh_distc_fanout_threshold;
-    hh_distc_fanout_aware_threshold;
+    hh_distc_fanout_full_init_threshold;
     hh_distc_exponential_backoff_num_retries;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
@@ -978,10 +987,12 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       load_state_natively_v4 = options.load_state_natively;
       rust_provider_backend = options.rust_provider_backend;
       use_distc = options.use_distc;
+      enable_fanout_aware_distc = options.enable_fanout_aware_distc;
       use_compressed_dep_graph = options.use_compressed_dep_graph;
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
-      hh_distc_fanout_aware_threshold = options.hh_distc_fanout_aware_threshold;
+      hh_distc_fanout_full_init_threshold =
+        options.hh_distc_fanout_full_init_threshold;
       rust_elab = options.rust_elab;
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
       ide_naming_table_update_threshold =

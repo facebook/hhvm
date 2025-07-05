@@ -214,12 +214,22 @@ let defer_or_do_type_check
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let hh_distc_fanout_config =
+      let hh_distc_config =
         let use_distc = genv.local_config.ServerLocalConfig.use_distc in
         Option.some_if
           use_distc
-          ( genv.local_config.ServerLocalConfig.hh_distc_fanout_aware_threshold,
-            genv.local_config.ServerLocalConfig.hh_distc_fanout_threshold )
+          Typing_check_service.
+            {
+              enable_fanout_aware_distc =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.enable_fanout_aware_distc;
+              fanout_threshold =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.hh_distc_fanout_threshold;
+              fanout_full_init_threshold =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.hh_distc_fanout_full_init_threshold;
+            }
       in
       let root = ServerArgs.root genv.ServerEnv.options in
       let ctx = Provider_utils.ctx_from_server_env env in
@@ -231,7 +241,7 @@ let defer_or_do_type_check
         files_to_check
         ~root:(Some root)
         ~longlived_workers
-        ~hh_distc_fanout_config
+        ~hh_distc_config
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)

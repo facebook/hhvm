@@ -832,6 +832,14 @@ let rec drain_events
   | Ok None -> Ok (warnings_saved_state, (done_count, total_count))
   | Error error -> Error error
 
+type distc_config_options = {
+  enable_fanout_aware_distc: bool;
+  fanout_threshold: int;
+  fanout_full_init_threshold: int;
+}
+
+type distc_config = distc_config_options option
+
 type 'env distc_outcome =
   | Success of
       Errors.t
@@ -1192,7 +1200,7 @@ let go_with_interrupt
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(longlived_workers : bool)
-    ~(hh_distc_fanout_config : (int * int) option)
+    ~(hh_distc_config : distc_config)
     ~(check_info : check_info)
     ~warnings_saved_state : (_ * result) job_result =
   let typecheck_info =
@@ -1251,14 +1259,14 @@ let go_with_interrupt
         time_first_error ) =
     let fanout_size = BigList.length fnl in
     let (will_use_distc, fanout_aware_distc) =
-      match hh_distc_fanout_config with
-      | Some (fanout_aware_threshold, fanout_threshold) ->
-        assert (fanout_threshold >= fanout_aware_threshold);
+      match hh_distc_config with
+      | Some distc_config ->
         let fanout_aware_distc =
-          fanout_size >= fanout_aware_threshold
-          && fanout_size < fanout_threshold
+          fanout_size >= distc_config.fanout_threshold
+          && fanout_size < distc_config.fanout_full_init_threshold
+          && distc_config.enable_fanout_aware_distc
         in
-        (fanout_size >= fanout_aware_threshold, fanout_aware_distc)
+        (fanout_size >= distc_config.fanout_threshold, fanout_aware_distc)
       | None -> (false, false)
     in
     let fanout =
@@ -1352,7 +1360,7 @@ let go
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
     ~(longlived_workers : bool)
-    ~(hh_distc_fanout_config : (int * int) option)
+    ~(hh_distc_config : distc_config)
     ~(check_info : check_info)
     ~warnings_saved_state : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
@@ -1365,7 +1373,7 @@ let go
       ~root
       ~interrupt
       ~longlived_workers
-      ~hh_distc_fanout_config
+      ~hh_distc_config
       ~check_info
       ~warnings_saved_state
   in

@@ -10,6 +10,23 @@
 type 'a job_result =
   'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
 
+(* distc_config specifies if hh_distc is enabled and its thresholds
+ * - hh_distc is disabled (eg. config set to None) in dev testing and non-fb workflows
+ * - if hh_distc is enabled, jobs with fanout >= fanout_threshold are sent to distc
+ *   - if enable_fanout_aware_distc is enabled, then
+ *     - if fanout_threshold <= fanout < fanout_full_init_threshold, then
+ *       fanout aware distc is performed;
+ *     - if fanout_full_init_threshold <= fanout, then full init is performed;
+ *   - if enable_fanout_aware_distc is not set, then full init is performed.
+ *)
+type distc_config_options = {
+  enable_fanout_aware_distc: bool;
+  fanout_threshold: int;
+  fanout_full_init_threshold: int;
+}
+
+type distc_config = distc_config_options option
+
 type seconds_since_epoch = float
 
 type process_file_results = {
@@ -40,12 +57,7 @@ val go :
   Relative_path.t list ->
   root:Path.t option ->
   longlived_workers:bool ->
-  hh_distc_fanout_config:(int * int) option
-    (* Config specifies thresholds to invoke hh_distc: 
-     * - the first int specifies the threshold to invoke fanout-aware hh_distc 
-     * - the second int specifies the threshold to perform a full init with hh_distc (must be >= than first)
-     * If fanout is smaller than thresholds, incremental typechecking is performed.
-     * Can be `None` in dev,testing, and non-fb workflows *) ->
+  hh_distc_config:distc_config ->
   check_info:Typing_service_types.check_info ->
   warnings_saved_state:Warnings_saved_state.t option ->
   result
@@ -60,12 +72,7 @@ val go_with_interrupt :
   root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
   longlived_workers:bool ->
-  hh_distc_fanout_config:(int * int) option
-    (* Config specifies thresholds to invoke hh_distc: 
-     * - the first int specifies the threshold to invoke fanout-aware hh_distc 
-     * - the second int specifies the threshold to perform a full init with hh_distc (must be >= than first)
-     * If fanout is smaller than thresholds, incremental typechecking is performed.
-     * Can be `None` in dev,testing, and non-fb workflows *) ->
+  hh_distc_config:distc_config ->
   check_info:Typing_service_types.check_info ->
   warnings_saved_state:Warnings_saved_state.t option ->
   ('env * result) job_result

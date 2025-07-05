@@ -257,11 +257,13 @@ type t = {
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
   use_distc: bool;
-      (** use remote type-checking (hh_distc) rather than only local type-checking*)
+      (** use remote type-checking (hh_distc) rather than only local type-checking *)
+  enable_fanout_aware_distc: bool;
+      (** use fanout-aware remote type-checking (hh_distc) *)
   hh_distc_fanout_threshold: int;
-      (** fanout threshold where we trigger hh_distc without fanout information: hh_distc performs a full init *)
-  hh_distc_fanout_aware_threshold: int;
-      (** fanout threshold where we trigger hh_distc with fanout information *)
+      (** fanout threshold where we trigger hh_distc *)
+  hh_distc_fanout_full_init_threshold: int;
+      (** fanout threshold above which full-init hh_distc is triggered *)
   hh_distc_exponential_backoff_num_retries: int;
   ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)

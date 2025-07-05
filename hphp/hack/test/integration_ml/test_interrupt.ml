@@ -91,7 +91,7 @@ let test () =
       ~root:None
       ~interrupt
       ~longlived_workers:false
-      ~hh_distc_fanout_config:None
+      ~hh_distc_config:None
       ~warnings_saved_state:None
       ~check_info
   in

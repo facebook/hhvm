@@ -27,43 +27,43 @@ Mask reverseMask(Mask mask) {
     case Mask::Type::includes: {
       // We need to move the data to temporary variable since the mask is a
       // union, we can't move it from one field to another directly.
-      auto tmp = std::move(mask.includes_ref().value());
-      mask.excludes_ref() = std::move(tmp);
+      auto tmp = std::move(mask.includes().value());
+      mask.excludes() = std::move(tmp);
       return mask;
     }
     case Mask::Type::excludes: {
-      auto tmp = std::move(mask.excludes_ref().value());
-      mask.includes_ref() = std::move(tmp);
+      auto tmp = std::move(mask.excludes().value());
+      mask.includes() = std::move(tmp);
       return mask;
     }
     case Mask::Type::includes_map: {
-      auto tmp = std::move(mask.includes_map_ref().value());
-      mask.excludes_map_ref() = std::move(tmp);
+      auto tmp = std::move(mask.includes_map().value());
+      mask.excludes_map() = std::move(tmp);
       return mask;
     }
     case Mask::Type::excludes_map: {
-      auto tmp = std::move(mask.excludes_map_ref().value());
-      mask.includes_map_ref() = std::move(tmp);
+      auto tmp = std::move(mask.excludes_map().value());
+      mask.includes_map() = std::move(tmp);
       return mask;
     }
     case Mask::Type::includes_string_map: {
-      auto tmp = std::move(mask.includes_string_map_ref().value());
-      mask.excludes_string_map_ref() = std::move(tmp);
+      auto tmp = std::move(mask.includes_string_map().value());
+      mask.excludes_string_map() = std::move(tmp);
       return mask;
     }
     case Mask::Type::excludes_string_map: {
-      auto tmp = std::move(mask.excludes_string_map_ref().value());
-      mask.includes_string_map_ref() = std::move(tmp);
+      auto tmp = std::move(mask.excludes_string_map().value());
+      mask.includes_string_map() = std::move(tmp);
       return mask;
     }
     case Mask::Type::includes_type: {
-      auto tmp = std::move(mask.includes_type_ref().value());
-      mask.excludes_type_ref() = std::move(tmp);
+      auto tmp = std::move(mask.includes_type().value());
+      mask.excludes_type() = std::move(tmp);
       return mask;
     }
     case Mask::Type::excludes_type: {
-      auto tmp = std::move(mask.excludes_type_ref().value());
-      mask.includes_type_ref() = std::move(tmp);
+      auto tmp = std::move(mask.excludes_type().value());
+      mask.includes_type() = std::move(tmp);
       return mask;
     }
     case Mask::Type::__EMPTY__:
@@ -244,7 +244,7 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   Mask mask;
 
   if (getStringMapMask(lhs) || getStringMapMask(rhs)) {
-    mask.includes_string_map_ref() =
+    mask.includes_string_map() =
         func(toStringMapMask(lhs), toStringMapMask(rhs));
     return mask;
   }
@@ -253,17 +253,16 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   // map mask, or allMask/noneMask which either mask the whole integer map, or
   // nothing.
   if (getIntegerMapMask(lhs) || getIntegerMapMask(rhs)) {
-    mask.includes_map_ref() =
-        func(toIntegerMapMask(lhs), toIntegerMapMask(rhs));
+    mask.includes_map() = func(toIntegerMapMask(lhs), toIntegerMapMask(rhs));
     return mask;
   }
 
   if (getTypeMask(lhs) || getTypeMask(rhs)) {
-    mask.includes_type_ref() = func(toTypeMask(lhs), toTypeMask(rhs));
+    mask.includes_type() = func(toTypeMask(lhs), toTypeMask(rhs));
     return mask;
   }
 
-  mask.includes_ref() = func(toFieldMask(lhs), toFieldMask(rhs));
+  mask.includes() = func(toFieldMask(lhs), toFieldMask(rhs));
   return mask;
 }
 

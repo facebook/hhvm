@@ -624,7 +624,7 @@ void tryInsertAllMask(Mask& mask, Id id, const F& getIncludesRef) {
 // Constructs the field mask from the patch object for the field.
 void insertNextFieldsToMask(
     ExtractedMasksFromPatch& masks, const Object& patch) {
-  auto getIncludesObjRef = [&](Mask& mask) { return mask.includes_ref(); };
+  auto getIncludesObjRef = [&](Mask& mask) { return mask.includes(); };
   for (const auto& [id, value] : patch) {
     // Object patch can get here only StructPatch::Patch(Prior|After)
     // operations, which require reading existing value to know if/how given
@@ -642,9 +642,9 @@ void insertNextFieldsToMask(
 void insertNextMapItemsToMask(
     ExtractedMasksFromPatch& masks,
     const folly::F14FastMap<protocol::Value, protocol::Value>& patch) {
-  auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map_ref(); };
+  auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map(); };
   auto getIncludesStringMapRef = [&](Mask& mask) {
-    return mask.includes_string_map_ref();
+    return mask.includes_string_map();
   };
   // Map patch can get here only MapPatch::Patch(Prior|After) operations,
   // which require reading existing value to know if/how given operations
@@ -666,9 +666,7 @@ void insertNextMapItemsToMask(
 
 void insertNextTypesToMask(
     ExtractedMasksFromPatch& masks, const Value& patchTypes) {
-  auto getIncludesTypeRef = [&](Mask& mask) {
-    return mask.includes_type_ref();
-  };
+  auto getIncludesTypeRef = [&](Mask& mask) { return mask.includes_type(); };
   for (const auto& typePatchVal : patchTypes.as_list()) {
     op::TypeToPatchInternalDoNotUse type_to_patch;
     if (!ProtocolValueToThriftValue<
@@ -933,8 +931,8 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
   }
 
   ExtractedMasksFromPatch rwmask = {noneMask(), noneMask()};
-  if (mask.includes_ref()) {
-    const auto& [id, v] = *mask.includes_ref()->begin();
+  if (mask.includes()) {
+    const auto& [id, v] = *mask.includes()->begin();
     // If there is a StructPatch::remove, we can short-circuit the logic.
     if (auto* value = findOp(patch, PatchOp::Remove)) {
       if (std::find(
@@ -961,13 +959,13 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
         rwmask.write = rwmask.write & allMask();
       }
     }
-  } else if (mask.includes_map_ref()) {
-    const auto& [k, v] = *mask.includes_map_ref()->begin();
+  } else if (mask.includes_map()) {
+    const auto& [k, v] = *mask.includes_map()->begin();
     return extractMapMaskFromPatchMapImpl(patch, MapId{k}, v);
-  } else if (mask.includes_string_map_ref()) {
-    const auto& [k, v] = *mask.includes_string_map_ref()->begin();
+  } else if (mask.includes_string_map()) {
+    const auto& [k, v] = *mask.includes_string_map()->begin();
     return extractMapMaskFromPatchMapImpl(patch, k, v);
-  } else if (mask.includes_type_ref()) {
+  } else if (mask.includes_type()) {
     folly::throw_exception<std::runtime_error>("not implemented");
   } else {
     folly::throw_exception<std::runtime_error>("Invalid mask");

@@ -40,36 +40,36 @@ double randomDouble(double max) {
 
 Team testValue() {
   Team team;
-  team.peopleById_ref() = {};
-  team.peopleByName_ref() = {};
+  team.peopleById() = {};
+  team.peopleByName() = {};
   for (int i = 1; i <= 10; ++i) {
     auto id = hasher(i);
     Person p;
-    *p.id_ref() = id;
-    p.nums_ref()->insert(i);
-    p.nums_ref()->insert(-i);
-    p.dob_ref() = randomDouble(1e9);
-    folly::toAppend("Person ", i, &(*p.name_ref()));
-    (*team.peopleById_ref())[*p.id_ref()] = p;
-    auto& peopleByNameEntry = (*team.peopleByName_ref())[*p.name_ref()];
+    *p.id() = id;
+    p.nums()->insert(i);
+    p.nums()->insert(-i);
+    p.dob() = randomDouble(1e9);
+    folly::toAppend("Person ", i, &(*p.name()));
+    (*team.peopleById())[*p.id()] = p;
+    auto& peopleByNameEntry = (*team.peopleByName())[*p.name()];
     peopleByNameEntry = std::move(p);
   }
-  team.projects_ref() = {};
-  team.projects_ref()->insert("alpha");
-  team.projects_ref()->insert("beta");
+  team.projects() = {};
+  team.projects()->insert("alpha");
+  team.projects()->insert("beta");
 
   return team;
 }
 
 TEST(Frozen, Basic) {
   Team team = testValue();
-  EXPECT_EQ(*team.peopleById_ref()->at(hasher(3)).name_ref(), "Person 3");
-  EXPECT_EQ(*team.peopleById_ref()->at(hasher(4)).name_ref(), "Person 4");
-  EXPECT_EQ(*team.peopleById_ref()->at(hasher(5)).name_ref(), "Person 5");
-  EXPECT_EQ(*team.peopleByName_ref()->at("Person 3").id_ref(), 3);
-  EXPECT_EQ(team.peopleByName_ref()->begin()->second.nums_ref()->count(-1), 1);
-  EXPECT_EQ(team.projects_ref()->count("alpha"), 1);
-  EXPECT_EQ(team.projects_ref()->count("beta"), 1);
+  EXPECT_EQ(*team.peopleById()->at(hasher(3)).name(), "Person 3");
+  EXPECT_EQ(*team.peopleById()->at(hasher(4)).name(), "Person 4");
+  EXPECT_EQ(*team.peopleById()->at(hasher(5)).name(), "Person 5");
+  EXPECT_EQ(*team.peopleByName()->at("Person 3").id(), 3);
+  EXPECT_EQ(team.peopleByName()->begin()->second.nums()->count(-1), 1);
+  EXPECT_EQ(team.projects()->count("alpha"), 1);
+  EXPECT_EQ(team.projects()->count("beta"), 1);
 
   size_t size = frozenSize(team);
   (void)size;
@@ -97,7 +97,7 @@ TEST(Frozen, Basic) {
         frozen.peopleById.at(static_cast<int64_t>(hasher(5))).name, "Person 5");
     EXPECT_EQ(
         frozen.peopleById.at(static_cast<int64_t>(hasher(3))).dob,
-        *team.peopleById_ref()->at(hasher(3)).dob_ref());
+        *team.peopleById()->at(hasher(3)).dob());
     EXPECT_EQ(frozen.peopleByName.at("Person 3").id, 3);
     EXPECT_EQ(frozen.peopleByName.at(string("Person 4")).id, 4);
     EXPECT_EQ(frozen.peopleByName.at(fbstring("Person 5")).id, 5);
@@ -114,13 +114,11 @@ TEST(Frozen, Basic) {
 
 TEST(Frozen, FieldOrdering) {
   Pod p;
-  *p.a_ref() = 0x012345;
-  *p.b_ref() = 0x0678;
-  *p.c_ref() = 0x09;
-  EXPECT_LT(
-      static_cast<void*>(&(*p.a_ref())), static_cast<void*>(&(*p.b_ref())));
-  EXPECT_LT(
-      static_cast<void*>(&(*p.b_ref())), static_cast<void*>(&(*p.c_ref())));
+  *p.a() = 0x012345;
+  *p.b() = 0x0678;
+  *p.c() = 0x09;
+  EXPECT_LT(static_cast<void*>(&(*p.a())), static_cast<void*>(&(*p.b())));
+  EXPECT_LT(static_cast<void*>(&(*p.b())), static_cast<void*>(&(*p.c())));
   auto pf = freeze(p);
   auto& f = *pf;
   EXPECT_EQ(sizeof(f.__isset), 1);

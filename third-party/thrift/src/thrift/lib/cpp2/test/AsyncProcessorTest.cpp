@@ -660,7 +660,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
 
     std::optional<rocket::ProcessorInfo> tryHandle(
         const RequestSetupMetadata& meta) override {
-      if (meta.interfaceKind_ref() == InterfaceKind::MONITORING) {
+      if (meta.interfaceKind() == InterfaceKind::MONITORING) {
         auto processorFactory = server_.getMonitoringInterface();
         DCHECK(processorFactory);
         return rocket::ProcessorInfo{
@@ -702,7 +702,7 @@ TEST(AsyncProcessorMethodResolutionTest, MultipleService) {
   auto monitoringClient =
       runner.newClient<ChildAsyncClient>(nullptr, [](auto socket) {
         RequestSetupMetadata setupMetadata;
-        setupMetadata.interfaceKind_ref() = InterfaceKind::MONITORING;
+        setupMetadata.interfaceKind() = InterfaceKind::MONITORING;
         return RocketClientChannel::newChannelWithMetadata(
             std::move(socket), std::move(setupMetadata));
       });

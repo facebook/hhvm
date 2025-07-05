@@ -41,8 +41,8 @@ TEST(DebugProtocolTest, Containers) {
   DebugSortedAssociative sorted;
   DebugHashedAssociative hashed;
   for (int64_t n = 1; n < 50; ++n) {
-    factor(n, sorted.value_ref()[n]);
-    factor(n, hashed.value_ref()[n]);
+    factor(n, sorted.value()[n]);
+    factor(n, hashed.value()[n]);
   }
   auto debugHashed = debugString(hashed);
   auto debugSorted = debugString(sorted);
@@ -55,7 +55,7 @@ TEST(DebugProtocolTest, Containers) {
 
 TEST(DebugProtocolTest, NoIndices) {
   DebugList debugList;
-  auto& list = *debugList.aList_ref();
+  auto& list = *debugList.aList();
   list.resize(100);
   std::iota(list.begin(), list.end(), 0);
   DebugProtocolWriter::Options options;

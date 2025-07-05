@@ -42,9 +42,9 @@ TEST_F(ExtensionsTest, TestThriftParameters) {
   NegotiationParameters params;
   std::uint64_t compressions = 1ull << (int(CompressionAlgorithm::ZSTD) - 1) |
       1ull << (int(CompressionAlgorithm::ZLIB) - 1);
-  params.compressionAlgos_ref() = compressions;
-  params.useStopTLS_ref() = true;
-  params.useStopTLSV2_ref() = true;
+  params.compressionAlgos() = compressions;
+  params.useStopTLS() = true;
+  params.useStopTLSV2() = true;
   std::vector<fizz::Extension> exts;
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
@@ -54,10 +54,10 @@ TEST_F(ExtensionsTest, TestThriftParameters) {
 
   EXPECT_TRUE(ext.has_value());
   EXPECT_EQ(ext.value().params, paramsExt.params);
-  EXPECT_TRUE(ext->params.compressionAlgos_ref());
-  EXPECT_EQ(ext->params.compressionAlgos_ref().value(), compressions);
-  EXPECT_TRUE(ext->params.useStopTLS_ref().value());
-  EXPECT_TRUE(ext->params.useStopTLSV2_ref().value());
+  EXPECT_TRUE(ext->params.compressionAlgos());
+  EXPECT_EQ(ext->params.compressionAlgos().value(), compressions);
+  EXPECT_TRUE(ext->params.useStopTLS().value());
+  EXPECT_TRUE(ext->params.useStopTLSV2().value());
 }
 
 } // namespace apache::thrift::test

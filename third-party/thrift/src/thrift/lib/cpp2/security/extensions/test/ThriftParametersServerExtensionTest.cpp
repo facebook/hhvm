@@ -35,7 +35,7 @@ class ThriftParametersServerExtensionTest : public testing::Test {
         compressionAlgorithms |= 1ull << (int(comp) - 1);
       }
     }
-    clientThriftParams_.params.compressionAlgos_ref() = compressionAlgorithms;
+    clientThriftParams_.params.compressionAlgos() = compressionAlgorithms;
     chlo_.extensions.push_back(encodeThriftExtension(clientThriftParams_));
   }
 
@@ -53,9 +53,9 @@ TEST_F(ThriftParametersServerExtensionTest, ServerNegotiation) {
 
   auto thriftParametersExtension = getThriftExtension(exts);
   EXPECT_TRUE(thriftParametersExtension.has_value());
-  EXPECT_TRUE(thriftParametersExtension->params.compressionAlgos_ref());
+  EXPECT_TRUE(thriftParametersExtension->params.compressionAlgos());
   EXPECT_EQ(
-      *thriftParametersExtension->params.compressionAlgos_ref(),
+      *thriftParametersExtension->params.compressionAlgos(),
       1ull << (int(CompressionAlgorithm::ZSTD) - 1) |
           1ull << (int(CompressionAlgorithm::ZLIB) - 1));
 }
@@ -80,9 +80,9 @@ TEST_F(ThriftParametersServerExtensionTest, IncompatibleCompressionAlgorithms) {
 
   auto thriftParametersExtension = getThriftExtension(exts);
   EXPECT_TRUE(thriftParametersExtension.has_value());
-  EXPECT_TRUE(thriftParametersExtension->params.compressionAlgos_ref());
+  EXPECT_TRUE(thriftParametersExtension->params.compressionAlgos());
   EXPECT_EQ(
-      *thriftParametersExtension->params.compressionAlgos_ref(),
+      *thriftParametersExtension->params.compressionAlgos(),
       1ull << (int(CompressionAlgorithm::ZSTD) - 1) |
           1ull << (int(CompressionAlgorithm::ZLIB) - 1));
 }

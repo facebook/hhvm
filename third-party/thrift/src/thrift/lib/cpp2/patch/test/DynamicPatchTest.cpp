@@ -331,11 +331,11 @@ TEST(DiffVisitorTest, path) {
           return;
         }
 
-        EXPECT_EQ(mask.includes_ref()->size(), 1);
-        const Mask& m = mask.includes_ref()->begin()->second;
-        switch (FieldId fieldId{mask.includes_ref()->begin()->first}) {
+        EXPECT_EQ(mask.includes()->size(), 1);
+        const Mask& m = mask.includes()->begin()->second;
+        switch (FieldId fieldId{mask.includes()->begin()->first}) {
           case FieldId{1}:
-            EXPECT_EQ(mask.includes_ref()->at(1), allMask());
+            EXPECT_EQ(mask.includes()->at(1), allMask());
             EXPECT_TRUE((std::is_same_v<T, std::int64_t>));
             if constexpr (std::is_same_v<T, std::int64_t>) {
               EXPECT_EQ(from, 10);
@@ -352,16 +352,16 @@ TEST(DiffVisitorTest, path) {
                 EXPECT_EQ(&to, &dst[fieldId].as_object());
               }
               EXPECT_TRUE(cases.insert(3).second);
-            } else if (m.includes_ref()->count(21)) {
-              EXPECT_EQ(m.includes_ref()->at(21), allMask());
+            } else if (m.includes()->count(21)) {
+              EXPECT_EQ(m.includes()->at(21), allMask());
               EXPECT_TRUE((std::is_same_v<T, std::int64_t>));
               if constexpr (std::is_same_v<T, std::int64_t>) {
                 EXPECT_EQ(from, 210);
                 EXPECT_EQ(to, 211);
               }
               EXPECT_TRUE(cases.insert(4).second);
-            } else if (m.includes_ref()->count(22)) {
-              EXPECT_EQ(m.includes_ref()->at(22), allMask());
+            } else if (m.includes()->count(22)) {
+              EXPECT_EQ(m.includes()->at(22), allMask());
               EXPECT_TRUE((std::is_same_v<T, std::int64_t>));
               if constexpr (std::is_same_v<T, std::int64_t>) {
                 EXPECT_EQ(from, 220);
@@ -378,16 +378,16 @@ TEST(DiffVisitorTest, path) {
                 EXPECT_EQ(&to, &dst[fieldId].as_map());
               }
               EXPECT_TRUE(cases.insert(6).second);
-            } else if (m.includes_string_map_ref()->count("31")) {
-              EXPECT_EQ(m.includes_string_map_ref()->at("31"), allMask());
+            } else if (m.includes_string_map()->count("31")) {
+              EXPECT_EQ(m.includes_string_map()->at("31"), allMask());
               EXPECT_TRUE((std::is_same_v<T, std::int64_t>));
               if constexpr (std::is_same_v<T, std::int64_t>) {
                 EXPECT_EQ(from, 310);
                 EXPECT_EQ(to, 311);
               }
               EXPECT_TRUE(cases.insert(7).second);
-            } else if (m.includes_string_map_ref()->count("32")) {
-              EXPECT_EQ(m.includes_string_map_ref()->at("32"), allMask());
+            } else if (m.includes_string_map()->count("32")) {
+              EXPECT_EQ(m.includes_string_map()->at("32"), allMask());
               EXPECT_TRUE((std::is_same_v<T, std::int64_t>));
               if constexpr (std::is_same_v<T, std::int64_t>) {
                 EXPECT_EQ(from, 320);
@@ -433,11 +433,11 @@ TEST(DiffVisitorTest, Union) {
   auto obj = testDiffUnion(src, dst).toObject();
   EXPECT_TRUE(obj.empty());
 
-  src.s_ref() = "foo";
+  src.s() = "foo";
   obj = testDiffUnion(src, dst).toObject();
   EXPECT_EQ(obj[static_cast<FieldId>(op::PatchOp::Clear)].as_bool(), true);
 
-  dst.s_ref() = "foo1";
+  dst.s() = "foo1";
   obj = testDiffUnion(src, dst).toObject();
   EXPECT_EQ(
       obj[static_cast<FieldId>(op::PatchOp::PatchPrior)]
@@ -447,7 +447,7 @@ TEST(DiffVisitorTest, Union) {
           .toString(),
       "1");
 
-  dst.i_ref() = 10;
+  dst.i() = 10;
   obj = testDiffUnion(src, dst).toObject();
   EXPECT_EQ(
       obj[static_cast<FieldId>(op::PatchOp::Assign)],
@@ -864,7 +864,7 @@ TEST(DynamicPatch, Unknown) {
   Sets s;
   testDynamicUnknownPatch<type::struct_t<Sets>, DynamicUnknownPatch>(s);
   MyUnion u;
-  u.s_ref() = "1";
+  u.s() = "1";
   testDynamicUnknownPatch<type::union_t<MyUnion>, DynamicUnknownPatch>(u);
 }
 
@@ -884,8 +884,8 @@ TEST(DynamicPatch, FromAnyPatch) {
 
   auto any = fromValueStruct<type::struct_t<type::AnyStruct>>(anyValue);
   MyUnion u = type::AnyData{any}.get<type::union_t<MyUnion>>();
-  EXPECT_TRUE(u.s_ref().has_value());
-  EXPECT_EQ(u.s_ref().value(), "hello world");
+  EXPECT_TRUE(u.s().has_value());
+  EXPECT_EQ(u.s().value(), "hello world");
 }
 
 TEST(DynamicPatch, FromSetOrMapPatch) {
@@ -932,7 +932,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
     EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 
     MyUnion u;
-    u.i_ref() = 5;
+    u.i() = 5;
     auto value = asValueStruct<type::union_t<MyUnion>>(u);
     patch.apply(value);
     EXPECT_EQ(value.as_object()[FieldId{2}].as_i32(), 25);
@@ -1013,20 +1013,20 @@ class AnyDiffVisitor : public DiffVisitorBase {
     if (mask1 == allMask()) {
       return DiffVisitorBase::diffStructured(src, dst);
     }
-    auto mask2 = mask1.includes_ref().value().at(1);
+    auto mask2 = mask1.includes().value().at(1);
     if (mask2 == allMask()) {
       return DynamicPatch{diffAny(src, dst)};
     }
 
-    auto mask3 = mask2.includes_type_ref().value().at(type::union_t<MyUnion>());
+    auto mask3 = mask2.includes_type().value().at(type::union_t<MyUnion>());
     EXPECT_EQ(mask3, allMask());
     return DiffVisitorBase::diffStructured(src, dst);
   }
   op::I32Patch diffI32(std::int32_t src, std::int32_t dst) override {
     auto mask1 = getCurrentPath();
-    auto mask2 = mask1.includes_ref().value().at(1);
-    auto mask3 = mask2.includes_type_ref().value().at(type::union_t<MyUnion>());
-    auto mask4 = mask3.includes_ref().value().at(2);
+    auto mask2 = mask1.includes().value().at(1);
+    auto mask3 = mask2.includes_type().value().at(type::union_t<MyUnion>());
+    auto mask4 = mask3.includes().value().at(2);
     EXPECT_EQ(mask4, allMask());
     EXPECT_EQ(src, 100);
     EXPECT_EQ(dst, 101);
@@ -1047,7 +1047,7 @@ TEST(DynamicPatchTest, ToPatchType) {
 
 TEST(DynamicPatchTest, InvalidToPatchType) {
   type::Type type = type::Type::get<type::union_t<MyUnion>>();
-  type.toThrift().name()->unionType_ref()->scopedName_ref() = "scoped.name";
+  type.toThrift().name()->unionType()->scopedName() = "scoped.name";
   EXPECT_THROW(toPatchType(type), std::runtime_error);
   EXPECT_THROW(
       toPatchType(type::Type::get<type::infer_tag<MyStructPatch>>()),
@@ -1066,7 +1066,7 @@ TEST(DynamicPatchTest, FromPatchType) {
       type::Type::get<type::union_t<MyUnion>>(),
       fromPatchType(type::Type::get<type::infer_tag<MyUnionPatch>>(), true));
   type::Type type = type::Type::get<type::union_t<MyUnion>>();
-  type.toThrift().name()->unionType_ref()->scopedName_ref() = "scoped.name";
+  type.toThrift().name()->unionType()->scopedName() = "scoped.name";
   EXPECT_THROW(fromPatchType(type, true), std::runtime_error);
   EXPECT_THROW(
       fromPatchType(type::Type::get<type::infer_tag<MyStruct>>(), false),
@@ -1089,8 +1089,7 @@ TEST(DynamicPatchTest, ToSafePatchType) {
   EXPECT_THROW(
       toSafePatchType(type::Type::get<type::i32_t>()), std::runtime_error);
   type::Type unionScopedName = type::Type::get<type::union_t<MyUnion>>();
-  unionScopedName.toThrift().name()->unionType_ref()->scopedName_ref() =
-      "scoped.name";
+  unionScopedName.toThrift().name()->unionType()->scopedName() = "scoped.name";
   EXPECT_THROW(toSafePatchType(unionScopedName), std::runtime_error);
   EXPECT_THROW(
       toSafePatchType(type::Type::get<type::infer_tag<MyStructPatch>>()),
@@ -1113,8 +1112,7 @@ TEST(DynamicPatchTest, FromSafePatchType) {
       fromSafePatchType(type::Type::get<type::i32_t>(), false),
       std::runtime_error);
   type::Type unionScopedName = type::Type::get<type::union_t<MyUnion>>();
-  unionScopedName.toThrift().name()->unionType_ref()->scopedName_ref() =
-      "scoped.name";
+  unionScopedName.toThrift().name()->unionType()->scopedName() = "scoped.name";
   EXPECT_THROW(fromSafePatchType(unionScopedName, true), std::runtime_error);
   EXPECT_THROW(
       fromSafePatchType(type::Type::get<type::infer_tag<MyStruct>>(), false),
@@ -1153,8 +1151,8 @@ TEST(DynamicPatchTest, AnyPatch) {
   StructWithAny src, dst;
 
   MyUnion srcNested, dstNested;
-  srcNested.i_ref() = 100;
-  dstNested.i_ref() = 101;
+  srcNested.i() = 100;
+  dstNested.i() = 101;
 
   src.any() = type::AnyData::toAny(srcNested).toThrift();
   dst.any() = type::AnyData::toAny(dstNested).toThrift();
@@ -1390,7 +1388,7 @@ TEST(DynamicPatch, InvalidGetStoredPatchByTag) {
 
 TEST(DynamicPatch, DynamicSafePatch) {
   MyUnion obj;
-  obj.s_ref().emplace("123");
+  obj.s().emplace("123");
 
   MyUnionPatch patch;
   patch.patchIfSet<ident::s>() = "hello world";
@@ -1412,7 +1410,7 @@ TEST(DynamicPatch, DynamicSafePatch) {
   MyUnionPatch rpatch = MyUnionPatch::fromSafePatch(rSafePatch);
   rpatch.apply(obj);
 
-  EXPECT_EQ(obj.s_ref().value(), "hello world");
+  EXPECT_EQ(obj.s().value(), "hello world");
 }
 
 TEST(DynamicPatch, DynamicSafePatchInvalid) {
@@ -1523,7 +1521,7 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
 
 TEST(DynamicPatch, applyToDataFieldInsideAny) {
   MyUnion obj;
-  obj.s_ref().emplace("123");
+  obj.s().emplace("123");
 
   MyUnionPatch patch;
   patch.patchIfSet<ident::s>() = "hello world";
@@ -1540,7 +1538,7 @@ TEST(DynamicPatch, applyToDataFieldInsideAny) {
   dynPatch.applyToDataFieldInsideAny(objAny);
 
   EXPECT_EQ(
-      type::AnyData{objAny}.get<type::union_t<MyUnion>>().s_ref().value(),
+      type::AnyData{objAny}.get<type::union_t<MyUnion>>().s().value(),
       "hello world");
 }
 
@@ -1553,8 +1551,8 @@ TEST(DynamicPatchTest, Any) {
   constexpr auto kPatchAfterOp = static_cast<FieldId>(op::PatchOp::PatchAfter);
 
   MyUnion src, dst;
-  src.s_ref() = "123";
-  dst.s_ref() = "1234";
+  src.s() = "123";
+  dst.s() = "1234";
 
   auto any = type::AnyData::toAny(src).toThrift();
   const auto srcObj =

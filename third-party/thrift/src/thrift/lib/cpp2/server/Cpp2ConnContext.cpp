@@ -96,22 +96,22 @@ folly::Optional<std::string> Cpp2ConnContext::PeerCred::getError() const {
 }
 
 std::optional<std::string_view> ClientMetadataRef::getAgent() {
-  if (!md_.agent_ref()) {
+  if (!md_.agent()) {
     return {};
   }
-  return std::string_view{*md_.agent_ref()};
+  return std::string_view{*md_.agent()};
 }
 
 std::optional<std::string_view> ClientMetadataRef::getHostname() {
-  if (!md_.hostname_ref()) {
+  if (!md_.hostname()) {
     return {};
   }
-  return std::string_view{*md_.hostname_ref()};
+  return std::string_view{*md_.hostname()};
 }
 
 std::optional<std::string_view> ClientMetadataRef::getOtherMetadataField(
     std::string_view key) {
-  if (const auto& otherMetadata = md_.otherMetadata_ref()) {
+  if (const auto& otherMetadata = md_.otherMetadata()) {
     if (auto* value = folly::get_ptr(*otherMetadata, std::string{key})) {
       return std::string_view{*value};
     }
@@ -124,8 +124,8 @@ const folly::F14NodeMap<std::string, std::string>&
 ClientMetadataRef::getFields() const {
   static const folly::F14NodeMap<std::string, std::string> emptyFields;
 
-  return static_cast<bool>(md_.otherMetadata_ref()) ? *md_.otherMetadata_ref()
-                                                    : emptyFields;
+  return static_cast<bool>(md_.otherMetadata()) ? *md_.otherMetadata()
+                                                : emptyFields;
 }
 
 namespace detail {

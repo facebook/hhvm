@@ -106,9 +106,9 @@ void initializeUpdatedStruct(UpdatedStruct& obj) {
   obj.f68() = 1400;
   obj.f88() = 1500;
   obj.f20020() = "abc";
-  obj.f20031_ref()->elem() = 1;
+  obj.f20031()->elem() = 1;
   obj.f20033() = "ghi";
-  obj.f20035_ref()->push_back(1);
+  obj.f20035()->push_back(1);
 }
 
 TEST(CompactProtocolTest, ParsesOriginalViaRead) {

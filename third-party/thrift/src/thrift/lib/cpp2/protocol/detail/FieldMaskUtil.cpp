@@ -41,11 +41,11 @@ void clear_fields(MaskRef ref, type::AnyStruct& t) {
   }
 
   // The type of Any could be a hashed-URI so use getViaIdenticalType
-  auto nested = ref.getViaIdenticalType_INTERNAL_DO_NOT_USE(*t.type_ref());
+  auto nested = ref.getViaIdenticalType_INTERNAL_DO_NOT_USE(*t.type());
   if (!nested.isNoneMask()) {
     auto val = parseValueFromAny(t);
     nested.clear(val);
-    t = toAny(val, *t.type_ref(), *t.protocol_ref()).toThrift();
+    t = toAny(val, *t.type(), *t.protocol()).toThrift();
   }
 }
 
@@ -62,16 +62,14 @@ bool filter_fields(
   }
 
   // The type of Any could be a hashed-URI so use getViaIdenticalType
-  auto nested = ref.getViaIdenticalType_INTERNAL_DO_NOT_USE(*t.type_ref());
+  auto nested = ref.getViaIdenticalType_INTERNAL_DO_NOT_USE(*t.type());
   if (nested.isNoneMask()) {
     return false;
   }
 
   // recurse
-  ret =
-      toAny(
-          nested.filter(parseValueFromAny(t)), *t.type_ref(), *t.protocol_ref())
-          .toThrift();
+  ret = toAny(nested.filter(parseValueFromAny(t)), *t.type(), *t.protocol())
+            .toThrift();
   return true;
 }
 
@@ -82,7 +80,7 @@ Mask fieldPathToMask(const FieldPath& path, const Mask& other) {
   Mask mask;
   Mask* m = &mask;
   for (auto id : path) {
-    m = &m->includes_ref().emplace()[static_cast<int16_t>(id)];
+    m = &m->includes().emplace()[static_cast<int16_t>(id)];
   }
   *m = other;
   return mask;

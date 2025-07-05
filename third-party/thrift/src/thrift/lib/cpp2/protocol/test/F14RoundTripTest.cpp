@@ -38,8 +38,8 @@ class F14RoundTripTest : public testing::Test {};
 TEST_F(F14RoundTripTest, RoundTrip) {
   StructWithF14VectorContainers s0;
   for (size_t i = 0; i < 5; ++i) {
-    s0.m_ref()->emplace(i, i);
-    s0.s_ref()->emplace(i);
+    s0.m()->emplace(i, i);
+    s0.s()->emplace(i);
   }
 
   const auto serialized = CompactSerializer::serialize<string>(s0);
@@ -51,6 +51,6 @@ TEST_F(F14RoundTripTest, RoundTrip) {
         c.begin(), c.end());
   };
 
-  EXPECT_EQ(as_vector(*s0.m_ref()), as_vector(*s1.m_ref()));
-  EXPECT_EQ(as_vector(*s0.s_ref()), as_vector(*s1.s_ref()));
+  EXPECT_EQ(as_vector(*s0.m()), as_vector(*s1.m()));
+  EXPECT_EQ(as_vector(*s0.s()), as_vector(*s1.s()));
 }

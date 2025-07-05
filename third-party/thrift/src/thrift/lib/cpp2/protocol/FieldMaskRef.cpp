@@ -165,10 +165,10 @@ void MaskRef::throwIfNotTypeMask() const {
 
 MaskRef MaskRef::get(FieldId id) const {
   throwIfNotFieldMask();
-  if (mask.includes_ref()) {
-    return MaskRef{getMask(mask.includes_ref().value(), id), is_exclusion};
+  if (mask.includes()) {
+    return MaskRef{getMask(mask.includes().value(), id), is_exclusion};
   }
-  return MaskRef{getMask(mask.excludes_ref().value(), id), !is_exclusion};
+  return MaskRef{getMask(mask.excludes().value(), id), !is_exclusion};
 }
 
 MaskRef MaskRef::get(detail::MapId id) const {
@@ -176,10 +176,10 @@ MaskRef MaskRef::get(detail::MapId id) const {
     return *this;
   }
   throwIfNotIntegerMapMask();
-  if (mask.includes_map_ref()) {
-    return MaskRef{getMask(mask.includes_map_ref().value(), id), is_exclusion};
+  if (mask.includes_map()) {
+    return MaskRef{getMask(mask.includes_map().value(), id), is_exclusion};
   }
-  return MaskRef{getMask(mask.excludes_map_ref().value(), id), !is_exclusion};
+  return MaskRef{getMask(mask.excludes_map().value(), id), !is_exclusion};
 }
 
 MaskRef MaskRef::get(const std::string& key) const {
@@ -187,24 +187,24 @@ MaskRef MaskRef::get(const std::string& key) const {
     return *this;
   }
   throwIfNotStringMapMask();
-  if (mask.includes_string_map_ref()) {
+  if (mask.includes_string_map()) {
     return MaskRef{
-        getMask(mask.includes_string_map_ref().value(), key), is_exclusion};
+        getMask(mask.includes_string_map().value(), key), is_exclusion};
   }
   return MaskRef{
-      getMask(mask.excludes_string_map_ref().value(), key), !is_exclusion};
+      getMask(mask.excludes_string_map().value(), key), !is_exclusion};
 }
 MaskRef MaskRef::get(std::string_view key) const {
   if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
     return *this;
   }
   throwIfNotStringMapMask();
-  if (mask.includes_string_map_ref()) {
+  if (mask.includes_string_map()) {
     return MaskRef{
-        getMask(mask.includes_string_map_ref().value(), key), is_exclusion};
+        getMask(mask.includes_string_map().value(), key), is_exclusion};
   }
   return MaskRef{
-      getMask(mask.excludes_string_map_ref().value(), key), !is_exclusion};
+      getMask(mask.excludes_string_map().value(), key), !is_exclusion};
 }
 
 MaskRef MaskRef::get(const type::Type& type) const {
@@ -212,22 +212,20 @@ MaskRef MaskRef::get(const type::Type& type) const {
     return *this;
   }
   throwIfNotTypeMask();
-  if (mask.includes_type_ref()) {
-    return MaskRef{
-        getMask(mask.includes_type_ref().value(), type), is_exclusion};
+  if (mask.includes_type()) {
+    return MaskRef{getMask(mask.includes_type().value(), type), is_exclusion};
   } else {
-    return MaskRef{
-        getMask(mask.excludes_type_ref().value(), type), !is_exclusion};
+    return MaskRef{getMask(mask.excludes_type().value(), type), !is_exclusion};
   }
 }
 
 std::optional<MaskRef> MaskRef::tryGet(FieldId id) const {
   throwIfNotFieldMask();
-  if (mask.includes_ref()) {
-    const auto* m = getMaskOrNull(mask.includes_ref().value(), id);
+  if (mask.includes()) {
+    const auto* m = getMaskOrNull(mask.includes().value(), id);
     return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
   }
-  const auto* m = getMaskOrNull(mask.excludes_ref().value(), id);
+  const auto* m = getMaskOrNull(mask.excludes().value(), id);
   return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
 }
 
@@ -236,11 +234,11 @@ std::optional<MaskRef> MaskRef::tryGet(detail::MapId id) const {
     return *this;
   }
   throwIfNotIntegerMapMask();
-  if (mask.includes_map_ref()) {
-    const auto* m = getMaskOrNull(mask.includes_map_ref().value(), id);
+  if (mask.includes_map()) {
+    const auto* m = getMaskOrNull(mask.includes_map().value(), id);
     return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
   }
-  const auto* m = getMaskOrNull(mask.excludes_map_ref().value(), id);
+  const auto* m = getMaskOrNull(mask.excludes_map().value(), id);
   return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
 }
 
@@ -249,11 +247,11 @@ std::optional<MaskRef> MaskRef::tryGet(const std::string& key) const {
     return *this;
   }
   throwIfNotStringMapMask();
-  if (mask.includes_string_map_ref()) {
-    const auto* m = getMaskOrNull(mask.includes_string_map_ref().value(), key);
+  if (mask.includes_string_map()) {
+    const auto* m = getMaskOrNull(mask.includes_string_map().value(), key);
     return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
   }
-  const auto* m = getMaskOrNull(mask.excludes_string_map_ref().value(), key);
+  const auto* m = getMaskOrNull(mask.excludes_string_map().value(), key);
   return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
 }
 
@@ -262,11 +260,11 @@ std::optional<MaskRef> MaskRef::tryGet(const type::Type& type) const {
     return *this;
   }
   throwIfNotTypeMask();
-  if (mask.includes_type_ref()) {
-    const auto* m = getMaskOrNull(mask.includes_type_ref().value(), type);
+  if (mask.includes_type()) {
+    const auto* m = getMaskOrNull(mask.includes_type().value(), type);
     return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
   }
-  const auto* m = getMaskOrNull(mask.excludes_type_ref().value(), type);
+  const auto* m = getMaskOrNull(mask.excludes_type().value(), type);
   return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
 }
 
@@ -291,12 +289,12 @@ MaskRef MaskRef::getViaIdenticalType_INTERNAL_DO_NOT_USE(
     return field_mask_constants::noneMask();
   };
 
-  if (mask.includes_type_ref()) {
+  if (mask.includes_type()) {
     return MaskRef{
-        findViaIdenticalType(mask.includes_type_ref().value()), is_exclusion};
+        findViaIdenticalType(mask.includes_type().value()), is_exclusion};
   } else {
     return MaskRef{
-        findViaIdenticalType(mask.excludes_type_ref().value()), !is_exclusion};
+        findViaIdenticalType(mask.excludes_type().value()), !is_exclusion};
   }
 }
 
@@ -340,18 +338,18 @@ bool MaskRef::isNoneTypeMask() const {
 }
 
 bool MaskRef::isExclusive() const {
-  return (mask.includes_ref() && is_exclusion) ||
-      (mask.excludes_ref() && !is_exclusion) ||
-      (mask.includes_map_ref() && is_exclusion) ||
-      (mask.excludes_map_ref() && !is_exclusion) ||
-      (mask.includes_string_map_ref() && is_exclusion) ||
-      (mask.excludes_string_map_ref() && !is_exclusion) ||
-      (mask.includes_type_ref() && is_exclusion) ||
-      (mask.excludes_type_ref() && !is_exclusion);
+  return (mask.includes() && is_exclusion) ||
+      (mask.excludes() && !is_exclusion) ||
+      (mask.includes_map() && is_exclusion) ||
+      (mask.excludes_map() && !is_exclusion) ||
+      (mask.includes_string_map() && is_exclusion) ||
+      (mask.excludes_string_map() && !is_exclusion) ||
+      (mask.includes_type() && is_exclusion) ||
+      (mask.excludes_type() && !is_exclusion);
 }
 
 bool MaskRef::isFieldMask() const {
-  return mask.includes_ref() || mask.excludes_ref();
+  return mask.includes() || mask.excludes();
 }
 
 bool MaskRef::isMapMask() const {
@@ -359,15 +357,15 @@ bool MaskRef::isMapMask() const {
 }
 
 bool MaskRef::isIntegerMapMask() const {
-  return mask.includes_map_ref() || mask.excludes_map_ref();
+  return mask.includes_map() || mask.excludes_map();
 }
 
 bool MaskRef::isStringMapMask() const {
-  return mask.includes_string_map_ref() || mask.excludes_string_map_ref();
+  return mask.includes_string_map() || mask.excludes_string_map();
 }
 
 bool MaskRef::isTypeMask() const {
-  return mask.includes_type_ref() || mask.excludes_type_ref();
+  return mask.includes_type() || mask.excludes_type();
 }
 
 void MaskRef::clear(protocol::Value& value) const {

@@ -82,7 +82,7 @@ TEST_F(SimpleJSONProtocolTest, roundtrip_one_of_each_float_range) {
 
   for (const auto& testCase : kTestCases) {
     auto orig = OneOfEach{};
-    tie(*orig.myDouble_ref(), *orig.myFloat_ref()) = testCase;
+    tie(*orig.myDouble(), *orig.myFloat()) = testCase;
     const auto serialized = S::serialize<string>(orig);
     OneOfEach deserialized;
     const auto size = S::deserialize(serialized, deserialized);

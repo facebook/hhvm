@@ -35,7 +35,7 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testClientExtension) {
   // set up server
   std::vector<fizz::Extension> serverExtensions;
   NegotiationParameters params;
-  params.useStopTLS_ref() = serverSupport;
+  params.useStopTLS() = serverSupport;
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
   serverExtensions.push_back(encodeThriftExtension(paramsExt));
@@ -59,7 +59,7 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testServerExtension) {
 
   // set up client
   ThriftParametersExt clientThriftParams;
-  clientThriftParams.params.useStopTLS_ref() = clientSupport;
+  clientThriftParams.params.useStopTLS() = clientSupport;
 
   fizz::ClientHello chlo;
   chlo.extensions.push_back(encodeThriftExtension(clientThriftParams));
@@ -88,7 +88,7 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testClientExtensionStopTLSV2) {
   std::vector<fizz::Extension> serverExtensions;
   NegotiationParameters params;
   if (serverSupport) {
-    params.useStopTLSV2_ref() = true;
+    params.useStopTLSV2() = true;
   }
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
@@ -114,7 +114,7 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testServerExtensionStopTLSV2) {
   // set up client
   ThriftParametersExt clientThriftParams;
   if (clientSupport) {
-    clientThriftParams.params.useStopTLSV2_ref() = true;
+    clientThriftParams.params.useStopTLSV2() = true;
   }
   fizz::ClientHello chlo;
   chlo.extensions.push_back(encodeThriftExtension(clientThriftParams));
@@ -150,10 +150,10 @@ TEST_F(ThriftParametersExtensionStopTLSTest, testCombinedNegotiation) {
           std::vector<fizz::Extension> serverExtensions;
           NegotiationParameters params;
           if (serverStopTLS) {
-            params.useStopTLS_ref() = true;
+            params.useStopTLS() = true;
           }
           if (serverStopTLSV2) {
-            params.useStopTLSV2_ref() = true;
+            params.useStopTLSV2() = true;
           }
           ThriftParametersExt paramsExt;
           paramsExt.params = params;

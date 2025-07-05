@@ -30,23 +30,23 @@ using std::vector;
 Team testValue() {
   Team team;
   auto hasher = std::hash<int64_t>();
-  team.peopleById_ref() = {};
-  team.peopleByName_ref() = {};
+  team.peopleById() = {};
+  team.peopleByName() = {};
   for (int i = 1; i <= 500; ++i) {
     auto id = hasher(i);
     Person p;
-    *p.id_ref() = id;
-    p.nums_ref().ensure();
-    p.nums_ref()->insert(i);
-    p.nums_ref()->insert(-i);
-    folly::toAppend("Person ", i, &(*p.name_ref()));
-    (*team.peopleById_ref())[*p.id_ref()] = p;
-    auto& peopleByNameEntry = (*team.peopleByName_ref())[*p.name_ref()];
+    *p.id() = id;
+    p.nums().ensure();
+    p.nums()->insert(i);
+    p.nums()->insert(-i);
+    folly::toAppend("Person ", i, &(*p.name()));
+    (*team.peopleById())[*p.id()] = p;
+    auto& peopleByNameEntry = (*team.peopleByName())[*p.name()];
     peopleByNameEntry = std::move(p);
   }
-  team.projects_ref() = {};
-  team.projects_ref()->insert("alpha");
-  team.projects_ref()->insert("beta");
+  team.projects() = {};
+  team.projects()->insert("alpha");
+  team.projects()->insert("beta");
   return team;
 }
 

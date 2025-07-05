@@ -299,21 +299,21 @@ decltype(auto) visitDefinition(
   auto overloaded = folly::overload(std::forward<F>(visitors)...);
   switch (definition.getType()) {
     case type::Definition::Type::structDef:
-      return overloaded(*definition.structDef_ref());
+      return overloaded(*definition.structDef());
     case type::Definition::Type::unionDef:
-      return overloaded(*definition.unionDef_ref());
+      return overloaded(*definition.unionDef());
     case type::Definition::Type::exceptionDef:
-      return overloaded(*definition.exceptionDef_ref());
+      return overloaded(*definition.exceptionDef());
     case type::Definition::Type::enumDef:
-      return overloaded(*definition.enumDef_ref());
+      return overloaded(*definition.enumDef());
     case type::Definition::Type::typedefDef:
-      return overloaded(*definition.typedefDef_ref());
+      return overloaded(*definition.typedefDef());
     case type::Definition::Type::constDef:
-      return overloaded(*definition.constDef_ref());
+      return overloaded(*definition.constDef());
     case type::Definition::Type::serviceDef:
-      return overloaded(*definition.serviceDef_ref());
+      return overloaded(*definition.serviceDef());
     case type::Definition::Type::interactionDef:
-      return overloaded(*definition.interactionDef_ref());
+      return overloaded(*definition.interactionDef());
     case type::Definition::Type::__EMPTY__:
     default:
       folly::throw_exception<InvalidSyntaxGraphError>(fmt::format(
@@ -331,7 +331,7 @@ const type::DefinitionKey& SchemaIndex::definitionKeyOf(
   using T = type::TypeUri::Type;
   switch (typeUri.getType()) {
     case T::definitionKey:
-      return *typeUri.definitionKey_ref();
+      return *typeUri.definitionKey();
     case T::uri:
     case T::typeHashPrefixSha2_256:
     case T::scopedName:
@@ -367,19 +367,19 @@ TypeRef SchemaIndex::typeOf(const type::TypeStruct& type) const {
         return Primitive::BINARY;
       case T::enumType:
         return detail::Lazy<EnumNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->enumType_ref()));
+            resolver_, definitionKeyOf(*type.name()->enumType()));
       case T::typedefType:
         return detail::Lazy<TypedefNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->typedefType_ref()));
+            resolver_, definitionKeyOf(*type.name()->typedefType()));
       case T::structType:
         return detail::Lazy<StructNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->structType_ref()));
+            resolver_, definitionKeyOf(*type.name()->structType()));
       case T::unionType:
         return detail::Lazy<UnionNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->unionType_ref()));
+            resolver_, definitionKeyOf(*type.name()->unionType()));
       case T::exceptionType:
         return detail::Lazy<ExceptionNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->exceptionType_ref()));
+            resolver_, definitionKeyOf(*type.name()->exceptionType()));
       case T::listType: {
         const auto& params = *type.params();
         if (params.size() != 1) {
@@ -711,12 +711,12 @@ FunctionNode SchemaIndex::createFunction(
       };
 
   auto sinkOrStream = [&]() -> FunctionNode::Response::SinkOrStream {
-    if (const auto& streamRef = function.streamOrSink()->streamType_ref();
+    if (const auto& streamRef = function.streamOrSink()->streamType();
         streamRef.has_value()) {
       return FunctionNode::Stream(
           typeOf(*streamRef->payload()),
           collectExceptions(*streamRef->exceptions()));
-    } else if (const auto& sinkRef = function.streamOrSink()->sinkType_ref();
+    } else if (const auto& sinkRef = function.streamOrSink()->sinkType();
                sinkRef.has_value()) {
       return FunctionNode::Sink(
           typeOf(*sinkRef->payload()),
@@ -774,7 +774,7 @@ namespace {
 
 type::TypeUri createTypeUri(const type::DefinitionKey& definitionKey) {
   type::TypeUri typeUri;
-  typeUri.definitionKey_ref() = definitionKey;
+  typeUri.definitionKey() = definitionKey;
   return typeUri;
 }
 
@@ -805,12 +805,12 @@ const type::Type* SchemaIndex::tryGetAnnotationType(
     switch (definition->getType()) {
       case T::typedefDef: {
         type::TypeName typeName;
-        typeName.typedefType_ref() = createTypeUri(definitionKey);
+        typeName.typedefType() = createTypeUri(definitionKey);
         return createUnparamedType(std::move(typeName));
       }
       case T::structDef: {
         type::TypeName typeName;
-        typeName.structType_ref() = createTypeUri(definitionKey);
+        typeName.structType() = createTypeUri(definitionKey);
         return createUnparamedType(std::move(typeName));
       }
       case T::enumDef:
@@ -822,12 +822,12 @@ const type::Type* SchemaIndex::tryGetAnnotationType(
       // is incorrect.
       case T::unionDef: {
         type::TypeName typeName;
-        typeName.unionType_ref() = createTypeUri(definitionKey);
+        typeName.unionType() = createTypeUri(definitionKey);
         return createUnparamedType(std::move(typeName));
       }
       case T::exceptionDef: {
         type::TypeName typeName;
-        typeName.exceptionType_ref() = createTypeUri(definitionKey);
+        typeName.exceptionType() = createTypeUri(definitionKey);
         return createUnparamedType(std::move(typeName));
       }
       default:

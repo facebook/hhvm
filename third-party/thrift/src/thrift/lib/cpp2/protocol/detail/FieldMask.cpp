@@ -29,36 +29,36 @@ namespace field_mask_constants = apache::thrift::protocol::field_mask_constants;
 namespace apache::thrift::protocol::detail {
 
 const FieldIdToMask* FOLLY_NULLABLE getFieldMask(const Mask& mask) {
-  if (mask.includes_ref()) {
-    return &*mask.includes_ref();
+  if (mask.includes()) {
+    return &*mask.includes();
   }
 
-  if (mask.excludes_ref()) {
-    return &*mask.excludes_ref();
+  if (mask.excludes()) {
+    return &*mask.excludes();
   }
 
   return nullptr;
 }
 
 const MapIdToMask* FOLLY_NULLABLE getIntegerMapMask(const Mask& mask) {
-  if (mask.includes_map_ref()) {
-    return &*mask.includes_map_ref();
+  if (mask.includes_map()) {
+    return &*mask.includes_map();
   }
 
-  if (mask.excludes_map_ref()) {
-    return &*mask.excludes_map_ref();
+  if (mask.excludes_map()) {
+    return &*mask.excludes_map();
   }
 
   return nullptr;
 }
 
 const MapStringToMask* FOLLY_NULLABLE getStringMapMask(const Mask& mask) {
-  if (mask.includes_string_map_ref()) {
-    return &*mask.includes_string_map_ref();
+  if (mask.includes_string_map()) {
+    return &*mask.includes_string_map();
   }
 
-  if (mask.excludes_string_map_ref()) {
-    return &*mask.excludes_string_map_ref();
+  if (mask.excludes_string_map()) {
+    return &*mask.excludes_string_map();
   }
 
   return nullptr;
@@ -66,12 +66,12 @@ const MapStringToMask* FOLLY_NULLABLE getStringMapMask(const Mask& mask) {
 
 [[nodiscard]] const MapTypeToMask* FOLLY_NULLABLE
 getTypeMask(const Mask& mask) {
-  if (mask.includes_type_ref()) {
-    return &*mask.includes_type_ref();
+  if (mask.includes_type()) {
+    return &*mask.includes_type();
   }
 
-  if (mask.excludes_type_ref()) {
-    return &*mask.excludes_type_ref();
+  if (mask.excludes_type()) {
+    return &*mask.excludes_type();
   }
 
   return nullptr;
@@ -161,8 +161,8 @@ Value getValueAs(std::string key, const Value& as) {
 }
 
 void throwIfContainsMapMask(const Mask& mask) {
-  if (mask.includes_map_ref() || mask.excludes_map_ref() ||
-      mask.includes_string_map_ref() || mask.excludes_string_map_ref()) {
+  if (mask.includes_map() || mask.excludes_map() ||
+      mask.includes_string_map() || mask.excludes_string_map()) {
     folly::throw_exception<std::runtime_error>("map mask is not implemented");
   }
   if (auto* typeMapPtr = getTypeMask(mask)) {

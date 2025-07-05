@@ -27,23 +27,23 @@ namespace apache::thrift::test {
 
 OneOfEach makeTestData1() {
   OneOfEach ooe;
-  *ooe.myBool_ref() = false;
-  *ooe.myMap_ref() = std::map<std::string, int64_t>(
+  *ooe.myBool() = false;
+  *ooe.myMap() = std::map<std::string, int64_t>(
       {{"key1", 14}, {"key2", 0}, {"key3", 1000}});
-  *ooe.myList_ref() = std::vector<std::string>{"good1", "good2", "good3"};
+  *ooe.myList() = std::vector<std::string>{"good1", "good2", "good3"};
   return ooe;
 }
 
 OneOfEach makeTestData2() {
   OneOfEach ooe;
-  *ooe.myMap_ref() = std::map<std::string, int64_t>(
+  *ooe.myMap() = std::map<std::string, int64_t>(
       {{"key1", 14}, {"key2", 0}, {"key3", 1000}});
-  *ooe.myList_ref() = std::vector<std::string>{"good1", "good2", "good3"};
-  *ooe.mySet_ref() = std::set<std::string>{"elem1", "elem2", "elem3"};
+  *ooe.myList() = std::vector<std::string>{"good1", "good2", "good3"};
+  *ooe.mySet() = std::set<std::string>{"elem1", "elem2", "elem3"};
   SubStruct sub;
-  *sub.mySubI64_ref() = 123456789;
-  *sub.mySubString_ref() = "substring";
-  *ooe.myStruct_ref() = sub;
+  *sub.mySubI64() = 123456789;
+  *sub.mySubString() = "substring";
+  *ooe.myStruct() = sub;
   return ooe;
 }
 
@@ -61,8 +61,8 @@ void testSkipMap() {
   // Deserialize into a struct with different map types
   OneOfEach2 ooe2;
   EXPECT_NO_THROW(ooe2.read(&protocolReader));
-  EXPECT_EQ(0, ooe2.myMap_ref()->size());
-  EXPECT_EQ(*ooe.myList_ref(), *ooe2.myList_ref());
+  EXPECT_EQ(0, ooe2.myMap()->size());
+  EXPECT_EQ(*ooe.myList(), *ooe2.myList());
 }
 
 template <class ProtocolWriter, class ProtocolReader>
@@ -79,10 +79,10 @@ void testSkipListAndSet() {
   // Deserialize into a struct with different list/set types
   OneOfEach3 ooe3;
   EXPECT_NO_THROW(ooe3.read(&protocolReader));
-  EXPECT_EQ(*ooe.myMap_ref(), *ooe3.myMap_ref());
-  EXPECT_EQ(0, ooe3.myList_ref()->size());
-  EXPECT_EQ(0, ooe3.mySet_ref()->size());
-  EXPECT_EQ(*ooe.myStruct_ref(), *ooe3.myStruct_ref());
+  EXPECT_EQ(*ooe.myMap(), *ooe3.myMap());
+  EXPECT_EQ(0, ooe3.myList()->size());
+  EXPECT_EQ(0, ooe3.mySet()->size());
+  EXPECT_EQ(*ooe.myStruct(), *ooe3.myStruct());
 }
 
 TEST(ContainerSkippingTest, BinaryProtocolSkipMap) {

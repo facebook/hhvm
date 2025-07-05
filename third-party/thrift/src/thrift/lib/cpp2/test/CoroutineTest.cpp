@@ -47,13 +47,13 @@ class CoroutineServiceHandlerCoro
  public:
   void computeSumNoCoro(
       SumResponse& response, std::unique_ptr<SumRequest> request) override {
-    *response.sum_ref() = *request->x_ref() + *request->y_ref();
+    *response.sum() = *request->x() + *request->y();
   }
 
   folly::coro::Task<std::unique_ptr<SumResponse>> co_computeSum(
       std::unique_ptr<SumRequest> request) override {
     auto response = std::make_unique<SumResponse>();
-    *response->sum_ref() = *request->x_ref() + *request->y_ref();
+    *response->sum() = *request->x() + *request->y();
     co_return response;
   }
 
@@ -86,7 +86,7 @@ class CoroutineServiceHandlerCoro
   folly::Future<std::unique_ptr<SumResponse>> future_implementedWithFutures()
       override {
     auto result = std::make_unique<SumResponse>();
-    *result->sum_ref() = kNoParameterReturnValue;
+    *result->sum() = kNoParameterReturnValue;
     return folly::makeFuture(std::move(result));
   }
 
@@ -132,13 +132,13 @@ class CoroutineServiceHandlerFuture
  public:
   void computeSumNoCoro(
       SumResponse& response, std::unique_ptr<SumRequest> request) override {
-    *response.sum_ref() = *request->x_ref() + *request->y_ref();
+    *response.sum() = *request->x() + *request->y();
   }
 
   folly::Future<std::unique_ptr<SumResponse>> future_computeSum(
       std::unique_ptr<SumRequest> request) override {
     auto response = std::make_unique<SumResponse>();
-    *response->sum_ref() = *request->x_ref() + *request->y_ref();
+    *response->sum() = *request->x() + *request->y();
     return folly::makeFuture(std::move(response));
   }
 
@@ -173,7 +173,7 @@ class CoroutineServiceHandlerFuture
   folly::Future<std::unique_ptr<SumResponse>> future_implementedWithFutures()
       override {
     auto result = std::make_unique<SumResponse>();
-    *result->sum_ref() = kNoParameterReturnValue;
+    *result->sum() = kNoParameterReturnValue;
     return folly::makeFuture(std::move(result));
   }
 
@@ -234,22 +234,22 @@ TYPED_TEST_CASE_P(CoroutineTest);
 TYPED_TEST_P(CoroutineTest, SumNoCoro) {
   this->expectSumResults([&](int x, int y) {
     SumRequest request;
-    *request.x_ref() = x;
-    *request.y_ref() = y;
+    *request.x() = x;
+    *request.y() = y;
     SumResponse response;
     this->client_->sync_computeSumNoCoro(response, request);
-    return *response.sum_ref();
+    return *response.sum();
   });
 }
 
 TYPED_TEST_P(CoroutineTest, Sum) {
   this->expectSumResults([&](int x, int y) {
     SumRequest request;
-    *request.x_ref() = x;
-    *request.y_ref() = y;
+    *request.x() = x;
+    *request.y() = y;
     SumResponse response;
     this->client_->sync_computeSum(response, request);
-    return *response.sum_ref();
+    return *response.sum();
   });
 }
 
@@ -271,8 +271,8 @@ TYPED_TEST_P(CoroutineTest, SumUnimplemented) {
     bool error = false;
     try {
       SumRequest request;
-      *request.x_ref() = i;
-      *request.y_ref() = i;
+      *request.x() = i;
+      *request.y() = i;
       SumResponse response;
       this->client_->sync_computeSumUnimplemented(response, request);
     } catch (...) {
@@ -305,8 +305,8 @@ TYPED_TEST_P(CoroutineTest, SumThrows) {
     bool error = false;
     try {
       SumRequest request;
-      *request.x_ref() = i;
-      *request.y_ref() = i;
+      *request.x() = i;
+      *request.y() = i;
       SumResponse response;
       this->client_->sync_computeSumThrows(response, request);
     } catch (...) {
@@ -342,17 +342,17 @@ TYPED_TEST_P(CoroutineTest, NoParameters) {
 
 TYPED_TEST_P(CoroutineTest, ImplemetedWithFutures) {
   SumResponse response;
-  *response.sum_ref() = 0;
+  *response.sum() = 0;
   this->client_->sync_implementedWithFutures(response);
-  EXPECT_EQ(kNoParameterReturnValue, *response.sum_ref());
+  EXPECT_EQ(kNoParameterReturnValue, *response.sum());
 
-  *response.sum_ref() = 0;
+  *response.sum() = 0;
   this->client_->sync_implementedWithFutures(response);
-  EXPECT_EQ(kNoParameterReturnValue, *response.sum_ref());
+  EXPECT_EQ(kNoParameterReturnValue, *response.sum());
 
-  *response.sum_ref() = 0;
+  *response.sum() = 0;
   this->client_->sync_implementedWithFutures(response);
-  EXPECT_EQ(kNoParameterReturnValue, *response.sum_ref());
+  EXPECT_EQ(kNoParameterReturnValue, *response.sum());
 }
 
 TYPED_TEST_P(CoroutineTest, ImplemetedWithFuturesPrimitive) {
@@ -382,8 +382,8 @@ TYPED_TEST_P(CoroutineTest, SumThrowsUserEx) {
     bool error = false;
     try {
       SumRequest request;
-      *request.x_ref() = i;
-      *request.y_ref() = i;
+      *request.x() = i;
+      *request.y() = i;
       SumResponse response;
       this->client_->sync_computeSumThrowsUserEx(response, request);
     } catch (const Ex&) {
@@ -443,18 +443,18 @@ class CoroutineNullTest : public testing::Test {
 
 TEST_F(CoroutineNullTest, Basics) {
   SumRequest request;
-  *request.x_ref() = 123;
-  *request.y_ref() = 123;
+  *request.x() = 123;
+  *request.y() = 123;
 
   SumResponse response;
 
-  *response.sum_ref() = 123;
+  *response.sum() = 123;
   client_->sync_computeSumNoCoro(response, request);
-  EXPECT_EQ(0, *response.sum_ref());
+  EXPECT_EQ(0, *response.sum());
 
-  *response.sum_ref() = 123;
+  *response.sum() = 123;
   client_->sync_computeSum(response, request);
-  EXPECT_EQ(0, *response.sum_ref());
+  EXPECT_EQ(0, *response.sum());
 
   EXPECT_EQ(0, client_->sync_computeSumPrimitive(123, 456));
 
@@ -477,14 +477,14 @@ class CoroutineClientTest : public testing::Test {
 
 TEST_F(CoroutineClientTest, SumCoroClient) {
   SumRequest request;
-  *request.x_ref() = 123;
-  *request.y_ref() = 123;
+  *request.x() = 123;
+  *request.y() = 123;
 
   client_->co_computeSum(request)
       .semi()
       .via(&eventBase_)
       .then([&](folly::Try<SumResponse> response) {
-        EXPECT_EQ(246, *response->sum_ref());
+        EXPECT_EQ(246, *response->sum());
       })
       .getVia(&eventBase_);
 }
@@ -507,8 +507,8 @@ TEST_F(CoroutineClientTest, SumVoidCoroClient) {
 
 TEST_F(CoroutineClientTest, SumUnimplementedCoroClient) {
   SumRequest request;
-  *request.x_ref() = 43;
-  *request.y_ref() = 179;
+  *request.x() = 43;
+  *request.y() = 179;
   client_->co_computeSumUnimplemented(request)
       .semi()
       .via(&eventBase_)
@@ -532,8 +532,8 @@ TEST_F(CoroutineClientTest, SumUnimplementedPrimitiveCoroClient) {
 
 TEST_F(CoroutineClientTest, SumThrowsCoroClient) {
   SumRequest request;
-  *request.x_ref() = 290;
-  *request.y_ref() = 321;
+  *request.x() = 290;
+  *request.y() = 321;
   client_->co_computeSumThrows(request)
       .semi()
       .via(&eventBase_)
@@ -568,7 +568,7 @@ TEST_F(CoroutineClientTest, implementedWithFuturesCoroClient) {
       .semi()
       .via(&eventBase_)
       .then([&](folly::Try<SumResponse> response) {
-        EXPECT_EQ(kNoParameterReturnValue, *response->sum_ref());
+        EXPECT_EQ(kNoParameterReturnValue, *response->sum());
       })
       .getVia(&eventBase_);
 }
@@ -709,7 +709,7 @@ TEST(CoroutineHeaderTest, customHeaderTest) {
         }
       }
       auto response = std::make_unique<SumResponse>();
-      response->sum_ref() = *request->x_ref() + *request->y_ref();
+      response->sum() = *request->x() + *request->y();
       co_return response;
     }
   };
@@ -722,13 +722,13 @@ TEST(CoroutineHeaderTest, customHeaderTest) {
   rpcOptions.setWriteHeader("foo", "bar");
 
   SumRequest sumRequest;
-  sumRequest.x_ref() = 42;
-  sumRequest.y_ref() = 123;
+  sumRequest.x() = 42;
+  sumRequest.y() = 123;
   auto result =
       folly::coro::blockingWait(client->co_computeSum(rpcOptions, sumRequest));
   auto ptr = folly::get_ptr(rpcOptions.getReadHeaders(), "header_from_server");
   EXPECT_NE(nullptr, ptr);
   EXPECT_EQ("1", *ptr);
-  EXPECT_EQ(165, *result.sum_ref());
+  EXPECT_EQ(165, *result.sum());
 }
 #endif

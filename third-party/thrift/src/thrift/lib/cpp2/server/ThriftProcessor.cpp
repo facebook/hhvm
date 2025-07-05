@@ -55,10 +55,10 @@ void ThriftProcessor::onThriftRequest(
   worker->getEventBase()->dcheckIsInEventBaseThread();
 
   bool invalidMetadata =
-      !(metadata.protocol_ref() && metadata.name_ref() && metadata.kind_ref());
+      !(metadata.protocol() && metadata.name() && metadata.kind());
 
-  bool invalidChecksum = metadata.crc32c_ref() &&
-      *metadata.crc32c_ref() != apache::thrift::checksum::crc32c(*payload);
+  bool invalidChecksum = metadata.crc32c() &&
+      *metadata.crc32c() != apache::thrift::checksum::crc32c(*payload);
 
   auto request = std::make_unique<ThriftRequest>(
       server_, channel, std::move(metadata), std::move(connContext));

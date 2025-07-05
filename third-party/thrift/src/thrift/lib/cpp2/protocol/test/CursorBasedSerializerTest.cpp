@@ -100,7 +100,7 @@ TEST(CursorSerializer, UnionRead) {
   EXPECT_EQ(reader.readType(), Stringish::Type::__EMPTY__);
   wrapper.endRead(std::move(reader));
 
-  string.string_field_ref() = "foo";
+  string.string_field() = "foo";
   wrapper = CursorSerializationWrapper<Stringish>(string);
   reader = wrapper.beginRead();
   EXPECT_EQ(reader.readType(), Stringish::Type::string_field);
@@ -108,7 +108,7 @@ TEST(CursorSerializer, UnionRead) {
   EXPECT_FALSE(reader.read<ident::binary_field>());
   wrapper.endRead(std::move(reader));
 
-  string.binary_field_ref() = folly::IOBuf::wrapBufferAsValue(
+  string.binary_field() = folly::IOBuf::wrapBufferAsValue(
       folly::ByteRange(std::string_view("bar")));
   wrapper = CursorSerializationWrapper<Stringish>(string);
   reader = wrapper.beginRead();
@@ -362,9 +362,9 @@ TEST(CursorSerializer, AbandonNestedStructRead) {
 TEST(CursorSerializer, CursorReadInContainer) {
   Struct s;
   Stringish inner;
-  inner.string_field_ref() = "foo";
+  inner.string_field() = "foo";
   s.set_nested_field() = std::vector{std::set{inner}};
-  inner.string_field_ref() = "bar";
+  inner.string_field() = "bar";
   s.set_nested_field()[0].insert(inner);
 
   StructCursor wrapper(s);
@@ -500,7 +500,7 @@ TEST(CursorSerializer, UnionWrite) {
   wrapper.endWrite(std::move(writer));
 
   auto obj = wrapper.deserialize();
-  EXPECT_EQ(*obj.string_field_ref(), "foo");
+  EXPECT_EQ(*obj.string_field(), "foo");
 }
 
 TEST(CursorSerializer, ManagedStringViewWrite) {

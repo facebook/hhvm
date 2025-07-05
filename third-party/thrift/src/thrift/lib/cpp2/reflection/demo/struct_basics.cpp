@@ -52,10 +52,10 @@ int main(int argc, char** argv) {
   folly::init(&argc, &argv);
 
   simple_struct value;
-  *value.i32_data_ref() = 12345678;
-  *value.i16_data_ref() = 4321;
-  *value.double_data_ref() = 3.1415926;
-  *value.string_data_ref() = "hello, world";
+  *value.i32_data() = 12345678;
+  *value.i16_data() = 4321;
+  *value.double_data() = 3.1415926;
+  *value.string_data() = "hello, world";
 
   print_struct_info(value);
 

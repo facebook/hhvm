@@ -37,7 +37,7 @@ class ThriftParametersClientExtensionTest : public testing::Test {
         compressionAlgorithms |= 1ull << (int(comp) - 1);
       }
     }
-    params.compressionAlgos_ref() = compressionAlgorithms;
+    params.compressionAlgos() = compressionAlgorithms;
     ThriftParametersExt paramsExt;
     paramsExt.params = params;
     serverExtensions_.push_back(encodeThriftExtension(paramsExt));

@@ -237,19 +237,19 @@ apache::thrift::ServerStream<Message> TestStreamServiceMock::streamThrows(
     int32_t whichEx) {
   if (whichEx == 0) {
     SecondEx ex;
-    ex.errCode_ref() = 0;
+    ex.errCode() = 0;
     throw ex;
   }
 
   auto streamAndPublisher = ServerStream<Message>::createPublisher();
   if (whichEx == 1) {
     FirstEx ex;
-    ex.errMsg_ref() = "FirstEx";
-    ex.errCode_ref() = 1;
+    ex.errMsg() = "FirstEx";
+    ex.errCode() = 1;
     std::move(streamAndPublisher.second).complete(ex);
   } else if (whichEx == 2) {
     SecondEx ex;
-    ex.errCode_ref() = 2;
+    ex.errCode() = 2;
     std::move(streamAndPublisher.second).complete(ex);
   } else {
     std::move(streamAndPublisher.second)

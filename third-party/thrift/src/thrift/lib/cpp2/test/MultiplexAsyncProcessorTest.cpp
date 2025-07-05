@@ -132,28 +132,25 @@ TEST_F(MultiplexAsyncProcessorTest, getServiceMetadata) {
   LOG(INFO) << "ServiceMetadata: " << debugString(response);
 
   EXPECT_EQ(
-      *response.context_ref()->service_info_ref()->name_ref(),
+      *response.context()->service_info()->name(),
       "MultiplexAsyncProcessor.First");
 
-  auto& services = *response.services_ref();
+  auto& services = *response.services();
   EXPECT_EQ(services.size(), 6);
-  EXPECT_EQ(*services[0].service_name_ref(), "MultiplexAsyncProcessor.First");
-  EXPECT_EQ(*services[1].service_name_ref(), "MultiplexAsyncProcessor.Second");
-  EXPECT_EQ(
-      *services[2].service_name_ref(), "MultiplexAsyncProcessor.SomeService");
+  EXPECT_EQ(*services[0].service_name(), "MultiplexAsyncProcessor.First");
+  EXPECT_EQ(*services[1].service_name(), "MultiplexAsyncProcessor.Second");
+  EXPECT_EQ(*services[2].service_name(), "MultiplexAsyncProcessor.SomeService");
   // Base service of SomeService
-  EXPECT_EQ(*services[3].service_name_ref(), "MultiplexAsyncProcessor.Third");
-  EXPECT_EQ(
-      *services[4].service_name_ref(), "MultiplexAsyncProcessor.Conflicts");
-  EXPECT_EQ(*services[5].service_name_ref(), "MultiplexAsyncProcessor.Third");
+  EXPECT_EQ(*services[3].service_name(), "MultiplexAsyncProcessor.Third");
+  EXPECT_EQ(*services[4].service_name(), "MultiplexAsyncProcessor.Conflicts");
+  EXPECT_EQ(*services[5].service_name(), "MultiplexAsyncProcessor.Third");
 
-  const auto& metadata = *response.metadata_ref();
-  EXPECT_EQ(metadata.structs_ref()->size(), 1);
+  const auto& metadata = *response.metadata();
+  EXPECT_EQ(metadata.structs()->size(), 1);
   EXPECT_EQ(
-      metadata.structs_ref()->begin()->first,
-      "MultiplexAsyncProcessor.SomeStruct");
+      metadata.structs()->begin()->first, "MultiplexAsyncProcessor.SomeStruct");
   // All composed services are referred to
-  EXPECT_EQ(metadata.services_ref()->size(), 5);
+  EXPECT_EQ(metadata.services()->size(), 5);
 }
 
 TEST_F(MultiplexAsyncProcessorTest, getServiceMetadata_Nested) {
@@ -179,28 +176,25 @@ TEST_F(MultiplexAsyncProcessorTest, getServiceMetadata_Nested) {
   LOG(INFO) << "ServiceMetadata: " << debugString(response);
 
   EXPECT_EQ(
-      *response.context_ref()->service_info_ref()->name_ref(),
+      *response.context()->service_info()->name(),
       "MultiplexAsyncProcessor.First");
 
-  auto& services = *response.services_ref();
+  auto& services = *response.services();
   EXPECT_EQ(services.size(), 6);
-  EXPECT_EQ(*services[0].service_name_ref(), "MultiplexAsyncProcessor.First");
-  EXPECT_EQ(*services[1].service_name_ref(), "MultiplexAsyncProcessor.Second");
-  EXPECT_EQ(
-      *services[2].service_name_ref(), "MultiplexAsyncProcessor.SomeService");
+  EXPECT_EQ(*services[0].service_name(), "MultiplexAsyncProcessor.First");
+  EXPECT_EQ(*services[1].service_name(), "MultiplexAsyncProcessor.Second");
+  EXPECT_EQ(*services[2].service_name(), "MultiplexAsyncProcessor.SomeService");
   // Base service of SomeService
-  EXPECT_EQ(*services[3].service_name_ref(), "MultiplexAsyncProcessor.Third");
-  EXPECT_EQ(
-      *services[4].service_name_ref(), "MultiplexAsyncProcessor.Conflicts");
-  EXPECT_EQ(*services[5].service_name_ref(), "MultiplexAsyncProcessor.Third");
+  EXPECT_EQ(*services[3].service_name(), "MultiplexAsyncProcessor.Third");
+  EXPECT_EQ(*services[4].service_name(), "MultiplexAsyncProcessor.Conflicts");
+  EXPECT_EQ(*services[5].service_name(), "MultiplexAsyncProcessor.Third");
 
-  const auto& metadata = *response.metadata_ref();
-  EXPECT_EQ(metadata.structs_ref()->size(), 1);
+  const auto& metadata = *response.metadata();
+  EXPECT_EQ(metadata.structs()->size(), 1);
   EXPECT_EQ(
-      metadata.structs_ref()->begin()->first,
-      "MultiplexAsyncProcessor.SomeStruct");
+      metadata.structs()->begin()->first, "MultiplexAsyncProcessor.SomeStruct");
   // All composed services are referred to
-  EXPECT_EQ(metadata.services_ref()->size(), 5);
+  EXPECT_EQ(metadata.services()->size(), 5);
 }
 
 TEST_F(MultiplexAsyncProcessorServerTest, Basic) {

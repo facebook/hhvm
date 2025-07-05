@@ -48,17 +48,17 @@ enum class ExpectCompression { Empty, NotEmpty };
 
 CodecConfig toCodecConfig(const ZlibCompressionCodecConfig& zlibConfig) {
   CodecConfig codecConfig;
-  codecConfig.zlibConfig_ref() = zlibConfig;
+  codecConfig.zlibConfig() = zlibConfig;
   return codecConfig;
 }
 CodecConfig toCodecConfig(const ZstdCompressionCodecConfig& zstdConfig) {
   CodecConfig codecConfig;
-  codecConfig.zstdConfig_ref() = zstdConfig;
+  codecConfig.zstdConfig() = zstdConfig;
   return codecConfig;
 }
 CodecConfig toCodecConfig(const Lz4CompressionCodecConfig& lz4Config) {
   CodecConfig codecConfig;
-  codecConfig.lz4Config_ref() = lz4Config;
+  codecConfig.lz4Config() = lz4Config;
   return codecConfig;
 }
 
@@ -141,9 +141,9 @@ Metadata testSetCompressionCodec(
   Metadata metadata;
   auto codecConfig = toCodecConfig(Config());
   CompressionConfig compressionConfig;
-  compressionConfig.codecConfig_ref() = codecConfig;
+  compressionConfig.codecConfig() = codecConfig;
   if (compressionSizeLimitOpt) {
-    compressionConfig.compressionSizeLimit_ref() = *compressionSizeLimitOpt;
+    compressionConfig.compressionSizeLimit() = *compressionSizeLimitOpt;
   }
 
   cmb.setCompressionCodec(compressionConfig, metadata, basePayloadSize);

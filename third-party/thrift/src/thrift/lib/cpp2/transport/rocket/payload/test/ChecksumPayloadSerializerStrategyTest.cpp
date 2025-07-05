@@ -75,7 +75,7 @@ TEST(
       .ensure()
       .codecConfig()
       .ensure()
-      .zstdConfig_ref()
+      .zstdConfig()
       .ensure();
 
   Checksum checksum;
@@ -110,7 +110,7 @@ TEST(
       .ensure()
       .codecConfig()
       .ensure()
-      .zstdConfig_ref()
+      .zstdConfig()
       .ensure();
 
   Checksum checksum;

@@ -981,8 +981,7 @@ class TestClientCallback : public StreamClientCallback {
     }
     for (size_t i = 1; i <= echoHeaders_; ++i) {
       HeadersPayloadContent header;
-      header.otherMetadata_ref() = {
-          {"expected_header", folly::to<std::string>(i)}};
+      header.otherMetadata() = {{"expected_header", folly::to<std::string>(i)}};
       auto alive = subscription_->onSinkHeaders({std::move(header), {}});
       DCHECK(alive);
     }
@@ -1017,7 +1016,7 @@ class TestClientCallback : public StreamClientCallback {
     evb_.terminateLoopSoon();
   }
   bool onStreamHeaders(HeadersPayload&& payload) override {
-    auto metadata_ref = payload.payload.otherMetadata_ref();
+    auto metadata_ref = payload.payload.otherMetadata();
     EXPECT_TRUE(metadata_ref);
     if (metadata_ref) {
       EXPECT_EQ(

@@ -28,17 +28,17 @@ class CodecConfigSelector {
  public:
   static CodecConfig fromConfig(const ZlibCompressionCodecConfig& zlibConfig) {
     CodecConfig codecConfig;
-    codecConfig.zlibConfig_ref() = zlibConfig;
+    codecConfig.zlibConfig() = zlibConfig;
     return codecConfig;
   }
   static CodecConfig fromConfig(const ZstdCompressionCodecConfig& zstdConfig) {
     CodecConfig codecConfig;
-    codecConfig.zstdConfig_ref() = zstdConfig;
+    codecConfig.zstdConfig() = zstdConfig;
     return codecConfig;
   }
   static CodecConfig fromConfig(const Lz4CompressionCodecConfig& lz4Config) {
     CodecConfig codecConfig;
-    codecConfig.lz4Config_ref() = lz4Config;
+    codecConfig.lz4Config() = lz4Config;
     return codecConfig;
   }
 

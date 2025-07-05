@@ -196,7 +196,7 @@ TEST(Presult, Presult) {
       .thenError(
           folly::tag_t<Exception1>{},
           [&count](const Exception1& e) {
-            EXPECT_EQ(*e.code_ref(), 5);
+            EXPECT_EQ(*e.code(), 5);
             count--;
           })
       .thenError(folly::tag_t<std::exception>{}, [](const std::exception&) {
@@ -208,7 +208,7 @@ TEST(Presult, Presult) {
       .thenError(
           folly::tag_t<Exception2>{},
           [&count](const Exception2& e) {
-            EXPECT_EQ(*e.message_ref(), "ex2");
+            EXPECT_EQ(*e.message(), "ex2");
             count--;
           })
       .thenError(folly::tag_t<std::exception>{}, [](const std::exception&) {

@@ -58,7 +58,7 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
       header,
       nullptr,
       /*customCompressionEnabled=*/false);
-  const auto& buf = **requestRpcMetadata.frameworkMetadata_ref();
+  const auto& buf = **requestRpcMetadata.frameworkMetadata();
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());
   EXPECT_EQ(content, "linked");
 }
@@ -85,7 +85,7 @@ TEST(RpcMetadataUtil, interceptorFrameworkMetadata) {
       header,
       folly::IOBuf::copyBuffer(std::string("interceptor_metadata")),
       /*customCompressionEnabled=*/false);
-  const auto& buf = **requestRpcMetadata.frameworkMetadata_ref();
+  const auto& buf = **requestRpcMetadata.frameworkMetadata();
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());
   EXPECT_EQ(content, "interceptor_metadata");
 }
@@ -103,7 +103,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
 
   {
     CompressionConfig compressionConfig;
-    compressionConfig.codecConfig().ensure().customConfig_ref().emplace();
+    compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
     auto requestRpcMetadata = makeRequestRpcMetadata(
@@ -123,7 +123,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     EXPECT_TRUE(requestRpcMetadata.compressionConfig()
                     .value()
                     .codecConfig()
-                    ->zlibConfig_ref()
+                    ->zlibConfig()
                     .has_value());
     EXPECT_EQ(
         requestRpcMetadata.compression().value(), CompressionAlgorithm::ZLIB);
@@ -131,7 +131,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
 
   {
     CompressionConfig compressionConfig;
-    compressionConfig.codecConfig().ensure().customConfig_ref().emplace();
+    compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
     auto requestRpcMetadata = makeRequestRpcMetadata(
@@ -150,7 +150,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     EXPECT_TRUE(requestRpcMetadata.compressionConfig()
                     .value()
                     .codecConfig()
-                    ->zstdConfig_ref()
+                    ->zstdConfig()
                     .has_value());
     EXPECT_EQ(
         requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);
@@ -158,7 +158,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
 
   {
     CompressionConfig compressionConfig;
-    compressionConfig.codecConfig().ensure().customConfig_ref().emplace();
+    compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
     auto requestRpcMetadata = makeRequestRpcMetadata(
@@ -177,7 +177,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     EXPECT_TRUE(requestRpcMetadata.compressionConfig()
                     .value()
                     .codecConfig()
-                    ->customConfig_ref()
+                    ->customConfig()
                     .has_value());
     EXPECT_EQ(
         requestRpcMetadata.compression().value(), CompressionAlgorithm::CUSTOM);
@@ -185,7 +185,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
 
   {
     CompressionConfig compressionConfig;
-    compressionConfig.codecConfig().ensure().zstdConfig_ref().emplace();
+    compressionConfig.codecConfig().ensure().zstdConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
     auto requestRpcMetadata = makeRequestRpcMetadata(
@@ -204,7 +204,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     EXPECT_TRUE(requestRpcMetadata.compressionConfig()
                     .value()
                     .codecConfig()
-                    ->zstdConfig_ref()
+                    ->zstdConfig()
                     .has_value());
     EXPECT_EQ(
         requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);

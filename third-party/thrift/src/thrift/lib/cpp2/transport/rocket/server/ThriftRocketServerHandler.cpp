@@ -64,8 +64,8 @@ thread_local uint32_t ThriftRocketServerHandler::sample_{0};
 
 namespace {
 bool isMetadataValid(const RequestRpcMetadata& metadata, RpcKind expectedKind) {
-  return metadata.protocol_ref() && metadata.name_ref() &&
-      metadata.kind_ref() && metadata.kind_ref() == expectedKind;
+  return metadata.protocol() && metadata.name() && metadata.kind() &&
+      metadata.kind() == expectedKind;
 }
 
 // The reason we have separate helper functions is for some minor perf
@@ -186,8 +186,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
 
     connContext_.readSetupMetadata(meta);
 
-    auto minVersion = meta.minVersion_ref().value_or(0);
-    auto maxVersion = meta.maxVersion_ref().value_or(0);
+    auto minVersion = meta.minVersion().value_or(0);
+    auto maxVersion = meta.maxVersion().value_or(0);
 
     THRIFT_CONNECTION_EVENT(rocket.setup).log(connContext_, [&] {
       return folly::dynamic::object("client_min_version", minVersion)(
@@ -278,8 +278,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
 
     ServerPushMetadata serverMeta;
     serverMeta.set_setupResponse();
-    serverMeta.setupResponse_ref()->version_ref() = version_;
-    serverMeta.setupResponse_ref()->zstdSupported_ref() = true;
+    serverMeta.setupResponse()->version() = version_;
+    serverMeta.setupResponse()->zstdSupported() = true;
 
     if (auto ref = meta.compressionSetupRequest()) {
       auto compressionSetupRes =
@@ -291,10 +291,10 @@ void ThriftRocketServerHandler::handleSetupFrame(
       } else {
         auto optResponse = std::move(compressionSetupRes.value());
         if (optResponse) {
-          serverMeta.setupResponse_ref()
+          serverMeta.setupResponse()
               ->compressionSetupResponse()
               .ensure()
-              .custom_ref() = std::move(*optResponse);
+              .custom() = std::move(*optResponse);
         }
         // otherwise, custom compression is simply not used
       }
@@ -317,11 +317,11 @@ folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
 ThriftRocketServerHandler::handleSetupFrameCustomCompression(
     CompressionSetupRequest const& setupRequest,
     RocketServerConnection& connection) {
-  if (!setupRequest.custom_ref()) {
+  if (!setupRequest.custom()) {
     return folly::makeUnexpected(
         "Cannot setup compression on server due to unrecognized request type");
   }
-  const auto& customSetupRequest = *setupRequest.custom_ref();
+  const auto& customSetupRequest = *setupRequest.custom();
 
   auto factory =
       CustomCompressorRegistry::get(*customSetupRequest.compressorName());
@@ -585,17 +585,16 @@ void ThriftRocketServerHandler::handleRequestCommon(
   }
 
   THRIFT_APPLICATION_EVENT(server_read_headers).log([&] {
-    auto size =
-        metadata.otherMetadata_ref() ? metadata.otherMetadata_ref()->size() : 0;
+    auto size = metadata.otherMetadata() ? metadata.otherMetadata()->size() : 0;
     std::vector<folly::dynamic> keys;
     if (size) {
       keys.reserve(size);
-      for (auto& [k, v] : *metadata.otherMetadata_ref()) {
+      for (auto& [k, v] : *metadata.otherMetadata()) {
         keys.push_back(k);
       }
     }
     int fmd_sz = 0;
-    if (auto fmd = metadata.frameworkMetadata_ref()) {
+    if (auto fmd = metadata.frameworkMetadata()) {
       DCHECK(*fmd) << "initialized IOBuf is null";
       fmd_sz = (**fmd).computeChainDataLength();
     }
@@ -604,9 +603,9 @@ void ThriftRocketServerHandler::handleRequestCommon(
         ("frameworkMetadataSize", fmd_sz);
   });
 
-  if (metadata.crc32c_ref()) {
+  if (metadata.crc32c()) {
     try {
-      if (auto compression = metadata.compression_ref()) {
+      if (auto compression = metadata.compression()) {
         data = connection.getPayloadSerializer()->uncompressBuffer(
             std::move(data), *compression);
       }
@@ -622,8 +621,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   }
 
   // check the checksum
-  const bool badChecksum = metadata.crc32c_ref() &&
-      (*metadata.crc32c_ref() != checksum::crc32c(*data));
+  const bool badChecksum =
+      metadata.crc32c() && (*metadata.crc32c() != checksum::crc32c(*data));
 
   if (badChecksum) {
     handleRequestWithBadChecksum(makeActiveRequest(
@@ -661,8 +660,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   using PerServiceMetadata = Cpp2Worker::PerServiceMetadata;
   const PerServiceMetadata::FindMethodResult methodMetadataResult =
       serviceMetadata_->findMethod(
-          metadata.name_ref()
-              ? metadata.name_ref()->view()
+          metadata.name()
+              ? metadata.name()->view()
               : std::string_view{}); // need to call with empty string_view
                                      // because we still distinguish
                                      // between NotImplemented and
@@ -771,7 +770,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   if (interactionCreateOpt) {
     cpp2ReqCtx->setInteractionCreate(*interactionCreateOpt);
     DCHECK_EQ(cpp2ReqCtx->getInteractionId(), 0);
-    cpp2ReqCtx->setInteractionId(*interactionCreateOpt->interactionId_ref());
+    cpp2ReqCtx->setInteractionId(*interactionCreateOpt->interactionId());
   }
 
   cpp2ReqCtx->setRpcKind(expectedKind);

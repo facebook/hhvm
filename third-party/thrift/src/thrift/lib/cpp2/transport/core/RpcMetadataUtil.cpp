@@ -72,12 +72,12 @@ RequestRpcMetadata makeRequestRpcMetadata(
       // (see logic right below).
       if (codec->getType() == CodecConfig::Type::customConfig &&
           !customCompressionEnabled) {
-        codec->zlibConfig_ref().emplace();
+        codec->zlibConfig().emplace();
       }
 
       if (codec->getType() == CodecConfig::Type::zlibConfig &&
           serverZstdSupported) {
-        codec->zstdConfig_ref().emplace();
+        codec->zstdConfig().emplace();
       }
 
       if (payloadSize > compressionConfig->compressionSizeLimit().value_or(0)) {

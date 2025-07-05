@@ -25,16 +25,16 @@ TEST(Foo, base) {
   metadata::ThriftMetadata md;
   const metadata::ThriftStruct& ts =
       StructMetadata<::metadata::test::nested_structs::Foo>::gen(md);
-  EXPECT_EQ(md.structs_ref()->size(), 1);
-  EXPECT_EQ(&ts, &md.structs_ref()->at("nested_structs_test.Foo"));
+  EXPECT_EQ(md.structs()->size(), 1);
+  EXPECT_EQ(&ts, &md.structs()->at("nested_structs_test.Foo"));
 }
 
 TEST(City, base) {
   metadata::ThriftMetadata md;
   const metadata::ThriftStruct& ts =
       StructMetadata<::metadata::test::nested_structs::City>::gen(md);
-  EXPECT_EQ(md.structs_ref()->size(), 2);
-  EXPECT_EQ(&ts, &md.structs_ref()->at("nested_structs_test.City"));
+  EXPECT_EQ(md.structs()->size(), 2);
+  EXPECT_EQ(&ts, &md.structs()->at("nested_structs_test.City"));
 }
 
 TEST(City, structured_metadata) {
@@ -43,22 +43,21 @@ TEST(City, structured_metadata) {
 
   const metadata::ThriftConstStruct& struct_annotation =
       metadata.structured_annotations()->at(0);
-  EXPECT_EQ(
-      struct_annotation.type_ref()->name_ref(), "simple_structs_test.Nat");
+  EXPECT_EQ(struct_annotation.type()->name(), "simple_structs_test.Nat");
   const metadata::ThriftConstValue& value =
-      struct_annotation.fields_ref()->at("data");
-  EXPECT_EQ(value.cv_string_ref(), "struct");
+      struct_annotation.fields()->at("data");
+  EXPECT_EQ(value.cv_string(), "struct");
 
-  const metadata::ThriftField& field = metadata.fields_ref()->at(0);
+  const metadata::ThriftField& field = metadata.fields()->at(0);
   const auto field_annotation = field.structured_annotations()->at(0);
-  EXPECT_EQ(field_annotation.type_ref()->name_ref(), "simple_structs_test.Map");
-  auto field_value = field_annotation.fields_ref()->at("value");
-  for (auto kv : *field_value.cv_map_ref()) {
-    if (kv.key_ref()->cv_integer_ref() == 0) {
-      EXPECT_EQ(kv.value_ref()->cv_string_ref(), "0");
+  EXPECT_EQ(field_annotation.type()->name(), "simple_structs_test.Map");
+  auto field_value = field_annotation.fields()->at("value");
+  for (auto kv : *field_value.cv_map()) {
+    if (kv.key()->cv_integer() == 0) {
+      EXPECT_EQ(kv.value()->cv_string(), "0");
     } else {
-      EXPECT_EQ(kv.key_ref()->cv_integer_ref(), 1);
-      EXPECT_EQ(kv.value_ref()->cv_string_ref(), "1");
+      EXPECT_EQ(kv.key()->cv_integer(), 1);
+      EXPECT_EQ(kv.value()->cv_string(), "1");
     }
   }
 }

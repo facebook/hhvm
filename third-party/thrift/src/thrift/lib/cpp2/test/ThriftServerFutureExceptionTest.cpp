@@ -57,7 +57,7 @@ class ThriftServerFutureExceptionTest : public testing::Test {
 
 Fiery makeFiery(std::string msg) {
   Fiery e;
-  *e.message_ref() = std::move(msg);
+  *e.message() = std::move(msg);
   return e;
 }
 
@@ -70,7 +70,7 @@ TEST_F(ThriftServerFutureExceptionTest, fiery_return) {
   auto client = runner.newClient<RaiserAsyncClient>(&eb);
 
   EXPECT_TRUE(exn(client->future_doRaise(), [&](const Fiery& e) {
-    EXPECT_EQ("rofl", *e.message_ref());
+    EXPECT_EQ("rofl", *e.message());
     EXPECT_EQ("::apache::thrift::test::Fiery", string(e.what()));
   }));
 }
@@ -84,7 +84,7 @@ TEST_F(ThriftServerFutureExceptionTest, fiery_throw) {
   auto client = runner.newClient<RaiserAsyncClient>(&eb);
 
   EXPECT_TRUE(exn(client->future_doRaise(), [&](const Fiery& e) {
-    EXPECT_EQ("rofl", *e.message_ref());
+    EXPECT_EQ("rofl", *e.message());
     EXPECT_EQ("::apache::thrift::test::Fiery", string(e.what()));
   }));
 }

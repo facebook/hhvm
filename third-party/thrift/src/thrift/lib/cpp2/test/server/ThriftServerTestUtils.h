@@ -74,7 +74,7 @@ class HeaderOrRocketTest : public testing::Test {
       } else if (compression == Compression::Custom) {
         RequestSetupMetadata meta;
         auto& custom =
-            meta.compressionSetupRequest().ensure().custom_ref().ensure();
+            meta.compressionSetupRequest().ensure().custom().ensure();
         custom.compressorName() = getCustomCompressorNameForCurrentTestCase();
         custom.payload() = "magic_prefix";
 
@@ -87,11 +87,11 @@ class HeaderOrRocketTest : public testing::Test {
 
     if (compression == Compression::Enabled) {
       apache::thrift::CompressionConfig compressionConfig;
-      compressionConfig.codecConfig_ref().ensure().set_zstdConfig();
+      compressionConfig.codecConfig().ensure().set_zstdConfig();
       channel->setDesiredCompressionConfig(compressionConfig);
     } else if (compression == Compression::Custom) {
       apache::thrift::CompressionConfig compressionConfig;
-      compressionConfig.codecConfig_ref().ensure().customConfig_ref().ensure();
+      compressionConfig.codecConfig().ensure().customConfig().ensure();
       channel->setDesiredCompressionConfig(compressionConfig);
     }
     return channel;

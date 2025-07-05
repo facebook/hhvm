@@ -838,7 +838,7 @@ void TransportCompatibilityTest::TestRequestResponse_Checksumming() {
       channel->getEventBase()->runInEventBaseThreadAndWait([&]() {
         CompressionConfig compressionConfig;
         if (compression) {
-          compressionConfig.codecConfig_ref().ensure().set_zstdConfig();
+          compressionConfig.codecConfig().ensure().set_zstdConfig();
         }
         channel->setDesiredCompressionConfig(compressionConfig);
       });
@@ -1068,10 +1068,10 @@ void TransportCompatibilityTest::TestBadPayload() {
     auto channel = static_cast<ClientChannel*>(client->getChannel());
     channel->getEventBase()->runInEventBaseThreadAndWait([&]() {
       RequestRpcMetadata metadata;
-      metadata.clientTimeoutMs_ref() = 10000;
-      metadata.kind_ref() = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
-      metadata.name_ref() = "name";
-      metadata.protocol_ref() = ProtocolId::BINARY;
+      metadata.clientTimeoutMs() = 10000;
+      metadata.kind() = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+      metadata.name() = "name";
+      metadata.protocol() = ProtocolId::BINARY;
 
       // Put a bad payload!
       auto payload = std::make_unique<folly::IOBuf>();

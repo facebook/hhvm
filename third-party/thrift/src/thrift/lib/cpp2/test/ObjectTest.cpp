@@ -269,7 +269,7 @@ TEST(ObjectTest, Struct) {
 TEST(ObjectTest, StructWithList) {
   testset::struct_with<type::list<type::i32_t>> s;
   std::vector<int> listValues = {1, 2, 3};
-  s.field_1_ref() = listValues;
+  s.field_1() = listValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
   const Object& object = value.as_object();
@@ -282,7 +282,7 @@ TEST(ObjectTest, StructWithList) {
 TEST(ObjectTest, StructWithMap) {
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
   std::map<std::string, int> mapValues = {{"one", 1}, {"four", 4}, {"two", 2}};
-  s.field_1_ref() = mapValues;
+  s.field_1() = mapValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
   const Object& object = value.as_object();
@@ -294,7 +294,7 @@ TEST(ObjectTest, StructWithMap) {
 TEST(ObjectTest, StructWithSet) {
   testset::struct_with<type::set<type::i64_t>> s;
   std::set<std::int64_t> setValues = {1, 2, 3};
-  s.field_1_ref() = setValues;
+  s.field_1() = setValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
   const Object& object = value.as_object();
@@ -464,7 +464,7 @@ TEST(ObjectTest, parseObject) {
   folly::IOBufQueue iobufQueue;
   testset::struct_with<type::set<type::i64_t>> thriftStruct;
   std::set<std::int64_t> setValues = {1, 2, 3};
-  thriftStruct.field_1_ref() = setValues;
+  thriftStruct.field_1() = setValues;
   BinarySerializer::serialize(thriftStruct, &iobufQueue);
   auto serialized = iobufQueue.move();
   auto object = parseObject<BinarySerializer::ProtocolReader>(*serialized);
@@ -478,7 +478,7 @@ TEST(ObjectTest, serializeObject) {
   folly::IOBufQueue iobufQueue;
   testset::struct_with<type::set<type::i64_t>> thriftStruct;
   std::set<std::int64_t> setValues = {1, 2, 3};
-  thriftStruct.field_1_ref() = setValues;
+  thriftStruct.field_1() = setValues;
   BinarySerializer::serialize(thriftStruct, &iobufQueue);
   auto expected = iobufQueue.move();
   auto object = parseObject<BinarySerializer::ProtocolReader>(*expected);
@@ -617,7 +617,7 @@ void testWithMask(bool testSerialize) {
     {
       // parseObject with Mask = includes{1: allMask()}
       Mask mask;
-      mask.includes_ref().emplace()[1] = allMask();
+      mask.includes().emplace()[1] = allMask();
       auto result =
           parseObjectWithTest<protocol_reader_t<Protocol>>(*iobuf, mask);
       if (testSerialize) {
@@ -863,7 +863,7 @@ TEST(Value, IsIntrinsicDefaultTrue) {
   EXPECT_TRUE(isIntrinsicDefault(
       asValueStruct<type::map<type::i32_t, type::string_t>>({})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
-  s.field_1_ref() = std::map<std::string, int>{};
+  s.field_1() = std::map<std::string, int>{};
   Object obj = asObject(s);
   EXPECT_TRUE(isIntrinsicDefault(obj));
 }
@@ -886,7 +886,7 @@ TEST(Value, IsIntrinsicDefaultFalse) {
       isIntrinsicDefault(asValueStruct<type::map<type::i32_t, type::string_t>>(
           {{1, "foo"}, {2, "bar"}})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
-  s.field_1_ref() = std::map<std::string, int>{{"foo", 1}, {"bar", 2}};
+  s.field_1() = std::map<std::string, int>{{"foo", 1}, {"bar", 2}};
   EXPECT_FALSE(isIntrinsicDefault(asObject(s)));
 }
 
@@ -914,9 +914,9 @@ void testParseObjectWithMask(bool testSerialize) {
 
   // masks obj[2] and obj[3][6]
   Mask mask;
-  auto& includes = mask.includes_ref().emplace();
+  auto& includes = mask.includes().emplace();
   includes[2] = allMask();
-  includes[3].includes_ref().emplace()[6] = allMask();
+  includes[3].includes().emplace()[6] = allMask();
 
   // expected{2: {1: "foo"}
   //          3: {6: true}}
@@ -944,10 +944,10 @@ void testParseObjectWithMask(bool testSerialize) {
   auto& values = *result.excluded.values();
   EXPECT_EQ(values.size(), 2);
   // Excluded should contain obj[1] and obj[3][5].
-  auto& excludedFields = result.excluded.data()->fields_ref().value();
+  auto& excludedFields = result.excluded.data()->fields().value();
   EXPECT_EQ(excludedFields.size(), 2);
   auto& i16Encoded = detail::getByValueId(
-      values, excludedFields.at(FieldId{1}).full_ref().value());
+      values, excludedFields.at(FieldId{1}).full().value());
 
   {
     Value v =
@@ -955,11 +955,10 @@ void testParseObjectWithMask(bool testSerialize) {
             i16Encoded);
     EXPECT_EQ(v.as_i16(), 3);
   }
-  auto& nestedExcludedFields =
-      excludedFields.at(FieldId{3}).fields_ref().value();
+  auto& nestedExcludedFields = excludedFields.at(FieldId{3}).fields().value();
   EXPECT_EQ(nestedExcludedFields.size(), 1);
   auto& objectEncoded = detail::getByValueId(
-      values, nestedExcludedFields.at(FieldId{5}).full_ref().value());
+      values, nestedExcludedFields.at(FieldId{5}).full().value());
   {
     Value v =
         parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::struct_c>(
@@ -983,8 +982,8 @@ void testSerializeObjectWithMask() {
 
   // masks obj[1][1] and obj[2]
   Mask mask;
-  auto& includes = mask.includes_ref().emplace();
-  includes[1].includes_ref().emplace()[1] = allMask();
+  auto& includes = mask.includes().emplace();
+  includes[1].includes().emplace()[1] = allMask();
   includes[2] = allMask();
 
   // serialize the object and deserialize with mask
@@ -1049,8 +1048,8 @@ void testSerializeObjectWithMaskError() {
     // MaskedData[1] is full, which should be fields.
     MaskedProtocolData protocolData;
     protocolData.protocol() = convertStandardProtocol(Protocol);
-    MaskedData& maskedData = protocolData.data_ref().value();
-    maskedData.fields_ref().ensure()[FieldId{1}].full_ref() = type::ValueId{1};
+    MaskedData& maskedData = protocolData.data().value();
+    maskedData.fields().ensure()[FieldId{1}].full() = type::ValueId{1};
 
     EXPECT_THROW(
         protocol::serializeObject<protocol_writer_t<Protocol>>(
@@ -1061,8 +1060,8 @@ void testSerializeObjectWithMaskError() {
     // MaskedData[2] is fields, which should be full.
     MaskedProtocolData protocolData;
     protocolData.protocol() = convertStandardProtocol(Protocol);
-    MaskedData& maskedData = protocolData.data_ref().value();
-    maskedData.fields_ref().ensure()[FieldId{2}].fields_ref().ensure();
+    MaskedData& maskedData = protocolData.data().value();
+    maskedData.fields().ensure()[FieldId{2}].fields().ensure();
 
     EXPECT_THROW(
         protocol::serializeObject<protocol_writer_t<Protocol>>(
@@ -1151,16 +1150,16 @@ void testParseObjectWithMapMask(bool testSerialize) {
   int16_t key20 = 20;
   std::string keyFoo = "foo";
   std::string keyBar = "bar";
-  auto& includes = mask.includes_ref().emplace();
+  auto& includes = mask.includes().emplace();
   includes[1]
-      .includes_map_ref()
+      .includes_map()
       .emplace()[key10]
-      .includes_string_map_ref()
+      .includes_string_map()
       .emplace()[keyFoo] = allMask();
   // This is treated as allMask() as the type is set. It tests the edge case
   // that a set field may have a map mask, since extractMaskFromPatch cannot
   // determine if a patch is for map or set for some operators.
-  includes[2].excludes_map_ref().emplace()[99] = allMask();
+  includes[2].excludes_map().emplace()[99] = allMask();
 
   Object expected;
   // expected{1: map{10: {"foo": 1}},
@@ -1195,7 +1194,7 @@ void testParseObjectWithMapMask(bool testSerialize) {
 
   // Excluded should contain map[10]["bar"] and map[20]
   auto& excludedKeys =
-      result.excluded.data()->fields_ref()->at(FieldId{1}).values_ref().value();
+      result.excluded.data()->fields()->at(FieldId{1}).values().value();
   EXPECT_EQ(excludedKeys.size(), 2);
   // check map[20]
   {
@@ -1316,8 +1315,8 @@ void testSerializeObjectWithMapMaskError() {
     // MaskedData[1] is full, which should be values.
     MaskedProtocolData protocolData;
     protocolData.protocol() = convertStandardProtocol(Protocol);
-    MaskedData& maskedData = protocolData.data_ref().value();
-    maskedData.fields_ref().ensure()[FieldId{1}].full_ref() = type::ValueId{1};
+    MaskedData& maskedData = protocolData.data().value();
+    maskedData.fields().ensure()[FieldId{1}].full() = type::ValueId{1};
 
     EXPECT_THROW(
         protocol::serializeObject<protocol_writer_t<Protocol>>(
@@ -1328,16 +1327,16 @@ void testSerializeObjectWithMapMaskError() {
     // MaskedData[1][2] is values, which should be full.
     MaskedProtocolData protocolData;
     protocolData.protocol() = convertStandardProtocol(Protocol);
-    MaskedData& maskedData = protocolData.data_ref().value();
+    MaskedData& maskedData = protocolData.data().value();
     auto& keys = protocolData.keys().ensure();
     keys.push_back(asValueStruct<type::i32_t>(2));
     type::ValueId keyValueId =
         type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
-    maskedData.fields_ref()
+    maskedData.fields()
         .ensure()[FieldId{1}]
-        .values_ref()
+        .values()
         .ensure()[keyValueId]
-        .values_ref()
+        .values()
         .ensure();
 
     EXPECT_THROW(
@@ -1392,24 +1391,24 @@ void testParseObjectWithTwoMasks() {
   // masks obj[2] and obj[4][10]["foo"]
   Mask readMask;
   {
-    auto& includes = readMask.includes_ref().emplace();
+    auto& includes = readMask.includes().emplace();
     includes[2] = allMask();
     includes[4]
-        .includes_map_ref()
+        .includes_map()
         .emplace()[key10]
-        .includes_string_map_ref()
+        .includes_string_map()
         .emplace()[keyFoo] = allMask();
   }
 
   // masks obj[1][1], obj[3], obj[4][10], and obj[4][20]["baz"]
   Mask writeMask;
   {
-    auto& includes = writeMask.includes_ref().emplace();
-    includes[1].includes_ref().emplace()[1] = allMask();
+    auto& includes = writeMask.includes().emplace();
+    includes[1].includes().emplace()[1] = allMask();
     includes[3] = allMask();
-    auto& includes_map = includes[4].includes_map_ref().emplace();
+    auto& includes_map = includes[4].includes_map().emplace();
     includes_map[key10] = allMask();
-    includes_map[key20].includes_string_map_ref().emplace()[keyBaz] = allMask();
+    includes_map[key20].includes_string_map().emplace()[keyBaz] = allMask();
   }
 
   // serialize the object and deserialize with mask

@@ -214,8 +214,8 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
   }
   std::optional<rocket::ProcessorInfo> tryHandle(
       const RequestSetupMetadata& meta) override {
-    if (meta.interfaceKind_ref().has_value() &&
-        meta.interfaceKind_ref().value() == InterfaceKind::DEBUGGING) {
+    if (meta.interfaceKind().has_value() &&
+        meta.interfaceKind().value() == InterfaceKind::DEBUGGING) {
       if (apache::thrift::useResourcePoolsFlagsSet()) {
         auto asyncHandle = apache::thrift::ResourcePoolHandle::defaultAsync();
         // Ensure there is an async handler set up in the resource pool.
@@ -259,11 +259,11 @@ class RejectingFrameInterceptor : public rocket::SetupFrameInterceptor {
   folly::Expected<folly::Unit, std::runtime_error> acceptSetup(
       const RequestSetupMetadata& meta,
       const ConnectionLoggingContext&) override {
-    const auto& clientMeta = meta.clientMetadata_ref();
+    const auto& clientMeta = meta.clientMetadata();
     if (!clientMeta) {
       return folly::Unit();
     }
-    const auto& otherMeta = clientMeta->otherMetadata_ref();
+    const auto& otherMeta = clientMeta->otherMetadata();
     if (!otherMeta) {
       return folly::Unit();
     }
@@ -372,7 +372,7 @@ class RequestInstrumentationTest : public ::testing::Test {
     return server().newClient<DebugTestServiceAsyncClient>(
         nullptr, [](auto socket) mutable {
           RequestSetupMetadata meta;
-          meta.interfaceKind_ref() = InterfaceKind::DEBUGGING;
+          meta.interfaceKind() = InterfaceKind::DEBUGGING;
           return apache::thrift::RocketClientChannel::newChannelWithMetadata(
               std::move(socket), std::move(meta));
         });

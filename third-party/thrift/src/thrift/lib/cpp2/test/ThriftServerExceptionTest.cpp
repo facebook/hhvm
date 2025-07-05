@@ -194,7 +194,7 @@ class ThriftServerExceptionTest : public testing::Test {
   Banal make_banal() const { return Banal(); }
   Fiery make_fiery() const {
     Fiery f;
-    *f.message_ref() = message;
+    *f.message() = message;
     return f;
   }
 
@@ -219,9 +219,9 @@ TEST_F(ThriftServerExceptionTest, dummy_test) {
   auto reader = rpcOptions.getReadHeaders();
   auto errorClass =
       apache::thrift::detail::deserializeErrorClassification(reader["exm"]);
-  EXPECT_EQ(*errorClass.kind_ref(), ErrorKind::UNSPECIFIED);
-  EXPECT_EQ(*errorClass.blame_ref(), ErrorBlame::UNSPECIFIED);
-  EXPECT_EQ(*errorClass.safety_ref(), ErrorSafety::UNSPECIFIED);
+  EXPECT_EQ(*errorClass.kind(), ErrorKind::UNSPECIFIED);
+  EXPECT_EQ(*errorClass.blame(), ErrorBlame::UNSPECIFIED);
+  EXPECT_EQ(*errorClass.safety(), ErrorSafety::UNSPECIFIED);
 
   try {
     folly::coro::blockingWait(client->co_fun2(rpcOptions));
@@ -230,9 +230,9 @@ TEST_F(ThriftServerExceptionTest, dummy_test) {
   reader = rpcOptions.getReadHeaders();
   errorClass =
       apache::thrift::detail::deserializeErrorClassification(reader["exm"]);
-  EXPECT_EQ(*errorClass.kind_ref(), ErrorKind::UNSPECIFIED);
-  EXPECT_EQ(*errorClass.blame_ref(), ErrorBlame::UNSPECIFIED);
-  EXPECT_EQ(*errorClass.safety_ref(), ErrorSafety::SAFE);
+  EXPECT_EQ(*errorClass.kind(), ErrorKind::UNSPECIFIED);
+  EXPECT_EQ(*errorClass.blame(), ErrorBlame::UNSPECIFIED);
+  EXPECT_EQ(*errorClass.safety(), ErrorSafety::SAFE);
 
   try {
     folly::coro::blockingWait(client->co_fun3(rpcOptions));
@@ -241,9 +241,9 @@ TEST_F(ThriftServerExceptionTest, dummy_test) {
   reader = rpcOptions.getReadHeaders();
   errorClass =
       apache::thrift::detail::deserializeErrorClassification(reader["exm"]);
-  EXPECT_EQ(*errorClass.kind_ref(), ErrorKind::STATEFUL);
-  EXPECT_EQ(*errorClass.blame_ref(), ErrorBlame::CLIENT);
-  EXPECT_EQ(*errorClass.safety_ref(), ErrorSafety::UNSPECIFIED);
+  EXPECT_EQ(*errorClass.kind(), ErrorKind::STATEFUL);
+  EXPECT_EQ(*errorClass.blame(), ErrorBlame::CLIENT);
+  EXPECT_EQ(*errorClass.safety(), ErrorSafety::UNSPECIFIED);
 
   try {
     folly::coro::blockingWait(client->co_fun4(rpcOptions));
@@ -252,9 +252,9 @@ TEST_F(ThriftServerExceptionTest, dummy_test) {
   reader = rpcOptions.getReadHeaders();
   errorClass =
       apache::thrift::detail::deserializeErrorClassification(reader["exm"]);
-  EXPECT_EQ(*errorClass.kind_ref(), ErrorKind::PERMANENT);
-  EXPECT_EQ(*errorClass.blame_ref(), ErrorBlame::CLIENT);
-  EXPECT_EQ(*errorClass.safety_ref(), ErrorSafety::SAFE);
+  EXPECT_EQ(*errorClass.kind(), ErrorKind::PERMANENT);
+  EXPECT_EQ(*errorClass.blame(), ErrorBlame::CLIENT);
+  EXPECT_EQ(*errorClass.safety(), ErrorSafety::SAFE);
 
   try {
     folly::coro::blockingWait(client->co_fun5(rpcOptions));
@@ -263,9 +263,9 @@ TEST_F(ThriftServerExceptionTest, dummy_test) {
   reader = rpcOptions.getReadHeaders();
   errorClass =
       apache::thrift::detail::deserializeErrorClassification(reader["exm"]);
-  EXPECT_EQ(*errorClass.kind_ref(), ErrorKind::PERMANENT);
-  EXPECT_EQ(*errorClass.blame_ref(), ErrorBlame::CLIENT);
-  EXPECT_EQ(*errorClass.safety_ref(), ErrorSafety::SAFE);
+  EXPECT_EQ(*errorClass.kind(), ErrorKind::PERMANENT);
+  EXPECT_EQ(*errorClass.blame(), ErrorBlame::CLIENT);
+  EXPECT_EQ(*errorClass.safety(), ErrorSafety::SAFE);
   EXPECT_EQ("apache::thrift::test::TripleKill", reader["uex"]);
 
   try {
@@ -275,9 +275,9 @@ TEST_F(ThriftServerExceptionTest, dummy_test) {
   reader = rpcOptions.getReadHeaders();
   errorClass =
       apache::thrift::detail::deserializeErrorClassification(reader["exm"]);
-  EXPECT_EQ(*errorClass.kind_ref(), ErrorKind::TRANSIENT);
-  EXPECT_EQ(*errorClass.blame_ref(), ErrorBlame::SERVER);
-  EXPECT_EQ(*errorClass.safety_ref(), ErrorSafety::SAFE);
+  EXPECT_EQ(*errorClass.kind(), ErrorKind::TRANSIENT);
+  EXPECT_EQ(*errorClass.blame(), ErrorBlame::SERVER);
+  EXPECT_EQ(*errorClass.safety(), ErrorSafety::SAFE);
   EXPECT_EQ("apache::thrift::test::TripleKill", reader["uex"]);
 }
 
@@ -380,7 +380,7 @@ TEST_F(ThriftServerExceptionTest, fiery_with_exception_ptr) {
   }));
   EXPECT_TRUE(exn(client->future_doRaise(), [&](const Fiery& e) {
     EXPECT_EQ(fiery_w_known, string(e.what()));
-    EXPECT_EQ(message, *e.message_ref());
+    EXPECT_EQ(message, *e.message());
     EXPECT_EQ(fiery_s, ctx().ex_type);
     EXPECT_EQ(fiery_w_known, ctx().ex_what);
     EXPECT_TRUE(ctx().ew.is_compatible_with<Fiery>());
@@ -393,7 +393,7 @@ TEST_F(ThriftServerExceptionTest, fiery_with_exception_ptr) {
   }));
   EXPECT_TRUE(exn(client->future_get500(), [&](const Fiery& e) {
     EXPECT_EQ(fiery_w_known, string(e.what()));
-    EXPECT_EQ(message, *e.message_ref());
+    EXPECT_EQ(message, *e.message());
     EXPECT_EQ(fiery_s, ctx().ex_type);
     EXPECT_EQ(fiery_w_known, ctx().ex_what);
     EXPECT_TRUE(ctx().ew.is_compatible_with<Fiery>());
@@ -499,7 +499,7 @@ TEST_F(ThriftServerExceptionTest, fiery_with_exception_wrapper) {
   }));
   EXPECT_TRUE(exn(client->future_doRaise(), [&](const Fiery& e) {
     EXPECT_EQ(fiery_w_known, string(e.what()));
-    EXPECT_EQ(message, *e.message_ref());
+    EXPECT_EQ(message, *e.message());
     EXPECT_EQ(fiery_s, ctx().ex_type);
     EXPECT_EQ(fiery_w_known, ctx().ex_what);
     EXPECT_TRUE(ctx().ew.is_compatible_with<Fiery>());
@@ -512,7 +512,7 @@ TEST_F(ThriftServerExceptionTest, fiery_with_exception_wrapper) {
   }));
   EXPECT_TRUE(exn(client->future_get500(), [&](const Fiery& e) {
     EXPECT_EQ(fiery_w_known, string(e.what()));
-    EXPECT_EQ(message, *e.message_ref());
+    EXPECT_EQ(message, *e.message());
     EXPECT_EQ(fiery_s, ctx().ex_type);
     EXPECT_EQ(fiery_w_known, ctx().ex_what);
     EXPECT_TRUE(ctx().ew.is_compatible_with<Fiery>());

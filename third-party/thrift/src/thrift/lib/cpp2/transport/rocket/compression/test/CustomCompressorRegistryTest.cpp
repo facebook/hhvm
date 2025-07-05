@@ -59,7 +59,7 @@ class MockCompressorFactory : public CustomCompressorFactory {
   createCustomCompressorNegotiationResponse(
       CustomCompressionSetupRequest const& /*request*/) const override {
     CustomCompressionSetupResponse r;
-    r.payload_ref() = responsePayload_;
+    r.payload() = responsePayload_;
     return r;
   }
 
@@ -95,7 +95,7 @@ TEST_F(CompressionTest, customRegistryAddRemoveGet) {
     EXPECT_EQ(
         *CustomCompressorRegistry::get(kName1)
              ->createCustomCompressorNegotiationResponse({})
-             ->payload_ref(),
+             ->payload(),
         "payload1");
     EXPECT_EQ(CustomCompressorRegistry::get(kName2), nullptr);
   }
@@ -117,7 +117,7 @@ TEST_F(CompressionTest, customRegistryAddRemoveGet) {
     EXPECT_EQ(
         *CustomCompressorRegistry::get(kName2)
              ->createCustomCompressorNegotiationResponse({})
-             ->payload_ref(),
+             ->payload(),
         "payload2");
   }
 

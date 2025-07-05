@@ -19,9 +19,9 @@
 using namespace apache::thrift::test::cpp2;
 
 bool Inner::operator<(const Inner& r) const {
-  return *i_ref() < *r.i_ref();
+  return *i() < *r.i();
 }
 
 bool Inner2::operator<(const Inner2& r) const {
-  return *i_ref() < *r.i_ref();
+  return *i() < *r.i();
 }

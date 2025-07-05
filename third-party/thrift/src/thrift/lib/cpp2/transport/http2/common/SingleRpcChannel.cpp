@@ -99,12 +99,12 @@ bool renameHeader(
 }
 
 void preprocessExceptionHeaders(ResponseRpcMetadata& metadata) {
-  auto otherMetadataRef = metadata.otherMetadata_ref();
+  auto otherMetadataRef = metadata.otherMetadata();
   if (!otherMetadataRef) {
     return;
   }
   auto& otherMetadata = *otherMetadataRef;
-  const bool isProxied = (bool)metadata.proxiedPayloadMetadata_ref();
+  const bool isProxied = (bool)metadata.proxiedPayloadMetadata();
 
   auto anyexPtr =
       folly::get_ptr(otherMetadata, apache::thrift::detail::kHeaderAnyex);
@@ -151,7 +151,7 @@ void SingleRpcChannel::sendThriftResponse(
   if (httpTransaction_) {
     HTTPMessage msg;
     msg.setStatusCode(200);
-    if (auto otherMetadata = metadata.otherMetadata_ref()) {
+    if (auto otherMetadata = metadata.otherMetadata()) {
       encodeHeaders(std::move(*otherMetadata), msg);
     }
     httpTransaction_->sendHeaders(msg);
@@ -167,11 +167,10 @@ void SingleRpcChannel::sendThriftRequest(
     std::unique_ptr<ThriftClientCallback> callback) noexcept {
   auto& metadata = requestMetadata.requestRpcMetadata;
   DCHECK(evb_->isInEventBaseThread());
-  DCHECK(metadata.kind_ref());
+  DCHECK(metadata.kind());
   DCHECK(
-      metadata.kind_ref().value_or(0) ==
-          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE ||
-      metadata.kind_ref().value_or(0) == RpcKind::SINGLE_REQUEST_NO_RESPONSE);
+      metadata.kind().value_or(0) == RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE ||
+      metadata.kind().value_or(0) == RpcKind::SINGLE_REQUEST_NO_RESPONSE);
   DCHECK(payload);
   DCHECK(callback);
   VLOG(4) << "sendThriftRequest:" << std::endl
@@ -196,19 +195,19 @@ void SingleRpcChannel::sendThriftRequest(
   msgHeaders.set(HTTPHeaderCode::HTTP_HEADER_USER_AGENT, "C++/THttpClient");
   msgHeaders.set(
       HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE, "application/x-thrift");
-  if (auto clientTimeoutMs = metadata.clientTimeoutMs_ref()) {
+  if (auto clientTimeoutMs = metadata.clientTimeoutMs()) {
     DCHECK(*clientTimeoutMs > 0);
     httpTransaction_->setIdleTimeout(
         std::chrono::milliseconds(*clientTimeoutMs));
   }
 
   apache::thrift::transport::THeader::StringToStringMap otherMetadata;
-  if (auto other = metadata.otherMetadata_ref()) {
+  if (auto other = metadata.otherMetadata()) {
     otherMetadata = std::move(*other);
   }
 
   if (!otherMetadata.contains(detail::getFrameworkMetadataHttpKey())) {
-    if (auto tfm_frc = metadata.frameworkMetadata_ref()) {
+    if (auto tfm_frc = metadata.frameworkMetadata()) {
       // HTTP headers need to be base64-encoded
       auto bytes = (**tfm_frc).coalesce();
       auto start = bytes.data();
@@ -219,20 +218,20 @@ void SingleRpcChannel::sendThriftRequest(
     }
   }
 
-  if (auto clientTimeoutMs = metadata.clientTimeoutMs_ref()) {
+  if (auto clientTimeoutMs = metadata.clientTimeoutMs()) {
     otherMetadata[transport::THeader::CLIENT_TIMEOUT_HEADER] =
         folly::to<string>(*clientTimeoutMs);
   }
-  if (auto queueTimeoutMs = metadata.queueTimeoutMs_ref()) {
+  if (auto queueTimeoutMs = metadata.queueTimeoutMs()) {
     DCHECK(*queueTimeoutMs > 0);
     otherMetadata[transport::THeader::QUEUE_TIMEOUT_HEADER] =
         folly::to<string>(*queueTimeoutMs);
   }
-  if (auto priority = metadata.priority_ref()) {
+  if (auto priority = metadata.priority()) {
     otherMetadata[transport::THeader::PRIORITY_HEADER] =
         folly::to<string>(*priority);
   }
-  if (auto kind = metadata.kind_ref()) {
+  if (auto kind = metadata.kind()) {
     otherMetadata[RPC_KIND.str()] = folly::to<string>(*kind);
   }
   encodeHeaders(std::move(otherMetadata), msg);
@@ -246,7 +245,7 @@ void SingleRpcChannel::sendThriftRequest(
   // "onThriftRequestSent()".  This is safe because "callback_" will
   // be eventually moved to this same thread to call either
   // "onThriftResponse()" or "onThriftError()".
-  if (metadata.kind_ref().value_or(0) == RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
+  if (metadata.kind().value_or(0) == RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
     callbackEvb->runInEventBaseThread(
         [cb = std::move(callback)]() mutable { cb->onThriftRequestSent(); });
   } else {
@@ -348,13 +347,13 @@ void SingleRpcChannel::onThriftRequest() noexcept {
       sendThriftErrorResponse("Invalid envelope: see logs for error");
       return;
     }
-    metadata.name_ref() = envelopeAndRequest->first.methodName;
+    metadata.name() = envelopeAndRequest->first.methodName;
     switch (envelopeAndRequest->first.protocolId) {
       case protocol::T_BINARY_PROTOCOL:
-        metadata.protocol_ref() = ProtocolId::BINARY;
+        metadata.protocol() = ProtocolId::BINARY;
         break;
       case protocol::T_COMPACT_PROTOCOL:
-        metadata.protocol_ref() = ProtocolId::COMPACT;
+        metadata.protocol() = ProtocolId::COMPACT;
         break;
       default:
         std::terminate();
@@ -362,13 +361,13 @@ void SingleRpcChannel::onThriftRequest() noexcept {
     contents_ = std::move(envelopeAndRequest->second);
   }
   // Default Single Request Single Response
-  metadata.kind_ref() = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+  metadata.kind() = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   extractHeaderInfo(&metadata);
 
-  DCHECK(metadata.protocol_ref());
-  DCHECK(metadata.name_ref());
-  DCHECK(metadata.kind_ref());
-  if (*metadata.kind_ref() == RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
+  DCHECK(metadata.protocol());
+  DCHECK(metadata.name());
+  DCHECK(metadata.kind());
+  if (*metadata.kind() == RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
     // Send a dummy response for the oneway call since we need to do
     // this with HTTP2.
     ResponseRpcMetadata responseMetadata;
@@ -416,7 +415,7 @@ void SingleRpcChannel::onThriftResponse() noexcept {
     transport::THeader::StringToStringMap headers;
     // send this up the stack to be exposed as a proper app overloaded exception
     headers["ex"] = kAppOverloadedErrorCode;
-    metadata.otherMetadata_ref() = std::move(headers);
+    metadata.otherMetadata() = std::move(headers);
 
     evb->runInEventBaseThread([evbCallback = std::move(callback_),
                                evbMetadata = std::move(metadata)]() mutable {
@@ -459,7 +458,7 @@ void SingleRpcChannel::onThriftResponse() noexcept {
   transport::THeader::StringToStringMap headers;
   decodeHeaders(*headers_, headers, /*requestMetadata=*/nullptr);
   if (!headers.empty()) {
-    metadata.otherMetadata_ref() = std::move(headers);
+    metadata.otherMetadata() = std::move(headers);
   }
 
   // We don't need to set any of the other fields in metadata currently.
@@ -476,7 +475,7 @@ void SingleRpcChannel::extractHeaderInfo(
   transport::THeader::StringToStringMap headers;
   decodeHeaders(*headers_, headers, metadata);
   if (!headers.empty()) {
-    metadata->otherMetadata_ref() = std::move(headers);
+    metadata->otherMetadata() = std::move(headers);
   }
 }
 

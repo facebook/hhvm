@@ -39,13 +39,13 @@ bool Type::isFull(const TypeUri& typeUri, bool validate_uri) {
 bool Type::isFull(const TypeName& typeName, bool validate_uri) {
   switch (typeName.getType()) {
     case TypeName::Type::enumType:
-      return isFull(*typeName.enumType_ref(), validate_uri);
+      return isFull(*typeName.enumType(), validate_uri);
     case TypeName::Type::structType:
-      return isFull(*typeName.structType_ref(), validate_uri);
+      return isFull(*typeName.structType(), validate_uri);
     case TypeName::Type::unionType:
-      return isFull(*typeName.unionType_ref(), validate_uri);
+      return isFull(*typeName.unionType(), validate_uri);
     case TypeName::Type::exceptionType:
-      return isFull(*typeName.exceptionType_ref(), validate_uri);
+      return isFull(*typeName.exceptionType(), validate_uri);
     case TypeName::Type::__EMPTY__:
       return false;
     default:
@@ -90,23 +90,19 @@ bool identicalTypeUri(const TypeUri& lhs, const TypeUri& rhs) {
   // compatible reason and couldn't be generated with any of our standard
   // offerings.
   if (lhs.getType() != rhs.getType()) {
-    if (lhs.uri_ref().has_value() &&
-        rhs.typeHashPrefixSha2_256_ref().has_value()) {
+    if (lhs.uri().has_value() && rhs.typeHashPrefixSha2_256().has_value()) {
       return getUniversalHashPrefix(
                  getUniversalHash(
                      type::UniversalHashAlgorithm::Sha2_256,
 
-                     lhs.uri_ref().value()),
-                 kDefaultTypeHashBytes) ==
-          rhs.typeHashPrefixSha2_256_ref().value();
+                     lhs.uri().value()),
+                 kDefaultTypeHashBytes) == rhs.typeHashPrefixSha2_256().value();
     } else if (
-        lhs.typeHashPrefixSha2_256_ref().has_value() &&
-        rhs.uri_ref().has_value()) {
-      return lhs.typeHashPrefixSha2_256_ref().value() ==
+        lhs.typeHashPrefixSha2_256().has_value() && rhs.uri().has_value()) {
+      return lhs.typeHashPrefixSha2_256().value() ==
           getUniversalHashPrefix(
                  getUniversalHash(
-                     type::UniversalHashAlgorithm::Sha2_256,
-                     rhs.uri_ref().value()),
+                     type::UniversalHashAlgorithm::Sha2_256, rhs.uri().value()),
                  kDefaultTypeHashBytes);
     }
     return false;
@@ -136,24 +132,20 @@ bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs) {
     // definitions
     case TypeName::Type::enumType:
       return identicalTypeUri(
-          lhs.name()->enumType_ref().value(),
-          rhs.name()->enumType_ref().value());
+          lhs.name()->enumType().value(), rhs.name()->enumType().value());
     case TypeName::Type::typedefType:
       return identicalTypeUri(
-          lhs.name()->typedefType_ref().value(),
-          rhs.name()->typedefType_ref().value());
+          lhs.name()->typedefType().value(), rhs.name()->typedefType().value());
     case TypeName::Type::structType:
       return identicalTypeUri(
-          lhs.name()->structType_ref().value(),
-          rhs.name()->structType_ref().value());
+          lhs.name()->structType().value(), rhs.name()->structType().value());
     case TypeName::Type::unionType:
       return identicalTypeUri(
-          lhs.name()->unionType_ref().value(),
-          rhs.name()->unionType_ref().value());
+          lhs.name()->unionType().value(), rhs.name()->unionType().value());
     case TypeName::Type::exceptionType:
       return identicalTypeUri(
-          lhs.name()->exceptionType_ref().value(),
-          rhs.name()->exceptionType_ref().value());
+          lhs.name()->exceptionType().value(),
+          rhs.name()->exceptionType().value());
     // containers
     case TypeName::Type::listType:
     case TypeName::Type::setType:
@@ -200,9 +192,9 @@ std::string debugScopedName(std::string_view name) {
 std::string debugUri(const TypeUri& type) {
   switch (type.getType()) {
     case TypeUri::Type::uri:
-      return debugUri(*type.uri_ref());
+      return debugUri(*type.uri());
     case TypeUri::Type::scopedName:
-      return debugScopedName(*type.scopedName_ref());
+      return debugScopedName(*type.scopedName());
     case TypeUri::Type::typeHashPrefixSha2_256:
     case TypeUri::Type::definitionKey:
       // Need schema information!
@@ -233,19 +225,17 @@ std::string debugStringImpl(const TypeStruct& type) {
     case TypeName::Type::binaryType:
       return "binary";
     case TypeName::Type::enumType:
-      return fmt::format("enum<{}>", debugUri(*type.name()->enumType_ref()));
+      return fmt::format("enum<{}>", debugUri(*type.name()->enumType()));
     case TypeName::Type::typedefType:
       // Need schema to resolve :(
-      return fmt::format(
-          "typedef<{}>", debugUri(*type.name()->typedefType_ref()));
+      return fmt::format("typedef<{}>", debugUri(*type.name()->typedefType()));
     case TypeName::Type::structType:
-      return fmt::format(
-          "struct<{}>", debugUri(*type.name()->structType_ref()));
+      return fmt::format("struct<{}>", debugUri(*type.name()->structType()));
     case TypeName::Type::unionType:
-      return fmt::format("union<{}>", debugUri(*type.name()->unionType_ref()));
+      return fmt::format("union<{}>", debugUri(*type.name()->unionType()));
     case TypeName::Type::exceptionType:
       return fmt::format(
-          "exception<{}>", debugUri(*type.name()->exceptionType_ref()));
+          "exception<{}>", debugUri(*type.name()->exceptionType()));
     case TypeName::Type::listType:
       return fmt::format("list<{}>", debugStringImpl(type.params()->at(0)));
     case TypeName::Type::setType:

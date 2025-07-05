@@ -140,7 +140,7 @@ bool H2Channel::handleThriftMetadata(
       LOG(INFO) << "Bad Request Kind " << value;
       return false;
     }
-    metadata->kind_ref() = static_cast<RpcKind>(*parsed);
+    metadata->kind() = static_cast<RpcKind>(*parsed);
     return true;
   } else if (code == proxygen::HTTP_HEADER_QUEUE_TIMEOUT) {
     auto parsed = folly::tryTo<int64_t>(value);
@@ -148,7 +148,7 @@ bool H2Channel::handleThriftMetadata(
       LOG(INFO) << "Bad client timeout " << value;
       return false;
     }
-    metadata->queueTimeoutMs_ref() = *parsed;
+    metadata->queueTimeoutMs() = *parsed;
     return true;
   } else if (code == proxygen::HTTP_HEADER_THRIFT_PRIORITY) {
     auto parsed = folly::tryTo<int32_t>(value);
@@ -161,7 +161,7 @@ bool H2Channel::handleThriftMetadata(
       LOG(INFO) << "Too large value for method priority " << value;
       return false;
     }
-    metadata->priority_ref() = pr;
+    metadata->priority() = pr;
     return true;
   } else if (code == proxygen::HTTP_HEADER_CLIENT_TIMEOUT) {
     auto parsed = folly::tryTo<int64_t>(value);
@@ -169,7 +169,7 @@ bool H2Channel::handleThriftMetadata(
       LOG(INFO) << "Bad client timeout " << value;
       return false;
     }
-    metadata->clientTimeoutMs_ref() = *parsed;
+    metadata->clientTimeoutMs() = *parsed;
     return true;
   }
   return false;

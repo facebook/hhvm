@@ -54,23 +54,20 @@ ThriftRequestCore::ThriftRequestCore(
     apache::thrift::detail::ServiceInterceptorRequestStorageContext
         serviceInterceptorsStorage)
     : serverConfigs_(serverConfigs),
-      kind_(metadata.kind_ref().value_or(
-          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)),
-      checksumRequested_(metadata.crc32c_ref().has_value()),
+      kind_(metadata.kind().value_or(RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)),
+      checksumRequested_(metadata.crc32c().has_value()),
       loadMetric_(
-          metadata.loadMetric_ref()
-              ? folly::make_optional(std::move(*metadata.loadMetric_ref()))
+          metadata.loadMetric()
+              ? folly::make_optional(std::move(*metadata.loadMetric()))
               : folly::none),
       secondaryLoadMetric_(
-          metadata.secondaryLoadMetric_ref()
-              ? folly::make_optional(
-                    std::move(*metadata.secondaryLoadMetric_ref()))
+          metadata.secondaryLoadMetric()
+              ? folly::make_optional(std::move(*metadata.secondaryLoadMetric()))
               : folly::none),
       reqContext_(
           &connContext,
           &header_,
-          metadata.name_ref() ? std::move(*metadata.name_ref()).str()
-                              : std::string{},
+          metadata.name() ? std::move(*metadata.name()).str() : std::string{},
           std::move(serviceInterceptorsStorage)),
       queueTimeout_(*this),
       taskTimeout_(*this, serverConfigs_),
@@ -80,26 +77,26 @@ ThriftRequestCore::ThriftRequestCore(
           serverConfigs_.getCPUConcurrencyController()) {
   // Note that method name, RPC kind, and serialization protocol are validated
   // outside the ThriftRequestCore constructor.
-  header_.setProtocolId(static_cast<int16_t>(
-      metadata.protocol_ref().value_or(ProtocolId::BINARY)));
+  header_.setProtocolId(
+      static_cast<int16_t>(metadata.protocol().value_or(ProtocolId::BINARY)));
 
-  if (auto clientTimeoutMs = metadata.clientTimeoutMs_ref()) {
+  if (auto clientTimeoutMs = metadata.clientTimeoutMs()) {
     clientTimeout_ = std::chrono::milliseconds(*clientTimeoutMs);
     header_.setClientTimeout(clientTimeout_);
   }
-  if (auto queueTimeoutMs = metadata.queueTimeoutMs_ref()) {
+  if (auto queueTimeoutMs = metadata.queueTimeoutMs()) {
     clientQueueTimeout_ = std::chrono::milliseconds(*queueTimeoutMs);
     header_.setClientQueueTimeout(clientQueueTimeout_);
   }
-  if (auto priority = metadata.priority_ref()) {
+  if (auto priority = metadata.priority()) {
     header_.setCallPriority(static_cast<concurrency::PRIORITY>(*priority));
   }
-  auto otherMetadata = metadata.otherMetadata_ref();
+  auto otherMetadata = metadata.otherMetadata();
 
   // When processing ThriftFrameworkMetadata, the header takes priority.
   if (!otherMetadata ||
       !detail::handleFrameworkMetadataHeader(*otherMetadata, &reqContext_)) {
-    if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
+    if (auto frameworkMetadata = metadata.frameworkMetadata()) {
       DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
       detail::handleFrameworkMetadata(
           std::move(*frameworkMetadata), &reqContext_);
@@ -108,19 +105,19 @@ ThriftRequestCore::ThriftRequestCore(
   if (otherMetadata) {
     header_.setReadHeaders(std::move(*otherMetadata));
   }
-  if (auto clientId = metadata.clientId_ref()) {
+  if (auto clientId = metadata.clientId()) {
     header_.setClientId(*clientId);
     header_.setReadHeader(transport::THeader::kClientId, std::move(*clientId));
   }
-  if (auto serviceTraceMeta = metadata.serviceTraceMeta_ref()) {
+  if (auto serviceTraceMeta = metadata.serviceTraceMeta()) {
     header_.setServiceTraceMeta(*serviceTraceMeta);
     header_.setReadHeader(
         transport::THeader::kServiceTraceMeta, std::move(*serviceTraceMeta));
   }
-  if (auto loggingContext = metadata.loggingContext_ref()) {
+  if (auto loggingContext = metadata.loggingContext()) {
     header_.loggingContext() = std::move(*loggingContext);
   }
-  if (auto tenantId = metadata.tenantId_ref()) {
+  if (auto tenantId = metadata.tenantId()) {
     header_.setTenantId(*tenantId);
     header_.setReadHeader(transport::THeader::kTenantId, std::move(*tenantId));
   }
@@ -128,7 +125,7 @@ ThriftRequestCore::ThriftRequestCore(
   // Store client's compression configs (if client explicitly requested
   // compression codec and size limit, use these settings to compress
   // response)
-  if (auto compressionConfig = metadata.compressionConfig_ref()) {
+  if (auto compressionConfig = metadata.compressionConfig()) {
     compressionConfig_ = *compressionConfig;
   }
 
@@ -217,7 +214,7 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
   requestLoggingContext.timestamps = timestamps;
   requestLoggingContext.responseRpcError = responseRpcError;
   if (auto payloadMetadata = metadata.payloadMetadata()) {
-    if (auto exceptionMetadata = payloadMetadata->exceptionMetadata_ref()) {
+    if (auto exceptionMetadata = payloadMetadata->exceptionMetadata()) {
       requestLoggingContext.exceptionMetaData = *exceptionMetadata;
     }
   }
@@ -316,7 +313,7 @@ void ThriftRequestCore::sendReply(
           header_.extractProxiedPayloadMetadata(),
           header_.getChecksum());
       if (crc32c) {
-        metadata.crc32c_ref() = *crc32c;
+        metadata.crc32c() = *crc32c;
       }
       sendReplyInternal(
           std::move(metadata),
@@ -375,33 +372,32 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
   ResponseRpcMetadata metadata;
 
   if (auto tfmr = detail::makeThriftFrameworkMetadataOnResponse(writeHeaders)) {
-    metadata.frameworkMetadata_ref() = std::move(tfmr);
+    metadata.frameworkMetadata() = std::move(tfmr);
   }
 
-  metadata.proxiedPayloadMetadata_ref().from_optional(proxiedPayloadMetadata);
+  metadata.proxiedPayloadMetadata().from_optional(proxiedPayloadMetadata);
 
   if (loadMetric_) {
-    metadata.load_ref() = serverConfigs_.getLoad(*loadMetric_);
+    metadata.load() = serverConfigs_.getLoad(*loadMetric_);
   }
 
   if (secondaryLoadMetric_) {
-    metadata.secondaryLoad_ref() =
-        serverConfigs_.getLoad(*secondaryLoadMetric_);
+    metadata.secondaryLoad() = serverConfigs_.getLoad(*secondaryLoadMetric_);
   }
 
   if (!writeHeaders.empty()) {
-    metadata.otherMetadata_ref() = std::move(writeHeaders);
+    metadata.otherMetadata() = std::move(writeHeaders);
   }
 
   auto queueTime = stateMachine_.queueingTime();
-  auto& queueMetadata = metadata.queueMetadata_ref().ensure();
+  auto& queueMetadata = metadata.queueMetadata().ensure();
   if (queueTime.hasValue()) {
-    queueMetadata.queueingTimeMs_ref() = queueTime.value().count();
+    queueMetadata.queueingTimeMs() = queueTime.value().count();
   } else {
-    queueMetadata.queueingTimeMs_ref() = -1;
+    queueMetadata.queueingTimeMs() = -1;
   }
 
-  queueMetadata.queueTimeoutMs_ref() = queueTimeout_.value.count();
+  queueMetadata.queueTimeoutMs() = queueTimeout_.value.count();
 
   if (checksum) {
     metadata.checksum() = *checksum;

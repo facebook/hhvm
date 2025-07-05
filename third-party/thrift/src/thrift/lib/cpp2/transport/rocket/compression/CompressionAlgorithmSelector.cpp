@@ -85,11 +85,11 @@ CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
   const auto& codecConfigType = codecConfig.getType();
   switch (codecConfigType) {
     case CodecConfig::Type::zlibConfig:
-      return fromZlibConfig(*codecConfig.zlibConfig_ref());
+      return fromZlibConfig(*codecConfig.zlibConfig());
     case CodecConfig::Type::zstdConfig:
-      return fromZstdConfig(*codecConfig.zstdConfig_ref());
+      return fromZstdConfig(*codecConfig.zstdConfig());
     case CodecConfig::Type::lz4Config:
-      return fromLz4Config(*codecConfig.lz4Config_ref());
+      return fromLz4Config(*codecConfig.lz4Config());
     case CodecConfig::Type::customConfig:
       return CompressionAlgorithm::CUSTOM;
     case CodecConfig::Type::__EMPTY__:
@@ -121,33 +121,31 @@ CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
       return codecConfig;
     case CompressionAlgorithm::ZLIB_LESS:
       codecConfig.set_zlibConfig();
-      codecConfig.zlibConfig_ref()->levelPreset() =
+      codecConfig.zlibConfig()->levelPreset() =
           ZlibCompressionLevelPreset::LESS;
       return codecConfig;
     case CompressionAlgorithm::ZSTD_LESS:
       codecConfig.set_zstdConfig();
-      codecConfig.zstdConfig_ref()->levelPreset() =
+      codecConfig.zstdConfig()->levelPreset() =
           ZstdCompressionLevelPreset::LESS;
       return codecConfig;
     case CompressionAlgorithm::LZ4_LESS:
       codecConfig.set_lz4Config();
-      codecConfig.lz4Config_ref()->levelPreset() =
-          Lz4CompressionLevelPreset::LESS;
+      codecConfig.lz4Config()->levelPreset() = Lz4CompressionLevelPreset::LESS;
       return codecConfig;
     case CompressionAlgorithm::ZLIB_MORE:
       codecConfig.set_zlibConfig();
-      codecConfig.zlibConfig_ref()->levelPreset() =
+      codecConfig.zlibConfig()->levelPreset() =
           ZlibCompressionLevelPreset::MORE;
       return codecConfig;
     case CompressionAlgorithm::ZSTD_MORE:
       codecConfig.set_zstdConfig();
-      codecConfig.zstdConfig_ref()->levelPreset() =
+      codecConfig.zstdConfig()->levelPreset() =
           ZstdCompressionLevelPreset::MORE;
       return codecConfig;
     case CompressionAlgorithm::LZ4_MORE:
       codecConfig.set_lz4Config();
-      codecConfig.lz4Config_ref()->levelPreset() =
-          Lz4CompressionLevelPreset::MORE;
+      codecConfig.lz4Config()->levelPreset() = Lz4CompressionLevelPreset::MORE;
       return codecConfig;
     case CompressionAlgorithm::NONE:
       codecConfig.set_customConfig();

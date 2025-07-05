@@ -213,15 +213,15 @@ OptionalTypeRef TypeFinder::findTypeInAny(const type::Type& type) const {
   const auto& name = *type.toThrift().name();
   switch (name.getType()) {
     case type::TypeName::Type::structType:
-      uri = &*name.structType_ref();
+      uri = &*name.structType();
       break;
     case type::TypeName::Type::unionType:
-      uri = &*name.unionType_ref();
+      uri = &*name.unionType();
       break;
     default:
       return {};
   }
-  return uri && uri->uri_ref() ? findType(Uri{*uri->uri_ref()}) : std::nullopt;
+  return uri && uri->uri() ? findType(Uri{*uri->uri()}) : std::nullopt;
 }
 
 scope DebugTree<std::string>::operator()(

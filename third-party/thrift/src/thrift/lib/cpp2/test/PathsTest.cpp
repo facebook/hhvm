@@ -34,11 +34,11 @@ TEST(PathsDemo, example) {
     int x = 60 * std::cos(i * 0.01);
     int y = 60 * std::sin(i * 0.01);
     Point p;
-    *p.x_ref() = x;
-    *p.y_ref() = y;
-    p1.points_ref()->push_back(p);
-    p2.xs_ref()->push_back(x);
-    p2.ys_ref()->push_back(y);
+    *p.x() = x;
+    *p.y() = y;
+    p1.points()->push_back(p);
+    p2.xs()->push_back(x);
+    p2.ys()->push_back(y);
   }
 
   auto s1 = CompactSerializer::serialize<std::string>(p1);

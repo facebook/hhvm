@@ -359,11 +359,11 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
     size_t unpackedSize =
         PayloadSerializer::getInstance()->unpack(meta, cursor, false);
     EXPECT_EQ(unpackedSize, frame.payload().metadataSize());
-    EXPECT_EQ(expectedSetupMetadata_, meta.opaque_ref().value_or({}));
-    version_ = std::min(kServerVersion, meta.maxVersion_ref().value_or(0));
+    EXPECT_EQ(expectedSetupMetadata_, meta.opaque().value_or({}));
+    version_ = std::min(kServerVersion, meta.maxVersion().value_or(0));
     ServerPushMetadata serverMeta;
     serverMeta.set_setupResponse();
-    serverMeta.setupResponse_ref()->version_ref() = version_;
+    serverMeta.setupResponse()->version() = version_;
     connection.sendMetadataPush(
         PayloadSerializer::getInstance()->packCompact(serverMeta));
   }

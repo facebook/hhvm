@@ -40,9 +40,9 @@ namespace {
 std::string_view appendTypeUri(const type::TypeUri& uri) {
   switch (uri.getType()) {
     case apache::thrift::type::TypeUri::Type::uri:
-      return *uri.uri_ref();
+      return *uri.uri();
     case apache::thrift::type::TypeUri::Type::typeHashPrefixSha2_256:
-      return uri.typeHashPrefixSha2_256_ref()->c_str();
+      return uri.typeHashPrefixSha2_256()->c_str();
     case apache::thrift::type::TypeUri::Type::scopedName:
     case apache::thrift::type::TypeUri::Type::__EMPTY__:
       return "(unspecified)";
@@ -86,20 +86,18 @@ std::string getTypeName(const type::TypeStruct& type) {
     case type::TypeName::Type::binaryType:
       return "binary";
     case type::TypeName::Type::enumType:
-      return fmt::format(
-          "enum<{}>", appendTypeUri(*type.name()->enumType_ref()));
+      return fmt::format("enum<{}>", appendTypeUri(*type.name()->enumType()));
     case type::TypeName::Type::typedefType:
       return fmt::format(
-          "typedef<{}>", appendTypeUri(*type.name()->typedefType_ref()));
+          "typedef<{}>", appendTypeUri(*type.name()->typedefType()));
     case type::TypeName::Type::structType:
       return fmt::format(
-          "struct<{}>", appendTypeUri(*type.name()->structType_ref()));
+          "struct<{}>", appendTypeUri(*type.name()->structType()));
     case type::TypeName::Type::unionType:
-      return fmt::format(
-          "union<{}>", appendTypeUri(*type.name()->unionType_ref()));
+      return fmt::format("union<{}>", appendTypeUri(*type.name()->unionType()));
     case type::TypeName::Type::exceptionType:
       return fmt::format(
-          "exception<{}>", appendTypeUri(*type.name()->exceptionType_ref()));
+          "exception<{}>", appendTypeUri(*type.name()->exceptionType()));
     case type::TypeName::Type::listType:
       return "list";
     case type::TypeName::Type::setType:

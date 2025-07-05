@@ -172,7 +172,7 @@ RocketClient::RocketClient(
 
   // keep a copy to be used in later
   if (setupMetadata.compressionSetupRequest()) {
-    if (auto ref = setupMetadata.compressionSetupRequest()->custom_ref()) {
+    if (auto ref = setupMetadata.compressionSetupRequest()->custom()) {
       customCompressionSetupRequest_.emplace(*ref);
     }
   }
@@ -244,13 +244,12 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
       case ServerPushMetadata::Type::setupResponse: {
         sendTransportMetadataPush();
         setServerVersion(std::min(
-            serverMeta.setupResponse_ref()->version_ref().value_or(0),
+            serverMeta.setupResponse()->version().value_or(0),
             (int32_t)std::numeric_limits<int16_t>::max()));
         serverZstdSupported_ =
-            serverMeta.setupResponse_ref()->zstdSupported_ref().value_or(false);
+            serverMeta.setupResponse()->zstdSupported().value_or(false);
 
-        if (auto ref =
-                serverMeta.setupResponse_ref()->compressionSetupResponse()) {
+        if (auto ref = serverMeta.setupResponse()->compressionSetupResponse()) {
           auto customCompressionRes =
               handleSetupResponseCustomCompression(*ref);
           if (customCompressionRes.hasError()) {
@@ -261,8 +260,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
         break;
       }
       case ServerPushMetadata::Type::streamHeadersPush: {
-        StreamId sid(
-            serverMeta.streamHeadersPush_ref()->streamId_ref().value_or(0));
+        StreamId sid(serverMeta.streamHeadersPush()->streamId().value_or(0));
         auto it = streams_.find(sid);
         if (it != streams_.end()) {
           it->match([&](auto* serverCallbackPtr) {
@@ -272,7 +270,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
                               RocketSinkServerCallback*>) {
               serverCallbackPtr->onStreamHeaders(
                   HeadersPayload(serverMeta.streamHeadersPush_ref()
-                                     ->headersPayloadContent_ref()
+                                     ->headersPayloadContent()
                                      .value_or({})));
             }
           });
@@ -280,18 +278,16 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
         return;
       }
       case ServerPushMetadata::Type::drainCompletePush: {
-        auto drainCode =
-            serverMeta.drainCompletePush_ref()->drainCompleteCode_ref();
+        auto drainCode = serverMeta.drainCompletePush()->drainCompleteCode();
         if (drainCode &&
             *drainCode == DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT) {
           ResponseRpcError responseRpcError;
-          responseRpcError.name_utf8_ref() =
+          responseRpcError.name_utf8() =
               apache::thrift::TEnumTraits<ResponseRpcErrorCode>::findName(
                   ResponseRpcErrorCode::OVERLOAD);
-          responseRpcError.what_utf8_ref() = "Exceeded ingress memory limit";
-          responseRpcError.code_ref() = ResponseRpcErrorCode::OVERLOAD;
-          responseRpcError.category_ref() =
-              ResponseRpcErrorCategory::LOADSHEDDING;
+          responseRpcError.what_utf8() = "Exceeded ingress memory limit";
+          responseRpcError.code() = ResponseRpcErrorCode::OVERLOAD;
+          responseRpcError.category() = ResponseRpcErrorCategory::LOADSHEDDING;
 
           close(RocketException(
               ErrorCode::REJECTED,
@@ -316,12 +312,12 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
 folly::Expected<folly::Unit, transport::TTransportException>
 RocketClient::handleSetupResponseCustomCompression(
     CompressionSetupResponse const& setupResponse) {
-  if (!setupResponse.custom_ref()) {
+  if (!setupResponse.custom()) {
     return folly::makeUnexpected(transport::TTransportException(
         transport::TTransportException::NOT_SUPPORTED,
         "Only 'custom' compressor setup response is supported on client."));
   }
-  const auto& customSetupResponse = setupResponse.custom_ref().value();
+  const auto& customSetupResponse = setupResponse.custom().value();
 
   auto factory =
       CustomCompressorRegistry::get(*customSetupResponse.compressorName());
@@ -601,7 +597,7 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     }
 
     streamPayload->isOrderedHeader = true;
-    auto payloadMetadataRef = streamPayload->metadata.payloadMetadata_ref();
+    auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
@@ -649,7 +645,7 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
         streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
         << "FD passing is not implemented for sinks";
 
-    auto payloadMetadataRef = streamPayload->metadata.payloadMetadata_ref();
+    auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
@@ -1245,9 +1241,9 @@ bool RocketClient::sendHeadersPush(
     close(std::move(ex));
   };
   ClientPushMetadata clientMeta;
-  clientMeta.streamHeadersPush_ref().ensure().streamId_ref() =
+  clientMeta.streamHeadersPush().ensure().streamId() =
       static_cast<uint32_t>(streamId);
-  clientMeta.streamHeadersPush_ref()->headersPayloadContent_ref() =
+  clientMeta.streamHeadersPush()->headersPayloadContent() =
       std::move(payload.payload);
   return sendFrame(
       MetadataPushFrame::makeFromMetadata(
@@ -1635,7 +1631,7 @@ void RocketClient::terminateInteraction(int64_t id) {
       };
 
   ClientPushMetadata clientMeta;
-  clientMeta.interactionTerminate_ref().ensure().interactionId_ref() = id;
+  clientMeta.interactionTerminate().ensure().interactionId() = id;
   std::ignore = sendFrame(
       MetadataPushFrame::makeFromMetadata(
           getPayloadSerializer()->packCompact(clientMeta)),
@@ -1676,7 +1672,7 @@ void RocketClient::sendTransportMetadataPush() {
   if (auto transportMetadataPush =
           apache::thrift::detail::getTransportMetadataPush(transport)) {
     ClientPushMetadata clientMeta;
-    clientMeta.transportMetadataPush_ref() = std::move(*transportMetadataPush);
+    clientMeta.transportMetadataPush() = std::move(*transportMetadataPush);
     std::ignore = sendFrame(
         MetadataPushFrame::makeFromMetadata(
             getPayloadSerializer()->packCompact(clientMeta)),

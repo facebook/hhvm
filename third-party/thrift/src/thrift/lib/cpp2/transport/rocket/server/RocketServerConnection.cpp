@@ -284,12 +284,11 @@ RocketServerConnection::~RocketServerConnection() {
 namespace {
 StreamRpcError getStreamConnectionClosingError() {
   StreamRpcError streamRpcError;
-  streamRpcError.code_ref() = StreamRpcErrorCode::SERVER_CLOSING_CONNECTION;
-  streamRpcError.name_utf8_ref() =
+  streamRpcError.code() = StreamRpcErrorCode::SERVER_CLOSING_CONNECTION;
+  streamRpcError.name_utf8() =
       apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
           StreamRpcErrorCode::SERVER_CLOSING_CONNECTION);
-  streamRpcError.what_utf8_ref() =
-      "Server closing connection, cancelling stream";
+  streamRpcError.what_utf8() = "Server closing connection, cancelling stream";
   return streamRpcError;
 }
 } // namespace
@@ -303,10 +302,8 @@ void RocketServerConnection::closeIfNeeded() {
 
     if (drainCompleteCode_) {
       ServerPushMetadata serverMeta;
-      serverMeta.drainCompletePush_ref()
-          .ensure()
-          .drainCompleteCode_ref()
-          .from_optional(drainCompleteCode_);
+      serverMeta.drainCompletePush().ensure().drainCompleteCode().from_optional(
+          drainCompleteCode_);
       sendMetadataPush(getPayloadSerializer()->packCompact(serverMeta));
       // Send CONNECTION_ERROR error in case client doesn't support
       // DrainCompletePush
@@ -538,12 +535,11 @@ void RocketServerConnection::handleUntrackedFrame(
       switch (clientMeta.getType()) {
         case ClientPushMetadata::Type::interactionTerminate: {
           frameHandler_->terminateInteraction(
-              *clientMeta.interactionTerminate_ref()->interactionId_ref());
+              *clientMeta.interactionTerminate()->interactionId());
           break;
         }
         case ClientPushMetadata::Type::streamHeadersPush: {
-          StreamId sid(
-              clientMeta.streamHeadersPush_ref()->streamId_ref().value_or(0));
+          StreamId sid(clientMeta.streamHeadersPush()->streamId().value_or(0));
           auto it = streams_.find(sid);
           if (it != streams_.end()) {
             folly::variant_match(
@@ -552,8 +548,8 @@ void RocketServerConnection::handleUntrackedFrame(
                         clientCallback) {
                   std::ignore =
                       clientCallback->getStreamServerCallback().onSinkHeaders(
-                          HeadersPayload(clientMeta.streamHeadersPush_ref()
-                                             ->headersPayloadContent_ref()
+                          HeadersPayload(clientMeta.streamHeadersPush()
+                                             ->headersPayloadContent()
                                              .value_or({})));
                 },
                 [&](const std::unique_ptr<RocketSinkClientCallback>&) {});
@@ -562,8 +558,7 @@ void RocketServerConnection::handleUntrackedFrame(
         }
         case ClientPushMetadata::Type::transportMetadataPush: {
           if (auto context = frameHandler_->getCpp2ConnContext()) {
-            auto md =
-                clientMeta.transportMetadataPush_ref()->transportMetadata_ref();
+            auto md = clientMeta.transportMetadataPush()->transportMetadata();
             std::optional<folly::F14NodeMap<std::string, std::string>> metadata;
             if (md) {
               metadata = std::move(*md);
@@ -689,8 +684,7 @@ void RocketServerConnection::handleSinkFrame(
               streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
               << "FD passing is not implemented for sinks";
 
-          auto payloadMetadataRef =
-              streamPayload->metadata.payloadMetadata_ref();
+          auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
           if (payloadMetadataRef &&
               payloadMetadataRef->getType() ==
                   PayloadMetadata::Type::exceptionMetadata) {

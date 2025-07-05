@@ -68,8 +68,8 @@ struct CalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
     folly::coro::Task<void> co_noop() override { co_return; }
     folly::coro::Task<void> co_accumulatePoint(
         std::unique_ptr<::apache::thrift::test::Point> a) override {
-      *pacc_.x_ref() += *a->x_ref();
-      *pacc_.y_ref() += *a->y_ref();
+      *pacc_.x() += *a->x();
+      *pacc_.y() += *a->y();
       co_return;
     }
     folly::coro::Task<int32_t> co_getPrimitive() override { co_return acc_; }
@@ -215,13 +215,13 @@ TEST_F(GuardedRequestChannelTest, basicRequestResponseMethodCallInteraction) {
     EXPECT_EQ(sum, 42);
 
     Point p;
-    p.x_ref() = 1;
+    p.x() = 1;
     co_await adder.co_accumulatePoint(p);
-    p.y_ref() = 2;
+    p.y() = 2;
     co_await adder.co_accumulatePoint(p);
     auto pacc = co_await adder.co_getPoint();
-    EXPECT_EQ(*pacc.x_ref(), 2);
-    EXPECT_EQ(*pacc.y_ref(), 2);
+    EXPECT_EQ(*pacc.x(), 2);
+    EXPECT_EQ(*pacc.y(), 2);
   }());
 #endif
 }

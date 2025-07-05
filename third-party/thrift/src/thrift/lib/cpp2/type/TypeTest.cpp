@@ -230,10 +230,7 @@ TEST(TypeTest, IdenticalTypeStructHash) {
   auto structType = Type::create<struct_c>(structUri).toThrift();
   // TODO(dokwon): Consider adding Type::create with hash
   TypeStruct structTypeWithHash;
-  structTypeWithHash.name()
-      ->structType_ref()
-      .ensure()
-      .typeHashPrefixSha2_256_ref() =
+  structTypeWithHash.name()->structType().ensure().typeHashPrefixSha2_256() =
       getUniversalHashPrefix(
           getUniversalHash(type::UniversalHashAlgorithm::Sha2_256, structUri),
           kDefaultTypeHashBytes)
@@ -242,31 +239,31 @@ TEST(TypeTest, IdenticalTypeStructHash) {
   // list<struct>
   {
     TypeStruct type;
-    type.name()->listType_ref().ensure();
+    type.name()->listType().ensure();
     type.params()->push_back(structType);
     TypeStruct typeWithHash;
-    typeWithHash.name()->listType_ref().ensure();
+    typeWithHash.name()->listType().ensure();
     typeWithHash.params()->push_back(structTypeWithHash);
     EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
   }
   // set<struct>
   {
     TypeStruct type;
-    type.name()->setType_ref().ensure();
+    type.name()->setType().ensure();
     type.params()->push_back(structType);
     TypeStruct typeWithHash;
-    typeWithHash.name()->setType_ref().ensure();
+    typeWithHash.name()->setType().ensure();
     typeWithHash.params()->push_back(structTypeWithHash);
     EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
   }
   // map<struct, int>
   {
     TypeStruct type;
-    type.name()->mapType_ref().ensure();
+    type.name()->mapType().ensure();
     type.params()->push_back(structType);
     type.params()->push_back(Type::create<type::i32_t>().toThrift());
     TypeStruct typeWithHash;
-    typeWithHash.name()->mapType_ref().ensure();
+    typeWithHash.name()->mapType().ensure();
     typeWithHash.params()->push_back(structTypeWithHash);
     typeWithHash.params()->push_back(Type::create<type::i32_t>().toThrift());
     EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
@@ -274,11 +271,11 @@ TEST(TypeTest, IdenticalTypeStructHash) {
   // map<int, struct>
   {
     TypeStruct type;
-    type.name()->mapType_ref().ensure();
+    type.name()->mapType().ensure();
     type.params()->push_back(Type::create<type::i32_t>().toThrift());
     type.params()->push_back(structType);
     TypeStruct typeWithHash;
-    typeWithHash.name()->mapType_ref().ensure();
+    typeWithHash.name()->mapType().ensure();
     typeWithHash.params()->push_back(Type::create<type::i32_t>().toThrift());
     typeWithHash.params()->push_back(structTypeWithHash);
     EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
@@ -286,11 +283,11 @@ TEST(TypeTest, IdenticalTypeStructHash) {
   // map<struct, struct>
   {
     TypeStruct type;
-    type.name()->mapType_ref().ensure();
+    type.name()->mapType().ensure();
     type.params()->push_back(structType);
     type.params()->push_back(structType);
     TypeStruct typeWithHash;
-    typeWithHash.name()->mapType_ref().ensure();
+    typeWithHash.name()->mapType().ensure();
     typeWithHash.params()->push_back(structTypeWithHash);
     typeWithHash.params()->push_back(structTypeWithHash);
     EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
@@ -299,15 +296,14 @@ TEST(TypeTest, IdenticalTypeStructHash) {
 
 TEST(TypeTest, DebugString) {
   TypeStruct scopedStruct;
-  scopedStruct.name()->structType_ref().emplace().scopedName_ref() =
-      "foo.bar.Baz";
+  scopedStruct.name()->structType().emplace().scopedName() = "foo.bar.Baz";
 
   TypeStruct hashedUnion;
-  hashedUnion.name()->unionType_ref().emplace().typeHashPrefixSha2_256_ref() =
+  hashedUnion.name()->unionType().emplace().typeHashPrefixSha2_256() =
       "\x00\x01\x02\x03";
 
   TypeStruct keyedEnum;
-  keyedEnum.name()->enumType_ref().emplace().definitionKey_ref() = "abcde";
+  keyedEnum.name()->enumType().emplace().definitionKey() = "abcde";
 
   auto testCases = std::list<std::pair<Type, std::string>>{
       {Type::get<bool_t>(), "bool"},

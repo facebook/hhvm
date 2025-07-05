@@ -57,7 +57,7 @@ void TestServiceMock::onewayThrowsUnexpectedException(int32_t delayMs) {
 
 void TestServiceMock::throwExpectedException(int32_t) {
   TestServiceException exception;
-  *exception.message_ref() = "mock_service_method_exception";
+  *exception.message() = "mock_service_method_exception";
   throw exception;
 }
 
@@ -84,14 +84,14 @@ void TestServiceMock::headers() {
 
   if (keyValue.find("expected_exception") != keyValue.end()) {
     TestServiceException exception;
-    *exception.message_ref() = "expected exception";
+    *exception.message() = "expected exception";
     throw exception;
   }
 
   if (keyValue.find("header_from_client") == keyValue.end() ||
       keyValue.find("header_from_client")->second != "2") {
     TestServiceException exception;
-    *exception.message_ref() = "Expected key/value, foo:bar, is missing";
+    *exception.message() = "Expected key/value, foo:bar, is missing";
     throw exception;
   }
 }

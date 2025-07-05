@@ -75,13 +75,13 @@ TEST(MatcherTestThriftMacher, OptionalRef) {
 
 TEST(MatcherTest, FiledRefPrintsCorrectly) {
   auto p = Person();
-  EXPECT_EQ(testing::PrintToString(p.name_ref()), "empty optional_field_ref");
-  p.name_ref() = "Zaphod";
+  EXPECT_EQ(testing::PrintToString(p.name()), "empty optional_field_ref");
+  p.name() = "Zaphod";
   EXPECT_EQ(
-      testing::PrintToString(p.name_ref()),
+      testing::PrintToString(p.name()),
       "optional_field_ref holding \"Zaphod\"");
-  p.id_ref() = 42;
-  EXPECT_EQ(testing::PrintToString(p.id_ref()), "field_ref holding 42");
+  p.id() = 42;
+  EXPECT_EQ(testing::PrintToString(p.id()), "field_ref holding 42");
 }
 
 TEST(ThriftMacherUnion, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
@@ -89,7 +89,7 @@ TEST(ThriftMacherUnion, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
   auto r = Result();
 
   int value = 42;
-  r.success_ref() = value;
+  r.success() = value;
   EXPECT_THAT(r, IsThriftUnionWith<field::success>(value));
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(r, IsThriftUnionWith<field::success>(Not(value))), "");
@@ -97,7 +97,7 @@ TEST(ThriftMacherUnion, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
       EXPECT_THAT(r, IsThriftUnionWith<field::error>(_)), "");
 
   std::string error = "error";
-  r.error_ref() = error;
+  r.error() = error;
   EXPECT_THAT(r, IsThriftUnionWith<field::error>(error));
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(r, IsThriftUnionWith<field::error>(Not(error))), "");
@@ -121,7 +121,7 @@ TEST(
   namespace field = apache::thrift::ident;
 
   auto r = SameType();
-  r.b_ref() = "b";
+  r.b() = "b";
   EXPECT_THAT(r, IsThriftUnionWith<field::b>(_));
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(r, IsThriftUnionWith<field::a>(_)), "");
 }
@@ -141,7 +141,7 @@ TEST(MatcherTest, WorksWithUnion) {
   auto r = Result();
 
   int value = 42;
-  r.success_ref() = value;
+  r.success() = value;
   EXPECT_THAT(r, ThriftField<field::success>(value));
   EXPECT_THAT(r, ThriftField<field::error>(testing::IsFalse()));
 }

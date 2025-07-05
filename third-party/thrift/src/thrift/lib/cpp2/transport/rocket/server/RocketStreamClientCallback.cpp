@@ -86,7 +86,7 @@ bool RocketStreamClientCallback::onFirstResponse(
     scheduleTimeout();
   }
 
-  firstResponse.metadata.streamId_ref() = static_cast<uint32_t>(streamId_);
+  firstResponse.metadata.streamId() = static_cast<uint32_t>(streamId_);
 
   connection_.sendPayload(
       streamId_,
@@ -201,9 +201,9 @@ void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
 
 bool RocketStreamClientCallback::onStreamHeaders(HeadersPayload&& payload) {
   ServerPushMetadata serverMeta;
-  serverMeta.streamHeadersPush_ref().ensure().streamId_ref() =
+  serverMeta.streamHeadersPush().ensure().streamId() =
       static_cast<uint32_t>(streamId_);
-  serverMeta.streamHeadersPush_ref()->headersPayloadContent_ref() =
+  serverMeta.streamHeadersPush()->headersPayloadContent() =
       std::move(payload.payload);
   connection_.sendMetadataPush(
       connection_.getPayloadSerializer()->packCompact(serverMeta));
@@ -261,12 +261,11 @@ void RocketStreamClientCallback::timeoutExpired() noexcept {
 
   serverCallback()->onStreamCancel();
   StreamRpcError streamRpcError;
-  streamRpcError.code_ref() = StreamRpcErrorCode::CREDIT_TIMEOUT;
-  streamRpcError.name_utf8_ref() =
+  streamRpcError.code() = StreamRpcErrorCode::CREDIT_TIMEOUT;
+  streamRpcError.name_utf8() =
       apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
           StreamRpcErrorCode::CREDIT_TIMEOUT);
-  streamRpcError.what_utf8_ref() =
-      "Stream expire timeout(no credit from client)";
+  streamRpcError.what_utf8() = "Stream expire timeout(no credit from client)";
   onStreamError(folly::make_exception_wrapper<rocket::RocketException>(
       rocket::ErrorCode::CANCELED,
       connection_.getPayloadSerializer()->packCompact(streamRpcError)));

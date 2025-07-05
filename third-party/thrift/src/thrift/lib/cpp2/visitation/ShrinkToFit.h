@@ -92,7 +92,7 @@ class shrink_to_fit_fn {
   static void shrink_to_fit_list(
       ThriftList& l, const metadata::ThriftType& thriftType) {
     for (auto& e : l) {
-      shrink_to_fit(e, *thriftType.get_t_list().valueType_ref());
+      shrink_to_fit(e, *thriftType.get_t_list().valueType());
     }
   }
 
@@ -103,7 +103,7 @@ class shrink_to_fit_fn {
     // TODO(dokwon): Use 'extract' or 'eraseInto' for optimization.
     for (auto& e : s) {
       typename ThriftSet::key_type new_e = std::move(e);
-      shrink_to_fit(new_e, *thriftType.get_t_set().valueType_ref());
+      shrink_to_fit(new_e, *thriftType.get_t_set().valueType());
       new_set.insert(std::move(new_e));
     }
     s = std::move(new_set);
@@ -116,8 +116,8 @@ class shrink_to_fit_fn {
     // TODO(dokwon): Use 'extract' or 'eraseInto' for optimization.
     for (auto& [k, e] : m) {
       typename ThriftMap::key_type new_k = std::move(k);
-      shrink_to_fit(new_k, *thriftType.get_t_map().keyType_ref());
-      shrink_to_fit(e, *thriftType.get_t_map().valueType_ref());
+      shrink_to_fit(new_k, *thriftType.get_t_map().keyType());
+      shrink_to_fit(e, *thriftType.get_t_map().valueType());
       new_map.try_emplace(std::move(new_k), std::move(e));
     }
     m = std::move(new_map);
@@ -151,8 +151,7 @@ class shrink_to_fit_fn {
         }
         throw std::logic_error("Invalid ThriftType metadata.");
       case ThriftTypeEnum::t_typedef:
-        return shrink_to_fit(
-            t, *thriftType.get_t_typedef().underlyingType_ref());
+        return shrink_to_fit(t, *thriftType.get_t_typedef().underlyingType());
       case ThriftTypeEnum::__EMPTY__:
       case ThriftTypeEnum::t_primitive:
       case ThriftTypeEnum::t_enum:

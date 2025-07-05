@@ -268,7 +268,7 @@ TEST(ThriftServer, DefaultCompressionTest) {
   auto channel =
       boost::polymorphic_downcast<ClientChannel*>(client.getChannel());
   apache::thrift::CompressionConfig compressionConfig;
-  compressionConfig.codecConfig_ref().ensure().set_zstdConfig();
+  compressionConfig.codecConfig().ensure().set_zstdConfig();
   channel->setDesiredCompressionConfig(compressionConfig);
   client.sendResponse(
       std::make_unique<Callback>(

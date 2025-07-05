@@ -43,8 +43,7 @@ TEST(ThriftRequest, frameworkMetadata) {
   RequestRpcMetadata metadata;
   auto connContext = std::make_unique<Cpp2ConnContext>();
 
-  metadata.frameworkMetadata_ref() =
-      folly::IOBuf::copyBuffer(std::string("abc"));
+  metadata.frameworkMetadata() = folly::IOBuf::copyBuffer(std::string("abc"));
   ThriftRequest req(
       serverConfigs, channel, std::move(metadata), std::move(connContext));
 }

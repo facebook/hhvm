@@ -195,32 +195,32 @@ TEST(ShrinkToFitTest, NestedStructListMapField) {
 
 TEST(ShrinkToFitTest, CppRefListFields) {
   Fields obj;
-  obj.listFieldRef_ref()->reserve(42);
-  obj.structFieldRef_ref()->listField().ensure().reserve(42);
+  obj.listFieldRef()->reserve(42);
+  obj.structFieldRef()->listField().ensure().reserve(42);
 
-  EXPECT_EQ(obj.listFieldRef_ref()->capacity(), 42);
-  EXPECT_EQ(obj.structFieldRef_ref()->listField()->capacity(), 42);
+  EXPECT_EQ(obj.listFieldRef()->capacity(), 42);
+  EXPECT_EQ(obj.structFieldRef()->listField()->capacity(), 42);
 
   apache::thrift::shrink_to_fit(obj);
 
-  EXPECT_EQ(obj.listFieldRef_ref()->capacity(), 0);
-  EXPECT_EQ(obj.structFieldRef_ref()->listField()->capacity(), 0);
+  EXPECT_EQ(obj.listFieldRef()->capacity(), 0);
+  EXPECT_EQ(obj.structFieldRef()->listField()->capacity(), 0);
 }
 
 TEST(ShrinkToFitTest, OptionalCppRefListFields) {
   Fields obj;
-  obj.optListFieldRef_ref() = std::make_shared<std::vector<int>>();
-  obj.optStructFieldRef_ref() = std::make_shared<StructWithListField>();
-  obj.optListFieldRef_ref()->reserve(42);
-  obj.optStructFieldRef_ref()->listField().ensure().reserve(42);
+  obj.optListFieldRef() = std::make_shared<std::vector<int>>();
+  obj.optStructFieldRef() = std::make_shared<StructWithListField>();
+  obj.optListFieldRef()->reserve(42);
+  obj.optStructFieldRef()->listField().ensure().reserve(42);
 
-  EXPECT_EQ(obj.optListFieldRef_ref()->capacity(), 42);
-  EXPECT_EQ(obj.optStructFieldRef_ref()->listField()->capacity(), 42);
+  EXPECT_EQ(obj.optListFieldRef()->capacity(), 42);
+  EXPECT_EQ(obj.optStructFieldRef()->listField()->capacity(), 42);
 
   apache::thrift::shrink_to_fit(obj);
 
-  EXPECT_EQ(obj.optListFieldRef_ref()->capacity(), 0);
-  EXPECT_EQ(obj.optStructFieldRef_ref()->listField()->capacity(), 0);
+  EXPECT_EQ(obj.optListFieldRef()->capacity(), 0);
+  EXPECT_EQ(obj.optStructFieldRef()->listField()->capacity(), 0);
 }
 
 TEST(ShrinkToFitTest, BoxListFields) {

@@ -52,9 +52,9 @@ TEST(FrozenUtilTest, Set) {
 
 TEST(FrozenUtilTest, Vector) {
   std::vector<Person> people(3);
-  *people[0].id_ref() = 300;
-  *people[1].id_ref() = 301;
-  *people[2].id_ref() = 302;
+  *people[0].id() = 300;
+  *people[1].id() = 301;
+  *people[2].id() = 302;
 
   auto tempFrozen = freezeToTempFile(people);
   MemoryMapping mapping(tempFrozen.fd());
@@ -73,7 +73,7 @@ TEST(FrozenUtilTest, Shrink) {
   size_t count = 1 << 16;
   for (size_t i = 0; i < count; ++i) {
     people.emplace_back();
-    *people.back().id_ref() = i + count;
+    *people.back().id() = i + count;
   }
 
   freezeToFile(people, f.fd());
@@ -98,7 +98,7 @@ TEST(FrozenUtilTest, Sparse) {
   size_t count = 1 << 20;
   for (size_t i = 0; i < count; ++i) {
     people.emplace_back();
-    *people.back().id_ref() = i + count;
+    *people.back().id() = i + count;
   }
 
   File f = File::temporary();
@@ -113,15 +113,15 @@ TEST(FrozenUtilTest, Sparse) {
   MemoryMapping mapping(f.fd());
   auto* pfvect = mapFrozen<std::vector<Person>>(mapping);
   auto& fvect = *pfvect;
-  EXPECT_EQ(*people[100].id_ref(), fvect[100].id);
-  EXPECT_EQ(*people[9876].id_ref(), fvect[9876].id);
+  EXPECT_EQ(*people[100].id(), fvect[100].id);
+  EXPECT_EQ(*people[9876].id(), fvect[9876].id);
 }
 
 TEST(FrozenUtilTest, KeepMapped) {
   Person p;
-  *p.nums_ref() = {9, 8, 7};
-  *p.id_ref() = 123;
-  *p.name_ref() = "Tom";
+  *p.nums() = {9, 8, 7};
+  *p.id() = 123;
+  *p.name() = "Tom";
 
   File f = File::temporary();
   MemoryMapping mapping(

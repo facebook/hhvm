@@ -127,7 +127,7 @@ TEST_F(RocketClientChannelTest, ConstructorWithDefaultMetaData) {
 TEST_F(RocketClientChannelTest, ConstructorWithClientAgentData) {
   RequestSetupMetadata setupMetadata;
   ClientMetadata clientMetadata;
-  clientMetadata.agent_ref() = kTestAgentName;
+  clientMetadata.agent() = kTestAgentName;
   setupMetadata.clientMetadata().ensure() = clientMetadata;
 
   Client<TestService> testClient{

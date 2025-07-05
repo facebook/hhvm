@@ -26,7 +26,7 @@
 namespace apache::thrift {
 namespace {
 void processExceptionHeaders(ResponseRpcMetadata& metadata) {
-  auto otherMetadataRef = metadata.otherMetadata_ref();
+  auto otherMetadataRef = metadata.otherMetadata();
   if (!otherMetadataRef) {
     return;
   }

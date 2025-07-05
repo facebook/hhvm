@@ -248,7 +248,7 @@ folly::Future<RequestState> sendRequest(
       [&channel, url = std::move(url), cb = std::move(cb)]() mutable {
         ThriftChannelIf::RequestMetadata metadata;
         metadata.url = url;
-        metadata.requestRpcMetadata.kind_ref() =
+        metadata.requestRpcMetadata.kind() =
             ::apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
         channel.sendThriftRequest(
             std::move(metadata), folly::IOBuf::create(1), std::move(cb));

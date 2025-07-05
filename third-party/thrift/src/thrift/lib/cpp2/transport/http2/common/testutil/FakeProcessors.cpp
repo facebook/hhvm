@@ -41,10 +41,10 @@ void EchoProcessor::onThriftRequestHelper(
   CHECK(payload);
   CHECK(channel);
   ResponseRpcMetadata responseMetadata;
-  if (auto otherMetadata = requestMetadata.otherMetadata_ref()) {
-    responseMetadata.otherMetadata_ref() = std::move(*otherMetadata);
+  if (auto otherMetadata = requestMetadata.otherMetadata()) {
+    responseMetadata.otherMetadata() = std::move(*otherMetadata);
   }
-  (*responseMetadata.otherMetadata_ref())[key_] = value_;
+  (*responseMetadata.otherMetadata())[key_] = value_;
   auto iobuf = IOBuf::copyBuffer(trailer_);
   payload->prependChain(std::move(iobuf));
   channel->sendThriftResponse(std::move(responseMetadata), std::move(payload));

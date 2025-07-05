@@ -101,8 +101,8 @@ class TestInterface : public apache::thrift::ServiceHandler<FutureService> {
     auto f = p.getFuture();
 
     Xception x;
-    *x.errorCode_ref() = 32;
-    *x.message_ref() = "test";
+    *x.errorCode() = 32;
+    *x.message() = "test";
 
     p.setException(x);
 
@@ -114,8 +114,8 @@ class TestInterface : public apache::thrift::ServiceHandler<FutureService> {
     auto f = p.getFuture();
 
     Xception x;
-    *x.errorCode_ref() = 42;
-    *x.message_ref() = "test2";
+    *x.errorCode() = 42;
+    *x.message() = "test2";
 
     p.setException(x);
 

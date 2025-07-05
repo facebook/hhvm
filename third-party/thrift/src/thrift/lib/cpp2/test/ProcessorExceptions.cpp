@@ -66,18 +66,18 @@ int32_t call_return42(std::function<void(MyArgs2&)> isset_cb) {
       HeaderClientChannel::newChannel(std::move(socket)));
 
   Inner2 inner;
-  inner.i_ref() = 7;
+  inner.i() = 7;
   MyArgs2 args;
-  args.i_ref() = {};
-  args.s_ref() = "qwerty";
-  args.l_ref() = {1, 2, 3};
-  args.m_ref() = {{"a", 1}, {"b", 2}};
-  args.li_ref() = {inner};
-  args.mi_ref() = {{11, inner}};
-  args.complex_key_ref() = {{inner, 11}};
-  args.i_ref()->i_ref().ensure();
-  (*args.li_ref())[0].i_ref().ensure();
-  (*args.mi_ref())[11].i_ref().ensure();
+  args.i() = {};
+  args.s() = "qwerty";
+  args.l() = {1, 2, 3};
+  args.m() = {{"a", 1}, {"b", 2}};
+  args.li() = {inner};
+  args.mi() = {{11, inner}};
+  args.complex_key() = {{inner, 11}};
+  args.i()->i().ensure();
+  (*args.li())[0].i().ensure();
+  (*args.mi())[11].i().ensure();
   MyArgs2 all_is_set(args);
   isset_cb(args);
 
@@ -99,74 +99,65 @@ TEST(ProcessorExceptionTest, ok_if_required_set) {
 
 TEST(ProcessorExceptionTest, throw_if_scalar_required_missing) {
   EXPECT_THROW(
-      call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.s_ref()); }),
+      call_return42([](MyArgs2& a) { apache::thrift::unset_unsafe(a.s()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_inner_required_missing) {
   EXPECT_THROW(
-      call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.i_ref()); }),
+      call_return42([](MyArgs2& a) { apache::thrift::unset_unsafe(a.i()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_inner_field_required_missing) {
   EXPECT_THROW(
       call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.i_ref()->i_ref()); }),
+          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.i()->i()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_list_required_missing) {
   EXPECT_THROW(
-      call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.l_ref()); }),
+      call_return42([](MyArgs2& a) { apache::thrift::unset_unsafe(a.l()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_map_required_missing) {
   EXPECT_THROW(
-      call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.m_ref()); }),
+      call_return42([](MyArgs2& a) { apache::thrift::unset_unsafe(a.m()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_list_of_struct_required_missing) {
   EXPECT_THROW(
-      call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.li_ref()); }),
+      call_return42([](MyArgs2& a) { apache::thrift::unset_unsafe(a.li()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_list_inner_required_missing) {
   EXPECT_THROW(
-      call_return42([](MyArgs2& a) {
-        apache::thrift::unset_unsafe((*a.li_ref())[0].i_ref());
-      }),
+      call_return42(
+          [](MyArgs2& a) { apache::thrift::unset_unsafe((*a.li())[0].i()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_map_of_struct_required_missing) {
   EXPECT_THROW(
-      call_return42(
-          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.mi_ref()); }),
+      call_return42([](MyArgs2& a) { apache::thrift::unset_unsafe(a.mi()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_map_inner_required_missing) {
   EXPECT_THROW(
-      call_return42([](MyArgs2& a) {
-        apache::thrift::unset_unsafe((*a.mi_ref())[11].i_ref());
-      }),
+      call_return42(
+          [](MyArgs2& a) { apache::thrift::unset_unsafe((*a.mi())[11].i()); }),
       TApplicationException);
 }
 
 TEST(ProcessorExceptionTest, throw_if_map_key_required_missing) {
   EXPECT_THROW(
-      call_return42([](MyArgs2& a) {
-        apache::thrift::unset_unsafe(a.complex_key_ref());
-      }),
+      call_return42(
+          [](MyArgs2& a) { apache::thrift::unset_unsafe(a.complex_key()); }),
       TApplicationException);
 }
 
@@ -197,10 +188,10 @@ TEST(ProcessorExceptionTest, throw_if_method_missing) {
 TEST(ProcessorExceptionTest, throw_if_map_key_inner_required_missing) {
   EXPECT_THROW(
       call_return42([](MyArgs2& a) {
-        std::pair<Inner2, int> elem = *a.complex_key_ref()->cbegin();
-        apache::thrift::unset_unsafe(elem.first.i_ref());
-        a.complex_key_ref()->clear();
-        a.complex_key_ref()->insert(elem);
+        std::pair<Inner2, int> elem = *a.complex_key()->cbegin();
+        apache::thrift::unset_unsafe(elem.first.i());
+        a.complex_key()->clear();
+        a.complex_key()->insert(elem);
       }),
       TApplicationException);
 }

@@ -52,10 +52,10 @@ ResponseRpcError makeResponseRpcError(
     folly::StringPiece message,
     const ResponseRpcMetadata& metadata) {
   ResponseRpcError responseRpcError;
-  responseRpcError.name_utf8_ref() =
+  responseRpcError.name_utf8() =
       apache::thrift::TEnumTraits<ResponseRpcErrorCode>::findName(errorCode);
-  responseRpcError.what_utf8_ref() = message.str();
-  responseRpcError.code_ref() = errorCode;
+  responseRpcError.what_utf8() = message.str();
+  responseRpcError.code() = errorCode;
   auto category = [&] {
     switch (errorCode) {
       case ResponseRpcErrorCode::REQUEST_PARSING_FAILURE:
@@ -80,10 +80,10 @@ ResponseRpcError makeResponseRpcError(
         return ResponseRpcErrorCategory::INTERNAL_ERROR;
     }
   }();
-  responseRpcError.category_ref() = category;
+  responseRpcError.category() = category;
 
-  if (auto loadRef = metadata.load_ref()) {
-    responseRpcError.load_ref() = *loadRef;
+  if (auto loadRef = metadata.load()) {
+    responseRpcError.load() = *loadRef;
   }
 
   return responseRpcError;
@@ -143,11 +143,11 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
 
         PayloadMetadata payloadMetadata;
         if (fid == 0) {
-          payloadMetadata.responseMetadata_ref() = PayloadResponseMetadata();
+          payloadMetadata.responseMetadata() = PayloadResponseMetadata();
         } else {
           PayloadExceptionMetadataBase exceptionMetadataBase;
           PayloadDeclaredExceptionMetadata declaredExceptionMetadata;
-          if (auto otherMetadataRef = metadata.otherMetadata_ref()) {
+          if (auto otherMetadataRef = metadata.otherMetadata()) {
             // defined in sync with
             // thrift/lib/cpp2/transport/core/RpcMetadataUtil.h
 
@@ -155,13 +155,13 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
             static const auto uex =
                 std::string(apache::thrift::detail::kHeaderUex);
             if (auto uexPtr = folly::get_ptr(*otherMetadataRef, uex)) {
-              exceptionMetadataBase.name_utf8_ref() = *uexPtr;
+              exceptionMetadataBase.name_utf8() = *uexPtr;
               otherMetadataRef->erase(uex);
             }
             static const auto uexw =
                 std::string(apache::thrift::detail::kHeaderUexw);
             if (auto uexwPtr = folly::get_ptr(*otherMetadataRef, uexw)) {
-              exceptionMetadataBase.what_utf8_ref() = *uexwPtr;
+              exceptionMetadataBase.what_utf8() = *uexwPtr;
               otherMetadataRef->erase(uexw);
             }
 
@@ -172,18 +172,18 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
               ErrorClassification errorClassification =
                   apache::thrift::detail::deserializeErrorClassification(
                       *metaPtr);
-              declaredExceptionMetadata.errorClassification_ref() =
+              declaredExceptionMetadata.errorClassification() =
                   std::move(errorClassification);
             }
           }
           PayloadExceptionMetadata exceptionMetadata;
-          exceptionMetadata.declaredException_ref() =
+          exceptionMetadata.declaredException() =
               std::move(declaredExceptionMetadata);
-          exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
-          payloadMetadata.exceptionMetadata_ref() =
+          exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
+          payloadMetadata.exceptionMetadata() =
               std::move(exceptionMetadataBase);
         }
-        metadata.payloadMetadata_ref() = std::move(payloadMetadata);
+        metadata.payloadMetadata() = std::move(payloadMetadata);
         break;
       }
       case MessageType::T_EXCEPTION: {
@@ -191,9 +191,9 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
         ::apache::thrift::detail::deserializeExceptionBody(&reader, &ex);
 
         PayloadExceptionMetadataBase exceptionMetadataBase;
-        exceptionMetadataBase.what_utf8_ref() = ex.getMessage();
+        exceptionMetadataBase.what_utf8() = ex.getMessage();
 
-        auto otherMetadataRef = metadata.otherMetadata_ref();
+        auto otherMetadataRef = metadata.otherMetadata();
         DCHECK(
             !otherMetadataRef ||
             !folly::get_ptr(
@@ -214,29 +214,25 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
 
         if (anyexPtr && anyexTypePtr) {
           if (version < 10) {
-            exceptionMetadataBase.name_utf8_ref() = *anyexTypePtr;
+            exceptionMetadataBase.name_utf8() = *anyexTypePtr;
             PayloadExceptionMetadata exceptionMetadata;
-            exceptionMetadata.DEPRECATED_proxyException_ref() =
+            exceptionMetadata.DEPRECATED_proxyException() =
                 PayloadProxyExceptionMetadata();
-            exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
+            exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
 
             payload = protocol::base64Decode(*anyexPtr);
           } else {
 #ifdef THRIFT_ANY_AVAILABLE
-            exceptionMetadataBase.name_utf8_ref() = *anyexTypePtr;
-            exceptionMetadataBase.metadata_ref()
-                .ensure()
-                .anyException_ref()
-                .ensure();
+            exceptionMetadataBase.name_utf8() = *anyexTypePtr;
+            exceptionMetadataBase.metadata().ensure().anyException().ensure();
 
             type::SemiAnyStruct anyException;
-            anyException.type_ref() =
+            anyException.type() =
                 type::Type(type::exception_c{}, *anyexTypePtr);
             if (!std::is_same_v<Serializer, CompactSerializer>) {
-              anyException.protocol_ref() = type::StandardProtocol::Compact;
+              anyException.protocol() = type::StandardProtocol::Compact;
             }
-            anyException.data_ref() =
-                std::move(*protocol::base64Decode(*anyexPtr));
+            anyException.data() = std::move(*protocol::base64Decode(*anyexPtr));
             folly::IOBufQueue payloadQueue;
             Serializer::serialize(anyException, &payloadQueue);
             payload = payloadQueue.move();
@@ -315,18 +311,18 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
             return makeResponseRpcError(*errorCode, ex.getMessage(), metadata);
           }
           if (uexPtr) {
-            exceptionMetadataBase.name_utf8_ref() = *uexPtr;
+            exceptionMetadataBase.name_utf8() = *uexPtr;
             otherMetadataRef->erase(apache::thrift::detail::kHeaderUex);
           }
 
           const auto isClientError = exPtr && *exPtr == kAppClientErrorCode;
-          exceptionMetadataBase.metadata_ref()
+          exceptionMetadataBase.metadata()
               .ensure()
-              .appUnknownException_ref()
+              .appUnknownException()
               .ensure()
-              .errorClassification_ref()
+              .errorClassification()
               .ensure()
-              .blame_ref() =
+              .blame() =
               isClientError ? ErrorBlame::CLIENT : ErrorBlame::SERVER;
 
           payload->clear();
@@ -338,9 +334,8 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
         }
 
         PayloadMetadata payloadMetadata;
-        payloadMetadata.exceptionMetadata_ref() =
-            std::move(exceptionMetadataBase);
-        metadata.payloadMetadata_ref() = std::move(payloadMetadata);
+        payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
+        metadata.payloadMetadata() = std::move(payloadMetadata);
 
         break;
       }
@@ -373,12 +368,11 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponse(
   }
 
   THRIFT_APPLICATION_EVENT(server_write_headers).log([&] {
-    auto size =
-        metadata.otherMetadata_ref() ? metadata.otherMetadata_ref()->size() : 0;
+    auto size = metadata.otherMetadata() ? metadata.otherMetadata()->size() : 0;
     std::vector<folly::dynamic> keys;
     if (size) {
       keys.reserve(size);
-      for (auto& [k, v] : *metadata.otherMetadata_ref()) {
+      for (auto& [k, v] : *metadata.otherMetadata()) {
         keys.push_back(k);
       }
     }
@@ -506,7 +500,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
     if (!metadata.payloadMetadata()) {
       // unexpected, handle it conservatively
       payloadIsException = true;
-    } else if (metadata.payloadMetadata()->exceptionMetadata_ref()) {
+    } else if (metadata.payloadMetadata()->exceptionMetadata()) {
       payloadIsException = true;
     }
 

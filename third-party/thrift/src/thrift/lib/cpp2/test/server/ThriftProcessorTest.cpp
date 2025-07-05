@@ -80,7 +80,7 @@ TEST_F(CoreTestFixture, BadMetadata) {
     serializeSumTwoNumbers(5, 10, false, &request, &metadata);
     auto channel = std::shared_ptr<ThriftChannelIf>(channel_);
 
-    metadata.kind_ref().reset(); // make sure there is an error
+    metadata.kind().reset(); // make sure there is an error
 
     processor_.onThriftRequest(
         std::move(metadata), request.move(), channel, newCpp2ConnContext());

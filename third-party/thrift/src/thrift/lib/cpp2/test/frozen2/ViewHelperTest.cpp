@@ -32,16 +32,16 @@ using namespace ::test::frozen2;
 
 TEST(ViewHelperTest, TestThaw) {
   TestStruct strct;
-  strct.i32Field_ref() = 0xBAD;
-  strct.strField_ref() = "foo";
-  strct.doubleField_ref() = 1.5;
-  strct.boolField_ref() = true;
-  strct.listField_ref() = {"bar", "baz"};
-  strct.mapField_ref() = {
+  strct.i32Field() = 0xBAD;
+  strct.strField() = "foo";
+  strct.doubleField() = 1.5;
+  strct.boolField() = true;
+  strct.listField() = {"bar", "baz"};
+  strct.mapField() = {
       {0, "a"},
       {1, "b"},
   };
-  strct.enumField_ref() = TestEnum::Foo;
+  strct.enumField() = TestEnum::Foo;
 
   std::string frozen;
   freezeToString(strct, frozen);

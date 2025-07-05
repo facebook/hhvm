@@ -129,18 +129,17 @@ TEST(GetValueOrNullTest, Optional) {
 TEST(GetValueOrNullTest, Union) {
   {
     UnionStruct obj;
-    EXPECT_EQ(op::getValueOrNull(obj.field_ref()), nullptr);
-    obj.field_ref().emplace().int_field_ref() = 2;
-    EXPECT_EQ(op::getValueOrNull(obj.field_ref())->get_int_field(), 2);
+    EXPECT_EQ(op::getValueOrNull(obj.field()), nullptr);
+    obj.field().emplace().int_field() = 2;
+    EXPECT_EQ(op::getValueOrNull(obj.field())->get_int_field(), 2);
   }
   {
     // test with const T&
     UnionStruct obj;
     const auto& objConst = obj;
-    EXPECT_EQ(op::getValueOrNull(objConst.field_ref()), nullptr);
-    obj.field_ref().emplace().string_field_ref() = "foo";
-    EXPECT_EQ(
-        op::getValueOrNull(objConst.field_ref())->get_string_field(), "foo");
+    EXPECT_EQ(op::getValueOrNull(objConst.field()), nullptr);
+    obj.field().emplace().string_field() = "foo";
+    EXPECT_EQ(op::getValueOrNull(objConst.field())->get_string_field(), "foo");
   }
 }
 
@@ -170,10 +169,10 @@ TEST(VisitUnionTest, Basic) {
 
   EXPECT_EQ(visit(), 0);
 
-  obj.int_field_ref() = 0;
+  obj.int_field() = 0;
   EXPECT_EQ(visit(), 1);
 
-  obj.string_field_ref() = "foo";
+  obj.string_field() = "foo";
   EXPECT_EQ(visit(), 2);
 
   apache::thrift::clear(obj);

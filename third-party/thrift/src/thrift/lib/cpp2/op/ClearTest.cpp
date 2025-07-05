@@ -108,7 +108,7 @@ TEST(ClearTest, Structured) {
   testClear<type::exception_t<testset::exception_optional_i64>>(
       {}, {apache::thrift::FragileConstructor(), 1});
   testset::union_i64 one;
-  one.field_1_ref().ensure() = 1;
+  one.field_1().ensure() = 1;
   testClear<type::union_t<testset::union_i64>>({}, one);
 }
 

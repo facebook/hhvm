@@ -26,7 +26,7 @@ using namespace testing;
 
 TEST(FrozenUnion, union_contains_int) {
   TestUnion u;
-  u.aInt_ref() = 937;
+  u.aInt() = 937;
   auto f = freeze(u);
   EXPECT_EQ(f.get_aInt(), 937);
   EXPECT_EQ(f.thaw(), u);
@@ -34,7 +34,7 @@ TEST(FrozenUnion, union_contains_int) {
 
 TEST(FrozenUnion, union_contains_string) {
   TestUnion u;
-  u.aString_ref() = "hello world";
+  u.aString() = "hello world";
   auto f = freeze(u);
   EXPECT_EQ(f.get_aString(), "hello world");
   EXPECT_EQ(f.thaw(), u);
@@ -43,7 +43,7 @@ TEST(FrozenUnion, union_contains_string) {
 TEST(FrozenUnion, union_contains_list) {
   TestUnion u;
   std::vector<int64_t> thatList{9, 5, 376, 28};
-  u.aList_ref() = thatList;
+  u.aList() = thatList;
   auto f = freeze(u);
   for (size_t i = 0; i < thatList.size(); i++) {
     EXPECT_EQ(f.get_aList()[i], thatList[i]);
@@ -54,7 +54,7 @@ TEST(FrozenUnion, union_contains_list) {
 TEST(FrozenUnion, union_contains_map) {
   TestUnion u;
   std::map<int32_t, int64_t> thatMap{{9, 5}, {376, 28}};
-  u.aMap_ref() = thatMap;
+  u.aMap() = thatMap;
   auto f = freeze(u);
   EXPECT_EQ(f.get_aMap().at(9), 5);
   EXPECT_EQ(f.get_aMap().at(376), 28);
@@ -64,7 +64,7 @@ TEST(FrozenUnion, union_contains_map) {
 TEST(FrozenUnion, union_contains_set) {
   TestUnion u;
   std::set<std::string> thatSet{"good", "night", "it's", "09/15/2019 3:48am"};
-  u.aSet_ref() = thatSet;
+  u.aSet() = thatSet;
   auto f = freeze(u);
   EXPECT_EQ(TestUnion::Type::aSet, u.getType());
   EXPECT_THAT(f.get_aSet(), Contains("good"));
@@ -82,7 +82,7 @@ TEST(FrozenUnion, union_contains_sturct) {
   std::vector<int64_t> thatCreativeIds{9, 5, 376, 28};
   thatStruct.creativeIds() = thatCreativeIds;
 
-  u.aStruct_ref() = thatStruct;
+  u.aStruct() = thatStruct;
   auto f = freeze(u);
   EXPECT_EQ(f.get_aStruct().adId(), 2010);
   EXPECT_EQ(f.get_aStruct().name(), "Tiger");
@@ -99,7 +99,7 @@ TEST(FrozenUnion, union_contains_cpp_shared_ref) {
   max->age() = 7;
   max->vegan() = true;
 
-  u.aPet1_ref() = *max;
+  u.aPet1() = *max;
   auto f = freeze(u);
 
   EXPECT_EQ(f.get_aPet1()->name(), "max");
@@ -116,7 +116,7 @@ TEST(FrozenUnion, union_contains_cpp_unique_ref) {
   *tiny.c() = "ccc";
   *tiny.d() = "ddd";
 
-  u.aTiny_ref() = tiny;
+  u.aTiny() = tiny;
   auto f = freeze(u);
 
   EXPECT_EQ(f.get_aTiny()->a(), "aaa");
@@ -132,7 +132,7 @@ TEST(FrozenUnion, union_contains_cpp_ref_true) {
   *place.name() = "somewhere";
   place.popularityByHour()[37] = 21;
 
-  u.aPlace_ref() = std::move(place);
+  u.aPlace() = std::move(place);
   auto f = freeze(u);
 
   EXPECT_EQ(f.get_aPlace()->name(), "somewhere");
@@ -147,7 +147,7 @@ TEST(FrozenUnion, union_as_member) {
   *thatStruct.name() = "Jayden";
   std::vector<int64_t> thatCreativeIds{9, 5, 376, 28};
   thatStruct.creativeIds() = thatCreativeIds;
-  u.aStruct_ref() = thatStruct;
+  u.aStruct() = thatStruct;
 
   Big big;
   big.anOptionalString() = "so good!!";
@@ -176,7 +176,7 @@ TEST(FrozenUnion, union_as_member) {
 
 TEST(FrozenUnion, union_schema_evolution) {
   TestUnion u;
-  u.aInt_ref() = 937;
+  u.aInt() = 937;
   auto&& str = freezeToString(u);
 
   auto f2 = mapFrozen<TestUnion2>(std::move(str));
@@ -187,7 +187,7 @@ TEST(FrozenUnion, union_schema_evolution) {
 
 TEST(FrozenUnion, union_serde) {
   TestUnion u;
-  u.aInt_ref() = 937;
+  u.aInt() = 937;
   auto&& str = freezeToString(u);
 
   auto f = mapFrozen<TestUnion>(std::move(str));
@@ -200,7 +200,7 @@ TEST(FrozenUnion, union_serde) {
 
 TEST(FrozenUnion, union_get_wrong_type) {
   TestUnion u;
-  u.aInt_ref() = 937;
+  u.aInt() = 937;
   auto&& str = freezeToString(u);
 
   auto f = mapFrozen<TestUnion>(std::move(str));

@@ -105,19 +105,19 @@ TEST(HashTest, HashType) {
   };
 
   for (auto i = 0; i < 10; i++) {
-    value.myI32_ref() = i + 100;
+    value.myI32() = i + 100;
     check_and_add(Tag{}, value);
-    value.myList_ref() = {std::to_string(i + 200)};
+    value.myList() = {std::to_string(i + 200)};
     check_and_add(Tag{}, value);
-    value.mySet_ref() = {std::to_string(i + 300)};
+    value.mySet() = {std::to_string(i + 300)};
     check_and_add(Tag{}, value);
-    value.myMap_ref() = {{std::to_string(i + 400), 0}};
+    value.myMap() = {{std::to_string(i + 400), 0}};
     check_and_add(Tag{}, value);
 
-    check_and_add(type::i32_t{}, *value.myI32_ref());
-    check_and_add(type::list<type::string_t>{}, *value.myList_ref());
-    check_and_add(type::set<type::string_t>{}, *value.mySet_ref());
-    check_and_add(type::map<type::string_t, type::i64_t>{}, *value.myMap_ref());
+    check_and_add(type::i32_t{}, *value.myI32());
+    check_and_add(type::list<type::string_t>{}, *value.myList());
+    check_and_add(type::set<type::string_t>{}, *value.mySet());
+    check_and_add(type::map<type::string_t, type::i64_t>{}, *value.myMap());
   }
 }
 
@@ -205,17 +205,17 @@ TYPED_TEST(DeterministicProtocolTest, checkOneOfEach) {
 TYPED_TEST(DeterministicProtocolTest, checkOptional) {
   test::OptionalFields input;
   const auto result = this->hash(input);
-  input.f1_ref() = {};
+  input.f1() = {};
   EXPECT_NE(result, this->hash(input));
-  input.f1_ref().reset();
+  input.f1().reset();
   EXPECT_EQ(result, this->hash(input));
-  input.f2_ref() = {};
+  input.f2() = {};
   EXPECT_NE(result, this->hash(input));
-  input.f2_ref().reset();
+  input.f2().reset();
   EXPECT_EQ(result, this->hash(input));
-  input.f3_ref() = {};
+  input.f3() = {};
   EXPECT_NE(result, this->hash(input));
-  input.f3_ref().reset();
+  input.f3().reset();
   EXPECT_EQ(result, this->hash(input));
 }
 
@@ -232,69 +232,68 @@ TEST(HashTest, Struct) {
   auto result = hashStruct(input);
   auto previousResult = result;
   // 1
-  input.myBool_ref() = !input.myBool_ref().value();
+  input.myBool() = !input.myBool().value();
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 2
-  input.myByte_ref() = input.myByte_ref().value() + 1;
+  input.myByte() = input.myByte().value() + 1;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 3
-  input.myI16_ref() = input.myI16_ref().value() + 1;
+  input.myI16() = input.myI16().value() + 1;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 4
-  input.myI32_ref() = input.myI32_ref().value() + 1;
+  input.myI32() = input.myI32().value() + 1;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 5
-  input.myI64_ref() = input.myI64_ref().value() + 1;
+  input.myI64() = input.myI64().value() + 1;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 6
-  input.myDouble_ref() = input.myDouble_ref().value() + 1.23;
+  input.myDouble() = input.myDouble().value() + 1.23;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 7
-  input.myFloat_ref() = input.myFloat_ref().value() + 1.23;
+  input.myFloat() = input.myFloat().value() + 1.23;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 8
-  input.myMap_ref() = {{"abc", 1}};
+  input.myMap() = {{"abc", 1}};
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 9
-  input.myList_ref() = {"abc"};
+  input.myList() = {"abc"};
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 10
-  input.mySet_ref() = {"abc"};
+  input.mySet() = {"abc"};
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 11
-  input.myStruct_ref().emplace();
-  input.myStruct_ref()->mySubI64_ref() =
-      input.myStruct_ref()->mySubI64_ref().value() + 1;
+  input.myStruct().emplace();
+  input.myStruct()->mySubI64() = input.myStruct()->mySubI64().value() + 1;
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
-  input.myStruct_ref()->mySubString_ref() =
-      input.myStruct_ref()->mySubString_ref().value() + "a";
+  input.myStruct()->mySubString() =
+      input.myStruct()->mySubString().value() + "a";
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
   previousResult = result;
   // 12
-  input.myUnion_ref()->text_ref() = "abc";
+  input.myUnion()->text() = "abc";
   result = hashStruct(input);
   EXPECT_NE(previousResult, result);
 }

@@ -20,37 +20,37 @@ namespace apache::thrift::detail::md {
 
 ThriftConstValue cvBool(bool value) {
   ThriftConstValue ret;
-  ret.cv_bool_ref() = value;
+  ret.cv_bool() = value;
   return ret;
 }
 
 ThriftConstValue cvInteger(int64_t value) {
   ThriftConstValue ret;
-  ret.cv_integer_ref() = value;
+  ret.cv_integer() = value;
   return ret;
 }
 
 ThriftConstValue cvDouble(double value) {
   ThriftConstValue ret;
-  ret.cv_double_ref() = value;
+  ret.cv_double() = value;
   return ret;
 }
 
 ThriftConstValue cvString(const char* value) {
   ThriftConstValue ret;
-  ret.cv_string_ref() = value;
+  ret.cv_string() = value;
   return ret;
 }
 
 ThriftConstValue cvMap(std::vector<ThriftConstValuePair>&& value) {
   ThriftConstValue ret;
-  ret.cv_map_ref() = std::move(value);
+  ret.cv_map() = std::move(value);
   return ret;
 }
 
 ThriftConstValue cvList(std::vector<ThriftConstValue>&& value) {
   ThriftConstValue ret;
-  ret.cv_list_ref() = std::move(value);
+  ret.cv_list() = std::move(value);
   return ret;
 }
 
@@ -58,16 +58,16 @@ ThriftConstValue cvStruct(
     const char* name, std::map<std::string, ThriftConstValue>&& fields) {
   ThriftConstValue ret;
   ThriftConstStruct s;
-  s.type_ref()->name_ref() = name;
-  s.fields_ref() = std::move(fields);
-  ret.cv_struct_ref() = std::move(s);
+  s.type()->name() = name;
+  s.fields() = std::move(fields);
+  ret.cv_struct() = std::move(s);
   return ret;
 }
 
 ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value) {
   ThriftConstValuePair pair;
-  pair.key_ref() = std::move(key);
-  pair.value_ref() = std::move(value);
+  pair.key() = std::move(key);
+  pair.value() = std::move(value);
   return pair;
 }
 

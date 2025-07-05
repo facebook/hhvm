@@ -299,8 +299,8 @@ TEST(CompareTest, Union) {
   detail::UnionEquality equalTo;
   detail::UnionLessThan lessThan;
   test::UnionIntegers empty, u1, u2;
-  u1.myI16_ref() = 10;
-  u2.myI32_ref() = 1;
+  u1.myI16() = 10;
+  u2.myI32() = 1;
   EXPECT_TRUE(lessThan(empty, u1));
   EXPECT_FALSE(equalTo(empty, u1));
   EXPECT_TRUE(lessThan(u1, u2));
@@ -312,7 +312,7 @@ TEST(CompareTest, Union) {
   EXPECT_FALSE(lessThan(empty, empty));
   EXPECT_TRUE(equalTo(empty, empty));
 
-  u2.myI16_ref() = 10;
+  u2.myI16() = 10;
   EXPECT_FALSE(lessThan(u1, u2));
   EXPECT_TRUE(equalTo(u1, u2));
 }

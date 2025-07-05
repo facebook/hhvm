@@ -23,7 +23,6 @@
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 #include "common/services/cpp/TLSConfig.h"
 
-#include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
 #include <thrift/conformance/stresstest/server/StressTestServerModule.h>
@@ -61,7 +60,6 @@ DEFINE_bool(
     false,
     "Sets Thrift Server's default_sync_max_qps_to_execution_rate flag.");
 DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
-DEFINE_bool(work_stealing_executor, false, "Enable work stealing executor.");
 DEFINE_bool(
     parallel_concurrency_controller,
     false,
@@ -244,12 +242,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   }
 
   std::shared_ptr<folly::Executor> executor;
-  if (FLAGS_work_stealing_executor) {
-    LOG(INFO) << "WorkStealingExecutor enabled";
-    executor =
-        std::make_shared<folly::WorkStealingExecutor>(numCpuWorkerThreads);
-  } else if (
-      FLAGS_parallel_concurrency_controller ||
+  if (FLAGS_parallel_concurrency_controller ||
       FLAGS_se_parallel_concurrency_controller ||
       FLAGS_token_bucket_concurrency_controller) {
     LOG(INFO) << "CPUThreadPoolExecutor enabled";

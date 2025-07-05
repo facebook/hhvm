@@ -51,8 +51,8 @@ static void get_needed_includes_by_patch_impl(
         root, *asTypedef->get_type(), seen, result);
     return;
   }
-  if (type.is_primitive_type() || type.is_enum()) {
-    // We don't need to generate patch structs for primitive types or enum.
+  if (type.is_primitive_type()) {
+    // We don't need to import module to get the primitive tyeps.
     return;
   }
   if (type.get_program() && type.get_program() != root) {

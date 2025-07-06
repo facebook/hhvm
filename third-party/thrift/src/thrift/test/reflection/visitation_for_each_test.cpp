@@ -186,17 +186,17 @@ TYPED_TEST(ForEachFieldTest, test_cpp_ref_unique) {
   });
 
   // for cpp.ref, unqualified field has value by default
-  EXPECT_TRUE(s.aStruct_ref());
-  EXPECT_TRUE(s.aList_ref()->empty());
-  EXPECT_TRUE(s.aSet_ref()->empty());
-  EXPECT_TRUE(s.aMap_ref()->empty());
-  EXPECT_TRUE(s.aUnion_ref());
+  EXPECT_TRUE(s.aStruct());
+  EXPECT_TRUE(s.aList()->empty());
+  EXPECT_TRUE(s.aSet()->empty());
+  EXPECT_TRUE(s.aMap()->empty());
+  EXPECT_TRUE(s.aUnion());
 
-  EXPECT_FALSE(s.anOptionalStruct_ref());
-  EXPECT_EQ(*s.anOptionalList_ref(), names);
-  EXPECT_FALSE(s.anOptionalSet_ref());
-  EXPECT_FALSE(s.anOptionalMap_ref());
-  EXPECT_FALSE(s.anOptionalUnion_ref());
+  EXPECT_FALSE(s.anOptionalStruct());
+  EXPECT_EQ(*s.anOptionalList(), names);
+  EXPECT_FALSE(s.anOptionalSet());
+  EXPECT_FALSE(s.anOptionalMap());
+  EXPECT_FALSE(s.anOptionalUnion());
 }
 
 TYPED_TEST(ForEachFieldTest, test_reference_type) {

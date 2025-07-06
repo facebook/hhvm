@@ -709,6 +709,7 @@ class cpp_mstch_program : public mstch_program {
         *program_, [&] { return gen_transitive_include_map(program_); });
     mstch::array initializers = {
         fmt::format("{}()", schematizer::name_schema(sm_, *program_))};
+    initializers.reserve(includes.size() + 1);
     for (const auto& [_, include] : includes) {
       initializers.push_back(include);
     }

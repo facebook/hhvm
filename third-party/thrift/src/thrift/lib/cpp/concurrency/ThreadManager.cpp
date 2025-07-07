@@ -22,13 +22,11 @@
 #include <memory>
 #include <mutex>
 #include <queue>
-#include <set>
 #include <string>
 
 #include <glog/logging.h>
 
 #include <folly/Conv.h>
-#include <folly/CppAttributes.h>
 #include <folly/DefaultKeepAliveExecutor.h>
 #include <folly/ExceptionString.h>
 #include <folly/GLog.h>

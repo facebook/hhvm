@@ -373,7 +373,7 @@ string t_js_generator::render_const_value(
 
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -404,7 +404,7 @@ string t_js_generator::render_const_value(
     }
   } else if (type->is_enum()) {
     out << value->get_integer();
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     out << "new " << js_type_namespace(type->program()) << type->get_name()
         << "({" << endl;
     indent_up();
@@ -537,7 +537,7 @@ void t_js_generator::generate_js_struct_definition(
     string dval = declare_field(*m_iter, false, true);
     const t_type* t = (*m_iter)->get_type()->get_true_type();
     if ((*m_iter)->get_value() != nullptr &&
-        !(t->is_struct_or_union() || t->is_exception())) {
+        !(t->is_struct_or_union() || t->is<t_exception>())) {
       dval = render_const_value((*m_iter)->get_type(), (*m_iter)->get_value());
       out << indent() << "this." << (*m_iter)->get_name() << " = " << dval
           << ";" << endl;
@@ -551,7 +551,7 @@ void t_js_generator::generate_js_struct_definition(
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
       if ((*m_iter)->get_value() != nullptr &&
-          (t->is_struct_or_union() || t->is_exception())) {
+          (t->is_struct_or_union() || t->is<t_exception>())) {
         indent(out) << "this." << (*m_iter)->get_name() << " = "
                     << render_const_value(t, (*m_iter)->get_value()) << ";"
                     << endl;
@@ -561,7 +561,7 @@ void t_js_generator::generate_js_struct_definition(
     // Early returns for exceptions
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
-      if (t->is_exception()) {
+      if (t->is<t_exception>()) {
         out << indent() << "if (args instanceof "
             << js_type_namespace(t->program()) << t->get_name() << ") {" << endl
             << indent() << indent() << "this." << (*m_iter)->get_name()
@@ -1236,14 +1236,14 @@ void t_js_generator::generate_deserialize_field(
 
   string name = prefix + tfield->get_name();
 
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
-  } else if (type->is_primitive_type() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is_enum()) {
     indent(out) << name << " = input.";
 
-    if (type->is_primitive_type()) {
+    if (type->is<t_primitive_type>()) {
       t_primitive_type::t_primitive tbase =
           ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
@@ -1449,12 +1449,12 @@ void t_js_generator::generate_serialize_field(
         tfield->get_name());
   }
 
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     generate_serialize_struct(
         out, (t_struct*)type, prefix + tfield->get_name());
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
-  } else if (type->is_primitive_type() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is_enum()) {
     string name = tfield->get_name();
 
     // Hack for when prefix is defined (always a hash ref)
@@ -1463,7 +1463,7 @@ void t_js_generator::generate_serialize_field(
 
     indent(out) << "output.";
 
-    if (type->is_primitive_type()) {
+    if (type->is<t_primitive_type>()) {
       t_primitive_type::t_primitive tbase =
           ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
@@ -1639,7 +1639,7 @@ string t_js_generator::declare_field(
 
   if (init) {
     const t_type* type = tfield->get_type()->get_true_type();
-    if (type->is_primitive_type()) {
+    if (type->is<t_primitive_type>()) {
       t_primitive_type::t_primitive tbase =
           ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
@@ -1666,7 +1666,7 @@ string t_js_generator::declare_field(
       result += " = null";
     } else if (type->is<t_container>()) {
       result += " = null";
-    } else if (type->is_struct_or_union() || type->is_exception()) {
+    } else if (type->is_struct_or_union() || type->is<t_exception>()) {
       if (obj) {
         result += " = new " + js_type_namespace(type->program()) +
             type->get_name() + "()";
@@ -1733,7 +1733,7 @@ string t_js_generator::argument_list(
 string t_js_generator ::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -1759,7 +1759,7 @@ string t_js_generator ::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "Thrift.Type.I32";
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "Thrift.Type.STRUCT";
   } else if (type->is<t_map>()) {
     return "Thrift.Type.MAP";

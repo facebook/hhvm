@@ -192,7 +192,7 @@ void t_json_generator::generate_program() {
       if (o_iter != objects.begin()) {
         f_out_ << "," << endl;
       }
-      if ((*o_iter)->is_exception()) {
+      if ((*o_iter)->is<t_exception>()) {
         generate_xception(*o_iter);
       } else {
         generate_struct(*o_iter);
@@ -235,7 +235,7 @@ string t_json_generator::to_string(const t_type* type) {
     type = type->get_true_type();
   }
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -261,7 +261,7 @@ string t_json_generator::to_string(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "ENUM";
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "STRUCT";
   } else if (type->is<t_map>()) {
     return "MAP";
@@ -294,11 +294,11 @@ string t_json_generator::to_spec_args(const t_type* type) {
     type = type->get_true_type();
   }
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     return "null";
   } else if (
-      type->is_struct_or_union() || type->is_exception() || type->is_enum() ||
-      type->is_typedef()) {
+      type->is_struct_or_union() || type->is<t_exception>() ||
+      type->is_enum() || type->is_typedef()) {
     return to_spec_args_named(type);
   } else if (type->is<t_map>()) {
     return R"({ "key_type" : { "type_enum" : ")" +
@@ -638,7 +638,8 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
   indent_up();
   print_lineno(*tstruct);
   indent(f_out_) << "\"is_exception\" : "
-                 << (tstruct->is_exception() ? "true" : "false") << "," << endl;
+                 << (tstruct->is<t_exception>() ? "true" : "false") << ","
+                 << endl;
   indent(f_out_) << "\"is_union\" : "
                  << (tstruct->is_union() ? "true" : "false") << "," << endl;
   print_node_annotations(

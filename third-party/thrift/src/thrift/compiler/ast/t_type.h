@@ -181,7 +181,6 @@ class t_type : public t_named {
    * Default returns for every thrift type
    */
   virtual bool is_void() const { return false; }
-  virtual bool is_primitive_type() const { return false; }
   virtual bool is_string() const { return false; }
   virtual bool is_bool() const { return false; }
   virtual bool is_byte() const { return false; }
@@ -195,7 +194,6 @@ class t_type : public t_named {
   virtual bool is_struct_or_union() const { return false; }
   virtual bool is_struct() const { return false; }
   virtual bool is_union() const { return false; }
-  virtual bool is_exception() const { return false; }
   virtual bool is_binary() const { return false; }
 
   bool is_string_or_binary() const { return is_string() || is_binary(); }

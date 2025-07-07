@@ -51,8 +51,8 @@ static void get_needed_includes_by_patch_impl(
         root, *asTypedef->get_type(), seen, result);
     return;
   }
-  if (type.is_primitive_type()) {
-    // We don't need to import module to get the primitive tyeps.
+  if (type.is<t_primitive_type>()) {
+    // We don't need to import module to get the primitive types.
     return;
   }
   if (type.get_program() && type.get_program() != root) {

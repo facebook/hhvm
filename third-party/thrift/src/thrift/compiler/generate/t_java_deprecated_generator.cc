@@ -318,14 +318,14 @@ void t_java_deprecated_generator::print_const_value(
   if (!defval) {
     out << (in_static ? "" : "public static final ") << type_name(type) << " ";
   }
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     string v2 = render_const_value(out, name, type, value);
     out << name << " = " << v2 << ";" << endl << endl;
   } else if (type->is_enum()) {
     out << name << " = " << render_const_value(out, name, type, value) << ";"
         << endl
         << endl;
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     const vector<t_field*>& fields = ((t_struct*)type)->get_members();
     vector<t_field*>::const_iterator f_iter;
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
@@ -413,7 +413,7 @@ string t_java_deprecated_generator::render_const_value(
     const t_const_value* value) {
   type = type->get_true_type();
   std::ostringstream render;
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -1860,7 +1860,7 @@ void t_java_deprecated_generator::generate_reflection_getters(
   indent(out) << "case " << upcase_string(field_name) << ":" << endl;
   indent_up();
 
-  if (type->is_primitive_type() && !type->is_string_or_binary()) {
+  if (type->is<t_primitive_type>() && !type->is_string_or_binary()) {
     t_primitive_type* base_type = (t_primitive_type*)type;
 
     indent(out) << "return new " << type_name(type, true, false) << "("
@@ -1966,7 +1966,7 @@ std::string t_java_deprecated_generator::get_simple_getter_name(
   std::string cap_name = get_cap_name(field_name);
   const t_type* type = field->get_type()->get_true_type();
 
-  if (type->is_primitive_type() &&
+  if (type->is<t_primitive_type>() &&
       ((t_primitive_type*)type)->primitive_type() ==
           t_primitive_type::TYPE_BOOL) {
     return "is" + cap_name;
@@ -2153,7 +2153,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
           indent_up();
         }
 
-        if (ftype->is_primitive_type() && ftype->is_binary()) {
+        if (ftype->is<t_primitive_type>() && ftype->is_binary()) {
           indent(out) << "  int __" << fname << "_size = Math.min("
                       << field_getter << ".length, 128);" << endl;
           indent(out) << "  for (int i = 0; i < __" << fname << "_size; i++) {"
@@ -2271,13 +2271,13 @@ std::string t_java_deprecated_generator::get_java_type_string(
     return "TType.MAP";
   } else if (type->is<t_set>()) {
     return "TType.SET";
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType.STRUCT";
   } else if (type->is_enum()) {
     return "TType.I32";
   } else if (type->is_typedef()) {
     return get_java_type_string(((t_typedef*)type)->get_type());
-  } else if (type->is_primitive_type()) {
+  } else if (type->is<t_primitive_type>()) {
     switch (((t_primitive_type*)type)->primitive_type()) {
       case t_primitive_type::TYPE_VOID:
         return "TType.VOID";
@@ -3240,7 +3240,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
 
   string name = prefix + tfield->get_name();
 
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     generate_deserialize_struct(out, (t_structured*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
@@ -3248,7 +3248,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
     indent(out) << name << " = "
                 << get_enum_class_name(tfield->get_type()->get_true_type())
                 << ".findByValue(iprot.readI32());" << endl;
-  } else if (type->is_primitive_type()) {
+  } else if (type->is<t_primitive_type>()) {
     indent(out) << name << " = iprot.";
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
@@ -3458,7 +3458,7 @@ void t_java_deprecated_generator::generate_serialize_field(
         tfield->get_name());
   }
 
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     generate_serialize_struct(
         out, (t_structured*)type, prefix + tfield->get_name());
   } else if (type->is<t_container>()) {
@@ -3467,7 +3467,7 @@ void t_java_deprecated_generator::generate_serialize_field(
     auto enumName = prefix + tfield->get_name();
     indent(out) << "oprot.writeI32(" << enumName
                 << " == null ? 0 : " << enumName << ".getValue());" << endl;
-  } else if (type->is_primitive_type()) {
+  } else if (type->is<t_primitive_type>()) {
     string name = prefix + tfield->get_name();
     indent(out) << "oprot.";
 
@@ -3636,7 +3636,7 @@ string t_java_deprecated_generator::type_name(
   ttype = ttype->get_true_type();
   string prefix;
 
-  if (ttype->is_primitive_type()) {
+  if (ttype->is<t_primitive_type>()) {
     return base_type_name((t_primitive_type*)ttype, in_container);
   } else if (ttype->is<t_map>()) {
     const t_map* tmap = (t_map*)ttype;
@@ -3733,12 +3733,12 @@ string t_java_deprecated_generator::declare_field(
   string result = type_name(tfield->get_type()) + " " + tfield->get_name();
   if (init) {
     const t_type* ttype = tfield->get_type()->get_true_type();
-    if (ttype->is_primitive_type() && tfield->get_value() != nullptr) {
+    if (ttype->is<t_primitive_type>() && tfield->get_value() != nullptr) {
       ofstream dummy;
       result += " = " +
           render_const_value(
                     dummy, tfield->get_name(), ttype, tfield->get_value());
-    } else if (ttype->is_primitive_type()) {
+    } else if (ttype->is<t_primitive_type>()) {
       t_primitive_type::t_primitive tbase =
           ((t_primitive_type*)ttype)->primitive_type();
       switch (tbase) {
@@ -3890,7 +3890,7 @@ string t_java_deprecated_generator::async_argument_list(
 string t_java_deprecated_generator::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -3916,7 +3916,7 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "TType.I32";
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType.STRUCT";
   } else if (type->is<t_map>()) {
     return "TType.MAP";
@@ -4092,11 +4092,11 @@ bool t_java_deprecated_generator::is_comparable(
     const t_type* type, vector<const t_type*>* enclosing) {
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     return true;
   } else if (type->is_enum()) {
     return true;
-  } else if (type->is_exception()) {
+  } else if (type->is<t_exception>()) {
     // There's no particular reason this wouldn't work exactly the same
     // as it does for structs. I'm not sure we actually want exceptions
     // to be Comparable though: in addition to the fields we have, which
@@ -4145,7 +4145,7 @@ bool t_java_deprecated_generator::struct_has_all_comparable_fields(
 bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     return type->is_binary();
   } else if (type->is_enum()) {
     return false;

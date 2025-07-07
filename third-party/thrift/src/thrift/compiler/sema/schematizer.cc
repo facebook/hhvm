@@ -400,7 +400,7 @@ void schematize_recursively(
       std::string def_type = [&] {
         if (resolved_type->is_union()) {
           return "unionDef";
-        } else if (resolved_type->is_exception()) {
+        } else if (resolved_type->is<t_exception>()) {
           return "exceptionDef";
         } else {
           return "structDef";
@@ -492,7 +492,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
       node.fields(),
       opts_.intern_value);
 
-  if (node.is_exception()) {
+  if (node.is<t_exception>()) {
     const auto& ex = static_cast<const t_exception&>(node);
     schema->add_map(val("safety"), val(ex.safety()));
     schema->add_map(val("kind"), val(ex.kind()));

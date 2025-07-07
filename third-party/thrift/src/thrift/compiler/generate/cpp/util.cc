@@ -296,7 +296,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
     if (t->is_any_int() || t->is_floating_point() || t->is_bool() ||
         t->is_enum()) {
       result = true;
-    } else if (t->is_union() || t->is_exception()) {
+    } else if (t->is_union() || t->is<t_exception>()) {
       // Union and exception constructors are not defaulted.
       result = false;
     } else if (t->has_unstructured_annotation(
@@ -429,7 +429,7 @@ std::string get_gen_type_class(t_type const& type) {
     return tc + "map<" + key_tc + ", " + val_tc + ">";
   } else if (ttype.is_union()) {
     return tc + "variant";
-  } else if (ttype.is_struct_or_union() || ttype.is_exception()) {
+  } else if (ttype.is_struct_or_union() || ttype.is<t_exception>()) {
     return tc + "structure";
   } else {
     throw std::runtime_error(
@@ -460,7 +460,7 @@ bool deprecated_terse_writes(const t_field* field) {
   auto t = field->get_type()->get_true_type();
   return field->get_req() == t_field::e_req::opt_in_req_out &&
       (cpp2::is_unique_ref(field) ||
-       (!t->is_struct_or_union() && !t->is_exception()));
+       (!t->is_struct_or_union() && !t->is<t_exception>()));
 }
 
 t_field_id get_internal_injected_field_id(t_field_id id) {

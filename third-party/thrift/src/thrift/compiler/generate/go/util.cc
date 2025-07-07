@@ -522,7 +522,7 @@ bool is_type_go_struct(const t_type* type) {
   //   * Thrift struct    - represented by Go struct pointer
   //   * Thrift union     - represented by Go struct pointer
   //   * Thrift exception - represented by Go struct pointer
-  return type->is_struct_or_union() || type->is_exception();
+  return type->is_struct_or_union() || type->is<t_exception>();
 }
 
 bool is_type_go_nilable(const t_type* type) {

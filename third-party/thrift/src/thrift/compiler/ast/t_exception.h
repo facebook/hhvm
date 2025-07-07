@@ -77,11 +77,6 @@ class t_exception final : public t_structured {
   t_error_kind kind_{};
   t_error_blame blame_{};
   t_error_safety safety_{};
-
-  // TODO(afuller): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  bool is_exception() const override { return true; }
 };
 
 } // namespace apache::thrift::compiler

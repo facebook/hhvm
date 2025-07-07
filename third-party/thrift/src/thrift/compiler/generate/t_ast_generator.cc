@@ -363,7 +363,7 @@ type::Schema t_ast_generator::gen_schema(
       } else if (auto map_type = dynamic_cast<const t_map*>(ref.get_type())) {
         recurse(map_type->key_type(), recurse);
         recurse(map_type->val_type(), recurse);
-      } else if (ref->is_primitive_type()) {
+      } else if (ref->is<t_primitive_type>()) {
       } else {
         try {
           type::IdentifierRef ident;

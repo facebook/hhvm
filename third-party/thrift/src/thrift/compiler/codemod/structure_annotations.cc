@@ -61,7 +61,7 @@ class structure_annotations {
       const t_named& node,
       std::map<std::string, std::string>* annotations_for_catch_all) {
     std::set<std::string> to_add;
-    if (!type_ref.resolve() || type_ref->is_primitive_type() ||
+    if (!type_ref.resolve() || type_ref->is<t_primitive_type>() ||
         type_ref->is<t_container>() ||
         (type_ref->is_typedef() &&
          static_cast<const t_typedef&>(*type_ref).typedef_kind() !=

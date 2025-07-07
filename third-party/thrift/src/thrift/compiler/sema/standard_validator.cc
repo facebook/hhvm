@@ -476,7 +476,7 @@ void validate_exception_message_annotation_is_only_in_exceptions(
   for (const auto& f : node.fields()) {
     if (f.has_structured_annotation(kExceptionMessageUri)) {
       ctx.check(
-          node.is_exception(),
+          node.is<t_exception>(),
           f,
           "@thrift.ExceptionMessage annotation is only allowed in exception definitions. '{}' is not an exception.",
           node.name());
@@ -809,7 +809,7 @@ void validate_field_name(sema_context& ctx, const t_field& field) {
     std::string parent_structure;
     if (strct->is_union()) {
       parent_structure = "union";
-    } else if (strct->is_exception()) {
+    } else if (strct->is<t_exception>()) {
       parent_structure = "exception";
     } else {
       parent_structure = "struct";
@@ -1120,7 +1120,7 @@ void validate_cpp_deprecated_terse_write_annotation(
     return;
   }
   const t_type* type = field.get_type()->get_true_type();
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     ctx.error(
         field,
         "@cpp.DeprecatedTerseWrite is not supported for structured types.");
@@ -1680,17 +1680,17 @@ void validate_py3_enable_cpp_adapter(sema_context& ctx, const t_typedef& node) {
 void forbid_exception_as_method_type(
     sema_context& ctx, const t_function& node) {
   ctx.check(
-      !node.return_type()->get_true_type()->is_exception(),
+      !node.return_type()->get_true_type()->is<t_exception>(),
       "Exceptions cannot be used as function return types");
   for (const auto& field : node.params().fields()) {
     ctx.check(
-        !field.type()->get_true_type()->is_exception(),
+        !field.type()->get_true_type()->is<t_exception>(),
         "Exceptions cannot be used as function arguments");
   }
 }
 void forbid_exception_as_const_type(sema_context& ctx, const t_const& node) {
   ctx.check(
-      !node.type()->get_true_type()->is_exception(),
+      !node.type()->get_true_type()->is<t_exception>(),
       "Exceptions cannot be used as const types");
 }
 

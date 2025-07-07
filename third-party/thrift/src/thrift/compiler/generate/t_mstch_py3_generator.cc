@@ -94,7 +94,7 @@ const t_type* get_map_val_type(const t_type& type) {
 
 bool type_needs_convert(const t_type* type) {
   // NB: float32 has to be rounded by cython to maintain old py3 behavior
-  return type->is_struct_or_union() || type->is_exception() ||
+  return type->is_struct_or_union() || type->is<t_exception>() ||
       type->is<t_container>() || type->is_float();
 }
 
@@ -108,7 +108,7 @@ bool container_needs_convert(const t_type* type) {
     return container_needs_convert(list_type->get_elem_type());
   } else if (const t_set* set_type = dynamic_cast<const t_set*>(true_type)) {
     return container_needs_convert(set_type->get_elem_type());
-  } else if (true_type->is_struct_or_union() || true_type->is_exception()) {
+  } else if (true_type->is_struct_or_union() || true_type->is<t_exception>()) {
     return true;
   }
   return false;
@@ -787,7 +787,7 @@ class py3_mstch_type : public mstch_type {
   // types that don't have an underlying C++ type
   // i.e., structs, unions, exceptions all enclose a C++ type
   mstch::node isSimple() {
-    return (type_->is_primitive_type() || type_->is_enum() ||
+    return (type_->is<t_primitive_type>() || type_->is_enum() ||
             type_->is<t_container>()) &&
         !is_custom_binary_type();
   }
@@ -828,7 +828,8 @@ class py3_mstch_type : public mstch_type {
   mstch::node resolves_to_complex_return() {
     return resolved_type_->is<t_container>() ||
         resolved_type_->is_string_or_binary() ||
-        resolved_type_->is_struct_or_union() || resolved_type_->is_exception();
+        resolved_type_->is_struct_or_union() ||
+        resolved_type_->is<t_exception>();
   }
 
   const std::string& get_flat_name() const { return cached_props_.flat_name(); }

@@ -1768,7 +1768,7 @@ class mstch_rust_value : public mstch_base {
   mstch::node map_entries();
   mstch::node is_struct() {
     return (underlying_type_->is_struct_or_union() ||
-            underlying_type_->is_exception()) &&
+            underlying_type_->is<t_exception>()) &&
         !underlying_type_->is_union() &&
         const_value_->kind() == value_type::CV_MAP;
   }

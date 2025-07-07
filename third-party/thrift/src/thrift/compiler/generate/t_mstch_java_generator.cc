@@ -561,7 +561,7 @@ class mstch_java_struct : public mstch_struct {
     return false;
   }
   mstch::node is_as_bean() {
-    if (!struct_->is_exception() && !struct_->is_union()) {
+    if (!struct_->is<t_exception>() && !struct_->is_union()) {
       return struct_->get_unstructured_annotation("java.swift.mutable") ==
           "true" ||
           struct_->has_structured_annotation(kJavaMutableUri);
@@ -602,7 +602,7 @@ class mstch_java_struct : public mstch_struct {
   // 2 - there is no struct field named 'message' (since it
   //  will generate `getMessage()` method)
   mstch::node needs_exception_message() {
-    return struct_->is_exception() &&
+    return struct_->is<t_exception>() &&
         dynamic_cast<const t_exception&>(*struct_).get_message_field() !=
         nullptr &&
         struct_->get_field_by_name("message") == nullptr;
@@ -979,7 +979,7 @@ class mstch_java_field : public mstch_field {
 
   mstch::node is_object() {
     const t_type* field_type = field_->get_type()->get_true_type();
-    return field_type->is_struct_or_union() || field_type->is_exception() ||
+    return field_type->is_struct_or_union() || field_type->is<t_exception>() ||
         field_type->is_union();
   }
 

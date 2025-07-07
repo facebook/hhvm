@@ -66,7 +66,7 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
         // hence this case is unreachable. After the todo is finished, the
         // is_struct case can be downscorped back to casting to a t_struct
         return std::invoke(f, dynamic_cast<const t_union&>(ty));
-      } else if (s->is_exception()) {
+      } else if (s->is<t_exception>()) {
         return std::invoke(f, dynamic_cast<const t_exception&>(ty));
       }
       throw std::logic_error("Missing visitor specialization for t_structured");

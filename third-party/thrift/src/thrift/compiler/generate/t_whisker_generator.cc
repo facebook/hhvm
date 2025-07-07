@@ -167,7 +167,7 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   auto def = prototype_builder<h_type>::extends(proto.of<t_named>());
   // clang-format off
   def.property("void?",             mem_fn(&t_type::is_void));
-  def.property("primitive?",        mem_fn(&t_type::is_primitive_type));
+  def.property("primitive?",        mem_fn(&t_type::is<t_primitive_type>));
   def.property("string?",           mem_fn(&t_type::is_string));
   def.property("bool?",             mem_fn(&t_type::is_bool));
   def.property("byte?",             mem_fn(&t_type::is_byte));
@@ -180,7 +180,7 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("enum?",             mem_fn(&t_type::is_enum));
   def.property("struct?",           mem_fn(&t_type::is_struct));
   def.property("union?",            mem_fn(&t_type::is_union));
-  def.property("exception?",        mem_fn(&t_type::is_exception));
+  def.property("exception?",        mem_fn(&t_type::is<t_exception>));
   def.property("container?",        mem_fn(&t_type::is<t_container>));
   def.property("list?",             mem_fn(&t_type::is<t_list>));
   def.property("set?",              mem_fn(&t_type::is<t_set>));

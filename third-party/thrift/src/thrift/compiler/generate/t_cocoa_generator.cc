@@ -240,7 +240,7 @@ class t_cocoa_generator : public t_concat_generator {
     ttype = ttype->get_true_type();
 
     return ttype->is<t_container>() || ttype->is_struct_or_union() ||
-        ttype->is_exception() || ttype->is_string_or_binary();
+        ttype->is<t_exception>() || ttype->is_string_or_binary();
   }
 
  private:
@@ -1430,7 +1430,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
       out << indent() << "[" << field_name << " makeImmutable];" << std::endl;
       indent_down();
       out << indent() << "}" << std::endl;
-    } else if (ttype->is_primitive_type()) {
+    } else if (ttype->is<t_primitive_type>()) {
       // nothing.
     } else if (ttype->is_enum()) {
       // nothing
@@ -1520,7 +1520,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
           << std::endl;
     } else if (ttype->is_string_or_binary()) {
       out << indent() << ret_equals << field_name << ";" << std::endl;
-    } else if (ttype->is_primitive_type() || ttype->is_enum()) {
+    } else if (ttype->is<t_primitive_type>() || ttype->is_enum()) {
       out << indent() << ret_equals << "@(" << field_name << ");" << std::endl;
       if (ttype->is_enum()) {
         const t_program* program = ttype->program();
@@ -1606,7 +1606,7 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
       out << indent() << "newCopy->" << field_name << " = " << "[self->"
           << field_name << " mutableCopyWithZone:zone];" << std::endl;
     } else if (
-        ttype->is_string_or_binary() || ttype->is_primitive_type() ||
+        ttype->is_string_or_binary() || ttype->is<t_primitive_type>() ||
         ttype->is_enum()) {
       out << indent() << "newCopy->" << field_name << " = " << "self->"
           << field_name << ";" << std::endl;
@@ -2183,14 +2183,14 @@ void t_cocoa_generator::generate_deserialize_field(
         "CANNOT GENERATE DESERIALIZE CODE FOR void TYPE: " + tfield->name());
   }
 
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     generate_deserialize_struct(out, type, fieldName);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, fieldName);
-  } else if (type->is_primitive_type() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is_enum()) {
     indent(out) << type_name(type) << " " << fieldName << " = [inProtocol ";
 
-    if (type->is_primitive_type()) {
+    if (type->is<t_primitive_type>()) {
       t_primitive_type::t_primitive tbase =
           ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
@@ -2322,7 +2322,7 @@ std::string t_cocoa_generator::containerize(
   ttype = ttype->get_true_type();
   if (ttype->is_enum()) {
     return "[NSNumber numberWithInt: " + fieldName + "]";
-  } else if (ttype->is_primitive_type()) {
+  } else if (ttype->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)ttype)->primitive_type();
     switch (tbase) {
@@ -2445,14 +2445,14 @@ void t_cocoa_generator::generate_serialize_field(
         "CANNOT GENERATE SERIALIZE CODE FOR void TYPE: " + tfield->name());
   }
 
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     generate_serialize_struct(out, (t_struct*)type, fieldName);
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, fieldName);
-  } else if (type->is_primitive_type() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is_enum()) {
     indent(out) << "[outProtocol ";
 
-    if (type->is_primitive_type()) {
+    if (type->is<t_primitive_type>()) {
       t_primitive_type::t_primitive tbase =
           ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
@@ -2594,7 +2594,7 @@ std::string t_cocoa_generator::decontainerize(
   const t_type* ttype = tfield->type()->get_true_type();
   if (ttype->is_enum()) {
     return "[" + fieldName + " intValue]";
-  } else if (ttype->is_primitive_type()) {
+  } else if (ttype->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)ttype)->primitive_type();
     switch (tbase) {
@@ -2676,7 +2676,7 @@ std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
   }
 
   std::string result;
-  if (ttype->is_primitive_type()) {
+  if (ttype->is<t_primitive_type>()) {
     return base_type_name((t_primitive_type*)ttype);
   } else if (ttype->is<t_map>()) {
     result = "TBaseStructDictionary";
@@ -2746,7 +2746,7 @@ void t_cocoa_generator::print_const_value(
   type = type->get_true_type();
 
   indent(out);
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     std::string v2 = render_const_value(out, type, value);
     if (defval)
       out << type_name(type) << " ";
@@ -2757,7 +2757,7 @@ void t_cocoa_generator::print_const_value(
     out << name << " = " << render_const_value(out, type, value) << ";"
         << std::endl
         << std::endl;
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     const auto* as_struct = static_cast<const t_structured*>(type);
     if (defval) {
       out << type_name(type) << " ";
@@ -2863,7 +2863,7 @@ std::string t_cocoa_generator::render_const_value(
   type = type->get_true_type();
   std::ostringstream render;
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -2985,7 +2985,7 @@ std::string t_cocoa_generator::argument_list(const t_paramlist& tparamlist) {
 std::string t_cocoa_generator::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -3011,7 +3011,7 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "TType_I32";
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType_STRUCT";
   } else if (type->is<t_map>()) {
     return "TType_MAP";
@@ -3030,7 +3030,7 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
 std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is_primitive_type()) {
+  if (type->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
@@ -3056,7 +3056,7 @@ std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "%i";
-  } else if (type->is_struct_or_union() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "%@";
   } else if (type->is<t_map>()) {
     return "%@";

@@ -640,7 +640,7 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     return ns + "union_t<" + get_standard_type(type) + ">";
   } else if (type.is_struct_or_union()) {
     return ns + "struct_t<" + get_standard_type(type) + ">";
-  } else if (type.is_exception()) {
+  } else if (type.is<t_exception>()) {
     return ns + "exception_t<" + get_standard_type(type) + ">";
   } else {
     throw std::runtime_error("unknown type for: " + type.get_full_name());

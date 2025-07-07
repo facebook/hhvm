@@ -886,11 +886,11 @@ class mstch_type : public mstch_base {
   // neccessary.
   mstch::node is_struct() {
     return resolved_type_->is_struct_or_union() ||
-        resolved_type_->is_exception();
+        resolved_type_->is<t_exception>();
   }
   mstch::node is_union() { return resolved_type_->is_union(); }
   mstch::node is_enum() { return resolved_type_->is_enum(); }
-  mstch::node is_base() { return resolved_type_->is_primitive_type(); }
+  mstch::node is_base() { return resolved_type_->is<t_primitive_type>(); }
   mstch::node is_container() { return resolved_type_->is<t_container>(); }
   mstch::node is_list() { return resolved_type_->is<t_list>(); }
   mstch::node is_set() { return resolved_type_->is<t_set>(); }
@@ -999,10 +999,10 @@ class mstch_struct : public mstch_base {
   mstch::node name() { return struct_->get_name(); }
   mstch::node has_fields() { return struct_->has_fields(); }
   mstch::node fields();
-  mstch::node is_exception() { return struct_->is_exception(); }
+  mstch::node is_exception() { return struct_->is<t_exception>(); }
   mstch::node is_union() { return struct_->is_union(); }
   mstch::node is_plain() {
-    return !struct_->is_exception() && !struct_->is_union();
+    return !struct_->is<t_exception>() && !struct_->is_union();
   }
   mstch::node has_structured_annotations() {
     return !struct_->structured_annotations().empty();

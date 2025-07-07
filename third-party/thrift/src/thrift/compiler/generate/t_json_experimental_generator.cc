@@ -321,7 +321,7 @@ class json_experimental_typedef : public mstch_typedef {
   }
   mstch::node has_docstring() { return typedef_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(typedef_->doc()); }
-  mstch::node is_exception() { return typedef_->is_exception(); }
+  mstch::node is_exception() { return typedef_->is<t_exception>(); }
 
  private:
   source_manager& source_mgr_;

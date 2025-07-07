@@ -76,7 +76,7 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
 
 bool is_complex_return(const t_type* type) {
   return type->is<t_container>() || type->is_string_or_binary() ||
-      type->is_struct_or_union() || type->is_exception();
+      type->is_struct_or_union() || type->is<t_exception>();
 }
 
 bool same_types(const t_type* a, const t_type* b) {
@@ -199,7 +199,7 @@ bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
 
 bool resolves_to_container_or_struct(const t_type* type) {
   return type->is<t_container>() || type->is_struct_or_union() ||
-      type->is_exception();
+      type->is<t_exception>();
 }
 
 bool is_runtime_annotation(const t_named& named) {
@@ -542,7 +542,7 @@ class cpp_mstch_program : public mstch_program {
       if (alias->is_typedef() &&
           alias->has_unstructured_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
-        if ((ttype->is_struct_or_union() || ttype->is_exception()) &&
+        if ((ttype->is_struct_or_union() || ttype->is<t_exception>()) &&
             !cpp_name_resolver::find_first_adapter(*ttype)) {
           result.push_back(i);
         }
@@ -1240,12 +1240,14 @@ class cpp_mstch_type : public mstch_type {
   std::string get_type_namespace(const t_program* program) override {
     return cpp2::get_gen_namespace(*program);
   }
-  mstch::node resolves_to_base() { return resolved_type_->is_primitive_type(); }
+  mstch::node resolves_to_base() {
+    return resolved_type_->is<t_primitive_type>();
+  }
   mstch::node resolves_to_integral() {
     return resolved_type_->is_byte() || resolved_type_->is_any_int();
   }
   mstch::node resolves_to_base_or_enum() {
-    return resolved_type_->is_primitive_type() || resolved_type_->is_enum();
+    return resolved_type_->is<t_primitive_type>() || resolved_type_->is_enum();
   }
   mstch::node resolves_to_container() {
     return resolved_type_->is<t_container>();
@@ -1452,7 +1454,7 @@ class cpp_mstch_struct : public mstch_struct {
         continue;
       }
       if (type->is_enum() ||
-          (type->is_primitive_type() && !type->is_string_or_binary()) ||
+          (type->is<t_primitive_type>() && !type->is_string_or_binary()) ||
           (type->is_string_or_binary() && field->get_value() != nullptr) ||
           (type->is<t_container>() && field->get_value() != nullptr &&
            !field->get_value()->is_empty()) ||
@@ -1463,7 +1465,7 @@ class cpp_mstch_struct : public mstch_struct {
              field->get_req() != t_field::e_req::optional))) ||
           (type->is<t_container>() && cpp2::is_explicit_ref(field) &&
            field->get_req() != t_field::e_req::optional) ||
-          (type->is_primitive_type() && cpp2::is_explicit_ref(field) &&
+          (type->is<t_primitive_type>() && cpp2::is_explicit_ref(field) &&
            field->get_req() != t_field::e_req::optional)) {
         filtered_fields.push_back(field);
       }
@@ -1582,7 +1584,7 @@ class cpp_mstch_struct : public mstch_struct {
         {"cpp.virtual", "cpp2.virtual"});
   }
   mstch::node message() {
-    if (!struct_->is_exception()) {
+    if (!struct_->is<t_exception>()) {
       return {};
     }
     const auto* message_field = struct_->as<t_exception>().get_message_field();
@@ -1681,7 +1683,7 @@ class cpp_mstch_struct : public mstch_struct {
     // member with a non-trivial destructor (involving at least a branch and a
     // likely deallocation).
     // TODO(ott): Support unions.
-    if (struct_->is_exception()) {
+    if (struct_->is<t_exception>()) {
       return true;
     }
     for (const auto& field : struct_->fields()) {

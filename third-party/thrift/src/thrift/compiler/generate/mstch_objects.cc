@@ -94,7 +94,7 @@ mstch::node mstch_enum::values() {
 
 // TODO(T219861020): Rename to get_structured
 mstch::node mstch_type::get_struct() {
-  if (type_->is_struct_or_union() || type_->is_exception() ||
+  if (type_->is_struct_or_union() || type_->is<t_exception>() ||
       type_->is_union()) {
     std::string id =
         type_->program()->name() + get_type_namespace(type_->program());
@@ -290,7 +290,7 @@ mstch::node mstch_const_value::is_const_struct() {
     return false;
   }
   const auto* type = const_value_->ttype()->get_true_type();
-  return type->is_struct_or_union() || type->is_exception();
+  return type->is_struct_or_union() || type->is<t_exception>();
 }
 
 mstch::node mstch_const_value::const_struct_type() {
@@ -299,7 +299,7 @@ mstch::node mstch_const_value::const_struct_type() {
   }
 
   const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     return context_.type_factory->make_mstch_object(type, context_);
   }
 
@@ -312,7 +312,7 @@ mstch::node mstch_const_value::const_struct() {
   mstch::array a;
 
   const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct_or_union() || type->is<t_exception>()) {
     const auto* strct = dynamic_cast<const t_structured*>(type);
     for (auto member : const_value_->get_map()) {
       const auto* field = strct->get_field_by_name(member.first->get_string());
@@ -441,7 +441,7 @@ mstch::node mstch_struct::fields() {
 }
 
 mstch::node mstch_struct::exception_safety() {
-  if (!struct_->is_exception()) {
+  if (!struct_->is<t_exception>()) {
     return std::string("");
   }
 
@@ -457,7 +457,7 @@ mstch::node mstch_struct::exception_safety() {
 }
 
 mstch::node mstch_struct::exception_blame() {
-  if (!struct_->is_exception()) {
+  if (!struct_->is<t_exception>()) {
     return std::string("");
   }
 
@@ -475,7 +475,7 @@ mstch::node mstch_struct::exception_blame() {
 }
 
 mstch::node mstch_struct::exception_kind() {
-  if (!struct_->is_exception()) {
+  if (!struct_->is<t_exception>()) {
     return std::string("");
   }
 

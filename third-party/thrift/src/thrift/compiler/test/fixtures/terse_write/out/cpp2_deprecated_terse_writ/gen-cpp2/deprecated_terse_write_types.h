@@ -2923,98 +2923,82 @@ class CppRefStructFields final  {
   bool operator==(const CppRefStructFields&) const;
   bool operator<(const CppRefStructFields&) const;
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE fbthrift_T& primitive_ref_field_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::int32_t>& primitive_ref_field_ref() & {
     return __fbthrift_field_primitive_ref_field;
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE const fbthrift_T& primitive_ref_field_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::int32_t>& primitive_ref_field_ref() const& {
     return __fbthrift_field_primitive_ref_field;
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE fbthrift_T&& primitive_ref_field_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_primitive_ref_field);
+  FOLLY_ERASE ::std::unique_ptr<::std::int32_t>&& primitive_ref_field_ref() && {
+    return static_cast<::std::unique_ptr<::std::int32_t>&&>(__fbthrift_field_primitive_ref_field);
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE const fbthrift_T&& primitive_ref_field_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_primitive_ref_field);
+  FOLLY_ERASE const ::std::unique_ptr<::std::int32_t>&& primitive_ref_field_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::std::int32_t>&&>(__fbthrift_field_primitive_ref_field);
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE fbthrift_T& primitive_ref_field() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::int32_t>& primitive_ref_field() & {
     return __fbthrift_field_primitive_ref_field;
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE const fbthrift_T& primitive_ref_field() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::int32_t>& primitive_ref_field() const& {
     return __fbthrift_field_primitive_ref_field;
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE fbthrift_T&& primitive_ref_field() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_primitive_ref_field);
+  FOLLY_ERASE ::std::unique_ptr<::std::int32_t>&& primitive_ref_field() && {
+    return static_cast<::std::unique_ptr<::std::int32_t>&&>(__fbthrift_field_primitive_ref_field);
   }
 
   /** Glean { "field": "primitive_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE const fbthrift_T&& primitive_ref_field() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_primitive_ref_field);
+  FOLLY_ERASE const ::std::unique_ptr<::std::int32_t>&& primitive_ref_field() const&& {
+    return static_cast<const ::std::unique_ptr<::std::int32_t>&&>(__fbthrift_field_primitive_ref_field);
   }
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE fbthrift_T& struct_ref_field_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field_ref() & {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE const fbthrift_T& struct_ref_field_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field_ref() const& {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE fbthrift_T&& struct_ref_field_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field_ref() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE const fbthrift_T&& struct_ref_field_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE fbthrift_T& struct_ref_field() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field() & {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE const fbthrift_T& struct_ref_field() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field() const& {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE fbthrift_T&& struct_ref_field() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
-  FOLLY_ERASE const fbthrift_T&& struct_ref_field() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   template <class Protocol_>

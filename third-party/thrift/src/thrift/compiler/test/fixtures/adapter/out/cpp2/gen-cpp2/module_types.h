@@ -3400,98 +3400,82 @@ class StructWithFieldAdapter final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T& shared_field_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>& shared_field_ref() & {
     return __fbthrift_field_shared_field;
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T& shared_field_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>& shared_field_ref() const& {
     return __fbthrift_field_shared_field;
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T&& shared_field_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_shared_field);
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&& shared_field_ref() && {
+    return static_cast<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_shared_field);
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T&& shared_field_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_shared_field);
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&& shared_field_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_shared_field);
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T& shared_field() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>& shared_field() & {
     return __fbthrift_field_shared_field;
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T& shared_field() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>& shared_field() const& {
     return __fbthrift_field_shared_field;
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T&& shared_field() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_shared_field);
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&& shared_field() && {
+    return static_cast<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_shared_field);
   }
 
   /** Glean { "field": "shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T&& shared_field() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_shared_field);
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&& shared_field() const&& {
+    return static_cast<const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_shared_field);
   }
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T& opt_shared_field_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>& opt_shared_field_ref() & {
     return __fbthrift_field_opt_shared_field;
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T& opt_shared_field_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>& opt_shared_field_ref() const& {
     return __fbthrift_field_opt_shared_field;
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T&& opt_shared_field_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_opt_shared_field);
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&& opt_shared_field_ref() && {
+    return static_cast<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_opt_shared_field);
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T&& opt_shared_field_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_opt_shared_field);
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&& opt_shared_field_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_opt_shared_field);
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T& opt_shared_field() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>& opt_shared_field() & {
     return __fbthrift_field_opt_shared_field;
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T& opt_shared_field() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>& opt_shared_field() const& {
     return __fbthrift_field_opt_shared_field;
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE fbthrift_T&& opt_shared_field() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_opt_shared_field);
+  FOLLY_ERASE ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&& opt_shared_field() && {
+    return static_cast<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_opt_shared_field);
   }
 
   /** Glean { "field": "opt_shared_field" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
-  FOLLY_ERASE const fbthrift_T&& opt_shared_field() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_opt_shared_field);
+  FOLLY_ERASE const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&& opt_shared_field() const&& {
+    return static_cast<const ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>&&>(__fbthrift_field_opt_shared_field);
   }
 
   /** Glean { "field": "opt_boxed_field" } */
@@ -6433,51 +6417,43 @@ class CircularStruct final  {
   bool operator==(const CircularStruct&) const;
   bool operator<(const CircularStruct&) const;
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE fbthrift_T& field_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>& field_ref() & {
     return __fbthrift_field_field;
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE const fbthrift_T& field_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>& field_ref() const& {
     return __fbthrift_field_field;
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE fbthrift_T&& field_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_field);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&& field_ref() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&&>(__fbthrift_field_field);
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE const fbthrift_T&& field_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_field);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&& field_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&&>(__fbthrift_field_field);
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE fbthrift_T& field() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>& field() & {
     return __fbthrift_field_field;
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE const fbthrift_T& field() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>& field() const& {
     return __fbthrift_field_field;
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE fbthrift_T&& field() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_field);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&& field() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&&>(__fbthrift_field_field);
   }
 
   /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>>
-  FOLLY_ERASE const fbthrift_T&& field() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_field);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&& field() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee>&&>(__fbthrift_field_field);
   }
 
   template <class Protocol_>
@@ -6798,51 +6774,43 @@ class ReorderedStruct final  {
   bool operator==(const ReorderedStruct&) const;
   bool operator<(const ReorderedStruct&) const;
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE fbthrift_T& reordered_dependent_adapted_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>& reordered_dependent_adapted_ref() & {
     return __fbthrift_field_reordered_dependent_adapted;
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE const fbthrift_T& reordered_dependent_adapted_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>& reordered_dependent_adapted_ref() const& {
     return __fbthrift_field_reordered_dependent_adapted;
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE fbthrift_T&& reordered_dependent_adapted_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_reordered_dependent_adapted);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&& reordered_dependent_adapted_ref() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&&>(__fbthrift_field_reordered_dependent_adapted);
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE const fbthrift_T&& reordered_dependent_adapted_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_reordered_dependent_adapted);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&& reordered_dependent_adapted_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&&>(__fbthrift_field_reordered_dependent_adapted);
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE fbthrift_T& reordered_dependent_adapted() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>& reordered_dependent_adapted() & {
     return __fbthrift_field_reordered_dependent_adapted;
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE const fbthrift_T& reordered_dependent_adapted() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>& reordered_dependent_adapted() const& {
     return __fbthrift_field_reordered_dependent_adapted;
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE fbthrift_T&& reordered_dependent_adapted() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_reordered_dependent_adapted);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&& reordered_dependent_adapted() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&&>(__fbthrift_field_reordered_dependent_adapted);
   }
 
   /** Glean { "field": "reordered_dependent_adapted" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
-  FOLLY_ERASE const fbthrift_T&& reordered_dependent_adapted() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_reordered_dependent_adapted);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&& reordered_dependent_adapted() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>&&>(__fbthrift_field_reordered_dependent_adapted);
   }
 
   template <class Protocol_>

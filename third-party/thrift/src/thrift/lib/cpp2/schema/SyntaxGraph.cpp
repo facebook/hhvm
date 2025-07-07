@@ -21,7 +21,6 @@
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
 
-#include <folly/MapUtil.h>
 #include <folly/container/Array.h>
 #include <folly/lang/SafeAssert.h>
 

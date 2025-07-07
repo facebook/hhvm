@@ -942,43 +942,51 @@ class OpEncodeStruct final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_list_field), __isset.at(4), __isset.bit(4)};
   }
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>& list_shared_ptr_field_ref() & {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE fbthrift_T& list_shared_ptr_field_ref() & {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>& list_shared_ptr_field_ref() const& {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE const fbthrift_T& list_shared_ptr_field_ref() const& {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&& list_shared_ptr_field_ref() && {
-    return static_cast<::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_list_shared_ptr_field);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE fbthrift_T&& list_shared_ptr_field_ref() && {
+    return static_cast<fbthrift_T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&& list_shared_ptr_field_ref() const&& {
-    return static_cast<const ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_list_shared_ptr_field);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE const fbthrift_T&& list_shared_ptr_field_ref() const&& {
+    return static_cast<const fbthrift_T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>& list_shared_ptr_field() & {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE fbthrift_T& list_shared_ptr_field() & {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>& list_shared_ptr_field() const& {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE const fbthrift_T& list_shared_ptr_field() const& {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&& list_shared_ptr_field() && {
-    return static_cast<::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_list_shared_ptr_field);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE fbthrift_T&& list_shared_ptr_field() && {
+    return static_cast<fbthrift_T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
   /** Glean { "field": "list_shared_ptr_field" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&& list_shared_ptr_field() const&& {
-    return static_cast<const ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_list_shared_ptr_field);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE const fbthrift_T&& list_shared_ptr_field() const&& {
+    return static_cast<const fbthrift_T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
   /** Glean { "field": "list_cpp_type_field" } */

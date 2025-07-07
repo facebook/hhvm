@@ -294,43 +294,51 @@ class AStructB final  {
   bool operator==(const AStructB&) const;
   bool operator<(const AStructB&) const;
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::a::different::ns::AStruct>& FieldA_ref() & {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE fbthrift_T& FieldA_ref() & {
     return __fbthrift_field_FieldA;
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::a::different::ns::AStruct>& FieldA_ref() const& {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE const fbthrift_T& FieldA_ref() const& {
     return __fbthrift_field_FieldA;
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::a::different::ns::AStruct>&& FieldA_ref() && {
-    return static_cast<::std::shared_ptr<const ::a::different::ns::AStruct>&&>(__fbthrift_field_FieldA);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE fbthrift_T&& FieldA_ref() && {
+    return static_cast<fbthrift_T&&>(__fbthrift_field_FieldA);
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::a::different::ns::AStruct>&& FieldA_ref() const&& {
-    return static_cast<const ::std::shared_ptr<const ::a::different::ns::AStruct>&&>(__fbthrift_field_FieldA);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE const fbthrift_T&& FieldA_ref() const&& {
+    return static_cast<const fbthrift_T&&>(__fbthrift_field_FieldA);
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::a::different::ns::AStruct>& FieldA() & {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE fbthrift_T& FieldA() & {
     return __fbthrift_field_FieldA;
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::a::different::ns::AStruct>& FieldA() const& {
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE const fbthrift_T& FieldA() const& {
     return __fbthrift_field_FieldA;
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE ::std::shared_ptr<const ::a::different::ns::AStruct>&& FieldA() && {
-    return static_cast<::std::shared_ptr<const ::a::different::ns::AStruct>&&>(__fbthrift_field_FieldA);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE fbthrift_T&& FieldA() && {
+    return static_cast<fbthrift_T&&>(__fbthrift_field_FieldA);
   }
 
   /** Glean { "field": "FieldA" } */
-  FOLLY_ERASE const ::std::shared_ptr<const ::a::different::ns::AStruct>&& FieldA() const&& {
-    return static_cast<const ::std::shared_ptr<const ::a::different::ns::AStruct>&&>(__fbthrift_field_FieldA);
+  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE const fbthrift_T&& FieldA() const&& {
+    return static_cast<const fbthrift_T&&>(__fbthrift_field_FieldA);
   }
 
   template <class Protocol_>

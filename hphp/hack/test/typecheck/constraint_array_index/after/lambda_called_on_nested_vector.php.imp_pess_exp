@@ -1,6 +1,0 @@
-ERROR: File "lambda_called_on_nested_vector.php", line 3, characters 16-23:
-Typing error (Typing[4110])
-  File "lambda_called_on_nested_vector.php", line 3, characters 16-23:
-  Expected an array that can be indexed
-  File "lambda_called_on_nested_vector.php", line 3, characters 16-17:
-  But got `~_` because a type could not be determined here

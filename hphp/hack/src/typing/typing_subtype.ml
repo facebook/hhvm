@@ -6158,7 +6158,7 @@ end = struct
       ~subtype_env
       ~this_ty
       ~lhs:{ sub_supportdyn; ty_sub }
-      ~rhs:{ reason_super; can_index }
+      ~rhs:({ reason_super; can_index } as rhs)
       env =
     let (env, ty_sub) = Env.expand_type env ty_sub in
     let subtype_env =
@@ -6174,6 +6174,9 @@ end = struct
         ~ty_super:
           (ConstraintType
              (mk_constraint_type (reason_super, Tcan_index can_index)))
+    in
+    let mk_prop ~subtype_env ~this_ty ~lhs ~rhs =
+      simplify ~subtype_env ~this_ty ~lhs ~rhs
     in
     let is_container tk tv =
       Subtype.simplify
@@ -6202,6 +6205,38 @@ end = struct
         (LoclType ty_sub)
         (ConstraintType
            (mk_constraint_type (reason_super, Tcan_index can_index)))
+    | (_, Tdynamic) ->
+      Subtype.simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = MakeType.dynamic reason_super }
+        ~rhs:
+          {
+            super_like = false;
+            super_supportdyn = false;
+            ty_super = can_index.ci_val;
+          }
+        env
+      &&&
+      if
+        Typing_env_types.(
+          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
+      then
+        let subtype_env =
+          { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+        in
+        Subtype.simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = can_index.ci_key }
+          ~rhs:
+            {
+              super_like = false;
+              super_supportdyn = false;
+              ty_super = MakeType.dynamic (get_reason ty_sub);
+            }
+      else
+        valid
     | (_, Tclass ((_, n), _, [tv]))
       when String.equal n SN.Collections.cVector
            || String.equal n SN.Collections.cVec
@@ -6218,6 +6253,17 @@ end = struct
       ->
       is_container tkv tkv
     | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
+    | (r_sub, Tunion ty_subs) ->
+      Common.simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop
+        ~update_reason:
+          (Typing_env.update_reason ~f:(fun r_sub_prj ->
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
     | _ -> invalid ~fail env
 end
 
@@ -6317,7 +6363,6 @@ end = struct
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs =
         simplify ~subtype_env ~this_ty ~lhs ~rhs
       in
-
       match deref lty_sub with
       | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
         valid env

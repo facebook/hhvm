@@ -21,7 +21,6 @@
 #include <thrift/conformance/cpp2/ConformanceHandler.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
-#include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift::conformance {
 

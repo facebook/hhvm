@@ -17,7 +17,6 @@
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>
 
 #include <gtest/gtest.h>
-#include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/conformance/cpp2/Testing.h>
 
 namespace apache::thrift::conformance {

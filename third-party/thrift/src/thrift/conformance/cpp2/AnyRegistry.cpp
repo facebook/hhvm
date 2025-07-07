@@ -18,7 +18,6 @@
 
 #include <glog/logging.h>
 
-#include <folly/CppAttributes.h>
 #include <folly/Demangle.h>
 #include <folly/Singleton.h>
 #include <folly/String.h>

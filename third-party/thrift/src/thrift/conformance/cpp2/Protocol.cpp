@@ -16,7 +16,6 @@
 
 #include <thrift/conformance/cpp2/Protocol.h>
 
-#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
 namespace apache::thrift::conformance {

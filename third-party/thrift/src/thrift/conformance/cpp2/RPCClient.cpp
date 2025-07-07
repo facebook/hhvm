@@ -26,7 +26,6 @@
 
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceService.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_types.h>
-#include <thrift/lib/cpp/transport/TTransport.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 

@@ -733,7 +733,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_nonexhaustive_structs() {
     for (t_structured* strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
-      if (!strct->is_union() &&
+      if (!strct->is<t_union>() &&
           !strct->has_structured_annotation(kRustExhaustiveUri)) {
         return true;
       }
@@ -1769,13 +1769,13 @@ class mstch_rust_value : public mstch_base {
   mstch::node is_struct() {
     return (underlying_type_->is_struct_or_union() ||
             underlying_type_->is<t_exception>()) &&
-        !underlying_type_->is_union() &&
+        !underlying_type_->is<t_union>() &&
         const_value_->kind() == value_type::CV_MAP;
   }
   mstch::node struct_fields();
   mstch::node is_exhaustive();
   mstch::node is_union() {
-    if (!underlying_type_->is_union() ||
+    if (!underlying_type_->is<t_union>() ||
         const_value_->kind() != value_type::CV_MAP) {
       return false;
     }

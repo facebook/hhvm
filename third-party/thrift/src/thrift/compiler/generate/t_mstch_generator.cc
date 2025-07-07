@@ -63,8 +63,8 @@ mstch::map t_mstch_generator::dump(const t_structured& strct, bool shallow) {
       {"fields",
        shallow ? static_cast<mstch::node>(false) : dump_elems(strct.fields())},
       {"exception?", strct.is<t_exception>()},
-      {"union?", strct.is_union()},
-      {"plain?", !strct.is<t_exception>() && !strct.is_union()},
+      {"union?", strct.is<t_union>()},
+      {"plain?", !strct.is<t_exception>() && !strct.is<t_union>()},
       {"annotations", dump_elems(strct.unstructured_annotations())},
   };
 
@@ -119,7 +119,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       // TODO(T219861020): Evaluate if unions should be included and rename as
       // needed.
       {"struct?", type.is_struct_or_union() || type.is<t_exception>()},
-      {"union?", type.is_union()},
+      {"union?", type.is<t_union>()},
       {"enum?", type.is_enum()},
       {"base?", type.is<t_primitive_type>()},
       {"container?", type.is<t_container>()},

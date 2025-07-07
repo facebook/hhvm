@@ -398,7 +398,7 @@ void schematize_recursively(
       auto new_schema_2 = generator->gen_schema(
           static_cast<const t_structured&>(*resolved_type));
       std::string def_type = [&] {
-        if (resolved_type->is_union()) {
+        if (resolved_type->is<t_union>()) {
           return "unionDef";
         } else if (resolved_type->is<t_exception>()) {
           return "exceptionDef";

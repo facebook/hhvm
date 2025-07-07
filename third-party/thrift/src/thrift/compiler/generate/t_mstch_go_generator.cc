@@ -403,7 +403,7 @@ class mstch_go_field : public mstch_field {
   bool is_inside_union_() {
     // Whether field is part of a union
     return field_context_ != nullptr && field_context_->strct != nullptr &&
-        field_context_->strct->is_union();
+        field_context_->strct->is<t_union>();
   }
 };
 
@@ -492,7 +492,8 @@ class mstch_go_struct : public mstch_struct {
           fields_in_id_order.begin(),
           fields_in_id_order.end(),
           std::back_inserter(fields_in_layout_order));
-      go::optimize_fields_layout(fields_in_layout_order, struct_->is_union());
+      go::optimize_fields_layout(
+          fields_in_layout_order, struct_->is<t_union>());
       return make_mstch_fields(fields_in_layout_order);
     }
     return make_mstch_fields(fields_in_id_order);

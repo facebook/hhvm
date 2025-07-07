@@ -508,7 +508,7 @@ string t_java_deprecated_generator::render_const_value(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_struct(const t_structured* tstruct) {
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     generate_java_union(tstruct);
   } else {
     generate_java_struct(tstruct, false /* is_exception */);
@@ -2119,7 +2119,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
       string fname = field->get_name();
       const t_type* ftype = field->get_type()->get_true_type();
 
-      if (tstruct->is_union()) {
+      if (tstruct->is<t_union>()) {
         indent(out) << "// Only print this field if it is the set field"
                     << endl;
         indent(out) << "if (" << generate_setfield_check(field) << ")" << endl;
@@ -2197,7 +2197,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
         scope_down(out);
       }
 
-      if (tstruct->is_union()) {
+      if (tstruct->is<t_union>()) {
         scope_down(out);
       }
 
@@ -3303,7 +3303,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
  */
 void t_java_deprecated_generator::generate_deserialize_struct(
     ofstream& out, const t_structured* tstruct, string prefix) {
-  if (generate_immutable_structs_ && !tstruct->is_union()) {
+  if (generate_immutable_structs_ && !tstruct->is<t_union>()) {
     out << indent() << prefix << " = " << type_name(tstruct)
         << ".deserialize(iprot);" << endl;
   } else {

@@ -368,7 +368,7 @@ class default_value_checker final {
       // If this is a union (and, per previous test, the initializer is not
       // empty), then it cannot be the default value, which is always empty for
       // unions.
-      if (structured_type->is_union()) {
+      if (structured_type->is<t_union>()) {
         return false;
       }
 

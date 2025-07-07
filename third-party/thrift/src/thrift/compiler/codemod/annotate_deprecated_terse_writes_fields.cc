@@ -62,7 +62,7 @@ class AnnonateDeprecatedTerseWriteFields final {
 
     const_ast_visitor visitor;
     visitor.add_structured_definition_visitor([&](const t_structured& strct) {
-      if (strct.is_union()) {
+      if (strct.is<t_union>()) {
         return;
       }
       for (const t_field& field : strct.fields()) {

@@ -248,7 +248,7 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node hasUnionTypes() {
     for (const auto* ttype : objects_) {
-      if (ttype->is_union()) {
+      if (ttype->is<t_union>()) {
         return true;
       }
     }
@@ -1019,7 +1019,7 @@ class py3_mstch_struct : public mstch_struct {
   mstch::node has_hidden_fields() { return hidden_fields; }
 
   mstch::node has_defaulted_field() {
-    if (struct_->is_union()) {
+    if (struct_->is<t_union>()) {
       return false;
     }
     for (const auto& field : py3_fields_) {

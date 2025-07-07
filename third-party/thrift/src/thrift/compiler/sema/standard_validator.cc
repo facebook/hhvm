@@ -601,7 +601,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
       dynamic_cast<const t_structured&>(*ctx.parent());
 
   if (node.qualifier() != t_field_qualifier::optional &&
-      !parent_node.is_union()) {
+      !parent_node.is<t_union>()) {
     // Field is not optional (and not in a union)
     // Reminder: all fields in a union are effectively optional.
 
@@ -752,7 +752,7 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
 
-  if (parent_node.is_union()) {
+  if (parent_node.is<t_union>()) {
     ctx.warning(
         field,
         "Union field is implicitly optional and should not have custom "
@@ -807,7 +807,7 @@ void validate_field_name(sema_context& ctx, const t_field& field) {
   const auto* strct = dynamic_cast<const t_structured*>(ctx.parent());
   if (field.get_name() == strct->get_name()) {
     std::string parent_structure;
-    if (strct->is_union()) {
+    if (strct->is<t_union>()) {
       parent_structure = "union";
     } else if (strct->is<t_exception>()) {
       parent_structure = "exception";

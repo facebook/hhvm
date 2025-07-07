@@ -296,7 +296,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
     if (t->is_any_int() || t->is_floating_point() || t->is_bool() ||
         t->is_enum()) {
       result = true;
-    } else if (t->is_union() || t->is<t_exception>()) {
+    } else if (t->is<t_union>() || t->is<t_exception>()) {
       // Union and exception constructors are not defaulted.
       result = false;
     } else if (t->has_unstructured_annotation(
@@ -427,7 +427,7 @@ std::string get_gen_type_class(t_type const& type) {
     auto key_tc = get_gen_type_class(key);
     auto val_tc = get_gen_type_class(val);
     return tc + "map<" + key_tc + ", " + val_tc + ">";
-  } else if (ttype.is_union()) {
+  } else if (ttype.is<t_union>()) {
     return tc + "variant";
   } else if (ttype.is_struct_or_union() || ttype.is<t_exception>()) {
     return tc + "structure";

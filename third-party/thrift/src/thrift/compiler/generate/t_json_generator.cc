@@ -641,7 +641,7 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
                  << (tstruct->is<t_exception>() ? "true" : "false") << ","
                  << endl;
   indent(f_out_) << "\"is_union\" : "
-                 << (tstruct->is_union() ? "true" : "false") << "," << endl;
+                 << (tstruct->is<t_union>() ? "true" : "false") << "," << endl;
   print_node_annotations(
       *tstruct,
       /*add_heading_comma=*/false,

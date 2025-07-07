@@ -1274,7 +1274,7 @@ string t_py_generator::render_const_value(
 }
 
 void t_py_generator::generate_forward_declaration(const t_structured* tstruct) {
-  if (!tstruct->is_union()) {
+  if (!tstruct->is<t_union>()) {
     generate_py_struct(tstruct, tstruct->is<t_exception>());
   } else {
     generate_py_union(f_types_, tstruct);
@@ -1616,7 +1616,7 @@ void t_py_generator::generate_py_thrift_spec(
                   << "__init__\", key))\n";
     }
 
-    if (tstruct->is_union()) {
+    if (tstruct->is<t_union>()) {
       indent(out) << "self.field = 0" << endl;
       indent(out) << "self.value = None" << endl;
 
@@ -1662,7 +1662,7 @@ void t_py_generator::generate_py_thrift_spec(
 
   // ThriftStruct.__setstate__: Ensure that unpickled objects have all expected
   // fields.
-  if (members.size() > 0 && !tstruct->is_union() && !gen_slots_) {
+  if (members.size() > 0 && !tstruct->is<t_union>() && !gen_slots_) {
     out << indent() << "def " << rename_reserved_keywords(tstruct->get_name())
         << "__setstate__(self, state):" << endl;
 
@@ -1971,7 +1971,7 @@ void t_py_generator::generate_fastproto_write(
 
   indent(out) << "oprot.trans.write(fastproto.encode(self, "
               << "[self.__class__, self.thrift_spec, "
-              << (tstruct->is_union() ? "True" : "False") << "], "
+              << (tstruct->is<t_union>() ? "True" : "False") << "], "
               << "utf8strings=UTF8STRINGS, protoid=0))" << endl;
   indent(out) << "return" << endl;
 
@@ -1988,7 +1988,7 @@ void t_py_generator::generate_fastproto_write(
 
   indent(out) << "oprot.trans.write(fastproto.encode(self, "
               << "[self.__class__, self.thrift_spec, "
-              << (tstruct->is_union() ? "True" : "False") << "], "
+              << (tstruct->is<t_union>() ? "True" : "False") << "], "
               << "utf8strings=UTF8STRINGS, protoid=2))" << endl;
   indent(out) << "return" << endl;
   indent_down();
@@ -2009,7 +2009,7 @@ void t_py_generator::generate_fastproto_read(
 
   indent(out) << "fastproto.decode(self, iprot.trans, "
               << "[self.__class__, self.thrift_spec, "
-              << (tstruct->is_union() ? "True" : "False") << "], "
+              << (tstruct->is<t_union>() ? "True" : "False") << "], "
               << "utf8strings=UTF8STRINGS, protoid=0)" << endl;
   indent(out) << "return" << endl;
   indent_down();
@@ -2027,7 +2027,7 @@ void t_py_generator::generate_fastproto_read(
 
   indent(out) << "fastproto.decode(self, iprot.trans, "
               << "[self.__class__, self.thrift_spec, "
-              << (tstruct->is_union() ? "True" : "False") << "], "
+              << (tstruct->is<t_union>() ? "True" : "False") << "], "
               << "utf8strings=UTF8STRINGS, protoid=2)" << endl;
   indent(out) << "return" << endl;
   indent_down();

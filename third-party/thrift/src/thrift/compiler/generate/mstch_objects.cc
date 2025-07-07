@@ -95,7 +95,7 @@ mstch::node mstch_enum::values() {
 // TODO(T219861020): Rename to get_structured
 mstch::node mstch_type::get_struct() {
   if (type_->is_struct_or_union() || type_->is<t_exception>() ||
-      type_->is_union()) {
+      type_->is<t_union>()) {
     std::string id =
         type_->program()->name() + get_type_namespace(type_->program());
     return make_mstch_array_cached(

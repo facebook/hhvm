@@ -1483,7 +1483,7 @@ void t_hack_generator::generate_json_reader(
   std::string name = tstruct->name();
   indent(out) << "public function readFromJson(string $jsonText): void {\n";
   indent_up();
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     indent(out) << "$this->_type = "
                 << union_field_to_enum(tstruct, nullptr, tstruct->name())
                 << ";\n";
@@ -1512,7 +1512,7 @@ void t_hack_generator::generate_json_reader(
         "",
         "HH\\FIXME\\UNSAFE_CAST<mixed, " + typehint + ">($parsed['" +
             tf.name() + "'])");
-    if (tstruct->is_union()) {
+    if (tstruct->is<t_union>()) {
       indent(out) << "$this->_type = "
                   << union_field_to_enum(tstruct, &tf, tstruct->name())
                   << ";\n";
@@ -2399,7 +2399,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_struct"), std::move(tstruct_tmeta));
-  } else if (type->is_union()) {
+  } else if (type->is<t_union>()) {
     auto tunion_tmeta = t_const_value::make_map();
     tunion_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
@@ -2619,7 +2619,7 @@ std::unique_ptr<t_const_value> t_hack_generator::struct_to_tmeta(
 
   if (!is_exception) {
     auto is_union = std::make_unique<t_const_value>();
-    is_union->set_bool(tstruct->is_union());
+    is_union->set_bool(tstruct->is<t_union>());
     tmeta->add_map(
         std::make_unique<t_const_value>("is_union"), std::move(is_union));
   }
@@ -3067,7 +3067,7 @@ void t_hack_generator::generate_php_struct_spec(
     indent(out) << field.id() << " => shape(\n";
     indent_up();
     out << indent() << "'var' => '" << field.name() << "',\n";
-    if (tstruct->is_union()) {
+    if (tstruct->is<t_union>()) {
       // Optimally, we shouldn't set this per field but rather per struct.
       // However, the tspec is a field_id => data array, and if we set it
       // at the top level people might think the 'union' key is a field
@@ -3421,7 +3421,7 @@ bool t_hack_generator::field_is_nullable(
     dval = render_default_value(t);
   }
 
-  return (dval == "null") || tstruct->is_union() ||
+  return (dval == "null") || tstruct->is<t_union>() ||
       (field->get_req() == t_field::e_req::optional &&
        field->default_value() == nullptr) ||
       (t->is_enum() && field->get_req() != t_field::e_req::required);
@@ -3460,7 +3460,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
 
-    bool use_pipe = tstruct->is_union() || nullable;
+    bool use_pipe = tstruct->is<t_union>() || nullable;
 
     std::stringstream source;
     if (use_pipe) {
@@ -3908,7 +3908,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
 
     std::string field_ref;
-    if (tstruct->is_union() || nullable) {
+    if (tstruct->is<t_union>() || nullable) {
       field_ref = "$" + name;
       out << indent() << field_ref << " = Shapes::idx($shape, '" << name
           << "');\n";
@@ -3920,7 +3920,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
 
     generate_php_struct_async_struct_creation_method_field_assignment(
         out, tstruct, field, field_ref, struct_hack_name_with_ns, namer, true);
-    if (tstruct->is_union() || nullable) {
+    if (tstruct->is<t_union>() || nullable) {
       indent_down();
       out << indent() << "}\n";
     }
@@ -3937,8 +3937,9 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     auto fieldRef = "$this->" + field.name();
     if (find_hack_wrapper(field)) {
       out << indent() << "$" << field.name() << " = await "
-          << (tstruct->is_union() ? "" : "(") << fieldRef
-          << (tstruct->is_union() ? "?" : " as nonnull)") << "->genUnwrap();\n";
+          << (tstruct->is<t_union>() ? "" : "(") << fieldRef
+          << (tstruct->is<t_union>() ? "?" : " as nonnull)")
+          << "->genUnwrap();\n";
       fieldRef = "$" + field.name();
     }
     auto [wrapper, name, ns] = find_hack_wrapper(field.get_type());
@@ -4102,7 +4103,7 @@ void t_hack_generator::generate_php_struct_definition(
     ThriftStructType type,
     const std::string& name) {
   const std::string& real_name = !name.empty() ? name : find_hack_name(tstruct);
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     // Generate enum for union before the actual class
     generate_php_union_enum(out, tstruct, real_name);
   }
@@ -4250,7 +4251,7 @@ void t_hack_generator::generate_php_struct_fields(
     std::string typehint = field_to_typehint(
         field,
         struct_hack_name_with_ns,
-        nullable && !tstruct->is_union() /* is_field_nullable */);
+        nullable && !tstruct->is<t_union>() /* is_field_nullable */);
 
     if (dynamic_cast<const t_result_struct*>(tstruct) &&
         fieldName == "success") {
@@ -4290,7 +4291,8 @@ void t_hack_generator::generate_php_struct_fields(
 
     std::string visibility = field_wrapper
         ? "private"
-        : ((protected_unions_ && tstruct->is_union()) ? "protected" : "public");
+        : ((protected_unions_ && tstruct->is<t_union>()) ? "protected"
+                                                         : "public");
 
     indent(out) << visibility << " " << typehint << " $" << fieldName << ";\n";
     generate_php_struct_field_methods(
@@ -4298,9 +4300,13 @@ void t_hack_generator::generate_php_struct_fields(
 
     if (field_wrapper) {
       generate_php_field_wrapper_methods(
-          out, field, tstruct->is_union(), nullable, struct_hack_name_with_ns);
+          out,
+          field,
+          tstruct->is<t_union>(),
+          nullable,
+          struct_hack_name_with_ns);
     }
-    if (!tstruct->is_union() && is_async_typ) {
+    if (!tstruct->is<t_union>() && is_async_typ) {
       out << "\n";
 
       // set_<fieldName>_DO_NOT_USE_THRIFT_INTERNAL()
@@ -4424,7 +4430,7 @@ void t_hack_generator::generate_php_struct_methods(
   out << indent() << "public function getName()[]: string {\n"
       << indent() << "  return '" << struct_hack_name << "';\n"
       << indent() << "}\n\n";
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     generate_php_union_methods(out, tstruct, struct_hack_name_with_ns);
   }
   if (type == ThriftStructType::EXCEPTION) {
@@ -4573,7 +4579,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   } else if (
       is_exception && (field.name() == "message" || field.name() == "file")) {
     dval = "''";
-  } else if (tstruct->is_union() || nullable_everything_) {
+  } else if (tstruct->is<t_union>() || nullable_everything_) {
     dval = "null";
   } else {
     dval = render_default_value(t);
@@ -4618,7 +4624,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
       out << indent() << "$this->" << field_name << " = " << dval << ";\n";
     }
   } else {
-    if (tstruct->is_union()) {
+    if (tstruct->is<t_union>()) {
       // Capture value from constructor and update _type field
       if (strict_unions_ && !first_field) {
         out << " else ";
@@ -4634,10 +4640,10 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
       field_expr = "HH\\FIXME\\UNSAFE_CAST<arraykey, int>(" + field_expr +
           ", 'nontransparent Enum')";
     }
-    out << indent() << (tstruct->is_union() ? "  " : "")
+    out << indent() << (tstruct->is<t_union>() ? "  " : "")
         << "$this->" + field_name + " = " << field_expr << ";\n";
 
-    if (tstruct->is_union()) {
+    if (tstruct->is<t_union>()) {
       out << indent() << "  $this->_type = "
           << union_field_to_enum(&field, struct_hack_name_with_ns) << ";\n"
           << indent() << "}";
@@ -4679,12 +4685,12 @@ void t_hack_generator::generate_php_struct_constructor(
   if (type == ThriftStructType::EXCEPTION) {
     out << indent() << "parent::__construct();\n";
   }
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     out << indent() << "$this->_type = "
         << union_field_to_enum(nullptr, struct_hack_name_with_ns) << ";\n";
   }
 
-  if (strict_unions_ && tstruct->is_union()) {
+  if (strict_unions_ && tstruct->is<t_union>()) {
     bool is_first_field = true;
     for (auto iter = tstruct->fields().rbegin();
          iter != tstruct->fields().rend();
@@ -4732,7 +4738,7 @@ void t_hack_generator::generate_php_struct_default_constructor(
     const std::string& struct_hack_name_with_ns) {
   out << indent() << "public function __construct()[] {\n";
   indent_up();
-  if (!tstruct->is_union()) {
+  if (!tstruct->is<t_union>()) {
     if (type == ThriftStructType::EXCEPTION) {
       out << indent() << "parent::__construct();\n";
     }
@@ -5257,7 +5263,7 @@ void t_hack_generator::_generate_php_struct_definition(
   }
 
   // Wrapper is not supported on unions.
-  if (tstruct->is_union() && !wrapper) {
+  if (tstruct->is<t_union>() && !wrapper) {
     std::string_view interface;
     if (strict_unions_) {
       interface = ", \\IThriftStrictUnion<";
@@ -5288,7 +5294,7 @@ void t_hack_generator::_generate_php_struct_definition(
   out << " {\n";
   indent_up();
 
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     indent(out) << "use \\ThriftUnionSerializationTrait;\n\n";
   } else {
     indent(out) << "use \\ThriftSerializationTrait;\n\n";
@@ -5316,7 +5322,7 @@ void t_hack_generator::_generate_php_struct_definition(
   generate_php_structural_id(out, tstruct, generateAsTrait);
   generate_php_struct_fields(out, tstruct, struct_hack_name_with_ns, type);
 
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     // Generate _type to store which field is set and initialize it to _EMPTY_
     indent(out) << "protected " << union_enum_name(struct_hack_name_with_ns)
                 << " $_type = "
@@ -5494,7 +5500,7 @@ void t_hack_generator::
         bool is_shape,
         bool uses_thrift_only_methods,
         const std::string& obj_ref) {
-  if (tstruct->is_union()) {
+  if (tstruct->is<t_union>()) {
     out << indent() << obj_ref
         << "->_type = " << union_field_to_enum(&field, struct_hack_name_with_ns)
         << ";\n";
@@ -5549,7 +5555,7 @@ void t_hack_generator::
       out << indent() << "$" << name << " = " << source_str << ";\n";
       source_str = "$" + name;
     }
-    if (tstruct->is_union()) {
+    if (tstruct->is<t_union>()) {
       out << indent() << obj_ref << "->" << name << " = ";
       if (uses_thrift_only_methods) {
         out << *field_wrapper << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
@@ -6397,7 +6403,7 @@ void t_hack_generator::generate_php_docstring(
   indent(out) << " * " << "Original thrift ";
   if (is_exception) {
     out << "exception";
-  } else if (tstruct->is_union()) {
+  } else if (tstruct->is<t_union>()) {
     out << "union";
   } else {
     out << "struct";

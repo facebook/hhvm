@@ -40,7 +40,6 @@ class t_struct final : public t_structured {
   // for backwards compatibility.
  public:
   bool is_struct_or_union() const override { return true; }
-  bool is_struct() const override { return true; }
 };
 
 } // namespace apache::thrift::compiler

@@ -572,7 +572,7 @@ class cpp_mstch_program : public mstch_program {
   std::vector<std::string> get_fatal_union_names() {
     std::vector<std::string> result;
     for (const t_structured* obj : program_->structured_definitions()) {
-      if (obj->is_union()) {
+      if (obj->is<t_union>()) {
         result.push_back(get_fatal_string_short_id(obj));
       }
     }
@@ -581,7 +581,7 @@ class cpp_mstch_program : public mstch_program {
   std::vector<std::string> get_fatal_struct_names() {
     std::vector<std::string> result;
     for (const t_structured* obj : program_->structured_definitions()) {
-      if (!obj->is_union() && !cpp_name_resolver::find_first_adapter(*obj)) {
+      if (!obj->is<t_union>() && !cpp_name_resolver::find_first_adapter(*obj)) {
         result.push_back(get_fatal_string_short_id(obj));
       }
     }
@@ -779,7 +779,7 @@ class cpp_mstch_program : public mstch_program {
     }
     // structs, unions and exceptions
     for (const t_structured* obj : program_->structured_definitions()) {
-      if (obj->is_union()) {
+      if (obj->is<t_union>()) {
         // When generating <program_name>_fatal_union.h, we will generate
         // <union_name>_Type_enum_traits
         unique_names.emplace("Type", "Type");
@@ -823,7 +823,7 @@ class cpp_mstch_program : public mstch_program {
     std::unordered_set<std::string> fields;
     std::vector<const std::string*> ordered_fields;
     for (const t_structured* s : program_->structured_definitions()) {
-      if (s->is_union()) {
+      if (s->is<t_union>()) {
         continue;
       }
       for (const t_field& f : s->fields()) {
@@ -1478,7 +1478,7 @@ class cpp_mstch_struct : public mstch_struct {
     for (auto i : cpp2::get_mixins_and_members(*struct_)) {
       const auto suffix =
           ::apache::thrift::compiler::generate_legacy_api(*struct_) ||
-              i.mixin->type()->is_union()
+              i.mixin->type()->is<t_union>()
           ? "_ref"
           : "";
       fields.push_back(mstch::map{
@@ -1714,7 +1714,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node get_num_union_members() {
-    if (!struct_->is_union()) {
+    if (!struct_->is<t_union>()) {
       throw std::runtime_error("not a union struct");
     }
     return struct_->fields().size();
@@ -2291,7 +2291,7 @@ class cpp_mstch_field : public mstch_field {
   bool is_eligible_for_storage_name_mangling() const {
     const auto* strct = field_context_->strct;
 
-    if (strct->is_union()) {
+    if (strct->is<t_union>()) {
       return false;
     }
 

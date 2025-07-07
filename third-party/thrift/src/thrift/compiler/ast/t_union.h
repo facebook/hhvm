@@ -34,8 +34,6 @@ class t_union final : public t_structured {
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
-  bool is_union() const override { return true; }
-
   // TODO(T219861020): remove this is_struct override
   bool is_struct_or_union() const override { return true; }
 };

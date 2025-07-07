@@ -636,7 +636,7 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     auto key_tag = gen_type_tag(key);
     auto val_tag = gen_type_tag(val);
     return ns + "map<" + key_tag + ", " + val_tag + ">";
-  } else if (type.is_union()) {
+  } else if (type.is<t_union>()) {
     return ns + "union_t<" + get_standard_type(type) + ">";
   } else if (type.is_struct_or_union()) {
     return ns + "struct_t<" + get_standard_type(type) + ">";

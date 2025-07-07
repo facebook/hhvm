@@ -526,7 +526,7 @@ class mstch_java_struct : public mstch_struct {
   mstch::node java_package() {
     return get_namespace_or_default(*struct_->program());
   }
-  mstch::node is_struct_union() { return struct_->is_union(); }
+  mstch::node is_struct_union() { return struct_->is<t_union>(); }
   mstch::node is_union_field_type_unique() {
     std::set<std::string> field_types;
     for (const auto& field : struct_->fields()) {
@@ -561,7 +561,7 @@ class mstch_java_struct : public mstch_struct {
     return false;
   }
   mstch::node is_as_bean() {
-    if (!struct_->is<t_exception>() && !struct_->is_union()) {
+    if (!struct_->is<t_exception>() && !struct_->is<t_union>()) {
       return struct_->get_unstructured_annotation("java.swift.mutable") ==
           "true" ||
           struct_->has_structured_annotation(kJavaMutableUri);
@@ -980,12 +980,12 @@ class mstch_java_field : public mstch_field {
   mstch::node is_object() {
     const t_type* field_type = field_->get_type()->get_true_type();
     return field_type->is_struct_or_union() || field_type->is<t_exception>() ||
-        field_type->is_union();
+        field_type->is<t_union>();
   }
 
   mstch::node is_union() {
     const t_type* field_type = field_->get_type()->get_true_type();
-    return field_type->is_union();
+    return field_type->is<t_union>();
   }
 
   mstch::node is_container() {

@@ -46,7 +46,6 @@ const char* getErrorCodeString(ErrorCode error) {
       return "MAX";
   }
   LOG(FATAL) << "Unreachable";
-  return "";
 }
 
 } // namespace proxygen

@@ -126,7 +126,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"list?", type.is<t_list>()},
       {"set?", type.is<t_set>()},
       {"map?", type.is<t_map>()},
-      {"typedef?", type.is_typedef()},
+      {"typedef?", type.is<t_typedef>()},
   };
 
   if (type.is_struct_or_union() || type.is<t_exception>()) {
@@ -147,7 +147,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
         "key_type", dump(*dynamic_cast<const t_map&>(type).get_key_type()));
     result.emplace(
         "value_type", dump(*dynamic_cast<const t_map&>(type).get_val_type()));
-  } else if (type.is_typedef()) {
+  } else if (type.is<t_typedef>()) {
     result.emplace(
         "typedef_type", dump(*dynamic_cast<const t_typedef&>(type).get_type()));
   }

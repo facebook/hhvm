@@ -162,7 +162,7 @@ mstch::node mstch_type::get_value_type() {
 }
 
 mstch::node mstch_type::get_typedef_type() {
-  if (type_->is_typedef()) {
+  if (type_->is<t_typedef>()) {
     return context_.type_factory->make_mstch_object(
         dynamic_cast<const t_typedef*>(type_)->get_type(), context_, pos_);
   }
@@ -170,7 +170,7 @@ mstch::node mstch_type::get_typedef_type() {
 }
 
 mstch::node mstch_type::get_typedef() {
-  if (type_->is_typedef()) {
+  if (type_->is<t_typedef>()) {
     return context_.typedef_factory->make_mstch_object(
         dynamic_cast<const t_typedef*>(type_), context_, pos_);
   }

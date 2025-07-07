@@ -34,7 +34,7 @@ namespace apache::thrift::compiler::detail {
 template <typename... Visitors>
 decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
   auto f = overload(std::forward<Visitors>(visitors)...);
-  if (ty.is_typedef()) {
+  if (ty.is<t_typedef>()) {
     return std::invoke(f, dynamic_cast<const t_typedef&>(ty));
   }
   switch (ty.get_type_value()) {

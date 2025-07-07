@@ -1044,7 +1044,7 @@ void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
   if (const auto* adapter = get_py_adapter(type)) {
     f_types_ << varname << " = " << *adapter << ".Type" << endl;
   } else if (
-      type->is_typedef() || type->is_enum() || type->is_struct_or_union() ||
+      type->is<t_typedef>() || type->is_enum() || type->is_struct_or_union() ||
       type->is<t_exception>()) {
     f_types_ << varname << " = " << type_name(type) << endl;
   } else {

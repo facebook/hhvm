@@ -539,7 +539,7 @@ class cpp_mstch_program : public mstch_program {
     std::vector<const t_typedef*> result;
     for (const t_typedef* i : program_->typedefs()) {
       const t_type* alias = i->get_type();
-      if (alias->is_typedef() &&
+      if (alias->is<t_typedef>() &&
           alias->has_unstructured_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
         if ((ttype->is_struct_or_union() || ttype->is<t_exception>()) &&

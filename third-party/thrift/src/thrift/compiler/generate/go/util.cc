@@ -160,7 +160,7 @@ void codegen_data::add_to_thrift_metadata_types(
   }
 
   // Skip over a chain of "non-defined" typedefs.
-  if (type->is_typedef()) {
+  if (type->is<t_typedef>()) {
     auto typedef_ = dynamic_cast<const t_typedef*>(type);
     if (typedef_->typedef_kind() != t_typedef::kind::defined) {
       auto underlying_type = typedef_->get_type();
@@ -174,7 +174,7 @@ void codegen_data::add_to_thrift_metadata_types(
   // The recursion below is equivalent to post-order tree traversal.
   // It ensures that the types are recorded in the dependency order.
 
-  if (type->is_typedef()) {
+  if (type->is<t_typedef>()) {
     auto typedef_ = dynamic_cast<const t_typedef*>(type);
     auto underlying_type = typedef_->get_type();
     add_to_thrift_metadata_types(underlying_type, visited_type_names);

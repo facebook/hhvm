@@ -895,7 +895,7 @@ class mstch_type : public mstch_base {
   mstch::node is_list() { return resolved_type_->is<t_list>(); }
   mstch::node is_set() { return resolved_type_->is<t_set>(); }
   mstch::node is_map() { return resolved_type_->is<t_map>(); }
-  mstch::node is_typedef() { return type_->is_typedef(); }
+  mstch::node is_typedef() { return type_->is<t_typedef>(); }
   virtual std::string get_type_namespace(const t_program*) { return ""; }
   mstch::node get_struct();
   mstch::node get_enum();
@@ -1147,7 +1147,7 @@ class mstch_field : public mstch_base {
       return true;
     }
     auto type = field_->get_type();
-    if (type->is_typedef()) {
+    if (type->is<t_typedef>()) {
       if (t_typedef::get_first_structured_annotation_or_null(type, uri) !=
           nullptr) {
         return true;
@@ -1169,7 +1169,7 @@ class mstch_field : public mstch_base {
       CodingErrorAction action,
       CodingErrorAction def) {
     auto type = field_->get_type();
-    if (type->is_typedef()) {
+    if (type->is<t_typedef>()) {
       if (auto annotation =
               t_typedef::get_first_structured_annotation_or_null(type, uri)) {
         return has_compat_action(annotation, field, action, def);

@@ -480,7 +480,7 @@ class python_mstch_program : public mstch_program {
           adapter_type_hint_modules_);
     }
     auto true_type = orig_type->get_true_type();
-    is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is_typedef()
+    is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is<t_typedef>()
         ? TypeDef::HasTypedef
         : TypeDef::NoTypedef;
     if (is_typedef == TypeDef::HasTypedef) {

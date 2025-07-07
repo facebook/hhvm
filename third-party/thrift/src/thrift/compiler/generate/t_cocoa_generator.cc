@@ -1420,7 +1420,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
   for (const auto& field : tstruct->fields()) {
     const t_type* ttype = field.get_type();
     std::string field_name = kFieldPrefix + field.name();
-    if (ttype->is_typedef()) {
+    if (ttype->is<t_typedef>()) {
       ttype = ttype->get_true_type();
     }
     if (ttype->is_struct_or_union()) {
@@ -1503,7 +1503,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
     const t_type* ttype = field.get_type();
     std::string field_name = kFieldPrefix + field.name();
     std::string ret_equals = "ret[@\"" + field.name() + "\"] = ";
-    if (ttype->is_typedef()) {
+    if (ttype->is<t_typedef>()) {
       ttype = ttype->get_true_type();
     }
 
@@ -1589,7 +1589,7 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
   for (const auto& field : tstruct->fields()) {
     const t_type* ttype = field.get_type();
     std::string field_name = kFieldPrefix + field.name();
-    if (ttype->is_typedef()) {
+    if (ttype->is<t_typedef>()) {
       ttype = ttype->get_true_type();
     }
 
@@ -2669,7 +2669,7 @@ void t_cocoa_generator::generate_serialize_list_element(
  * @return Java type name, i.e. HashMap<Key,Value>
  */
 std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
-  if (ttype->is_typedef() || ttype->is_enum()) {
+  if (ttype->is<t_typedef>() || ttype->is_enum()) {
     const t_program* program = ttype->program();
     return program ? (program->get_namespace("cocoa") + ttype->name())
                    : ttype->name();

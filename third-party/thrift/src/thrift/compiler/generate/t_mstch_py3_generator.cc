@@ -449,7 +449,7 @@ class py3_mstch_program : public mstch_program {
   std::string visit_type_impl(const t_type* orig_type, bool fromTypeDef);
 
   std::string visit_type(const t_type* orig_type) {
-    return visit_type_impl(orig_type, orig_type->is_typedef());
+    return visit_type_impl(orig_type, orig_type->is<t_typedef>());
   }
 
   mstch::node filtered_objects() {
@@ -1378,7 +1378,7 @@ std::string py3_mstch_program::visit_type_impl(
   const std::string& flatName = type->get_flat_name();
   // Import all types either beneath a typedef, even if the current type is
   // not directly a typedef
-  fromTypeDef = fromTypeDef || orig_type->is_typedef();
+  fromTypeDef = fromTypeDef || orig_type->is<t_typedef>();
   if (flatName.empty()) {
     std::string extra;
     if (trueType->is<t_list>()) {

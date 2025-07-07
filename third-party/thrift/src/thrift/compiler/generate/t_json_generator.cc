@@ -269,7 +269,7 @@ string t_json_generator::to_string(const t_type* type) {
     return "SET";
   } else if (type->is<t_list>()) {
     return "LIST";
-  } else if (type->is_typedef()) {
+  } else if (type->is<t_typedef>()) {
     return "TYPEDEF";
   }
 
@@ -298,7 +298,7 @@ string t_json_generator::to_spec_args(const t_type* type) {
     return "null";
   } else if (
       type->is_struct_or_union() || type->is<t_exception>() ||
-      type->is_enum() || type->is_typedef()) {
+      type->is_enum() || type->is<t_typedef>()) {
     return to_spec_args_named(type);
   } else if (type->is<t_map>()) {
     return R"({ "key_type" : { "type_enum" : ")" +

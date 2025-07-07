@@ -876,7 +876,7 @@ class mstch_java_field : public mstch_field {
 
   bool _has_type_adapter() {
     auto type = field_->get_type();
-    if (type->is_typedef()) {
+    if (type->is<t_typedef>()) {
       if (t_typedef::get_first_structured_annotation_or_null(
               type, kJavaAdapterUri)) {
         return true;
@@ -900,7 +900,7 @@ class mstch_java_field : public mstch_field {
   mstch::node get_typedef_structed_annotation_attribute(
       const char* uri, const std::string& field) {
     auto type = field_->get_type();
-    if (type->is_typedef()) {
+    if (type->is<t_typedef>()) {
       if (auto annotation =
               t_typedef::get_first_structured_annotation_or_null(type, uri)) {
         for (const auto& item : annotation->value()->get_map()) {
@@ -1026,7 +1026,7 @@ class mstch_java_field : public mstch_field {
     return default_value_for_type(field->get_type());
   }
   std::string default_value_for_type(const t_type* type) {
-    if (type->is_typedef()) {
+    if (type->is<t_typedef>()) {
       auto typedef_type = dynamic_cast<const t_typedef*>(type)->get_type();
       return default_value_for_type(typedef_type);
     } else {
@@ -1328,7 +1328,7 @@ class mstch_java_type : public mstch_type {
   }
 
   mstch::node has_structured_annotation(const char* uri) {
-    if (type_->is_typedef()) {
+    if (type_->is<t_typedef>()) {
       if (t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
         return true;
       }
@@ -1347,7 +1347,7 @@ class mstch_java_type : public mstch_type {
 
   mstch::node get_structed_annotation_attribute(
       const char* uri, const std::string& field) {
-    if (type_->is_typedef()) {
+    if (type_->is<t_typedef>()) {
       if (auto annotation =
               t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
         for (const auto& item : annotation->value()->get_map()) {
@@ -1387,7 +1387,7 @@ class mstch_java_type : public mstch_type {
     int32_t count = 0;
     auto type = type_;
     while (type) {
-      if (type_->is_typedef() &&
+      if (type_->is<t_typedef>() &&
           type->has_structured_annotation(kJavaAdapterUri)) {
         count++;
         if (const auto* as_typedef = dynamic_cast<const t_typedef*>(type)) {

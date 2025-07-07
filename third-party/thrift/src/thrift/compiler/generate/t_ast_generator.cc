@@ -350,7 +350,7 @@ type::Schema t_ast_generator::gen_schema(
       if (!ref || !schema_opts.source_ranges_ || !is_root_program) {
         return;
       }
-      while (ref->is_typedef() &&
+      while (ref->is<t_typedef>() &&
              static_cast<const t_typedef&>(*ref).typedef_kind() !=
                  t_typedef::kind::defined) {
         ref = static_cast<const t_typedef&>(*ref).type();

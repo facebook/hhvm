@@ -2275,7 +2275,7 @@ std::string t_java_deprecated_generator::get_java_type_string(
     return "TType.STRUCT";
   } else if (type->is_enum()) {
     return "TType.I32";
-  } else if (type->is_typedef()) {
+  } else if (type->is<t_typedef>()) {
     return get_java_type_string(((t_typedef*)type)->get_type());
   } else if (type->is<t_primitive_type>()) {
     switch (((t_primitive_type*)type)->primitive_type()) {

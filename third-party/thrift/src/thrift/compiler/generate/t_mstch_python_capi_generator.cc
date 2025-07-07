@@ -430,7 +430,7 @@ class python_capi_mstch_program : public mstch_program {
       return;
     }
     auto true_type = orig_type->get_true_type();
-    is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is_typedef()
+    is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is<t_typedef>()
         ? TypeDef::HasTypedef
         : TypeDef::NoTypedef;
     if (is_typedef == TypeDef::HasTypedef) {
@@ -560,7 +560,7 @@ class python_capi_mstch_struct : public mstch_struct {
              dynamic_cast<const t_map*>(type)->get_val_type()))) {
       return false;
     }
-    if (type->is_typedef()) {
+    if (type->is<t_typedef>()) {
       const t_typedef* tdef = dynamic_cast<const t_typedef*>(type);
       return capi_eligible_type(tdef->get_type());
     }

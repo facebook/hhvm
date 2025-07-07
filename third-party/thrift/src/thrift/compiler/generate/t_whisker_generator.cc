@@ -108,10 +108,10 @@ object t_type_as(const prototype_database& proto, const t_type& self) {
 // because this function will attach the prototype of t_struct.
 object resolve_derived_t_type(
     const prototype_database& proto, const t_type& self) {
-  if (self.is_typedef()) {
+  if (const auto* td = self.try_as<t_typedef>()) {
     // t_typedef::get_type_value() returns the underlying type value, which is
     // not useful for detecting t_typedef. So we handle it separately.
-    return object(proto.create<t_typedef>(*self.try_as<t_typedef>()));
+    return object(proto.create<t_typedef>(*td));
   }
   switch (self.get_type_value()) {
     case t_type::type::t_void:
@@ -176,7 +176,7 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("i64?",              mem_fn(&t_type::is_i64));
   def.property("float?",            mem_fn(&t_type::is_float));
   def.property("double?",           mem_fn(&t_type::is_double));
-  def.property("typedef?",          mem_fn(&t_type::is_typedef));
+  def.property("typedef?",          mem_fn(&t_type::is<t_typedef>));
   def.property("enum?",             mem_fn(&t_type::is_enum));
   def.property("struct?",           mem_fn(&t_type::is_struct));
   def.property("union?",            mem_fn(&t_type::is_union));

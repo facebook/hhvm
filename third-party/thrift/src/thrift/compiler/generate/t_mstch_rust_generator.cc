@@ -343,7 +343,7 @@ bool node_has_adapter(const t_named& node) {
 
 bool type_has_transitive_adapter(
     const t_type* type, bool step_through_newtypes) {
-  if (type->is_typedef()) {
+  if (type->is<t_typedef>()) {
     auto typedef_type = dynamic_cast<const t_typedef*>(type);
     if (typedef_type) {
       // Currently the only "type" that can have an adapter is a typedef.
@@ -389,7 +389,7 @@ bool type_has_transitive_adapter(
 }
 
 const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
-  while (t->is_typedef()) {
+  while (t->is<t_typedef>()) {
     auto typedef_type = dynamic_cast<const t_typedef*>(t);
     if (!typedef_type) {
       return t;

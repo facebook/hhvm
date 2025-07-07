@@ -547,7 +547,7 @@ std::string cpp_name_resolver::gen_adapted_type(
 
 std::string cpp_name_resolver::gen_type_tag(
     const t_type& type, bool ignore_cpp_type) {
-  std::string tag = type.is_typedef()
+  std::string tag = type.is<t_typedef>()
       ? gen_type_tag(*type.as<t_typedef>().get_type())
       : gen_thrift_type_tag(type);
 

@@ -67,7 +67,7 @@ uint64_t t_type::get_type_id() const {
 
 const t_type* t_type::get_true_type() const {
   return t_typedef::find_type_if(
-      this, [](const t_type* type) { return !type->is_typedef(); });
+      this, [](const t_type* type) { return !type->is<t_typedef>(); });
 }
 
 bool t_type_ref::resolved() const noexcept {

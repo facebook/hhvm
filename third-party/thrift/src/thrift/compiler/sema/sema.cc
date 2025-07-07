@@ -538,7 +538,7 @@ void add_annotations_to_node_type(
   }
 
   if (node_type->is<t_container>() ||
-      (node_type->is_typedef() &&
+      (node_type->is<t_typedef>() &&
        static_cast<const t_typedef*>(node_type)->typedef_kind() !=
            t_typedef::kind::defined) ||
       (node_type->is<t_primitive_type>() &&
@@ -609,7 +609,7 @@ void lower_deprecated_annotations(
         }
 
         auto* inner_type = const_cast<t_type*>(type->get_type());
-        if (inner_type->is_typedef()) {
+        if (inner_type->is<t_typedef>()) {
           ctx.error("Cannot use {} on typedefs of typedefs", annot);
         } else if (
             !inner_type->is<t_container>() &&

@@ -91,7 +91,6 @@ class t_typedef : public t_type {
   const t_type* get_type() const { return type_.get_type(); }
   void set_type(t_type_ref type) { type_ = type; }
 
-  bool is_typedef() const override { return true; }
   t_type::type get_type_value() const override {
     return get_type()->get_type_value();
   }

@@ -402,7 +402,7 @@ string t_js_generator::render_const_value(
             "compiler error: no const of base type " +
             t_primitive_type::t_primitive_name(tbase));
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     out << value->get_integer();
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     out << "new " << js_type_namespace(type->program()) << type->get_name()
@@ -1240,7 +1240,7 @@ void t_js_generator::generate_deserialize_field(
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
-  } else if (type->is<t_primitive_type>() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << name << " = input.";
 
     if (type->is<t_primitive_type>()) {
@@ -1278,7 +1278,7 @@ void t_js_generator::generate_deserialize_field(
               "compiler error: no JS name for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       out << "readI32()";
     }
 
@@ -1454,7 +1454,7 @@ void t_js_generator::generate_serialize_field(
         out, (t_struct*)type, prefix + tfield->get_name());
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
-  } else if (type->is<t_primitive_type>() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     string name = tfield->get_name();
 
     // Hack for when prefix is defined (always a hash ref)
@@ -1498,7 +1498,7 @@ void t_js_generator::generate_serialize_field(
               "compiler error: no JS name for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       out << "writeI32(" << name << ")";
     }
     out << ";" << endl;
@@ -1660,7 +1660,7 @@ string t_js_generator::declare_field(
               "compiler error: no JS initializer for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       result += " = null";
     } else if (type->is<t_map>()) {
       result += " = null";
@@ -1757,7 +1757,7 @@ string t_js_generator ::type_to_enum(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         throw std::runtime_error("Float type is not supported");
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "Thrift.Type.I32";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "Thrift.Type.STRUCT";

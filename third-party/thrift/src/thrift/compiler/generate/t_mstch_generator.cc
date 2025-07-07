@@ -120,7 +120,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       // needed.
       {"struct?", type.is_struct_or_union() || type.is<t_exception>()},
       {"union?", type.is<t_union>()},
-      {"enum?", type.is_enum()},
+      {"enum?", type.is<t_enum>()},
       {"base?", type.is<t_primitive_type>()},
       {"container?", type.is<t_container>()},
       {"list?", type.is<t_list>()},
@@ -132,7 +132,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
   if (type.is_struct_or_union() || type.is<t_exception>()) {
     // Shallow dump the struct
     result.emplace("struct", dump(dynamic_cast<const t_struct&>(type), true));
-  } else if (type.is_enum()) {
+  } else if (type.is<t_enum>()) {
     result.emplace("enum", dump(dynamic_cast<const t_enum&>(type)));
   } else if (type.is<t_list>()) {
     result.emplace(

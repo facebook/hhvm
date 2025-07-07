@@ -613,7 +613,7 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     return ns + "float_t";
   } else if (type.is_double()) {
     return ns + "double_t";
-  } else if (type.is_enum()) {
+  } else if (type.is<t_enum>()) {
     return ns + "enum_t<" + get_standard_type(type) + ">";
   } else if (type.is_string()) {
     return ns + "string_t";

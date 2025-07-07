@@ -143,7 +143,7 @@ bool can_derive_ord(const t_type* type) {
   type = type->get_true_type();
   if (type->is_string() || type->is_binary() || type->is_bool() ||
       type->is_byte() || type->is_i16() || type->is_i32() || type->is_i64() ||
-      type->is_enum() || type->is_void()) {
+      type->is<t_enum>() || type->is_void()) {
     return true;
   }
   if (type->has_structured_annotation(kRustOrdUri)) {
@@ -425,7 +425,7 @@ bool typedef_has_constructor_expression(const t_typedef* t) {
       break;
     }
     const t_type* definition = t->get_type();
-    if (definition->is_enum()) {
+    if (definition->is<t_enum>()) {
       // Outermost typedef refers to an enum.
       return true;
     }
@@ -1829,7 +1829,7 @@ class mstch_rust_value : public mstch_base {
     }
     return mstch::node();
   }
-  mstch::node is_enum() { return underlying_type_->is_enum(); }
+  mstch::node is_enum() { return underlying_type_->is<t_enum>(); }
   mstch::node enum_variant() {
     if (const_value_->is_enum()) {
       auto enum_value = const_value_->get_enum_value();
@@ -1861,7 +1861,7 @@ class mstch_rust_value : public mstch_base {
       return true;
     }
     // Enum variants as well
-    if (underlying_type_->is_enum()) {
+    if (underlying_type_->is<t_enum>()) {
       return enum_variant();
     }
     return false;
@@ -2231,7 +2231,7 @@ class rust_mstch_typedef : public mstch_typedef {
     if (!type_has_transitive_adapter(typedef_->get_type(), true)) {
       auto inner = typedef_->get_true_type();
       if (inner->is_bool() || inner->is_byte() || inner->is_i16() ||
-          inner->is_i32() || inner->is_i64() || inner->is_enum() ||
+          inner->is_i32() || inner->is_i64() || inner->is<t_enum>() ||
           inner->is_void()) {
         return true;
       }

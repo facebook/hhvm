@@ -1247,7 +1247,8 @@ class cpp_mstch_type : public mstch_type {
     return resolved_type_->is_byte() || resolved_type_->is_any_int();
   }
   mstch::node resolves_to_base_or_enum() {
-    return resolved_type_->is<t_primitive_type>() || resolved_type_->is_enum();
+    return resolved_type_->is<t_primitive_type>() ||
+        resolved_type_->is<t_enum>();
   }
   mstch::node resolves_to_container() {
     return resolved_type_->is<t_container>();
@@ -1257,17 +1258,17 @@ class cpp_mstch_type : public mstch_type {
         resolved_type_);
   }
   mstch::node resolves_to_container_or_enum() {
-    return resolved_type_->is<t_container>() || resolved_type_->is_enum();
+    return resolved_type_->is<t_container>() || resolved_type_->is<t_enum>();
   }
   mstch::node resolves_to_complex_return() {
     return is_complex_return(resolved_type_);
   }
   mstch::node resolves_to_fixed_size() {
     return resolved_type_->is_bool() || resolved_type_->is_byte() ||
-        resolved_type_->is_any_int() || resolved_type_->is_enum() ||
+        resolved_type_->is_any_int() || resolved_type_->is<t_enum>() ||
         resolved_type_->is_floating_point();
   }
-  mstch::node resolves_to_enum() { return resolved_type_->is_enum(); }
+  mstch::node resolves_to_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node transitively_refers_to_struct() {
     // fast path is unnecessary but may avoid allocations
     if (resolved_type_->is_struct_or_union()) {
@@ -1453,7 +1454,7 @@ class cpp_mstch_struct : public mstch_struct {
           field->get_req() == t_field::e_req::optional) {
         continue;
       }
-      if (type->is_enum() ||
+      if (type->is<t_enum>() ||
           (type->is<t_primitive_type>() && !type->is_string_or_binary()) ||
           (type->is_string_or_binary() && field->get_value() != nullptr) ||
           (type->is<t_container>() && field->get_value() != nullptr &&
@@ -2334,7 +2335,7 @@ class cpp_mstch_const : public mstch_const {
         });
   }
   mstch::node enum_value() {
-    if (const_->type()->is_enum()) {
+    if (const_->type()->is<t_enum>()) {
       const auto* enm = static_cast<const t_enum*>(const_->type());
       const auto* enum_val = enm->find_value(const_->value()->get_integer());
       if (enum_val) {

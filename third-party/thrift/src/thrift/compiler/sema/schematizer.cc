@@ -891,7 +891,8 @@ protocol_value_builder::to_labeled_value(
   // Verify that the field is a valid type for a protocol value key
   switch (protocol_value.kind()) {
     case t_const_value::CV_INTEGER:
-      if (!(ty_->is_any_int() || ty_->is_enum() || ty_->is_floating_point())) {
+      if (!(ty_->is_any_int() || ty_->is<t_enum>() ||
+            ty_->is_floating_point())) {
         raise_exception();
       }
       if (ty_->is_floating_point()) {

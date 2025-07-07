@@ -62,7 +62,7 @@ class mstch_starlark_type : public mstch_type {
   }
 
   bool is_supported_collection(const t_type* type) {
-    if (type->is_enum()) {
+    if (type->is<t_enum>()) {
       return true;
     }
     if (type->is<t_list>()) {

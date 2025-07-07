@@ -771,7 +771,7 @@ class python_mstch_type : public mstch_type {
   mstch::node program_name() { return get_type_program()->name(); }
 
   mstch::node metadata_path() {
-    if (type_->is_enum()) {
+    if (type_->is<t_enum>()) {
       return get_py3_namespace_with_name_and_prefix(
                  get_type_program(), get_option("root_module_prefix")) +
           ".thrift_enums";
@@ -1329,7 +1329,7 @@ class python_mstch_const_value : public mstch_const_value {
       return {};
     }
     const auto* type = const_value_->ttype()->get_true_type();
-    if (type->is_enum()) {
+    if (type->is<t_enum>()) {
       return context_.type_factory->make_mstch_object(type, context_);
     }
     return {};

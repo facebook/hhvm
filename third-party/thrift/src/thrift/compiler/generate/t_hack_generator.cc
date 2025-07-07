@@ -98,7 +98,7 @@ class t_result_struct final : public t_structured {
 bool is_type_arraykey(const t_type& type) {
   const t_type* true_type = type.get_true_type();
   return true_type->is_string_or_binary() || true_type->is_any_int() ||
-      true_type->is_byte() || true_type->is_enum();
+      true_type->is_byte() || true_type->is<t_enum>();
 }
 
 /**
@@ -1453,7 +1453,7 @@ void t_hack_generator::generate_json_map_element(
       "compiler error: Thrift Hack compiler"
       "does not support complex types as the key of a map.");
 
-  if (!keytype->is_enum() && !keytype->is<t_primitive_type>()) {
+  if (!keytype->is<t_enum>() && !keytype->is<t_primitive_type>()) {
     throw error;
   }
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(keytype)) {
@@ -1886,7 +1886,7 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
     return is_hack_const_type(ttypedef->get_type());
   }
   type = type->get_true_type();
-  if (type->is<t_primitive_type>() || type->is_enum()) {
+  if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     return true;
   } else if (type->is<t_container>()) {
     if (legacy_arrays_ || hack_collections_) {
@@ -2286,7 +2286,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
             "compiler error: no const of base type " +
             t_primitive_type::t_primitive_name(tbase));
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     dval = "null";
   } else if (const auto* tstruct = dynamic_cast<const t_structured*>(type)) {
     if (no_nullables_) {
@@ -2383,7 +2383,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_map"), std::move(tmap_tmeta));
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     auto tenum_tmeta = t_const_value::make_map();
     tenum_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
@@ -2955,7 +2955,7 @@ void t_hack_generator::generate_php_type_spec(
 
   if (t->is<t_primitive_type>()) {
     // Noop, type is all we need
-  } else if (t->is_enum()) {
+  } else if (t->is<t_enum>()) {
     indent(out) << "'enum' => " << hack_name(t) << "::class,\n";
   } else if (t->is_struct_or_union() || t->is<t_exception>()) {
     auto sname = hack_name(t);
@@ -3424,7 +3424,7 @@ bool t_hack_generator::field_is_nullable(
   return (dval == "null") || tstruct->is<t_union>() ||
       (field->get_req() == t_field::e_req::optional &&
        field->default_value() == nullptr) ||
-      (t->is_enum() && field->get_req() != t_field::e_req::required);
+      (t->is<t_enum>() && field->get_req() != t_field::e_req::required);
 }
 
 void t_hack_generator::generate_php_struct_stringifyMapKeys_method(
@@ -4079,7 +4079,7 @@ bool t_hack_generator::is_async_type(
     return true;
   }
   type = type->get_true_type();
-  if (type->is<t_primitive_type>() || type->is_enum()) {
+  if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     return false;
   } else if (type->is<t_container>()) {
     if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
@@ -4232,7 +4232,7 @@ void t_hack_generator::generate_php_struct_fields(
 
     t = t->get_true_type();
 
-    if (t->is_enum() && is_bitmask_enum(static_cast<const t_enum*>(t))) {
+    if (t->is<t_enum>() && is_bitmask_enum(static_cast<const t_enum*>(t))) {
       throw std::runtime_error(
           "Enum " + t->name() +
           " is actually a bitmask, cannot generate a field of this enum type");
@@ -4272,18 +4272,18 @@ void t_hack_generator::generate_php_struct_fields(
     }
 
     if (type == ThriftStructType::EXCEPTION && fieldName == "code") {
-      if (!(t->is_any_int() || t->is_enum())) {
+      if (!(t->is_any_int() || t->is<t_enum>())) {
         throw std::runtime_error(
             tstruct->name() + "::code defined to be a non-integral type. " +
             "code fields for Exception classes must be integral");
       } else if (
-          t->is_enum() &&
+          t->is<t_enum>() &&
           static_cast<const t_enum*>(t)->get_enum_values().empty()) {
         throw std::runtime_error(
             "Enum " + t->name() + " is the type for the code property of " +
             tstruct->name() + ", but it has no values.");
       }
-      if (t->is_enum()) {
+      if (t->is<t_enum>()) {
         typehint.insert(0, "/* Originally defined as ");
         typehint += " */ int";
       }
@@ -4364,7 +4364,7 @@ void t_hack_generator::generate_php_field_wrapper_methods(
 void t_hack_generator::generate_php_struct_field_methods(
     std::ofstream& out, const t_field* field, bool is_exception) {
   const t_type* t = field->get_type()->get_true_type();
-  if (is_exception && field->name() == "code" && t->is_enum()) {
+  if (is_exception && field->name() == "code" && t->is<t_enum>()) {
     std::string enum_type = type_to_typehint(field->get_type());
     out << "\n";
     out << indent() << "public function setCodeAsEnum(" << enum_type
@@ -4602,7 +4602,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
 
   const std::string& field_name = field.name();
   bool need_enum_code_fixme = is_exception && field_name == "code" &&
-      t->is_enum() && !enum_transparenttype_;
+      t->is<t_enum>() && !enum_transparenttype_;
   if (is_default_assignment) {
     auto [type_wrapper, underlying_name, ns] =
         find_hack_wrapper(field.get_type());
@@ -5415,7 +5415,7 @@ void t_hack_generator::_generate_args(
         const std::string& name = field.name();
         const t_type* ftype = field.type()->get_true_type();
         bool nullable = nullable_everything_ || !no_nullables_ ||
-            (ftype->is_enum() &&
+            (ftype->is<t_enum>() &&
              (field.default_value() == nullptr ||
               field.get_req() != t_field::e_req::required));
         if (nullable) {
@@ -7444,7 +7444,7 @@ std::string t_hack_generator::declare_field(
               "compiler error: no Hack initializer for base type " +
               t_primitive_type::t_primitive_name(tbase_type->primitive_type()));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       result += " = null";
     } else if (type->is<t_map>()) {
       if (hack_collections_) {
@@ -7516,7 +7516,7 @@ std::string t_hack_generator::argument_list(
        * Structs are nullable unless no_nullables_ is set.
        * Enums are always nullable
        */
-      auto is_param_nullable = force_nullable || true_type->is_enum() ||
+      auto is_param_nullable = force_nullable || true_type->is<t_enum>() ||
           (!no_nullables_ && true_type->is_struct_or_union());
       result +=
           type_to_param_typehint(field.get_type(), is_param_nullable) + " ";
@@ -7601,7 +7601,7 @@ std::string t_hack_generator::type_to_enum(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         return "\\TType::FLOAT";
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "\\TType::I32";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "\\TType::STRUCT";

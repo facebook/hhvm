@@ -969,12 +969,12 @@ class mstch_java_field : public mstch_field {
         field_type->is_bool() || field_type->is_byte() ||
         field_type->is_float() || field_type->is_i16() ||
         field_type->is_i32() || field_type->is_i64() ||
-        field_type->is_double() || field_type->is_enum());
+        field_type->is_double() || field_type->is<t_enum>());
   }
 
   mstch::node is_enum() {
     const t_type* field_type = field_->get_type()->get_true_type();
-    return field_type->is_enum();
+    return field_type->is<t_enum>();
   }
 
   mstch::node is_object() {
@@ -1040,7 +1040,7 @@ class mstch_java_field : public mstch_field {
         return "0.";
       } else if (type->is_bool()) {
         return "false";
-      } else if (type->is_enum()) {
+      } else if (type->is<t_enum>()) {
         // we use fromInteger(0) as default value as it may be null or the enum
         // entry for 0.
         auto javaNamespace = get_namespace_or_default(*(type->program()));
@@ -1185,21 +1185,21 @@ class mstch_java_const : public mstch_const {
     // we don't have the constant values to work with.
     if (const_->type()->is<t_map>()) {
       t_map* map = (t_map*)const_->type();
-      if (map->get_key_type()->is_enum()) {
+      if (map->get_key_type()->is<t_enum>()) {
         return map->get_key_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
     if (const_->type()->is<t_list>()) {
       t_list* list = (t_list*)const_->type();
-      if (list->get_elem_type()->is_enum()) {
+      if (list->get_elem_type()->is<t_enum>()) {
         return list->get_elem_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
     if (const_->type()->is<t_set>()) {
       t_set* set = (t_set*)const_->type();
-      if (set->get_elem_type()->is_enum()) {
+      if (set->get_elem_type()->is<t_enum>()) {
         return set->get_elem_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }

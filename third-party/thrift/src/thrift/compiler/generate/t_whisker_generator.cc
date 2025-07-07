@@ -177,7 +177,7 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("float?",            mem_fn(&t_type::is_float));
   def.property("double?",           mem_fn(&t_type::is_double));
   def.property("typedef?",          mem_fn(&t_type::is<t_typedef>));
-  def.property("enum?",             mem_fn(&t_type::is_enum));
+  def.property("enum?",             mem_fn(&t_type::is<t_enum>));
   def.property("struct?",           mem_fn(&t_type::is<t_struct>));
   def.property("union?",            mem_fn(&t_type::is<t_union>));
   def.property("exception?",        mem_fn(&t_type::is<t_exception>));

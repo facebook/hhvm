@@ -321,7 +321,7 @@ void t_java_deprecated_generator::print_const_value(
   if (type->is<t_primitive_type>()) {
     string v2 = render_const_value(out, name, type, value);
     out << name << " = " << v2 << ";" << endl << endl;
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     out << name << " = " << render_const_value(out, name, type, value) << ";"
         << endl
         << endl;
@@ -479,7 +479,7 @@ string t_java_deprecated_generator::render_const_value(
             "compiler error: no const of base type " +
             t_primitive_type::t_primitive_name(tbase));
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     std::string namespace_prefix =
         type->program()->get_namespace(namespace_key_);
     if (namespace_prefix.length() > 0) {
@@ -2169,7 +2169,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
           indent(out) << "  }" << endl;
           indent(out) << "  if (" << field_getter
                       << ".length > 128) sb.append(\" ...\");" << endl;
-        } else if (ftype->is_enum()) {
+        } else if (ftype->is<t_enum>()) {
           indent(out) << "String " << fname << "_name = " << field_getter
                       << " == null ? \"null\" : " << field_getter << ".name();"
                       << endl;
@@ -2273,7 +2273,7 @@ std::string t_java_deprecated_generator::get_java_type_string(
     return "TType.SET";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType.STRUCT";
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "TType.I32";
   } else if (type->is<t_typedef>()) {
     return get_java_type_string(((t_typedef*)type)->get_type());
@@ -3244,7 +3244,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
     generate_deserialize_struct(out, (t_structured*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     indent(out) << name << " = "
                 << get_enum_class_name(tfield->get_type()->get_true_type())
                 << ".findByValue(iprot.readI32());" << endl;
@@ -3463,7 +3463,7 @@ void t_java_deprecated_generator::generate_serialize_field(
         out, (t_structured*)type, prefix + tfield->get_name());
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     auto enumName = prefix + tfield->get_name();
     indent(out) << "oprot.writeI32(" << enumName
                 << " == null ? 0 : " << enumName << ".getValue());" << endl;
@@ -3765,7 +3765,7 @@ string t_java_deprecated_generator::declare_field(
           break;
       }
 
-    } else if (ttype->is_enum()) {
+    } else if (ttype->is<t_enum>()) {
       result += " = 0";
     } else if (ttype->is<t_container>()) {
       result += " = new " + type_name(ttype, false, true) + "()";
@@ -3914,7 +3914,7 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         return "TType.FLOAT";
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "TType.I32";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType.STRUCT";
@@ -3966,7 +3966,7 @@ void t_java_deprecated_generator::generate_java_docstring_comment(
 
 void t_java_deprecated_generator::generate_java_doc(
     ofstream& out, const t_field* field) {
-  if (field->get_type()->is_enum()) {
+  if (field->get_type()->is<t_enum>()) {
     string combined_message =
         field->doc() + "\n@see " + get_enum_class_name(field->get_type());
     generate_java_docstring_comment(out, combined_message);
@@ -4094,7 +4094,7 @@ bool t_java_deprecated_generator::is_comparable(
 
   if (type->is<t_primitive_type>()) {
     return true;
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return true;
   } else if (type->is<t_exception>()) {
     // There's no particular reason this wouldn't work exactly the same
@@ -4147,7 +4147,7 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
 
   if (type->is<t_primitive_type>()) {
     return type->is_binary();
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return false;
   } else if (type->is<t_structured>()) {
     return false;

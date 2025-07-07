@@ -94,7 +94,7 @@ bool type_is_orderable_walk(
   auto g = make_scope_guard([&] { context.current_visiting_set.erase(&type); });
 
   // Primitive types and enums are always orderable.
-  if (type.is<t_primitive_type>() || type.is_enum()) {
+  if (type.is<t_primitive_type>() || type.is<t_enum>()) {
     return true;
   }
 

@@ -406,7 +406,7 @@ void t_py_generator::generate_json_field(
     generate_json_struct(out, (t_struct*)type, name, prefix_json);
   } else if (type->is<t_container>()) {
     generate_json_container(out, (t_container*)type, name, prefix_json);
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     generate_json_enum(out, (t_enum*)type, name, prefix_json);
   } else if (type->is<t_primitive_type>()) {
     string conversion_function;
@@ -586,7 +586,7 @@ void t_py_generator::generate_json_collection_element(
       default:
         break;
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     to_parse = elem;
     to_act_on = tmp("_enum");
   } else if (type->is<t_list>()) {
@@ -615,7 +615,7 @@ void t_py_generator::generate_json_map_key(
     const string& parsed_key,
     const string& raw_key) {
   type = type->get_true_type();
-  if (type->is_enum()) {
+  if (type->is<t_enum>()) {
     indent(out) << parsed_key << " = int(" << raw_key << ")" << endl;
     indent(out) << "if wrap_enum_constants:" << endl;
     indent_up();
@@ -1044,8 +1044,8 @@ void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
   if (const auto* adapter = get_py_adapter(type)) {
     f_types_ << varname << " = " << *adapter << ".Type" << endl;
   } else if (
-      type->is<t_typedef>() || type->is_enum() || type->is_struct_or_union() ||
-      type->is<t_exception>()) {
+      type->is<t_typedef>() || type->is<t_enum>() ||
+      type->is_struct_or_union() || type->is<t_exception>()) {
     f_types_ << varname << " = " << type_name(type) << endl;
   } else {
     // Emit dummy symbols for other type names, because otherwise a typedef
@@ -1195,7 +1195,7 @@ string t_py_generator::render_const_value(
             "compiler error: no const of base type " +
             t_primitive_type::t_primitive_name(tbase));
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     indent(out) << value->get_integer();
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     out << rename_reserved_keywords(type_name(type)) << "(**{" << endl;
@@ -1636,7 +1636,7 @@ void t_py_generator::generate_py_thrift_spec(
         }
         // Initialize fields
         const t_type* type = (*m_iter)->get_type();
-        if (!type->is<t_primitive_type>() && !type->is_enum() &&
+        if (!type->is<t_primitive_type>() && !type->is<t_enum>() &&
             (*m_iter)->get_value() != nullptr) {
           indent(out) << "if "
                       << rename_reserved_keywords((*m_iter)->get_name())
@@ -3251,7 +3251,7 @@ void t_py_generator::generate_deserialize_field(
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
-  } else if (type->is<t_primitive_type>() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << name << " = iprot.";
 
     if (type->is<t_primitive_type>()) {
@@ -3295,7 +3295,7 @@ void t_py_generator::generate_deserialize_field(
               "compiler error: no Python name for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       out << "readI32()";
     }
     out << endl;
@@ -3477,7 +3477,7 @@ void t_py_generator::generate_serialize_field(
     generate_serialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, name);
-  } else if (type->is<t_primitive_type>() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << "oprot.";
 
     if (type->is<t_primitive_type>()) {
@@ -3522,7 +3522,7 @@ void t_py_generator::generate_serialize_field(
               "compiler error: no Python name for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       out << "writeI32(" << name << ")";
     }
     out << endl;
@@ -3833,7 +3833,7 @@ string t_py_generator::type_to_enum(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         return "TType.FLOAT";
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "TType.I32";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType.STRUCT";
@@ -3862,7 +3862,7 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
       return "False";
     }
     return "None";
-  } else if (ttype->is_enum()) {
+  } else if (ttype->is<t_enum>()) {
     return type_name(ttype);
   } else if (ttype->is<t_exception>()) {
     return "[" + type_name(ttype) + ", " + type_name(ttype) +

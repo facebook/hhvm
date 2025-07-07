@@ -109,7 +109,7 @@ mstch::node mstch_type::get_struct() {
 }
 
 mstch::node mstch_type::get_enum() {
-  if (resolved_type_->is_enum()) {
+  if (resolved_type_->is<t_enum>()) {
     std::string id =
         type_->program()->name() + get_type_namespace(type_->program());
     return make_mstch_array_cached(

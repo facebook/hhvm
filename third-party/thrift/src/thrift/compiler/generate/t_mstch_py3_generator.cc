@@ -787,7 +787,7 @@ class py3_mstch_type : public mstch_type {
   // types that don't have an underlying C++ type
   // i.e., structs, unions, exceptions all enclose a C++ type
   mstch::node isSimple() {
-    return (type_->is<t_primitive_type>() || type_->is_enum() ||
+    return (type_->is<t_primitive_type>() || type_->is<t_enum>() ||
             type_->is<t_container>()) &&
         !is_custom_binary_type();
   }
@@ -1321,7 +1321,7 @@ class py3_mstch_const_value : public mstch_const_value {
       return {};
     }
     const auto* type = const_value_->ttype()->get_true_type();
-    if (type->is_enum()) {
+    if (type->is<t_enum>()) {
       return context_.type_factory->make_mstch_object(type, context_);
     }
     return {};

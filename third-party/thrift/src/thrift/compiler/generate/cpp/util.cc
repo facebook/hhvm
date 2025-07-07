@@ -294,7 +294,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
     }
     bool result = false;
     if (t->is_any_int() || t->is_floating_point() || t->is_bool() ||
-        t->is_enum()) {
+        t->is<t_enum>()) {
       result = true;
     } else if (t->is<t_union>() || t->is<t_exception>()) {
       // Union and exception constructors are not defaulted.
@@ -404,7 +404,7 @@ std::string get_gen_type_class(t_type const& type) {
     return tc + "integral";
   } else if (ttype.is_floating_point()) {
     return tc + "floating_point";
-  } else if (ttype.is_enum()) {
+  } else if (ttype.is<t_enum>()) {
     return tc + "enumeration";
   } else if (ttype.is_string()) {
     return tc + "string";

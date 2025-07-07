@@ -115,6 +115,9 @@ class t_type : public t_named {
   t_type(const t_program* program, std::string name)
       : t_named(program, std::move(name)) {}
 
+  // TODO(hchok): To be removed once is_scalar/is_int_or_enum are removed
+  virtual bool is_enum() const { return false; }
+
   // TODO(afuller): Delete everything below this point. It's only here for
   // backwards compatibility.
  public:
@@ -189,7 +192,6 @@ class t_type : public t_named {
   virtual bool is_i64() const { return false; }
   virtual bool is_float() const { return false; }
   virtual bool is_double() const { return false; }
-  virtual bool is_enum() const { return false; }
   virtual bool is_struct_or_union() const { return false; }
   virtual bool is_binary() const { return false; }
 

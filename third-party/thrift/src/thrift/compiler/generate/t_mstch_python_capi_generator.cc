@@ -277,7 +277,7 @@ std::string format_marshal_type_unadapted(
   } else if (true_type->is_string_or_binary()) {
     // unicode's internal_data representation is binary
     return "Bytes";
-  } else if (true_type->is_enum()) {
+  } else if (true_type->is<t_enum>()) {
     return fmt::format(
         "::apache::thrift::python::capi::ComposedEnum<{}::{}>",
         cpp2::get_gen_namespace(*true_type->program()),

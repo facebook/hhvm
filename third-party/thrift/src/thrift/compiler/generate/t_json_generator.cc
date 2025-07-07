@@ -259,7 +259,7 @@ string t_json_generator::to_string(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         return "FLOAT";
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "ENUM";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "STRUCT";
@@ -298,7 +298,7 @@ string t_json_generator::to_spec_args(const t_type* type) {
     return "null";
   } else if (
       type->is_struct_or_union() || type->is<t_exception>() ||
-      type->is_enum() || type->is<t_typedef>()) {
+      type->is<t_enum>() || type->is<t_typedef>()) {
     return to_spec_args_named(type);
   } else if (type->is<t_map>()) {
     return R"({ "key_type" : { "type_enum" : ")" +

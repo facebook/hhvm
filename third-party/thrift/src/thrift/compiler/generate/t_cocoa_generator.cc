@@ -765,7 +765,7 @@ void t_cocoa_generator::generate_cocoa_struct_init_with_coder_method(
     if (type_can_be_null(t)) {
       out << "[[decoder decodeObjectForKey: @\"" << field.name()
           << "\"] retain_stub];" << std::endl;
-    } else if (t->is_enum()) {
+    } else if (t->is<t_enum>()) {
       out << "[decoder decodeIntForKey: @\"" << field.name() << "\"];"
           << std::endl;
     } else {
@@ -835,7 +835,7 @@ void t_cocoa_generator::generate_cocoa_struct_encode_with_coder_method(
       out << indent() << "[encoder encodeObject: " << kFieldPrefix
           << field.name() << " forKey: @\"" << field.name() << "\"];"
           << std::endl;
-    } else if (t->is_enum()) {
+    } else if (t->is<t_enum>()) {
       out << indent() << "[encoder encodeInt: " << kFieldPrefix << field.name()
           << " forKey: @\"" << field.name() << "\"];" << std::endl;
     } else {
@@ -1432,7 +1432,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
       out << indent() << "}" << std::endl;
     } else if (ttype->is<t_primitive_type>()) {
       // nothing.
-    } else if (ttype->is_enum()) {
+    } else if (ttype->is<t_enum>()) {
       // nothing
     } else if (ttype->is<t_list>() || ttype->is<t_set>()) {
       out << indent() << "if (" << field_name << ") {" << std::endl;
@@ -1520,9 +1520,9 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
           << std::endl;
     } else if (ttype->is_string_or_binary()) {
       out << indent() << ret_equals << field_name << ";" << std::endl;
-    } else if (ttype->is<t_primitive_type>() || ttype->is_enum()) {
+    } else if (ttype->is<t_primitive_type>() || ttype->is<t_enum>()) {
       out << indent() << ret_equals << "@(" << field_name << ");" << std::endl;
-      if (ttype->is_enum()) {
+      if (ttype->is<t_enum>()) {
         const t_program* program = ttype->program();
         std::string ToStringFunctionName = program
             ? (program->get_namespace("cocoa") + ttype->name() +
@@ -1607,7 +1607,7 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
           << field_name << " mutableCopyWithZone:zone];" << std::endl;
     } else if (
         ttype->is_string_or_binary() || ttype->is<t_primitive_type>() ||
-        ttype->is_enum()) {
+        ttype->is<t_enum>()) {
       out << indent() << "newCopy->" << field_name << " = " << "self->"
           << field_name << ";" << std::endl;
     } else {
@@ -2187,7 +2187,7 @@ void t_cocoa_generator::generate_deserialize_field(
     generate_deserialize_struct(out, type, fieldName);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, fieldName);
-  } else if (type->is<t_primitive_type>() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << type_name(type) << " " << fieldName << " = [inProtocol ";
 
     if (type->is<t_primitive_type>()) {
@@ -2227,7 +2227,7 @@ void t_cocoa_generator::generate_deserialize_field(
               "compiler error: no Objective-C name for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       out << "readI32];";
     }
     out << std::endl;
@@ -2320,7 +2320,7 @@ std::string t_cocoa_generator::containerize(
     const t_type* ttype, const std::string& fieldName) {
   // FIXME - optimize here to avoid autorelease pool?
   ttype = ttype->get_true_type();
-  if (ttype->is_enum()) {
+  if (ttype->is<t_enum>()) {
     return "[NSNumber numberWithInt: " + fieldName + "]";
   } else if (ttype->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
@@ -2449,7 +2449,7 @@ void t_cocoa_generator::generate_serialize_field(
     generate_serialize_struct(out, (t_struct*)type, fieldName);
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, fieldName);
-  } else if (type->is<t_primitive_type>() || type->is_enum()) {
+  } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << "[outProtocol ";
 
     if (type->is<t_primitive_type>()) {
@@ -2489,7 +2489,7 @@ void t_cocoa_generator::generate_serialize_field(
               "compiler error: no Objective-C name for base type " +
               t_primitive_type::t_primitive_name(tbase));
       }
-    } else if (type->is_enum()) {
+    } else if (type->is<t_enum>()) {
       out << "writeI32: " << fieldName << "];";
     }
     out << std::endl;
@@ -2592,7 +2592,7 @@ void t_cocoa_generator::generate_serialize_container(
 std::string t_cocoa_generator::decontainerize(
     const t_field* tfield, const std::string& fieldName) {
   const t_type* ttype = tfield->type()->get_true_type();
-  if (ttype->is_enum()) {
+  if (ttype->is<t_enum>()) {
     return "[" + fieldName + " intValue]";
   } else if (ttype->is<t_primitive_type>()) {
     t_primitive_type::t_primitive tbase =
@@ -2669,7 +2669,7 @@ void t_cocoa_generator::generate_serialize_list_element(
  * @return Java type name, i.e. HashMap<Key,Value>
  */
 std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
-  if (ttype->is<t_typedef>() || ttype->is_enum()) {
+  if (ttype->is<t_typedef>() || ttype->is<t_enum>()) {
     const t_program* program = ttype->program();
     return program ? (program->get_namespace("cocoa") + ttype->name())
                    : ttype->name();
@@ -2751,7 +2751,7 @@ void t_cocoa_generator::print_const_value(
     if (defval)
       out << type_name(type) << " ";
     out << name << " = " << v2 << ";" << std::endl << std::endl;
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     if (defval)
       out << type_name(type) << " ";
     out << name << " = " << render_const_value(out, type, value) << ";"
@@ -2894,7 +2894,7 @@ std::string t_cocoa_generator::render_const_value(
             "compiler error: no const of base type " +
             t_primitive_type::t_primitive_name(tbase));
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     render << value->get_integer();
   } else {
     std::string t = tmp("tmp");
@@ -3009,7 +3009,7 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         return "TType_FLOAT";
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "TType_I32";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "TType_STRUCT";
@@ -3054,7 +3054,7 @@ std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
       case t_primitive_type::TYPE_FLOAT:
         return "%f";
     }
-  } else if (type->is_enum()) {
+  } else if (type->is<t_enum>()) {
     return "%i";
   } else if (type->is_struct_or_union() || type->is<t_exception>()) {
     return "%@";

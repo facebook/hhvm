@@ -71,6 +71,9 @@ class t_enum : public t_type {
 
   void update_unused(int32_t val);
 
+ protected:
+  bool is_enum() const override { return true; }
+
  public:
   void append(
       std::unique_ptr<t_enum_value> enum_value,
@@ -90,7 +93,6 @@ class t_enum : public t_type {
     return values_raw_;
   }
 
-  bool is_enum() const override { return true; }
   type get_type_value() const override { return type::t_enum; }
 };
 

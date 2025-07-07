@@ -891,7 +891,7 @@ class mstch_type : public mstch_base {
         resolved_type_->is<t_exception>();
   }
   mstch::node is_union() { return resolved_type_->is<t_union>(); }
-  mstch::node is_enum() { return resolved_type_->is_enum(); }
+  mstch::node is_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node is_base() { return resolved_type_->is<t_primitive_type>(); }
   mstch::node is_container() { return resolved_type_->is<t_container>(); }
   mstch::node is_list() { return resolved_type_->is<t_list>(); }

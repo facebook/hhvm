@@ -325,7 +325,7 @@ void t_java_deprecated_generator::print_const_value(
     out << name << " = " << render_const_value(out, name, type, value) << ";"
         << endl
         << endl;
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     const vector<t_field*>& fields = ((t_struct*)type)->get_members();
     vector<t_field*>::const_iterator f_iter;
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
@@ -2271,7 +2271,7 @@ std::string t_java_deprecated_generator::get_java_type_string(
     return "TType.MAP";
   } else if (type->is<t_set>()) {
     return "TType.SET";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "TType.STRUCT";
   } else if (type->is<t_enum>()) {
     return "TType.I32";
@@ -3240,7 +3240,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
 
   string name = prefix + tfield->get_name();
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_deserialize_struct(out, (t_structured*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
@@ -3458,7 +3458,7 @@ void t_java_deprecated_generator::generate_serialize_field(
         tfield->get_name());
   }
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_serialize_struct(
         out, (t_structured*)type, prefix + tfield->get_name());
   } else if (type->is<t_container>()) {
@@ -3916,7 +3916,7 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is<t_enum>()) {
     return "TType.I32";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "TType.STRUCT";
   } else if (type->is<t_map>()) {
     return "TType.MAP";

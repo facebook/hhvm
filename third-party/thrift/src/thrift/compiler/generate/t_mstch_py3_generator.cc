@@ -94,8 +94,8 @@ const t_type* get_map_val_type(const t_type& type) {
 
 bool type_needs_convert(const t_type* type) {
   // NB: float32 has to be rounded by cython to maintain old py3 behavior
-  return type->is_struct_or_union() || type->is<t_exception>() ||
-      type->is<t_container>() || type->is_float();
+  return type->is<t_structured>() || type->is<t_container>() ||
+      type->is_float();
 }
 
 bool container_needs_convert(const t_type* type) {
@@ -108,7 +108,7 @@ bool container_needs_convert(const t_type* type) {
     return container_needs_convert(list_type->get_elem_type());
   } else if (const t_set* set_type = dynamic_cast<const t_set*>(true_type)) {
     return container_needs_convert(set_type->get_elem_type());
-  } else if (true_type->is_struct_or_union() || true_type->is<t_exception>()) {
+  } else if (true_type->is<t_structured>()) {
     return true;
   }
   return false;
@@ -828,8 +828,7 @@ class py3_mstch_type : public mstch_type {
   mstch::node resolves_to_complex_return() {
     return resolved_type_->is<t_container>() ||
         resolved_type_->is_string_or_binary() ||
-        resolved_type_->is_struct_or_union() ||
-        resolved_type_->is<t_exception>();
+        resolved_type_->is<t_structured>();
   }
 
   const std::string& get_flat_name() const { return cached_props_.flat_name(); }

@@ -886,10 +886,7 @@ class mstch_type : public mstch_base {
   }
   // TODO(T219861020): Evaluate if unions should be here and rename method as
   // neccessary.
-  mstch::node is_struct() {
-    return resolved_type_->is_struct_or_union() ||
-        resolved_type_->is<t_exception>();
-  }
+  mstch::node is_struct() { return resolved_type_->is<t_structured>(); }
   mstch::node is_union() { return resolved_type_->is<t_union>(); }
   mstch::node is_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node is_base() { return resolved_type_->is<t_primitive_type>(); }

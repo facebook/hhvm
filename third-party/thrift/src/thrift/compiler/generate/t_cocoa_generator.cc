@@ -239,8 +239,8 @@ class t_cocoa_generator : public t_concat_generator {
   bool type_can_be_null(const t_type* ttype) {
     ttype = ttype->get_true_type();
 
-    return ttype->is<t_container>() || ttype->is_struct_or_union() ||
-        ttype->is<t_exception>() || ttype->is_string_or_binary();
+    return ttype->is<t_container>() || ttype->is<t_structured>() ||
+        ttype->is_string_or_binary();
   }
 
  private:
@@ -2183,7 +2183,7 @@ void t_cocoa_generator::generate_deserialize_field(
         "CANNOT GENERATE DESERIALIZE CODE FOR void TYPE: " + tfield->name());
   }
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_deserialize_struct(out, type, fieldName);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, fieldName);
@@ -2445,7 +2445,7 @@ void t_cocoa_generator::generate_serialize_field(
         "CANNOT GENERATE SERIALIZE CODE FOR void TYPE: " + tfield->name());
   }
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_serialize_struct(out, (t_struct*)type, fieldName);
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, fieldName);
@@ -2757,7 +2757,7 @@ void t_cocoa_generator::print_const_value(
     out << name << " = " << render_const_value(out, type, value) << ";"
         << std::endl
         << std::endl;
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     const auto* as_struct = static_cast<const t_structured*>(type);
     if (defval) {
       out << type_name(type) << " ";
@@ -3011,7 +3011,7 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is<t_enum>()) {
     return "TType_I32";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "TType_STRUCT";
   } else if (type->is<t_map>()) {
     return "TType_MAP";
@@ -3056,7 +3056,7 @@ std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
     }
   } else if (type->is<t_enum>()) {
     return "%i";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "%@";
   } else if (type->is<t_map>()) {
     return "%@";

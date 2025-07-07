@@ -76,7 +76,7 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
 
 bool is_complex_return(const t_type* type) {
   return type->is<t_container>() || type->is_string_or_binary() ||
-      type->is_struct_or_union() || type->is<t_exception>();
+      type->is<t_structured>();
 }
 
 bool same_types(const t_type* a, const t_type* b) {
@@ -198,8 +198,7 @@ bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
 }
 
 bool resolves_to_container_or_struct(const t_type* type) {
-  return type->is<t_container>() || type->is_struct_or_union() ||
-      type->is<t_exception>();
+  return type->is<t_container>() || type->is<t_structured>();
 }
 
 bool is_runtime_annotation(const t_named& named) {
@@ -542,7 +541,7 @@ class cpp_mstch_program : public mstch_program {
       if (alias->is<t_typedef>() &&
           alias->has_unstructured_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
-        if ((ttype->is_struct_or_union() || ttype->is<t_exception>()) &&
+        if ((ttype->is<t_structured>()) &&
             !cpp_name_resolver::find_first_adapter(*ttype)) {
           result.push_back(i);
         }

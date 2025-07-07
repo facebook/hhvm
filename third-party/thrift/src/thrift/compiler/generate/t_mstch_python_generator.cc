@@ -130,8 +130,7 @@ bool is_invariant_container_type(const t_type* type) {
   if (true_type->is<t_map>()) {
     const t_map* map_type = dynamic_cast<const t_map*>(true_type);
     const t_type* key_type = map_type->get_key_type()->get_true_type();
-    return key_type->is_struct_or_union() || key_type->is<t_exception>() ||
-        key_type->is<t_container>() ||
+    return key_type->is<t_structured>() || key_type->is<t_container>() ||
         is_invariant_container_type(map_type->get_val_type());
   } else if (true_type->is<t_list>()) {
     return is_invariant_container_type(

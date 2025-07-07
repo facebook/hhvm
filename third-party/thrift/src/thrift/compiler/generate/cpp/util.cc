@@ -429,7 +429,7 @@ std::string get_gen_type_class(t_type const& type) {
     return tc + "map<" + key_tc + ", " + val_tc + ">";
   } else if (ttype.is<t_union>()) {
     return tc + "variant";
-  } else if (ttype.is_struct_or_union() || ttype.is<t_exception>()) {
+  } else if (ttype.is<t_structured>()) {
     return tc + "structure";
   } else {
     throw std::runtime_error(
@@ -459,8 +459,7 @@ bool deprecated_terse_writes(const t_field* field) {
   // (e.g. i32/i64, empty strings/list/map)
   auto t = field->get_type()->get_true_type();
   return field->get_req() == t_field::e_req::opt_in_req_out &&
-      (cpp2::is_unique_ref(field) ||
-       (!t->is_struct_or_union() && !t->is<t_exception>()));
+      (cpp2::is_unique_ref(field) || (!t->is<t_structured>()));
 }
 
 t_field_id get_internal_injected_field_id(t_field_id id) {

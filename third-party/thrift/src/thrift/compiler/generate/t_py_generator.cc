@@ -402,7 +402,7 @@ void t_py_generator::generate_json_field(
   string name = prefix_thrift + rename_reserved_keywords(tfield->get_name()) +
       suffix_thrift;
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_json_struct(out, (t_struct*)type, name, prefix_json);
   } else if (type->is<t_container>()) {
     generate_json_container(out, (t_container*)type, name, prefix_json);
@@ -1044,8 +1044,7 @@ void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
   if (const auto* adapter = get_py_adapter(type)) {
     f_types_ << varname << " = " << *adapter << ".Type" << endl;
   } else if (
-      type->is<t_typedef>() || type->is<t_enum>() ||
-      type->is_struct_or_union() || type->is<t_exception>()) {
+      type->is<t_typedef>() || type->is<t_enum>() || type->is<t_structured>()) {
     f_types_ << varname << " = " << type_name(type) << endl;
   } else {
     // Emit dummy symbols for other type names, because otherwise a typedef
@@ -1197,7 +1196,7 @@ string t_py_generator::render_const_value(
     }
   } else if (type->is<t_enum>()) {
     indent(out) << value->get_integer();
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     out << rename_reserved_keywords(type_name(type)) << "(**{" << endl;
     indent_up();
     const vector<t_field*>& fields = ((t_struct*)type)->get_members();
@@ -3247,7 +3246,7 @@ void t_py_generator::generate_deserialize_field(
 
   string name = prefix + rename_reserved_keywords(tfield->get_name());
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
@@ -3473,7 +3472,7 @@ void t_py_generator::generate_serialize_field(
     indent(out) << name << " = " << *adapter << ".to_thrift(" << real_name
                 << ")" << endl;
   }
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_serialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, name);
@@ -3835,7 +3834,7 @@ string t_py_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is<t_enum>()) {
     return "TType.I32";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "TType.STRUCT";
   } else if (type->is<t_map>()) {
     return "TType.MAP";

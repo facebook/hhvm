@@ -94,8 +94,7 @@ mstch::node mstch_enum::values() {
 
 // TODO(T219861020): Rename to get_structured
 mstch::node mstch_type::get_struct() {
-  if (type_->is_struct_or_union() || type_->is<t_exception>() ||
-      type_->is<t_union>()) {
+  if (type_->is<t_structured>()) {
     std::string id =
         type_->program()->name() + get_type_namespace(type_->program());
     return make_mstch_array_cached(
@@ -290,7 +289,7 @@ mstch::node mstch_const_value::is_const_struct() {
     return false;
   }
   const auto* type = const_value_->ttype()->get_true_type();
-  return type->is_struct_or_union() || type->is<t_exception>();
+  return type->is<t_structured>();
 }
 
 mstch::node mstch_const_value::const_struct_type() {
@@ -299,7 +298,7 @@ mstch::node mstch_const_value::const_struct_type() {
   }
 
   const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     return context_.type_factory->make_mstch_object(type, context_);
   }
 
@@ -312,7 +311,7 @@ mstch::node mstch_const_value::const_struct() {
   mstch::array a;
 
   const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     const auto* strct = dynamic_cast<const t_structured*>(type);
     for (auto member : const_value_->get_map()) {
       const auto* field = strct->get_field_by_name(member.first->get_string());

@@ -979,8 +979,7 @@ class mstch_java_field : public mstch_field {
 
   mstch::node is_object() {
     const t_type* field_type = field_->get_type()->get_true_type();
-    return field_type->is_struct_or_union() || field_type->is<t_exception>() ||
-        field_type->is<t_union>();
+    return field_type->is<t_structured>();
   }
 
   mstch::node is_union() {

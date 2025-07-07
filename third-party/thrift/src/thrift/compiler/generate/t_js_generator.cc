@@ -404,7 +404,7 @@ string t_js_generator::render_const_value(
     }
   } else if (type->is<t_enum>()) {
     out << value->get_integer();
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     out << "new " << js_type_namespace(type->program()) << type->get_name()
         << "({" << endl;
     indent_up();
@@ -536,8 +536,7 @@ void t_js_generator::generate_js_struct_definition(
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     string dval = declare_field(*m_iter, false, true);
     const t_type* t = (*m_iter)->get_type()->get_true_type();
-    if ((*m_iter)->get_value() != nullptr &&
-        !(t->is_struct_or_union() || t->is<t_exception>())) {
+    if ((*m_iter)->get_value() != nullptr && !(t->is<t_structured>())) {
       dval = render_const_value((*m_iter)->get_type(), (*m_iter)->get_value());
       out << indent() << "this." << (*m_iter)->get_name() << " = " << dval
           << ";" << endl;
@@ -550,8 +549,7 @@ void t_js_generator::generate_js_struct_definition(
   if (members.size() > 0) {
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
-      if ((*m_iter)->get_value() != nullptr &&
-          (t->is_struct_or_union() || t->is<t_exception>())) {
+      if ((*m_iter)->get_value() != nullptr && (t->is<t_structured>())) {
         indent(out) << "this." << (*m_iter)->get_name() << " = "
                     << render_const_value(t, (*m_iter)->get_value()) << ";"
                     << endl;
@@ -1236,7 +1234,7 @@ void t_js_generator::generate_deserialize_field(
 
   string name = prefix + tfield->get_name();
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
@@ -1449,7 +1447,7 @@ void t_js_generator::generate_serialize_field(
         tfield->get_name());
   }
 
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     generate_serialize_struct(
         out, (t_struct*)type, prefix + tfield->get_name());
   } else if (type->is<t_container>()) {
@@ -1666,7 +1664,7 @@ string t_js_generator::declare_field(
       result += " = null";
     } else if (type->is<t_container>()) {
       result += " = null";
-    } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+    } else if (type->is<t_structured>()) {
       if (obj) {
         result += " = new " + js_type_namespace(type->program()) +
             type->get_name() + "()";
@@ -1759,7 +1757,7 @@ string t_js_generator ::type_to_enum(const t_type* type) {
     }
   } else if (type->is<t_enum>()) {
     return "Thrift.Type.I32";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "Thrift.Type.STRUCT";
   } else if (type->is<t_map>()) {
     return "Thrift.Type.MAP";

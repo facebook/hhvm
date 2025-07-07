@@ -2391,7 +2391,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_enum"), std::move(tenum_tmeta));
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     auto tstruct_tmeta = t_const_value::make_map();
     tstruct_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
@@ -2957,7 +2957,7 @@ void t_hack_generator::generate_php_type_spec(
     // Noop, type is all we need
   } else if (t->is<t_enum>()) {
     indent(out) << "'enum' => " << hack_name(t) << "::class,\n";
-  } else if (t->is_struct_or_union() || t->is<t_exception>()) {
+  } else if (t->is<t_structured>()) {
     auto sname = hack_name(t);
     if (const auto* tstruct = dynamic_cast<const t_structured*>(t)) {
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
@@ -3409,8 +3409,7 @@ bool t_hack_generator::field_is_nullable(
     const t_structured* tstruct, const t_field* field) {
   std::string dval;
   const t_type* t = field->type()->get_true_type();
-  if (field->default_value() != nullptr &&
-      !(t->is_struct_or_union() || t->is<t_exception>())) {
+  if (field->default_value() != nullptr && !(t->is<t_structured>())) {
     dval = render_const_value(
         t,
         field->default_value(),
@@ -4557,8 +4556,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   std::string dval;
   bool is_exception = tstruct->is<t_exception>();
   if (field.default_value() != nullptr &&
-      !(t->is_struct_or_union() || t->is<t_exception>() ||
-        skip_custom_default)) {
+      !(t->is<t_structured>() || skip_custom_default)) {
     dval = render_const_value(
         t,
         field.default_value(),
@@ -6609,7 +6607,7 @@ std::string t_hack_generator::type_to_typehint(
     return typedef_to_typehint(ttypedef, variations);
   }
 
-  if (ttype->is_struct_or_union() || ttype->is<t_exception>()) {
+  if (ttype->is<t_structured>()) {
     std::string struct_name = hack_name(ttype);
 
     auto [wrapper, name, ns] = find_hack_wrapper(ttype, false);
@@ -7466,7 +7464,7 @@ std::string t_hack_generator::declare_field(
       } else {
         result += " = keyset[]";
       }
-    } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+    } else if (type->is<t_structured>()) {
       if (obj) {
         result += " = " + hack_name(type) + "::withDefaultValues()";
       } else {
@@ -7603,7 +7601,7 @@ std::string t_hack_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is<t_enum>()) {
     return "\\TType::I32";
-  } else if (type->is_struct_or_union() || type->is<t_exception>()) {
+  } else if (type->is<t_structured>()) {
     return "\\TType::STRUCT";
   } else if (type->is<t_map>()) {
     return "\\TType::MAP";

@@ -118,7 +118,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"floating_point?", type.is_floating_point()},
       // TODO(T219861020): Evaluate if unions should be included and rename as
       // needed.
-      {"struct?", type.is_struct_or_union() || type.is<t_exception>()},
+      {"struct?", type.is<t_structured>()},
       {"union?", type.is<t_union>()},
       {"enum?", type.is<t_enum>()},
       {"base?", type.is<t_primitive_type>()},
@@ -129,7 +129,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"typedef?", type.is<t_typedef>()},
   };
 
-  if (type.is_struct_or_union() || type.is<t_exception>()) {
+  if (type.is<t_structured>()) {
     // Shallow dump the struct
     result.emplace("struct", dump(dynamic_cast<const t_struct&>(type), true));
   } else if (type.is<t_enum>()) {

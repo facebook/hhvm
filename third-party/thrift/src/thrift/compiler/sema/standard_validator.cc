@@ -1120,7 +1120,7 @@ void validate_cpp_deprecated_terse_write_annotation(
     return;
   }
   const t_type* type = field.get_type()->get_true_type();
-  if (type->is_struct_or_union() || type->is<t_exception>()) {
+  if (type->is<t_structured>()) {
     ctx.error(
         field,
         "@cpp.DeprecatedTerseWrite is not supported for structured types.");

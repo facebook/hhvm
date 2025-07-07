@@ -46,12 +46,7 @@ abstract class ThriftImmutableWrapper
   }
 
   final public function createDeepCopy(): this::TThrift {
-    return TCompactSerializer::deserialize(
-      TCompactSerializer::serialize($this->data),
-      Classnames::getx($this->data)
-        |> HH\classname_to_class($$)
-        |> $$::withDefaultValues(),
-    );
+    return SignalsPipeUtils::makeCopy($this->data);
   }
 
   final public function serialize(

@@ -358,6 +358,7 @@ struct RuntimeOption {
   static hphp_string_map<TypedValue> ConstantFunctions;
 
   static std::vector<std::string> TzdataSearchPaths;
+  static std::map<std::string, std::string> GFlags;
 
   static hphp_fast_string_set ActiveExperiments;
   static hphp_fast_string_set InactiveExperiments;

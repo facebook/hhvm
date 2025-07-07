@@ -86,6 +86,7 @@
 #include <folly/json/DynamicConverter.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
+#include <folly/portability/GFlags.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
@@ -605,6 +606,7 @@ int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorMode::HPHP_ALL);
 
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
+std::map<std::string, std::string> RuntimeOption::GFlags;
 hphp_fast_string_set RuntimeOption::ActiveExperiments;
 hphp_fast_string_set RuntimeOption::InactiveExperiments;
 
@@ -1615,6 +1617,20 @@ void RuntimeOption::Load(
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
+
+  Config::Bind(GFlags, ini, config, "GFlags");
+  for (auto const& gflag : GFlags) {
+    auto result = folly::gflags::SetCommandLineOption(gflag.first.c_str(),
+                                                      gflag.second.c_str());
+    if (result.empty()) {
+      // result is empty under error conditions, or if the flag does not exist
+      Logger::Error("Unrecognised GFlags '%s'", gflag.first.c_str());
+    } else {
+      Logger::Verbose("Set GFlags '%s' = '%s'", gflag.first.c_str(),
+                      gflag.second.c_str());
+    }
+  }
+
 
   // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();

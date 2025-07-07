@@ -16,8 +16,4 @@
 
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
-namespace apache::thrift {
-
-constexpr std::array<CompressionAlgorithm, 2>
-    ThriftParametersContext::supportedCompressionAlgos_;
-}
+namespace apache::thrift {}

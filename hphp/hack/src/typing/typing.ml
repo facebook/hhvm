@@ -3962,7 +3962,10 @@ end = struct
                     Tcan_index
                       {
                         ci_key = ty2;
-                        ci_shape = None;
+                        ci_shape =
+                          (match e2 with
+                          | (_, _, Int i) -> IntLit (int_of_string i)
+                          | _ -> Generic);
                         ci_val = res_ty;
                         ci_expr_pos = p;
                         ci_index_pos = snd3 e2;

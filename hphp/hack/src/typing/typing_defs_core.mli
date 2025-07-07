@@ -645,9 +645,14 @@ type destructure = {
  * indexed with certain literals, and so in those cases it is not sufficient to
  * record simply the type of the index.
  *)
+type can_index_shape =
+  | IntLit of int
+  | Generic
+[@@deriving show]
+
 type can_index = {
   ci_key: locl_ty;
-  ci_shape: tshape_field_name option;
+  ci_shape: can_index_shape;
   ci_val: locl_ty;
   ci_expr_pos: Pos.t;
   ci_index_pos: Pos.t;

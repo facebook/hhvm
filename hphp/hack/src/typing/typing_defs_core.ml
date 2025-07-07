@@ -1443,9 +1443,14 @@ type has_member = {
 }
 [@@deriving show]
 
+type can_index_shape =
+  | IntLit of int
+  | Generic
+[@@deriving show]
+
 type can_index = {
   ci_key: locl_ty;
-  ci_shape: tshape_field_name option;
+  ci_shape: can_index_shape;
   ci_val: locl_ty;
   ci_expr_pos: Pos.t;
   ci_index_pos: Pos.t;
@@ -1573,11 +1578,18 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     | comp -> comp)
   | comp -> comp
 
+let can_index_shape_compare cis1 cis2 =
+  match (cis1, cis2) with
+  | (IntLit i1, IntLit i2) -> Int.compare i1 i2
+  | (IntLit _, _) -> -1
+  | (_, IntLit _) -> 1
+  | (Generic, Generic) -> 0
+
 let can_index_compare ~normalize_lists ci1 ci2 =
   match ty_compare ~normalize_lists ci1.ci_key ci2.ci_key with
   | 0 ->
     (match ty_compare ~normalize_lists ci1.ci_val ci2.ci_val with
-    | 0 -> Option.compare compare_tshape_field_name ci1.ci_shape ci2.ci_shape
+    | 0 -> can_index_shape_compare ci1.ci_shape ci2.ci_shape
     | comp -> comp)
   | comp -> comp
 

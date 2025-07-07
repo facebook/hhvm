@@ -652,10 +652,10 @@ module Full = struct
     let (fuel, val_doc) = k ~fuel ci.ci_val in
     ( fuel,
       match ci.ci_shape with
-      | None ->
+      | Generic ->
         Concat
           [text "can_index"; text "("; key_doc; comma_sep; val_doc; text ")"]
-      | Some _ft ->
+      | _ ->
         Concat
           [
             text "can_index";

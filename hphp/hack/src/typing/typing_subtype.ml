@@ -6178,23 +6178,17 @@ end = struct
     let mk_prop ~subtype_env ~this_ty ~lhs ~rhs =
       simplify ~subtype_env ~this_ty ~lhs ~rhs
     in
-    let is_container tk tv =
+    let simplify_default ~subtype_env lhs rhs env =
       Subtype.simplify
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = can_index.ci_key }
-        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = tk }
+        ~lhs:{ sub_supportdyn; ty_sub = lhs }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = rhs }
         env
-      &&& Subtype.simplify
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = tv }
-            ~rhs:
-              {
-                super_like = false;
-                super_supportdyn = false;
-                ty_super = can_index.ci_val;
-              }
+    in
+    let is_container tk tv =
+      simplify_default ~subtype_env can_index.ci_key tk env
+      &&& simplify_default ~subtype_env tv can_index.ci_val
     in
     match deref ty_sub with
     | (_, Tvar _) ->
@@ -6206,16 +6200,10 @@ end = struct
         (ConstraintType
            (mk_constraint_type (reason_super, Tcan_index can_index)))
     | (_, Tdynamic) ->
-      Subtype.simplify
+      simplify_default
         ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = MakeType.dynamic reason_super }
-        ~rhs:
-          {
-            super_like = false;
-            super_supportdyn = false;
-            ty_super = can_index.ci_val;
-          }
+        (MakeType.dynamic reason_super)
+        can_index.ci_val
         env
       &&&
       if
@@ -6225,16 +6213,10 @@ end = struct
         let subtype_env =
           { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
         in
-        Subtype.simplify
+        simplify_default
           ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = can_index.ci_key }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = MakeType.dynamic (get_reason ty_sub);
-            }
+          can_index.ci_key
+          (MakeType.dynamic (get_reason ty_sub))
       else
         valid
     | (_, Tclass ((_, n), _, [tv]))
@@ -6264,6 +6246,35 @@ end = struct
         (sub_supportdyn, ty_subs)
         rhs
         env
+    | (_, Ttuple tup) ->
+      (match can_index.ci_shape with
+      | IntLit i ->
+        (match List.nth tup.t_required i with
+        | Some ty -> simplify_default ~subtype_env ty can_index.ci_val env
+        | None ->
+          invalid
+            ~fail:
+              (Some
+                 Typing_error.(
+                   primary
+                   @@ Primary.Generic_unify
+                        {
+                          pos = can_index.ci_index_pos;
+                          msg = Reason.string_of_ureason Reason.index_tuple;
+                        }))
+            env)
+      | _ ->
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Generic_unify
+                      {
+                        pos = can_index.ci_index_pos;
+                        msg = Reason.string_of_ureason Reason.URtuple_access;
+                      }))
+          env)
     | _ -> invalid ~fail env
 end
 

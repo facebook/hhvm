@@ -1,10 +1,26 @@
+Const B::TC1 -> Fun refBaz, Fun refBuz, Type B
+Const B::TC2 -> Fun refBaz, Fun refBuz, Type B
+Const C::TC -> Fun refBaz, Fun refBuz, Type B
 Fun qux -> Fun refQux
+Method B::buz -> Fun refBuz
 Method C::bar -> Fun refBar
+SMethod B::baz -> Fun refBaz
 SMethod C::foo -> Fun refFoo
-Type C -> Fun refBar, Fun refFoo
+Type A -> Fun refBaz, Fun refBuz, Type B, Type C
+Type B -> Fun refBaz, Fun refBuz
+Type C -> Fun refBar, Fun refBaz, Fun refBuz, Fun refFoo, Type B
 Type HH\Capabilities\WriteProperty -> Fun qux,
                                       Fun refBar,
+                                      Fun refBaz,
+                                      Fun refBuz,
                                       Fun refFoo,
                                       Fun refQux,
+                                      Type B,
                                       Type C
-Type HH\supportdyn -> Fun qux, Fun refBar, Fun refFoo, Fun refQux, Type C
+Type HH\supportdyn -> Fun qux,
+                      Fun refBar,
+                      Fun refBaz,
+                      Fun refBuz,
+                      Fun refFoo,
+                      Fun refQux,
+                      Type C

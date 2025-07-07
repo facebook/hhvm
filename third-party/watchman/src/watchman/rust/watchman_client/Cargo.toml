@@ -11,14 +11,14 @@ exclude = ["examples/*"]
 
 [dependencies]
 anyhow = "1.0"
-bytes = { version = "1.0", features = ["serde"] }
+bytes = { version = "1.9", features = ["serde"] }
 futures = { version = "0.3.13", features = ["async-await", "compat"] }
 maplit = "1.0"
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_bser = { version = "0.4", path = "../serde_bser" }
-thiserror = "1.0"
-tokio = { version = "1.7.1", features = ["full", "test-util"] }
-tokio-util = { version = "0.6", features = ["full"] }
+thiserror = "2.0"
+tokio = { version = "1.45", features = ["full", "test-util"] }
+tokio-util = { version = "0.7", features = ["full"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["fileapi", "handleapi", "winbase", "winuser"] }

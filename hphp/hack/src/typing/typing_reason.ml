@@ -3139,6 +3139,7 @@ type ureason =
   | URarray_value
   | URpair_value
   | URtuple_access
+  | URtuple_OOB
   | URpair_access
   | URnewtype_cstr
   | URclass_req
@@ -3193,6 +3194,7 @@ let string_of_ureason = function
   | URpair_value -> "Incompatible pair values"
   | URtuple_access ->
     "Tuple elements can only be accessed with an integer literal"
+  | URtuple_OOB -> "Tuple accessed with an index out of bounds"
   | URpair_access ->
     "Pair elements can only be accessed with an integer literal"
   | URnewtype_cstr -> "Invalid constraint on `newtype`"

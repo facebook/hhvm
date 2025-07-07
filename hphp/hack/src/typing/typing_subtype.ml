@@ -6260,7 +6260,7 @@ end = struct
                    @@ Primary.Generic_unify
                         {
                           pos = can_index.ci_index_pos;
-                          msg = Reason.string_of_ureason Reason.index_tuple;
+                          msg = Reason.string_of_ureason Reason.URtuple_OOB;
                         }))
             env)
       | _ ->

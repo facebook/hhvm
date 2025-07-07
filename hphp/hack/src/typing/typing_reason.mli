@@ -137,6 +137,7 @@ type ureason =
   | URarray_value
   | URpair_value
   | URtuple_access
+  | URtuple_OOB
   | URpair_access
   | URnewtype_cstr
   | URclass_req

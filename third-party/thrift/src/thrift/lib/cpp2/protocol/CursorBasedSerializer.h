@@ -1388,9 +1388,8 @@ void ContainerCursorReader<Tag, ProtocolReader, Contiguous>::readItem() {
         decodeTo<typename detail::ContainerTraits<Tag>::KeyTag, ProtocolReader>(
             *protocol_, lastRead_->first);
     detail::decodeTo<
-        ProtocolReader,
-        typename detail::ContainerTraits<Tag>::ValueTag>(
-        *protocol_, lastRead_->second);
+        typename detail::ContainerTraits<Tag>::ValueTag,
+        ProtocolReader>(*protocol_, lastRead_->second);
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
   }

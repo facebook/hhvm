@@ -322,7 +322,8 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
         result = eligible::no;
         return false;
       } else if (result == eligible::unknown) {
-        if (!field->get_type()->is_struct_or_union()) {
+        if (!field->get_type()->is<t_struct>() &&
+            !field->get_type()->is<t_union>()) {
           return false;
         }
         // Structs are eligible if all their fields are.
@@ -369,9 +370,9 @@ static void get_mixins_and_members_impl(
     std::vector<mixin_member>& out) {
   for (const auto& member : strct.fields()) {
     if (is_mixin(member)) {
-      assert(member.type()->get_true_type()->is_struct_or_union());
+      assert(member.type()->get_true_type()->is<t_structured>());
       auto mixin_struct =
-          static_cast<const t_structured*>(member.type()->get_true_type());
+          member.type()->get_true_type()->try_as<t_structured>();
       const auto& mixin =
           top_level_mixin != nullptr ? *top_level_mixin : member;
 

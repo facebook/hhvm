@@ -572,7 +572,7 @@ class mstch_java_struct : public mstch_struct {
 
   mstch::node is_BigStruct() {
     return (
-        struct_->is_struct_or_union() &&
+        (struct_->is<t_struct>() || struct_->is<t_union>()) &&
         struct_->fields().size() > bigStructThreshold);
   }
 

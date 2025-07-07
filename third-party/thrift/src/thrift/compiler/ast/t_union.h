@@ -31,11 +31,6 @@ class t_union final : public t_structured {
       : t_structured(program, std::move(name)) {}
 
   ~t_union() override;
-  // TODO(afuller): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  // TODO(T219861020): remove this is_struct override
-  bool is_struct_or_union() const override { return true; }
 };
 
 } // namespace apache::thrift::compiler

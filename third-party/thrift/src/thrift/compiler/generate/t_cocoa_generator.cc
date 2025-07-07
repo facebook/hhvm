@@ -535,7 +535,8 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
     std::string name = tconst->name();
     const t_type* type = tconst->type();
     f_impl_ << "static " << type_name(type) << " " << cocoa_prefix_ << name;
-    if (!type->is<t_container>() && !type->is_struct_or_union()) {
+    if (!type->is<t_container>() && !type->is<t_struct>() &&
+        !type->is<t_union>()) {
       f_impl_ << " = " << render_const_value(f_impl_, type, tconst->value());
     }
     f_impl_ << ";" << std::endl;
@@ -548,15 +549,16 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
   // when the class is initialized
   bool should_have_initialize =
       std::any_of(consts.begin(), consts.end(), [](const t_const* c) {
-        return c->type()->is<t_container>() || c->type()->is_struct_or_union();
+        return c->type()->is<t_container>() || c->type()->is<t_struct>() ||
+            c->type()->is<t_union>();
       });
   if (should_have_initialize) {
     f_impl_ << "+ (void) initialize ";
     scope_up(f_impl_);
 
     for (const auto* tconst : consts) {
-      if (tconst->type()->is<t_container>() ||
-          tconst->type()->is_struct_or_union()) {
+      if (tconst->type()->is<t_container>() || tconst->type()->is<t_struct>() ||
+          tconst->type()->is<t_union>()) {
         print_const_value(
             f_impl_,
             cocoa_prefix_ + tconst->name(),
@@ -1423,7 +1425,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
     if (ttype->is<t_typedef>()) {
       ttype = ttype->get_true_type();
     }
-    if (ttype->is_struct_or_union()) {
+    if (ttype->is<t_struct>() || ttype->is<t_union>()) {
       out << indent() << "if (" << field_name << " && " << "![" << field_name
           << " isImmutable]" << ") {" << std::endl;
       indent_up();
@@ -1507,7 +1509,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
       ttype = ttype->get_true_type();
     }
 
-    const bool check_for_null = ttype->is_struct_or_union() ||
+    const bool check_for_null = ttype->is<t_struct>() || ttype->is<t_union>() ||
         ttype->is_string_or_binary() || ttype->is<t_container>();
 
     if (check_for_null) {
@@ -1515,7 +1517,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
       indent_up();
     }
 
-    if (ttype->is_struct_or_union()) {
+    if (ttype->is<t_struct>() || ttype->is<t_union>()) {
       out << indent() << ret_equals << "[" << field_name << " toDict];"
           << std::endl;
     } else if (ttype->is_string_or_binary()) {
@@ -1593,7 +1595,7 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
       ttype = ttype->get_true_type();
     }
 
-    const bool check_for_null = ttype->is_struct_or_union() ||
+    const bool check_for_null = ttype->is<t_struct>() || ttype->is<t_union>() ||
         ttype->is_string_or_binary() || ttype->is<t_container>();
 
     if (check_for_null) {
@@ -1601,7 +1603,7 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
       indent_up();
     }
 
-    if (ttype->is_struct_or_union() || ttype->is<t_list>() ||
+    if (ttype->is<t_struct>() || ttype->is<t_union>() || ttype->is<t_list>() ||
         ttype->is<t_set>() || ttype->is<t_map>()) {
       out << indent() << "newCopy->" << field_name << " = " << "[self->"
           << field_name << " mutableCopyWithZone:zone];" << std::endl;

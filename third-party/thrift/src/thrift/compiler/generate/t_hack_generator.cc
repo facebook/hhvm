@@ -87,9 +87,6 @@ class t_result_struct final : public t_structured {
     return t_type::type::t_structured;
   }
 
-  // See get_type_value().
-  bool is_struct_or_union() const override { return true; }
-
  private:
   std::string result_return_type;
 };
@@ -3197,7 +3194,7 @@ void t_hack_generator::generate_php_struct_shape_collection_value_lambda(
   std::string tmp = namer("_val");
   indent(out);
   out << "($" << tmp << ") ==> ";
-  if (t->is_struct_or_union()) {
+  if (t->is<t_struct>() || t->is<t_union>()) {
     out << "$" << tmp << "->__toShape(),\n";
   } else if (t->is<t_set>()) {
     if (arraysets_ || legacy_arrays_) {
@@ -3215,7 +3212,8 @@ void t_hack_generator::generate_php_struct_shape_collection_value_lambda(
     }
     val_type = val_type->get_true_type();
 
-    if (!val_type->is<t_container>() && !val_type->is_struct_or_union()) {
+    if (!val_type->is<t_container>() && !val_type->is<t_struct>() &&
+        !val_type->is<t_union>()) {
       out << generate_to_array_method(t, "$" + tmp) << ",\n";
       return;
     }
@@ -3334,7 +3332,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
   } else if (t->is<t_list>()) {
     generate_hack_array_from_shape_lambda(
         out, namer, static_cast<const t_list*>(t));
-  } else if (t->is_struct_or_union()) {
+  } else if (t->is<t_struct>() || t->is<t_union>()) {
     generate_hack_array_from_shape_lambda(
         out, namer, static_cast<const t_structured*>(t));
   } else if (t->is<t_set>()) {
@@ -3364,7 +3362,7 @@ void t_hack_generator::generate_shape_from_hack_array_lambda(
   }
   val_type = val_type->get_true_type();
 
-  if (val_type->is_struct_or_union()) {
+  if (val_type->is<t_struct>() || val_type->is<t_union>()) {
     out << "->__toShape(),\n";
   } else if (val_type->is<t_map>() || val_type->is<t_list>()) {
     indent_up();
@@ -3392,7 +3390,7 @@ bool t_hack_generator::type_has_nested_struct(const t_type* t) {
     val_type = val_type->get_true_type();
 
     if (!(val_type->is<t_map>() || val_type->is<t_list>())) {
-      if (val_type->is_struct_or_union()) {
+      if (val_type->is<t_struct>() || val_type->is<t_union>()) {
         has_struct = true;
       }
       break;
@@ -3488,7 +3486,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
         inner << str;
         is_simple_shape_index = false;
       }
-    } else if (t->is_struct_or_union()) {
+    } else if (t->is<t_struct>() || t->is<t_union>()) {
       is_simple_shape_index = false;
       std::string type = hack_name(t);
       inner << type << "::__fromShape(" << source.str() << ")";
@@ -3548,10 +3546,11 @@ void t_hack_generator::generate_php_struct_shape_methods(
           }
           val_type = val_type->get_true_type();
 
-          if (val_type->is<t_container>() || val_type->is_struct_or_union() ||
-              nullable) {
+          if (val_type->is<t_container>() || val_type->is<t_struct>() ||
+              val_type->is<t_union>() || nullable) {
             val << fieldRef;
-            if (val_type->is<t_container>() || val_type->is_struct_or_union()) {
+            if (val_type->is<t_container>() || val_type->is<t_struct>() ||
+                val_type->is<t_union>()) {
               val << (nullable ? "?" : "") << "->map(\n";
               indent_up();
               generate_php_struct_shape_collection_value_lambda(
@@ -3607,7 +3606,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
           indent_down();
         }
       }
-    } else if (t->is_struct_or_union()) {
+    } else if (t->is<t_struct>() || t->is<t_union>()) {
       val << fieldRef;
       val << (nullable ? "?" : "") << "->__toShape(),\n";
     } else {
@@ -3830,7 +3829,8 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
       val_type = ttypedef->get_type();
     }
     auto [wrapper, name, ns] = find_hack_wrapper(val_type);
-    if (val_type->is<t_container>() || val_type->is_struct_or_union()) {
+    if (val_type->is<t_container>() || val_type->is<t_struct>() ||
+        val_type->is<t_union>()) {
       std::stringstream inner;
       std::string inner_val = namer("$val");
       indent_up();
@@ -3976,7 +3976,8 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     }
     if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       out << fieldRef << ",\n";
-    } else if (!t->is<t_container>() && !t->is_struct_or_union()) {
+    } else if (
+        !t->is<t_container>() && !t->is<t_struct>() && !t->is<t_union>()) {
       out << fieldRef << ",\n";
     } else {
       bool is_async = generate_php_struct_async_toShape_method_helper(
@@ -6571,7 +6572,8 @@ std::string t_hack_generator::typedef_to_typehint(
   } else {
     typehint = type_to_typehint(ttypedef->get_type(), variations);
 
-    if (ttypedef->get_true_type()->is_struct_or_union() &&
+    if ((ttypedef->get_true_type()->is<t_struct>() ||
+         ttypedef->get_true_type()->is<t_union>()) &&
         variations[TypeToTypehintVariations::IS_SHAPE]) {
       return typehint;
     }
@@ -7515,7 +7517,8 @@ std::string t_hack_generator::argument_list(
        * Enums are always nullable
        */
       auto is_param_nullable = force_nullable || true_type->is<t_enum>() ||
-          (!no_nullables_ && true_type->is_struct_or_union());
+          (!no_nullables_ &&
+           (true_type->is<t_struct>() || true_type->is<t_union>()));
       result +=
           type_to_param_typehint(field.get_type(), is_param_nullable) + " ";
     }

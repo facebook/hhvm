@@ -1270,7 +1270,7 @@ class cpp_mstch_type : public mstch_type {
   mstch::node resolves_to_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node transitively_refers_to_struct() {
     // fast path is unnecessary but may avoid allocations
-    if (resolved_type_->is_struct_or_union()) {
+    if (resolved_type_->is<t_struct>() || resolved_type_->is<t_union>()) {
       return true;
     }
     if (!resolved_type_->is<t_container>()) {
@@ -1282,7 +1282,7 @@ class cpp_mstch_type : public mstch_type {
     while (!queue.empty()) {
       auto next = queue.front();
       queue.pop();
-      if (next->is_struct_or_union()) {
+      if (next->is<t_struct>() || next->is<t_union>()) {
         return true;
       }
       if (!next->is<t_container>()) {
@@ -1458,7 +1458,7 @@ class cpp_mstch_struct : public mstch_struct {
           (type->is_string_or_binary() && field->get_value() != nullptr) ||
           (type->is<t_container>() && field->get_value() != nullptr &&
            !field->get_value()->is_empty()) ||
-          (type->is_struct_or_union() &&
+          ((type->is<t_struct>() || type->is<t_union>()) &&
            (struct_ != type->try_as<t_struct>()) &&
            ((field->get_value() && !field->get_value()->is_empty()) ||
             (cpp2::is_explicit_ref(field) &&

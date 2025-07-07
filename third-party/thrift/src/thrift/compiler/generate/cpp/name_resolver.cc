@@ -638,7 +638,7 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     return ns + "map<" + key_tag + ", " + val_tag + ">";
   } else if (type.is<t_union>()) {
     return ns + "union_t<" + get_standard_type(type) + ">";
-  } else if (type.is_struct_or_union()) {
+  } else if (type.is<t_struct>()) {
     return ns + "struct_t<" + get_standard_type(type) + ">";
   } else if (type.is<t_exception>()) {
     return ns + "exception_t<" + get_standard_type(type) + ">";

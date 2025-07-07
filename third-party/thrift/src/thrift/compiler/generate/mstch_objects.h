@@ -1526,7 +1526,8 @@ class mstch_structured_annotation : public mstch_base {
   }
 
   mstch::node is_const_struct() {
-    return const_.type()->get_true_type()->is_struct_or_union();
+    return const_.type()->get_true_type()->is<t_struct>() ||
+        const_.type()->get_true_type()->is<t_union>();
   }
 
  protected:

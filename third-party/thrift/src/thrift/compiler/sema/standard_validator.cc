@@ -283,7 +283,7 @@ class adapter_or_wrapper_checker {
         } else {
           break;
         }
-      } else if (type->is_struct_or_union()) {
+      } else if (type->is<t_struct>() || type->is<t_union>()) {
         has_wrapper =
             type->has_structured_annotation(structured_wrapper_annotation);
         typedef_name = type->name();
@@ -632,7 +632,8 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
 
   if (intern_box) {
     ctx.check(
-        node.type()->get_true_type()->is_struct_or_union(),
+        node.type()->get_true_type()->is<t_struct>() ||
+            node.type()->get_true_type()->is<t_union>(),
         "The `@thrift.InternBox` annotation can only be used with a struct field.");
     // TODO(dokwon): Add support for custom defaults and remove this check.
     ctx.check(

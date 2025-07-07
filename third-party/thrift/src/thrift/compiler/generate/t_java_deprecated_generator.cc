@@ -2316,7 +2316,7 @@ void t_java_deprecated_generator::generate_field_value_meta_data(
   out << endl;
   indent_up();
   indent_up();
-  if (type->is_struct_or_union()) {
+  if (type->is<t_struct>() || type->is<t_union>()) {
     indent(out) << "new StructMetaData(TType.STRUCT, " << type_name(type)
                 << ".class";
   } else if (type->is<t_container>()) {

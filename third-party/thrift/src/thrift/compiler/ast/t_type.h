@@ -192,7 +192,6 @@ class t_type : public t_named {
   virtual bool is_i64() const { return false; }
   virtual bool is_float() const { return false; }
   virtual bool is_double() const { return false; }
-  virtual bool is_struct_or_union() const { return false; }
   virtual bool is_binary() const { return false; }
 
   bool is_string_or_binary() const { return is_string() || is_binary(); }

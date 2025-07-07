@@ -43,7 +43,8 @@ namespace apache::thrift::compiler {
 namespace {
 
 const std::string* get_py_adapter(const t_type* type) {
-  if (!type->get_true_type()->is_struct_or_union()) {
+  if (!type->get_true_type()->is<t_struct>() &&
+      !type->get_true_type()->is<t_union>()) {
     return nullptr;
   }
   return t_typedef::get_first_unstructured_annotation_or_null(
@@ -598,7 +599,7 @@ void t_py_generator::generate_json_collection_element(
   } else if (type->is<t_set>()) {
     to_parse = elem;
     to_act_on = tmp("_set");
-  } else if (type->is_struct_or_union()) {
+  } else if (type->is<t_struct>() || type->is<t_union>()) {
     to_parse = elem;
     to_act_on = tmp("_struct");
   }

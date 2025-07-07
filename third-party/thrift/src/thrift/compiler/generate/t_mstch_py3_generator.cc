@@ -893,7 +893,8 @@ class py3_mstch_type : public mstch_type {
 
   bool has_cython_type() const {
     return has_option("inplace_migrate")
-        ? !(type_->is<t_container>() || type_->is_struct_or_union())
+        ? !(type_->is<t_container>() || type_->is<t_struct>() ||
+            type_->is<t_union>())
         : !type_->is<t_container>();
   }
 

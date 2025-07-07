@@ -115,6 +115,15 @@ class TypeRef;
 struct SourceIdentifierView {
   std::string_view location;
   std::string_view name;
+
+  friend bool operator==(
+      SourceIdentifierView lhs, SourceIdentifierView rhs) noexcept {
+    return std::tie(lhs.location, lhs.name) == std::tie(rhs.location, rhs.name);
+  }
+  friend bool operator!=(
+      SourceIdentifierView lhs, SourceIdentifierView rhs) noexcept {
+    return !(lhs == rhs);
+  }
 };
 struct SourceIdentifier {
   std::string location;
@@ -123,7 +132,34 @@ struct SourceIdentifier {
   /* implicit */ operator SourceIdentifierView() const noexcept {
     return {location, name};
   }
+
+  friend bool operator==(
+      const SourceIdentifier& lhs, const SourceIdentifier& rhs) noexcept {
+    return std::tie(lhs.location, lhs.name) == std::tie(rhs.location, rhs.name);
+  }
+  friend bool operator!=(
+      const SourceIdentifier& lhs, const SourceIdentifier& rhs) noexcept {
+    return !(lhs == rhs);
+  }
 };
+
+inline bool operator==(
+    SourceIdentifierView lhs, const SourceIdentifier& rhs) noexcept {
+  return lhs == SourceIdentifierView(rhs);
+}
+inline bool operator==(
+    const SourceIdentifier& lhs, SourceIdentifierView rhs) noexcept {
+  return SourceIdentifierView(lhs) == rhs;
+}
+
+inline bool operator!=(
+    SourceIdentifierView lhs, const SourceIdentifier& rhs) noexcept {
+  return !(lhs == rhs);
+}
+inline bool operator!=(
+    const SourceIdentifier& lhs, SourceIdentifierView rhs) noexcept {
+  return !(lhs == rhs);
+}
 
 /**
  * An interface for a Thrift "type system", which is a store of schema
@@ -208,6 +244,16 @@ class SourceIndexedTypeSystem : public TypeSystem {
    */
   virtual std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
       SourceIdentifierView) const = 0;
+
+  /**
+   * Retrieves the source identifier for a user-defined type, if it exists. This
+   * is the inverse of `getUserDefinedTypeBySourceIdentifier`.
+   *
+   * Note that source information is optional — not all user-defined types may
+   * have a source identifier.
+   */
+  virtual std::optional<SourceIdentifierView>
+      getSourceIdentiferForUserDefinedType(DefinitionRef) const = 0;
 
   using NameToDefinitionsMap = folly::F14FastMap<std::string, DefinitionRef>;
   /**
@@ -903,6 +949,16 @@ class DefinitionRef final {
         [&](const auto&) -> const T& { throwAccessInactiveKind(); });
   }
 
+  /**
+   * Returns true if two DefinitionRef objects refer to the exact same node
+   * object (by address).
+   *
+   * Note that there is always exactly one node object for each definition, and
+   * so the address of the node object is sufficient to uniquely identify the
+   * definition.
+   */
+  friend bool operator==(const DefinitionRef&, const DefinitionRef&) noexcept;
+
   explicit DefinitionRef(Alternative definition)
       : definition_(std::move(definition)) {}
 
@@ -941,3 +997,11 @@ template <typename K, typename V>
 } // namespace detail
 
 } // namespace apache::thrift::type_system
+
+namespace std {
+template <>
+struct hash<apache::thrift::type_system::DefinitionRef> {
+  std::size_t operator()(
+      const apache::thrift::type_system::DefinitionRef&) const;
+};
+} // namespace std

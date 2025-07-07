@@ -66,18 +66,34 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
   // Map of location to all definitions at that location
   using LocationToDefinitionsMap =
       folly::F14FastMap<Location, NameToDefinitionsMap>;
+
   LocationToDefinitionsMap sourceIndexedDefinitions;
+  folly::F14FastMap<DefinitionRef, SourceIdentifier>
+      definitionToSourceIdentifier;
 
   void tryAddToSourceIndex(
-      SourceIdentifierView sourceIdentifier, DefinitionRef def) {
-    auto [_, inserted] =
-        sourceIndexedDefinitions[sourceIdentifier.location].emplace(
-            sourceIdentifier.name, def);
-    if (!inserted) {
-      throw InvalidTypeError(fmt::format(
-          "Duplicate source identifier name '{}' at location '{}'",
-          sourceIdentifier.name,
-          sourceIdentifier.location));
+      SourceIdentifier sourceIdentifier, DefinitionRef def) {
+    {
+      auto [_, inserted] =
+          sourceIndexedDefinitions[sourceIdentifier.location].emplace(
+              sourceIdentifier.name, def);
+      if (!inserted) {
+        throw InvalidTypeError(fmt::format(
+            "Duplicate source identifier name '{}' at location '{}'",
+            sourceIdentifier.name,
+            sourceIdentifier.location));
+      }
+    }
+
+    {
+      auto [_, inserted] =
+          definitionToSourceIdentifier.emplace(def, sourceIdentifier);
+      if (!inserted) {
+        throw InvalidTypeError(fmt::format(
+            "Duplicate definition for source identifier name '{}' at location '{}'",
+            sourceIdentifier.name,
+            sourceIdentifier.location));
+      }
     }
   }
 
@@ -89,6 +105,15 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
           *atLocation, sourceIdentifier.name);
     }
     return std::nullopt;
+  }
+
+  std::optional<SourceIdentifierView> getSourceIdentiferForUserDefinedType(
+      DefinitionRef ref) const final {
+    const SourceIdentifier* sourceIdentifier =
+        folly::get_ptr(definitionToSourceIdentifier, ref);
+    return sourceIdentifier
+        ? std::optional<SourceIdentifierView>{*sourceIdentifier}
+        : std::nullopt;
   }
 
   folly::F14FastMap<std::string, DefinitionRef> getUserDefinedTypesAtLocation(

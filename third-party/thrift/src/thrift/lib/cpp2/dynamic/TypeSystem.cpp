@@ -331,6 +331,21 @@ const Uri& DefinitionRef::uri() const {
 }
 
 namespace {
+// A DefinitionRef is a variant of pointers to definition nodes. There is
+// exactly one node object per definition. Therefore, the address of the
+// node is a unique identifier for the definition.
+std::uintptr_t addressOfDefinition(DefinitionRef ref) {
+  return ref.visit([](const auto& def) {
+    return reinterpret_cast<std::uintptr_t>(std::addressof(def));
+  });
+}
+} // namespace
+
+bool operator==(const DefinitionRef& lhs, const DefinitionRef& rhs) noexcept {
+  return addressOfDefinition(lhs) == addressOfDefinition(rhs);
+}
+
+namespace {
 std::string_view kindToString(DefinitionRef::Kind k) noexcept {
   using Kind = DefinitionRef::Kind;
   switch (k) {
@@ -437,3 +452,9 @@ TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) const {
 }
 
 } // namespace apache::thrift::type_system
+
+std::size_t std::hash<apache::thrift::type_system::DefinitionRef>::operator()(
+    const apache::thrift::type_system::DefinitionRef& ref) const {
+  return std::hash<std::uintptr_t>{}(
+      apache::thrift::type_system::addressOfDefinition(ref));
+}

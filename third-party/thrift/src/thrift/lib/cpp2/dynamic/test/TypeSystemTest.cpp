@@ -1163,4 +1163,55 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemWithDuplicateEntries) {
           testing::HasSubstr("Duplicate source identifier")));
 }
 
+TEST(TypeSystemTest, SourceIndexedTypeSystemLookupByDefinition) {
+  TypeSystemBuilder builder;
+
+  builder.addType(
+      "meta.com/thrift/test/StructWithI32Field",
+      makeStruct({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      }),
+      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+
+  builder.addType(
+      "meta.com/thrift/test/Enum",
+      makeEnum({{"VALUE1", 1}, {"VALUE2", 2}}),
+      makeSourceInfo("file://foo/bar.thrift", "Enum"));
+
+  builder.addType(
+      "meta.com/thrift/test/UnionWithI32Field",
+      makeUnion({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      }),
+      std::nullopt /* sourceInfo */);
+
+  auto typeSystem = std::move(builder).build();
+  const auto& sym = dynamic_cast<const SourceIndexedTypeSystem&>(*typeSystem);
+
+  const StructNode& structWithI32FieldNode =
+      sym.getUserDefinedTypeBySourceIdentifier(
+             {"file://foo/bar.thrift", "StructWithI32Field"})
+          ->asStruct();
+  EXPECT_EQ(
+      sym.getSourceIdentiferForUserDefinedType(
+             DefinitionRef(&structWithI32FieldNode))
+          .value(),
+      (SourceIdentifier{"file://foo/bar.thrift", "StructWithI32Field"}));
+
+  const EnumNode& enumNode =
+      sym.getUserDefinedType("meta.com/thrift/test/Enum")->asEnum();
+  EXPECT_EQ(
+      sym.getSourceIdentiferForUserDefinedType(DefinitionRef(&enumNode))
+          .value(),
+      (SourceIdentifier{"file://foo/bar.thrift", "Enum"}));
+
+  const UnionNode& unionWithI32FieldNode =
+      sym.getUserDefinedType("meta.com/thrift/test/UnionWithI32Field")
+          ->asUnion();
+  EXPECT_EQ(
+      sym.getSourceIdentiferForUserDefinedType(
+          DefinitionRef(&unionWithI32FieldNode)),
+      std::nullopt);
+}
+
 } // namespace apache::thrift::type_system

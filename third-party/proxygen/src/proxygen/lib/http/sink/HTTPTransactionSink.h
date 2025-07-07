@@ -156,7 +156,6 @@ class HTTPTransactionSink : public HTTPSink {
     httpTransaction_->setIdleTimeout(timeout);
   }
   // Capabilities
-  bool safeToUpgrade(HTTPMessage* req) const override;
   [[nodiscard]] bool supportsPush() const override {
     return true;
   }

@@ -159,10 +159,6 @@ class HTTPConnectSink
   void setIdleTimeout(std::chrono::milliseconds timeout) override;
 
   // Capabilities
-  bool safeToUpgrade(HTTPMessage*) const override {
-    return false;
-  }
-
   [[nodiscard]] bool supportsPush() const override {
     return false;
   }

@@ -91,7 +91,6 @@ class HTTPSink {
   virtual void timeoutExpired() = 0;
   virtual void setIdleTimeout(std::chrono::milliseconds timeout) = 0;
   // Capabilities
-  virtual bool safeToUpgrade(HTTPMessage* req) const = 0;
   [[nodiscard]] virtual bool supportsPush() const = 0;
   // Logging
   virtual void describe(std::ostream& os) = 0;

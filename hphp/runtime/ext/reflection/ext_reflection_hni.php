@@ -189,10 +189,22 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   /**
    * Extract type var names used in a function's parameter type hints.
    *
+   * NB: Please use getTypeVarNames() instead, as it returns all the
+   * type vars that are defined on the function irrespective of how
+   * they are used (params, return type, within the body etc.).
+   *
    * @return keyset containing type var names as strings
    */
   <<__Native>>
   public function getParamTypeVarNames()[]: keyset<string>;
+
+  /**
+   * Get names of type vars defined on this function or method.
+   *
+   * @return vec containing type var names as strings
+   */
+  <<__Native>>
+  public function getTypeVarNames()[]: vec<string>;
 
   /**
    * ( excerpt from
@@ -2025,6 +2037,14 @@ class ReflectionClass implements Reflector {
     }
     return $ret;
   }
+
+  /**
+   * Get names of type vars defined on this class.
+   *
+   * @return vec containing type var names as strings
+   */
+  <<__Native>>
+  public function getTypeVarNames()[]: vec<string>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getextension.php

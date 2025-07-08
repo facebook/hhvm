@@ -20,6 +20,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <string>
+#include <string_view>
 
 namespace proxygen {
 
@@ -93,15 +94,11 @@ class HTTPHeaders {
   using headers_initializer_list =
       std::initializer_list<std::pair<HTTPHeaderName, folly::StringPiece>>;
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
-
   /*
    * separator used to concatenate multiple values of the same header
    * check out sections 4.2 and 14.45 from rfc2616
    */
-  CLANG_LAZY_INIT_TEST static const std::string COMBINE_SEPARATOR;
+  static constexpr std::string_view kCombineSeparator{", "};
 
   FB_EXPORT HTTPHeaders();
   FB_EXPORT ~HTTPHeaders();
@@ -178,8 +175,9 @@ class HTTPHeaders {
    * combine all the value for this header into a string
    */
   template <typename T>
-  std::string combine(const T& header,
-                      const std::string& separator = COMBINE_SEPARATOR) const;
+  std::string combine(
+      const T& header,
+      const std::string_view separator = kCombineSeparator) const;
 
   /**
    * Process the list of all headers, in the order that they were seen:
@@ -536,7 +534,7 @@ bool HTTPHeaders::forEachValueOfHeader(HTTPHeaderCode code, LAMBDA func) const {
 
 template <typename T>
 std::string HTTPHeaders::combine(const T& header,
-                                 const std::string& separator) const {
+                                 const std::string_view separator) const {
   std::string combined;
   forEachValueOfHeader(header, [&](const std::string& value) -> bool {
     if (combined.empty()) {

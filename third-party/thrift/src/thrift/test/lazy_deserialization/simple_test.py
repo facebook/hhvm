@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-unsafe
+# pyre-strict
 
 import unittest
+from typing import Any, Callable, Type
 
 from thrift.py3 import deserialize, Protocol, serialize
 from thrift.test.lazy_deserialization.simple.types import (
@@ -26,7 +27,7 @@ from thrift.test.lazy_deserialization.simple.types import (
 )
 
 
-def gen(Struct):
+def gen(Struct: Type[Any]) -> Any:
     return Struct(
         field1=[1] * 10,
         field2=[2] * 20,
@@ -35,8 +36,10 @@ def gen(Struct):
     )
 
 
-def test_supported_protocols(func):
-    def wrapper(self):
+def test_supported_protocols(
+    func: Callable[[Any, Protocol], None],
+) -> Callable[[Any], None]:
+    def wrapper(self: Any) -> None:
         for protocol in [Protocol.COMPACT, Protocol.BINARY]:
             func(self, protocol)
 
@@ -45,7 +48,7 @@ def test_supported_protocols(func):
 
 class UnitTest(unittest.TestCase):
     @test_supported_protocols
-    def testFooToLazyFoo(self, protocol):
+    def testFooToLazyFoo(self, protocol: Protocol) -> None:
         foo = gen(Foo)
         s = serialize(foo, protocol)
         lazyFoo = deserialize(LazyFoo, s, protocol)
@@ -55,7 +58,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(foo.field4, lazyFoo.field4)
 
     @test_supported_protocols
-    def testLazyFooToFoo(self, protocol):
+    def testLazyFooToFoo(self, protocol: Protocol) -> None:
         lazyFoo = gen(LazyFoo)
         s = serialize(lazyFoo, protocol)
         foo = deserialize(Foo, s, protocol)
@@ -65,7 +68,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(foo.field4, lazyFoo.field4)
 
     @test_supported_protocols
-    def testLazyCppRefRoundTrip(self, protocol):
+    def testLazyCppRefRoundTrip(self, protocol: Protocol) -> None:
         foo = LazyCppRef(
             field1=[1] * 10,
             field2=[2] * 20,
@@ -78,7 +81,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(bar.field3, [3] * 30)
 
     @test_supported_protocols
-    def testEmptyLazyCppRefRoundTrip(self, protocol):
+    def testEmptyLazyCppRefRoundTrip(self, protocol: Protocol) -> None:
         foo = LazyCppRef()
         s = serialize(foo, protocol)
         bar = deserialize(LazyCppRef, s, protocol)
@@ -87,7 +90,7 @@ class UnitTest(unittest.TestCase):
         self.assertIsNone(bar.field3)
 
     @test_supported_protocols
-    def testComparison(self, protocol):
+    def testComparison(self, protocol: Protocol) -> None:
         foo1 = gen(LazyFoo)
         s = serialize(foo1, protocol)
         foo2 = deserialize(LazyFoo, s, protocol)
@@ -98,7 +101,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(foo1, foo2)
 
     @test_supported_protocols
-    def testOptional(self, protocol):
+    def testOptional(self, protocol: Protocol) -> None:
         s = serialize(gen(Foo), protocol)
         foo = deserialize(OptionalFoo, s, protocol)
         lazyFoo = deserialize(OptionalLazyFoo, s, protocol)

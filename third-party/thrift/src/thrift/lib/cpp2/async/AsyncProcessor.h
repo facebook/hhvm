@@ -52,6 +52,7 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/processor/AsyncProcessor.h>
+#include <thrift/lib/cpp2/async/processor/RequestParams.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
@@ -301,58 +302,6 @@ class RequestTask final : public EventTask {
  private:
   ChildType* childClass_;
   GeneratedAsyncProcessorBase::ExecuteFunc<ChildType> executeFunc_;
-};
-
-/**
- * This struct encapsulates the various thrift control information of interest
- * to request handlers; the executor on which we expect them to execute, the
- * Cpp2RequestContext of the incoming request struct, etc.
- */
-class RequestParams {
- public:
-  RequestParams(
-      Cpp2RequestContext* requestContext,
-      concurrency::ThreadManager* threadManager,
-      folly::EventBase* eventBase,
-      folly::Executor* handlerExecutor = nullptr)
-      : requestContext_(requestContext),
-        threadManager_(threadManager),
-        handlerExecutor_(handlerExecutor),
-        eventBase_(eventBase) {}
-  RequestParams() = default;
-
-  Cpp2RequestContext* getRequestContext() const { return requestContext_; }
-
-  // For cases where caller only needs the folly::Executor* interface.
-  // These calls can be replaced with getHandlerExecutor.
-  [[deprecated("Use getHandlerExecutor()")]] folly::Executor* getThreadManager()
-      const {
-    return getHandlerExecutor();
-  }
-
-  // For cases where the caller needs the ThreadManager interface. Caller
-  // needs to be refactored to replace these calls with getHandlerExecutor.
-  [[deprecated("Use getHandlerExecutor()")]] concurrency::ThreadManager*
-  getThreadManager_deprecated() const {
-    return threadManager_;
-  }
-
-  folly::EventBase* getEventBase() const { return eventBase_; }
-  folly::Executor* getHandlerExecutor() const {
-    if (threadManager_) {
-      return threadManager_;
-    } else {
-      return handlerExecutor_;
-    }
-  }
-
- private:
-  friend class ServerInterface;
-
-  Cpp2RequestContext* requestContext_{nullptr};
-  concurrency::ThreadManager* threadManager_{nullptr};
-  folly::Executor* handlerExecutor_{nullptr};
-  folly::EventBase* eventBase_{nullptr};
 };
 
 /**

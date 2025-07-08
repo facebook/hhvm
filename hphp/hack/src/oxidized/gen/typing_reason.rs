@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<84d5e5620eb9e3567cf1f5a85b9433df>>
+// @generated SignedSource<<1605e2e7781e7600a60816debcfee93a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -803,6 +803,8 @@ pub enum Ureason {
     URpairValue,
     #[rust_to_ocaml(name = "URtuple_access")]
     URtupleAccess,
+    #[rust_to_ocaml(name = "URtuple_OOB")]
+    URtupleOOB,
     #[rust_to_ocaml(name = "URpair_access")]
     URpairAccess,
     #[rust_to_ocaml(name = "URnewtype_cstr")]

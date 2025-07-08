@@ -44,6 +44,7 @@ final class TApplicationException extends TException implements IThriftStruct {
 
   const int STRUCTURAL_ID = 0;
 
+  // These correspond to the TApplicationExceptionType enum in thrift/lib/cpp/TApplicationException.h
   const UNKNOWN = 0;
   const UNKNOWN_METHOD = 1;
   const INVALID_MESSAGE_TYPE = 2;
@@ -51,6 +52,15 @@ final class TApplicationException extends TException implements IThriftStruct {
   const BAD_SEQUENCE_ID = 4;
   const MISSING_RESULT = 5;
   const INVALID_TRANSFORM = 6;
+  const INVALID_PROTOCOL = 9;
+  const UNSUPPORTED_CLIENT_TYPE = 10;
+  const LOADSHEDDING = 11;
+  const TIMEOUT = 12;
+  const INJECTED_FAILURE = 13;
+  const CHECKSUM_MISMATCH = 14;
+  const INTERRUPTION = 15;
+  const TENANT_QUOTA_EXCEEDED = 16;
+  // const TENANT_BLOCKLISTED = 17; // DEPRECATED
 
   public function __construct(?string $message = null, ?int $code = null)[] {
     parent::__construct($message, $code);

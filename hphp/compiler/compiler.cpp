@@ -754,7 +754,6 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setCleanup(Option::ExternWorkerCleanup)
     .setUseEdenFS(Cfg::Eval::UseEdenFS)
     .setUseRichClient(Option::ExternWorkerUseRichClient)
-    .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
     .setUseP2P(Option::ExternWorkerUseP2P)
     .setCasConnectionCount(Option::ExternWorkerCasConnectionCount)
     .setEngineConnectionCount(Option::ExternWorkerEngineConnectionCount)

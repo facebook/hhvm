@@ -413,7 +413,6 @@ extern_worker::Options make_extern_worker_options() {
     .setCacheExecs(options.ExternWorkerUseExecCache)
     .setCleanup(options.ExternWorkerCleanup)
     .setUseRichClient(options.ExternWorkerUseRichClient)
-    .setUseZippyRichClient(options.ExternWorkerUseZippyRichClient)
     .setUseP2P(options.ExternWorkerUseP2P)
     .setVerboseLogging(options.ExternWorkerVerboseLogging)
     .setCasConnectionCount(options.ExternWorkerCASConnectionCount)

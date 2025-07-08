@@ -427,11 +427,6 @@ struct Options {
     return *this;
   }
 
-  Options& setUseZippyRichClient(bool b) {
-    m_useZippyRichClient = b;
-    return *this;
-  }
-
   Options& setUseP2P(bool b) {
     m_useP2P = b;
     return *this;
@@ -468,7 +463,6 @@ struct Options {
   bool m_useEdenFS{true};
   bool m_cleanup{true};
   bool m_useRichClient{true};
-  bool m_useZippyRichClient{false};
   bool m_useP2P{false};
   int m_casConnectionCount{16};
   int m_engineConnectionCount{6};

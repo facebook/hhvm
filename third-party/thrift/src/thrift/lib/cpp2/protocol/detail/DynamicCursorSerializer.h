@@ -318,6 +318,24 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     advance();
   }
 
+  /** Checkpointing */
+  struct Checkpoint {
+    size_t offset;
+    uint32_t remaining;
+  };
+  Checkpoint checkpoint() {
+    checkState(State::Active);
+    return {protocol_->getCursorPosition(), remaining_};
+  }
+  void restoreCheckpoint(Checkpoint c) {
+    checkState(State::Active);
+    // Modifying the cursor is generally unsafe, but we know that resetting in a
+    // container read is ok for compact/binary.
+    auto& cursor = const_cast<folly::io::Cursor&>(protocol_->getCursor());
+    cursor.retreat(cursor.getCurrentPosition() - c.offset);
+    remaining_ = c.remaining;
+  }
+
  private:
   void checkRemaining() {
     checkState(State::Active);

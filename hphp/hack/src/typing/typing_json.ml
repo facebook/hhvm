@@ -40,6 +40,20 @@ let is_like ty =
   | Tunion tyl -> List.exists tyl ~f:is_dynamic
   | _ -> false
 
+let cstr_kind cstr_kind =
+  let kind_str =
+    match cstr_kind with
+    | Ast_defs.Constraint_as -> "as"
+    | Ast_defs.Constraint_super -> "super"
+    | Ast_defs.Constraint_eq -> "eq"
+  in
+  ("kind", Hh_json.JSON_String kind_str)
+
+let user_attribute { ua_name = (_, name); _ } =
+  let open Hh_json in
+  let fields = [("name", JSON_String name)] in
+  JSON_Object fields
+
 let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
  fun env ~show_like_ty ty ->
   (* Helpers to construct fields that appear in JSON rendering of type *)
@@ -269,6 +283,31 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
         []
     in
     let params fps = [("params", JSON_Array (List.map fps ~f:param))] in
+
+    (* Function type parameters shouldn't be declared with variance annotations *)
+    let tparams ft_tparams =
+      [
+        ( "tparams",
+          JSON_Array
+            (List.map
+               ft_tparams
+               ~f:(fun
+                    Typing_defs_core.
+                      { tp_name; tp_constraints; tp_user_attributes; _ }
+                  ->
+                 obj
+                   [
+                     ("name", JSON_String (snd tp_name));
+                     ( "constraints",
+                       JSON_Array
+                         (List.map tp_constraints ~f:(fun (c, ty) ->
+                              obj (cstr_kind c :: typ ty))) );
+                     ( "user_attributes",
+                       JSON_Array
+                         (List.map tp_user_attributes ~f:user_attribute) );
+                   ])) );
+      ]
+    in
     let capability =
       match ft.ft_implicit_params.capability with
       | CapDefaults _ -> []
@@ -277,6 +316,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
     obj
     @@ fun_kind p
     @ readonly_this (get_ft_readonly_this ft)
+    @ tparams ft.ft_tparams
     @ params ft.ft_params
     @ readonly_ret (get_ft_returns_readonly ft)
     @ result ft.ft_ret
@@ -337,6 +377,15 @@ let deserialization_error ~message ~keytrace =
 
 let not_supported ~message ~keytrace =
   Error (Not_supported (message ^ Hh_json.Access.keytrace_to_string keytrace))
+
+let get_constraint_kind key (json, keytrace) =
+  Result.(
+    get_string key (json, keytrace) >>= fun (kind_str, keytrace) ->
+    match kind_str with
+    | "as" -> Ok Ast_defs.Constraint_as
+    | "super" -> Ok Constraint_super
+    | "eq" -> Ok Constraint_eq
+    | _ -> deserialization_error ~message:"Expected constraint kind" ~keytrace)
 
 let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
     : deserialized_result =
@@ -571,6 +620,33 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
         get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
         aux_args args ~keytrace >>= fun tyl -> ty (Tintersection tyl)
       | "function" ->
+        get_array "tparams" (json, keytrace)
+        >>= fun (tparams, tparams_keytrace) ->
+        let tparams =
+          map_array
+            tparams
+            ~keytrace:tparams_keytrace
+            ~f:(fun param ~keytrace ->
+              get_string "name" (param, keytrace)
+              >>= fun (name, _name_keytrace) ->
+              get_array "constraints" (json, keytrace)
+              >>= fun (cstrs, keytrace) ->
+              map_array cstrs ~keytrace ~f:aux_constraint
+              >>= fun tp_constraints ->
+              get_array "user_attributes" (json, keytrace)
+              >>= fun (attrs, keytrace) ->
+              map_array attrs ~keytrace ~f:aux_user_attribute
+              >>= fun tp_user_attributes ->
+              Ok
+                {
+                  tp_name = (Pos_or_decl.none, name);
+                  tp_reified = Ast_defs.Erased;
+                  tp_constraints;
+                  tp_user_attributes;
+                  tp_variance = Ast_defs.Invariant;
+                })
+        in
+        tparams >>= fun ft_tparams ->
         get_array "params" (json, keytrace) >>= fun (params, params_keytrace) ->
         let params =
           map_array params ~keytrace:params_keytrace ~f:(fun param ~keytrace ->
@@ -622,8 +698,8 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
             ft_params;
             ft_implicit_params = { capability };
             ft_ret;
+            ft_tparams;
             (* Dummy values: these aren't currently serialized. *)
-            ft_tparams = [];
             ft_where_constraints = [];
             ft_flags = Typing_defs_flags.Fun.default;
             ft_cross_package = None;
@@ -724,6 +800,20 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
       deserialization_error
         ~message:(Hh_json.Access.access_failure_to_string access_failure)
         ~keytrace
+  and aux_constraint json ~keytrace =
+    Result.(
+      get_constraint_kind "kind" (json, keytrace) >>= fun kind ->
+      get_val "type" (json, keytrace) >>= fun (ty_json, keytrace) ->
+      aux ty_json ~keytrace >>= fun ty -> Ok (kind, ty))
+  and aux_user_attribute json ~keytrace =
+    Result.(
+      get_string "name" (json, keytrace) >>= fun (name, _keytrace) ->
+      Ok
+        {
+          ua_name = (Pos_or_decl.none, name);
+          ua_params = [];
+          ua_raw_val = None;
+        })
   in
   aux json ~keytrace
 

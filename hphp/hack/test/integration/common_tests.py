@@ -756,6 +756,22 @@ class CommonTests(BarebonesTests):
             options=["--type-at-pos", "{root}foo_3.php:11:14"],
         )
 
+    def test_type_at_pos_poly_function(self) -> None:
+        """
+        Test hh_client --type-at-pos
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd_and_json_cmd(
+            ["(function<T as Bigly super Smol>(T): T)"],
+            [
+                '{{"type":"(function<T as Bigly super Smol>(T): T)",'
+                + '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},'
+                + '"full_type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":3,"char_end":59}},"kind":"function","tparams":[{{"name":"T","constraints":[{{"kind":"as","type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":36,"char_end":40}},"kind":"class","name":"\\\\Bigly","args":[]}}}},{{"kind":"super","type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":48,"char_end":51}},"kind":"class","name":"\\\\Smol","args":[]}}}}],"user_attributes":[{{"name":"__NoAutoBound"}}]}}],"params":[{{"callConvention":"normal","type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":54,"char_end":54}},"kind":"generic","name":"T"}}}}],"result":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":58,"char_end":58}},"kind":"generic","name":"T"}}}}}}'
+            ],
+            options=["--type-at-pos", "{root}foo_poly_function.php:9:4"],
+        )
+
     def test_type_at_pos_batch(self) -> None:
         """
         Test hh_client --type-at-pos-batch
@@ -792,6 +808,7 @@ class CommonTests(BarebonesTests):
                 + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":23,"char_end":81}},'
                 + '"kind":"function",'
                 + '"readonly_this":true,'
+                + '"tparams":[],'
                 + '"params":[{{"callConvention":"normal","readonly":true,"type":{{'
                 + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":51,"char_end":53}},"kind":"primitive","name":"int"}}}}],'
                 + '"readonly_return":true,'
@@ -817,6 +834,7 @@ class CommonTests(BarebonesTests):
                 + ',"type":{{'
                 + '"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":23,"char_end":57}},'
                 + '"kind":"function",'
+                + '"tparams":[],'
                 + '"params":[{{"callConvention":"normal","type":{{'
                 + '"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":33,"char_end":35}},"kind":"primitive","name":"int"}}}},'
                 + '{{"callConvention":"normal",'

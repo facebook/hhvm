@@ -27,14 +27,14 @@ thrift-python specific container types.
   }}{{> private/alias_prefix}}{{struct:py_name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:list?}}{{> types/sequence }}[{{!
-    }}{{#type:list_elem_type}}{{> types/compatible_pep484_type}}{{/type:list_elem_type}}{{!
+    }}{{#type:list_elem_type}}{{> types/aliased_pep484_type}}{{/type:list_elem_type}}{{!
 }}]{{/type:list?}}{{!
 }}{{#type:set?}}{{> types/set }}[{{!
-    }}{{#type:set_elem_type}}{{> types/compatible_pep484_type}}{{/type:set_elem_type}}{{!
+    }}{{#type:set_elem_type}}{{> types/aliased_pep484_type}}{{/type:set_elem_type}}{{!
 }}]{{/type:set?}}{{!
 }}{{#type:map?}}{{> types/mapping }}[{{!
     }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
-    }}{{#type:value_type}}{{> types/compatible_pep484_type}}{{/type:value_type}}{{!
+    }}{{#type:value_type}}{{> types/aliased_pep484_type}}{{/type:value_type}}{{!
 }}]{{/type:map?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{!

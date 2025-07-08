@@ -1,0 +1,4 @@
+WARN: File "truthiness_test_closure_func_ref.php", line 6, characters 7-15:
+Invalid condition: a value of type `(function(): void)` will always be truthy (Warn[12006])
+WARN: File "truthiness_test_closure_func_ref.php", line 8, characters 7-13:
+Invalid condition: a value of type `HH\FunctionRef<(readonly function(): void)>` will always be truthy (Warn[12006])

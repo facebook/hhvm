@@ -181,15 +181,10 @@ let rec truthiness env ty =
     (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)
     Always_truthy
   | Ttuple _ -> Possibly_falsy
-  | Tfun _
-  | Taccess _ ->
-    (* TODO(T36532263) check if that's ok *) Unknown
-  | Tvec_or_dict _ ->
-    (* TODO(T69768816) determine which variant is correct for vec_or_dict *)
-    Unknown
-  | Tclass_ptr _ ->
-    (* TODO(T199606542) Check if (non-null) class pointers are ever falsy *)
-    Unknown
+  | Tfun _ -> Always_truthy
+  | Taccess _ -> (* TODO(T36532263) check if that's ok *) Unknown
+  | Tvec_or_dict _ -> Possibly_falsy
+  | Tclass_ptr _ -> Always_truthy
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some

@@ -61,24 +61,66 @@ void ensureImportOrThrow() {
 }
 
 /**
- * As a general rule, we cache everything except IOBuf.
+ * Returns a *new* owned reference to a PyObject* if generated.
+ * If a type is uncached, returns std::nullopt. See next function
+ * for documentation of default values.
+ *
+ * The caller is responsible for:
+ *   1. checking non-null
+ *   2. taking ownership (via UniquePyObjectPtr)
+ *
+ * As a general rule, we cache structs, but not immutable singletons
+ * like 0, b"", nil-ary tuple (), etc.
+ *
+ * As a special case, IOBuf should never be cached because we can't
+ * guarantee that it's immutable, so it's always generated fresh.
  */
-bool shouldCacheDefaultValue(const detail::TypeInfo& typeInfo) {
-  if (typeInfo.type != protocol::T_STRING) {
-    return true;
+template <typename Container>
+std::optional<PyObject*> genUncachedDefaultValue(
+    const detail::TypeInfo& typeInfo) {
+  switch (typeInfo.type) {
+    case protocol::TType::T_BOOL:
+      Py_IncRef(Py_False);
+      return Py_False;
+    case protocol::TType::T_BYTE:
+    case protocol::TType::T_I16:
+    case protocol::TType::T_I32:
+    case protocol::TType::T_I64:
+      return PyLong_FromLong(0);
+    case protocol::TType::T_DOUBLE:
+    case protocol::TType::T_FLOAT:
+      // The default 0.0 is not a singleton
+      return std::nullopt;
+    case protocol::TType::T_STRING:
+      switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
+        case detail::StringFieldType::String:
+        case detail::StringFieldType::StringView:
+        case detail::StringFieldType::Binary:
+        case detail::StringFieldType::BinaryStringView:
+          return PyBytes_FromString("");
+        case detail::StringFieldType::IOBuf:
+        case detail::StringFieldType::IOBufPtr:
+        case detail::StringFieldType::IOBufObj:
+          // IOBuf should ***never*** be cached because not immutable
+          return create_IOBuf(folly::IOBuf::create(0));
+      }
+    // empty tuple cheaply initializes to empty singletons.
+    case protocol::TType::T_LIST:
+      return Container::kIsMutable
+          ? std::nullopt
+          : std::make_optional<PyObject*>(PyTuple_New(0));
+    case protocol::TType::T_MAP:
+      return Container::kIsMutable
+          ? std::nullopt
+          : std::make_optional<PyObject*>(PyTuple_New(0));
+    case protocol::TType::T_SET:
+      // empty frozenset used to be a singleton, but not guaranteed
+    case protocol::TType::T_STRUCT:
+      // presumably there's actually a benefit to caching structs
+      return std::nullopt;
+    default:
+      LOG(FATAL) << "invalid typeInfo TType " << typeInfo.type;
   }
-  switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
-    case detail::StringFieldType::String:
-    case detail::StringFieldType::StringView:
-    case detail::StringFieldType::Binary:
-    case detail::StringFieldType::BinaryStringView:
-      return true;
-    case detail::StringFieldType::IOBuf:
-    case detail::StringFieldType::IOBufPtr:
-    case detail::StringFieldType::IOBufObj:
-      return false;
-  }
-  return true;
 }
 
 /**
@@ -107,27 +149,31 @@ UniquePyObjectPtr getDefaultValueForField(
     return UniquePyObjectPtr(value);
   }
 
-  // 2. Check local cache for an existing default value.
+  // 2. Most types aren't worth caching, so check if one of them
+  auto maybeDefault = genUncachedDefaultValue<Container>(*typeInfo);
+  if (maybeDefault) {
+    if (*maybeDefault == nullptr) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    return UniquePyObjectPtr(*maybeDefault);
+  }
+
+  // 3. Check local cache for an existing default value.
   static folly::Indestructible<
       folly::F14FastMap<const detail::TypeInfo*, PyObject*>>
       defaultValueCache;
-  const bool isTypeCached = shouldCacheDefaultValue(*typeInfo);
-  if (isTypeCached) {
-    auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
-    if (cachedDefaultValueIt != defaultValueCache->end()) {
-      UniquePyObjectPtr value(cachedDefaultValueIt->second);
-      Py_INCREF(value.get());
-      return value;
-    }
+  auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
+  if (cachedDefaultValueIt != defaultValueCache->end()) {
+    UniquePyObjectPtr value(cachedDefaultValueIt->second);
+    Py_INCREF(value.get());
+    return value;
   }
 
-  // 3. No cached value found. Determine the default value, and update cache (if
+  // 4. No cached value found. Determine the default value, and update cache (if
   // applicable).
   auto value = Container::GetStandardDefaultValueForType(*typeInfo);
-  if (isTypeCached) {
-    defaultValueCache->emplace(typeInfo, value);
-    Py_INCREF(value);
-  }
+  defaultValueCache->emplace(typeInfo, value);
+  Py_INCREF(value);
   return UniquePyObjectPtr(value);
 }
 
@@ -135,6 +181,7 @@ UniquePyObjectPtr getDefaultValueForField(
  * A policy for handling Python tuples.
  */
 struct TupleContainer final {
+  static const bool kIsMutable = false;
   /**
    * Return a new tuple object of given size, or NULL on failure.
    */
@@ -193,6 +240,7 @@ struct TupleContainer final {
  * A policy for handling Python lists.
  */
 struct ListContainer final {
+  static const bool kIsMutable = true;
   /**
    * Return a new list object of given size, or NULL on failure.
    */

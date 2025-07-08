@@ -454,7 +454,7 @@ void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
 }
 
 void TypeSystemBuilder::tryEmplace(Uri uri, DefinitionEntry&& def) {
-  auto [_, inserted] = definitions_.emplace(uri, std::move(def));
+  auto [_, inserted] = definitions_.try_emplace(std::move(uri), std::move(def));
   if (!inserted) {
     throw InvalidTypeError(
         fmt::format("Duplicate definition for Uri '{}'", uri));

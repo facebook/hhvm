@@ -21,6 +21,7 @@ cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
 namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
+namespace hack memcache
 
 exception CarbonResultBusy {
   @thrift.ExceptionMessage

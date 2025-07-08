@@ -6,6 +6,7 @@
 # TODO: Move to carbon namespace and remove 'Mc' prefixes.
 namespace facebook::memcache;
 thrift_namespace facebook.memcache.thrift;
+thrift_namespace_hack memcache;
 
 exception CarbonResultBusy {
   1: std::string message;

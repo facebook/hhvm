@@ -6235,6 +6235,11 @@ end = struct
       ->
       is_container tkv tkv
     | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
+    | (_, Tprim Tstring) ->
+      let pos = get_pos ty_sub in
+      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
+      let tv = MakeType.string reason_super in
+      is_container tk tv
     | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env

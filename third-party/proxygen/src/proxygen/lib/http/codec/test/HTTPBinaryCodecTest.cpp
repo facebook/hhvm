@@ -732,6 +732,24 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
             "Incomplete message received");
 }
 
+TEST_F(HTTPBinaryCodecTest, testOnIngressFailureIncompleteMessage) {
+  // Contains only framing indicator
+  const std::vector<uint8_t> binaryInvalidHTTPMessage{0x00};
+  auto binaryHTTPMessageIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
+      binaryInvalidHTTPMessage.data(), binaryInvalidHTTPMessage.size()));
+  folly::io::Cursor cursor(binaryHTTPMessageIOBuf.get());
+
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodecKnownLength_->setCallback(&callback);
+  upstreamBinaryCodecKnownLength_->onIngress(*binaryHTTPMessageIOBuf);
+  upstreamBinaryCodecKnownLength_->onIngressEOF();
+
+  // Check onError was called with the correct error
+  EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
+            "Incomplete message received, either empty or only contains "
+            "framing indicator");
+}
+
 TEST_F(HTTPBinaryCodecTest, testGenerateKnownLengthHeaders) {
   // Create HTTPMessage and encode it to a buffer
   HTTPMessage msgEncoded;

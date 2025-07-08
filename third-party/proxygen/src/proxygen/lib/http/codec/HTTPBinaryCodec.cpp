@@ -558,6 +558,17 @@ void HTTPBinaryCodec::onIngressEOF() {
                                      "Incomplete message received"));
     return;
   }
+  if (!parseError_ && (state_ == ParseState::FRAMING_INDICATOR ||
+                       state_ == ParseState::CONTROL_DATA)) {
+    // Case where sent message is either empty or only contains framing
+    // indicator
+    callback_->onError(
+        ingressTxnID_,
+        HTTPException(HTTPException::Direction::INGRESS,
+                      "Incomplete message received, either empty or only "
+                      "contains framing indicator"));
+    return;
+  }
   if (state_ == ParseState::HEADERS_SECTION) {
     // Case where the sent message only contains control data and no headers
     // nor body

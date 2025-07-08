@@ -50,6 +50,7 @@
 #if USE_JEMALLOC_EXTENT_HOOKS
 #include "hphp/util/managed-arena.h"
 #endif
+#include "hphp/util/roar.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/zend/zend-strtod.h"
@@ -549,24 +550,24 @@ void retranslateAll(bool skipSerialize) {
   // If running with ROAR, we call __roar_api_trigger_warmup(), which will reset
   // ROAR's profile counters and start collecting profile data for the specified
   // collection period before optimizing the code.
-#ifdef __roar__
-  if (__roar_api_trigger_warmup) {
-    if (serverMode) {
-      Logger::Info(
-        "Calling __roar_api_trigger_warmup (retranslateAll finished)"
-      );
+  if (use_roar) {
+    if (__roar_api_trigger_warmup) {
+      if (serverMode) {
+        Logger::Info(
+            "Calling __roar_api_trigger_warmup (retranslateAll finished)"
+        );
+      }
+      __roar_api_trigger_warmup();
     }
-    __roar_api_trigger_warmup();
-  }
-#else
-  if (__llvm_profile_reset_counters) {
-    if (serverMode) {
-      Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "
-                   "finished)");
+  } else {
+    if (__llvm_profile_reset_counters) {
+      if (serverMode) {
+        Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "
+                     "finished)");
+      }
+      __llvm_profile_reset_counters();
     }
-    __llvm_profile_reset_counters();
   }
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -819,17 +820,17 @@ void checkSerializeOptProf() {
       discardProfData();
     }
 
-#ifdef __roar__
     // When running under ROAR, we trigger ROAR's PGO/CSPGO after
     // retranslate-all, and we want to wait for ROAR to finish generating its
     // PGO/CSPGO code so that it can serialize that code to the jumpstart file
     // on disk.
-    if (__roar_api_cspgo_enabled && __roar_api_cspgo_enabled()) {
-      __roar_api_wait_for_cspgo();
-    } else if (__roar_api_pgo_enabled && __roar_api_pgo_enabled()) {
-      __roar_api_wait_for_pgo();
+    if (use_roar) {
+      if (__roar_api_cspgo_enabled && __roar_api_cspgo_enabled()) {
+        __roar_api_wait_for_cspgo();
+      } else if (__roar_api_pgo_enabled && __roar_api_pgo_enabled()) {
+        __roar_api_wait_for_pgo();
+      }
     }
-#endif
 
     auto const mode = RuntimeOption::EvalJitSerdesMode;
     if (mode == JitSerdesMode::SerializeAndExit) {

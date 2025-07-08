@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/tread-hash-map.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/roar.h"
 
 namespace HPHP::jit {
 
@@ -275,8 +276,7 @@ void CGMeta::process_only(
   }
   trapReasons.clear();
 
-#ifdef __roar__
-  if (__roar_api_flag_safe_function_call_site) {
+  if (use_roar && __roar_api_flag_safe_function_call_site) {
     for (auto const& nc : nativeCalls) {
       const int retval = __roar_api_flag_safe_function_call_site(nc.first, nc.second);
 
@@ -287,7 +287,6 @@ void CGMeta::process_only(
       }
     }
   }
-#endif
 
   process_literals();
 

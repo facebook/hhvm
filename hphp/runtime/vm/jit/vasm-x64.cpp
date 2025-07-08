@@ -37,6 +37,7 @@
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/roar.h"
 
 #include <tuple>
 
@@ -717,11 +718,11 @@ template<class X64Asm>
 void Vgen<X64Asm>::emit(const calls& i) {
   auto addr = emitSmashableCall(a.code(), env.meta, i.target);
   (void)addr;
-#ifdef __roar__
-  // Track the native call so we can register them with ROAR after the code is
-  // relocated into its final place in the code cache.
-  env.meta.nativeCalls[addr] = i.target;
-#endif
+  // When using ROAR, track the native call so we can register them with ROAR
+  // after the code is relocated into its final place in the code cache.
+  if (use_roar) {
+    env.meta.nativeCalls[addr] = i.target;
+  }
   if (i.watch) {
     *i.watch = a.frontier();
     env.meta.watchpoints.push_back(i.watch);

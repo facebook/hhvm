@@ -38,6 +38,7 @@
 #include "hphp/util/immed.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/roar.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit {
@@ -420,11 +421,13 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       // When using ROAR, we emit all native calls as smashable ones via the
       // fallthru below, so that ROAR can patch them when it re-JITs native
       // functions.
-#ifndef __roar__
-      v << call{static_cast<TCA>(target.address()), args};
+      if (use_roar) {
+        v << calls{static_cast<TCA>(target.address()), args};
+      } else {
+        v << call{static_cast<TCA>(target.address()), args};
+      }
       return;
-#endif
-      // fallthru
+
     case K::Smashable:
       v << calls{static_cast<TCA>(target.address()), args};
       return;

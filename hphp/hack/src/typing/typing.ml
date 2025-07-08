@@ -3973,6 +3973,7 @@ end = struct
                         ci_shape =
                           (match e2 with
                           | (_, _, Int i) -> IntLit (int_of_string i)
+                          | (_, _, String s) -> StringLit s
                           | _ -> Generic);
                         ci_val = res_ty;
                         ci_expr_pos = p;

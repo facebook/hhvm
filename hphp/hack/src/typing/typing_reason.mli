@@ -161,6 +161,8 @@ val index_array : ureason
 
 val index_tuple : ureason
 
+val index_shape : ureason
+
 val index_class : string -> ureason
 
 val set_element : string -> ureason

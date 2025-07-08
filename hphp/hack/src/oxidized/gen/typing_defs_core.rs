@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<061a1baad55781ab7cbf6d30a6d839fd>>
+// @generated SignedSource<<abef9fbe91b7128edb48f70051d1e4f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1124,13 +1124,11 @@ pub struct HasMember {
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -1143,6 +1141,7 @@ pub struct HasMember {
 #[repr(C, u8)]
 pub enum CanIndexShape {
     IntLit(isize),
+    StringLit(String),
     Generic,
 }
 

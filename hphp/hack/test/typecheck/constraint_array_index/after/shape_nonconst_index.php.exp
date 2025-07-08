@@ -1,0 +1,2 @@
+ERROR: File "shape_nonconst_index.php", line 3, characters 19-27:
+Invalid index type for this shape (Typing[4116])

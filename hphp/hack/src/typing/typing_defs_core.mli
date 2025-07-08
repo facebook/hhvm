@@ -647,6 +647,7 @@ type destructure = {
  *)
 type can_index_shape =
   | IntLit of int
+  | StringLit of string
   | Generic
 [@@deriving show]
 

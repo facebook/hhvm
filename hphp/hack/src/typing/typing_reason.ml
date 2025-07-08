@@ -3163,6 +3163,8 @@ let index_array = URindex "array"
 
 let index_tuple = URindex "tuple"
 
+let index_shape = URindex "shape"
+
 let index_class s = URindex (strip_ns s)
 
 let set_element s = URelement (strip_ns s)

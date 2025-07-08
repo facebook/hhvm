@@ -1445,6 +1445,7 @@ type has_member = {
 
 type can_index_shape =
   | IntLit of int
+  | StringLit of string
   | Generic
 [@@deriving show]
 
@@ -1583,6 +1584,9 @@ let can_index_shape_compare cis1 cis2 =
   | (IntLit i1, IntLit i2) -> Int.compare i1 i2
   | (IntLit _, _) -> -1
   | (_, IntLit _) -> 1
+  | (StringLit s1, StringLit s2) -> String.compare s1 s2
+  | (StringLit _, _) -> -1
+  | (_, StringLit _) -> 1
   | (Generic, Generic) -> 0
 
 let can_index_compare ~normalize_lists ci1 ci2 =

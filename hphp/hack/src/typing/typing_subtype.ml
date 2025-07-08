@@ -6275,6 +6275,39 @@ end = struct
                         msg = Reason.string_of_ureason Reason.URtuple_access;
                       }))
           env)
+    | (_, Tshape { s_fields = fdm; s_origin = _; s_unknown_value = _ }) ->
+      (match can_index.ci_shape with
+      | StringLit s ->
+        let decl_pos = Pos_or_decl.of_raw_pos can_index.ci_index_pos in
+        let field = TSFlit_str (decl_pos, s) in
+        (match TShapeMap.find_opt field fdm with
+        | Some { sft_optional = _; sft_ty = ty } ->
+          simplify_default ~subtype_env ty can_index.ci_val env
+        | None ->
+          invalid
+            ~fail:
+              (Some
+                 Typing_error.(
+                   primary
+                   @@ Primary.Undefined_field
+                        {
+                          pos = can_index.ci_index_pos;
+                          name = TUtils.get_printable_shape_field_name field;
+                          decl_pos;
+                        }))
+            env)
+      | _ ->
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Generic_unify
+                      {
+                        pos = can_index.ci_index_pos;
+                        msg = Reason.string_of_ureason Reason.index_shape;
+                      }))
+          env)
     | _ -> invalid ~fail env
 end
 

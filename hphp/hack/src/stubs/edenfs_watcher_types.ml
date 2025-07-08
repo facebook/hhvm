@@ -6,6 +6,12 @@
  *
  *)
 
+type settings = {
+  root: Path.t;
+  watch_spec: FilesToIgnore.watch_spec;
+  debug_logging: bool;
+}
+
 type changes =
   | FileChanges of string list  (** List is not guaranteed to be deduplicated *)
   | CommitTransition of {

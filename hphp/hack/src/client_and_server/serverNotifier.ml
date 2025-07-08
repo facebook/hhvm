@@ -166,7 +166,9 @@ let init
     let debug_logging =
       local_config.ServerLocalConfig.edenfs_file_watcher.debug_logging
     in
-    let init_settings = { Edenfs_watcher.root; watch_spec; debug_logging } in
+    let init_settings =
+      { Edenfs_watcher_types.root; watch_spec; debug_logging }
+    in
     match Edenfs_watcher.init init_settings with
     | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
       Hh_logger.log

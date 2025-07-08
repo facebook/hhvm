@@ -51,46 +51,6 @@ namespace apache::thrift {
 
 thread_local RequestParams ServerInterface::requestParams_;
 
-EventTask::~EventTask() {
-  expired();
-}
-
-void EventTask::expired() {
-  // only expire req_ once
-  if (!req_.request()) {
-    return;
-  }
-  failWith(
-      TApplicationException{"Task expired without processing"},
-      kTaskExpiredErrorCode);
-}
-
-void EventTask::failWith(folly::exception_wrapper ex, std::string exCode) {
-  auto cleanUp = [oneway = oneway_,
-                  req = apache::thrift::detail::ServerRequestHelper::request(
-                      std::move(req_)),
-                  ex = std::move(ex),
-                  exCode = std::move(exCode)]() mutable {
-    // if oneway, skip sending back anything
-    if (oneway) {
-      return;
-    }
-    req->sendErrorWrapped(std::move(ex), std::move(exCode));
-  };
-
-  auto eb = apache::thrift::detail::ServerRequestHelper::eventBase(req_);
-
-  if (eb->inRunningEventBaseThread()) {
-    cleanUp();
-  } else {
-    eb->runInEventBaseThread(std::move(cleanUp));
-  }
-}
-
-void EventTask::setTile(TilePtr&& tile) {
-  req_.requestContext()->setTile(std::move(tile));
-}
-
 ServerRequestTask::~ServerRequestTask() {
   // only expire req_ once
   if (!req_.request()) {

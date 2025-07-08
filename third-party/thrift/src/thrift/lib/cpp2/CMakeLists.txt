@@ -249,6 +249,7 @@ add_library(
   async/ServerRequestData.cpp
   async/ServerSinkBridge.cpp
   async/processor/AsyncProcessor.cpp
+  async/processor/EventTask.cpp
   async/processor/RequestParams.cpp
   async/processor/ServerRequest.cpp
   async/processor/ServerRequestHelper.cpp

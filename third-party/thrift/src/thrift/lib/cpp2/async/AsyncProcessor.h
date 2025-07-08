@@ -52,6 +52,7 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/processor/AsyncProcessor.h>
+#include <thrift/lib/cpp2/async/processor/EventTask.h>
 #include <thrift/lib/cpp2/async/processor/RequestParams.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
@@ -223,33 +224,6 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
       int64_t id, Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
   void destroyAllInteractions(
       Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
-};
-
-class EventTask : public concurrency::Runnable, public InteractionTask {
- public:
-  EventTask(
-      ResponseChannelRequest::UniquePtr req,
-      SerializedCompressedRequest&& serializedRequest,
-      folly::Executor::KeepAlive<> executor,
-      Cpp2RequestContext* ctx,
-      bool oneway)
-      : req_(std::move(req), std::move(serializedRequest), ctx, {}, {}, {}, {}),
-        oneway_(oneway) {
-    detail::ServerRequestHelper::setExecutor(req_, std::move(executor));
-  }
-
-  ~EventTask() override;
-
-  void expired();
-  void failWith(folly::exception_wrapper ex, std::string exCode) override;
-
-  void setTile(TilePtr&& tile) override;
-
-  friend class TilePromise;
-
- protected:
-  ServerRequest req_;
-  bool oneway_;
 };
 
 class ServerRequestTask : public concurrency::Runnable, public InteractionTask {

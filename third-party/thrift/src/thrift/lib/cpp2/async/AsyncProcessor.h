@@ -53,6 +53,7 @@
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/processor/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
+#include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>
@@ -82,30 +83,6 @@ struct HandlerCallbackHelper;
 
 class ServerRequest;
 class IResourcePoolAcceptor;
-
-namespace detail {
-
-class ServerRequestHelper : public ServerRequest {
- public:
-  using ServerRequest::asyncProcessor;
-  using ServerRequest::compressedRequest;
-  using ServerRequest::eventBase;
-  using ServerRequest::executor;
-  using ServerRequest::internalPriority;
-  using ServerRequest::moveConcurrencyControllerNotification;
-  using ServerRequest::moveRequestPileNotification;
-  using ServerRequest::protocol;
-  using ServerRequest::queueObserverPayload;
-  using ServerRequest::request;
-  using ServerRequest::requestContext;
-  using ServerRequest::resourcePool;
-  using ServerRequest::setExecutor;
-  using ServerRequest::setInternalPriority;
-  using ServerRequest::setResourcePool;
-};
-
-} // namespace detail
-
 class ServerInterface;
 
 class GeneratedAsyncProcessorBase : public AsyncProcessor {

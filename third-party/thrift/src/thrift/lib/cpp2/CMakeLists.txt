@@ -250,6 +250,7 @@ add_library(
   async/ServerSinkBridge.cpp
   async/processor/AsyncProcessor.cpp
   async/processor/ServerRequest.cpp
+  async/processor/ServerRequestHelper.cpp
   gen/module_constants_cpp.cpp
   gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp

@@ -26,9 +26,8 @@ import (
 )
 
 type streamPayload struct {
-	metadata  *rpcmetadata.StreamPayloadMetadata
-	exception *RocketException
-	data      []byte
+	metadata *rpcmetadata.StreamPayloadMetadata
+	data     []byte
 }
 
 func (r *streamPayload) Headers() map[string]string {
@@ -40,13 +39,6 @@ func (r *streamPayload) Headers() map[string]string {
 
 func (r *streamPayload) Data() []byte {
 	return r.data
-}
-
-func (r *streamPayload) Error() error {
-	if r.exception != nil && !r.exception.IsDeclared() {
-		return r.exception
-	}
-	return nil
 }
 
 // DecodeStreamPayload decodes a stream payload.
@@ -68,9 +60,13 @@ func DecodeStreamPayload(msg payload.Payload) (*streamPayload, error) {
 		return nil, fmt.Errorf("stream payload decompression failed: %w", err)
 	}
 	if res.metadata.PayloadMetadata != nil && res.metadata.PayloadMetadata.ExceptionMetadata != nil {
-		res.exception = newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)
+		exception := newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)
+		if !exception.IsDeclared() {
+			exception.SerializedException = res.data
+			return res, exception
+		}
 	}
-	return res, res.Error()
+	return res, nil
 }
 
 // EncodeStreamPayload encodes a stream payload.

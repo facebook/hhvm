@@ -62,6 +62,8 @@ type RocketException struct {
 	Kind          rpcmetadata.ErrorKind
 	Blame         rpcmetadata.ErrorBlame
 	Safety        rpcmetadata.ErrorSafety
+	// Optional serialized exception (set for "Any" and "DeprecatedProxy" exceptions)
+	SerializedException []byte
 }
 
 var _ error = (*RocketException)(nil)

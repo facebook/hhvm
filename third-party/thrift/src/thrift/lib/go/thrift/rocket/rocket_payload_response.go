@@ -26,9 +26,8 @@ import (
 )
 
 type responsePayload struct {
-	metadata  *rpcmetadata.ResponseRpcMetadata
-	exception *RocketException
-	data      []byte
+	metadata *rpcmetadata.ResponseRpcMetadata
+	data     []byte
 }
 
 func (r *responsePayload) Headers() map[string]string {
@@ -40,13 +39,6 @@ func (r *responsePayload) Headers() map[string]string {
 
 func (r *responsePayload) Data() []byte {
 	return r.data
-}
-
-func (r *responsePayload) Error() error {
-	if r.exception != nil && !r.exception.IsDeclared() {
-		return r.exception
-	}
-	return nil
 }
 
 // DecodeResponsePayload decodes a response payload.
@@ -71,9 +63,13 @@ func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 		return nil, fmt.Errorf("response payload decompression failed: %w", err)
 	}
 	if res.metadata.PayloadMetadata != nil && res.metadata.PayloadMetadata.ExceptionMetadata != nil {
-		res.exception = newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)
+		exception := newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)
+		if !exception.IsDeclared() {
+			exception.SerializedException = res.data
+			return res, exception
+		}
 	}
-	return res, res.Error()
+	return res, nil
 }
 
 // EncodeResponsePayload encodes a response payload.

@@ -721,7 +721,7 @@ std::vector<NameAndDType> globNameAndDType(
     logf(
         DBG,
         "Glob finished. Received {} files.\n",
-        glob.matchingFiles_ref()->size());
+        glob.matchingFiles()->size());
     std::vector<NameAndDType> result;
     appendGlobResultToNameAndDTypeVec(result, std::move(glob));
     return result;

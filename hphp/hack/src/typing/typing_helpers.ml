@@ -32,6 +32,7 @@ module ExpectedTy : sig
     reason: Typing_reason.ureason;
     ty: locl_ty;
     coerce: Typing_logic.coercion_direction option;
+    ignore_readonly: bool;
   }
   [@@deriving show]
 
@@ -49,6 +50,7 @@ module ExpectedTy : sig
 
   (* If type is an unsolved type variable, don't create an expected type *)
   val make_and_allow_coercion_opt :
+    ?ignore_readonly:bool ->
     Typing_env_types.env ->
     Pos.t ->
     Typing_reason.ureason ->
@@ -63,18 +65,20 @@ end = struct
     reason: Typing_reason.ureason;
     ty: locl_ty;
     coerce: Typing_logic.coercion_direction option;
+    ignore_readonly: bool;
   }
   [@@deriving show]
 
-  let make_and_allow_coercion_opt env pos reason ty =
+  let make_and_allow_coercion_opt ?(ignore_readonly = false) env pos reason ty =
     let (_env, ety) = Env.expand_type env ty in
     match get_node ety with
     | Tvar v when Internal_type_set.is_empty (Env.get_tyvar_upper_bounds env v)
       ->
       None
-    | _ -> Some { pos; reason; ty; coerce = None }
+    | _ -> Some { pos; reason; ty; coerce = None; ignore_readonly }
 
-  let make_and_allow_coercion pos reason ty = { pos; reason; ty; coerce = None }
+  let make_and_allow_coercion pos reason ty =
+    { pos; reason; ty; coerce = None; ignore_readonly = false }
 
   let make ?coerce pos reason locl_ty =
     let res = make_and_allow_coercion pos reason locl_ty in

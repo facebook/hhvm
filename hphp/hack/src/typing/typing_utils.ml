@@ -15,6 +15,7 @@ module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
 module TySet = Typing_set
+module ITySet = Internal_type_set
 module Cls = Folded_class
 module MakeType = Typing_make_type
 
@@ -743,6 +744,90 @@ let has_ancestor_including_req = has_ancestor_including_req ~visited:SSet.empty
 
 let has_ancestor_including_req_refl =
   has_ancestor_including_req_refl ~visited:SSet.empty
+
+(* Return true if the type is known to support dynamic (i.e. is a subtype of supportdyn<mixed>)
+ * Note that we look at bounds on type variables, so vec<#0> produces true if #0 has a
+ * bound that supports dynamic
+ *)
+let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
+  let (env, ty) = Env.expand_type env ty in
+  let recurse ty = is_supportdyn ~visited_tyvars ~visited_typarams env ty in
+  match get_node ty with
+  | Tprim _
+  | Tdynamic
+  | Tlabel _
+  | Tany _ ->
+    true
+  | Tunion tyl -> List.for_all tyl ~f:recurse
+  | Tintersection tyl -> List.exists tyl ~f:recurse
+  | Tnonnull -> false
+  | Tfun ft -> get_ft_support_dynamic_type ft
+  | Toption ty -> recurse ty
+  | Ttuple { t_required; t_extra } ->
+    List.for_all t_required ~f:recurse
+    && begin
+         match t_extra with
+         | Textra { t_optional; t_variadic } ->
+           List.for_all t_optional ~f:recurse && recurse t_variadic
+         | Tsplat t -> recurse t
+       end
+  | Tshape { s_origin = _; s_unknown_value; s_fields } ->
+    recurse s_unknown_value
+    && TShapeMap.fold
+         (fun _ { sft_ty; _ } d -> d && recurse sft_ty)
+         s_fields
+         true
+  | Tvec_or_dict (ty1, ty2) -> recurse ty1 && recurse ty2
+  | Tnewtype (n, [_], _) when String.equal n SN.Classes.cSupportDyn -> true
+  | Tnewtype (_, _, bound) -> recurse bound
+  | Tdependent (_, ty) -> recurse ty
+  | Tclass ((_, class_id), _exact, tyargs) ->
+    List.for_all tyargs ~f:recurse
+    &&
+    let class_def_sub = Env.get_class env class_id in
+    (match class_def_sub with
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      true
+    | Decl_entry.Found class_sub ->
+      Cls.get_support_dynamic_type class_sub || Env.is_enum env class_id)
+  | Tvar id ->
+    if Tvid.Set.mem id visited_tyvars || is_tyvar_error env ty then
+      false
+    else
+      let upper_bounds = Env.get_tyvar_upper_bounds env id in
+      let visited_tyvars = Tvid.Set.add id visited_tyvars in
+      ITySet.exists
+        (is_supportdyn_i ~visited_tyvars ~visited_typarams env)
+        upper_bounds
+  | Tgeneric name ->
+    if SSet.mem name visited_typarams then
+      false
+    else
+      let upper_bounds = Env.get_upper_bounds env name in
+      let visited_typarams = SSet.add name visited_typarams in
+      Typing_set.exists
+        (is_supportdyn ~visited_tyvars ~visited_typarams env)
+        upper_bounds
+  | Tclass_ptr ty -> recurse ty
+  | _ -> false
+
+and is_supportdyn_i ~visited_tyvars ~visited_typarams env ty =
+  match ty with
+  | LoclType ty -> is_supportdyn ~visited_tyvars ~visited_typarams env ty
+  | _ -> false
+
+(* Alternative implementation of is_supportdyn (compare below) that makes use of tyvar
+ * bounds e.g. if #0 <: supportdyn<mixed> then function will return true on vec<#0>.
+ * Ideally we would have a variant of subtyping that does this, but until that's the
+ * case we can use this function to get the same behaviour.
+ *)
+let is_supportdyn_use_tyvar_bounds env ty =
+  is_supportdyn
+    ~visited_tyvars:Tvid.Set.empty
+    ~visited_typarams:SSet.empty
+    env
+    ty
 
 let is_supportdyn env ty =
   is_sub_type_for_union env ty (MakeType.supportdyn_mixed Reason.none)

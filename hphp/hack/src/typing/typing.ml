@@ -282,11 +282,12 @@ end = struct
             | Some rty ->
               (* We can only apply like-pushing if the type actually supports dynamic.
                * We know this if we've gone under a supportdyn, *OR* if the type is
-               * known to be a dynamic-aware subtype of dynamic. The latter might fail
-               * if it's yet to be resolved i.e. a type variable, in which case we just
-               * remove the expected type.
+               * known to be a dynamic-aware subtype of dynamic.
                *)
-              if under_supportdyn || TUtils.is_supportdyn env rty then
+              if
+                under_supportdyn
+                || TUtils.is_supportdyn_use_tyvar_bounds env rty
+              then
                 aux ~under_supportdyn:true env rty
               else
                 (env, None)
@@ -512,12 +513,13 @@ let check_expected_ty_res
     ~(coerce_for_op : bool)
     (env : env)
     (inferred_ty : locl_ty)
-    (ExpectedTy.{ pos = p; reason = ur; ty; coerce } : ExpectedTy.t) :
-    (env, env) result =
+    (ExpectedTy.{ pos = p; reason = ur; ty; coerce; ignore_readonly } :
+      ExpectedTy.t) : (env, env) result =
   let (env, ty_err_opt) =
     Typing_coercion.coerce_type
       ~coerce_for_op
       ~coerce
+      ~ignore_readonly
       p
       ur
       env
@@ -536,7 +538,9 @@ let check_expected_ty_res
     (inferred_ty : locl_ty)
     (expected_ty : ExpectedTy.t) : (env, env) result =
   if Log.should_log_check_expected_ty env then
-    let ExpectedTy.{ pos; ty; reason = _; coerce = _ } = expected_ty in
+    let ExpectedTy.{ pos; ty; reason = _; coerce = _; ignore_readonly = _ } =
+      expected_ty
+    in
     Log.log_check_expected_ty env pos ~message ~inferred_ty ~ty @@ fun () ->
     check_expected_ty_res ~coerce_for_op env inferred_ty expected_ty
   else
@@ -3085,6 +3089,9 @@ end = struct
             if explicit then
               (env, ety)
             else
+              let (env, ety) =
+                Typing_dynamic_utils.recompose_like_type env ety
+              in
               (* Extract the underlying type from the expected type.
                * If it's an intersection, pick up the type under the like
                * e.g. For ~int & arraykey we want to pick up int
@@ -3402,7 +3409,8 @@ end = struct
               env
               expected
           with
-          | (env, Some (pos, reason, _, ety, _)) -> begin
+          | (env, Some (pos, reason, _, ety, _)) when not (List.is_empty l) ->
+          begin
             match get_expected_kind ety with
             | Some (env, kty, vty) ->
               let k_expected = ExpectedTy.make pos reason kty in
@@ -6973,6 +6981,7 @@ end = struct
                 in
                 let expected =
                   ExpectedTy.make_and_allow_coercion_opt
+                    ~ignore_readonly:(get_fp_ignore_readonly_error param)
                     env
                     (Aast_utils.get_expr_pos e)
                     Reason.URparam

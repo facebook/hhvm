@@ -12,6 +12,7 @@ module ExpectedTy : sig
     reason: Typing_reason.ureason;
     ty: Typing_defs.locl_ty;
     coerce: Typing_logic.coercion_direction option;
+    ignore_readonly: bool;
   }
 
   val make :
@@ -25,6 +26,7 @@ module ExpectedTy : sig
     Pos.t -> Typing_reason.ureason -> Typing_defs.locl_ty -> t
 
   val make_and_allow_coercion_opt :
+    ?ignore_readonly:bool ->
     Typing_env_types.env ->
     Pos.t ->
     Typing_reason.ureason ->

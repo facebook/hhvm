@@ -1321,9 +1321,12 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       let env =
         match expected with
         | None -> (env, None)
-        | Some ExpectedTy.{ pos = p; reason = ur; ty = cty; coerce } ->
+        | Some
+            ExpectedTy.
+              { pos = p; reason = ur; ty = cty; coerce; ignore_readonly } ->
           Typing_coercion.coerce_type
             ~coerce
+            ~ignore_readonly
             p
             ur
             env

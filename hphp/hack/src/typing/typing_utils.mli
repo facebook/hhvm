@@ -493,6 +493,13 @@ val supports_dynamic :
 (* Return true if type definitely is a subtype of supportdyn<mixed> *)
 val is_supportdyn : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
+(* Return true if type definitely is a subtype of supportdyn<mixed>.
+ * Use type variable bounds (unlike subtype algorithm) e.g. if
+ * #0 <: supportdyn<mixed> then is_supportdyn_use_tyvar_bounds(#0) = true
+ *)
+val is_supportdyn_use_tyvar_bounds :
+  Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
 val strip_supportdyn :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->

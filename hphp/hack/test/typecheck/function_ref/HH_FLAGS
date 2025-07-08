@@ -1,1 +1,1 @@
---config allowed_files_for_ignore_readonly=function_ref.php
+--config allowed_files_for_ignore_readonly=function_ref.php,function_ref_bug.php

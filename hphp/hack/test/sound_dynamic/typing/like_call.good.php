@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 <<__SupportDynamicType>>
 class C { public function p() : bool { return true; } }

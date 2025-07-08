@@ -697,7 +697,12 @@ let rec keep_trying_to_open
             (Exit_status.Exit_with
                (Exit_status.Server_hung_up_should_abort finale_data))
       end
-      | Ok { Server_progress.ErrorsRead.pid; clock = None; _ } ->
+      | Ok
+          {
+            Server_progress.ErrorsRead.pid;
+            clock = None | Some (ServerNotifier.Eden _);
+            _;
+          } ->
         (* If there's an existing file, but it's not using watchman, then we cannot offer
            consistency guarantees. We'll just go with it. This happens for instance
            if the server was started using dfind instead of watchman. *)
@@ -705,16 +710,20 @@ let rec keep_trying_to_open
           "Errors-file: %s is present, without watchman, so just going with it."
           (Sys_utils.show_inode fd);
         Lwt.return (pid, fd)
-      | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
+      | Ok
+          {
+            Server_progress.ErrorsRead.pid;
+            clock = Some (ServerNotifier.Watchman clock);
+            _;
+          } -> begin
         Hh_logger.log
           "Errors-file: %s is present, was started at clock %s, so querying watchman..."
           (Sys_utils.show_inode fd)
-          (ServerNotifier.show_clock clock);
+          clock;
         (* Watchman doesn't support "what files have changed from error.bin's clock until
            hh-invocation clock?". We'll instead use the (less permissive, still correct) query
            "what files have changed from error.bin's clock until now?". *)
         (* TODO frankemrich: This must become eden-aware *)
-        let clock = ServerNotifier.watchman_clock_of_clock clock in
         let%lwt since_result =
           let watchman_sockname = local_config.watchman.sockname in
           watchman_get_raw_updates_since

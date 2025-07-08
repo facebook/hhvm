@@ -357,7 +357,7 @@
  (wrapped false)
  (modules serverNotifierTypes)
  (libraries
-   watchman)
+   edenfs_watcher_stubs watchman)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

@@ -6,4 +6,7 @@
  *
  *)
 
-type clock = Watchman of Watchman.clock [@@deriving show, eq]
+type clock =
+  | Watchman of Watchman.clock
+  | Eden of Edenfs_watcher.clock
+[@@deriving show, eq]

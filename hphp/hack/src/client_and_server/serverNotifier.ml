@@ -17,11 +17,10 @@ type changes =
       (** contains some of the changes up to the point that the notifier was invoked,
           but there may be more pending changes that have not been included *)
 
-type clock = ServerNotifierTypes.clock = Watchman of Watchman.clock
+type clock = ServerNotifierTypes.clock =
+  | Watchman of Watchman.clock
+  | Eden of Edenfs_watcher.clock
 [@@deriving show, eq]
-
-let watchman_clock_of_clock = function
-  | ServerNotifierTypes.Watchman clock -> clock
 
 let handle_edenfs_watcher_result
     (result : ('t, Edenfs_watcher_types.edenfs_watcher_error) result) : 't =
@@ -62,6 +61,10 @@ type t =
           that just listens to these events. *)
       root: Path.t;
       local_config: ServerLocalConfig.t;
+      last_clock: Edenfs_watcher.clock ref;
+          (** Clock up to which we have gotten changes from the instance.
+          Concretely, clock as of the last call to any of the following Edenfs_watcher functions:
+          init, get_all_files, get_changes_sync, get_changes_async. *)
     }
   | MockChanges of {
       get_changes_async: unit -> changes;
@@ -81,13 +84,14 @@ let indexer (t : t) (filter : string -> bool) : unit -> string list =
   | Watchman { wenv; num_workers; _ } ->
     let files = Watchman.get_all_files wenv in
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
-  | EdenfsFileWatcher { instance; num_workers; _ } ->
-    let files =
+  | EdenfsFileWatcher { instance; num_workers; last_clock; _ } ->
+    let (files, new_clock) =
       Edenfs_watcher.get_all_files instance |> handle_edenfs_watcher_result
     in
     Hh_logger.debug
       "Edenfs_watcher.get_all_files returned %d files"
       (List.length files);
+    last_clock := new_clock;
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
 
 let init
@@ -159,8 +163,11 @@ let init
   let try_init_edenfs_watcher () : t option =
     Hh_logger.log "Using EdenFS file watcher";
     let watch_spec = FilesToIgnore.server_watch_spec in
-    let init_settings = { Edenfs_watcher.root; watch_spec } in
-    match Edenfs_watcher.init init_settings local_config with
+    let debug_logging =
+      local_config.ServerLocalConfig.edenfs_file_watcher.debug_logging
+    in
+    let init_settings = { Edenfs_watcher.root; watch_spec; debug_logging } in
+    match Edenfs_watcher.init init_settings with
     | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
       Hh_logger.log
         "Failed to initialize EdenFS watcher, failed with message:\n%s"
@@ -185,10 +192,11 @@ let init
       Hh_logger.log "%s" msg;
       HackEventLogger.edenfs_watcher_fallback ~msg;
       None
-    | Result.Ok instance ->
+    | Result.Ok (instance, initial_clock) ->
       (* TODO(frankemrich): Add use_edenfs_file_watcher to hh_server_events
          table and HackEventLogger *)
       (* HackEventLogger.set_use_edenfs_file_watcher (); *)
+      let last_clock = ref initial_clock in
 
       (* This is just temporary:
          For now, we also carry around a Watchman instance.
@@ -229,6 +237,7 @@ let init
                num_workers;
                root;
                local_config;
+               last_clock;
              })
       | None ->
         let msg = "Failed to initialize Watchman event watching instance" in
@@ -408,7 +417,8 @@ let get_changes_sync (t : t) : SSet.t * clock option =
       let clock = Watchman.get_clock !watchman in
       (changes, Some (ServerNotifierTypes.Watchman clock))
     | EdenfsFileWatcher
-        { instance; root; local_config; tmp_watchman_instance; _ } ->
+        { instance; root; local_config; tmp_watchman_instance; last_clock; _ }
+      ->
       process_watchman_state_changes
         ~sync:true
         tmp_watchman_instance
@@ -417,8 +427,6 @@ let get_changes_sync (t : t) : SSet.t * clock option =
 
       (* TODO(T226505256) Workaround for deferring changes while Meerkat is running *)
       if MeerkatTracker.is_meerkat_running () then (
-        (* TODO(T215219438) We need to return a proper clock value here *)
-        let new_clock = None in
         (* This is here to slow down the interrupt mechanism while we are deferring changes:
            Edenfs_watcher itself is unaware of the deferral and will write to the notification
            file descriptor if it sees changes.
@@ -426,20 +434,19 @@ let get_changes_sync (t : t) : SSet.t * clock option =
            query_notifier to check if there are actual changes, which might take us here.
            Without this delay, this will cause us to clog the CPU. *)
         Unix.sleepf 0.25;
-        (SSet.empty, new_clock)
+        (SSet.empty, Some (ServerNotifierTypes.Eden !last_clock))
       ) else
         (* Note that this will handle all errors by raising Exit_status *)
-        let (changes, _clock) =
+        let (changes, new_clock) =
           handle_edenfs_watcher_result
             (Edenfs_watcher.get_changes_sync instance)
         in
+        last_clock := new_clock;
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union acc (convert_edenfs_watcher_changes local_config c))
         in
-        (* TODO(T215219438) We need to return a proper clock value here *)
-        let new_clock = None in
-        (changes_set, new_clock)
+        (changes_set, Some (ServerNotifierTypes.Eden new_clock))
   in
 
   if
@@ -487,7 +494,8 @@ let get_changes_async (t : t) : changes * clock option =
 
       (changes, Some (ServerNotifierTypes.Watchman clock))
     | EdenfsFileWatcher
-        { instance; tmp_watchman_instance; root; local_config; _ } ->
+        { instance; tmp_watchman_instance; root; local_config; last_clock; _ }
+      ->
       process_watchman_state_changes
         ~sync:false
         tmp_watchman_instance
@@ -496,8 +504,6 @@ let get_changes_async (t : t) : changes * clock option =
 
       (* TODO(T226505256) Workaround for deferring changes while Meerkat is running *)
       if MeerkatTracker.is_meerkat_running () then (
-        (* TODO(T215219438) We need to return a proper clock value here *)
-        let new_clock = None in
         (* This is here to slow down the interrupt mechanism while we are deferring changes:
            Edenfs_watcher itself is unaware of the deferral and will write to the notification
            file descriptor if it sees changes.
@@ -505,20 +511,19 @@ let get_changes_async (t : t) : changes * clock option =
            query_notifier to check if there are actual changes, which might take us here.
            Without this delay, this will cause us to clog the CPU. *)
         Unix.sleepf 0.25;
-        (AsyncChanges SSet.empty, new_clock)
+        (AsyncChanges SSet.empty, Some (Eden !last_clock))
       ) else
         (* Note that this will handle all errors by raising Exit_status *)
-        let (changes, _clock) =
+        let (changes, new_clock) =
           handle_edenfs_watcher_result
             (Edenfs_watcher.get_changes_async instance)
         in
+        last_clock := new_clock;
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union acc (convert_edenfs_watcher_changes local_config c))
         in
-        (* TODO(T215219438) We need to return a proper clock value here *)
-        let new_clock = None in
-        (AsyncChanges changes_set, new_clock)
+        (AsyncChanges changes_set, Some (Eden new_clock))
   in
 
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then begin

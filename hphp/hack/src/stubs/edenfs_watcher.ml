@@ -8,11 +8,12 @@
 
 open Hh_prelude
 
-type clock = string
+type clock = string [@@deriving show, eq]
 
 type init_settings = {
   root: Path.t;
   watch_spec: FilesToIgnore.watch_spec;
+  debug_logging: bool;
 }
 
 type instance_handle_ffi
@@ -24,8 +25,7 @@ type edenfs_watcher_error = Edenfs_watcher_types.edenfs_watcher_error
 
 type changes = Edenfs_watcher_types.changes [@@deriving show]
 
-let init (_settings : init_settings) (_local_config : ServerLocalConfig.t) =
-  failwith "not implemented"
+let init (_settings : init_settings) = failwith "not implemented"
 
 let get_changes_sync (_instance : instance) :
     (changes list * clock, edenfs_watcher_error) result =
@@ -40,5 +40,5 @@ let get_notification_fd (_instance : instance) :
   failwith "not implemented"
 
 let get_all_files (_instance : instance) :
-    (string list, edenfs_watcher_error) result =
+    (string list * clock, edenfs_watcher_error) result =
   failwith "not implemented"

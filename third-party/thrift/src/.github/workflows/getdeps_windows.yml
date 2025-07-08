@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
     - name: Export boost environment
       run: "echo BOOST_ROOT=%BOOST_ROOT_1_83_0% >> %GITHUB_ENV%"
@@ -507,7 +507,7 @@ jobs:
        path: ${{ steps.paths.outputs.wangle_INSTALL }}
        key: ${{ steps.paths.outputs.wangle_CACHE_KEY }}-install
     - name: Build fbthrift
-      run: python build/fbcode_builder/getdeps.py build --src-dir=. fbthrift 
+      run: python build/fbcode_builder/getdeps.py build --src-dir=. fbthrift
     - name: Copy artifacts
       run: python build/fbcode_builder/getdeps.py fixup-dyn-deps --src-dir=. fbthrift _artifacts/windows  --final-install-prefix /usr/local
     - uses: actions/upload-artifact@v4
@@ -515,4 +515,4 @@ jobs:
         name: fbthrift
         path: _artifacts
     - name: Test fbthrift
-      run: python build/fbcode_builder/getdeps.py test --src-dir=. fbthrift 
+      run: python build/fbcode_builder/getdeps.py test --src-dir=. fbthrift

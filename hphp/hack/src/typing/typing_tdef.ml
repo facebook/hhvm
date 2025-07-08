@@ -97,15 +97,15 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
   with
   | Error cycle ->
     let r = Typing_reason.illegal_recursive_type (Reason.to_pos r) x in
-    let (env, mixed) =
+    let mixed =
       match td_as_constraint with
       | Some ty ->
         (match get_node ty with
         | Tapply ((_pos, sdt), [_]) when String.equal sdt SN.Classes.cSupportDyn
           ->
-          Typing_utils.make_supportdyn r env (MakeType.mixed r)
-        | _ -> (env, MakeType.mixed r))
-      | _ -> (env, MakeType.mixed r)
+          MakeType.supportdyn_mixed r
+        | _ -> MakeType.mixed r)
+      | _ -> MakeType.mixed r
     in
     let ty =
       (* For regular typechecking, we localize to mixed to prevent various unsoundness,

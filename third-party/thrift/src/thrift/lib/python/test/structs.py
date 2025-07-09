@@ -465,14 +465,6 @@ class StructTestsImmutable(unittest.TestCase):
             with self.assertRaisesRegex(AttributeError, field):
                 setattr(e, field, val)
 
-            if field == "val":
-                object.__setattr__(e, field, val)
-                self.assertEqual(e.val, val)
-                # BAD, AttributeError still not raised for primitive types
-                # and the mutation succeeds
-                # "primitive" means types where internal type same as python type
-                continue
-
             # for both cinder and cpython, normal setattr is blocked
             with self.assertRaisesRegex(AttributeError, field):
                 setattr(e, field, val)

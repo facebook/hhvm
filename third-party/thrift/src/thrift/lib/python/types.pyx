@@ -16,18 +16,19 @@ from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence, Set as pySet, Sized
 import warnings
 
-from folly.iobuf cimport cIOBuf, IOBuf, from_unique_ptr
+from cpython cimport bool as pbool, int as pint, float as pfloat
+from cpython.long cimport PyLong_AsLong
+from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
+from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM, PyTuple_GET_ITEM, PyTuple_Check
+from cpython.ref cimport Py_INCREF, Py_DECREF
+from cpython.set cimport PyFrozenSet_New, PySet_Add
+from cpython.unicode cimport PyUnicode_AsUTF8String, PyUnicode_FromEncodedObject
+from cython.operator cimport dereference as deref
+from cython cimport final as _cython__final
 from libcpp cimport bool as cbool
 from libcpp.utility cimport move as cmove
 from libcpp.memory cimport make_unique
-from cpython cimport bool as pbool, int as pint, float as pfloat
-from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
-from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM, PyTuple_GET_ITEM, PyTuple_Check
-from cpython.set cimport PyFrozenSet_New, PySet_Add
-from cpython.ref cimport Py_INCREF, Py_DECREF
-from cpython.long cimport PyLong_AsLong
-from cpython.unicode cimport PyUnicode_AsUTF8String, PyUnicode_FromEncodedObject
-from cython.operator cimport dereference as deref
+from folly.iobuf cimport cIOBuf, IOBuf, from_unique_ptr
 
 import copy
 import cython
@@ -147,7 +148,7 @@ cdef class TypeInfoBase:
         """
         return False
 
-@cython.final
+@_cython__final
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(
@@ -200,7 +201,7 @@ cdef class TypeInfo(TypeInfoBase):
         # instead of repeatedly constructing TypeInfo instances
         return self.singleton_name
 
-@cython.final
+@_cython__final
 cdef class IntegerTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, min_value, max_value, str singleton_name):
@@ -1132,7 +1133,6 @@ cdef class Struct(StructOrUnion):
 
     def __init__(self, **kwargs):
         self._initStructTupleWithValues(kwargs)
-        self._fbthrift_populate_primitive_fields()
 
     def __call__(self, **kwargs):
         if not kwargs:
@@ -1160,7 +1160,6 @@ cdef class Struct(StructOrUnion):
                 f"'{type(self).__name__}' object does not have attribute(s): "
                 f"'{', '.join(kwargs.keys())}'"
             )
-        new_inst._fbthrift_populate_primitive_fields()
         return new_inst
 
     def __copy__(Struct self):
@@ -1215,7 +1214,6 @@ cdef class Struct(StructOrUnion):
         cdef uint32_t len = cdeserialize(
             deref(info.cpp_obj), buf._this, self._fbthrift_data, proto
         )
-        self._fbthrift_populate_primitive_fields()
         return len
 
     cdef _fbthrift_py_value_from_internal_data(self, int16_t index):
@@ -1253,25 +1251,6 @@ cdef class Struct(StructOrUnion):
         PyTuple_SET_ITEM(self._fbthrift_field_cache, index, py_value)
         Py_INCREF(py_value)
         return py_value
-
-    cdef _fbthrift_populate_primitive_fields(self):
-        """
-        Copies the values of all primitive fields from the underlying struct
-        tuple (`_fbthrift_primitive_types`), or None if n/a, to instance
-        attributes with the same names.
-
-        This method is typically called exactly once, just prior to returning a
-        newly constructed instance of this Struct, i.e.:
-          * `__init__()`, after processing all kwargs
-          * `__call__()`, after creating a new instance and processing all
-            previous and new values. This method is called on the new instance.
-          * `_deserialize()`
-          * `Struct._fbthrift_from_internal_data()`
-        """
-        for index, name, type_info in self._fbthrift_primitive_types:
-            data = self._fbthrift_data[index + 1]
-            val = (<TypeInfoBase>type_info).to_python_value(data) if data is not None else None
-            object.__setattr__(self, name, val)
 
     cdef _fbthrift_fully_populate_cache(self):
         for _, field in self:
@@ -1361,14 +1340,12 @@ cdef class Struct(StructOrUnion):
     def _fbthrift_from_internal_data(cls, tuple fbthrift_data not None):
         cdef Struct inst = cls.__new__(cls)
         inst._fbthrift_data = fbthrift_data
-        inst._fbthrift_populate_primitive_fields()
         return inst
 
     # Initializes Struct to partially valid state.
     # On completion:
     #   - Struct internal data `_fbthrift_data` is valid
     #   - Struct `_fbthrift_field_cache` contains no cached values
-    #   - caller is responsible for calling `_fbthrift_populate_primitive_fields`
     @classmethod
     def _fbthrift_new(cls, **kwargs):
         cdef Struct inst = cls.__new__(cls)
@@ -1745,17 +1722,32 @@ def _make_readonly_mutate_attr():
 
     return _readonly_setattr, _readonly_delattr
 
-
-cdef class _StructCachedField:
-    """ A descriptor that enforces immutability. 
-        The _fbthrift_get_cached_field_value is responsible for the caching
+cdef class _FieldDescriptorBase:
+    """ 
+    A descriptor parent class that enforces immutability. 
     """
-    cdef int _field_index
     cdef str _field_name
 
-    def __init__(self, int field_index, str field_name):
-        self._field_index = field_index
+    def __init__(self, str field_name):
         self._field_name = field_name
+
+    def __set__(self, obj, value):
+        raise AttributeError(f"Cannot set attribute {self._field_name}: thrift-python structs are immutable") 
+
+    def __delete__(self, obj):
+        raise AttributeError(f"Cannot delete attribute {self._field_name}: thrift-python structs are immutable") 
+
+
+@cython.final
+cdef class _StructCachedField(_FieldDescriptorBase):
+    """ 
+    A descriptor that enforces immutability and implements cached field access.
+    """
+    cdef int16_t _field_index
+
+    def __init__(self, int16_t field_index, str field_name):
+        self._field_index = field_index
+        super().__init__(field_name)
 
     def __get__(self, Struct obj, objtype):
         if obj is None:
@@ -1763,11 +1755,25 @@ cdef class _StructCachedField:
 
         return obj._fbthrift_get_cached_field_value(self._field_index)
 
-    def __set__(self, obj, value):
-        raise AttributeError(f"Cannot set attribute {self._field_name}: thrift-python structs are immutable") 
 
-    def __delete__(self, obj):
-        raise AttributeError(f"Cannot delete attribute {self._field_name}: thrift-python structs are immutable") 
+@cython.final
+cdef class _StructPrimitiveField(_FieldDescriptorBase):
+    """
+    A descriptor that enforces immutability and implements field access for
+    types where the internal data type is exactly the python value type.
+                
+    """
+    cdef int16_t _tuple_index
+
+    def __init__(self, int16_t field_index, str field_name):
+        self._tuple_index = field_index + 1
+        super().__init__(field_name)
+
+    def __get__(self, Struct obj, objtype):
+        if obj is None:
+            return None
+
+        return obj._fbthrift_data[self._tuple_index]
 
 
 class StructMeta(type):
@@ -1823,7 +1829,8 @@ class StructMeta(type):
             slots.append(field_info.py_name)
 
             # if field has an adapter or is not primitive type, consider as "non-primitive"
-            if field_info.adapter_info is not None or not field_info.is_primitive:
+            if not field_info.is_primitive or field_info.adapter_info is not None \
+                    or isinstance(field_info.type_info, AdaptedTypeInfo):
                 non_primitive_types.append((i, field_info.py_name))
             else:
                 primitive_types.append((i, field_info.py_name, field_info.type_info))
@@ -1839,6 +1846,10 @@ class StructMeta(type):
                 field_name,
                 _make_cached_property(klass, field_index, field_name),
             )
+        for field_index, field_name, field_type_info in primitive_types:
+            descriptor = _StructPrimitiveField(field_index, field_name)
+            type.__setattr__(klass, field_name, descriptor)
+
         klass.__setattr__, klass.__delattr__ = _make_readonly_mutate_attr()
         return klass
 

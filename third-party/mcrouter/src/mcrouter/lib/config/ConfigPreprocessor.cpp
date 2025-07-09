@@ -2029,8 +2029,8 @@ dynamic ConfigPreprocessor::expandMacros(dynamic json, const Context& context)
       auto& value = json[i];
       try {
         value = expandMacros(std::move(value), context);
-      } catch (const std::logic_error& e) {
-        throwLogic("Array element #{}:\n{}", i, e.what());
+      } catch (const std::logic_error& err) {
+        throwLogic("Array element #{}:\n{}", i, err.what());
       }
     }
     return json;

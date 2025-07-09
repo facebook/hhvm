@@ -21,7 +21,7 @@ import copy
 import math
 import types
 import unittest
-from typing import Callable, Type, TypeVar
+from typing import Callable, cast as typing_cast, Type, TypeVar
 from unittest import mock
 
 import testing.thrift_mutable_types as mutable_test_types
@@ -36,13 +36,18 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-from testing.thrift_mutable_types import _Reserved as _ReservedMutable
+from testing.thrift_mutable_types import (
+    _Reserved as _ReservedMutable,
+    DefaultedFields as MutableDefaultedFields,
+    LatLon as MutableLatLon,
+)
 
 from testing.thrift_types import (
     _Reserved,
     Color,
     ComplexRef,
     customized,
+    DefaultedFields,
     easy,
     EmptyStruct,
     File,
@@ -670,6 +675,7 @@ class StructDeepcopyTests(unittest.TestCase):
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        self.DefaultedFields: Type[DefaultedFields] = self.test_types.DefaultedFields
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
@@ -851,3 +857,43 @@ class StructDeepcopyTests(unittest.TestCase):
         self.assertFalse(issubclass(int, Nested1))
         self.assertFalse(issubclass(Struct, Nested1))
         self.assertFalse(issubclass(Nested1, Nested2))
+
+    def test_field_deepcopy(self) -> None:
+        d1 = self.DefaultedFields()
+        d2 = self.DefaultedFields()
+        self.assertEqual(d1, d2)
+        for fld_name, d1_value in d1:
+            d2_value = getattr(d2, fld_name)
+            self.assertEqual(d1_value, d2_value)
+            # for mutable, they should be distinct objects, ofc
+            # for immutable, the internal data types are references to the same object,
+            # but field access creates a new distinct python object (thrift List or Map)
+            self.assertIsNot(d1_value, d2_value)
+
+        if not self.is_mutable_run:
+            return
+
+        # mutate the first one and verify that values of second don't change
+        d1 = typing_cast(MutableDefaultedFields, d1)
+        d1.int_list.append(49)
+        d1.unicode_set.add("£")
+        d1.location_map[38] = to_thrift_list(
+            [MutableLatLon(lat=39.7392567, lon=-104.9848600)]
+        )
+        d1.location_map[47].append(MutableLatLon())
+        d1.location_map[47][0].lat += 1e-6
+
+        # d2 should be unchanged
+        self.assertEqual(d1.int_list, list(range(11)) + [49])
+        self.assertEqual(d2.int_list, list(range(11)))
+
+        self.assertEqual(d1.unicode_set - d2.unicode_set, {"£"})
+        self.assertEqual(d2.unicode_set - d1.unicode_set, set())
+
+        self.assertEqual(d1.location_map[31], d2.location_map[31])
+        self.assertEqual(len(d1.location_map[38]), 1)
+        self.assertNotIn(38, d2.location_map)
+        self.assertEqual(len(d1.location_map[47]), 3)
+        self.assertEqual(len(d2.location_map[47]), 2)
+        self.assertNotEqual(d1.location_map[47][0].lat, d2.location_map[47][0].lat)
+        self.assertEqual(d1.location_map[47][0].lon, d2.location_map[47][0].lon)

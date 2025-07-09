@@ -60,6 +60,47 @@ void ensureImportOrThrow() {
   }
 }
 
+enum class PythonVariant { Immutable, Mutable };
+
+/**
+ * Which types must be copied in mutable python for IDL custom defaults
+ */
+bool requiresDeepCopy(const detail::TypeInfo& typeInfo) {
+  switch (typeInfo.type) {
+    case protocol::TType::T_BOOL:
+    case protocol::TType::T_BYTE:
+    case protocol::TType::T_I16:
+    case protocol::TType::T_I32:
+    case protocol::TType::T_I64:
+    case protocol::TType::T_DOUBLE:
+    case protocol::TType::T_FLOAT:
+      // these are immutable
+      return false;
+    case protocol::TType::T_STRING:
+      switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
+        case detail::StringFieldType::String:
+        case detail::StringFieldType::StringView:
+        case detail::StringFieldType::Binary:
+        case detail::StringFieldType::BinaryStringView:
+          // str and bytes are immutable
+          return false;
+        case detail::StringFieldType::IOBuf:
+        case detail::StringFieldType::IOBufPtr:
+        case detail::StringFieldType::IOBufObj:
+          // IOBuf is not immutable
+          return true;
+      }
+    case protocol::TType::T_LIST:
+    case protocol::TType::T_MAP:
+    case protocol::TType::T_SET:
+    case protocol::TType::T_STRUCT:
+      // all this jank is mutable
+      return true;
+    default:
+      LOG(FATAL) << "invalid typeInfo TType " << typeInfo.type;
+  }
+}
+
 /**
  * Returns a *new* owned reference to a PyObject* if generated.
  * If a type is uncached, returns std::nullopt. See next function
@@ -75,7 +116,7 @@ void ensureImportOrThrow() {
  * As a special case, IOBuf should never be cached because we can't
  * guarantee that it's immutable, so it's always generated fresh.
  */
-template <typename Container>
+template <PythonVariant Variant>
 std::optional<PyObject*> genUncachedDefaultValue(
     const detail::TypeInfo& typeInfo) {
   switch (typeInfo.type) {
@@ -106,11 +147,11 @@ std::optional<PyObject*> genUncachedDefaultValue(
       }
     // empty tuple cheaply initializes to empty singletons.
     case protocol::TType::T_LIST:
-      return Container::kIsMutable
+      return Variant == PythonVariant::Mutable
           ? std::nullopt
           : std::make_optional<PyObject*>(PyTuple_New(0));
     case protocol::TType::T_MAP:
-      return Container::kIsMutable
+      return Variant == PythonVariant::Mutable
           ? std::nullopt
           : std::make_optional<PyObject*>(PyTuple_New(0));
     case protocol::TType::T_SET:
@@ -134,8 +175,7 @@ std::optional<PyObject*> genUncachedDefaultValue(
  *
  * @throws if the thrift python types module could not be imported.
  */
-template <typename Container>
-UniquePyObjectPtr getDefaultValueForField(
+UniquePyObjectPtr getDefaultValueForImmutableField(
     const detail::TypeInfo* typeInfo,
     const FieldValueMap& userDefaultValues,
     int16_t index) {
@@ -150,7 +190,8 @@ UniquePyObjectPtr getDefaultValueForField(
   }
 
   // 2. Most types aren't worth caching, so check if one of them
-  auto maybeDefault = genUncachedDefaultValue<Container>(*typeInfo);
+  auto maybeDefault =
+      genUncachedDefaultValue<PythonVariant::Immutable>(*typeInfo);
   if (maybeDefault) {
     if (*maybeDefault == nullptr) {
       THRIFT_PY3_CHECK_ERROR();
@@ -171,9 +212,54 @@ UniquePyObjectPtr getDefaultValueForField(
 
   // 4. No cached value found. Determine the default value, and update cache (if
   // applicable).
-  auto value = Container::GetStandardDefaultValueForType(*typeInfo);
+  auto value = getStandardImmutableDefaultValuePtrForType(*typeInfo);
   defaultValueCache->emplace(typeInfo, value);
   Py_INCREF(value);
+  return UniquePyObjectPtr(value);
+}
+
+/**
+ * Returns a deep copy of the given object. Since ListContainer acts as a
+ * data holder policy for mutable types, a real deep copy is necessary assuming
+ * the type holds at least one mutable field (struct, list, map, set, IOBuf)
+ */
+static PyObject* deepCopy(PyObject* p) {
+  ensureImportOrThrow();
+  return deepcopy(p);
+}
+
+/**
+ * Returns the standard default value for a thrift field of the given type.
+ *
+ * The returned value will either be the one provided by the user (in the Thrift
+ * IDL), or the standard default value for the given `typeInfo`.
+ *
+ * @param `index` of the field in `userDefaultValues`, i.e. insertion order (NOT
+ *        field ID).
+ *
+ * @throws if the thrift python types module could not be imported.
+ */
+UniquePyObjectPtr getDefaultValueForMutableField(
+    const detail::TypeInfo* typeInfo,
+    const FieldValueMap& userDefaultValues,
+    int16_t index) {
+  ensureImportOrThrow();
+
+  // 1. If the user explicitly provided a default value, use it.
+  auto userDefaultValueIt = userDefaultValues.find(index);
+  if (userDefaultValueIt != userDefaultValues.end()) {
+    PyObject* value = userDefaultValueIt->second;
+    if (requiresDeepCopy(*typeInfo)) {
+      return UniquePyObjectPtr(deepCopy(value));
+    } else {
+      Py_INCREF(value);
+      return UniquePyObjectPtr(value);
+    }
+  }
+
+  // 2. For non-IDL default, just generate the default value. We can't
+  // cache it because then it would require a deepcopy
+  auto value = getStandardMutableDefaultValuePtrForType(*typeInfo);
   return UniquePyObjectPtr(value);
 }
 
@@ -181,7 +267,6 @@ UniquePyObjectPtr getDefaultValueForField(
  * A policy for handling Python tuples.
  */
 struct TupleContainer final {
-  static const bool kIsMutable = false;
   /**
    * Return a new tuple object of given size, or NULL on failure.
    */
@@ -219,20 +304,11 @@ struct TupleContainer final {
 
   static Py_ssize_t Size(PyObject* p) { return PyTuple_Size(p); }
 
-  /**
-   * Returns a deep copy of the given object. Since TupleContainer acts as a
-   * data holder policy for immutable types, this operation simply returns the
-   * original object, as no actual copying is necessary for immutable data.
-   */
-  static PyObject* deepCopy(PyObject* p) { return p; }
-
-  /**
-   * Produces standard default value internal data for the type. See description
-   * of called function in header for full documentation.
-   */
-  static PyObject* GetStandardDefaultValueForType(
-      const ::apache::thrift::detail::TypeInfo& typeInfo) {
-    return getStandardImmutableDefaultValuePtrForType(typeInfo);
+  static UniquePyObjectPtr getDefaultValueForField(
+      const detail::TypeInfo* typeInfo,
+      const FieldValueMap& userDefaultValues,
+      int16_t index) {
+    return getDefaultValueForImmutableField(typeInfo, userDefaultValues, index);
   }
 };
 
@@ -240,7 +316,6 @@ struct TupleContainer final {
  * A policy for handling Python lists.
  */
 struct ListContainer final {
-  static const bool kIsMutable = true;
   /**
    * Return a new list object of given size, or NULL on failure.
    */
@@ -278,23 +353,11 @@ struct ListContainer final {
 
   static Py_ssize_t Size(PyObject* p) { return PyList_Size(p); }
 
-  /**
-   * Returns a deep copy of the given object. Since ListContainer acts as a
-   * data holder policy for mutable types, a real deep copy is necessary. For
-   * immutable types, the deep copy operation simply returns the object itself.
-   */
-  static PyObject* deepCopy(PyObject* p) {
-    ensureImportOrThrow();
-    return deepcopy(p);
-  }
-
-  /**
-   * Produces standard default value internal data for the type. See description
-   * of called function in header for full documentation.
-   */
-  static PyObject* GetStandardDefaultValueForType(
-      const ::apache::thrift::detail::TypeInfo& typeInfo) {
-    return getStandardMutableDefaultValuePtrForType(typeInfo);
+  static UniquePyObjectPtr getDefaultValueForField(
+      const detail::TypeInfo* typeInfo,
+      const FieldValueMap& userDefaultValues,
+      int16_t index) {
+    return getDefaultValueForMutableField(typeInfo, userDefaultValues, index);
   }
 };
 
@@ -354,7 +417,7 @@ PyObject* createStructContainerWithDefaultValues(
       Container::SET_ITEM(
           container.get(),
           fieldIndex + 1,
-          getDefaultValueForField<Container>(
+          Container::getDefaultValueForField(
               fieldInfo.typeInfo, defaultValues, fieldIndex)
               .release());
     }
@@ -362,7 +425,7 @@ PyObject* createStructContainerWithDefaultValues(
 
   // The policy determines the actual deep copy operation; it performs a no-op
   // for immutable types.
-  return Container::deepCopy(container.release());
+  return container.release();
 }
 
 /**
@@ -407,8 +470,9 @@ PyObject* createStructTupleWithDefaultValues(
  *
  * @throws if there is no standard default value
  */
+template <PythonVariant Variant>
 UniquePyObjectPtr getStandardDefaultValueForType(
-    const detail::TypeInfo& typeInfo, bool isMutable) {
+    const detail::TypeInfo& typeInfo) {
   PyObject* ptr = nullptr;
 
   // Immutable types use a default-value cache and initialize the fields with
@@ -453,27 +517,27 @@ UniquePyObjectPtr getStandardDefaultValueForType(
       }
       break;
     case protocol::TType::T_LIST:
-      ptr = isMutable ? PyList_New(0) : PyTuple_New(0);
+      ptr = Variant == PythonVariant::Mutable ? PyList_New(0) : PyTuple_New(0);
       break;
     case protocol::TType::T_MAP:
-      ptr = isMutable ? PyDict_New() : PyTuple_New(0);
+      ptr = Variant == PythonVariant::Mutable ? PyDict_New() : PyTuple_New(0);
       break;
     case protocol::TType::T_SET:
       // For sets, the default value is an empty `frozenset`.
-      ptr = isMutable ? PySet_New(nullptr) : PyFrozenSet_New(nullptr);
+      ptr = Variant == PythonVariant::Mutable ? PySet_New(nullptr)
+                                              : PyFrozenSet_New(nullptr);
       break;
     case protocol::TType::T_STRUCT: {
       // For struct and unions, the default value is a (recursively)
       // default-initialized instance.
       auto structInfo =
           static_cast<const detail::StructInfo*>(typeInfo.typeExt);
-      if (isMutable) {
-        ptr = structInfo->unionExt != nullptr
-            ? createMutableUnionDataHolder()
-            : createStructListWithDefaultValues(*structInfo);
+      if (structInfo->unionExt != nullptr) {
+        ptr = Variant == PythonVariant::Mutable ? createMutableUnionDataHolder()
+                                                : createUnionTuple();
       } else {
-        ptr = structInfo->unionExt != nullptr
-            ? createUnionTuple()
+        ptr = Variant == PythonVariant::Mutable
+            ? createStructListWithDefaultValues(*structInfo)
             : createStructTupleWithDefaultValues(*structInfo);
       }
       break;
@@ -506,7 +570,7 @@ UniquePyObjectPtr getStandardDefaultValueForType(
  */
 UniquePyObjectPtr getStandardImmutableDefaultValueForType(
     const detail::TypeInfo& typeInfo) {
-  return getStandardDefaultValueForType(typeInfo, false);
+  return getStandardDefaultValueForType<PythonVariant::Immutable>(typeInfo);
 }
 
 /**
@@ -529,7 +593,7 @@ UniquePyObjectPtr getStandardImmutableDefaultValueForType(
  */
 UniquePyObjectPtr getStandardMutableDefaultValueForType(
     const detail::TypeInfo& typeInfo) {
-  return getStandardDefaultValueForType(typeInfo, true);
+  return getStandardDefaultValueForType<PythonVariant::Mutable>(typeInfo);
 }
 
 /**
@@ -579,9 +643,9 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
       Container::SET_ITEM(
           container,
           i + 1,
-          Container::deepCopy(getDefaultValueForField<Container>(
-                                  fieldInfo.typeInfo, defaultValues, i)
-                                  .release()));
+          Container::getDefaultValueForField(
+              fieldInfo.typeInfo, defaultValues, i)
+              .release());
     }
     Py_DECREF(oldValue);
   }
@@ -1307,9 +1371,8 @@ void resetFieldToStandardDefault(
     PyList_SET_ITEM(
         structList,
         index + 1,
-        ListContainer::deepCopy(getDefaultValueForField<ListContainer>(
-                                    fieldInfo.typeInfo, defaultValues, index)
-                                    .release()));
+        getDefaultValueForMutableField(fieldInfo.typeInfo, defaultValues, index)
+            .release());
   }
   Py_DECREF(oldValue);
 }

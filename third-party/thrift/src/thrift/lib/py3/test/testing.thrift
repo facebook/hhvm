@@ -32,6 +32,7 @@ namespace py3 ""
 namespace cpp2 cpp2
 
 const list<i16> int_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 const list<string> unicode_list = ["Bulgaria", "Benin", "Saint Barthélemy"];
 const list<binary> binary_list = ["Saint Barthélemy"];
 
@@ -39,6 +40,25 @@ const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
 
 const sub_dependency.IncludedColour RedColour = sub_dependency.IncludedColour.red;
 const sub_dependency.IncludedColour BlueColour = sub_dependency.IncludedColour.blue;
+
+struct LatLon {
+  1: double lat = 51.4769;
+  2: double lon = 0.0005;
+}
+
+const map<i16, list<LatLon>> CoolPlaces = {
+  31: [{lat: 51.4769, lon: 0.0005}, {lat: 37.484983, lon: -122.1481479}],
+  47: [
+    {lat: 35.1085106, lon: -106.5354721},
+    {lat: 35.1955072, lon: -106.4336690},
+  ],
+};
+
+struct DefaultedFields {
+  1: map<i16, list<LatLon>> location_map = CoolPlaces;
+  2: list<i16> int_list = int_list;
+  3: set<string> unicode_set = ["Bulgaria", "Benin", "Saint Barthélemy"];
+}
 
 const dependency.IncludedStruct FANCY_CONST = dependency.IncludedStruct{
   val = sub_dependency.Basic{nom = "fancy", val = 47, bin = "01010101"},

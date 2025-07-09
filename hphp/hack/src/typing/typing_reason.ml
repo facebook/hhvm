@@ -318,6 +318,7 @@ let flow_kind_to_json = function
 type witness_locl =
   | Witness of Pos.t
   | Idx_vector of Pos.t
+  | Idx_string of Pos.t
   | Foreach of Pos.t
   | Asyncforeach of Pos.t
   | Arith of Pos.t
@@ -380,6 +381,7 @@ type witness_locl =
 let witness_locl_to_raw_pos = function
   | Witness pos
   | Idx_vector pos
+  | Idx_string pos
   | Foreach pos
   | Asyncforeach pos
   | Arith pos
@@ -448,6 +450,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   match w with
   | Witness p -> Witness (pos p)
   | Idx_vector p -> Idx_vector (pos p)
+  | Idx_string p -> Idx_string (pos p)
   | Foreach p -> Foreach (pos p)
   | Asyncforeach p -> Asyncforeach (pos p)
   | Arith p -> Arith (pos p)
@@ -510,6 +513,7 @@ let map_pos_witness_locl pos pos_or_decl w =
 let constructor_string_of_witness_locl = function
   | Witness _ -> "Rwitness"
   | Idx_vector _ -> "Ridx_vector"
+  | Idx_string _ -> "Ridx_string"
   | Foreach _ -> "Rforeach"
   | Asyncforeach _ -> "Rasyncforeach"
   | Arith _ -> "Rarith"
@@ -588,6 +592,7 @@ let pp_witness_locl fmt witness =
       Format.pp_print_string fmt s2;
       ()
     | Idx_vector p
+    | Idx_string p
     | Foreach p
     | Asyncforeach p
     | Arith p
@@ -668,6 +673,8 @@ let witness_locl_to_json witness =
     Hh_json.(JSON_Object [("Witness", JSON_Array [pos_to_json pos])])
   | Idx_vector pos ->
     Hh_json.(JSON_Object [("Idx_vector", JSON_Array [pos_to_json pos])])
+  | Idx_string pos ->
+    Hh_json.(JSON_Object [("Idx_string", JSON_Array [pos_to_json pos])])
   | Foreach pos ->
     Hh_json.(JSON_Object [("Foreach", JSON_Array [pos_to_json pos])])
   | Asyncforeach pos ->
@@ -828,6 +835,9 @@ let witness_locl_to_string prefix witness =
     ( Pos_or_decl.of_raw_pos pos,
       prefix
       ^ " because only `int` can be used to index into a `Vector` or `vec`." )
+  | Idx_string pos ->
+    ( Pos_or_decl.of_raw_pos pos,
+      prefix ^ " because only `int` can be used to index into a `string`." )
   | Foreach pos ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " because this is used in a `foreach` statement" )
@@ -1028,6 +1038,7 @@ let witness_locl_to_string prefix witness =
 type witness_decl =
   | Witness_from_decl of (Pos_or_decl.t[@hash.ignore])
   | Idx_vector_from_decl of (Pos_or_decl.t[@hash.ignore])
+  | Idx_string_from_decl of (Pos_or_decl.t[@hash.ignore])
   | Hint of (Pos_or_decl.t[@hash.ignore])
   | Class_class of (Pos_or_decl.t[@hash.ignore]) * string
   | Var_param_from_decl of (Pos_or_decl.t[@hash.ignore])
@@ -1062,6 +1073,7 @@ type witness_decl =
 let witness_decl_to_raw_pos = function
   | Witness_from_decl pos_or_decl
   | Idx_vector_from_decl pos_or_decl
+  | Idx_string_from_decl pos_or_decl
   | Ret_fun_kind_from_decl (pos_or_decl, _)
   | Hint pos_or_decl
   | Class_class (pos_or_decl, _)
@@ -1095,6 +1107,7 @@ let map_pos_witness_decl pos_or_decl witness =
   match witness with
   | Witness_from_decl p -> Witness_from_decl (pos_or_decl p)
   | Idx_vector_from_decl p -> Idx_vector_from_decl (pos_or_decl p)
+  | Idx_string_from_decl p -> Idx_string_from_decl (pos_or_decl p)
   | Ret_fun_kind_from_decl (p, k) -> Ret_fun_kind_from_decl (pos_or_decl p, k)
   | Hint p -> Hint (pos_or_decl p)
   | Class_class (p, s) -> Class_class (pos_or_decl p, s)
@@ -1148,6 +1161,7 @@ let string_of_pessimise_reason = function
 let constructor_string_of_witness_decl = function
   | Witness_from_decl _ -> "Rwitness_from_decl"
   | Idx_vector_from_decl _ -> "Ridx_vector_from_decl"
+  | Idx_string_from_decl _ -> "Ridx_string_from_decl"
   | Ret_fun_kind_from_decl _ -> "Rret_fun_kind_from_decl"
   | Hint _ -> "Rhint"
   | Class_class _ -> "Rclass_class"
@@ -1214,6 +1228,7 @@ let pp_witness_decl fmt witness =
     | Vec_or_dict_key p
     | Default_capability p
     | Idx_vector_from_decl p
+    | Idx_string_from_decl p
     | Inout_param p
     | Support_dynamic_type p
     | Support_dynamic_type_assume p
@@ -1257,6 +1272,10 @@ let witness_decl_to_json = function
     Hh_json.(
       JSON_Object
         [("Idx_vector_from_decl", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Idx_string_from_decl pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Idx_string_from_decl", JSON_Array [Pos_or_decl.json pos_or_decl])])
   | Ret_fun_kind_from_decl (pos_or_decl, fun_kind) ->
     Hh_json.(
       JSON_Object
@@ -1440,6 +1459,9 @@ let witness_decl_to_string prefix witness =
     ( pos_or_decl,
       prefix
       ^ " because only `int` can be used to index into a `Vector` or `vec`." )
+  | Idx_string_from_decl pos_or_decl ->
+    ( pos_or_decl,
+      prefix ^ " because only `int` can be used to index into a `string`." )
   | Ret_fun_kind_from_decl (pos_or_decl, kind) ->
     ( pos_or_decl,
       (match kind with
@@ -2556,6 +2578,10 @@ module Constructors = struct
   let idx_vector p = from_witness_locl @@ Idx_vector p
 
   let idx_vector_from_decl p = from_witness_decl @@ Idx_vector_from_decl p
+
+  let idx_string p = from_witness_locl @@ Idx_string p
+
+  let idx_string_from_decl p = from_witness_decl @@ Idx_string_from_decl p
 
   let foreach p = from_witness_locl @@ Foreach p
 

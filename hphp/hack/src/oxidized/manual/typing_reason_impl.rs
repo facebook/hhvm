@@ -11,6 +11,7 @@ impl WitnessLocl {
         match self {
             Self::Witness(pos)
             | Self::IdxVector(pos)
+            | Self::IdxString(pos)
             | Self::Foreach(pos)
             | Self::Asyncforeach(pos)
             | Self::Arith(pos)
@@ -77,6 +78,7 @@ impl WitnessDecl {
         match self {
             Self::WitnessFromDecl(pos_or_decl)
             | Self::IdxVectorFromDecl(pos_or_decl)
+            | Self::IdxStringFromDecl(pos_or_decl)
             | Self::RetFunKindFromDecl(pos_or_decl, _)
             | Self::Hint(pos_or_decl)
             | Self::ClassClass(pos_or_decl, _)

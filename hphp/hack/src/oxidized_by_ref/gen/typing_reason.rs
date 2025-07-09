@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c54aac0b69174bd4ab48691ca7fb7bf>>
+// @generated SignedSource<<4a12719b12aafd1be5f0b1c4564411e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -257,6 +257,9 @@ pub enum WitnessLocl<'a> {
     #[rust_to_ocaml(name = "Idx_vector")]
     IdxVector(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Idx_string")]
+    IdxString(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Foreach(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Asyncforeach(&'a pos::Pos<'a>),
@@ -450,6 +453,9 @@ pub enum WitnessDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Idx_vector_from_decl")]
     IdxVectorFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Idx_string_from_decl")]
+    IdxStringFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hint(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

@@ -226,6 +226,7 @@ impl<'a> ToOxidizedByRef<'a> for ExprDepTypeReason {
 pub enum WitnessDecl<P> {
     WitnessFromDecl(P),
     IdxVectorFromDecl(P),
+    IdxStringFromDecl(P),
     Hint(P),
     ClassClass(P, TypeName),
     VarParamFromDecl(P),

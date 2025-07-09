@@ -185,6 +185,11 @@ val idx_vector : Pos.t -> t
 
 val idx_vector_from_decl : Pos_or_decl.t -> 'phase t_
 
+(* Used as an index, in the String case *)
+val idx_string : Pos.t -> t
+
+val idx_string_from_decl : Pos_or_decl.t -> 'phase t_
+
 (* Because it is iterated in a foreach loop *)
 val foreach : Pos.t -> t
 

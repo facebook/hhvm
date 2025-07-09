@@ -6237,7 +6237,7 @@ end = struct
     | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
     | (_, Tprim Tstring) ->
       let pos = get_pos ty_sub in
-      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
+      let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
       is_container tk tv
     | (r_sub, Tunion ty_subs) ->

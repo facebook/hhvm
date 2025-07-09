@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1605e2e7781e7600a60816debcfee93a>>
+// @generated SignedSource<<76543548f204346bbc57ca9f1fea695a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -422,6 +422,8 @@ pub enum WitnessLocl {
     Witness(pos::Pos),
     #[rust_to_ocaml(name = "Idx_vector")]
     IdxVector(pos::Pos),
+    #[rust_to_ocaml(name = "Idx_string")]
+    IdxString(pos::Pos),
     Foreach(pos::Pos),
     Asyncforeach(pos::Pos),
     Arith(pos::Pos),
@@ -546,6 +548,8 @@ pub enum WitnessDecl {
     WitnessFromDecl(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Idx_vector_from_decl")]
     IdxVectorFromDecl(pos_or_decl::PosOrDecl),
+    #[rust_to_ocaml(name = "Idx_string_from_decl")]
+    IdxStringFromDecl(pos_or_decl::PosOrDecl),
     Hint(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Class_class")]
     ClassClass(pos_or_decl::PosOrDecl, String),

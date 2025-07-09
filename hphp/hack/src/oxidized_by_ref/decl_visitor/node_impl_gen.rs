@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37e32a7712a8171d720335196fc06e58>>
+// @generated SignedSource<<369880de458004bb136d3a2444b614db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1215,6 +1215,7 @@ impl<'a> Node<'a> for WitnessLocl<'a> {
         match self {
             WitnessLocl::Witness(ref __binding_0) => __binding_0.accept(v),
             WitnessLocl::IdxVector(ref __binding_0) => __binding_0.accept(v),
+            WitnessLocl::IdxString(ref __binding_0) => __binding_0.accept(v),
             WitnessLocl::Foreach(ref __binding_0) => __binding_0.accept(v),
             WitnessLocl::Asyncforeach(ref __binding_0) => __binding_0.accept(v),
             WitnessLocl::Arith(ref __binding_0) => __binding_0.accept(v),
@@ -1283,6 +1284,7 @@ impl<'a> Node<'a> for WitnessDecl<'a> {
         match self {
             WitnessDecl::WitnessFromDecl(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::IdxVectorFromDecl(ref __binding_0) => __binding_0.accept(v),
+            WitnessDecl::IdxStringFromDecl(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::Hint(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::ClassClass(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::VarParamFromDecl(ref __binding_0) => __binding_0.accept(v),

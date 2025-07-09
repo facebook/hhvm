@@ -13,6 +13,7 @@ impl<'a> WitnessLocl<'a> {
         match self {
             WitnessLocl::Witness(p)
             | WitnessLocl::IdxVector(p)
+            | WitnessLocl::IdxString(p)
             | WitnessLocl::Foreach(p)
             | WitnessLocl::Asyncforeach(p)
             | WitnessLocl::Arith(p)
@@ -79,6 +80,7 @@ impl<'a> WitnessDecl<'a> {
         match self {
             WitnessDecl::WitnessFromDecl(p)
             | WitnessDecl::IdxVectorFromDecl(p)
+            | WitnessDecl::IdxStringFromDecl(p)
             | WitnessDecl::RetFunKindFromDecl((p, _))
             | WitnessDecl::Hint(p)
             | WitnessDecl::ClassClass((p, _))

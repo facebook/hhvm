@@ -7,6 +7,7 @@
 
 namespace cpp2 carbon
 namespace py3 carbon
+namespace hack carbon
 
 enum Result {
   UNKNOWN = 0,

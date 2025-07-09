@@ -590,9 +590,10 @@ LoggingArray* mutateMove(LoggingArray* lad, EntryTypes ms,
   }
 
   auto const profile = lad->profile;
+  auto const result = LoggingArray::Make(res, profile, ms, ko);
   assertx(lad->decReleaseCheck());
   LoggingArray::ZombieRelease(lad);
-  return LoggingArray::Make(res, profile, ms, ko);
+  return result;
 }
 
 }

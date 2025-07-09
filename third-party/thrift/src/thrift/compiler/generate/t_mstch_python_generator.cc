@@ -119,6 +119,16 @@ mstch::node adapter_node(
   return node;
 }
 
+bool is_invariant_adapter(
+    const t_const* adapter_annotation, const t_type* true_type) {
+  if (true_type->is<t_primitive_type>() || !adapter_annotation) {
+    return false;
+  }
+
+  auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
+  return boost::algorithm::ends_with(type_hint, "[]");
+}
+
 bool is_invariant_container_type(const t_type* type) {
   // Mapping is invariant in its key type
   // For example, if `Derived` extends `Base`,
@@ -130,8 +140,13 @@ bool is_invariant_container_type(const t_type* type) {
   if (true_type->is<t_map>()) {
     const t_map* map_type = dynamic_cast<const t_map*>(true_type);
     const t_type* key_type = map_type->get_key_type()->get_true_type();
+    const t_type* val_type = map_type->get_val_type()->get_true_type();
     return key_type->is<t_structured>() || key_type->is<t_container>() ||
-        is_invariant_container_type(map_type->get_val_type());
+        is_invariant_adapter(
+               find_structured_adapter_annotation(*key_type), key_type) ||
+        is_invariant_container_type(val_type) ||
+        is_invariant_adapter(
+               find_structured_adapter_annotation(*val_type), val_type);
   } else if (true_type->is<t_list>()) {
     return is_invariant_container_type(
         dynamic_cast<const t_list*>(true_type)->get_elem_type());
@@ -141,16 +156,6 @@ bool is_invariant_container_type(const t_type* type) {
   }
 
   return false;
-}
-
-bool is_invariant_adapter(
-    const t_const* adapter_annotation, const t_type* true_type) {
-  if (true_type->is<t_primitive_type>() || !adapter_annotation) {
-    return false;
-  }
-
-  auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
-  return boost::algorithm::ends_with(type_hint, "[]");
 }
 
 bool field_has_invariant_type(const t_field* field) {

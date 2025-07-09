@@ -106,12 +106,11 @@ class {{> structs/unadapted_name}}({{!
 {{#program:typedefs?}}
 
 {{#program:typedefs}}
-{{typedef:name}} = {{! TODO(T207953628): ADAPTER COMMENTED OUT #typedef:has_adapter?}}{{!
-    }}{{! adapter:type_hint}}{{! #adapter:is_generic?}}{{! [ }}{{! #typedef:type}}{{! > types/typedef_pep484_type}}{{! /typedef:type}}{{! ] }}{{! /adapter:is_generic?}}{{!
-}}{{! /typedef:has_adapter?}}{{!
-   Uncomment the check for ^typedef:has_adapter when you figure out adapters.
-}}{{! ^typedef:has_adapter?}}{{!
-    }}{{#typedef:type}}{{> types/unadapted_pep484_type}}{{/typedef:type}}{{!
-}}{{! /typedef:has_adapter?}}
+{{typedef:name}} = {{#typedef:has_adapter?}}{{!
+    }}{{adapter:type_hint}}{{#adapter:is_generic?}}[{{#typedef:type}}{{> types/typedef_pep484_type}}{{/typedef:type}}]{{/adapter:is_generic?}}{{!
+}}{{/typedef:has_adapter?}}{{!
+}}{{^typedef:has_adapter?}}{{!
+    }}{{#typedef:type}}{{> types/typedef_pep484_type}}{{/typedef:type}}{{!
+}}{{/typedef:has_adapter?}}
 {{/program:typedefs}}
 {{/program:typedefs?}}

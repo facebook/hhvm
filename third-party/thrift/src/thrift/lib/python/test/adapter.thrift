@@ -102,3 +102,13 @@ union Bar {
 
 @AsDatetime{signature = "DatetimeConstant"}
 const i32 NINETEEN_EIGHTY_FOUR = 441792000;
+
+union UnionMapWithAdaptedKeyAndValueTypes {
+  1: map<AdaptedInt2, WrappedBool> field_1;
+  2: map<AdaptedInt2, WrappedBool> field_2;
+}
+
+union UnionMapWithInvariantAdaptedValueTypes {
+  1: map<AdaptedInt2, Baz> field_1;
+  2: map<AdaptedInt2, Baz> field_2;
+}

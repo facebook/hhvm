@@ -15,10 +15,16 @@
   limitations under the License.
 
 }}{{!
-Typing for a union field
-}}{{#pragma ignore-newlines}}
-_typing.Union[None
-{{#struct:fields_ordered_by_id}}, {{#field:type}}
-{{> types/pep484_type}}
-{{/field:type}}
-{{/struct:fields_ordered_by_id}}]
+This is import module for abstract, mutable, and immutable sets
+}}
+{{#pragma ignore-newlines}}
+{{^program:generate_abstract_types}}
+{{#type:list?}}_typing.List{{/type:list?}}{{!
+}}{{#type:set?}}_typing.Set{{/type:set?}}{{!
+}}{{#type:map?}}_typing.Dict{{/type:map?}}
+{{/program:generate_abstract_types}}
+{{#program:generate_abstract_types}}
+{{#type:list?}}_typing.Sequence{{/type:list?}}{{!
+}}{{#type:set?}}_typing.AbstractSet{{/type:set?}}{{!
+}}{{#type:map?}}_typing.Mapping{{/type:map?}}
+{{/program:generate_abstract_types}}

@@ -6190,6 +6190,36 @@ end = struct
       simplify_default ~subtype_env can_index.ci_key tk env
       &&& simplify_default ~subtype_env tv can_index.ci_val
     in
+    let do_tuple tup =
+      match can_index.ci_shape with
+      | IntLit i ->
+        (match List.nth tup i with
+        | Some ty -> simplify_default ~subtype_env ty can_index.ci_val env
+        | None ->
+          invalid
+            ~fail:
+              (Some
+                 Typing_error.(
+                   primary
+                   @@ Primary.Generic_unify
+                        {
+                          pos = can_index.ci_index_pos;
+                          msg = Reason.string_of_ureason Reason.URtuple_OOB;
+                        }))
+            env)
+      | _ ->
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Generic_unify
+                      {
+                        pos = can_index.ci_index_pos;
+                        msg = Reason.string_of_ureason Reason.URtuple_access;
+                      }))
+          env
+    in
     match deref ty_sub with
     | (_, Tvar _) ->
       mk_issubtype_prop
@@ -6251,35 +6281,9 @@ end = struct
         (sub_supportdyn, ty_subs)
         rhs
         env
-    | (_, Ttuple tup) ->
-      (match can_index.ci_shape with
-      | IntLit i ->
-        (match List.nth tup.t_required i with
-        | Some ty -> simplify_default ~subtype_env ty can_index.ci_val env
-        | None ->
-          invalid
-            ~fail:
-              (Some
-                 Typing_error.(
-                   primary
-                   @@ Primary.Generic_unify
-                        {
-                          pos = can_index.ci_index_pos;
-                          msg = Reason.string_of_ureason Reason.URtuple_OOB;
-                        }))
-            env)
-      | _ ->
-        invalid
-          ~fail:
-            (Some
-               Typing_error.(
-                 primary
-                 @@ Primary.Generic_unify
-                      {
-                        pos = can_index.ci_index_pos;
-                        msg = Reason.string_of_ureason Reason.URtuple_access;
-                      }))
-          env)
+    | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
+      do_tuple tup
+    | (_, Ttuple tup) -> do_tuple tup.t_required
     | (_, Tshape { s_fields = fdm; s_origin = _; s_unknown_value = _ }) ->
       (match can_index.ci_shape with
       | StringLit s ->

@@ -1,0 +1,8 @@
+ERROR: File "lambda_called_on_pair_oob.php", line 3, characters 19-19:
+Tuple accessed with an index out of bounds (Typing[4116])
+ERROR: File "lambda_called_on_pair_oob.php", line 4, characters 6-20:
+Invalid argument (Typing[4110])
+  File "lambda_called_on_pair_oob.php", line 3, characters 9-10:
+  Expected `~_` because a type could not be determined here
+  File "lambda_called_on_pair_oob.php", line 4, characters 6-20:
+  But got `Pair<string, string>`

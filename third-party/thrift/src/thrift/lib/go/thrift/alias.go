@@ -20,6 +20,7 @@ import (
 	"io"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -55,6 +56,16 @@ type WritableResult = types.WritableResult
 type TransportException = types.TransportException
 
 type FormatException = types.ProtocolException
+
+type RocketException = rocket.RocketException
+
+const (
+	RocketExceptionUnknown         = rocket.RocketExceptionUnknown
+	RocketExceptionDeclared        = rocket.RocketExceptionDeclared
+	RocketExceptionAppUnknown      = rocket.RocketExceptionAppUnknown
+	RocketExceptionAny             = rocket.RocketExceptionAny
+	RocketExceptionDeprecatedProxy = rocket.RocketExceptionDeprecatedProxy
+)
 
 var REPLY types.MessageType = types.REPLY
 var CALL types.MessageType = types.CALL

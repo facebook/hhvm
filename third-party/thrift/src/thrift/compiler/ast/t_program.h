@@ -248,16 +248,6 @@ class t_program : public t_named {
     return language_includes_;
   }
 
-  // TODO: replace all callsites and remove
-  const std::vector<std::string>& cpp_includes() const {
-    if (language_includes_.count("cpp")) {
-      return language_includes_.at("cpp");
-    }
-    static const std::vector<std::string>& kEmpty =
-        *new std::vector<std::string>;
-    return kEmpty;
-  }
-
   /**
    * Outputs a reference to the namespace corresponding to the
    * key(language) in the namespaces_ map.

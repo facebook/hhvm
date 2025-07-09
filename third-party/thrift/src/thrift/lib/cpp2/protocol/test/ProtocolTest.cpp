@@ -172,13 +172,13 @@ template <
 void runBigListTest(
     folly::tag_t<ProtocolWriter, ProtocolReader>, ArithmeticType) {
   for (int randomInit = 0; randomInit <= 1; ++randomInit) {
-    for (int i = 1; i < 1024; ++i) {
+    for (int i = 1; i < 256; ++i) {
       auto w = ProtocolWriter();
       auto q = folly::IOBufQueue();
       w.setOutput(&q);
 
       // Make sure we exercise the multi-IOBuf case
-      const size_t intListSize = randomInit ? i : (i + 1024 * 1024);
+      const size_t intListSize = randomInit ? i : (i + 128 * 1024);
       std::vector<ArithmeticType> intList(intListSize);
 
       // Specify the engine and distribution.

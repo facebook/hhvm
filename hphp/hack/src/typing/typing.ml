@@ -3952,11 +3952,18 @@ end = struct
       let env = might_throw ~join_pos:p env in
       let is_lvalue = Valkind.is_lvalue valkind in
       let (_, p1, _) = e1 in
-      if
-        TypecheckerOptions.constraint_array_index env.genv.tcopt
-        && not lhs_of_null_coalesce
-      then (
-        let (env, res_ty) = Env.fresh_type env p1 in
+      let (_, p2, _) = e2 in
+      if TypecheckerOptions.constraint_array_index env.genv.tcopt then (
+        let (env, key_ty) = Env.fresh_type_invariant env p2 in
+        let (env, ty_err_opt) =
+          SubType.sub_type_i
+            env
+            (LoclType ty2)
+            (LoclType key_ty)
+            (Some (Typing_error.Reasons_callback.unify_error_at p))
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        let (env, val_ty) = Env.fresh_type_invariant env p1 in
         let (env, ty_err_opt) =
           SubType.sub_type_i
             env
@@ -3966,21 +3973,21 @@ end = struct
                   ( Reason.witness p,
                     Tcan_index
                       {
-                        ci_key = ty2;
+                        ci_key = key_ty;
                         ci_shape =
                           (match e2 with
                           | (_, _, Int i) -> IntLit (int_of_string i)
                           | (_, _, String s) -> StringLit s
                           | _ -> Generic);
-                        ci_val = res_ty;
+                        ci_val = val_ty;
                         ci_expr_pos = p;
-                        ci_index_pos = snd3 e2;
+                        ci_index_pos = p2;
                       } )))
             (Some (Typing_error.Reasons_callback.unify_error_at p))
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         let (env, pess_res_ty) =
-          Typing_array_access.maybe_pessimise_type env res_ty
+          Typing_array_access.maybe_pessimise_type env val_ty
         in
         make_result env p (Aast.Array_get (te1, Some te2)) pess_res_ty
       ) else

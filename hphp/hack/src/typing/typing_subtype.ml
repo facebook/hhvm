@@ -6220,6 +6220,40 @@ end = struct
                       }))
           env
     in
+    let do_shape { s_fields = fdm; s_origin = _; s_unknown_value = _ } =
+      match can_index.ci_shape with
+      | StringLit s ->
+        let decl_pos = Pos_or_decl.of_raw_pos can_index.ci_index_pos in
+        let field = TSFlit_str (decl_pos, s) in
+        (match TShapeMap.find_opt field fdm with
+        | Some { sft_optional = _; sft_ty = ty } ->
+          simplify_default ~subtype_env ty can_index.ci_val env
+        | None ->
+          invalid
+            ~fail:
+              (Some
+                 Typing_error.(
+                   primary
+                   @@ Primary.Undefined_field
+                        {
+                          pos = can_index.ci_index_pos;
+                          name = TUtils.get_printable_shape_field_name field;
+                          decl_pos;
+                        }))
+            env)
+      | _ ->
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Generic_unify
+                      {
+                        pos = can_index.ci_index_pos;
+                        msg = Reason.string_of_ureason Reason.index_shape;
+                      }))
+          env
+    in
     match deref ty_sub with
     | (_, Tvar _) ->
       mk_issubtype_prop
@@ -6260,7 +6294,8 @@ end = struct
       is_container tk tv
     | (_, Tclass ((_, n), _, [tk; tv])) when String.equal n SN.Collections.cDict
       ->
-      is_container tk tv
+      simplify_default ~subtype_env tk can_index.ci_key env
+      &&& simplify_default ~subtype_env tv can_index.ci_val
     | (_, Tclass ((_, n), _, [tkv])) when String.equal n SN.Collections.cKeyset
       ->
       is_container tkv tkv
@@ -6281,42 +6316,51 @@ end = struct
         (sub_supportdyn, ty_subs)
         rhs
         env
+    | (r_sub, Tintersection ty_subs) ->
+      (* A & B <: C iif A <: C | !B *)
+      (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+      | (env, Some non_ty, tyl) ->
+        let ty_sub = MakeType.intersection r_sub tyl in
+
+        let mk_prop = simplify
+        and lift_rhs { reason_super; can_index } =
+          mk_constraint_type (reason_super, Tcan_index can_index)
+        and lhs = (sub_supportdyn, ty_sub)
+        and rhs_subtype =
+          Subtype.
+            { super_supportdyn = false; super_like = false; ty_super = non_ty }
+        and rhs_can_index = { reason_super; can_index } in
+        let rhs = (reason_super, rhs_subtype, rhs_can_index) in
+        Common.simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          lhs
+          rhs
+          env
+      | _ ->
+        Common.simplify_intersection_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          ~update_reason:
+            (Typing_env.update_reason ~f:(fun r_sub_prj ->
+                 Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
+          (sub_supportdyn, ty_subs)
+          rhs
+          env)
     | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
       do_tuple tup
     | (_, Ttuple tup) -> do_tuple tup.t_required
-    | (_, Tshape { s_fields = fdm; s_origin = _; s_unknown_value = _ }) ->
-      (match can_index.ci_shape with
-      | StringLit s ->
-        let decl_pos = Pos_or_decl.of_raw_pos can_index.ci_index_pos in
-        let field = TSFlit_str (decl_pos, s) in
-        (match TShapeMap.find_opt field fdm with
-        | Some { sft_optional = _; sft_ty = ty } ->
-          simplify_default ~subtype_env ty can_index.ci_val env
-        | None ->
-          invalid
-            ~fail:
-              (Some
-                 Typing_error.(
-                   primary
-                   @@ Primary.Undefined_field
-                        {
-                          pos = can_index.ci_index_pos;
-                          name = TUtils.get_printable_shape_field_name field;
-                          decl_pos;
-                        }))
-            env)
-      | _ ->
-        invalid
-          ~fail:
-            (Some
-               Typing_error.(
-                 primary
-                 @@ Primary.Generic_unify
-                      {
-                        pos = can_index.ci_index_pos;
-                        msg = Reason.string_of_ureason Reason.index_shape;
-                      }))
-          env)
+    | (_, Tshape ts) -> do_shape ts
+    | (_r, Tnewtype (name_sub, [tyarg_sub], _))
+      when String.equal name_sub SN.Classes.cSupportDyn ->
+      (match deref tyarg_sub with
+      | (_, Tshape ts) -> do_shape ts
+      | _ -> invalid ~fail env)
     | _ -> invalid ~fail env
 end
 
@@ -6494,8 +6538,8 @@ end = struct
                 super_like = false;
                 ty_super = non_ty;
               }
-          and rhs_destructure = { reason_super = r; can_traverse = ct } in
-          let rhs = (r, rhs_subtype, rhs_destructure) in
+          and rhs_can_traverse = { reason_super = r; can_traverse = ct } in
+          let rhs = (r, rhs_subtype, rhs_can_traverse) in
           Common.simplify_disj_r
             ~subtype_env
             ~this_ty

@@ -177,9 +177,46 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE enum_find<U>& enum_find_instance() {
   return impl;
 }
 
+template <typename E, typename = void>
+inline constexpr bool eligible_for_dense_enum_optimization_v = false;
+
+// Union tag enum doesn't have max/min/size so we only consider dense enum
+// optimization for user-defined enums
+template <typename E>
+inline constexpr bool eligible_for_dense_enum_optimization_v<
+    E,
+    folly::void_t<decltype(TEnumTraits<E>::max())>> =
+    (((folly::to_underlying(TEnumTraits<E>::max()) -
+       folly::to_underlying(TEnumTraits<E>::min())) <
+      2 * TEnumTraits<E>::size) ||
+     ((folly::to_underlying(TEnumTraits<E>::max()) -
+       folly::to_underlying(TEnumTraits<E>::min())) < 16)) &&
+    (TEnumTraits<E>::size < 10'000);
+
 template <typename E, typename U = std::underlying_type_t<E>>
 FOLLY_ERASE bool enum_find_name(
     E const value, std::string_view* const out) noexcept {
+  if constexpr (eligible_for_dense_enum_optimization_v<E>) {
+    static constexpr auto index = []() FOLLY_CONSTEVAL {
+      constexpr auto min = folly::to_underlying(TEnumTraits<E>::min());
+      constexpr auto max = folly::to_underlying(TEnumTraits<E>::max());
+      constexpr auto size = TEnumTraits<E>::size;
+      std::array<std::string_view, max - min + 1> ret;
+      for (size_t i = 0; i < size; ++i) {
+        ret[folly::to_underlying(TEnumDataStorage<E>::values[i]) - min] =
+            TEnumDataStorage<E>::names[i];
+      }
+      return ret;
+    }();
+    constexpr auto min = folly::to_underlying(TEnumTraits<E>::min());
+    constexpr auto max = folly::to_underlying(TEnumTraits<E>::max());
+    const auto under = folly::to_underlying(value);
+    if (under < min || under > max) {
+      return false;
+    }
+    std::string_view name = index[under - min];
+    return !name.empty() && ((*out = name), true);
+  }
   const auto r = enum_find<U>::find_name(U(value), enum_find_instance<E>());
   return r && ((*out = r.result), true);
 }

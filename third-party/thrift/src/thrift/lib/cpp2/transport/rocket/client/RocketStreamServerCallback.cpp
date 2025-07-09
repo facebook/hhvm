@@ -159,14 +159,14 @@ bool RocketSinkServerCallback::onSinkNext(StreamPayload&& payload) {
         payload.metadata,
         payload.payload->computeChainDataLength());
   }
-  std::ignore = client_.sendPayload(
-      streamId_, std::move(payload), rocket::Flags().next(true));
+  std::ignore =
+      client_.sendPayload(streamId_, std::move(payload), Flags().next(true));
   return true;
 }
 void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
   DCHECK(state_ == State::BothOpen);
   ew.handle(
-      [&](rocket::RocketException& rex) {
+      [&](RocketException& rex) {
         client_.sendError(streamId_, std::move(rex));
       },
       [this](::apache::thrift::detail::EncodedStreamError& err) {
@@ -181,8 +181,7 @@ void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
       [&](...) {
         client_.sendError(
             streamId_,
-            rocket::RocketException(
-                rocket::ErrorCode::APPLICATION_ERROR, ew.what()));
+            RocketException(ErrorCode::APPLICATION_ERROR, ew.what()));
       });
 }
 bool RocketSinkServerCallback::onSinkComplete() {
@@ -198,8 +197,7 @@ bool RocketSinkServerCallback::onInitialPayload(
 }
 void RocketSinkServerCallback::onInitialError(folly::exception_wrapper ew) {
   clientCallback_->onFirstResponseError(std::move(ew));
-  client_.sendError(
-      streamId_, rocket::RocketException(rocket::ErrorCode::CANCELED));
+  client_.sendError(streamId_, RocketException(ErrorCode::CANCELED));
 }
 StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponse(
     StreamPayload&& payload) {

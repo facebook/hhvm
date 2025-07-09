@@ -54,8 +54,8 @@ class StreamChannelStatusResponse {
 class RocketStreamServerCallback : public StreamServerCallback {
  public:
   RocketStreamServerCallback(
-      rocket::StreamId streamId,
-      rocket::RocketClient& client,
+      StreamId streamId,
+      RocketClient& client,
       StreamClientCallback& clientCallback)
       : client_(client),
         clientCallback_(&clientCallback),
@@ -79,22 +79,22 @@ class RocketStreamServerCallback : public StreamServerCallback {
   StreamChannelStatusResponse onStreamError(folly::exception_wrapper);
   void onStreamHeaders(HeadersPayload&&);
 
-  rocket::StreamId streamId() const noexcept { return streamId_; }
+  StreamId streamId() const noexcept { return streamId_; }
 
  protected:
-  rocket::RocketClient& client_;
+  RocketClient& client_;
 
  private:
   StreamClientCallback* clientCallback_;
-  rocket::StreamId streamId_;
+  StreamId streamId_;
 };
 
 class RocketStreamServerCallbackWithChunkTimeout
     : public RocketStreamServerCallback {
  public:
   RocketStreamServerCallbackWithChunkTimeout(
-      rocket::StreamId streamId,
-      rocket::RocketClient& client,
+      StreamId streamId,
+      RocketClient& client,
       StreamClientCallback& clientCallback,
       std::chrono::milliseconds chunkTimeout,
       uint64_t initialCredits)
@@ -122,8 +122,8 @@ class RocketStreamServerCallbackWithChunkTimeout
 class RocketSinkServerCallback : public SinkServerCallback {
  public:
   RocketSinkServerCallback(
-      rocket::StreamId streamId,
-      rocket::RocketClient& client,
+      StreamId streamId,
+      RocketClient& client,
       SinkClientCallback& clientCallback,
       std::unique_ptr<CompressionConfig> compressionConfig)
       : client_(client),
@@ -147,12 +147,12 @@ class RocketSinkServerCallback : public SinkServerCallback {
 
   StreamChannelStatusResponse onSinkRequestN(uint64_t tokens);
 
-  rocket::StreamId streamId() const noexcept { return streamId_; }
+  StreamId streamId() const noexcept { return streamId_; }
 
  private:
-  rocket::RocketClient& client_;
+  RocketClient& client_;
   SinkClientCallback* clientCallback_;
-  rocket::StreamId streamId_;
+  StreamId streamId_;
   enum class State { BothOpen, StreamOpen };
   State state_{State::BothOpen};
   std::unique_ptr<CompressionConfig> compressionConfig_;

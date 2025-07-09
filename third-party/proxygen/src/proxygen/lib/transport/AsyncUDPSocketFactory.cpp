@@ -13,7 +13,7 @@ namespace proxygen {
 AsyncUDPSocketFactory::AsyncUDPSocketFactory(
     folly::EventBase* eventBase,
     folly::SocketAddress v6Address,
-    folly::Optional<folly::SocketAddress> v4Address)
+    std::optional<folly::SocketAddress> v4Address)
     : v6Address_(std::move(v6Address)), v4Address_(std::move(v4Address)) {
   CHECK(eventBase);
   eventBase_ = eventBase;
@@ -50,7 +50,7 @@ AsyncUDPSocketFactory::getBindingAddress(
     const folly::SocketAddress& destination) {
 
   if (destination.getIPAddress().isV4()) {
-    if (!v4Address_.hasValue()) {
+    if (!v4Address_.has_value()) {
       return folly::makeUnexpected(Exception(
           "Bind addresses not provided for address family, destination=",
           destination.getAddressStr()));

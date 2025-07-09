@@ -11,6 +11,7 @@
 #include <folly/Expected.h>
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncUDPSocket.h>
+#include <optional>
 #include <proxygen/lib/utils/Exception.h>
 
 namespace proxygen {
@@ -24,7 +25,7 @@ class AsyncUDPSocketFactory {
   explicit AsyncUDPSocketFactory(
       folly::EventBase* eventBase,
       folly::SocketAddress v6BindAddress,
-      folly::Optional<folly::SocketAddress> v4BindAddress = folly::none);
+      std::optional<folly::SocketAddress> v4BindAddress = std::nullopt);
   ~AsyncUDPSocketFactory() = default;
 
   folly::Expected<std::unique_ptr<folly::AsyncUDPSocket>, proxygen::Exception>
@@ -41,6 +42,6 @@ class AsyncUDPSocketFactory {
 
   folly::EventBase* eventBase_{nullptr};
   folly::SocketAddress v6Address_;
-  folly::Optional<folly::SocketAddress> v4Address_;
+  std::optional<folly::SocketAddress> v4Address_;
 };
 } // namespace proxygen

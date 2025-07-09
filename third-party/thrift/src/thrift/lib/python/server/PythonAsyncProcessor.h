@@ -91,8 +91,9 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::Cpp2RequestContext*,
       folly::EventBase*,
       apache::thrift::concurrency::ThreadManager*) override {
-    CHECK(false)
-        << "processSerializedCompressedRequestWithMetadata should never be called.";
+    LOG(FATAL)
+        << "processSerializedCompressedRequestWithMetadata support has been "
+        << "removed from PythonAsyncProcessor";
   }
 
   void executeRequest(

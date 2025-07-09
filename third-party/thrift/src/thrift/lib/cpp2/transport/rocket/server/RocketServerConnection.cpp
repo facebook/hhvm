@@ -345,7 +345,7 @@ void RocketServerConnection::closeIfNeeded() {
         [&](const std::unique_ptr<RocketStreamClientCallback>& callback) {
           if (THRIFT_FLAG(enable_stream_graceful_shutdown)) {
             sendErrorAfterDrain(
-                callback->getStreamId(),
+                callback->streamId(),
                 RocketException(
                     ErrorCode::CANCELED,
                     getPayloadSerializer()->packCompact(

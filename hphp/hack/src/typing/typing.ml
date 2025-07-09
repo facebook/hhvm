@@ -284,10 +284,7 @@ end = struct
                * We know this if we've gone under a supportdyn, *OR* if the type is
                * known to be a dynamic-aware subtype of dynamic.
                *)
-              if
-                under_supportdyn
-                || TUtils.is_supportdyn_use_tyvar_bounds env rty
-              then
+              if under_supportdyn || TUtils.is_supportdyn env rty then
                 aux ~under_supportdyn:true env rty
               else
                 (env, None)

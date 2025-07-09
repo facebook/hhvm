@@ -1094,26 +1094,27 @@ TEST(TypeSystemTest, SourceIndexedTypeSystem) {
       makeSourceInfo("file://foo/other.thrift", "OpaqueAlias"));
 
   auto typeSystem = std::move(builder).build();
-  const auto& sym = dynamic_cast<const SourceIndexedTypeSystem&>(*typeSystem);
 
   EXPECT_EQ(
       &typeSystem->getUserDefinedType("meta.com/thrift/test/StructWithI32Field")
            ->asStruct(),
-      &sym.getUserDefinedTypeBySourceIdentifier(
-              {"file://foo/bar.thrift", "StructWithI32Field"})
+      &typeSystem
+           ->getUserDefinedTypeBySourceIdentifier(
+               {"file://foo/bar.thrift", "StructWithI32Field"})
            ->asStruct());
 
   EXPECT_EQ(
-      sym.getUserDefinedTypeBySourceIdentifier(
+      typeSystem->getUserDefinedTypeBySourceIdentifier(
           {"file://does-not-exist.thrift", "StructWithI32Field"}),
       std::nullopt);
   EXPECT_EQ(
-      sym.getUserDefinedTypeBySourceIdentifier(
+      typeSystem->getUserDefinedTypeBySourceIdentifier(
           {"file://foo/bar.thrift", "DoesNotExist"}),
       std::nullopt);
 
   {
-    auto types = sym.getUserDefinedTypesAtLocation("file://foo/bar.thrift");
+    auto types =
+        typeSystem->getUserDefinedTypesAtLocation("file://foo/bar.thrift");
     EXPECT_EQ(types.size(), 2);
     EXPECT_EQ(
         &types.find("StructWithI32Field")->second.asStruct(),
@@ -1126,7 +1127,8 @@ TEST(TypeSystemTest, SourceIndexedTypeSystem) {
   }
 
   {
-    auto types = sym.getUserDefinedTypesAtLocation("file://foo/other.thrift");
+    auto types =
+        typeSystem->getUserDefinedTypesAtLocation("file://foo/other.thrift");
     EXPECT_EQ(types.size(), 2);
     EXPECT_EQ(
         &types.find("UnionWithI32Field")->second.asUnion(),
@@ -1186,30 +1188,31 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemLookupByDefinition) {
       std::nullopt /* sourceInfo */);
 
   auto typeSystem = std::move(builder).build();
-  const auto& sym = dynamic_cast<const SourceIndexedTypeSystem&>(*typeSystem);
 
   const StructNode& structWithI32FieldNode =
-      sym.getUserDefinedTypeBySourceIdentifier(
-             {"file://foo/bar.thrift", "StructWithI32Field"})
+      typeSystem
+          ->getUserDefinedTypeBySourceIdentifier(
+              {"file://foo/bar.thrift", "StructWithI32Field"})
           ->asStruct();
   EXPECT_EQ(
-      sym.getSourceIdentiferForUserDefinedType(
-             DefinitionRef(&structWithI32FieldNode))
+      typeSystem
+          ->getSourceIdentiferForUserDefinedType(
+              DefinitionRef(&structWithI32FieldNode))
           .value(),
       (SourceIdentifier{"file://foo/bar.thrift", "StructWithI32Field"}));
 
   const EnumNode& enumNode =
-      sym.getUserDefinedType("meta.com/thrift/test/Enum")->asEnum();
+      typeSystem->getUserDefinedType("meta.com/thrift/test/Enum")->asEnum();
   EXPECT_EQ(
-      sym.getSourceIdentiferForUserDefinedType(DefinitionRef(&enumNode))
+      typeSystem->getSourceIdentiferForUserDefinedType(DefinitionRef(&enumNode))
           .value(),
       (SourceIdentifier{"file://foo/bar.thrift", "Enum"}));
 
   const UnionNode& unionWithI32FieldNode =
-      sym.getUserDefinedType("meta.com/thrift/test/UnionWithI32Field")
+      typeSystem->getUserDefinedType("meta.com/thrift/test/UnionWithI32Field")
           ->asUnion();
   EXPECT_EQ(
-      sym.getSourceIdentiferForUserDefinedType(
+      typeSystem->getSourceIdentiferForUserDefinedType(
           DefinitionRef(&unionWithI32FieldNode)),
       std::nullopt);
 }

@@ -677,6 +677,7 @@ void SyntaxGraph::printTo(
 }
 
 namespace {
+
 class TypeSystemFacade final : public type_system::TypeSystem {
   using TSDefinition = std::variant<
       type_system::StructNode,
@@ -718,6 +719,23 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     // This is only used for serializing the type system, which is already not
     // guaranteed to be possible as we don't require URIs for all user-defined
     // types.
+    return {};
+  }
+
+  // TypeSystemFacade doesn't currently support source information-based lookups
+  // yet.
+  std::optional<type_system::DefinitionRef>
+  getUserDefinedTypeBySourceIdentifier(
+      type_system::SourceIdentifierView) const override {
+    return std::nullopt;
+  }
+  std::optional<type_system::SourceIdentifierView>
+  getSourceIdentiferForUserDefinedType(
+      type_system::DefinitionRef) const override {
+    return std::nullopt;
+  }
+  TypeSystem::NameToDefinitionsMap getUserDefinedTypesAtLocation(
+      std::string_view) const override {
     return {};
   }
 
@@ -948,6 +966,7 @@ class TypeSystemFacade final : public type_system::TypeSystem {
   folly::F14NodeMap<const DefinitionNode*, TSDefinition> cache_;
   mutable folly::SharedMutex cacheMutex_;
 };
+
 } // namespace
 
 const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {

@@ -251,7 +251,7 @@ cdef class IntegerTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return self.singleton_name
 
-@cython.final
+@_cython__final
 cdef class StringTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, str singleton_name):
@@ -306,7 +306,7 @@ cdef class StringTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return self.singleton_name
 
-@cython.final
+@_cython__final
 cdef class IOBufTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, str singleton_name):
@@ -351,13 +351,6 @@ typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo, "typeinfo_iobuf")
 
 StructOrError = cython.fused_type(Struct, GeneratedError)
 
-# AdapterInfo = (
-#     typing.Tuple[
-#         "thrift.python.adapter.Adapter", typing.Callable[[], typing.Optional[Struct]]
-#     ]
-# )
-
-
 AnyTypeInfo = typing.Union[
     StructTypeInfo,
     ListTypeInfo,
@@ -369,6 +362,7 @@ AnyTypeInfo = typing.Union[
     StringTypeInfo,
 ]
 
+@_cython__final
 cdef class FieldInfo:
     def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive, idl_type = -1):
         """
@@ -459,6 +453,7 @@ cdef class FieldInfo:
     def idl_type(self):
         return self.idl_type
 
+@_cython__final
 cdef class StructInfo:
     """
     Stores information for a specific Thrift Struct class.
@@ -556,7 +551,7 @@ cdef class StructInfo:
             default_value = (<TypeInfoBase>type_info).to_internal_data(default_value)
             dynamic_struct_info.addFieldValue(idx, default_value)
 
-
+@_cython__final
 cdef class UnionInfo:
     """
     Stores information for a specific (immutable) Thrift union class.
@@ -620,7 +615,7 @@ cdef to_container_elements_no_convert(type_info):
     return isinstance(type_info, (TypeInfo, IntegerTypeInfo)) or type_info is typeinfo_iobuf
 
 
-@cython.final
+@_cython__final
 cdef class ListTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
@@ -701,7 +696,7 @@ cdef class ListTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (ListTypeInfo, (self.val_info,))
 
-@cython.final
+@_cython__final
 cdef class SetTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
@@ -758,7 +753,7 @@ cdef class SetTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (SetTypeInfo, (self.val_info,))
 
-@cython.final
+@_cython__final
 cdef class MapTypeInfo(TypeInfoBase):
     def __cinit__(self, key_info, val_info):
         self.key_info = key_info
@@ -834,7 +829,7 @@ cdef class MapTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (MapTypeInfo, (self.key_info, self.val_info))
 
-@cython.final
+@_cython__final
 cdef class StructTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
@@ -909,7 +904,7 @@ cdef class StructTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (StructTypeInfo, (self._class,))
 
-@cython.final
+@_cython__final
 cdef class EnumTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
@@ -967,7 +962,7 @@ cdef class EnumTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (EnumTypeInfo, (self._class,))
 
-@cython.final
+@_cython__final
 cdef class AdaptedTypeInfo(TypeInfoBase):
     def __cinit__(self, orig_type_info, adapter_class, transitive_annotation_factory):
         self._orig_type_info = orig_type_info
@@ -1738,7 +1733,7 @@ cdef class _FieldDescriptorBase:
         raise AttributeError(f"Cannot delete attribute {self._field_name}: thrift-python structs are immutable") 
 
 
-@cython.final
+@_cython__final
 cdef class _StructCachedField(_FieldDescriptorBase):
     """ 
     A descriptor that enforces immutability and implements cached field access.
@@ -1756,7 +1751,7 @@ cdef class _StructCachedField(_FieldDescriptorBase):
         return obj._fbthrift_get_cached_field_value(self._field_index)
 
 
-@cython.final
+@_cython__final
 cdef class _StructPrimitiveField(_FieldDescriptorBase):
     """
     A descriptor that enforces immutability and implements field access for
@@ -1986,7 +1981,7 @@ class UnionMeta(type):
     def _fbthrift_fill_spec(cls):
         (<UnionInfo>cls._fbthrift_struct_info)._fill_union_info()
 
-
+@_cython__final
 cdef class BadEnum:
     """
     This represents a BadEnum value from thrift.

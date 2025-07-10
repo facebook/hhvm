@@ -1,5 +1,5 @@
 <?hh
-function test() :mixed{
+<<__DynamicallyCallable>> function test() :mixed{
   return "Hello World";
 }
 <<__EntryPoint>> function main(): void {

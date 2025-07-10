@@ -1,6 +1,6 @@
 <?hh
 
-function checkAuth($peid,$auth) :mixed{
+<<__DynamicallyCallable>> function checkAuth($peid,$auth) :mixed{
 	return $peid;
 }
 

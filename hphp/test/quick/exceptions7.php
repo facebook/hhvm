@@ -1,13 +1,13 @@
 <?hh
 
-function handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   throw new Exception;
 }
 
-function another_handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function another_handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";

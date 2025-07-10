@@ -33,7 +33,7 @@ function f($a, inout $b, $c=null, $d=vec[1, 2, SOME_CONSTANT]) :mixed{
 /**
  * This is g's doc comment.
  */
-function g($a=null, $b=vec[1, 2, 3], $c=SOME_CONSTANT) :mixed{
+<<__DynamicallyCallable>> function g($a=null, $b=vec[1, 2, 3], $c=SOME_CONSTANT) :mixed{
   print "In g($a, $b, $c)\n";
 }
 

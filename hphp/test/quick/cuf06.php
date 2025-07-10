@@ -4,7 +4,7 @@ function handler($a, $b) :mixed{
   var_dump($a, $b);
 }
 
-function foo() :mixed{}
+<<__DynamicallyCallable>> function foo() :mixed{}
 
 function test() :mixed{
   call_user_func_array('foo', vec[]);

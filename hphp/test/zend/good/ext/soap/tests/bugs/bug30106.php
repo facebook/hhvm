@@ -1,6 +1,6 @@
 <?hh
 
-function getContinentList() :mixed{
+<<__DynamicallyCallable>> function getContinentList() :mixed{
 	return dict["getContinentListResult"=>dict[
 	  "schema"=>"<xsd:schema><element name=\"test\" type=\"xsd:string\"/></xsd:schema>",
 	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"]];

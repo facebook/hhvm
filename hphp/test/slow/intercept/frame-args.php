@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function handler($name, $obj, inout $args) :mixed{
   var_dump($args);
   return shape();
 }

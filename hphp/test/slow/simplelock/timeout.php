@@ -37,7 +37,7 @@ async function multi() {
   }
 }
 
-function thread_main() {
+<<__DynamicallyCallable>> function thread_main() {
   HH\Asio\join(thread_func());
 }
 

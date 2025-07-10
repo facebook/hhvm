@@ -1,6 +1,6 @@
 <?hh
 
-function thread_main() {
+<<__DynamicallyCallable>> function thread_main() {
   HH\Asio\join(HH\SimpleLock\lock("x"));
   HH\Asio\join(HH\SimpleLock\lock("hello"));
   echo "Thread start.\n";

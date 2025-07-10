@@ -14,12 +14,12 @@ function test($what) :mixed{
   var_dump($w->valid());
 }
 
-function produce_stdClass() :mixed{ return new stdClass(); }
-function produce_native_data() :mixed{ return new PDOStatement(); }
-function produce_collection() :mixed{ return Vector{}; }
-async function produce_awaitable() :Awaitable<mixed>{ return 1; }
-function produce_php_closure() :mixed{ return function() { return 1; }; }
-function produce_hack_closure() :mixed{ return () ==> {}; }
+<<__DynamicallyCallable>> function produce_stdClass() :mixed{ return new stdClass(); }
+<<__DynamicallyCallable>> function produce_native_data() :mixed{ return new PDOStatement(); }
+<<__DynamicallyCallable>> function produce_collection() :mixed{ return Vector{}; }
+<<__DynamicallyCallable>> async function produce_awaitable() :Awaitable<mixed>{ return 1; }
+<<__DynamicallyCallable>> function produce_php_closure() :mixed{ return function() { return 1; }; }
+<<__DynamicallyCallable>> function produce_hack_closure() :mixed{ return () ==> {}; }
 
 <<__EntryPoint>> function main(): void {
   test('stdClass');

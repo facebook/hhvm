@@ -1,5 +1,5 @@
 <?hh
-function id($x = 'id') :mixed{ return $x; }
+<<__DynamicallyCallable>> function id($x = 'id') :mixed{ return $x; }
 class Test {
   public static function id($x = vec[__CLASS__, 'id']) :mixed{ return $x; }
   public static $f;

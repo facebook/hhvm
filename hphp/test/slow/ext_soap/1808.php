@@ -1,6 +1,6 @@
 <?hh
 
-function add($a, $b) :mixed{
+<<__DynamicallyCallable>> function add($a, $b) :mixed{
  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
  }
 

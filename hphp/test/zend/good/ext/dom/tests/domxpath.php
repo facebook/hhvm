@@ -1,6 +1,6 @@
 <?hh
 
-function MyAverage($nodelist) :mixed{
+<<__DynamicallyCallable>> function MyAverage($nodelist) :mixed{
     $count = 0;
     $val = 0;
     foreach ($nodelist as $node) {

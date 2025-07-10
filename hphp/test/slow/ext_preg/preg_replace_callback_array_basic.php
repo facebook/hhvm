@@ -9,7 +9,7 @@ class Foo {
     return "ok";
   }
 }
-function b() :mixed{
+<<__DynamicallyCallable>> function b() :mixed{
   return "b";
 }
 

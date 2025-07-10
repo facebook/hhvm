@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function meep($a, $b) :mixed{
+<<__DynamicallyCallable>> function meep($a, $b) :mixed{
   throw new Exception('blah');
 }
 

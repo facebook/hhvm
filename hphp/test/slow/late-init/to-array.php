@@ -7,14 +7,14 @@ class A {
   public $z = 'abc';
 }
 
-function test_iter($a) :mixed{
+<<__DynamicallyCallable>> function test_iter($a) :mixed{
   foreach ($a as $p) {
     echo "$p ";
   }
   echo "\n";
 }
 
-function test_obj_prop_array($a) :mixed{
+<<__DynamicallyCallable>> function test_obj_prop_array($a) :mixed{
   var_dump(HH\object_prop_array($a));
 }
 

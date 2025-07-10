@@ -9,7 +9,7 @@ class Foo {
   }
 }
 
-function thread_main() :mixed{
+<<__DynamicallyCallable>> function thread_main() :mixed{
   echo "In thread_main\n";
   $res = false;
   var_dump(apc_cas  ('whoops', 1, 2));

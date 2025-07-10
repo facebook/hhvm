@@ -3,7 +3,7 @@
 abstract final class FStatics {
   public static $count = 1;
 }
-function f() :mixed{
+<<__DynamicallyCallable>> function f() :mixed{
   throw new Exception((string)FStatics::$count);
 }
 function test($fn) {
@@ -11,7 +11,7 @@ function test($fn) {
 }
 // From PHP 7 testing sources, with minor modification
 
-<<__EntryPoint>>
+<<__EntryPoint, __DynamicallyCallable>>
 function main_preg_replace_callback_array_errors(): void {
   set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);

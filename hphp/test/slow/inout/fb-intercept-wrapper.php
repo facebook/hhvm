@@ -16,7 +16,7 @@ function meep(inout $f, $g, inout $r) :mixed{
   return $g;
 }
 
-function io_intercept($name, $obj_or_cls, inout $args) :mixed{
+<<__DynamicallyCallable>> function io_intercept($name, $obj_or_cls, inout $args) :mixed{
   var_dump($name);
   var_dump($args);
   return shape();

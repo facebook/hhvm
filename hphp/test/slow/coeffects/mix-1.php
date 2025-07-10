@@ -1,14 +1,14 @@
 <?hh
 
-function write_props_read_globals($fn)[write_props, read_globals] :mixed{
+<<__DynamicallyCallable>> function write_props_read_globals($fn)[write_props, read_globals] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props_globals($fn)[write_props, globals] :mixed{
+<<__DynamicallyCallable>> function write_props_globals($fn)[write_props, globals] :mixed{
   if ($fn) $fn(null);
 }
 
-function defaults($fn)[defaults] :mixed{
+<<__DynamicallyCallable>> function defaults($fn)[defaults] :mixed{
   if ($fn) $fn(null);
 }
 

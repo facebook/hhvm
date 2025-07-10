@@ -1,6 +1,6 @@
 <?hh
 
-function f<<<__Soft>> reify T>() :mixed{
+<<__DynamicallyCallable>> function f<<<__Soft>> reify T>() :mixed{
   echo "ok\n";
 }
 

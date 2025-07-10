@@ -8,7 +8,7 @@ function foo1($i = 10) :mixed{
   var_dump(__METHOD__);
 }
 
-function bar($_1, $_2, inout $_3) :mixed{
+<<__DynamicallyCallable>> function bar($_1, $_2, inout $_3) :mixed{
   var_dump(__METHOD__);
   return shape('value' => null);
 }

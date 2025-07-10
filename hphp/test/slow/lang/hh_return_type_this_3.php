@@ -17,47 +17,47 @@ function handler($errno, $errmsg) :mixed{
 
 type my_t = int;
 
-function f1($p) :mixed{ return $p; }
-function f2($p): int { return $p; }
-function f2_soft($p): <<__Soft>> int { return $p; }
-function f3($p): string { return $p; }
-function f3_soft($p): <<__Soft>> string { return $p; }
-function f4($p): bool { return $p; }
-function f4_soft($p): <<__Soft>> bool { return $p; }
-function f5($p): float { return $p; }
-function f5_soft($p): <<__Soft>> float { return $p; }
-function f6($p): resource { return $p; }
-function f6_soft($p): <<__Soft>> resource { return $p; }
-function f7($p): varray { return $p; }
-function f7_soft($p): <<__Soft>> varray { return $p; }
-function f8($p): callable { return $p; }
-function f8_soft($p): <<__Soft>> callable { return $p; }
-function f9($p): Figure { return $p; }
-function f9_soft($p): <<__Soft>> Figure { return $p; }
-function f10($p): Square { return $p; }
-function f10_soft($p): <<__Soft>> Square { return $p; }
-function f11($p): :div { return $p; }
-function f11_soft($p): <<__Soft>> :div { return $p; }
-function f12($p): Fractal<Square> { return $p; }
-function f12_soft($p): <<__Soft>> Fractal<Square> { return $p; }
-function f13<T>($p): Fractal<T> { return $p; }
-function f13_soft<T>($p): <<__Soft>> Fractal<T> { return $p; }
-function f14($p): my_t { return $p; }
-function f14_soft($p): <<__Soft>> my_t { return $p; }
-function f15($p): void { return $p; }
-function f15_soft($p): <<__Soft>> void { return $p; }
-function f16($p): mixed { return $p; }
-function f16_soft($p): <<__Soft>> mixed { return $p; }
-function f17($p): ?int { return $p; }
-function f17_soft($p): <<__Soft>> ?int { return $p; }
-function f18($p): (string, int) { return $p; }
-function f18_soft($p): <<__Soft>> (string, int) { return $p; }
-function f19($p): (function(int): int) { return $p; }
-function f19_soft($p): <<__Soft>> (function(int): int) { return $p; }
-function f20($p): callable { return $p; }
-function f20_soft($p): <<__Soft>> callable { return $p; }
-function f21($p): noreturn { return $p; }
-function f21_soft($p): <<__Soft>> noreturn { return $p; }
+<<__DynamicallyCallable>> function f1($p) :mixed{ return $p; }
+<<__DynamicallyCallable>> function f2($p): int { return $p; }
+<<__DynamicallyCallable>> function f2_soft($p): <<__Soft>> int { return $p; }
+<<__DynamicallyCallable>> function f3($p): string { return $p; }
+<<__DynamicallyCallable>> function f3_soft($p): <<__Soft>> string { return $p; }
+<<__DynamicallyCallable>> function f4($p): bool { return $p; }
+<<__DynamicallyCallable>> function f4_soft($p): <<__Soft>> bool { return $p; }
+<<__DynamicallyCallable>> function f5($p): float { return $p; }
+<<__DynamicallyCallable>> function f5_soft($p): <<__Soft>> float { return $p; }
+<<__DynamicallyCallable>> function f6($p): resource { return $p; }
+<<__DynamicallyCallable>> function f6_soft($p): <<__Soft>> resource { return $p; }
+<<__DynamicallyCallable>> function f7($p): varray { return $p; }
+<<__DynamicallyCallable>> function f7_soft($p): <<__Soft>> varray { return $p; }
+<<__DynamicallyCallable>> function f8($p): callable { return $p; }
+<<__DynamicallyCallable>> function f8_soft($p): <<__Soft>> callable { return $p; }
+<<__DynamicallyCallable>> function f9($p): Figure { return $p; }
+<<__DynamicallyCallable>> function f9_soft($p): <<__Soft>> Figure { return $p; }
+<<__DynamicallyCallable>> function f10($p): Square { return $p; }
+<<__DynamicallyCallable>> function f10_soft($p): <<__Soft>> Square { return $p; }
+<<__DynamicallyCallable>> function f11($p): :div { return $p; }
+<<__DynamicallyCallable>> function f11_soft($p): <<__Soft>> :div { return $p; }
+<<__DynamicallyCallable>> function f12($p): Fractal<Square> { return $p; }
+<<__DynamicallyCallable>> function f12_soft($p): <<__Soft>> Fractal<Square> { return $p; }
+<<__DynamicallyCallable>> function f13<T>($p): Fractal<T> { return $p; }
+<<__DynamicallyCallable>> function f13_soft<T>($p): <<__Soft>> Fractal<T> { return $p; }
+<<__DynamicallyCallable>> function f14($p): my_t { return $p; }
+<<__DynamicallyCallable>> function f14_soft($p): <<__Soft>> my_t { return $p; }
+<<__DynamicallyCallable>> function f15($p): void { return $p; }
+<<__DynamicallyCallable>> function f15_soft($p): <<__Soft>> void { return $p; }
+<<__DynamicallyCallable>> function f16($p): mixed { return $p; }
+<<__DynamicallyCallable>> function f16_soft($p): <<__Soft>> mixed { return $p; }
+<<__DynamicallyCallable>> function f17($p): ?int { return $p; }
+<<__DynamicallyCallable>> function f17_soft($p): <<__Soft>> ?int { return $p; }
+<<__DynamicallyCallable>> function f18($p): (string, int) { return $p; }
+<<__DynamicallyCallable>> function f18_soft($p): <<__Soft>> (string, int) { return $p; }
+<<__DynamicallyCallable>> function f19($p): (function(int): int) { return $p; }
+<<__DynamicallyCallable>> function f19_soft($p): <<__Soft>> (function(int): int) { return $p; }
+<<__DynamicallyCallable>> function f20($p): callable { return $p; }
+<<__DynamicallyCallable>> function f20_soft($p): <<__Soft>> callable { return $p; }
+<<__DynamicallyCallable>> function f21($p): noreturn { return $p; }
+<<__DynamicallyCallable>> function f21_soft($p): <<__Soft>> noreturn { return $p; }
 
 class Figure {}
 class Square extends Figure {}

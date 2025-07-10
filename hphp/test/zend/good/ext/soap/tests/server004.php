@@ -1,5 +1,5 @@
 <?hh
-function Add($x,$y) :mixed{
+<<__DynamicallyCallable>> function Add($x,$y) :mixed{
   return $x+$y;
 }
 function Sub($x,$y) :mixed{

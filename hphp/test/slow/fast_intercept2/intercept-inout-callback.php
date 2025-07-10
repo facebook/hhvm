@@ -1,13 +1,13 @@
 <?hh
 
-function handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   return shape('callback' => 'bar');
 }
 
-function bar($arg, inout $a) :mixed{
+<<__DynamicallyCallable>> function bar($arg, inout $a) :mixed{
   echo "In bar!\n";
   echo "Arg is: " . $arg . "\n";
   $a = 7;

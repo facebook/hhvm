@@ -10,17 +10,17 @@ function VERIFY($x) :mixed{ VS($x != false, true); }
 //////////////////////////////////////////////////////////////////////
 
 // TODO(#2512714): if you comment out the function hello and you'll SEGV :)
-function hello() :mixed{
+<<__DynamicallyCallable>> function hello() :mixed{
   return 'Hello World';
 }
 
-function add($a, $b) :mixed{
+<<__DynamicallyCallable>> function add($a, $b) :mixed{
   return (int)$a + (int)$b;
 }
 function sub($a, $b) :mixed{
   return (int)$a - (int)$b;
 }
-function sum($a) :mixed{
+<<__DynamicallyCallable>> function sum($a) :mixed{
   $sum = 0;
   foreach ($a as $v) {
     $sum += (int)$v;

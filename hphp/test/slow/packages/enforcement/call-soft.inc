@@ -2,7 +2,7 @@
 
 module z.z;
 
-function f(): string {
+<<__DynamicallyCallable>> function f(): string {
     return "in f";
 }
 

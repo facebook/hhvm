@@ -25,24 +25,24 @@ class C {
   }
 }
 
-function serialize_test($a) :mixed{
+<<__DynamicallyCallable>> function serialize_test($a) :mixed{
   var_dump(serialize($a));
 }
 
-function json_encode_test($a) :mixed{
+<<__DynamicallyCallable>> function json_encode_test($a) :mixed{
   var_dump(json_encode($a));
 }
 
-function var_dump_test($a) :mixed{
+<<__DynamicallyCallable>> function var_dump_test($a) :mixed{
   var_dump($a);
 }
 
-function var_export_test($a) :mixed{
+<<__DynamicallyCallable>> function var_export_test($a) :mixed{
   var_export($a);
   echo "\n";
 }
 
-function print_r_test($a) :mixed{
+<<__DynamicallyCallable>> function print_r_test($a) :mixed{
   print_r($a);
 }
 

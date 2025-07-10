@@ -2,7 +2,7 @@
 
 <<file: __EnableUnstableFeatures('readonly')>>
 
-function f($x): readonly int { echo ""; return $x; }
+<<__DynamicallyCallable>> function f($x): readonly int { echo ""; return $x; }
 
 <<__EntryPoint>>
 function main() :mixed{

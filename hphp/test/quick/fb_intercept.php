@@ -1,13 +1,13 @@
 <?hh
 function mkh($c) :mixed{ return ($_1, $_2, inout $_3) ==> shape('value' => $c()); }
-function handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   return shape('value' => null);
 }
 
-function passthrough_handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function passthrough_handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";

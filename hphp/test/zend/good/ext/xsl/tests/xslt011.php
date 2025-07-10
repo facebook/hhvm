@@ -16,14 +16,14 @@ $dom = new DOMDocument();
   print $proc->transformToXML($xml);
 }
 
-  function foobar($id, $secondArg = "" ) :mixed{
+  <<__DynamicallyCallable>> function foobar($id, $secondArg = "" ) :mixed{
     if (is_array($id)) {
         return $id[0]->value . " - " . $secondArg;
     } else {
         return $id . " - " . $secondArg;
     }
   }
-  function nodeSet($id = null) :mixed{
+  <<__DynamicallyCallable>> function nodeSet($id = null) :mixed{
       if ($id && is_array($id)) {
           return $id[0];
       } else {
@@ -32,7 +32,7 @@ $dom = new DOMDocument();
           return $dom->documentElement;
       }
   }
-  function nonDomNode() :mixed{
+  <<__DynamicallyCallable>> function nonDomNode() :mixed{
     return  new foo();
   }
 

@@ -11,9 +11,9 @@ class B1 extends A { const ctx C = []; }
 class B2 extends A { const ctx C = [rx]; }
 class B3 extends A { const ctx C = [defaults]; }
 
-function pure($c)[]   :mixed{ $c->f(); }
-function rx($c)[rx]   :mixed{ $c->f(); }
-function defaults($c) :mixed{ $c->f(); }
+<<__DynamicallyCallable>> function pure($c)[]   :mixed{ $c->f(); }
+<<__DynamicallyCallable>> function rx($c)[rx]   :mixed{ $c->f(); }
+<<__DynamicallyCallable>> function defaults($c) :mixed{ $c->f(); }
 
 
 <<__EntryPoint>>

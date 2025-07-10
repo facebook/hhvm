@@ -1,6 +1,6 @@
 <?hh
 
-function do_a_parse($f) {
+<<__DynamicallyCallable>> function do_a_parse($f) {
   HH\FileDecls::parsePath($f);
 }
 <<__EntryPoint>>

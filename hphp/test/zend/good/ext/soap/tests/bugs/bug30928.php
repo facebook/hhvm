@@ -6,7 +6,7 @@ class foo {
 	protected $c="c";
 }
 
-function test($x) :mixed{
+<<__DynamicallyCallable>> function test($x) :mixed{
   return $x;
 }
 

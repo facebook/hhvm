@@ -17,7 +17,7 @@ async function thread_func() {
   if ($t % 2) HH\SimpleLock\unlock("sync");
 }
 
-function thread_main() {
+<<__DynamicallyCallable>> function thread_main() {
   HH\Asio\join(thread_func());
 }
 

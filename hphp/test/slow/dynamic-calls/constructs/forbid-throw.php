@@ -2,9 +2,9 @@
 
 function wrap($e) :mixed{ echo "Exception: {$e->getMessage()}\n"; }
 
-function func() :mixed{}
-async function async_func() :Awaitable<mixed>{ return 5; }
-function cmp($x, $y) :mixed{ return $x <=> $y; }
+<<__DynamicallyCallable>> function func() :mixed{}
+<<__DynamicallyCallable>> async function async_func() :Awaitable<mixed>{ return 5; }
+<<__DynamicallyCallable>> function cmp($x, $y) :mixed{ return $x <=> $y; }
 
 <<__DynamicallyCallable>> function func2() :mixed{}
 <<__DynamicallyCallable>> async function async_func2() :Awaitable<mixed>{ return 5; }

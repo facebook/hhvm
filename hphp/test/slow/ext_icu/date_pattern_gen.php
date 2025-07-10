@@ -47,19 +47,19 @@ const INVALID_FIELD = -1;
 
 //////////////////////////////////////////////////////////////////////
 
-function test_create_instance_with_no_locale_fails() :mixed{
+<<__DynamicallyCallable>> function test_create_instance_with_no_locale_fails() :mixed{
   EXPECT_NO_LOCALE(function () {
     IntlDatePatternGenerator::createInstance("");
   });
 }
 
-function test_create_instance_with_null_locale_fails() :mixed{
+<<__DynamicallyCallable>> function test_create_instance_with_null_locale_fails() :mixed{
   EXPECT_NO_LOCALE(function () {
     IntlDatePatternGenerator::createInstance('');
   });
 }
 
-function test_create_instances_with_different_locales() :mixed{
+<<__DynamicallyCallable>> function test_create_instances_with_different_locales() :mixed{
   $gen = IntlDatePatternGenerator::createInstance("en_US");
   VS($gen->getBestPattern('yyyyMMdd'), 'MM/dd/yyyy');
 
@@ -71,7 +71,7 @@ function test_create_instances_with_different_locales() :mixed{
   VS($gen->getBestPattern('yyyyMMdd'), 'dd/MM/yyyy');
 }
 
-function test_create_empty_instance() :mixed{
+<<__DynamicallyCallable>> function test_create_empty_instance() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
 
   // NOTE: This segfaults with ICU 49.1.2 (only with an empty instance)
@@ -80,7 +80,7 @@ function test_create_empty_instance() :mixed{
   VS($gen->getDateTimeFormat(), '');
 }
 
-function test_get_skeleton() :mixed{
+<<__DynamicallyCallable>> function test_get_skeleton() :mixed{
   $skeleton = "";
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
@@ -92,7 +92,7 @@ function test_get_skeleton() :mixed{
   });
 }
 
-function test_get_base_skeleton() :mixed{
+<<__DynamicallyCallable>> function test_get_base_skeleton() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
   VS($gen->getBaseSkeleton(''), '');
@@ -103,7 +103,7 @@ function test_get_base_skeleton() :mixed{
   });
 }
 
-function test_add_pattern() :mixed{
+<<__DynamicallyCallable>> function test_add_pattern() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getBestPattern('MMMMdd'), 'MMMM dd');
 
@@ -124,7 +124,7 @@ function test_add_pattern() :mixed{
   });
 }
 
-function test_append_item_format() :mixed{
+<<__DynamicallyCallable>> function test_append_item_format() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getAppendItemFormat(ERA_FIELD), '{0} {1}');
 
@@ -152,7 +152,7 @@ function test_append_item_format() :mixed{
   });
 }
 
-function test_append_item_name() :mixed{
+<<__DynamicallyCallable>> function test_append_item_name() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getAppendItemName(ERA_FIELD), "Era");
   $gen->setAppendItemName(ERA_FIELD, 'eras');
@@ -179,7 +179,7 @@ function test_append_item_name() :mixed{
   });
 }
 
-function test_date_time_format() :mixed{
+<<__DynamicallyCallable>> function test_date_time_format() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   //
   // Different versions of ICU will give us slightly different formats
@@ -197,7 +197,7 @@ function test_date_time_format() :mixed{
   });
 }
 
-function test_get_best_pattern() :mixed{
+<<__DynamicallyCallable>> function test_get_best_pattern() :mixed{
   $skeleton = 'yyyyMMMMddhhmm';
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
@@ -215,7 +215,7 @@ function test_get_best_pattern() :mixed{
   });
 }
 
-function test_replace_field_types() :mixed{
+<<__DynamicallyCallable>> function test_replace_field_types() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
   VS($gen->replaceFieldTypes("dd-MM-yy", 'yyyyMMMMdd'), 'dd-MMMM-yyyy');
 
@@ -234,7 +234,7 @@ function test_replace_field_types() :mixed{
   });
 }
 
-function test_get_skeletons() :mixed{
+<<__DynamicallyCallable>> function test_get_skeletons() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
 
   $skeletons = $gen->getSkeletons();
@@ -247,7 +247,7 @@ function test_get_skeletons() :mixed{
   VS($skeletons->next(), null);
 }
 
-function test_get_pattern_for_skeleton() :mixed{
+<<__DynamicallyCallable>> function test_get_pattern_for_skeleton() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
   $pattern = $gen->getPatternForSkeleton('yyMMdd');
   VS($pattern, '');
@@ -265,7 +265,7 @@ function test_get_pattern_for_skeleton() :mixed{
   });
 }
 
-function test_get_base_skeletons() :mixed{
+<<__DynamicallyCallable>> function test_get_base_skeletons() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
   $skeletons = $gen->getBaseSkeletons();
   VS($skeletons->valid(), false);
@@ -277,7 +277,7 @@ function test_get_base_skeletons() :mixed{
   VS($skeletons->next(), null);
 }
 
-function test_decimal() :mixed{
+<<__DynamicallyCallable>> function test_decimal() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getDecimal(), '.');
 
@@ -289,7 +289,7 @@ function test_decimal() :mixed{
   });
 }
 
-function test_get_error() :mixed{
+<<__DynamicallyCallable>> function test_get_error() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getErrorCode(), 0);
   VS($gen->getErrorMessage(), 'U_ZERO_ERROR');

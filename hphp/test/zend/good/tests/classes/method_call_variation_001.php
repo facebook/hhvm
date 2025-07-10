@@ -7,7 +7,7 @@ class C
     }
 }
 
-function foo($a, $b)
+<<__DynamicallyCallable>> function foo($a, $b)
 :mixed{
     echo "Called global foo($a, $b)\n";
 }

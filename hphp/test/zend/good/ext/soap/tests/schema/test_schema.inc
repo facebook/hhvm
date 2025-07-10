@@ -18,7 +18,7 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-function test($input) {
+<<__DynamicallyCallable>> function test($input) {
   LocalSoapClient::$input = $input;
 }
 

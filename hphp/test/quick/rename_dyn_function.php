@@ -1,10 +1,10 @@
 <?hh
 
-function a() :mixed{
+<<__DynamicallyCallable>> function a() :mixed{
   echo "Hello from a\n";
 }
 
-function b() :mixed{
+<<__DynamicallyCallable>> function b() :mixed{
   echo "I am b\n";
 }
 

@@ -1,5 +1,5 @@
 <?hh
-function test() :mixed{
+<<__DynamicallyCallable>> function test() :mixed{
     return new SoapFault("MyFault","My fault string");
 }
 <<__EntryPoint>> function main(): void {

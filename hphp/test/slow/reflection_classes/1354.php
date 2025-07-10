@@ -15,7 +15,7 @@ class cls1 implements i1, i2 {
  function func1(cls1 $p1, inout $p2, $p3='def') :mixed{
  var_dump($p1);
 }
- function func2($a) :mixed{
+ <<__DynamicallyCallable>> function func2($a) :mixed{
  var_dump($a);
 }
  class cls2 extends cls1 {

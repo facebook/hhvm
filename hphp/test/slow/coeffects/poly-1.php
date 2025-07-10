@@ -16,17 +16,17 @@ class Foo3 implements I {
   const ctx C = [defaults];
 }
 
-function f1(I $a = null)[$a::C] :mixed{
+<<__DynamicallyCallable>> function f1(I $a = null)[$a::C] :mixed{
   echo "in f1\n";
 }
 
-function f2(I $a = null)[write_props, $a::C] :mixed{
+<<__DynamicallyCallable>> function f2(I $a = null)[write_props, $a::C] :mixed{
   echo "in f2\n";
 }
 
-function pure($f, $a)[] :mixed{ $f($a); }
-function rx($f, $a)[rx] :mixed{ $f($a); }
-function defaults($f, $a) :mixed{ $f($a); }
+<<__DynamicallyCallable>> function pure($f, $a)[] :mixed{ $f($a); }
+<<__DynamicallyCallable>> function rx($f, $a)[rx] :mixed{ $f($a); }
+<<__DynamicallyCallable>> function defaults($f, $a) :mixed{ $f($a); }
 
 <<__EntryPoint>>
 function main() :mixed{

@@ -17,45 +17,45 @@ function handler($errno, $errmsg) :mixed{
 
 type my_t = int;
 
-async function f1($p) :Awaitable<mixed>{ return $p; }
-async function f2($p): Awaitable<int> { return $p; }
-async function f2_soft($p): <<__Soft>> Awaitable<int> { return $p; }
-async function f3($p): Awaitable<string> { return $p; }
-async function f3_soft($p): <<__Soft>> Awaitable<string> { return $p; }
-async function f4($p): Awaitable<bool> { return $p; }
-async function f4_soft($p): <<__Soft>> Awaitable<bool> { return $p; }
-async function f5($p): Awaitable<float> { return $p; }
-async function f5_soft($p): <<__Soft>> Awaitable<float> { return $p; }
-async function f6($p): Awaitable<resource> { return $p; }
-async function f6_soft($p): <<__Soft>> Awaitable<resource> { return $p; }
-async function f7($p): Awaitable<varray> { return $p; }
-async function f7_soft($p): <<__Soft>> Awaitable<varray> { return $p; }
-async function f8($p): Awaitable<callable> { return $p; }
-async function f8_soft($p): <<__Soft>> Awaitable<callable> { return $p; }
-async function f9($p): Awaitable<Figure> { return $p; }
-async function f9_soft($p): <<__Soft>> Awaitable<Figure> { return $p; }
-async function f10($p): Awaitable<Square> { return $p; }
-async function f10_soft($p): <<__Soft>> Awaitable<Square> { return $p; }
-async function f11($p): Awaitable<:div> { return $p; }
-async function f11_soft($p): <<__Soft>> Awaitable<:div> { return $p; }
-async function f12($p): Awaitable<Fractal<Square>> { return $p; }
-async function f12_soft($p): <<__Soft>> Awaitable<Fractal<Square>> { return $p; }
-async function f13<T>($p): Awaitable<Fractal<T>> { return $p; }
-async function f13_soft<T>($p): <<__Soft>> Awaitable<Fractal<T>> { return $p; }
-async function f14($p): Awaitable<my_t> { return $p; }
-async function f14_soft($p): <<__Soft>> Awaitable<my_t> { return $p; }
-async function f15($p): Awaitable<void> { return $p; }
-async function f15_soft($p): <<__Soft>> Awaitable<void> { return $p; }
-async function f16($p): Awaitable<mixed> { return $p; }
-async function f16_soft($p): <<__Soft>> Awaitable<mixed> { return $p; }
-async function f17($p): Awaitable<?int> { return $p; }
-async function f17_soft($p): <<__Soft>> Awaitable<?int> { return $p; }
-async function f18($p): Awaitable<(string, int)> { return $p; }
-async function f18_soft($p): <<__Soft>> Awaitable<(string, int)> { return $p; }
-async function f19($p): Awaitable<(function(int): int)> { return $p; }
-async function f19_soft($p): <<__Soft>> Awaitable<(function(int): int)> { return $p; }
-async function f20($p): Awaitable<callable> { return $p; }
-async function f20_soft($p): <<__Soft>> Awaitable<callable> { return $p; }
+<<__DynamicallyCallable>> async function f1($p) :Awaitable<mixed>{ return $p; }
+<<__DynamicallyCallable>> async function f2($p): Awaitable<int> { return $p; }
+<<__DynamicallyCallable>> async function f2_soft($p): <<__Soft>> Awaitable<int> { return $p; }
+<<__DynamicallyCallable>> async function f3($p): Awaitable<string> { return $p; }
+<<__DynamicallyCallable>> async function f3_soft($p): <<__Soft>> Awaitable<string> { return $p; }
+<<__DynamicallyCallable>> async function f4($p): Awaitable<bool> { return $p; }
+<<__DynamicallyCallable>> async function f4_soft($p): <<__Soft>> Awaitable<bool> { return $p; }
+<<__DynamicallyCallable>> async function f5($p): Awaitable<float> { return $p; }
+<<__DynamicallyCallable>> async function f5_soft($p): <<__Soft>> Awaitable<float> { return $p; }
+<<__DynamicallyCallable>> async function f6($p): Awaitable<resource> { return $p; }
+<<__DynamicallyCallable>> async function f6_soft($p): <<__Soft>> Awaitable<resource> { return $p; }
+<<__DynamicallyCallable>> async function f7($p): Awaitable<varray> { return $p; }
+<<__DynamicallyCallable>> async function f7_soft($p): <<__Soft>> Awaitable<varray> { return $p; }
+<<__DynamicallyCallable>> async function f8($p): Awaitable<callable> { return $p; }
+<<__DynamicallyCallable>> async function f8_soft($p): <<__Soft>> Awaitable<callable> { return $p; }
+<<__DynamicallyCallable>> async function f9($p): Awaitable<Figure> { return $p; }
+<<__DynamicallyCallable>> async function f9_soft($p): <<__Soft>> Awaitable<Figure> { return $p; }
+<<__DynamicallyCallable>> async function f10($p): Awaitable<Square> { return $p; }
+<<__DynamicallyCallable>> async function f10_soft($p): <<__Soft>> Awaitable<Square> { return $p; }
+<<__DynamicallyCallable>> async function f11($p): Awaitable<:div> { return $p; }
+<<__DynamicallyCallable>> async function f11_soft($p): <<__Soft>> Awaitable<:div> { return $p; }
+<<__DynamicallyCallable>> async function f12($p): Awaitable<Fractal<Square>> { return $p; }
+<<__DynamicallyCallable>> async function f12_soft($p): <<__Soft>> Awaitable<Fractal<Square>> { return $p; }
+<<__DynamicallyCallable>> async function f13<T>($p): Awaitable<Fractal<T>> { return $p; }
+<<__DynamicallyCallable>> async function f13_soft<T>($p): <<__Soft>> Awaitable<Fractal<T>> { return $p; }
+<<__DynamicallyCallable>> async function f14($p): Awaitable<my_t> { return $p; }
+<<__DynamicallyCallable>> async function f14_soft($p): <<__Soft>> Awaitable<my_t> { return $p; }
+<<__DynamicallyCallable>> async function f15($p): Awaitable<void> { return $p; }
+<<__DynamicallyCallable>> async function f15_soft($p): <<__Soft>> Awaitable<void> { return $p; }
+<<__DynamicallyCallable>> async function f16($p): Awaitable<mixed> { return $p; }
+<<__DynamicallyCallable>> async function f16_soft($p): <<__Soft>> Awaitable<mixed> { return $p; }
+<<__DynamicallyCallable>> async function f17($p): Awaitable<?int> { return $p; }
+<<__DynamicallyCallable>> async function f17_soft($p): <<__Soft>> Awaitable<?int> { return $p; }
+<<__DynamicallyCallable>> async function f18($p): Awaitable<(string, int)> { return $p; }
+<<__DynamicallyCallable>> async function f18_soft($p): <<__Soft>> Awaitable<(string, int)> { return $p; }
+<<__DynamicallyCallable>> async function f19($p): Awaitable<(function(int): int)> { return $p; }
+<<__DynamicallyCallable>> async function f19_soft($p): <<__Soft>> Awaitable<(function(int): int)> { return $p; }
+<<__DynamicallyCallable>> async function f20($p): Awaitable<callable> { return $p; }
+<<__DynamicallyCallable>> async function f20_soft($p): <<__Soft>> Awaitable<callable> { return $p; }
 
 class Figure {}
 class Square extends Figure {}

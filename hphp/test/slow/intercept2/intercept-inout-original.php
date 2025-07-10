@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, inout $args) :mixed{
+<<__DynamicallyCallable>> function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";

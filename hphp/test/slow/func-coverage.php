@@ -2,7 +2,7 @@
 
 function a() :mixed{ echo __METHOD__."\n"; }
 function b() :mixed{ echo __METHOD__."\n"; }
-function c() :mixed{ echo __METHOD__."\n"; }
+<<__DynamicallyCallable>> function c() :mixed{ echo __METHOD__."\n"; }
 
 trait T {
   function f() :mixed{ echo __METHOD__."\n"; }

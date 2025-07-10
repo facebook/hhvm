@@ -17,7 +17,7 @@ class Cls {
   }
 }
 
-internal function foo() {
+<<__DynamicallyCallable>> internal function foo() {
   echo "in foo\n";
 }
 

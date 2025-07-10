@@ -3,7 +3,7 @@
 <<__NEVER_INLINE>>
 function foo() :mixed{}
 
-function intercept($n, $_2, inout $_3) :mixed{
+<<__DynamicallyCallable>> function intercept($n, $_2, inout $_3) :mixed{
   var_dump($n);
   return shape('value' => null);
 }

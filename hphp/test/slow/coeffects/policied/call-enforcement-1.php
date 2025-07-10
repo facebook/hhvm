@@ -1,50 +1,50 @@
 <?hh
 
-function non_zoned($fn) :mixed{
+<<__DynamicallyCallable>> function non_zoned($fn) :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned_local($fn)[zoned_local] :mixed{
+<<__DynamicallyCallable>> function zoned_local($fn)[zoned_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned_shallow($fn)[zoned_shallow] :mixed{
+<<__DynamicallyCallable>> function zoned_shallow($fn)[zoned_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned($fn)[zoned] :mixed{
+<<__DynamicallyCallable>> function zoned($fn)[zoned] :mixed{
   if ($fn) $fn(null);
 }
 
-function leak_safe_local($fn)[leak_safe_local] :mixed{
+<<__DynamicallyCallable>> function leak_safe_local($fn)[leak_safe_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function leak_safe_shallow($fn)[leak_safe_shallow] :mixed{
+<<__DynamicallyCallable>> function leak_safe_shallow($fn)[leak_safe_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function leak_safe($fn)[leak_safe] :mixed{
+<<__DynamicallyCallable>> function leak_safe($fn)[leak_safe] :mixed{
   if ($fn) $fn(null);
 }
 
-function read_globals($fn)[read_globals] :mixed{
+<<__DynamicallyCallable>> function read_globals($fn)[read_globals] :mixed{
   if ($fn) $fn(null);
 }
 
-function globals($fn)[globals] :mixed{
+<<__DynamicallyCallable>> function globals($fn)[globals] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props($fn)[write_props] :mixed{
+<<__DynamicallyCallable>> function write_props($fn)[write_props] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_this_props($fn)[write_this_props] :mixed{
+<<__DynamicallyCallable>> function write_this_props($fn)[write_this_props] :mixed{
   if ($fn) $fn(null);
 }
 
-function pure($fn)[] :mixed{
+<<__DynamicallyCallable>> function pure($fn)[] :mixed{
   if ($fn) $fn(null);
 }
 

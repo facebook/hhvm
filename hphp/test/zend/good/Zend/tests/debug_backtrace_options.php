@@ -1,6 +1,6 @@
 <?hh
 
-function backtrace_print($opt = null)
+<<__DynamicallyCallable>> function backtrace_print($opt = null)
 :mixed{
 	if(is_null($opt)) {
 		print_r(debug_backtrace());
@@ -10,7 +10,7 @@ function backtrace_print($opt = null)
 	__hhvm_intrinsics\launder_value($opt);
 }
 
-function doit($a, $b, $how)
+<<__DynamicallyCallable>> function doit($a, $b, $how)
 :mixed{
 	echo "==default\n";
 	$how();

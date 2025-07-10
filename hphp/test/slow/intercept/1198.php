@@ -8,7 +8,7 @@ function bar(inout $a) :mixed{
   var_dump('bar');
   $a[0] = 2;
 }
-function goo($name, $obj, inout $params) :mixed{
+<<__DynamicallyCallable>> function goo($name, $obj, inout $params) :mixed{
   return shape('value' => bar(inout $params));
 }
 

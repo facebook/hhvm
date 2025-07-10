@@ -1,7 +1,7 @@
 <?hh
 
-function bar() :mixed{ return count(func_get_args()); }
-function baz($_1, $_2, inout $_3) :mixed{ return shape('value' => null); }
+<<__DynamicallyCallable>> function bar() :mixed{ return count(func_get_args()); }
+<<__DynamicallyCallable>> function baz($_1, $_2, inout $_3) :mixed{ return shape('value' => null); }
 
 function test($f, $x) :mixed{
   call_user_func_array($f, vec[$x]);

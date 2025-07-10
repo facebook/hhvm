@@ -7,7 +7,7 @@ function lock3($name) {
   var_dump(HH\SimpleLock\try_lock('held'));
 }
 
-function thread_main() {
+<<__DynamicallyCallable>> function thread_main() {
   lock3('thread');
 }
 
@@ -33,4 +33,3 @@ async function main() {
 
   lock3('main');
 }
-

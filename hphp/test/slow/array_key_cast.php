@@ -14,19 +14,19 @@ function run_tests($tests) :mixed{
 
 // Use type-hints to test HHBBC optimizations
 
-function test1($v) :mixed{ return HH\array_key_cast($v); }
-function test2(bool $v) :mixed{ return HH\array_key_cast($v); }
-function test3(bool $v) :mixed{ return HH\array_key_cast($v); }
-function test4(int $v) :mixed{ return HH\array_key_cast($v); }
-function test5(float $v) :mixed{ return HH\array_key_cast($v); }
-function test6(string $v) :mixed{ return HH\array_key_cast($v); }
-function test7(string $v) :mixed{ return HH\array_key_cast($v); }
-function test8(resource $v) :mixed{ return HH\array_key_cast($v); }
-function test9(varray $v) :mixed{ return HH\array_key_cast($v); }
-function test10(vec $v) :mixed{ return HH\array_key_cast($v); }
-function test11(dict $v) :mixed{ return HH\array_key_cast($v); }
-function test12(keyset $v) :mixed{ return HH\array_key_cast($v); }
-function test13(stdClass $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test1($v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test2(bool $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test3(bool $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test4(int $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test5(float $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test6(string $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test7(string $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test8(resource $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test9(varray $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test10(vec $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test11(dict $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test12(keyset $v) :mixed{ return HH\array_key_cast($v); }
+<<__DynamicallyCallable>> function test13(stdClass $v) :mixed{ return HH\array_key_cast($v); }
 
 function func_maker1() :mixed{ return 'HH\array_key_cast'; }
 

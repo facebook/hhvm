@@ -1,7 +1,7 @@
 <?hh
 
 namespace testing {
-    function foobar($str) :mixed{
+    <<__DynamicallyCallable>> function foobar($str) :mixed{
         \var_dump($str);
     }
 

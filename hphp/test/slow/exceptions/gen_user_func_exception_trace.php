@@ -1,6 +1,6 @@
 <?hh
 
-function child_main(...$args): void {
+<<__DynamicallyCallable>> function child_main(...$args): void {
   var_dump($args);
   throw new Exception("thrown from child");
 }

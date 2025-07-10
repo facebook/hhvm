@@ -1,5 +1,5 @@
 <?hh
-function Test($param) :mixed{
+<<__DynamicallyCallable>> function Test($param) :mixed{
 
 	ZendGoodExtSoapTestsBugsBug38067::$g = $param->str;
 	return ZendGoodExtSoapTestsBugsBug38067::$g;

@@ -2,7 +2,7 @@
 
 module x.y; // outside the active deployment
 
-function foo() {
+<<__DynamicallyCallable>> function foo() {
     echo "in foo\n";
 }
 

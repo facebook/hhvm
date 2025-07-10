@@ -1,6 +1,6 @@
 <?hh
 
-function thread_main() {
+<<__DynamicallyCallable>> function thread_main() {
   HH\SimpleLock\lock('abandon');
   HH\SimpleLock\lock('abandon');
   HH\SimpleLock\lock('abandon');

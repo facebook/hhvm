@@ -1,9 +1,9 @@
 <?hh
 
-function test1() :mixed{
+<<__DynamicallyCallable>> function test1() :mixed{
   var_dump(__METHOD__);
 }
-function test2() :mixed{
+<<__DynamicallyCallable>> function test2() :mixed{
   var_dump(__METHOD__);
 }
 function test($test) :mixed{

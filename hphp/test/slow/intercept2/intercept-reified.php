@@ -7,7 +7,7 @@ function handler($name, $obj, inout $args) :mixed{
   return shape('prepend_this' => true, 'callback' => 'bar');
 }
 
-function bar<reify Ta, reify Tb>($_this, $arg) :mixed{
+<<__DynamicallyCallable>> function bar<reify Ta, reify Tb>($_this, $arg) :mixed{
   echo "In bar!\n";
   echo "Arg is: " . $arg . "\n";
   var_dump(HH\ReifiedGenerics\get_type_structure<Ta>());

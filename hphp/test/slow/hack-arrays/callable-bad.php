@@ -6,9 +6,9 @@ class A {
   public static function staticMeth($x) :mixed{ var_dump(__METHOD__); return $x; }
 }
 
-function call1($c, $x) :mixed{ return $c($x); }
-function call2($c, $x) :mixed{ return call_user_func($c, $x); }
-function call3($c, $x) :mixed{ return array_map($c, vec[$x]); }
+<<__DynamicallyCallable>> function call1($c, $x) :mixed{ return $c($x); }
+<<__DynamicallyCallable>> function call2($c, $x) :mixed{ return call_user_func($c, $x); }
+<<__DynamicallyCallable>> function call3($c, $x) :mixed{ return array_map($c, vec[$x]); }
 
 <<__EntryPoint>>
 function main_callable_bad() :mixed{

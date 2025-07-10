@@ -19,7 +19,7 @@ async function thread_func() {
   HH\SimpleLock\unlock('thread_lock2');
 }
 
-function thread_main() {
+<<__DynamicallyCallable>> function thread_main() {
   HH\Asio\join(thread_func());
 }
 
@@ -58,4 +58,3 @@ async function main() {
 
   echo "Main done.\n";
 }
-

@@ -1,6 +1,6 @@
 <?hh
 
-function echoLong($num) :mixed{
+<<__DynamicallyCallable>> function echoLong($num) :mixed{
   return $num;
 }
 

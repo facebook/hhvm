@@ -72,34 +72,34 @@ class K {
   const BAR = vec[self::FOO];
 }
 
-function test1() :mixed{ var_dump(A::FOO); }
-function test2() :mixed{ var_dump(A::BAR); }
-function test3() :mixed{ var_dump(A::BAZ); }
-function test4() :mixed{ var_dump(B::FOO); }
-function test5() :mixed{ var_dump(B::BAR); }
-function test6() :mixed{ var_dump(B::BAZ); }
-function test7() :mixed{ var_dump(C1::FOO); }
-function test8() :mixed{ var_dump(C2::BAR); }
-function test9() :mixed{ var_dump(D::FOO); }
-function test10() :mixed{ var_dump(E::FOO1); }
-function test11() :mixed{ var_dump(E::BAR1); }
-function test12() :mixed{ var_dump(E::FOO2); }
-function test13() :mixed{ var_dump(E::BAR2); }
-function test14() :mixed{ var_dump(F::FOO); }
-function test15() :mixed{ var_dump(F::BAR); }
-function test16() :mixed{ var_dump(G::FOO); }
-function test17() :mixed{ var_dump(G::BAR); }
-function test18() :mixed{ var_dump(H1::FOO); }
-function test19() :mixed{
+<<__DynamicallyCallable>> function test1() :mixed{ var_dump(A::FOO); }
+<<__DynamicallyCallable>> function test2() :mixed{ var_dump(A::BAR); }
+<<__DynamicallyCallable>> function test3() :mixed{ var_dump(A::BAZ); }
+<<__DynamicallyCallable>> function test4() :mixed{ var_dump(B::FOO); }
+<<__DynamicallyCallable>> function test5() :mixed{ var_dump(B::BAR); }
+<<__DynamicallyCallable>> function test6() :mixed{ var_dump(B::BAZ); }
+<<__DynamicallyCallable>> function test7() :mixed{ var_dump(C1::FOO); }
+<<__DynamicallyCallable>> function test8() :mixed{ var_dump(C2::BAR); }
+<<__DynamicallyCallable>> function test9() :mixed{ var_dump(D::FOO); }
+<<__DynamicallyCallable>> function test10() :mixed{ var_dump(E::FOO1); }
+<<__DynamicallyCallable>> function test11() :mixed{ var_dump(E::BAR1); }
+<<__DynamicallyCallable>> function test12() :mixed{ var_dump(E::FOO2); }
+<<__DynamicallyCallable>> function test13() :mixed{ var_dump(E::BAR2); }
+<<__DynamicallyCallable>> function test14() :mixed{ var_dump(F::FOO); }
+<<__DynamicallyCallable>> function test15() :mixed{ var_dump(F::BAR); }
+<<__DynamicallyCallable>> function test16() :mixed{ var_dump(G::FOO); }
+<<__DynamicallyCallable>> function test17() :mixed{ var_dump(G::BAR); }
+<<__DynamicallyCallable>> function test18() :mixed{ var_dump(H1::FOO); }
+<<__DynamicallyCallable>> function test19() :mixed{
   var_dump(I1_NotRecursive::FOO);
 }
-function test20() :mixed{
+<<__DynamicallyCallable>> function test20() :mixed{
   var_dump(I1_Recursive::FOO);
 }
-function test21() :mixed{ var_dump(J1::FOO); }
-function test22() :mixed{ var_dump(J2::FOO); }
-function test23() :mixed{ var_dump(K::FOO); }
-function test24() :mixed{ var_dump(K::BAR); }
+<<__DynamicallyCallable>> function test21() :mixed{ var_dump(J1::FOO); }
+<<__DynamicallyCallable>> function test22() :mixed{ var_dump(J2::FOO); }
+<<__DynamicallyCallable>> function test23() :mixed{ var_dump(K::FOO); }
+<<__DynamicallyCallable>> function test24() :mixed{ var_dump(K::BAR); }
 
 const TESTS = vec[
   'test1',

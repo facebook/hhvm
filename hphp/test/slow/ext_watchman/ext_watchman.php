@@ -62,7 +62,7 @@ function test_core(WatchmanInstance $wminst): void {
   print("Test corrupt subscription callback\n");
   $tmpcode = tempnam(sys_get_temp_dir(), 'cd1');
   chmod($tmpcode, 0666);
-  file_put_contents($tmpcode, '<?hh function tmpCB($_, $_, $_, $_, $_){}');
+  file_put_contents($tmpcode, '<?hh <<__DynamicallyCallable>> function tmpCB($_, $_, $_, $_, $_){}');
   require $tmpcode;
   HH\watchman_subscribe(
     '{"fields": ["name"], "expression": ["exists"]}',
@@ -71,7 +71,7 @@ function test_core(WatchmanInstance $wminst): void {
     'tmpCB',
     $sock,
   ) |> HH\Asio\join($$);
-  file_put_contents($tmpcode, '<?hh function tmpCB($_, $_, $_, $_, $_){asdf}');
+  file_put_contents($tmpcode, '<?hh <<__DynamicallyCallable>> function tmpCB($_, $_, $_, $_, $_){asdf}');
   file_put_contents($wminst->getRepoRoot().'/blah.php', 'X');
   sleep(2);
   $breakpass = false;
@@ -92,7 +92,7 @@ function test_core(WatchmanInstance $wminst): void {
   print("Test delete subscription callback\n");
   $tmpcode = tempnam(sys_get_temp_dir(), 'cd2');
   chmod($tmpcode, 0666);
-  file_put_contents($tmpcode, '<?hh function tmpCB1($_, $_, $_, $_, $_){}');
+  file_put_contents($tmpcode, '<?hh <<__DynamicallyCallable>> function tmpCB1($_, $_, $_, $_, $_){}');
   require $tmpcode;
   HH\watchman_subscribe(
     '{"fields": ["name"], "expression": ["exists"]}',

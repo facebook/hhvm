@@ -1,6 +1,6 @@
 <?hh
 
-function bassCall() :mixed{
+<<__DynamicallyCallable>> function bassCall() :mixed{
   return "ok";
 }
 <<__EntryPoint>>

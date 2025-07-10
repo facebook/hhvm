@@ -18,7 +18,7 @@ function do_function($fn) :mixed{
   echo "$str\n";
   var_dump($param->getDefaultValue());
   $fn .= '_eval';
-  eval(sprintf('function %s($v = %s) { var_dump($v); }',
+  eval(sprintf('<<__DynamicallyCallable>> function %s($v = %s) { var_dump($v); }',
                $fn, $str));
   $fn();
 }

@@ -1,22 +1,22 @@
 <?hh
 
-function non_rx($fn) :mixed{
+<<__DynamicallyCallable>> function non_rx($fn) :mixed{
   if ($fn) $fn(null);
 }
 
-function rx_local($fn)[rx_local] :mixed{
+<<__DynamicallyCallable>> function rx_local($fn)[rx_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function rx_shallow($fn)[rx_shallow] :mixed{
+<<__DynamicallyCallable>> function rx_shallow($fn)[rx_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function rx($fn)[rx] :mixed{
+<<__DynamicallyCallable>> function rx($fn)[rx] :mixed{
   if ($fn) $fn(null);
 }
 
-function pure($fn)[] :mixed{
+<<__DynamicallyCallable>> function pure($fn)[] :mixed{
   if ($fn) $fn(null);
 }
 

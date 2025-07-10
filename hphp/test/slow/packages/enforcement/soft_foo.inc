@@ -2,7 +2,7 @@
 
 module z.z; // soft deployed in the active deployment
 
-function soft_foo() {
+<<__DynamicallyCallable>> function soft_foo() {
     echo "in soft_foo\n";
 }
 

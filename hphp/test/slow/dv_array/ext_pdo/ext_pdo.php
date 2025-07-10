@@ -30,7 +30,7 @@ function cleanupSqliteTestTable($tmp_sqllite) :mixed{
 class MyStatement extends PDOStatement {
 }
 
-function on_fetch($data) :mixed{
+<<__DynamicallyCallable>> function on_fetch($data) :mixed{
   return $data.'_foobar';
 }
 <<__EntryPoint>>

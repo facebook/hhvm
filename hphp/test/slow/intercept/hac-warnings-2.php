@@ -4,7 +4,7 @@
 
 function takes_varray(varray $x) :mixed{}
 
-function handler($name, $target, inout $args) :mixed{
+<<__DynamicallyCallable>> function handler($name, $target, inout $args) :mixed{
   var_dump(is_varray($args));
   takes_varray($args);
   $args[0] = 'handler';

@@ -1,7 +1,7 @@
 <?hh
 
 class X { static function y() :mixed{} }
-function t() :mixed{ var_dump(__FUNCTION__); }
+<<__DynamicallyCallable>> function t() :mixed{ var_dump(__FUNCTION__); }
 
 <<__EntryPoint>>
 function main() :mixed{

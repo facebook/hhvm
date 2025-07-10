@@ -3,7 +3,7 @@
 
 module a;
 
-internal function foo() { echo "in f\n"; }
+<<__DynamicallyCallable>> internal function foo() { echo "in f\n"; }
 
 class C {
   static internal function foo_static() { echo "in C::f_static\n"; }

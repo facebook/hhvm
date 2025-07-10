@@ -105,12 +105,12 @@ class Cls8 {
   use Trait4;
 }
 
-<<__Memoize>> function func1() :mixed{
+<<__Memoize, __DynamicallyCallable>> function func1() :mixed{
   echo "func1()\n";
   return 'zyzzy';
 }
 
-<<__Memoize>> function func2($a) :mixed{
+<<__Memoize, __DynamicallyCallable>> function func2($a) :mixed{
   echo "func2()\n";
   return $a;
 }

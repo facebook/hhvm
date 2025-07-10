@@ -8,7 +8,7 @@ class B extends A {
   public $y;
 }
 
-function f($a) :mixed{
+<<__DynamicallyCallable>> function f($a) :mixed{
   return $a;
 }
 

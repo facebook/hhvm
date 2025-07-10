@@ -1,6 +1,6 @@
 <?hh
 
-function Test($param) :mixed{
+<<__DynamicallyCallable>> function Test($param) :mixed{
 
   DvArrayExtSoapBug38055::$g1 = $param->boolA;
   DvArrayExtSoapBug38055::$g2 = $param->boolB;

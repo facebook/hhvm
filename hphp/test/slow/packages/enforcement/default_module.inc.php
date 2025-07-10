@@ -1,6 +1,6 @@
 <?hh // in the active deployment
 
-function default_foo() {
+<<__DynamicallyCallable>> function default_foo() {
     echo "in default_foo\n";
 }
 

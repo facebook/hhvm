@@ -1,6 +1,6 @@
 <?hh
 
-function foo(int $a) :mixed{ echo "foo($a)\n"; }
+<<__DynamicallyCallable>> function foo(int $a) :mixed{ echo "foo($a)\n"; }
 class A { static function b(int $a) :mixed{ echo "A::b($a)\n"; } }
 
 <<__Memoize>>

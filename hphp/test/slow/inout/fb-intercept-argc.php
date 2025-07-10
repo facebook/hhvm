@@ -14,19 +14,19 @@ function meep(inout $f, $g, inout $r) :mixed{
   return $g;
 }
 
-function too_many($name, $obj_or_cls, inout $args) :mixed{
+<<__DynamicallyCallable>> function too_many($name, $obj_or_cls, inout $args) :mixed{
   var_dump($args);
   $args = vec['red', 'green', 'blue', 'apple', 'bannana', 'pear'];
   return shape('value' => null);
 }
 
-function too_few($name, $obj_or_cls, inout $args) :mixed{
+<<__DynamicallyCallable>> function too_few($name, $obj_or_cls, inout $args) :mixed{
   var_dump($args);
   $args = vec['foo'];
   return shape('value' => null);
 }
 
-function wrong_type($name, $obj_or_cls, inout $args) :mixed{
+<<__DynamicallyCallable>> function wrong_type($name, $obj_or_cls, inout $args) :mixed{
   var_dump($args);
   $args = new stdClass;
   return shape('value' => null);

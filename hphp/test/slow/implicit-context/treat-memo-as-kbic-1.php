@@ -45,19 +45,19 @@ class B extends Base {
 }
 
 
-<<__Memoize(#KeyedByIC)>>
+<<__Memoize(#KeyedByIC), __DynamicallyCallable>>
 function memo_kbic($a, $b)[defaults]: mixed{
   $context = (ClassContext::getContext()?->name() ?? 'null');
   echo "args: $a, $b name: $context\n";
 }
 
-<<__Memoize(#MakeICInaccessible)>>
+<<__Memoize(#MakeICInaccessible), __DynamicallyCallable>>
 function memo_inaccessible($a, $b)[defaults]: mixed{
   $context = (ClassContext::getContext()?->name() ?? 'null');
   echo "args: $a, $b name: $context\n";
 }
 
-<<__Memoize>>
+<<__Memoize, __DynamicallyCallable>>
 function memo_default($a, $b)[defaults]: mixed{
   $context = (ClassContext::getContext()?->name() ?? 'null');
   echo "args: $a, $b name: $context\n";

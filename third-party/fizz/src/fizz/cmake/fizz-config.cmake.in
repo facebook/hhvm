@@ -22,6 +22,7 @@ set_and_check(FIZZ_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_DIR@")
 # Fizz was configured with the following at build time.
 set(FIZZ_HAVE_OQS "@FIZZ_HAVE_OQS@")
 set(FIZZ_HAVE_LIBAEGIS "@FIZZ_HAVE_LIBAEGIS@")
+set(FIZZ_HAVE_SODIUM "@FIZZ_HAVE_SODIUM@")
 
 if (NOT TARGET fizz::fizz)
   include("${FIZZ_CMAKE_DIR}/fizz-targets.cmake")

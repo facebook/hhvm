@@ -63,6 +63,7 @@ endif()
 include(CheckAtomic)
 
 find_package(Sodium REQUIRED)
+set(FIZZ_HAVE_SODIUM ${Sodium_FOUND})
 
 SET(FIZZ_SHINY_DEPENDENCIES "")
 SET(FIZZ_LINK_LIBRARIES "")

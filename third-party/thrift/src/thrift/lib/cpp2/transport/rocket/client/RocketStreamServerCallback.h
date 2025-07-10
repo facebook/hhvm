@@ -27,28 +27,11 @@
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
-#include <thrift/lib/cpp2/transport/rocket/client/StreamChannelStatus.h>
+#include <thrift/lib/cpp2/transport/rocket/client/StreamChannelStatusResponse.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
 class RocketClient;
-
-class StreamChannelStatusResponse {
- public:
-  /* implicit */ StreamChannelStatusResponse(StreamChannelStatus status)
-      : status_(status) {}
-  StreamChannelStatusResponse(StreamChannelStatus status, std::string errorMsg)
-      : status_(status), errorMsg_(std::move(errorMsg)) {}
-
-  StreamChannelStatus getStatus() const { return status_; }
-  std::string getErrorMsg() && {
-    return std::move(errorMsg_).value_or("Unknown error");
-  }
-
- private:
-  StreamChannelStatus status_;
-  std::optional<std::string> errorMsg_;
-};
 
 class RocketStreamServerCallback : public StreamServerCallback {
  public:

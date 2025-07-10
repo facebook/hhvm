@@ -6220,10 +6220,14 @@ end = struct
                       }))
           env
     in
-    let do_shape { s_fields = fdm; s_origin = _; s_unknown_value = _ } =
+    let do_shape r { s_fields = fdm; s_origin; s_unknown_value = _ } =
       match can_index.ci_shape with
       | StringLit s ->
-        let decl_pos = Pos_or_decl.of_raw_pos can_index.ci_index_pos in
+        let decl_pos =
+          match s_origin with
+          | From_alias (_, Some pos) -> pos
+          | _ -> Reason.to_pos r
+        in
         let field = TSFlit_str (decl_pos, s) in
         (match TShapeMap.find_opt field fdm with
         | Some { sft_optional = _; sft_ty = ty } ->
@@ -6357,11 +6361,11 @@ end = struct
     | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
       do_tuple tup
     | (_, Ttuple tup) -> do_tuple tup.t_required
-    | (_, Tshape ts) -> do_shape ts
-    | (_r, Tnewtype (name_sub, [tyarg_sub], _))
+    | (r, Tshape ts) -> do_shape r ts
+    | (_, Tnewtype (name_sub, [tyarg_sub], _))
       when String.equal name_sub SN.Classes.cSupportDyn ->
       (match deref tyarg_sub with
-      | (_, Tshape ts) -> do_shape ts
+      | (r, Tshape ts) -> do_shape r ts
       | _ -> invalid ~fail env)
     | _ -> invalid ~fail env
 end

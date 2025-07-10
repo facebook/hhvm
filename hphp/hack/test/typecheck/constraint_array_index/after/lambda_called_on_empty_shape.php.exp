@@ -1,4 +1,4 @@
 ERROR: File "lambda_called_on_empty_shape.php", line 3, characters 19-21:
 This shape doesn't have a field `a` (Typing[4108])
-  File "lambda_called_on_empty_shape.php", line 3, characters 19-21:
+  File "lambda_called_on_empty_shape.php", line 4, characters 6-12:
   The shape is defined here

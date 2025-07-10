@@ -45,12 +45,28 @@ final abstract class ThriftStreamingSerializationHelpers {
             $ex->getMessage(),
             TApplicationException::UNKNOWN,
           );
+          $result->setPrevious($ex);
         } else {
           // Undeclared thrift exception: Wrap with TApplicationException
           $result = new \TApplicationException(
             $ex->getMessage()."\n".$ex->getTraceAsString(),
           );
+          $result->setPrevious($ex);
         }
+
+        $script = RelativeScript::getMajorPath() ?? '<UNKNOWN>';
+        FBLogger($script)
+          ->consequence(
+            causes_a(#THRIFT_SERVICE, $script)
+              ->to('throw a streaming exception')
+              ->addTags(ConsequenceTag::TOTAL_FAILURE)
+              ->document(
+                "The Thrift handler threw an unexpected exception and we returned".
+                " the exception to the caller of the Thrift service.",
+              ),
+          )
+          ->event('unexpected_exception')
+          ->exception($result, 'Thrift streaming handler threw an exception');
       } else {
         if ($result is ThriftSyncStructWithResult) {
           /* HH_FIXME[4110] Implicit pessimisation */

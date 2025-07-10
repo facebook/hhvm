@@ -864,6 +864,7 @@ class DeviousBatonHandler : public BaseSampleHandler {
 
   folly::Optional<devious::DeviousBaton> devious_;
   void readHandler(proxygen::WebTransport::StreamReadHandle* readHandle,
+                   uint64_t id,
                    folly::Try<proxygen::WebTransport::StreamData> streamData);
   folly::EventBase* evb_{nullptr};
   std::map<uint64_t, devious::DeviousBaton::BatonMessageState> streams_;

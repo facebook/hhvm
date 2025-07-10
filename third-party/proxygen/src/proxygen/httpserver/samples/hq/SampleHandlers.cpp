@@ -330,8 +330,9 @@ void DeviousBatonHandler::onHeadersComplete(
                      devious::DeviousBaton::Mode::SERVER,
                      [this](WebTransport::StreamReadHandle* readHandle) {
                        readHandle->awaitNextRead(
-                           evb_, [this](auto readHandle, auto streamData) {
-                             readHandler(readHandle, std::move(streamData));
+                           evb_,
+                           [this](auto readHandle, auto id, auto streamData) {
+                             readHandler(readHandle, id, std::move(streamData));
                            });
                      });
     auto respCode = devious_->onRequest(*msg);
@@ -367,19 +368,19 @@ void DeviousBatonHandler::onHeadersComplete(
 
 void DeviousBatonHandler::readHandler(
     WebTransport::StreamReadHandle* readHandle,
+    uint64_t id,
     folly::Try<WebTransport::StreamData> streamData) {
   if (streamData.hasException()) {
     VLOG(4) << "read error=" << streamData.exception().what();
   } else {
-    VLOG(4) << "read data id=" << readHandle->getID();
-    devious_->onStreamData(readHandle->getID(),
-                           streams_[readHandle->getID()],
-                           std::move(streamData->data),
-                           streamData->fin);
+    VLOG(4) << "read data id=" << id;
+    devious_->onStreamData(
+        id, streams_[id], std::move(streamData->data), streamData->fin);
     if (!streamData->fin) {
-      readHandle->awaitNextRead(evb_, [this](auto readHandle, auto streamData) {
-        readHandler(readHandle, std::move(streamData));
-      });
+      readHandle->awaitNextRead(
+          evb_, [this](auto readHandle, auto id, auto streamData) {
+            readHandler(readHandle, id, std::move(streamData));
+          });
     }
   }
 }
@@ -388,8 +389,8 @@ void DeviousBatonHandler::onWebTransportBidiStream(
     HTTPCodec::StreamID id, WebTransport::BidiStreamHandle stream) noexcept {
   VLOG(4) << "New Bidi Stream=" << id;
   stream.readHandle->awaitNextRead(
-      evb_, [this](auto readHandle, auto streamData) {
-        readHandler(readHandle, std::move(streamData));
+      evb_, [this](auto readHandle, auto id, auto streamData) {
+        readHandler(readHandle, id, std::move(streamData));
       });
 }
 
@@ -397,9 +398,10 @@ void DeviousBatonHandler::onWebTransportUniStream(
     HTTPCodec::StreamID id,
     WebTransport::StreamReadHandle* readHandle) noexcept {
   VLOG(4) << "New Uni Stream=" << id;
-  readHandle->awaitNextRead(evb_, [this](auto readHandle, auto streamData) {
-    readHandler(readHandle, std::move(streamData));
-  });
+  readHandle->awaitNextRead(
+      evb_, [this](auto readHandle, auto id, auto streamData) {
+        readHandler(readHandle, id, std::move(streamData));
+      });
 }
 
 void DeviousBatonHandler::onWebTransportSessionClose(

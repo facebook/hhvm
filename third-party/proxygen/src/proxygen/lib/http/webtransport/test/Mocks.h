@@ -18,6 +18,7 @@ using GenericApiRet = folly::Expected<folly::Unit, WebTransport::ErrorCode>;
 class MockStreamReadHandle : public WebTransport::StreamReadHandle {
  public:
   explicit MockStreamReadHandle(uint64_t inId) : id(inId) {
+    ON_CALL(*this, getID()).WillByDefault(testing::Return(id));
   }
 
   MOCK_METHOD(uint64_t, getID, ());

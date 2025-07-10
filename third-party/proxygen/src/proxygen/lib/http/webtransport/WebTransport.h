@@ -123,18 +123,21 @@ class WebTransport {
     // or an exception.
     virtual folly::SemiFuture<StreamData> readStreamData() = 0;
 
-    using ReadStreamDataFn =
-        std::function<void(StreamReadHandle*, folly::Try<StreamData>)>;
+    using ReadStreamDataFn = std::function<void(
+        StreamReadHandle*, uint64_t streamId, folly::Try<StreamData>)>;
     void awaitNextRead(
         folly::Executor* exec,
         const ReadStreamDataFn& readCb,
         folly::Optional<std::chrono::milliseconds> timeout = folly::none) {
+      auto id = getID();
       auto fut = readStreamData();
       if (timeout) {
         fut = std::move(fut).within(*timeout);
       }
-      std::move(fut).via(exec).thenTry([this, readCb](auto streamData) {
-        readCb(this, std::move(streamData));
+      std::move(fut).via(exec).thenTry([this, id, readCb](auto streamData) {
+        readCb((streamData.hasException() || streamData->fin) ? nullptr : this,
+               id,
+               std::move(streamData));
       });
     }
 

@@ -38,8 +38,9 @@ TEST(WebTransportTest, AwaitNextRead) {
   readHandle.awaitNextRead(
       &evb,
       [&](WebTransport::StreamReadHandle* handle,
+          uint64_t,
           folly::Try<WebTransport::StreamData> streamData) {
-        EXPECT_EQ(handle, &readHandle);
+        EXPECT_EQ(handle, nullptr);
         EXPECT_EQ(streamData.value().data, nullptr);
         EXPECT_TRUE(streamData.value().fin);
       });
@@ -60,8 +61,9 @@ TEST(WebTransportTest, AwaitNextReadTimeout) {
   readHandle.awaitNextRead(
       &evb,
       [&, &promise = promise](WebTransport::StreamReadHandle* handle,
+                              uint64_t,
                               folly::Try<WebTransport::StreamData> streamData) {
-        EXPECT_EQ(handle, &readHandle);
+        EXPECT_EQ(handle, nullptr);
         EXPECT_NE(streamData.tryGetExceptionObject<folly::FutureException>(),
                   nullptr);
         // The promise core holds a keep alive to the event base, kill it here

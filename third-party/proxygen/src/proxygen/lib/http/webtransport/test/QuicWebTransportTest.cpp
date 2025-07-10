@@ -67,6 +67,7 @@ TEST_F(QuicWebTransportTest, PeerUniStream) {
         readHandle->awaitNextRead(
             &eventBase_,
             [](WebTransport::StreamReadHandle*,
+               uint64_t,
                folly::Try<WebTransport::StreamData> data) {
               EXPECT_FALSE(data.hasException());
               EXPECT_EQ(data->data->computeChainDataLength(), 5);
@@ -85,6 +86,7 @@ TEST_F(QuicWebTransportTest, PeerBidiStream) {
         bidiHandle.readHandle->awaitNextRead(
             &eventBase_,
             [](WebTransport::StreamReadHandle*,
+               uint64_t,
                folly::Try<WebTransport::StreamData> data) {
               EXPECT_FALSE(data.hasException());
               EXPECT_TRUE(data->fin);

@@ -81,7 +81,7 @@ TEST_F(ServiceSchemaTest, Programs) {
   EXPECT_EQ(programs.size(), 3);
 
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
-  EXPECT_EQ(mainProgram->definitionsByName().size(), 14);
+  EXPECT_EQ(mainProgram->definitionsByName().size(), 15);
   EXPECT_EQ(mainProgram->namespaces().size(), 1);
   EXPECT_EQ(
       mainProgram->namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
@@ -377,6 +377,27 @@ TEST_F(ServiceSchemaTest, Constant) {
       "│        ├─ 'VALUE_1' → 1\n"
       "│        ╰─ 'VALUE_2' → 2\n"
       "╰─ value = ...\n");
+}
+
+TEST_F(ServiceSchemaTest, NestedConstant) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+
+  folly::not_null<const DefinitionNode*> testNestedConst =
+      program->definitionsByName().at("testNestedConst");
+  EXPECT_EQ(&testNestedConst->program(), program.unwrap());
+  EXPECT_EQ(testNestedConst->kind(), DefinitionNode::Kind::CONSTANT);
+  EXPECT_EQ(testNestedConst->name(), "testNestedConst");
+  const ConstantNode& c = testNestedConst->asConstant();
+
+  EXPECT_EQ(
+      &c.type().asStruct(),
+      &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
+  const auto& value = c.value().as_object();
+  EXPECT_EQ(value.at(FieldId{1}).as_i64(), 3);
+  EXPECT_TRUE(value.at(FieldId{2}).is_object());
+  const auto& inner = value.at(FieldId{2}).as_object();
+  EXPECT_EQ(inner.at(FieldId{1}).as_i64(), 4);
 }
 
 TEST_F(ServiceSchemaTest, Service) {

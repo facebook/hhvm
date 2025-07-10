@@ -77,6 +77,10 @@ exception TestException {
 }
 
 const TestStruct testConst = TestStruct{field1 = 2, field2 = VALUE_1};
+const TestStructuredAnnotation testNestedConst = TestStructuredAnnotation{
+  field1 = 3,
+  field2 = TestInnerStructuredAnnotation{field1 = 4},
+};
 
 interaction TestInteraction {
   i32 foo(1: TestRecursiveStruct input) throws (1: TestException ex);

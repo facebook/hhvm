@@ -577,12 +577,12 @@ jobs:
        path: ${{ steps.paths.outputs.wangle_INSTALL }}
        key: ${{ steps.paths.outputs.wangle_CACHE_KEY }}-install
     - name: Build proxygen
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. proxygen  --project-install-prefix proxygen:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. proxygen --project-install-prefix proxygen:/usr/local
     - name: Copy artifacts
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fixup-dyn-deps --strip --src-dir=. proxygen _artifacts/linux  --project-install-prefix proxygen:/usr/local --final-install-prefix /usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fixup-dyn-deps --strip --src-dir=. proxygen _artifacts/linux --project-install-prefix proxygen:/usr/local --final-install-prefix /usr/local
     - uses: actions/upload-artifact@v4
       with:
         name: proxygen
         path: _artifacts
     - name: Test proxygen
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages test --src-dir=. proxygen  --project-install-prefix proxygen:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages test --src-dir=. proxygen --project-install-prefix proxygen:/usr/local

@@ -33,7 +33,7 @@ namespace {
 using TSDefinition =
     std::variant<StructNode, UnionNode, EnumNode, OpaqueAliasNode>;
 
-class TypeSystemImpl final : public TypeSystem {
+class TypeSystemImpl final : public SourceIndexedTypeSystem {
  public:
   using DefinitionsMap = folly::F14NodeMap<
       Uri,
@@ -62,7 +62,7 @@ class TypeSystemImpl final : public TypeSystem {
   using Location = std::string;
   using DefinitionName = std::string;
   // Map of definition name (within one location) to definition
-  using NameToDefinitionsMap = TypeSystem::NameToDefinitionsMap;
+  using NameToDefinitionsMap = SourceIndexedTypeSystem::NameToDefinitionsMap;
   // Map of location to all definitions at that location
   using LocationToDefinitionsMap =
       folly::F14FastMap<Location, NameToDefinitionsMap>;

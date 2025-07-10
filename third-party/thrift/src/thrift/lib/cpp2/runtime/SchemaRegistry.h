@@ -155,21 +155,6 @@ class SchemaRegistry : public type_system::TypeSystem {
     }
     return ret;
   }
-  // SchemaRegistry doesn't currently support source information-based lookups.
-  std::optional<type_system::DefinitionRef>
-  getUserDefinedTypeBySourceIdentifier(
-      type_system::SourceIdentifierView) const override {
-    return std::nullopt;
-  }
-  std::optional<type_system::SourceIdentifierView>
-  getSourceIdentiferForUserDefinedType(
-      type_system::DefinitionRef) const override {
-    return std::nullopt;
-  }
-  TypeSystem::NameToDefinitionsMap getUserDefinedTypesAtLocation(
-      std::string_view) const override {
-    return {};
-  }
 
   using Ptr = std::shared_ptr<type::Schema>;
 

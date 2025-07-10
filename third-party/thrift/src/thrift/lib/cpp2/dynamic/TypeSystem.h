@@ -174,21 +174,6 @@ inline bool operator!=(
  *     generation.
  *   - Schema information fetched from a remote source.
  *   - Schema information created programmatically at runtime.
- *
- * All user-defined types are identified by a URI. These types can be accessed
- * by calling `TypeSystem::getUserDefinedType`.
- *
- * Built-in types, or type constructors (such as list, set, map) are identified
- * by a TypeId. These types can be accessed by calling
- * `TypeSystem::resolveTypeId`.
- *
- * User-defined types may be accessed using source names instead of URIs by
- * calling `TypeSystem::getUserDefinedTypeBySourceIdentifier`. Note that source
- * information is an optional feature and can only provide an incomplete view of
- * the type system.
- *
- * Typically, source information for a type system is derived
- * from the Thrift IDL source file that produced it.
  */
 class TypeSystem {
  public:
@@ -232,6 +217,23 @@ class TypeSystem {
    * guarantee because it allows the caller to traverse the full `TypeSystem`.
    */
   virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
+};
+
+/**
+ * An interface for a Thrift "type system" that supports looking up types by
+ * source names instead of URIs. Note that unlike URIs, source names do not
+ * uniquely identify types within a type system.
+ *
+ * Typically, source information for a type system is derived from the Thrift
+ * IDL source file that produced it.
+ *
+ * The SourceIndexedTypeSystem interface provides only an alternative lookup
+ * scheme. It does not include any other information regarding the types
+ * contained within the type system.
+ */
+class SourceIndexedTypeSystem : public TypeSystem {
+ public:
+  ~SourceIndexedTypeSystem() noexcept override = default;
 
   /**
    * Resolves the defintion of a user-defined type referred to by a source

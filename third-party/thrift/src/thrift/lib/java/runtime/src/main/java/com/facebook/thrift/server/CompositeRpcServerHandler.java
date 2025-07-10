@@ -48,29 +48,16 @@ public class CompositeRpcServerHandler implements RpcServerHandler {
     }
   }
 
-  /**
-   * GeneratedRpcServerHandlerBuilder passes us list of handlers, and some of them might be part of
-   * same class hierarchy. In such cases we want to select most specific handler. If method comes
-   * from an unrelated class but has the same name, we want to throw an exception.
-   */
   private void addServiceNameToMethodMapping(RpcServerHandler handler) {
     for (Map.Entry<String, RpcServerHandler> entry : handler.getMethodMap().entrySet()) {
       if (methodMap.containsKey(entry.getKey())) {
-        Class<?> newHandlerClass = entry.getValue().getClass();
-        Class<?> existingHandlerClass = methodMap.get(entry.getKey()).getClass();
-        // If the new handler is a subclass of the existing one - we replace the method
-        if (existingHandlerClass.isAssignableFrom(newHandlerClass)) {
-          methodMap.put(entry.getKey(), entry.getValue());
-        } else if (!newHandlerClass.isAssignableFrom(existingHandlerClass)) {
-          // If the new handler and existing one are not related - we throw an exception
-          throw new IllegalArgumentException(
-              "Error when attempting to add "
-                  + entry.getKey()
-                  + " to CompositeRpcServerHandler from "
-                  + handler.getClass().getName()
-                  + " due to a duplicated entry from "
-                  + methodMap.get(entry.getKey()).getClass().getName());
-        }
+        throw new IllegalArgumentException(
+            "Error when attempting to add "
+                + entry.getKey()
+                + " to CompositeRpcServerHandler from "
+                + handler.getClass().getName()
+                + " due to a duplicated entry from "
+                + methodMap.get(entry.getKey()).getClass().getName());
       } else {
         methodMap.put(entry.getKey(), entry.getValue());
       }

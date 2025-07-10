@@ -57,7 +57,6 @@ public class GeneratedRpcServerHandlerBuilder {
     return new CompositeRpcServerHandler(serverHandlers);
   }
 
-  @SuppressWarnings("unchecked")
   @VisibleForTesting
   static <T> RpcServerHandlerBuilder<T> getServerHandlerBuilder(
       Object impl, Class<T> serverInterface) {
@@ -106,11 +105,10 @@ public class GeneratedRpcServerHandlerBuilder {
 
   private static boolean hasServerHandlerBuilderMethod(Class<?> iface) {
     try {
-      MethodHandle methodHandle =
-          LOOKUP.findStatic(
-              iface,
-              "serverHandlerBuilder",
-              MethodType.methodType(RpcServerHandlerBuilder.class, iface));
+      LOOKUP.findStatic(
+          iface,
+          "serverHandlerBuilder",
+          MethodType.methodType(RpcServerHandlerBuilder.class, iface));
       return true;
     } catch (NoSuchMethodException | IllegalAccessException e) {
       return false;

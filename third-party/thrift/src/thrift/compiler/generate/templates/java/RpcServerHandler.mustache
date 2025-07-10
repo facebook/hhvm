@@ -516,7 +516,6 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     {{#service:extends}}
       java.util.Map<String, com.facebook.thrift.server.RpcServerHandler> _combined = new java.util.HashMap();
       _combined.putAll(_methodMap);
-      _combined.putAll(super.getMethodMap());
       return _combined;
     {{/service:extends}}
     {{^service:extends}}

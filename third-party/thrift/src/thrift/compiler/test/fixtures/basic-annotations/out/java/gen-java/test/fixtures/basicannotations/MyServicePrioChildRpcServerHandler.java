@@ -244,7 +244,6 @@ public class MyServicePrioChildRpcServerHandler  extends test.fixtures.basicanno
   public java.util.Map<String, com.facebook.thrift.server.RpcServerHandler> getMethodMap() {
       java.util.Map<String, com.facebook.thrift.server.RpcServerHandler> _combined = new java.util.HashMap();
       _combined.putAll(_methodMap);
-      _combined.putAll(super.getMethodMap());
       return _combined;
   }
 

@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallbackWithChunkTimeout.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressor.h>
 #include <thrift/lib/cpp2/transport/rocket/flush/FlushManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>

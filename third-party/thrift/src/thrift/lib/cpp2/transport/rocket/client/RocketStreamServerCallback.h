@@ -71,36 +71,6 @@ class RocketStreamServerCallback : public StreamServerCallback {
   StreamId streamId_;
 };
 
-class RocketStreamServerCallbackWithChunkTimeout
-    : public RocketStreamServerCallback {
- public:
-  RocketStreamServerCallbackWithChunkTimeout(
-      StreamId streamId,
-      RocketClient& client,
-      StreamClientCallback& clientCallback,
-      std::chrono::milliseconds chunkTimeout,
-      uint64_t initialCredits)
-      : RocketStreamServerCallback(streamId, client, clientCallback),
-        chunkTimeout_(chunkTimeout),
-        credits_(initialCredits) {}
-
-  bool onStreamRequestN(uint64_t tokens) override;
-
-  bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
-
-  StreamChannelStatusResponse onStreamPayload(StreamPayload&&);
-
-  void timeoutExpired() noexcept;
-
- private:
-  void scheduleTimeout();
-  void cancelTimeout();
-
-  const std::chrono::milliseconds chunkTimeout_;
-  uint64_t credits_{0};
-  std::unique_ptr<folly::HHWheelTimer::Callback> timeout_;
-};
-
 class RocketSinkServerCallback : public SinkServerCallback {
  public:
   RocketSinkServerCallback(

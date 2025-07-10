@@ -138,10 +138,12 @@ void add_explicit_include_validators(
     visit_type(ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type());
   });
   validator.add_sink_visitor([](sema_context& ctx, const t_sink& s) {
-    visit_type(
-        ctx,
-        static_cast<const t_named&>(*ctx.parent()),
-        *s.final_response_type());
+    if (s.final_response_type()) {
+      visit_type(
+          ctx,
+          static_cast<const t_named&>(*ctx.parent()),
+          *s.final_response_type());
+    }
     visit_type(ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type());
   });
 

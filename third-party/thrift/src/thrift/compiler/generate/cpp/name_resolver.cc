@@ -135,6 +135,9 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
   type_resolve_fn resolve_fn = &cpp_name_resolver::get_native_type;
   if (const t_sink* sink = fun.sink()) {
     return detail::get_or_gen(sink_cache_, sink, [&]() {
+      if (!sink->get_final_response_type()) {
+        return std::string("/* TODO (@sazonovk) */");
+      }
       if (fun.has_return_type()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",

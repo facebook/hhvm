@@ -1419,7 +1419,8 @@ struct ValidateAnnotationPositions {
     }
     if (const auto* s = node.sink()) {
       if (owns_annotations(s->elem_type()) ||
-          owns_annotations(s->final_response_type())) {
+          (s->final_response_type() &&
+           owns_annotations(s->final_response_type()))) {
         err(ctx);
       }
     }

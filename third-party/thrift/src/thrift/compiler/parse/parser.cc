@@ -536,8 +536,10 @@ class parser {
     consume_token();
     expect_and_consume('<');
     auto sink = parse_type_throws();
-    expect_and_consume(',');
-    auto final_response = parse_type_throws();
+    std::optional<type_throws_spec> final_response;
+    if (try_consume_token(',')) {
+      final_response = parse_type_throws();
+    }
     expect_and_consume('>');
     return actions_.on_sink(range, std::move(sink), std::move(final_response));
   }

@@ -69,6 +69,12 @@ struct parsing_params {
    * Search path for includes.
    */
   std::vector<std::string> incl_searchpath;
+
+  /**
+   * Allow parsing Bidi and simple sink while under development.
+   * TODO(iahs): Remove this flag once the features are released.
+   */
+  bool allow_unreleased_streaming = false;
 };
 
 /**

@@ -133,7 +133,7 @@ class parser_actions {
   virtual std::unique_ptr<t_sink> on_sink(
       source_range range,
       type_throws_spec sink_spec,
-      type_throws_spec final_response_spec) = 0;
+      std::optional<type_throws_spec> final_response_spec) = 0;
 
   virtual std::unique_ptr<t_stream> on_stream(
       source_range range, type_throws_spec spec) = 0;

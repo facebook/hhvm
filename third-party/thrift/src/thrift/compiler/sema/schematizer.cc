@@ -624,9 +624,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
             throws->fields(),
             opts_.intern_value);
       }
-      sink_schema->add_map(
-          val("finalResponse"),
-          gen_type(*sink->final_response_type(), node.program()));
+      if (sink->final_response_type()) {
+        sink_schema->add_map(
+            val("finalResponse"),
+            gen_type(*sink->final_response_type(), node.program()));
+      }
       if (auto throws = sink->final_response_exceptions()) {
         add_fields(
             this,

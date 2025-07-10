@@ -656,12 +656,18 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_sink> on_sink(
       source_range range,
       type_throws_spec sink_spec,
-      type_throws_spec final_response_spec) override {
+      std::optional<type_throws_spec> final_response_spec) override {
     auto sink = std::make_unique<t_sink>(
-        std::move(sink_spec.type), std::move(final_response_spec.type));
+        sink_spec.type,
+        final_response_spec ? final_response_spec->type : t_type_ref{});
     sink->set_src_range(range);
     sink->set_sink_exceptions(std::move(sink_spec.throws));
-    sink->set_final_response_exceptions(std::move(final_response_spec.throws));
+    if (final_response_spec) {
+      sink->set_final_response_exceptions(
+          std::move(final_response_spec->throws));
+    } else if (!params_.allow_unreleased_streaming) {
+      diags_.error(range.begin, "Final response type is required");
+    }
     return sink;
   }
 

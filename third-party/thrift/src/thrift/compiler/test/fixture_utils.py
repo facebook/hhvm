@@ -242,6 +242,10 @@ def _parse_fixture_cmd(
             base_args[0] = thrift2ast_bin_path
             base_args[-1:-1] = ["--inject-schema-const"]
 
+        if generator_spec.startswith("streamdev-"):
+            generator_spec = generator_spec.removeprefix("streamdev-")
+            base_args[-1:-1] = ["--allow-unreleased-streaming"]
+
         return FixtureCmd(
             unique_name=cmd_name,
             build_command_args=[

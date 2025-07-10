@@ -555,9 +555,10 @@ mstch::node mstch_function::sink_exceptions() {
 
 mstch::node mstch_function::sink_final_reponse_type() {
   const t_sink* sink = function_->sink();
-  return sink ? context_.type_factory->make_mstch_object(
-                    sink->get_final_response_type(), context_, pos_)
-              : mstch::node();
+  return sink && sink->get_final_response_type()
+      ? context_.type_factory->make_mstch_object(
+            sink->get_final_response_type(), context_, pos_)
+      : mstch::node();
 }
 
 mstch::node mstch_function::sink_final_response_exceptions() {

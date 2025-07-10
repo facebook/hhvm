@@ -797,6 +797,8 @@ std::string parse_args(
         printUsageError();
         return {};
       }
+    } else if (flag == "allow-unreleased-streaming") {
+      pparams.allow_unreleased_streaming = true;
     } else {
       fprintf(
           stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());

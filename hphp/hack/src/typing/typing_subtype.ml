@@ -6263,6 +6263,8 @@ end = struct
         (LoclType ty_sub)
         (ConstraintType
            (mk_constraint_type (reason_super, Tcan_index can_index)))
+    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+      valid env
     | (_, Tdynamic) ->
       simplify_default
         ~subtype_env

@@ -3986,10 +3986,7 @@ end = struct
             (Some (Typing_error.Reasons_callback.unify_error_at p))
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let (env, pess_res_ty) =
-          Typing_array_access.maybe_pessimise_type env val_ty
-        in
-        make_result env p (Aast.Array_get (te1, Some te2)) pess_res_ty
+        make_result env p (Aast.Array_get (te1, Some te2)) val_ty
       ) else
         let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
           Typing_array_access.array_get

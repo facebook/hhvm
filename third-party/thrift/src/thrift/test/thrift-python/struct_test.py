@@ -49,6 +49,7 @@ from thrift.python.types import (
     StructOrUnion as ImmutableStructOrUnion,
 )
 
+from thrift.test.thrift_python.struct_test.thrift_abstract_types import TestEnum
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     bool_constant,
     byte_constant,
@@ -2330,6 +2331,28 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
                 self.assertIsNone(y)
             case _:
                 self.fail("Expected match, got none.")
+
+    def test_default_enum_access(self) -> None:
+        s_default = TestStructWithDefaultValuesMutable()
+        field_value = s_default.unqualified_enum
+        self.assertEqual(field_value, TestEnum.ARM1)
+        # for most types, this would verify that the field was cached,
+        # but enums are always singletons, so can only verify with benchmark
+        self.assertIs(s_default.unqualified_enum, field_value)
+        # unset optional field is always None even if default provided
+        self.assertIsNone(s_default.optional_enum)
+
+        s_default.unqualified_enum = TestEnum.ARM2
+        s_default.optional_enum = TestEnum.ARM4
+        self.assertEqual(s_default.unqualified_enum, TestEnum.ARM2)
+        self.assertEqual(s_default.optional_enum, TestEnum.ARM4)
+
+        s_default.optional_enum = None
+        self.assertIsNone(s_default.optional_enum)
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[8]: Intentional for test
+            s_default.unqualified_enum = None
 
     def test_fbthrift_copy_from(self) -> None:
         """

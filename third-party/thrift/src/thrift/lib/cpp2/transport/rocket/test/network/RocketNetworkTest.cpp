@@ -38,7 +38,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 
-#include <folly/stop_watch.h>
 #include <thrift/lib/cpp/transport/TTransport.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
@@ -46,7 +45,6 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
-#include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>

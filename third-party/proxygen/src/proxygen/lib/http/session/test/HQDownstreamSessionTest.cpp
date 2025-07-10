@@ -2720,10 +2720,11 @@ TEST_P(HQDownstreamSessionTest, DelegateResponse) {
                 setDSRPacketizationRequestSender(_, _))
         .WillOnce(Invoke(
             [&](StreamId,
-                std::unique_ptr<quic::DSRPacketizationRequestSender> sender) {
+                std::unique_ptr<quic::DSRPacketizationRequestSender> sender)
+                -> quic::Expected<void, quic::LocalErrorCode> {
               EXPECT_EQ(rawDsrSender, sender.get());
               senderStorage = std::move(sender);
-              return folly::unit;
+              return {};
             }));
     folly::Optional<size_t> dsrOffset;
     EXPECT_CALL(*mockDsrRequestSender, onHeaderBytesGenerated(_))
@@ -2777,10 +2778,11 @@ TEST_P(HQDownstreamSessionTest, DelegateResponseError) {
                 setDSRPacketizationRequestSender(_, _))
         .WillOnce(Invoke(
             [&](StreamId,
-                std::unique_ptr<quic::DSRPacketizationRequestSender> sender) {
+                std::unique_ptr<quic::DSRPacketizationRequestSender> sender)
+                -> quic::Expected<void, quic::LocalErrorCode> {
               EXPECT_EQ(rawDsrSender, sender.get());
               senderStorage = std::move(sender);
-              return folly::unit;
+              return {};
             }));
     folly::Optional<size_t> dsrOffset;
     EXPECT_CALL(*mockDsrRequestSender, onHeaderBytesGenerated(_))
@@ -2835,7 +2837,7 @@ TEST_P(HQDownstreamSessionTest, getHTTPPriority) {
             expectedResults.value().urgency,
             expectedResults.value().incremental)))
         .WillOnce(
-            Return(folly::makeUnexpected(LocalErrorCode::STREAM_NOT_EXISTS)))
+            Return(quic::make_unexpected(LocalErrorCode::STREAM_NOT_EXISTS)))
         .WillOnce(Return(quic::HTTPPriorityQueue::Priority(
             expectedResults.value().urgency,
             expectedResults.value().incremental)));
@@ -3366,21 +3368,21 @@ TEST_P(HQDownstreamSessionTestDeliveryAck,
                                                     quic::StreamId id,
                                                     uint64_t offset,
                                                     quic::ByteEventCallback* cb)
-              -> folly::Expected<folly::Unit, LocalErrorCode> {
+              -> quic::Expected<void, LocalErrorCode> {
             if (id == streamId) {
-              return folly::makeUnexpected(LocalErrorCode::INVALID_OPERATION);
+              return quic::make_unexpected(LocalErrorCode::INVALID_OPERATION);
             }
 
             socketDriver->checkNotReadOnlyStream(id);
             auto it = socketDriver->streams_.find(id);
             if (it == socketDriver->streams_.end() ||
                 it->second.nextWriteOffset >= offset) {
-              return folly::makeUnexpected(LocalErrorCode::STREAM_NOT_EXISTS);
+              return quic::make_unexpected(LocalErrorCode::STREAM_NOT_EXISTS);
             }
             CHECK_NE(it->second.writeState,
                      MockQuicSocketDriver::StateEnum::CLOSED);
             it->second.deliveryCallbacks.push_back({offset, cb});
-            return folly::unit;
+            return {};
           }));
 
   EXPECT_CALL(*handler, _onError(_))
@@ -3522,26 +3524,26 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryErr) {
                                           quic::StreamId id,
                                           uint64_t offset,
                                           quic::ByteEventCallback* cb)
-              -> folly::Expected<folly::Unit, LocalErrorCode> {
+              -> quic::Expected<void, LocalErrorCode> {
             if (id == streamId && offset > streamOffsetAfterHeaders) {
               for (auto& it : socketDriver->streams_) {
                 auto& stream = it.second;
                 stream.readState = quic::MockQuicSocketDriver::ERROR;
                 stream.writeState = quic::MockQuicSocketDriver::ERROR;
               }
-              return folly::makeUnexpected(LocalErrorCode::INVALID_OPERATION);
+              return quic::make_unexpected(LocalErrorCode::INVALID_OPERATION);
             }
 
             socketDriver->checkNotReadOnlyStream(id);
             auto it = socketDriver->streams_.find(id);
             if (it == socketDriver->streams_.end() ||
                 it->second.nextWriteOffset >= offset) {
-              return folly::makeUnexpected(LocalErrorCode::STREAM_NOT_EXISTS);
+              return quic::make_unexpected(LocalErrorCode::STREAM_NOT_EXISTS);
             }
             CHECK_NE(it->second.writeState,
                      MockQuicSocketDriver::StateEnum::CLOSED);
             it->second.deliveryCallbacks.push_back({offset, cb});
-            return folly::unit;
+            return {};
           }));
 
   EXPECT_CALL(*handler, _onError(_))

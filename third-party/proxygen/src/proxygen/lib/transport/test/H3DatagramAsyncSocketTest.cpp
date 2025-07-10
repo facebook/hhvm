@@ -307,7 +307,7 @@ TEST_F(H3DatagramAsyncSocketTest, DiscardWhenApplicationWriteBufferFull) {
 TEST_F(H3DatagramAsyncSocketTest, CheckErrorWhenTransportFails) {
   EXPECT_CALL(*socketDriver_->getSocket(), writeDatagram(testing::_))
       .WillRepeatedly(
-          Return(folly::makeUnexpected(LocalErrorCode::INVALID_WRITE_DATA)));
+          Return(quic::make_unexpected(LocalErrorCode::INVALID_WRITE_DATA)));
 
   datagramSocket_->connect(getRemoteAddress());
   session_->onTransportReady();

@@ -20,9 +20,9 @@ size_t writeFrameHeaderManual(folly::IOBufQueue& queue,
   folly::io::QueueAppender appender(&queue, proxygen::hq::kMaxFrameHeaderSize);
   auto appenderOp = [&](auto val) { appender.writeBE(val); };
   auto typeRes = quic::encodeQuicInteger(decodedType, appenderOp);
-  CHECK(typeRes.hasValue());
+  CHECK(typeRes.has_value());
   auto lengthRes = quic::encodeQuicInteger(decodedLength, appenderOp);
-  CHECK(lengthRes.hasValue());
+  CHECK(lengthRes.has_value());
   return *typeRes + *lengthRes;
 }
 
@@ -54,7 +54,8 @@ void writeValidFrame(folly::IOBufQueue& queue, proxygen::hq::FrameType type) {
                          : 0));
       folly::io::QueueAppender appender(&queue, *idSize);
       auto appenderOp = [&](auto val) { appender.writeBE(val); };
-      quic::encodeQuicInteger(id, appenderOp);
+      auto idResult = quic::encodeQuicInteger(id, appenderOp);
+      CHECK(idResult.has_value());
       if (type == proxygen::hq::FrameType::PUSH_PROMISE) {
         // header data for push-promise
         uint8_t simplePushPromise[] = {0x00, 0x00, 0xC0, 0xC1, 0xD1, 0xD7};
@@ -83,7 +84,9 @@ void writeValidFrame(folly::IOBufQueue& queue, proxygen::hq::FrameType type) {
           *prioritizedIdSize + data->computeChainDataLength());
       folly::io::QueueAppender appender(&queue, *prioritizedIdSize);
       auto appenderOp = [&](auto val) { appender.writeBE(val); };
-      quic::encodeQuicInteger(prioritizedId, appenderOp);
+      auto prioritizedIdResult =
+          quic::encodeQuicInteger(prioritizedId, appenderOp);
+      CHECK(prioritizedIdResult.has_value());
       queue.append(std::move(data));
       break;
     }

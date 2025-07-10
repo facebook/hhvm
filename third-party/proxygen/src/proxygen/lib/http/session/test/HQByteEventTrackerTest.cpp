@@ -38,8 +38,7 @@ class HQByteEventTrackerTest : public Test {
    */
   std::unique_ptr<quic::ByteEventCallback*> expectRegisterTxCallback(
       const uint64_t offset,
-      folly::Expected<folly::Unit, quic::LocalErrorCode> returnVal =
-          folly::Unit()) const {
+      quic::Expected<void, quic::LocalErrorCode> returnVal = {}) const {
     auto capturedCallbackPtr =
         std::make_unique<quic::ByteEventCallback*>(nullptr);
     EXPECT_CALL(*socket_, registerTxCallback(streamId_, offset, _))
@@ -56,8 +55,7 @@ class HQByteEventTrackerTest : public Test {
    */
   std::unique_ptr<quic::ByteEventCallback*> expectRegisterDeliveryCallback(
       const uint64_t offset,
-      folly::Expected<folly::Unit, quic::LocalErrorCode> returnVal =
-          folly::Unit()) const {
+      quic::Expected<void, quic::LocalErrorCode> returnVal = {}) const {
     auto capturedCallbackPtr =
         std::make_unique<quic::ByteEventCallback*>(nullptr);
     EXPECT_CALL(*socket_, registerDeliveryCallback(streamId_, offset, _))
@@ -524,14 +522,14 @@ TEST_F(HQByteEventTrackerTest, FirstLastBodyByteErrorOnRegistration) {
   // first and last byte written
   EXPECT_CALL(transportCallback_, firstByteFlushed());
   auto fbbTxCbHandler = expectRegisterTxCallback(
-      firstBodyByteOffset, folly::makeUnexpected(quic::LocalErrorCode()));
+      firstBodyByteOffset, quic::make_unexpected(quic::LocalErrorCode()));
   auto fbbAckCbHandler = expectRegisterDeliveryCallback(
-      firstBodyByteOffset, folly::makeUnexpected(quic::LocalErrorCode()));
+      firstBodyByteOffset, quic::make_unexpected(quic::LocalErrorCode()));
   EXPECT_CALL(transportCallback_, lastByteFlushed());
   auto lbbTxCbHandler = expectRegisterTxCallback(
-      lastBodyByteOffset, folly::makeUnexpected(quic::LocalErrorCode()));
+      lastBodyByteOffset, quic::make_unexpected(quic::LocalErrorCode()));
   auto lbbAckCbHandler = expectRegisterDeliveryCallback(
-      lastBodyByteOffset, folly::makeUnexpected(quic::LocalErrorCode()));
+      lastBodyByteOffset, quic::make_unexpected(quic::LocalErrorCode()));
 
   byteEventTracker_->processByteEvents(byteEventTracker_, lastBodyByteOffset);
   Mock::VerifyAndClearExpectations(&socket_);

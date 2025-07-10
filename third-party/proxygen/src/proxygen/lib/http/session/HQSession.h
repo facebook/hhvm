@@ -380,8 +380,9 @@ class HQSession
   /**
    * Sends a knob frame on the session.
    */
-  folly::Expected<folly::Unit, quic::LocalErrorCode> sendKnob(
-      uint64_t knobSpace, uint64_t knobId, quic::BufPtr knobBlob) {
+  quic::Expected<void, quic::LocalErrorCode> sendKnob(uint64_t knobSpace,
+                                                      uint64_t knobId,
+                                                      quic::BufPtr knobBlob) {
     return sock_->setKnob(knobSpace, knobId, std::move(knobBlob));
   }
 

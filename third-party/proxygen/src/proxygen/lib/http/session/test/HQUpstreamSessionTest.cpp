@@ -1101,13 +1101,13 @@ TEST_P(HQUpstreamSessionTest, TestOnStopSendingHTTPRequestRejected) {
   EXPECT_CALL(*socketDriver_->getSocket(),
               resetStream(streamId, HTTP3::ErrorCode::HTTP_REQUEST_CANCELLED))
       .Times(2) // once from on stopSending and once from sendAbort
-      .WillRepeatedly(
-          Invoke([&](quic::StreamId id, quic::ApplicationErrorCode) {
-            // setWriteError will cancaleDeliveryCallbacks which will invoke
-            // onCanceled to decrementPendingByteEvents on the txn.
-            socketDriver_->setWriteError(id);
-            return folly::unit;
-          }));
+      .WillRepeatedly(Invoke([&](quic::StreamId id, quic::ApplicationErrorCode)
+                                 -> quic::Expected<void, quic::LocalErrorCode> {
+        // setWriteError will cancaleDeliveryCallbacks which will invoke
+        // onCanceled to decrementPendingByteEvents on the txn.
+        socketDriver_->setWriteError(id);
+        return {};
+      }));
   EXPECT_CALL(*handler, _onError(_))
       .Times(1)
       .WillOnce(Invoke([](HTTPException ex) {

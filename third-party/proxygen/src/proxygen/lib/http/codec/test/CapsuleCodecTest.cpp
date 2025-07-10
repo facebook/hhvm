@@ -63,8 +63,12 @@ quic::BufQueue generateStringCapsule(uint64_t type,
                                      const std::string& value) {
   auto buf = folly::IOBuf::create(1024);
   quic::BufAppender appender(buf.get(), 1024);
-  quic::encodeQuicInteger(type, [&](auto val) { appender.writeBE(val); });
-  quic::encodeQuicInteger(length, [&](auto val) { appender.writeBE(val); });
+  auto typeResult =
+      quic::encodeQuicInteger(type, [&](auto val) { appender.writeBE(val); });
+  CHECK(typeResult.has_value());
+  auto lengthResult =
+      quic::encodeQuicInteger(length, [&](auto val) { appender.writeBE(val); });
+  CHECK(lengthResult.has_value());
   quic::BufQueue queue(std::move(buf));
   auto str = folly::IOBuf::copyBuffer(value);
   queue.append(std::move(str));
@@ -109,7 +113,9 @@ TEST_F(CapsuleCodecTest, ParseUnderflowLength) {
   // Encode type=0x01, missing length
   auto buf = folly::IOBuf::create(1024);
   quic::BufAppender appender(buf.get(), 1024);
-  quic::encodeQuicInteger(0x01, [&](auto val) { appender.writeBE(val); });
+  auto typeResult =
+      quic::encodeQuicInteger(0x01, [&](auto val) { appender.writeBE(val); });
+  CHECK(typeResult.has_value());
   quic::BufQueue capsule(std::move(buf));
   EXPECT_CALL(*callback_, onCapsule(_, _)).Times(0);
   EXPECT_CALL(*callback_,
@@ -141,8 +147,12 @@ TEST_F(CapsuleCodecTest, ParseUnderflowAndNotEom) {
   // encode type=0x01, length=5, payload="AAA", false EOMs before true EOM
   auto buf = folly::IOBuf::create(1024);
   quic::BufAppender appender(buf.get(), 1024);
-  quic::encodeQuicInteger(0x01, [&](auto val) { appender.writeBE(val); });
-  quic::encodeQuicInteger(3, [&](auto val) { appender.writeBE(val); });
+  auto typeResult =
+      quic::encodeQuicInteger(0x01, [&](auto val) { appender.writeBE(val); });
+  CHECK(typeResult.has_value());
+  auto lengthResult =
+      quic::encodeQuicInteger(3, [&](auto val) { appender.writeBE(val); });
+  CHECK(lengthResult.has_value());
   quic::BufQueue capsule1(std::move(buf));
   EXPECT_CALL(*callback_, onCapsule(0x01, 3));
   EXPECT_CALL(*callback_, onConnectionError(_)).Times(0);

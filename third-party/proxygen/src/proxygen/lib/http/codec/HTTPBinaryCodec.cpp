@@ -26,7 +26,13 @@ namespace proxygen {
 namespace {
 folly::Expected<size_t, quic::TransportErrorCode> encodeInteger(
     uint64_t i, folly::io::QueueAppender& appender) {
-  return quic::encodeQuicInteger(i, [&](auto val) { appender.writeBE(val); });
+  auto result =
+      quic::encodeQuicInteger(i, [&](auto val) { appender.writeBE(val); });
+  if (result.has_value()) {
+    return result.value();
+  } else {
+    return folly::makeUnexpected(result.error());
+  }
 }
 
 void encodeString(folly::StringPiece str, folly::io::QueueAppender& appender) {

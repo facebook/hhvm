@@ -270,7 +270,7 @@ folly::Expected<uint64_t, quic::QuicError> getCapsuleSize(
   for (auto v : varints) {
     auto res = quic::getQuicIntegerSize(v);
     if (!res) {
-      return res;
+      return folly::makeUnexpected(res.error());
     }
     size += *res;
   }

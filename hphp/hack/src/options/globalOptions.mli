@@ -293,15 +293,13 @@ type t = {
   needs_concrete: bool;
       (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
-  class_pointer_ban_classname_new: bool;
+  class_pointer_ban_classname_new: int;
       (** Error on new $c() when $c: classname<T>  *)
-  class_pointer_ban_classname_type_structure: bool;
+  class_pointer_ban_classname_type_structure: int;
       (** Error on type_structure($c, 'T') when $c: classname<T>  *)
-  class_pointer_ban_classname_static_prop: bool;
-      (** Error on $c::$foo when $c: classname<T>  *)
-  class_pointer_ban_classname_static_meth: bool;
+  class_pointer_ban_classname_static_meth: int;
       (** Error on $c::foo() when $c: classname<T>  *)
-  class_pointer_ban_classname_class_const: bool;
+  class_pointer_ban_classname_class_const: int;
       (** Error on $c::FOO when $c: classname<T>  *)
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
@@ -420,11 +418,10 @@ val set :
   ?safe_abstract:bool ->
   ?needs_concrete:bool ->
   ?allow_class_string_cast:bool ->
-  ?class_pointer_ban_classname_new:bool ->
-  ?class_pointer_ban_classname_type_structure:bool ->
-  ?class_pointer_ban_classname_static_prop:bool ->
-  ?class_pointer_ban_classname_static_meth:bool ->
-  ?class_pointer_ban_classname_class_const:bool ->
+  ?class_pointer_ban_classname_new:int ->
+  ?class_pointer_ban_classname_type_structure:int ->
+  ?class_pointer_ban_classname_static_meth:int ->
+  ?class_pointer_ban_classname_class_const:int ->
   ?class_pointer_ban_class_array_key:bool ->
   ?tco_poly_function_pointers:bool ->
   t ->

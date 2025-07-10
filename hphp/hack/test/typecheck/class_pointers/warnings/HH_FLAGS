@@ -1,0 +1,4 @@
+--config 'class_pointer_ban_classname_new=1'
+--config 'class_pointer_ban_classname_type_structure=1'
+--config 'class_pointer_ban_classname_static_meth=1'
+--config 'class_pointer_ban_classname_class_const=1'

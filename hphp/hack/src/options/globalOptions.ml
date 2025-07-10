@@ -198,11 +198,10 @@ type t = {
   safe_abstract: bool;
   needs_concrete: bool;
   allow_class_string_cast: bool;
-  class_pointer_ban_classname_new: bool;
-  class_pointer_ban_classname_type_structure: bool;
-  class_pointer_ban_classname_static_prop: bool;
-  class_pointer_ban_classname_static_meth: bool;
-  class_pointer_ban_classname_class_const: bool;
+  class_pointer_ban_classname_new: int;
+  class_pointer_ban_classname_type_structure: int;
+  class_pointer_ban_classname_static_meth: int;
+  class_pointer_ban_classname_class_const: int;
   class_pointer_ban_class_array_key: bool;
   tco_poly_function_pointers: bool;
 }
@@ -321,11 +320,10 @@ let default =
     safe_abstract = false;
     needs_concrete = false;
     allow_class_string_cast = true;
-    class_pointer_ban_classname_new = false;
-    class_pointer_ban_classname_type_structure = false;
-    class_pointer_ban_classname_static_prop = false;
-    class_pointer_ban_classname_static_meth = false;
-    class_pointer_ban_classname_class_const = false;
+    class_pointer_ban_classname_new = 0;
+    class_pointer_ban_classname_type_structure = 0;
+    class_pointer_ban_classname_static_meth = 0;
+    class_pointer_ban_classname_class_const = 0;
     class_pointer_ban_class_array_key = false;
     tco_poly_function_pointers = false;
   }
@@ -443,7 +441,6 @@ let set
     ?allow_class_string_cast
     ?class_pointer_ban_classname_new
     ?class_pointer_ban_classname_type_structure
-    ?class_pointer_ban_classname_static_prop
     ?class_pointer_ban_classname_static_meth
     ?class_pointer_ban_classname_class_const
     ?class_pointer_ban_class_array_key
@@ -761,10 +758,6 @@ let set
       setting
         class_pointer_ban_classname_type_structure
         options.class_pointer_ban_classname_type_structure;
-    class_pointer_ban_classname_static_prop =
-      setting
-        class_pointer_ban_classname_static_prop
-        options.class_pointer_ban_classname_static_prop;
     class_pointer_ban_classname_static_meth =
       setting
         class_pointer_ban_classname_static_meth

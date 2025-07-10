@@ -814,6 +814,7 @@ module Warning = struct
     | SwitchRedundancy [@value 12019]
     | StaticCallOnTrait [@value 12020]
     | StaticPropertyOverride [@value 12021]
+    | StringToClassPointer [@value 12022]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

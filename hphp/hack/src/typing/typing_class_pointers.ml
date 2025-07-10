@@ -19,6 +19,14 @@ let error_at_cls_ptr_type env pos ty =
     ~env
     Typing_error.(primary @@ Primary.Class_pointer_to_string { pos; ty })
 
+let warning_at_classname_type env pos cls_name ty_pos =
+  Typing_warning_utils.add
+    env
+    Typing_warning.
+      ( pos,
+        String_to_class_pointer,
+        String_to_class_pointer.{ cls_name; ty_pos } )
+
 let error_at_classname_type env pos cls_name ty_pos =
   Typing_error_utils.add_typing_error
     ~env

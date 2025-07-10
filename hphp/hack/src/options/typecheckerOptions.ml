@@ -341,9 +341,6 @@ let class_pointer_ban_classname_new t =
 let class_pointer_ban_classname_type_structure t =
   t.GlobalOptions.class_pointer_ban_classname_type_structure
 
-let class_pointer_ban_classname_static_prop t =
-  t.GlobalOptions.class_pointer_ban_classname_static_prop
-
 let class_pointer_ban_classname_static_meth t =
   t.GlobalOptions.class_pointer_ban_classname_static_meth
 

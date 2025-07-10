@@ -1,5 +1,5 @@
 <?hh
 
-function test<T>(classname<T> $c): void {
+function test<T>(class<T> $c): void {
   $_ = $c::$doesNotExist;
 }

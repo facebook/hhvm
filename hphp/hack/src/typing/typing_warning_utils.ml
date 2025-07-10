@@ -609,6 +609,29 @@ module Static_property_override = struct
   let quickfixes _ = []
 end
 
+module String_to_class_pointer = struct
+  open Typing_warning.String_to_class_pointer
+
+  type t = Typing_warning.String_to_class_pointer.t
+
+  let code = Codes.StringToClassPointer
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { cls_name; _ } =
+    let name = Utils.strip_ns cls_name in
+    Printf.sprintf
+      "It is no longer allowed to use a `classname<%s>` in this position. Please use a `class<%s>` instead."
+      name
+      name
+
+  let reasons { ty_pos; _ } = [(ty_pos, "Definition is here")]
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -626,6 +649,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Switch_redundancy -> (module Switch_redundancy)
   | Typing_warning.Static_call_on_trait -> (module Static_call_on_trait)
   | Typing_warning.Static_property_override -> (module Static_property_override)
+  | Typing_warning.String_to_class_pointer -> (module String_to_class_pointer)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

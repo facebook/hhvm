@@ -576,23 +576,19 @@ impl HhConfig {
             needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
-            class_pointer_ban_classname_new: hhconfig.get_bool_or(
+            class_pointer_ban_classname_new: hhconfig.get_int_or(
                 "class_pointer_ban_classname_new",
                 default.class_pointer_ban_classname_new,
             )?,
-            class_pointer_ban_classname_type_structure: hhconfig.get_bool_or(
+            class_pointer_ban_classname_type_structure: hhconfig.get_int_or(
                 "class_pointer_ban_classname_type_structure",
                 default.class_pointer_ban_classname_type_structure,
             )?,
-            class_pointer_ban_classname_static_prop: hhconfig.get_bool_or(
-                "class_pointer_ban_classname_static_prop",
-                default.class_pointer_ban_classname_static_prop,
-            )?,
-            class_pointer_ban_classname_static_meth: hhconfig.get_bool_or(
+            class_pointer_ban_classname_static_meth: hhconfig.get_int_or(
                 "class_pointer_ban_classname_static_meth",
                 default.class_pointer_ban_classname_static_meth,
             )?,
-            class_pointer_ban_classname_class_const: hhconfig.get_bool_or(
+            class_pointer_ban_classname_class_const: hhconfig.get_int_or(
                 "class_pointer_ban_classname_class_const",
                 default.class_pointer_ban_classname_class_const,
             )?,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b3db13c4a99061e71e7fd88e59d10d9e>>
+// @generated SignedSource<<8816312c95bd82d52ae6ae9910e368ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -261,11 +261,10 @@ pub struct GlobalOptions {
     pub safe_abstract: bool,
     pub needs_concrete: bool,
     pub allow_class_string_cast: bool,
-    pub class_pointer_ban_classname_new: bool,
-    pub class_pointer_ban_classname_type_structure: bool,
-    pub class_pointer_ban_classname_static_prop: bool,
-    pub class_pointer_ban_classname_static_meth: bool,
-    pub class_pointer_ban_classname_class_const: bool,
+    pub class_pointer_ban_classname_new: isize,
+    pub class_pointer_ban_classname_type_structure: isize,
+    pub class_pointer_ban_classname_static_meth: isize,
+    pub class_pointer_ban_classname_class_const: isize,
     pub class_pointer_ban_class_array_key: bool,
     pub tco_poly_function_pointers: bool,
 }

@@ -506,15 +506,13 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?needs_concrete:(bool_opt "needs_concrete" config)
     ?allow_class_string_cast:(bool_opt "allow_class_string_cast" config)
     ?class_pointer_ban_classname_new:
-      (bool_opt "class_pointer_ban_classname_new" config)
+      (int_opt "class_pointer_ban_classname_new" config)
     ?class_pointer_ban_classname_type_structure:
-      (bool_opt "class_pointer_ban_classname_type_structure" config)
-    ?class_pointer_ban_classname_static_prop:
-      (bool_opt "class_pointer_ban_classname_static_prop" config)
+      (int_opt "class_pointer_ban_classname_type_structure" config)
     ?class_pointer_ban_classname_static_meth:
-      (bool_opt "class_pointer_ban_classname_static_meth" config)
+      (int_opt "class_pointer_ban_classname_static_meth" config)
     ?class_pointer_ban_classname_class_const:
-      (bool_opt "class_pointer_ban_classname_class_const" config)
+      (int_opt "class_pointer_ban_classname_class_const" config)
     ?class_pointer_ban_class_array_key:
       (bool_opt "class_pointer_ban_class_array_key" config)
     ?tco_poly_function_pointers:(bool_opt "poly_function_pointers" config)

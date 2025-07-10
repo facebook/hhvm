@@ -11,7 +11,7 @@ File "dynamic1.php", line 21, characters 3-13:
 File "dynamic1.php", line 23, characters 3-13:
   dynamic
 File "dynamic1.php", line 25, characters 3-14:
-  classname<dynamic>
+  class<dynamic>
 File "dynamic1.php", line 27, characters 3-13:
   dynamic
 File "dynamic1.php", line 29, characters 3-13:
@@ -58,5 +58,5 @@ File "dynamic1.php", line 67, characters 3-13:
   dynamic
 File "dynamic1.php", line 71, characters 3-13:
   dynamic
-ERROR: File "dynamic1.php", line 11, characters 68-69:
+ERROR: File "dynamic1.php", line 11, characters 64-65:
 Was expecting a type hint (Typing[4032])

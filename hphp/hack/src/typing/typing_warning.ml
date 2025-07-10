@@ -168,6 +168,13 @@ module Static_property_override = struct
   }
 end
 
+module String_to_class_pointer = struct
+  type t = {
+    cls_name: string;
+    ty_pos: Pos_or_decl.t;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Safe_abstract : (Safe_abstract.t, warn) kind
@@ -183,5 +190,6 @@ type (_, _) kind =
   | Switch_redundancy : (Switch_redundancy.t, warn) kind
   | Static_call_on_trait : (Static_call_on_trait.t, warn) kind
   | Static_property_override : (Static_property_override.t, warn) kind
+  | String_to_class_pointer : (String_to_class_pointer.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

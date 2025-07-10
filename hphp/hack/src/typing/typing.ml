@@ -4233,8 +4233,9 @@ end = struct
         env
         p
         ~require_class_ptr:
-          (TypecheckerOptions.class_pointer_ban_classname_class_const
-             env.genv.tcopt)
+          (Class_id.classname_error
+             env
+             TypecheckerOptions.class_pointer_ban_classname_class_const)
         ~is_attribute_param:ctxt.Context.is_attribute_param
         (cid, mid)
     | Class_get (((_, _, cid_) as cid), CGstring mid, Is_prop)
@@ -4265,13 +4266,7 @@ end = struct
     (* Statically-known static property access e.g. Foo::$x *)
     | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
       let (env, _tal, te, cty) =
-        Class_id.class_expr
-          ~require_class_ptr:
-            (TypecheckerOptions.class_pointer_ban_classname_static_prop
-               env.genv.tcopt)
-          env
-          []
-          cid
+        Class_id.(class_expr ~require_class_ptr:Error env [] cid)
       in
       let env = might_throw ~join_pos:p env in
       let (env, (ty, _tal)) =
@@ -5082,7 +5077,7 @@ end = struct
   and class_const
       ?(is_attribute_param = false)
       ?(incl_tc = false)
-      ?(require_class_ptr = false)
+      ?(require_class_ptr = Class_id.Pass)
       env
       p
       (cid, mid) =
@@ -5830,8 +5825,9 @@ end = struct
       let (env, _tal, tcid, ty1) =
         Class_id.class_expr
           ~require_class_ptr:
-            (TypecheckerOptions.class_pointer_ban_classname_static_meth
-               env.genv.tcopt)
+            (Class_id.classname_error
+               env
+               TypecheckerOptions.class_pointer_ban_classname_static_meth)
           env
           []
           e1
@@ -6087,8 +6083,10 @@ end = struct
               class_const
                 ~incl_tc:true
                 ~require_class_ptr:
-                  (TypecheckerOptions.class_pointer_ban_classname_type_structure
-                     env.genv.tcopt)
+                  (Class_id.classname_error
+                     env
+                     TypecheckerOptions
+                     .class_pointer_ban_classname_type_structure)
                 env
                 p
                 (cid, (p, cst))
@@ -10967,6 +10965,14 @@ end = struct
 end
 
 and Class_id : sig
+  val classname_error :
+    env -> (GlobalOptions.t -> int) -> Class_id.classname_expr_error
+
+  type classname_expr_error =
+    | Pass
+    | Warning
+    | Error
+
   (** Resolve class expressions:
   *     self    CIself       lexically enclosing class
   *     parent  CIparent     lexically enclosing `extends` class
@@ -10984,7 +10990,7 @@ and Class_id : sig
     ?is_attribute:bool ->
     ?is_catch:bool ->
     ?is_function_pointer:bool ->
-    ?require_class_ptr:bool ->
+    ?require_class_ptr:classname_expr_error ->
     env ->
     Nast.targ list ->
     Nast.class_id ->
@@ -11053,6 +11059,17 @@ and Class_id : sig
     Nast.targ list ->
     newable_class_info
 end = struct
+  type classname_expr_error =
+    | Pass
+    | Warning
+    | Error
+
+  let classname_error env flag =
+    match flag (Env.get_tcopt env) with
+    | 2 -> Class_id.Error
+    | 1 -> Class_id.Warning
+    | _ -> Class_id.Pass
+
   let class_expr
       ?(check_targs_integrity = false)
       ?(is_attribute_param = false)
@@ -11063,7 +11080,7 @@ end = struct
       ?(is_attribute = false)
       ?(is_catch = false)
       ?(is_function_pointer = false)
-      ?(require_class_ptr = false)
+      ?(require_class_ptr = Class_id.Pass)
       (env : env)
       (tal : Nast.targ list)
       ((_, p, cid_) : Nast.class_id) :
@@ -11289,12 +11306,20 @@ end = struct
           let cls_name =
             Typing_print.full_strip_ns ~hide_internals:true env cls_ty
           in
-          if require_class_ptr then
+          (match require_class_ptr with
+          | Error ->
             Typing_class_pointers.error_at_classname_type
               env
               p
               cls_name
-              (get_pos ty);
+              (get_pos ty)
+          | Warning ->
+            Typing_class_pointers.warning_at_classname_type
+              env
+              p
+              cls_name
+              (get_pos ty)
+          | Pass -> ());
           ((env, ty_err), (cls_ty, err_res))
         | (_, Tclass_ptr the_cls) ->
           let wrap ty = mk (Reason.none, Tclass_ptr ty) in
@@ -11418,7 +11443,9 @@ end = struct
         ~is_attribute
         ~is_catch
         ~require_class_ptr:
-          (TypecheckerOptions.class_pointer_ban_classname_new env.genv.tcopt)
+          (classname_error
+             env
+             TypecheckerOptions.class_pointer_ban_classname_new)
         env
         explicit_targs
         ((), p, cid)

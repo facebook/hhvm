@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f92b4b74919c95e0365eeb6365b8e885>>
+// @generated SignedSource<<45e13e7170306721ff98b07b18e5d819>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -652,6 +652,7 @@ pub enum Warning {
     SwitchRedundancy = 12019,
     StaticCallOnTrait = 12020,
     StaticPropertyOverride = 12021,
+    StringToClassPointer = 12022,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

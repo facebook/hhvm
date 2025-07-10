@@ -320,7 +320,7 @@ std::string cpp_name_resolver::gen_unprefixed_namespace(
 }
 
 bool cpp_name_resolver::can_resolve_to_scalar(const t_type& node) {
-  return node.get_true_type()->is_scalar() || find_first_adapter(node) ||
+  return is_scalar(*node.get_true_type()) || find_first_adapter(node) ||
       find_first_type(node);
 }
 

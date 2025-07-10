@@ -23,6 +23,8 @@
 
 #include <openssl/sha.h>
 
+#include <thrift/compiler/ast/t_enum.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_typedef.h>
 
@@ -151,6 +153,18 @@ std::optional<t_type::value_type> t_type::as_value_type() const {
       return std::nullopt;
   }
   abort();
+}
+
+bool is_scalar(const t_type& type) {
+  if (type.is<t_enum>()) {
+    return true;
+  }
+
+  const auto* primitive = type.try_as<t_primitive_type>();
+  return primitive != nullptr &&
+      primitive->primitive_type() != t_primitive_type::type::t_binary &&
+      primitive->primitive_type() != t_primitive_type::type::t_string &&
+      primitive->primitive_type() != t_primitive_type::type::t_void;
 }
 
 } // namespace apache::thrift::compiler

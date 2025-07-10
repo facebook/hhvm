@@ -115,9 +115,6 @@ class t_type : public t_named {
   t_type(const t_program* program, std::string name)
       : t_named(program, std::move(name)) {}
 
-  // TODO(hchok): To be removed once is_scalar/is_int_or_enum are removed
-  virtual bool is_enum() const { return false; }
-
   // TODO(afuller): Delete everything below this point. It's only here for
   // backwards compatibility.
  public:
@@ -197,11 +194,6 @@ class t_type : public t_named {
   bool is_string_or_binary() const { return is_string() || is_binary(); }
   bool is_any_int() const { return is_i16() || is_i32() || is_i64(); }
   bool is_floating_point() const { return is_double() || is_float(); }
-  bool is_scalar() const {
-    return is_enum() || is_any_int() || is_byte() || is_bool() ||
-        is_floating_point();
-  }
-  bool is_int_or_enum() const { return is_any_int() || is_enum(); }
 
   /**
    * Create a unique hash number based on t_type's properties.
@@ -305,5 +297,7 @@ class t_type_ref final {
   static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
   t_placeholder_typedef* get_unresolved_type() { return unresolved_type_; }
 };
+
+bool is_scalar(const t_type& type);
 
 } // namespace apache::thrift::compiler

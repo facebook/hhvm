@@ -189,8 +189,6 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("string_or_binary?", mem_fn(&t_type::is_string_or_binary));
   def.property("any_int?",          mem_fn(&t_type::is_any_int));
   def.property("floating_point?",   mem_fn(&t_type::is_floating_point));
-  def.property("scalar?",           mem_fn(&t_type::is_scalar));
-  def.property("int_or_enum?",      mem_fn(&t_type::is_int_or_enum));
   // clang-format on
 
   def.property("full_name", mem_fn(&t_type::get_full_name));

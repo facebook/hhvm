@@ -58,6 +58,9 @@ cdef class MutableList:
         self._list_data = list_data
         self._value_type_is_container = value_typeinfo.is_container()
 
+    def __iter__(self):
+        return ValueIterator(self._val_typeinfo, self._list_data)
+
     def __getitem__(self, object index_obj):
         if isinstance(index_obj, slice):
             return MutableList(self._val_typeinfo, self._list_data[index_obj])

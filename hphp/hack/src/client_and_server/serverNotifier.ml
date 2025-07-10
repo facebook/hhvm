@@ -22,6 +22,10 @@ type clock = ServerNotifierTypes.clock =
   | Eden of Edenfs_watcher.clock
 [@@deriving show, eq]
 
+let show_file_watcher_name = function
+  | Watchman _ -> "Watchman"
+  | Eden _ -> "Edenfs_watcher"
+
 let handle_edenfs_watcher_result
     (result : ('t, Edenfs_watcher_types.edenfs_watcher_error) result) : 't =
   match result with

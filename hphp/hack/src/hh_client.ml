@@ -184,7 +184,8 @@ let exec_command_with_config
 let () =
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();
-  Folly.ensure_folly_init ();
+  (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
+  Startup_initializer.init ();
   set_up_signals ();
   let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
   let command =

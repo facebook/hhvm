@@ -19,6 +19,9 @@ type clock = ServerNotifierTypes.clock =
   | Eden of Edenfs_watcher.clock
 [@@deriving show, eq]
 
+(** Prints the name of the file watcher used to create the clock. *)
+val show_file_watcher_name : clock -> string
+
 type t
 
 (** This takes a filter, and returns all files under root that match *)

@@ -528,6 +528,84 @@ class EdenfsWatcherTests(common_tests.CommonTests):
                 ["string"], options=["--type-at-pos", "{root}sync_1.php:5:24"]
             )
 
+    def test_hh_check_streaming_error_syncness(self) -> None:
+        # Running hh check when streaming erros are enabled involves a synchronous check with the file watcher,
+        # to check if the errors file is up to date (or wait for a newer one otherwise).
+        # This means that we should see changes instantaneously.
+
+        iterations = 50
+
+        with open(os.path.join(self.test_driver.repo_dir, "hh.conf"), "a") as f:
+            f.write(
+                "produce_streaming_errors = true\n"
+                + "consume_streaming_errors = true\n"
+            )
+
+        self.test_driver.start_hh_server()
+
+        for _ in range(iterations):
+            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_g(): int {
+                return "not an int";
+            }
+            """
+                )
+            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_f(): string {
+                return 3;
+            }
+            """
+                )
+
+            self.test_driver.check_cmd(
+                [
+                    "ERROR: {root}sync_1.php:4:24,35: Invalid return type (Typing[4110])",
+                    "  {root}sync_1.php:3:32,34: Expected `int`",
+                    "  {root}sync_1.php:4:24,35: But got `string`",
+                    "ERROR: {root}sync_2.php:4:24,24: Invalid return type (Typing[4110])",
+                    "  {root}sync_2.php:3:32,37: Expected `string`",
+                    "  {root}sync_2.php:4:24,24: But got `int`",
+                ]
+            )
+
+            print("finished iteration")
+
+            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_g(): string {
+                return 3;
+            }
+            """
+                )
+            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
+                f.write(
+                    """<?hh
+
+            function sync_f(): int {
+                return "not an int";
+            }
+            """
+                )
+
+            self.test_driver.check_cmd(
+                [
+                    "ERROR: {root}sync_1.php:4:24,24: Invalid return type (Typing[4110])",
+                    "  {root}sync_1.php:3:32,37: Expected `string`",
+                    "  {root}sync_1.php:4:24,24: But got `int`",
+                    "ERROR: {root}sync_2.php:4:24,35: Invalid return type (Typing[4110])",
+                    "  {root}sync_2.php:3:32,34: Expected `int`",
+                    "  {root}sync_2.php:4:24,35: But got `string`",
+                ]
+            )
+
     def test_hg_update_basic(self) -> None:
         self.test_driver.start_hh_server()
 

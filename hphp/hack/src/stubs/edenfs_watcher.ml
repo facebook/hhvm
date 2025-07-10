@@ -37,3 +37,7 @@ let get_notification_fd (_instance : instance) :
 let get_all_files (_instance : instance) :
     (string list * clock, edenfs_watcher_error) result =
   failwith "not implemented"
+
+module Standalone = struct
+  let get_changes_since _settings _clock = failwith "not implemented"
+end

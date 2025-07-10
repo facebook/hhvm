@@ -37,7 +37,7 @@ let is_stale_msg liveness =
   | Stale_status ->
     Some
       ("(but this may be stale, probably due to"
-      ^ " watchman being unresponsive)\n")
+      ^ " file watcher being unresponsive)\n")
   | Live_status -> None
 
 let go status error_format ~is_interactive ~output_json ~max_errors =
@@ -81,8 +81,8 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
            ~max_errors)
         ~f:(fun msg -> Printf.printf "%s" msg);
       (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
-         reflects data from a watchman sync, or just whatever has arrived so far over the watchman
-         subscription. *)
+         reflects data from a sync file watcher query, or just whatever has arrived asynchronously
+         so far. *)
       Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
       error_count
   in
@@ -490,6 +490,60 @@ let watchman_get_raw_updates_since
       Lwt.return_ok files
   end
 
+let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
+  let watch_spec = FilesToIgnore.server_watch_spec in
+  let debug_logging =
+    local_config.ServerLocalConfig.edenfs_file_watcher.debug_logging
+  in
+  let settings = { Edenfs_watcher_types.root; watch_spec; debug_logging } in
+  let translate_changes list = function
+    | Edenfs_watcher_types.FileChanges file_changes
+    | CommitTransition { file_changes; _ } ->
+      List.append list file_changes
+  in
+
+  match Edenfs_watcher.Standalone.get_changes_since settings clock with
+  | Ok (changes, _clock) ->
+    let changes = List.fold ~init:[] ~f:translate_changes changes in
+    Lwt.return_ok changes
+  | Error error ->
+    Lwt.return_error (Edenfs_watcher_types.show_edenfs_watcher_error error)
+
+(** Gets all files-changed since [clock] which match the standard hack
+  predicate [FilesToIgnore.server_watch_spec].
+
+  If the returned flag is true, then paths are relative to the watch root.
+  Otherwise, they are absolute.
+
+  Note that we pick the file watcher to query based on the clock type that
+  the server wrote to the errors file.
+  This way, we ensure to use the same file watcher as the server. *)
+let file_watcher_get_raw_updates_since ~root ~clock ~local_config :
+    (string list * bool, string) result Lwt.t =
+  let (changes, is_relative) =
+    match clock with
+    | ServerNotifier.Watchman clock ->
+      let watchman_sockname =
+        local_config.ServerLocalConfig.watchman.sockname
+      in
+      let changes =
+        watchman_get_raw_updates_since
+          ~root
+          ~clock
+          ~watchman_sockname
+          ~fail_on_new_instance:false
+          ~fail_during_state:false
+      in
+      (changes, true)
+    | ServerNotifier.Eden clock ->
+      let changes =
+        edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config
+      in
+      (changes, false)
+  in
+  let%lwt changes = changes in
+  Lwt.return (Result.map changes ~f:(fun changes -> (changes, is_relative)))
+
 module FileId : sig
   (** Identifier for a file, based on inode and ctime *)
   type t [@@deriving eq]
@@ -540,14 +594,14 @@ let show_progress_and_sleep progress_callback =
 
   How this function fulfills those cases:
   * It of course has to check whether files on disk have changed since this errors.bin was started.
-    It does this with a synchronous watchman query,
-    and displays "hh_server is busy [watchman sync]".
+    It does this with a synchronous file watcher query,
+    and displays "hh_server is busy [file watcher sync]".
   * If there is a fault like "errors.bin was started too long ago and files have changed
     in the meantime" which can be rectified by waiting and trying again on the assumption
     that a server is running and will pick up the changes, then this will wait and try
     again indefinitely. It will display "hh_server is busy [hh_server sync]".
     The parameter [already_checked_clock] indicates that we have already done a
-    (costly) watchman query for this clock, and will not do another watchman query until
+    (costly) file watcher query for this clock, and will not do another file watcher query until
     we see a new errors.bin which started at a different (newer) clock.
   * If there is a fault like "missing errors.bin" or "binary mismatch" which can
     be rectified by connecting to the monitor+server, this will do so at most once
@@ -569,7 +623,8 @@ let show_progress_and_sleep progress_callback =
   waiting until an errors.bin comes about where there are no changed files between
   errors.bin's start time and "now". Both are correct; the former is more principled,
   would result in more "files changed under your feet", but alas there doesn't exist
-  the ability in watchman to compare two clocks so we can't use it. Therefore we use (B).
+  the ability in watchman or Edenfs notifications to compare two clocks so we can't use it.
+  Therefore we use (B).
   How do we know that (B) will eventually terminate? Well if the user keeps modifying
   files then it never will! But if the user stops, then hh_server is guaranteed to
   do a final recheck, hence guaranteed to write an errors.bin with no files changed
@@ -586,7 +641,7 @@ let show_progress_and_sleep progress_callback =
   below if we continued work). In summary it's crucial to clear out the spinner at the right time:
   * [connect_then_close] is assumed to clear the spinner in case it writes to stderr
   * This function clears the spinner in case of exceptions
-  * But it leaves the spinner at "watchman sync" in case of success, in the expectation
+  * But it leaves the spinner at "file watcher sync" in case of success, in the expectation
   that subsequent code will update the spinner. *)
 let rec keep_trying_to_open
     ~(local_config : ServerLocalConfig.t)
@@ -697,57 +752,44 @@ let rec keep_trying_to_open
             (Exit_status.Exit_with
                (Exit_status.Server_hung_up_should_abort finale_data))
       end
-      | Ok
-          {
-            Server_progress.ErrorsRead.pid;
-            clock = None | Some (ServerNotifier.Eden _);
-            _;
-          } ->
-        (* If there's an existing file, but it's not using watchman, then we cannot offer
+      | Ok { Server_progress.ErrorsRead.pid; clock = None; _ } ->
+        (* If there's an existing file, but it's not using watchman or Edenfs_watcher, then we cannot offer
            consistency guarantees. We'll just go with it. This happens for instance
            if the server was started using dfind instead of watchman. *)
         Hh_logger.log
-          "Errors-file: %s is present, without watchman, so just going with it."
+          "Errors-file: %s is present, without Watchman or Edenfs_watcher, so just going with it."
           (Sys_utils.show_inode fd);
         Lwt.return (pid, fd)
-      | Ok
-          {
-            Server_progress.ErrorsRead.pid;
-            clock = Some (ServerNotifier.Watchman clock);
-            _;
-          } -> begin
+      | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
         Hh_logger.log
-          "Errors-file: %s is present, was started at clock %s, so querying watchman..."
+          "Errors-file: %s is present, was started at clock %s, so querying %s..."
           (Sys_utils.show_inode fd)
-          clock;
-        (* Watchman doesn't support "what files have changed from error.bin's clock until
+          (ServerNotifierTypes.show_clock clock)
+          (ServerNotifier.show_file_watcher_name clock);
+        (* Neither Watchman or Eden support "what files have changed from error.bin's clock until
            hh-invocation clock?". We'll instead use the (less permissive, still correct) query
            "what files have changed from error.bin's clock until now?". *)
-        (* TODO frankemrich: This must become eden-aware *)
         let%lwt since_result =
-          let watchman_sockname = local_config.watchman.sockname in
-          watchman_get_raw_updates_since
-            ~root
-            ~clock
-            ~watchman_sockname
-            ~fail_on_new_instance:false
-            ~fail_during_state:false
+          file_watcher_get_raw_updates_since ~root ~clock ~local_config
         in
         match since_result with
         | Error e ->
-          Hh_logger.log "Errors-file: watchman failure:\n%s\n" e;
-          (* The errors file is present, was started at clock `clock` but the watchman query failed.
+          Hh_logger.log "Errors-file: file watcher failure:\n%s\n" e;
+          (* The errors file is present, was started at clock `clock` but the file watcher query failed.
              We'll assume there has not been any file change since that clock.,
              If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
              ask the user to re-run hh. This is sub-optimal UX, but still better UX than
              loudly failing now. *)
           Lwt.return (pid, fd)
-        | Ok relative_raw_updates ->
+        | Ok (raw_updates, paths_are_relative) ->
           let raw_updates =
-            relative_raw_updates
-            |> List.map ~f:(fun file ->
-                   Filename.concat (Path.to_string root) file)
-            |> SSet.of_list
+            if paths_are_relative then
+              raw_updates
+              |> List.map ~f:(fun file ->
+                     Filename.concat (Path.to_string root) file)
+              |> SSet.of_list
+            else
+              SSet.of_list raw_updates
           in
           let updates =
             FindUtils.post_watchman_filter_from_fully_qualified_raw_updates
@@ -758,9 +800,10 @@ let rec keep_trying_to_open
             (* If there was an existing errors.bin, and no files have changed since then,
                then use it! *)
             Hh_logger.log
-              "Errors-file: %s is present, was started at clock %s and watchman reports no updates since then, so using it!"
+              "Errors-file: %s is present, was started at clock %s and %s reports no updates since then, so using it!"
               (Sys_utils.show_inode fd)
-              clock;
+              (ServerNotifierTypes.show_clock clock)
+              (ServerNotifier.show_file_watcher_name clock);
             Lwt.return (pid, fd)
           end else begin
             (* But if files have changed since the errors.bin, then we will keep spinning
@@ -768,12 +811,12 @@ let rec keep_trying_to_open
                a new errors.bin file, which we'll then pick up on another iteration.
                CARE! This only works if hh_server's test for "are there new files" is at least
                as strict as our own.
-               They're identical, in fact, because they both use the same watchman filter
-               [FilesToIgnore.watchman_server_expression_terms] and the same [FindUtils.post_watchman_filter]. *)
+               They're identical, in fact, because they both use the same watch_spec filter
+               [FilesToIgnore.server_watch_spec] and the same [FindUtils.post_watchman_filter]. *)
             Hh_logger.log
-              "Errors-file: %s is present, was started at clock %s, but watchman reports updates since then, so trying again. %d updates, for example %s"
+              "Errors-file: %s is present, was started at clock %s, but file watcher reports updates since then, so trying again. %d updates, for example %s"
               (Sys_utils.show_inode fd)
-              clock
+              (ServerNotifierTypes.show_clock clock)
               (Relative_path.Set.cardinal updates)
               (Relative_path.Set.choose updates |> Relative_path.suffix);
             keep_trying_to_open

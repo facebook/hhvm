@@ -14,6 +14,7 @@
   client_highlight_refs
   client_ide_service
   clowder_paste
+  edenfs_watcher_stubs
   flytrap
   formatting_stubs
   hh_server_monitor

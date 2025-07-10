@@ -136,16 +136,19 @@ cdef _resetFieldToStandardDefault(structOrError, field_index):
 
 
 @_cython__final
-cdef class _MutableStructField:
+cdef class _MutablePrimitiveField:
     """
-    The `_MutableStructField` class is a descriptor class that is used to
+    The `_MutablePrimitiveField` class is a descriptor class that is used to
     manage the access to a specific field in a mutable Thrift struct object.
     It uses the descriptor protocol.
+
+    It can *only* be used for primitive types, i.e., types where the internal
+    data type is exactly the Python value type.
     """
+    # `_field_index` is the insertion order of the field in `MutableStructInfo`,
+    # not the Thrift field id
     cdef int16_t _field_index
     cdef bint _is_optional
-    # `_field_index` is the insertion order of the field in the
-    # `MutableStructInfo` (this is not the Thrift field id)
     __slots__ = ('_field_index', '_is_optional')
 
     def __init__(self, field_id, is_optional):
@@ -157,9 +160,9 @@ cdef class _MutableStructField:
             return None
 
         if isinstance(obj, MutableStruct):
-            return (<MutableStruct>obj)._fbthrift_get_field_value(self._field_index)
+            return (<MutableStruct>obj)._fbthrift_data[self._field_index + 1]
         else:
-            return (<MutableGeneratedError>obj)._fbthrift_get_field_value(self._field_index)
+            return (<MutableGeneratedError>obj)._fbthrift_data[self._field_index + 1]
 
     def __set__(self, obj, value):
         if obj is None:
@@ -710,7 +713,8 @@ cdef class MutableStructInfo:
             dynamic_struct_info.addFieldValue(idx, default_value)
 
 cdef inline _is_primitive_field(FieldInfo field_info) noexcept:
-    return field_info.is_primitive and field_info.adapter_info is None
+    return field_info.is_primitive and field_info.adapter_info is None \
+        and not isinstance(field_info.type_info, AdaptedTypeInfo)
 
 cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
     """
@@ -730,7 +734,7 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
         # if field has an adapter or is not primitive type, consider
         # as "non-primitive"
         if _is_primitive_field(field_info):
-            descriptor_kls = _MutableStructField 
+            descriptor_kls = _MutablePrimitiveField 
         else:
             descriptor_kls = _MutableStructCachedField
         is_optional = field_info.qualifier == FieldQualifier.Optional

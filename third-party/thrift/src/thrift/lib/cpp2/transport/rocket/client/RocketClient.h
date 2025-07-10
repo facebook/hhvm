@@ -37,6 +37,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/KeepAliveWatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RocketSinkServerCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallbackWithChunkTimeout.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressor.h>

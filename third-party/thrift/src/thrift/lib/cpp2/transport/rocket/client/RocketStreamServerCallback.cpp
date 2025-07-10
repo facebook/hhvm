@@ -18,17 +18,17 @@
 
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 
 namespace apache::thrift::rocket {
 
-// RocketStreamServerCallback
 bool RocketStreamServerCallback::onStreamRequestN(uint64_t tokens) {
   return client_.sendRequestN(streamId_, tokens);
 }
+
 void RocketStreamServerCallback::onStreamCancel() {
   client_.cancelStream(streamId_);
 }
+
 bool RocketStreamServerCallback::onSinkHeaders(HeadersPayload&& payload) {
   return client_.sendHeadersPush(streamId_, std::move(payload));
 }
@@ -42,11 +42,13 @@ void RocketStreamServerCallback::onInitialError(folly::exception_wrapper ew) {
   clientCallback_->onFirstResponseError(std::move(ew));
   client_.cancelStream(streamId_);
 }
+
 StreamChannelStatusResponse RocketStreamServerCallback::onStreamPayload(
     StreamPayload&& payload) {
   std::ignore = clientCallback_->onStreamNext(std::move(payload));
   return StreamChannelStatus::Alive;
 }
+
 StreamChannelStatusResponse RocketStreamServerCallback::onStreamFinalPayload(
     StreamPayload&& payload) {
   auto& client = client_;
@@ -59,10 +61,12 @@ StreamChannelStatusResponse RocketStreamServerCallback::onStreamFinalPayload(
   }
   return StreamChannelStatus::Alive;
 }
+
 StreamChannelStatusResponse RocketStreamServerCallback::onStreamComplete() {
   clientCallback_->onStreamComplete();
   return StreamChannelStatus::Complete;
 }
+
 StreamChannelStatusResponse RocketStreamServerCallback::onStreamError(
     folly::exception_wrapper ew) {
   ew.handle(
@@ -85,94 +89,9 @@ StreamChannelStatusResponse RocketStreamServerCallback::onStreamError(
       });
   return StreamChannelStatus::Complete;
 }
+
 void RocketStreamServerCallback::onStreamHeaders(HeadersPayload&& payload) {
   std::ignore = clientCallback_->onStreamHeaders(std::move(payload));
 }
 
-// RocketSinkServerCallback
-bool RocketSinkServerCallback::onSinkNext(StreamPayload&& payload) {
-  DCHECK(state_ == State::BothOpen);
-  // apply compression if client has specified compression codec
-  if (compressionConfig_) {
-    CompressionManager().setCompressionCodec(
-        *compressionConfig_,
-        payload.metadata,
-        payload.payload->computeChainDataLength());
-  }
-  std::ignore =
-      client_.sendPayload(streamId_, std::move(payload), Flags().next(true));
-  return true;
-}
-void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
-  DCHECK(state_ == State::BothOpen);
-  ew.handle(
-      [&](RocketException& rex) {
-        client_.sendError(streamId_, std::move(rex));
-      },
-      [this](::apache::thrift::detail::EncodedStreamError& err) {
-        if (compressionConfig_) {
-          CompressionManager().setCompressionCodec(
-              *compressionConfig_,
-              err.encoded.metadata,
-              err.encoded.payload->computeChainDataLength());
-        }
-        std::ignore = client_.sendSinkError(streamId_, std::move(err.encoded));
-      },
-      [&](...) {
-        client_.sendError(
-            streamId_,
-            RocketException(ErrorCode::APPLICATION_ERROR, ew.what()));
-      });
-}
-bool RocketSinkServerCallback::onSinkComplete() {
-  DCHECK(state_ == State::BothOpen);
-  state_ = State::StreamOpen;
-  client_.sendComplete(streamId_, false);
-  return true;
-}
-
-bool RocketSinkServerCallback::onInitialPayload(
-    FirstResponsePayload&& payload, folly::EventBase* evb) {
-  return clientCallback_->onFirstResponse(std::move(payload), evb, this);
-}
-void RocketSinkServerCallback::onInitialError(folly::exception_wrapper ew) {
-  clientCallback_->onFirstResponseError(std::move(ew));
-  client_.sendError(streamId_, RocketException(ErrorCode::CANCELED));
-}
-StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponse(
-    StreamPayload&& payload) {
-  clientCallback_->onFinalResponse(std::move(payload));
-  return StreamChannelStatus::Complete;
-}
-StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponseError(
-    folly::exception_wrapper ew) {
-  ew.handle(
-      [&](RocketException& ex) {
-        if (ex.hasErrorData()) {
-          if (client_.getServerVersion() >= 8) {
-            clientCallback_->onFinalResponseError(
-                thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
-          } else {
-            clientCallback_->onFinalResponseError(
-                thrift::detail::EncodedError(ex.moveErrorData()));
-          }
-        } else {
-          clientCallback_->onFinalResponseError(std::move(ew));
-        }
-      },
-      [&](...) { clientCallback_->onFinalResponseError(std::move(ew)); });
-  return StreamChannelStatus::Complete;
-}
-StreamChannelStatusResponse RocketSinkServerCallback::onSinkRequestN(
-    uint64_t tokens) {
-  switch (state_) {
-    case State::BothOpen:
-      std::ignore = clientCallback_->onSinkRequestN(tokens);
-      return StreamChannelStatus::Alive;
-    case State::StreamOpen:
-      return StreamChannelStatus::Alive;
-    default:
-      folly::assume_unreachable();
-  }
-}
 } // namespace apache::thrift::rocket

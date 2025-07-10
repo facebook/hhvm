@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/HHWheelTimer.h>
@@ -30,42 +33,43 @@
 namespace apache::thrift::rocket {
 class RocketClient;
 
-class RocketStreamServerCallback : public StreamServerCallback {
+class RocketSinkServerCallback : public SinkServerCallback {
  public:
-  RocketStreamServerCallback(
+  RocketSinkServerCallback(
       StreamId streamId,
       RocketClient& client,
-      StreamClientCallback& clientCallback)
+      SinkClientCallback& clientCallback,
+      std::unique_ptr<CompressionConfig> compressionConfig)
       : client_(client),
         clientCallback_(&clientCallback),
-        streamId_(streamId) {}
+        streamId_(streamId),
+        compressionConfig_(std::move(compressionConfig)) {}
 
-  bool onStreamRequestN(uint64_t tokens) override;
-  void onStreamCancel() override;
+  bool onSinkNext(StreamPayload&&) override;
+  void onSinkError(folly::exception_wrapper) override;
+  bool onSinkComplete() override;
 
-  bool onSinkHeaders(HeadersPayload&& payload) override;
-
-  void resetClientCallback(StreamClientCallback& clientCallback) override {
+  void resetClientCallback(SinkClientCallback& clientCallback) override {
     clientCallback_ = &clientCallback;
   }
 
   bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
-  void onInitialError(folly::exception_wrapper ew);
+  void onInitialError(folly::exception_wrapper);
 
-  StreamChannelStatusResponse onStreamPayload(StreamPayload&&);
-  StreamChannelStatusResponse onStreamFinalPayload(StreamPayload&&);
-  StreamChannelStatusResponse onStreamComplete();
-  StreamChannelStatusResponse onStreamError(folly::exception_wrapper);
-  void onStreamHeaders(HeadersPayload&&);
+  StreamChannelStatusResponse onFinalResponse(StreamPayload&&);
+  StreamChannelStatusResponse onFinalResponseError(folly::exception_wrapper);
+
+  StreamChannelStatusResponse onSinkRequestN(uint64_t tokens);
 
   StreamId streamId() const noexcept { return streamId_; }
 
- protected:
-  RocketClient& client_;
-
  private:
-  StreamClientCallback* clientCallback_;
+  RocketClient& client_;
+  SinkClientCallback* clientCallback_;
   StreamId streamId_;
+  enum class State { BothOpen, StreamOpen };
+  State state_{State::BothOpen};
+  std::unique_ptr<CompressionConfig> compressionConfig_;
 };
 
 } // namespace apache::thrift::rocket

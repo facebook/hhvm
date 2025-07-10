@@ -27,12 +27,11 @@
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/client/StreamChannelStatus.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
 class RocketClient;
-
-enum class StreamChannelStatus { Alive, Complete, ContractViolation };
 
 class StreamChannelStatusResponse {
  public:

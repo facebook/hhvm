@@ -1,4 +1,7 @@
-dict(2) {
+dict(3) {
+  ["__DynamicallyCallable"]=>
+  vec(0) {
+  }
   ["A"]=>
   vec(2) {
     int(1)

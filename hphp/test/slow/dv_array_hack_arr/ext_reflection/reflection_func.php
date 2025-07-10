@@ -1,6 +1,6 @@
 <?hh
 
-<<A(1, 2), B>>
+<<A(1, 2), B, __DynamicallyCallable>>
 function foo($a, $b = null, $c = null): void {
   var_dump($a);
 }

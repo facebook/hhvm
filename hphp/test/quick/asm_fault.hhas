@@ -26,7 +26,7 @@
   }
 }
 
-.function N foo() {
+.function [dyn_callable] N foo() {
   String "testing catch region\n"
   Print
   PopC
@@ -61,7 +61,7 @@
 .class Three extends Exception {
 }
 
-.function N throw_various() {
+.function [dyn_callable] N throw_various() {
   .declvars $counter;
            Int 0
            SetL $counter

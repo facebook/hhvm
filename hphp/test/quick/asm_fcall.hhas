@@ -22,7 +22,7 @@
   RetC
 }
 
-.function N b() {
+.function [dyn_callable] N b() {
   String "In b() now\n"
   Print
   PopC
@@ -31,7 +31,7 @@
   RetC
 }
 
-.function N a(N $arg) {
+.function [dyn_callable] N a(N $arg) {
   CGetL $arg
   String "\n"
   Concat

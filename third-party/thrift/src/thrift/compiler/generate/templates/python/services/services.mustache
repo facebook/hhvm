@@ -38,7 +38,7 @@ from {{program:base_library_package}}.mutable_serializer import serialize_iobuf,
 from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
 
 import {{program:module_path}}.{{> types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}
-import {{program:module_path}}.thrift_metadata
+import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
 {{#program:include_namespaces}}
 {{#has_services?}}
 import {{included_module_path}}.thrift_services
@@ -83,11 +83,11 @@ class {{service:name}}Interface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return {{program:module_path}}.thrift_metadata._fbthrift_metadata_service_response_{{service:name}}()
+        return {{program:module_mangle}}__thrift_metadata._fbthrift_metadata_service_response_{{service:name}}()
 
 
 {{#service:supported_service_functions}}

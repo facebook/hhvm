@@ -300,26 +300,26 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedSt
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
 
 # This unfortunately has to be down here to prevent circular imports
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_Fields():
-    return module.thrift_metadata.gen_metadata_struct_Fields()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_Fields()
 
 
 def _fbthrift_metadata__struct_FieldsInjectedToEmptyStruct():
-    return module.thrift_metadata.gen_metadata_struct_FieldsInjectedToEmptyStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_FieldsInjectedToEmptyStruct()
 
 
 def _fbthrift_metadata__struct_FieldsInjectedToStruct():
-    return module.thrift_metadata.gen_metadata_struct_FieldsInjectedToStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_FieldsInjectedToStruct()
 
 
 def _fbthrift_metadata__struct_FieldsInjectedWithIncludedStruct():
-    return module.thrift_metadata.gen_metadata_struct_FieldsInjectedWithIncludedStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_FieldsInjectedWithIncludedStruct()
 
 
 _fbthrift_all_structs = [

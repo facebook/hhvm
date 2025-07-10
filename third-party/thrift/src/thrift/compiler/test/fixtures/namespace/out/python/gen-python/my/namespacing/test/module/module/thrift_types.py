@@ -76,14 +76,14 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Foo, Foo)
 _fbthrift_Foo = Foo
 
 # This unfortunately has to be down here to prevent circular imports
-import python_module_root.my.namespacing.test.module.module.thrift_metadata
+import python_module_root.my.namespacing.test.module.module.thrift_metadata as python_module_root__my__namespacing__test__module__module__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_Foo():
-    return python_module_root.my.namespacing.test.module.module.thrift_metadata.gen_metadata_struct_Foo()
+    return python_module_root__my__namespacing__test__module__module__thrift_metadata.gen_metadata_struct_Foo()
 
 
 _fbthrift_all_structs = [

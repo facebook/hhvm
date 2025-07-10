@@ -19,7 +19,7 @@ from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import meta.example.thrift.service.thrift_types as _fbthrift__meta__example__thrift__service__thrift_types
-import meta.example.thrift.service.thrift_metadata
+import meta.example.thrift.service.thrift_metadata as _fbthrift__meta__example__thrift__service__thrift_metadata
 import test.fixtures.basic.module.thrift_services
 import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
 
@@ -44,11 +44,11 @@ class EchoServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_EchoService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_EchoService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return meta.example.thrift.service.thrift_metadata._fbthrift_metadata_service_response_EchoService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata._fbthrift_metadata_service_response_EchoService()
 
 
 
@@ -91,11 +91,11 @@ EchoServiceInterface,
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedEchoService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return meta.example.thrift.service.thrift_metadata._fbthrift_metadata_service_response_ExtendedEchoService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata._fbthrift_metadata_service_response_ExtendedEchoService()
 
 
 
@@ -138,11 +138,11 @@ class ExtendedMyServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedMyService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return meta.example.thrift.service.thrift_metadata._fbthrift_metadata_service_response_ExtendedMyService()
+        return _fbthrift__meta__example__thrift__service__thrift_metadata._fbthrift_metadata_service_response_ExtendedMyService()
 
 
 

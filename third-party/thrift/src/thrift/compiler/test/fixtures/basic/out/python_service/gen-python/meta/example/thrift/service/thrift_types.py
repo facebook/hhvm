@@ -198,22 +198,22 @@ class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 _fbthrift_WhisperException = WhisperException
 
 # This unfortunately has to be down here to prevent circular imports
-import meta.example.thrift.service.thrift_metadata
+import meta.example.thrift.service.thrift_metadata as _fbthrift__meta__example__thrift__service__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_EchoRequest():
-    return meta.example.thrift.service.thrift_metadata.gen_metadata_struct_EchoRequest()
+    return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_struct_EchoRequest()
 
 
 def _fbthrift_metadata__struct_EchoResponse():
-    return meta.example.thrift.service.thrift_metadata.gen_metadata_struct_EchoResponse()
+    return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_struct_EchoResponse()
 
 
 def _fbthrift_metadata__exception_WhisperException():
-    return meta.example.thrift.service.thrift_metadata.gen_metadata_exception_WhisperException()
+    return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_exception_WhisperException()
 
 
 _fbthrift_all_structs = [

@@ -1275,7 +1275,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedTypedefFields, Adapte
 _fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
 # This unfortunately has to be down here to prevent circular imports
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 _fbthrift_all_enums = [
     AnEnum,
@@ -1285,51 +1285,51 @@ _fbthrift_all_enums = [
 
 
 def _fbthrift_metadata__exception_SimpleException():
-    return module.thrift_metadata.gen_metadata_exception_SimpleException()
+    return _fbthrift__module__thrift_metadata.gen_metadata_exception_SimpleException()
 
 
 def _fbthrift_metadata__struct_OptionalRefStruct():
-    return module.thrift_metadata.gen_metadata_struct_OptionalRefStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_OptionalRefStruct()
 
 
 def _fbthrift_metadata__struct_SimpleStruct():
-    return module.thrift_metadata.gen_metadata_struct_SimpleStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_SimpleStruct()
 
 
 def _fbthrift_metadata__struct_HiddenTypeFieldsStruct():
-    return module.thrift_metadata.gen_metadata_struct_HiddenTypeFieldsStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_HiddenTypeFieldsStruct()
 
 
 def _fbthrift_metadata__struct_AdaptedUnion():
-    return module.thrift_metadata.gen_metadata_struct_AdaptedUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_AdaptedUnion()
 
 
 def _fbthrift_metadata__exception_HiddenException():
-    return module.thrift_metadata.gen_metadata_exception_HiddenException()
+    return _fbthrift__module__thrift_metadata.gen_metadata_exception_HiddenException()
 
 
 def _fbthrift_metadata__struct_ComplexStruct():
-    return module.thrift_metadata.gen_metadata_struct_ComplexStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_ComplexStruct()
 
 
 def _fbthrift_metadata__struct_BinaryUnion():
-    return module.thrift_metadata.gen_metadata_struct_BinaryUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_BinaryUnion()
 
 
 def _fbthrift_metadata__struct_BinaryUnionStruct():
-    return module.thrift_metadata.gen_metadata_struct_BinaryUnionStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_BinaryUnionStruct()
 
 
 def _fbthrift_metadata__struct_CustomFields():
-    return module.thrift_metadata.gen_metadata_struct_CustomFields()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_CustomFields()
 
 
 def _fbthrift_metadata__struct_CustomTypedefFields():
-    return module.thrift_metadata.gen_metadata_struct_CustomTypedefFields()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_CustomTypedefFields()
 
 
 def _fbthrift_metadata__struct_AdaptedTypedefFields():
-    return module.thrift_metadata.gen_metadata_struct_AdaptedTypedefFields()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_AdaptedTypedefFields()
 
 
 _fbthrift_all_structs = [

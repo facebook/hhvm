@@ -62,7 +62,7 @@ service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_n
 ])
 new_struct = metadata_struct(services=service_dict)
 {{#service:extends?}}{{#service:extends}}
-new_struct = {{#service:external_program?}}{{service:module_path}}.thrift_metadata.{{/service:external_program?}}_fbthrift_gen_metadata_service_{{service:name}}(new_struct)
+new_struct = {{#service:external_program?}}{{service:module_mangle}}__thrift_metadata.{{/service:external_program?}}_fbthrift_gen_metadata_service_{{service:name}}(new_struct)
 {{/service:extends}}{{/service:extends?}}
 {{#service:functions}}{{^function:starts_interaction?}}
 

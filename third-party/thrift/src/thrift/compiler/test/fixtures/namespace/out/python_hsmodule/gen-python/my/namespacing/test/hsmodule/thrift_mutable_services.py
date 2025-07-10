@@ -20,7 +20,7 @@ from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Proto
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import python_module_root.my.namespacing.test.hsmodule.thrift_mutable_types as python_module_root__my__namespacing__test__hsmodule__thrift_mutable_types
-import python_module_root.my.namespacing.test.hsmodule.thrift_metadata
+import python_module_root.my.namespacing.test.hsmodule.thrift_metadata as python_module_root__my__namespacing__test__hsmodule__thrift_metadata
 
 class HsTestServiceInterface(
     ServiceInterface,
@@ -43,11 +43,11 @@ class HsTestServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return python_module_root.my.namespacing.test.hsmodule.thrift_metadata.gen_metadata_service_HsTestService()
+        return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_service_HsTestService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return python_module_root.my.namespacing.test.hsmodule.thrift_metadata._fbthrift_metadata_service_response_HsTestService()
+        return python_module_root__my__namespacing__test__hsmodule__thrift_metadata._fbthrift_metadata_service_response_HsTestService()
 
 
 

@@ -19,7 +19,7 @@ from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import test.namespace_from_package_without_module_name.module.thrift_types as _fbthrift__test__namespace_from_package_without_module_name__module__thrift_types
-import test.namespace_from_package_without_module_name.module.thrift_metadata
+import test.namespace_from_package_without_module_name.module.thrift_metadata as _fbthrift__test__namespace_from_package_without_module_name__module__thrift_metadata
 
 class TestServiceInterface(
     ServiceInterface,
@@ -42,11 +42,11 @@ class TestServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.namespace_from_package_without_module_name.module.thrift_metadata.gen_metadata_service_TestService()
+        return _fbthrift__test__namespace_from_package_without_module_name__module__thrift_metadata.gen_metadata_service_TestService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return test.namespace_from_package_without_module_name.module.thrift_metadata._fbthrift_metadata_service_response_TestService()
+        return _fbthrift__test__namespace_from_package_without_module_name__module__thrift_metadata._fbthrift_metadata_service_response_TestService()
 
 
 

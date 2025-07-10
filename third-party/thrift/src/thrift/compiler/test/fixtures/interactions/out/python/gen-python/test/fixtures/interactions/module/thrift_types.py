@@ -139,18 +139,18 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ShouldBeBoxed, ShouldBeBoxed
 _fbthrift_ShouldBeBoxed = ShouldBeBoxed
 
 # This unfortunately has to be down here to prevent circular imports
-import test.fixtures.interactions.module.thrift_metadata
+import test.fixtures.interactions.module.thrift_metadata as _fbthrift__test__fixtures__interactions__module__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__exception_CustomException():
-    return test.fixtures.interactions.module.thrift_metadata.gen_metadata_exception_CustomException()
+    return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_exception_CustomException()
 
 
 def _fbthrift_metadata__struct_ShouldBeBoxed():
-    return test.fixtures.interactions.module.thrift_metadata.gen_metadata_struct_ShouldBeBoxed()
+    return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_struct_ShouldBeBoxed()
 
 
 _fbthrift_all_structs = [

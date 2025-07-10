@@ -14,7 +14,7 @@ import apache.thrift.fixtures.types.module.thrift_enums
 
 
 import apache.thrift.fixtures.types.included.thrift_enums
-import apache.thrift.fixtures.types.included.thrift_metadata
+import apache.thrift.fixtures.types.included.thrift_metadata as _fbthrift__apache__thrift__fixtures__types__included__thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs

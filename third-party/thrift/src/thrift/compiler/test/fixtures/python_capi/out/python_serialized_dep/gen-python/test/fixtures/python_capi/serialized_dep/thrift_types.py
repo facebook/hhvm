@@ -511,34 +511,34 @@ class MarshalError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_MarshalError = MarshalError
 
 # This unfortunately has to be down here to prevent circular imports
-import test.fixtures.python_capi.serialized_dep.thrift_metadata
+import test.fixtures.python_capi.serialized_dep.thrift_metadata as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_SerializedStruct():
-    return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_SerializedStruct()
+    return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_struct_SerializedStruct()
 
 
 def _fbthrift_metadata__struct_SerializedUnion():
-    return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_SerializedUnion()
+    return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_struct_SerializedUnion()
 
 
 def _fbthrift_metadata__exception_SerializedError():
-    return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_exception_SerializedError()
+    return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_exception_SerializedError()
 
 
 def _fbthrift_metadata__struct_MarshalStruct():
-    return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_MarshalStruct()
+    return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_struct_MarshalStruct()
 
 
 def _fbthrift_metadata__struct_MarshalUnion():
-    return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_MarshalUnion()
+    return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_struct_MarshalUnion()
 
 
 def _fbthrift_metadata__exception_MarshalError():
-    return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_exception_MarshalError()
+    return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_exception_MarshalError()
 
 
 _fbthrift_all_structs = [

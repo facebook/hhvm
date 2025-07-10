@@ -617,38 +617,38 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.IndirectionC, IndirectionC)
 _fbthrift_IndirectionC = IndirectionC
 
 # This unfortunately has to be down here to prevent circular imports
-import test.fixtures.python_capi.containers.thrift_metadata
+import test.fixtures.python_capi.containers.thrift_metadata as _fbthrift__test__fixtures__python_capi__containers__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_TemplateLists():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_TemplateLists()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_TemplateLists()
 
 
 def _fbthrift_metadata__struct_TemplateSets():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_TemplateSets()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_TemplateSets()
 
 
 def _fbthrift_metadata__struct_TemplateMaps():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_TemplateMaps()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_TemplateMaps()
 
 
 def _fbthrift_metadata__struct_TWrapped():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_TWrapped()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_TWrapped()
 
 
 def _fbthrift_metadata__struct_IndirectionA():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_IndirectionA()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_IndirectionA()
 
 
 def _fbthrift_metadata__struct_IndirectionB():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_IndirectionB()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_IndirectionB()
 
 
 def _fbthrift_metadata__struct_IndirectionC():
-    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_IndirectionC()
+    return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_IndirectionC()
 
 
 _fbthrift_all_structs = [

@@ -209,7 +209,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{> structs/unadapted_name}}
 
 {{#program:generate_immutable_types}}
 # This unfortunately has to be down here to prevent circular imports
-import {{program:module_path}}.thrift_metadata
+import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
 {{/program:generate_immutable_types}}
 
 {{!
@@ -229,7 +229,7 @@ _fbthrift_all_enums = [
 
 
 def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():
-    return {{program:module_path}}.thrift_metadata.gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
+    return {{program:module_mangle}}__thrift_metadata.gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
 {{/program:structs}}{{!
 }}{{/program:generate_immutable_types}}
 

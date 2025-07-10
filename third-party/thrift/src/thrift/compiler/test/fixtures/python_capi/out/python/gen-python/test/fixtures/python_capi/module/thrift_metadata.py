@@ -14,16 +14,16 @@ import test.fixtures.python_capi.module.thrift_enums
 
 
 import apache.thrift.type.id.thrift_enums
-import apache.thrift.type.id.thrift_metadata
+import apache.thrift.type.id.thrift_metadata as _fbthrift__apache__thrift__type__id__thrift_metadata
 
 import apache.thrift.type.schema.thrift_enums
-import apache.thrift.type.schema.thrift_metadata
+import apache.thrift.type.schema.thrift_metadata as _fbthrift__apache__thrift__type__schema__thrift_metadata
 
 import test.fixtures.python_capi.serialized_dep.thrift_enums
-import test.fixtures.python_capi.serialized_dep.thrift_metadata
+import test.fixtures.python_capi.serialized_dep.thrift_metadata as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata
 
 import test.fixtures.python_capi.thrift_dep.thrift_enums
-import test.fixtures.python_capi.thrift_dep.thrift_metadata
+import test.fixtures.python_capi.thrift_dep.thrift_metadata as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs

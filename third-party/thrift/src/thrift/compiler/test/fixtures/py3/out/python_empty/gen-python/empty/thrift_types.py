@@ -17,7 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 # This unfortunately has to be down here to prevent circular imports
-import empty.thrift_metadata
+import empty.thrift_metadata as _fbthrift__empty__thrift_metadata
 
 _fbthrift_all_enums = [
 ]

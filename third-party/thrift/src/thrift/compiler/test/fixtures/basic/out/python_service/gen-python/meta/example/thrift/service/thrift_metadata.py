@@ -14,7 +14,7 @@ import meta.example.thrift.service.thrift_enums
 
 
 import test.fixtures.basic.module.thrift_enums
-import test.fixtures.basic.module.thrift_metadata
+import test.fixtures.basic.module.thrift_metadata as _fbthrift__test__fixtures__basic__module__thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -195,7 +195,7 @@ def _fbthrift_gen_metadata_service_ExtendedMyService(metadata_struct: _fbthrift_
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, parent="module.MyService", structured_annotations=[
     ])
     new_struct = metadata_struct(services=service_dict)
-    new_struct = test.fixtures.basic.module.thrift_metadata._fbthrift_gen_metadata_service_MyService(new_struct)
+    new_struct = _fbthrift__test__fixtures__basic__module__thrift_metadata._fbthrift_gen_metadata_service_MyService(new_struct)
     
      # id
      # data

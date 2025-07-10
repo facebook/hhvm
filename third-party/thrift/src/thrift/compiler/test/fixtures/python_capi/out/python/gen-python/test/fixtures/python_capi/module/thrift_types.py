@@ -1583,7 +1583,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SomeBinary, SomeBinary)
 _fbthrift_SomeBinary = SomeBinary
 
 # This unfortunately has to be down here to prevent circular imports
-import test.fixtures.python_capi.module.thrift_metadata
+import test.fixtures.python_capi.module.thrift_metadata as _fbthrift__test__fixtures__python_capi__module__thrift_metadata
 
 _fbthrift_all_enums = [
     MyEnum,
@@ -1592,59 +1592,59 @@ _fbthrift_all_enums = [
 
 
 def _fbthrift_metadata__struct_MyStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_MyStruct()
 
 
 def _fbthrift_metadata__struct_MyDataItem():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItem()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_MyDataItem()
 
 
 def _fbthrift_metadata__struct_TransitiveDoubler():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_TransitiveDoubler()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_TransitiveDoubler()
 
 
 def _fbthrift_metadata__struct_DoubledPair():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_DoubledPair()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_DoubledPair()
 
 
 def _fbthrift_metadata__struct_StringPair():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_StringPair()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_StringPair()
 
 
 def _fbthrift_metadata__struct_EmptyStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_EmptyStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_EmptyStruct()
 
 
 def _fbthrift_metadata__struct_PrimitiveStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_PrimitiveStruct()
 
 
 def _fbthrift_metadata__struct_AdaptedFields():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_AdaptedFields()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_AdaptedFields()
 
 
 def _fbthrift_metadata__struct_ListStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_ListStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_ListStruct()
 
 
 def _fbthrift_metadata__struct_SetStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_SetStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_SetStruct()
 
 
 def _fbthrift_metadata__struct_MapStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MapStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_MapStruct()
 
 
 def _fbthrift_metadata__struct_ComposeStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_ComposeStruct()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_ComposeStruct()
 
 
 def _fbthrift_metadata__struct_Onion():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_Onion()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_Onion()
 
 
 def _fbthrift_metadata__struct_SomeBinary():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_SomeBinary()
+    return _fbthrift__test__fixtures__python_capi__module__thrift_metadata.gen_metadata_struct_SomeBinary()
 
 
 _fbthrift_all_structs = [

@@ -219,22 +219,22 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.InvariantTypes, InvariantTyp
 _fbthrift_InvariantTypes = InvariantTypes
 
 # This unfortunately has to be down here to prevent circular imports
-import invariant.thrift_metadata
+import invariant.thrift_metadata as _fbthrift__invariant__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_StructForInvariantTypes():
-    return invariant.thrift_metadata.gen_metadata_struct_StructForInvariantTypes()
+    return _fbthrift__invariant__thrift_metadata.gen_metadata_struct_StructForInvariantTypes()
 
 
 def _fbthrift_metadata__struct_UnionForInvariantTypes():
-    return invariant.thrift_metadata.gen_metadata_struct_UnionForInvariantTypes()
+    return _fbthrift__invariant__thrift_metadata.gen_metadata_struct_UnionForInvariantTypes()
 
 
 def _fbthrift_metadata__struct_InvariantTypes():
-    return invariant.thrift_metadata.gen_metadata_struct_InvariantTypes()
+    return _fbthrift__invariant__thrift_metadata.gen_metadata_struct_InvariantTypes()
 
 
 _fbthrift_all_structs = [

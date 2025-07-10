@@ -14,7 +14,7 @@ import b.thrift_enums
 
 
 import c.thrift_enums
-import c.thrift_metadata
+import c.thrift_metadata as _fbthrift__c__thrift_metadata
 
 
 

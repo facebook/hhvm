@@ -20,7 +20,7 @@ from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Proto
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import empty.thrift_mutable_types as _fbthrift__empty__thrift_mutable_types
-import empty.thrift_metadata
+import empty.thrift_metadata as _fbthrift__empty__thrift_metadata
 
 class NullServiceInterface(
     ServiceInterface,
@@ -42,10 +42,10 @@ class NullServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return empty.thrift_metadata.gen_metadata_service_NullService()
+        return _fbthrift__empty__thrift_metadata.gen_metadata_service_NullService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return empty.thrift_metadata._fbthrift_metadata_service_response_NullService()
+        return _fbthrift__empty__thrift_metadata._fbthrift_metadata_service_response_NullService()
 
 

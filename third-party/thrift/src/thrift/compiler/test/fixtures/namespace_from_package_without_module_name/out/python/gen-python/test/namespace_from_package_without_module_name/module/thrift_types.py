@@ -76,14 +76,14 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Foo, Foo)
 _fbthrift_Foo = Foo
 
 # This unfortunately has to be down here to prevent circular imports
-import test.namespace_from_package_without_module_name.module.thrift_metadata
+import test.namespace_from_package_without_module_name.module.thrift_metadata as _fbthrift__test__namespace_from_package_without_module_name__module__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_Foo():
-    return test.namespace_from_package_without_module_name.module.thrift_metadata.gen_metadata_struct_Foo()
+    return _fbthrift__test__namespace_from_package_without_module_name__module__thrift_metadata.gen_metadata_struct_Foo()
 
 
 _fbthrift_all_structs = [

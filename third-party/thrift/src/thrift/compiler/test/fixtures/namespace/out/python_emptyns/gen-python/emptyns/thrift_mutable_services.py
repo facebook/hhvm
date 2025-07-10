@@ -20,7 +20,7 @@ from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Proto
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import emptyns.thrift_mutable_types as _fbthrift__emptyns__thrift_mutable_types
-import emptyns.thrift_metadata
+import emptyns.thrift_metadata as _fbthrift__emptyns__thrift_metadata
 
 class TestServiceInterface(
     ServiceInterface,
@@ -43,11 +43,11 @@ class TestServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return emptyns.thrift_metadata.gen_metadata_service_TestService()
+        return _fbthrift__emptyns__thrift_metadata.gen_metadata_service_TestService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return emptyns.thrift_metadata._fbthrift_metadata_service_response_TestService()
+        return _fbthrift__emptyns__thrift_metadata._fbthrift_metadata_service_response_TestService()
 
 
 

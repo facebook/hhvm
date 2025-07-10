@@ -14,7 +14,7 @@ import module.thrift_enums
 
 
 import includes.thrift_enums
-import includes.thrift_metadata
+import includes.thrift_metadata as _fbthrift__includes__thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs

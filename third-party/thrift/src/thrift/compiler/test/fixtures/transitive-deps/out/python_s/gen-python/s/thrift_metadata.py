@@ -14,10 +14,10 @@ import s.thrift_enums
 
 
 import b.thrift_enums
-import b.thrift_metadata
+import b.thrift_metadata as _fbthrift__b__thrift_metadata
 
 import c.thrift_enums
-import c.thrift_metadata
+import c.thrift_metadata as _fbthrift__c__thrift_metadata
 
 
 def gen_metadata_service_TestService() -> _fbthrift_metadata.ThriftMetadata:

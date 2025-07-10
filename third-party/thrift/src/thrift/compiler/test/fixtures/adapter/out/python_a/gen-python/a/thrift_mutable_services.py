@@ -20,7 +20,7 @@ from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Proto
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import a.thrift_mutable_types as _fbthrift__a__thrift_mutable_types
-import a.thrift_metadata
+import a.thrift_metadata as _fbthrift__a__thrift_metadata
 import b.thrift_mutable_types as _fbthrift__b__thrift_mutable_types
 import c.thrift_mutable_types as _fbthrift__c__thrift_mutable_types
 import three
@@ -52,11 +52,11 @@ class MyServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return a.thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__a__thrift_metadata.gen_metadata_service_MyService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return a.thrift_metadata._fbthrift_metadata_service_response_MyService()
+        return _fbthrift__a__thrift_metadata._fbthrift_metadata_service_response_MyService()
 
 
 

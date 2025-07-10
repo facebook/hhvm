@@ -14,7 +14,7 @@ import test.fixtures.interactions.module.thrift_enums
 
 
 import test.fixtures.another_interactions.shared.thrift_enums
-import test.fixtures.another_interactions.shared.thrift_metadata
+import test.fixtures.another_interactions.shared.thrift_metadata as _fbthrift__test__fixtures__another_interactions__shared__thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs

@@ -98,14 +98,14 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Fields, Fields)
 _fbthrift_Fields = Fields
 
 # This unfortunately has to be down here to prevent circular imports
-import foo.thrift_metadata
+import foo.thrift_metadata as _fbthrift__foo__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_Fields():
-    return foo.thrift_metadata.gen_metadata_struct_Fields()
+    return _fbthrift__foo__thrift_metadata.gen_metadata_struct_Fields()
 
 
 _fbthrift_all_structs = [

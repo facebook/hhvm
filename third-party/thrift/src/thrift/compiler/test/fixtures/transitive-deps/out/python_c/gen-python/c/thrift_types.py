@@ -125,18 +125,18 @@ class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_E = E
 
 # This unfortunately has to be down here to prevent circular imports
-import c.thrift_metadata
+import c.thrift_metadata as _fbthrift__c__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_C():
-    return c.thrift_metadata.gen_metadata_struct_C()
+    return _fbthrift__c__thrift_metadata.gen_metadata_struct_C()
 
 
 def _fbthrift_metadata__exception_E():
-    return c.thrift_metadata.gen_metadata_exception_E()
+    return _fbthrift__c__thrift_metadata.gen_metadata_exception_E()
 
 
 _fbthrift_all_structs = [

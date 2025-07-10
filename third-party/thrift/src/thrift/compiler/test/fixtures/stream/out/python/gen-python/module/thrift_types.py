@@ -164,22 +164,22 @@ class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_FooEx2 = FooEx2
 
 # This unfortunately has to be down here to prevent circular imports
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__exception_FooStreamEx():
-    return module.thrift_metadata.gen_metadata_exception_FooStreamEx()
+    return _fbthrift__module__thrift_metadata.gen_metadata_exception_FooStreamEx()
 
 
 def _fbthrift_metadata__exception_FooEx():
-    return module.thrift_metadata.gen_metadata_exception_FooEx()
+    return _fbthrift__module__thrift_metadata.gen_metadata_exception_FooEx()
 
 
 def _fbthrift_metadata__exception_FooEx2():
-    return module.thrift_metadata.gen_metadata_exception_FooEx2()
+    return _fbthrift__module__thrift_metadata.gen_metadata_exception_FooEx2()
 
 
 _fbthrift_all_structs = [

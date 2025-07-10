@@ -691,7 +691,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.union2, union2)
 _fbthrift_union2 = union2
 
 # This unfortunately has to be down here to prevent circular imports
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 _fbthrift_all_enums = [
     EmptyEnum,
@@ -701,35 +701,35 @@ _fbthrift_all_enums = [
 
 
 def _fbthrift_metadata__struct_Internship():
-    return module.thrift_metadata.gen_metadata_struct_Internship()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_Internship()
 
 
 def _fbthrift_metadata__struct_Range():
-    return module.thrift_metadata.gen_metadata_struct_Range()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_Range()
 
 
 def _fbthrift_metadata__struct_struct1():
-    return module.thrift_metadata.gen_metadata_struct_struct1()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_struct1()
 
 
 def _fbthrift_metadata__struct_struct2():
-    return module.thrift_metadata.gen_metadata_struct_struct2()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_struct2()
 
 
 def _fbthrift_metadata__struct_struct3():
-    return module.thrift_metadata.gen_metadata_struct_struct3()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_struct3()
 
 
 def _fbthrift_metadata__struct_struct4():
-    return module.thrift_metadata.gen_metadata_struct_struct4()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_struct4()
 
 
 def _fbthrift_metadata__struct_union1():
-    return module.thrift_metadata.gen_metadata_struct_union1()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_union1()
 
 
 def _fbthrift_metadata__struct_union2():
-    return module.thrift_metadata.gen_metadata_struct_union2()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_union2()
 
 
 _fbthrift_all_structs = [

@@ -14,10 +14,10 @@ import a.thrift_enums
 
 
 import b.thrift_enums
-import b.thrift_metadata
+import b.thrift_metadata as _fbthrift__b__thrift_metadata
 
 import c.thrift_enums
-import c.thrift_metadata
+import c.thrift_metadata as _fbthrift__c__thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs

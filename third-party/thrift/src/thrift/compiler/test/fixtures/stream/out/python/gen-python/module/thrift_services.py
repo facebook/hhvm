@@ -19,7 +19,7 @@ from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import module.thrift_types as _fbthrift__module__thrift_types
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 class PubSubStreamingServiceInterface(
     ServiceInterface,
@@ -50,11 +50,11 @@ class PubSubStreamingServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_PubSubStreamingService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_PubSubStreamingService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return module.thrift_metadata._fbthrift_metadata_service_response_PubSubStreamingService()
+        return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_PubSubStreamingService()
 
 
 

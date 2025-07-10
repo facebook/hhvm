@@ -20,7 +20,7 @@ import c.thrift_types as _fbthrift__c__thrift_types
 
 
 # This unfortunately has to be down here to prevent circular imports
-import b.thrift_metadata
+import b.thrift_metadata as _fbthrift__b__thrift_metadata
 
 _fbthrift_all_enums = [
 ]

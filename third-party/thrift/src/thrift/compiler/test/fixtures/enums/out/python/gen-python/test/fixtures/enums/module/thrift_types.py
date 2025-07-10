@@ -218,7 +218,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 # This unfortunately has to be down here to prevent circular imports
-import test.fixtures.enums.module.thrift_metadata
+import test.fixtures.enums.module.thrift_metadata as _fbthrift__test__fixtures__enums__module__thrift_metadata
 
 _fbthrift_all_enums = [
     Metasyntactic,
@@ -232,11 +232,11 @@ _fbthrift_all_enums = [
 
 
 def _fbthrift_metadata__struct_SomeStruct():
-    return test.fixtures.enums.module.thrift_metadata.gen_metadata_struct_SomeStruct()
+    return _fbthrift__test__fixtures__enums__module__thrift_metadata.gen_metadata_struct_SomeStruct()
 
 
 def _fbthrift_metadata__struct_MyStruct():
-    return test.fixtures.enums.module.thrift_metadata.gen_metadata_struct_MyStruct()
+    return _fbthrift__test__fixtures__enums__module__thrift_metadata.gen_metadata_struct_MyStruct()
 
 
 _fbthrift_all_structs = [

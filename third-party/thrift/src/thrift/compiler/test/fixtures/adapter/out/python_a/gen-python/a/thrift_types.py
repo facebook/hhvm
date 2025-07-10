@@ -107,14 +107,14 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 # This unfortunately has to be down here to prevent circular imports
-import a.thrift_metadata
+import a.thrift_metadata as _fbthrift__a__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_MyStruct():
-    return a.thrift_metadata.gen_metadata_struct_MyStruct()
+    return _fbthrift__a__thrift_metadata.gen_metadata_struct_MyStruct()
 
 
 _fbthrift_all_structs = [

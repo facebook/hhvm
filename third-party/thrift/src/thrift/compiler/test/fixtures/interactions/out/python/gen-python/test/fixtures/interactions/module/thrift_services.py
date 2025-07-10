@@ -19,7 +19,7 @@ from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.interactions.module.thrift_types as _fbthrift__test__fixtures__interactions__module__thrift_types
-import test.fixtures.interactions.module.thrift_metadata
+import test.fixtures.interactions.module.thrift_metadata as _fbthrift__test__fixtures__interactions__module__thrift_metadata
 import test.fixtures.another_interactions.shared.thrift_services
 import test.fixtures.another_interactions.shared.thrift_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_types
 
@@ -47,11 +47,11 @@ class MyServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_MyService()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_MyService()
 
 
 
@@ -135,11 +135,11 @@ class FactoriesInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_Factories()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_Factories()
 
 
 
@@ -220,11 +220,11 @@ class PerformInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_Perform()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_Perform()
 
 
 
@@ -260,11 +260,11 @@ class InteractWithSharedInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_InteractWithShared()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_InteractWithShared()
 
 
 
@@ -300,11 +300,11 @@ class BoxServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_BoxService()
+        return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_BoxService()
 
 
 

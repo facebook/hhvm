@@ -628,42 +628,42 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.NonCopyableUnion, NonCopyabl
 _fbthrift_NonCopyableUnion = NonCopyableUnion
 
 # This unfortunately has to be down here to prevent circular imports
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 _fbthrift_all_enums = [
 ]
 
 
 def _fbthrift_metadata__struct_ComplexUnion():
-    return module.thrift_metadata.gen_metadata_struct_ComplexUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_ComplexUnion()
 
 
 def _fbthrift_metadata__struct_ListUnion():
-    return module.thrift_metadata.gen_metadata_struct_ListUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_ListUnion()
 
 
 def _fbthrift_metadata__struct_DataUnion():
-    return module.thrift_metadata.gen_metadata_struct_DataUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_DataUnion()
 
 
 def _fbthrift_metadata__struct_Val():
-    return module.thrift_metadata.gen_metadata_struct_Val()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_Val()
 
 
 def _fbthrift_metadata__struct_ValUnion():
-    return module.thrift_metadata.gen_metadata_struct_ValUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_ValUnion()
 
 
 def _fbthrift_metadata__struct_VirtualComplexUnion():
-    return module.thrift_metadata.gen_metadata_struct_VirtualComplexUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_VirtualComplexUnion()
 
 
 def _fbthrift_metadata__struct_NonCopyableStruct():
-    return module.thrift_metadata.gen_metadata_struct_NonCopyableStruct()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_NonCopyableStruct()
 
 
 def _fbthrift_metadata__struct_NonCopyableUnion():
-    return module.thrift_metadata.gen_metadata_struct_NonCopyableUnion()
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_NonCopyableUnion()
 
 
 _fbthrift_all_structs = [

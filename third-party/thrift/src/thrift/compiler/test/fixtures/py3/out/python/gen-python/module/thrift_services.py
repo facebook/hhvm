@@ -21,7 +21,7 @@ from fbcode.thrift.python.serializer import serialize_iobuf, deserialize, Protoc
 from fbcode.thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import module.thrift_types as _fbthrift__module__thrift_types
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 class SimpleServiceInterface(
     ServiceInterface,
@@ -85,11 +85,11 @@ class SimpleServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_SimpleService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return module.thrift_metadata._fbthrift_metadata_service_response_SimpleService()
+        return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_SimpleService()
 
 
 
@@ -663,11 +663,11 @@ SimpleServiceInterface,
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_DerivedService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return module.thrift_metadata._fbthrift_metadata_service_response_DerivedService()
+        return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_DerivedService()
 
 
 
@@ -703,11 +703,11 @@ DerivedServiceInterface,
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return module.thrift_metadata.gen_metadata_service_RederivedService()
+        return _fbthrift__module__thrift_metadata.gen_metadata_service_RederivedService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return module.thrift_metadata._fbthrift_metadata_service_response_RederivedService()
+        return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_RederivedService()
 
 
 

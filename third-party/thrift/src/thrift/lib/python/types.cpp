@@ -103,64 +103,33 @@ bool requiresDeepCopy(const detail::TypeInfo& typeInfo) {
 
 /**
  * Returns a *new* owned reference to a PyObject* if generated.
- * If a type is uncached, returns std::nullopt. See next function
- * for documentation of default values.
- *
- * The caller is responsible for:
- *   1. checking non-null
- *   2. taking ownership (via UniquePyObjectPtr)
- *
- * As a general rule, we cache structs, but not immutable singletons
- * like 0, b"", nil-ary tuple (), etc.
- *
- * As a special case, IOBuf should never be cached because we can't
- * guarantee that it's immutable, so it's always generated fresh.
+ * If a type is uncached, returns std::nullopt.
+
+ * This function should be used for types that are *never* cached because they
+ * are mutatable from user code. In immutable Python, this only applies to
+ * IOBuf only.
  */
-template <PythonVariant Variant>
 std::optional<PyObject*> genUncachedDefaultValue(
     const detail::TypeInfo& typeInfo) {
-  switch (typeInfo.type) {
-    case protocol::TType::T_BOOL:
-      Py_IncRef(Py_False);
-      return Py_False;
-    case protocol::TType::T_BYTE:
-    case protocol::TType::T_I16:
-    case protocol::TType::T_I32:
-    case protocol::TType::T_I64:
-      return PyLong_FromLong(0);
-    case protocol::TType::T_DOUBLE:
-    case protocol::TType::T_FLOAT:
-      // The default 0.0 is not a singleton
+  if (typeInfo.type != protocol::TType::T_STRING) {
+    return std::nullopt;
+  }
+  switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
+    case detail::StringFieldType::String:
+    case detail::StringFieldType::StringView:
+    case detail::StringFieldType::Binary:
+    case detail::StringFieldType::BinaryStringView:
       return std::nullopt;
-    case protocol::TType::T_STRING:
-      switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
-        case detail::StringFieldType::String:
-        case detail::StringFieldType::StringView:
-        case detail::StringFieldType::Binary:
-        case detail::StringFieldType::BinaryStringView:
-          return PyBytes_FromString("");
-        case detail::StringFieldType::IOBuf:
-        case detail::StringFieldType::IOBufPtr:
-        case detail::StringFieldType::IOBufObj:
-          // IOBuf should ***never*** be cached because not immutable
-          return create_IOBuf(folly::IOBuf::create(0));
+    case detail::StringFieldType::IOBuf:
+    case detail::StringFieldType::IOBufPtr:
+    case detail::StringFieldType::IOBufObj: {
+      // IOBuf should ***never*** be cached because not immutable
+      PyObject* ptr = create_IOBuf(folly::IOBuf::create(0));
+      if (ptr == nullptr) {
+        THRIFT_PY3_CHECK_ERROR();
       }
-    // empty tuple cheaply initializes to empty singletons.
-    case protocol::TType::T_LIST:
-      return Variant == PythonVariant::Mutable
-          ? std::nullopt
-          : std::make_optional<PyObject*>(PyTuple_New(0));
-    case protocol::TType::T_MAP:
-      return Variant == PythonVariant::Mutable
-          ? std::nullopt
-          : std::make_optional<PyObject*>(PyTuple_New(0));
-    case protocol::TType::T_SET:
-      // empty frozenset used to be a singleton, but not guaranteed
-    case protocol::TType::T_STRUCT:
-      // presumably there's actually a benefit to caching structs
-      return std::nullopt;
-    default:
-      LOG(FATAL) << "invalid typeInfo TType " << typeInfo.type;
+      return ptr;
+    }
   }
 }
 
@@ -189,13 +158,9 @@ UniquePyObjectPtr getDefaultValueForImmutableField(
     return UniquePyObjectPtr(value);
   }
 
-  // 2. Most types aren't worth caching, so check if one of them
-  auto maybeDefault =
-      genUncachedDefaultValue<PythonVariant::Immutable>(*typeInfo);
-  if (maybeDefault) {
-    if (*maybeDefault == nullptr) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
+  // 2. Check if un-cacheable type (IOBuf)
+  auto maybeDefault = genUncachedDefaultValue(*typeInfo);
+  if (UNLIKELY(maybeDefault.has_value())) {
     return UniquePyObjectPtr(*maybeDefault);
   }
 

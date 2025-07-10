@@ -70,11 +70,7 @@ mock_mc_server_dual_LDADD = \
 	-lrpcmetadata \
 	-lasync \
 	-lconcurrency \
-	-lthrift-core \
-	-lfmt \
-	-lfizz \
-	-lwangle \
-	-lfolly
+	-lthrift-core
 
 libtest_util_a_SOURCES = \
   ClientSocket.cpp \
@@ -114,8 +110,4 @@ mcrouter_network_test_LDADD = \
   -lthriftcpp2 \
   -lthriftprotocol \
   -lrpcmetadata \
-  -ltransport \
-  -lwangle \
-  -lfizz \
-  -lsodium \
-  -lfolly
+  -ltransport

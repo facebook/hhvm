@@ -132,20 +132,18 @@ AC_CHECK_LIB([double-conversion],[ceil],[],[AC_MSG_ERROR(
              [Please install double-conversion library])])
 AC_CHECK_LIB([dl], [dlopen], [])
 AC_CHECK_LIB([iberty], [cplus_demangle_v3_callback], [])
+AC_CHECK_LIB([fmt],[getenv],[],[AC_MSG_ERROR(
+             [Please install fmtlib])])
 AC_CHECK_LIB([folly],[getenv],[],[AC_MSG_ERROR(
              [Please install the folly library])])
 AC_CHECK_LIB([sodium],[sodium_init],[],[AC_MSG_ERROR(
              [Please install the libsodium library])])
 AC_CHECK_LIB([fizz],[getenv],[],[AC_MSG_ERROR(
              [Please install the fizz library])])
+AC_CHECK_LIB([wangle], [getenv], [], [AC_MSG_ERROR(
+             [Please install the wangle library])])
 AC_CHECK_HEADER([folly/Likely.h], [], [AC_MSG_ERROR(
                 [Could not find folly, please download from https://github.com/facebook/folly])], [])
-
-# Commenting out the wangle dependency from here, because there is a tricky
-# inter-library dependency that resolves with the right order of LDFLAGS, and
-# this dependency here messes the order.
-#AC_CHECK_LIB([wangle], [getenv], [], [AC_MSG_ERROR(
-#             [Please install the wangle library])])
 
 PKG_CHECK_MODULES([GTEST], [gtest], [], [
   # gtest-devel shipped by CentOS doesn't include a .pc file, so let's fallback

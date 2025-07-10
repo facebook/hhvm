@@ -26,7 +26,6 @@ sudo apt-get install -y \
     libbz2-dev \
     libdouble-conversion-dev \
     libevent-dev \
-    libfast-float-dev \
     libgflags-dev \
     libgoogle-glog-dev \
     libgmock-dev \

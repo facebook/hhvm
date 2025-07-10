@@ -53,6 +53,8 @@ gen-cpp2/MemcacheAsyncClient.h: gen-cpp2/MemcacheService_constants.cpp
 gen-cpp2/MemcacheService_constants.cpp: gen-cpp2/MemcacheService_constants.h
 gen-cpp2/MemcacheService_constants.h: gen-cpp2/MemcacheService_types.cpp
 gen-cpp2/MemcacheService_types.cpp: gen-cpp2/MemcacheService_types.h
+gen-cpp2/MemcacheService_types_compact.cpp: gen-cpp2/MemcacheService_types.h
+gen-cpp2/MemcacheService_types_binary.cpp: gen-cpp2/MemcacheService_types.h
 gen-cpp2/MemcacheService_types.h: gen-cpp2/MemcacheService_types.tcc
 gen-cpp2/MemcacheService_types.tcc: gen-cpp2/MemcacheService_data.cpp
 gen-cpp2/MemcacheService_data.cpp: gen-cpp2/MemcacheService_data.h

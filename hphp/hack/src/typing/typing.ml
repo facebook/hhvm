@@ -3118,6 +3118,17 @@ end = struct
         end
         | None ->
           let (env, ty) = Env.fresh_type_reason env use_pos r in
+          let (env, ty_err_opt) =
+            if do_pessimise_builtin then
+              SubType.sub_type
+                env
+                ty
+                (MakeType.supportdyn_mixed (get_reason ty))
+                (Some (Typing_error.Reasons_callback.unify_error_at p))
+            else
+              (env, None)
+          in
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
           (env, None, ty)
       in
       (* Actually type the elements, given the expected element type *)

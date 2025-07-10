@@ -1,0 +1,6 @@
+ERROR: File "anon17.php", line 8, characters 24-29:
+Invalid argument (Typing[4110])
+  File "anon17.php", line 3, characters 51-56:
+  Expected `string`
+  File "anon17.php", line 6, characters 40-40:
+  But got `int`

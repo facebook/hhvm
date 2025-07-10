@@ -20,7 +20,6 @@
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
-#include <folly/Format.h>
 #include <folly/String.h>
 
 using fizz::DefaultCertificateVerifier;

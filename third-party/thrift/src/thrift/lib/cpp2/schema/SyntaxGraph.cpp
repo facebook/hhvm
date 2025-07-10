@@ -21,7 +21,6 @@
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
 
-#include <folly/container/Array.h>
 #include <folly/lang/SafeAssert.h>
 
 #include <fmt/core.h>
@@ -678,6 +677,8 @@ void SyntaxGraph::printTo(
 
 namespace {
 class TypeSystemFacade final : public type_system::TypeSystem {
+  // Thrift files (and therefore SyntaxGraph) cannot define opaque alias types.
+  // Therefore, they are not necessary for the TypeSystem for SyntaxGraph.
   using TSDefinition = std::variant<
       type_system::StructNode,
       type_system::UnionNode,
@@ -885,8 +886,9 @@ class TypeSystemFacade final : public type_system::TypeSystem {
   }
 
   type_system::TypeRef convertType(const TypeRef& type) {
+    using Result = type_system::TypeRef;
     return type.trueType().visit(
-        [](const Primitive& primitive) {
+        [](const Primitive& primitive) -> Result {
           switch (primitive) {
             case Primitive::BOOL:
               return type_system::TypeRef{type_system::TypeRef::Bool{}};
@@ -908,38 +910,36 @@ class TypeSystemFacade final : public type_system::TypeSystem {
               return type_system::TypeRef{type_system::TypeRef::Binary{}};
           }
         },
-        [&](const StructNode& s) {
+        [&](const StructNode& s) -> Result {
           return type_system::TypeRef{
               std::get<type_system::StructNode>(cache_.at(&s.definition()))};
         },
-        [&](const UnionNode& u) {
+        [&](const UnionNode& u) -> Result {
           return type_system::TypeRef{
               std::get<type_system::UnionNode>(cache_.at(&u.definition()))};
         },
-        [&](const ExceptionNode&) {
+        [&](const ExceptionNode&) -> Result {
           folly::throw_exception<std::runtime_error>(
               "Exceptions aren't supported by TypeSystem");
-          return type_system::TypeRef(type_system::TypeRef::Bool{});
         },
-        [&](const EnumNode& e) {
+        [&](const EnumNode& e) -> Result {
           return type_system::TypeRef{
               std::get<type_system::EnumNode>(cache_.at(&e.definition()))};
         },
-        [&](const TypedefNode&) {
+        [&](const TypedefNode&) -> Result {
           folly::throw_exception<std::logic_error>(
               "Typedefs should have been resolved by trueType call");
-          return type_system::TypeRef(type_system::TypeRef::Bool{});
         },
-        [&](const List& l) {
+        [&](const List& l) -> Result {
           return type_system::TypeRef{
-              type_system::detail::ListTypeRef{convertType(l.elementType())}};
+              type_system::TypeRef::List{convertType(l.elementType())}};
         },
-        [&](const Set& s) {
+        [&](const Set& s) -> Result {
           return type_system::TypeRef{
-              type_system::detail::SetTypeRef{convertType(s.elementType())}};
+              type_system::TypeRef::Set{convertType(s.elementType())}};
         },
-        [&](const Map& m) {
-          return type_system::TypeRef{type_system::detail::MapTypeRef{
+        [&](const Map& m) -> Result {
+          return type_system::TypeRef{type_system::TypeRef::Map{
               convertType(m.keyType()), convertType(m.valueType())}};
         });
   }

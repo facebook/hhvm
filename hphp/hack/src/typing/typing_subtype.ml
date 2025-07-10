@@ -6311,6 +6311,30 @@ end = struct
       let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
       is_container tk tv
+    | (r, Tprim Tnull) ->
+      let pos = get_pos ty_sub in
+      if can_index.ci_lhs_of_null_coalesce then
+        simplify_default
+          ~subtype_env
+          (MakeType.null (Reason.idx_string_from_decl pos))
+          can_index.ci_val
+          env
+      else
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Null_container
+                      {
+                        pos = can_index.ci_expr_pos;
+                        null_witness =
+                          lazy
+                            (Reason.to_string
+                               "This is what makes me believe it can be `null`"
+                               r);
+                      }))
+          env
     | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env

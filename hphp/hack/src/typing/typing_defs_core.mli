@@ -655,6 +655,7 @@ type can_index = {
   ci_key: locl_ty;
   ci_shape: can_index_shape;
   ci_val: locl_ty;
+  ci_lhs_of_null_coalesce: bool;
   ci_expr_pos: Pos.t;
   ci_index_pos: Pos.t;
 }

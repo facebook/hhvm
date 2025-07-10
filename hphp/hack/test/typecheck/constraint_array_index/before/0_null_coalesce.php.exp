@@ -1,0 +1,4 @@
+ERROR: File "0_null_coalesce.php", line 3, characters 3-8:
+This is not an object of type `KeyedContainer`, this is an int (Typing[4324])
+  File "0_null_coalesce.php", line 3, characters 3-3:
+  Definition is here

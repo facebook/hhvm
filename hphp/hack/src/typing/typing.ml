@@ -3980,6 +3980,7 @@ end = struct
                           | (_, _, String s) -> StringLit s
                           | _ -> Generic);
                         ci_val = val_ty;
+                        ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
                         ci_expr_pos = p;
                         ci_index_pos = p2;
                       } )))

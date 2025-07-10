@@ -402,10 +402,28 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       (env, mk_constraint_type (r, Thas_type_member htm))
 
     method on_Tcan_index env r ci =
-      let { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } = ci in
+      let {
+        ci_key;
+        ci_shape;
+        ci_val;
+        ci_lhs_of_null_coalesce;
+        ci_expr_pos;
+        ci_index_pos;
+      } =
+        ci
+      in
       let (env, ci_key) = this#on_type env ci_key in
       let (env, ci_val) = this#on_type env ci_val in
-      let ci = { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } in
+      let ci =
+        {
+          ci_key;
+          ci_shape;
+          ci_val;
+          ci_lhs_of_null_coalesce;
+          ci_expr_pos;
+          ci_index_pos;
+        }
+      in
       (env, mk_constraint_type (r, Tcan_index ci))
 
     method on_Tcan_traverse env r ct =

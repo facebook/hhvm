@@ -7,3 +7,4 @@
 #pragma once
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesServiceAsyncClient.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/ExtendedServiceAsyncClient.h"

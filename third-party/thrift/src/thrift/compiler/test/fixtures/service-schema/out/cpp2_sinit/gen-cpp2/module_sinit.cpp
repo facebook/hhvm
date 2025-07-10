@@ -17,8 +17,8 @@ namespace facebook::thrift::test {
 void __fbthrift_static_init_CustomException();
 
 namespace module_constants {
-extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_includes();
-extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_uris();
+extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_includes();
+extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_uris();
 }
 
 namespace {
@@ -28,11 +28,11 @@ struct StaticInit {
     __fbthrift_static_init_CustomException();
 
     ::apache::thrift::BaseSchemaRegistry::get().registerSchema(
-      "_fbthrift_schema_af7deaffee96429a",
-      module_constants::_fbthrift_schema_af7deaffee96429a_includes(),
+      "_fbthrift_schema_bc0984a218954d47",
+      module_constants::_fbthrift_schema_bc0984a218954d47_includes(),
       "thrift/compiler/test/fixtures/service-schema/src/module.thrift",
-      -5801222360042945894,
-      module_constants::_fbthrift_schema_af7deaffee96429a_uris()
+      -4897237288056697529,
+      module_constants::_fbthrift_schema_bc0984a218954d47_uris()
     );
   }
 };

@@ -10,10 +10,14 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/extend_metadata.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_metadata.h"
 
 namespace facebook::thrift::test {
 class PrimitivesService;
+} // namespace facebook::thrift::test
+namespace facebook::thrift::test {
+class ExtendedService;
 } // namespace facebook::thrift::test
 
 namespace apache {
@@ -49,6 +53,18 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   static void gen_init(ThriftMetadata& metadata, ThriftService& context);
   static void gen_method_that_throws(ThriftMetadata& metadata, ThriftService& context);
   static void gen_return_void_method(ThriftMetadata& metadata, ThriftService& context);
+};
+template <>
+class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>> {
+ public:
+  static void gen(ThriftServiceMetadataResponse& response);
+ private:
+  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
+
+  template <typename T>
+  friend class ServiceMetadata;
+
+  static void gen_init(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

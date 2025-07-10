@@ -14,30 +14,8 @@
  * limitations under the License.
  */
 
-include "extend.thrift"
-include "include.thrift"
-
 package "facebook.com/thrift/test"
 
-namespace java.swift test.fixtures.service_schema
-
-enum Result {
-  OK = 0,
-  SO_SO = 1,
-  GOOD = 2,
-}
-
-exception CustomException {
-  1: string name;
-  2: Result result = Result.SO_SO;
-}
-
-service PrimitivesService {
-  i64 init(1: i64 param0, 2: i64 param1);
-  Result method_that_throws() throws (1: CustomException e);
-  void return_void_method(1: i64 id, 2: include.I i);
-}
-
-service ExtendedService extends extend.BaseService {
-  i64 init(1: i64 param0, 2: i64 param1);
+service BaseService {
+  void base_method();
 }

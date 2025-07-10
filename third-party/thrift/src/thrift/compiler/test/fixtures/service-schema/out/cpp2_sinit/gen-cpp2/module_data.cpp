@@ -33,10 +33,10 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrif
 namespace detail {
 
 ::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CustomException, false>::bundle)() =
-    &::facebook::thrift::test::module_constants::_fbthrift_schema_af7deaffee96429a_includes;
+    &::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes;
 
 ::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Result, true>::bundle)() =
-    &::facebook::thrift::test::module_constants::_fbthrift_schema_af7deaffee96429a_includes;
+    &::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes;
 
 } // namespace detail
 } // namespace apache::thrift

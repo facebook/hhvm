@@ -10,6 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/extend_types.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_types.h"
 
 namespace folly {
@@ -95,8 +96,8 @@ class ServiceHandler<::facebook::thrift::test::PrimitivesService> : public apach
 namespace detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5801222360042945894;
-  static constexpr ::std::string_view definitionKey = {"\xd4\xc6\x7f\xc7\xc9\xc1\x55\x0b\x67\xf5\x98\x2d\x63\xad\x35\x5f", 16};
+  static constexpr int64_t programId = -4897237288056697529;
+  static constexpr ::std::string_view definitionKey = {"\x8a\x6f\xcf\x1a\xc4\x7f\xef\xe9\xfc\xd0\xb5\xce\x3b\x5e\x14\xb4", 16};
 };
 }
 } // namespace apache::thrift

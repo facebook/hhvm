@@ -175,6 +175,62 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "init";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_ExtendedService_init_param0_1;
+  module_ExtendedService_init_param0_1.id() = 1;
+  module_ExtendedService_init_param0_1.name() = "param0";
+  module_ExtendedService_init_param0_1.is_optional() = false;
+  auto module_ExtendedService_init_param0_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
+  module_ExtendedService_init_param0_1_type->writeAndGenType(*module_ExtendedService_init_param0_1.type(), metadata);
+  func.arguments()->push_back(std::move(module_ExtendedService_init_param0_1));
+  ::apache::thrift::metadata::ThriftField module_ExtendedService_init_param1_2;
+  module_ExtendedService_init_param1_2.id() = 2;
+  module_ExtendedService_init_param1_2.name() = "param1";
+  module_ExtendedService_init_param1_2.is_optional() = false;
+  auto module_ExtendedService_init_param1_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
+  module_ExtendedService_init_param1_2_type->writeAndGenType(*module_ExtendedService_init_param1_2.type(), metadata);
+  func.arguments()->push_back(std::move(module_ExtendedService_init_param1_2));
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module() = *self->module();
+  context.service_info() = response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
+}
+
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_ExtendedService;
+  module_ExtendedService.name() = "module.ExtendedService";
+  module_ExtendedService.uri() = "facebook.com/thrift/test/ExtendedService";
+  static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen_init,
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, module_ExtendedService);
+  }
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  module_ExtendedService.parent() = "extend.BaseService";
+  ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::BaseService>>::genRecurse(metadata, services);
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services()->emplace("module.ExtendedService", std::move(module_ExtendedService));
+  context.service_name() = "module.ExtendedService";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name() = "module";
+  context.module() = std::move(module);
+  return &context;
+}
 } // namespace md
 } // namespace detail
 } // namespace thrift

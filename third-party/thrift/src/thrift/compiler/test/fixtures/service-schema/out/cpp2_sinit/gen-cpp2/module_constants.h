@@ -14,10 +14,10 @@ namespace facebook::thrift::test {
 /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_af7deaffee96429a();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_bc0984a218954d47();
 
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_uris();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_uris();
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

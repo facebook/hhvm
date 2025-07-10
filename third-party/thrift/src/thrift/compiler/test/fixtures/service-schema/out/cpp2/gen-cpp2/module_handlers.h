@@ -7,3 +7,4 @@
 #pragma once
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/ExtendedService.h"

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/extend_types.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_types.h"
 
 namespace apache::thrift {
@@ -309,12 +310,12 @@ unsigned long CustomException::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::CustomException, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5801222360042945894;
-  static constexpr ::std::string_view definitionKey = {"\x16\xe5\x9e\x66\x30\x81\x1e\xe2\xb7\x62\xa1\x73\x54\x41\x10\xf4", 16};
+  static constexpr int64_t programId = -4897237288056697529;
+  static constexpr ::std::string_view definitionKey = {"\x34\x87\x8d\x8a\xb8\xbf\xb0\x8e\x22\xcc\xa5\xdc\x7e\xd7\x27\x7c", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Result, true> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5801222360042945894;
-  static constexpr ::std::string_view definitionKey = {"\xba\x6b\xf3\xf4\xfa\x21\x77\x6d\x90\xac\x6b\xaa\xbc\x6d\x26\x49", 16};
+  static constexpr int64_t programId = -4897237288056697529;
+  static constexpr ::std::string_view definitionKey = {"\x90\x81\x31\x92\x8f\x71\xb3\x1a\x8d\xcb\x1a\x91\x4e\xb0\x83\xa8", 16};
 };
 } // namespace apache::thrift::detail

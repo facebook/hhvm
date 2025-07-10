@@ -2062,6 +2062,7 @@ cdef list_lt(object first, object second):
     return len(first) < len(second)
 
 
+@_cython__final
 cdef class ListTypeFactory:
     cdef object val_info
     def __init__(self, val_info):
@@ -2162,6 +2163,7 @@ tag_object_as_sequence(<PyTypeObject*>List)
 Sequence.register(List)
 
 
+@_cython__final
 cdef class SetTypeFactory:
     cdef object val_info
     def __init__(self, val_info):
@@ -2275,6 +2277,7 @@ cdef class Set(Container):
 
 pySet.register(Set)
 
+@_cython__final
 cdef class MapTypeFactory:
     cdef object key_info
     cdef object val_info

@@ -28,8 +28,8 @@ import {{program:module_path}}.thrift_enums
 {{#has_types?}}
 
 import {{included_module_path}}.thrift_enums
-import {{included_module_path}}.thrift_metadata as {{included_module_mangle}}__thrift_metadata
 {{/has_types?}}
+import {{included_module_path}}.thrift_metadata as {{included_module_mangle}}__thrift_metadata
 {{/program:include_namespaces}}
 
 {{#program:structs}}

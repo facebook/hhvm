@@ -81,7 +81,7 @@ TEST_F(ServiceSchemaTest, Programs) {
   EXPECT_EQ(programs.size(), 3);
 
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
-  EXPECT_EQ(mainProgram->definitionsByName().size(), 13);
+  EXPECT_EQ(mainProgram->definitionsByName().size(), 14);
   EXPECT_EQ(mainProgram->namespaces().size(), 1);
   EXPECT_EQ(
       mainProgram->namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
@@ -546,8 +546,12 @@ TEST_F(ServiceSchemaTest, StructuredAnnotation) {
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
       &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
-  EXPECT_EQ(annotations[0].fields().size(), 1);
+  EXPECT_EQ(annotations[0].fields().size(), 2);
   EXPECT_EQ(annotations[0].fields().at("field1").as_i64(), 3);
+  EXPECT_TRUE(annotations[0].fields().at("field2").is_map());
+  const auto& field = *annotations[0].fields().at("field2").as_map().begin();
+  EXPECT_EQ(field.first.as_string(), "field1");
+  EXPECT_EQ(field.second.as_i64(), 4);
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {

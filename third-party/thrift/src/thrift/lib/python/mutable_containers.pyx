@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cimport cython
+from cython cimport final as _cython__final
 
 from collections.abc import (
     ItemsView,
@@ -37,7 +37,7 @@ from thrift.python.types cimport (
 )
 
 
-@cython.final
+@_cython__final
 cdef class MutableList:
     """
     A mutable container used to represent a Thrift mutable list.
@@ -204,7 +204,7 @@ tag_object_as_sequence(<PyTypeObject*>MutableList)
 MutableSequence.register(MutableList)
 
 
-@cython.final
+@_cython__final
 cdef class MutableSet:
     """
     A mutable container used to represent a Thrift mutable set. It implements
@@ -487,7 +487,7 @@ cdef class MutableSet:
 
 pyMutableSet.register(MutableSet)
 
-
+@_cython__final
 cdef class ValueIterator:
     def __cinit__(self, TypeInfoBase value_typeinfo, data: Iterable):
         self._val_typeinfo = value_typeinfo
@@ -500,7 +500,7 @@ cdef class ValueIterator:
         return self
 
 
-@cython.final
+@_cython__final
 cdef class MutableMap:
     """
     A mutable container used to represent a Thrift mutable map. It implements
@@ -699,7 +699,7 @@ cdef class MutableMap:
 tag_object_as_mapping(<PyTypeObject*>MutableMap)
 MutableMapping.register(MutableMap)
 
-
+@_cython__final
 cdef class MapKeysView:
     def __cinit__(self, TypeInfoBase key_typeinfo, dict_keys):
         self._key_typeinfo = key_typeinfo
@@ -725,7 +725,7 @@ cdef class MapKeysView:
 
 KeysView.register(MapKeysView)
 
-
+@_cython__final
 cdef class MapItemsView:
     def __cinit__(self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict_items):
         self._key_typeinfo = key_typeinfo
@@ -758,7 +758,7 @@ cdef class MapItemsView:
 
 ItemsView.register(MapItemsView)
 
-
+@_cython__final
 cdef class MapItemIterator:
     def __cinit__(self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict_items):
         self._key_typeinfo = key_typeinfo
@@ -773,7 +773,7 @@ cdef class MapItemIterator:
     def __iter__(self):
         return self
 
-
+@_cython__final
 cdef class MapValuesView:
     def __cinit__(self, TypeInfoBase value_typeinfo, dict_values):
         self._val_typeinfo = value_typeinfo

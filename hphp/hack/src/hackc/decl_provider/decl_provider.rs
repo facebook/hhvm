@@ -15,8 +15,8 @@ use std::path::PathBuf;
 use arena_deserializer::ArenaDeserializer;
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
-use direct_decl_parser::Decls;
-use direct_decl_parser::ParsedFile;
+use direct_decl_parser::DeclsObr;
+use direct_decl_parser::ParsedFileObr;
 use hash::IndexMap;
 pub use memo_provider::MemoProvider;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
@@ -100,7 +100,7 @@ pub trait DeclProvider<'d>: std::fmt::Debug {
 }
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
-pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
+pub fn serialize_decls(decls: &DeclsObr<'_>) -> Result<Vec<u8>, bincode::Error> {
     let mut blob = Vec::new();
     bincode::options()
         .with_native_endian()
@@ -115,7 +115,7 @@ pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
 pub fn deserialize_decls<'a>(
     arena: &'a bumpalo::Bump,
     data: &[u8],
-) -> Result<Decls<'a>, bincode::Error> {
+) -> Result<DeclsObr<'a>, bincode::Error> {
     let (data, hash) = split_serialized_decls(data);
     debug_assert!({
         let mut digest = Sha1::new();
@@ -125,7 +125,7 @@ pub fn deserialize_decls<'a>(
     let op = bincode::options().with_native_endian();
     let mut de = bincode::de::Deserializer::from_slice(data, op);
     let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
-    Decls::deserialize(de)
+    DeclsObr::deserialize(de)
 }
 
 /// Separate the raw serialized decls from the content hash suffixed by serialize_decls().
@@ -141,7 +141,7 @@ pub fn decls_content_hash(data: &[u8]) -> &[u8] {
     split_serialized_decls(data).1
 }
 
-pub fn find_type_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<TypeDecl<'a>> {
+pub fn find_type_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<TypeDecl<'a>> {
     decls
         .types()
         .find_map(|(name, decl)| match decl {
@@ -153,21 +153,21 @@ pub fn find_type_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<TypeDecl<'a
         .ok_or(Error::NotFound)
 }
 
-pub fn find_func_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a FunDecl<'a>> {
+pub fn find_func_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<&'a FunDecl<'a>> {
     decls
         .funs()
         .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
         .ok_or(Error::NotFound)
 }
 
-pub fn find_const_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a ConstDecl<'a>> {
+pub fn find_const_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<&'a ConstDecl<'a>> {
     decls
         .consts()
         .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
         .ok_or(Error::NotFound)
 }
 
-pub fn find_module_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a ModuleDecl<'a>> {
+pub fn find_module_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<&'a ModuleDecl<'a>> {
     decls
         .modules()
         .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
@@ -176,7 +176,7 @@ pub fn find_module_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a Modul
 
 pub fn serialize_batch_decls(
     w: impl Write,
-    parsed_files: &IndexMap<PathBuf, ParsedFile<'_>>,
+    parsed_files: &IndexMap<PathBuf, ParsedFileObr<'_>>,
 ) -> Result<(), bincode::Error> {
     let mut w = BufWriter::new(w);
     bincode::options()
@@ -187,7 +187,7 @@ pub fn serialize_batch_decls(
 pub fn deserialize_batch_decls<'a>(
     r: impl Read,
     arena: &'a bumpalo::Bump,
-) -> Result<IndexMap<PathBuf, ParsedFile<'a>>, bincode::Error> {
+) -> Result<IndexMap<PathBuf, ParsedFileObr<'a>>, bincode::Error> {
     let r = BufReader::new(r);
     let mut de = bincode::de::Deserializer::with_reader(r, bincode::options().with_native_endian());
     let de = ArenaDeserializer::new(arena, &mut de);

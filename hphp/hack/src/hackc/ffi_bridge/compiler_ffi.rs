@@ -20,7 +20,7 @@ use cxx::CxxString;
 use decl_provider::DeclProvider;
 use decl_provider::SelfProvider;
 use direct_decl_parser::DeclParserOptions;
-use direct_decl_parser::ParsedFile;
+use direct_decl_parser::ParsedFileObr;
 use external_decl_provider::ExternalDeclProvider;
 use hhbc::Unit;
 use options::Hhvm;
@@ -521,7 +521,7 @@ mod ffi {
 #[derive(Debug)]
 pub struct DeclsHolder {
     _arena: bumpalo::Bump,
-    parsed_file: ParsedFile<'static>,
+    parsed_file: ParsedFileObr<'static>,
 }
 
 // This is accessed in test_ffi.cpp; hence repr(C)
@@ -658,7 +658,7 @@ pub fn parse_decls(
     let arena = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
-    let parsed_file: ParsedFile<'static> =
+    let parsed_file: ParsedFileObr<'static> =
         direct_decl_parser::parse_decls_for_bytecode_obr(&decl_opts, relpath, text, alloc);
     let holder = Box::new(DeclsHolder {
         parsed_file,
@@ -750,7 +750,7 @@ fn binary_to_decls_holder(blob: &CxxString) -> bincode::Result<Box<DeclsHolder>>
     let op = bincode::options().with_native_endian();
     let mut de = bincode::de::Deserializer::from_slice(data, op);
     let de = arena_deserializer::ArenaDeserializer::new(alloc, &mut de);
-    let parsed_file = ParsedFile::deserialize(de)?;
+    let parsed_file = ParsedFileObr::deserialize(de)?;
     Ok(Box::new(DeclsHolder {
         parsed_file,
         _arena: arena,

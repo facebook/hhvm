@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Args;
-use direct_decl_parser::ParsedFile;
+use direct_decl_parser::ParsedFileObr;
 use hash::IndexMap;
 use relative_path::Prefix;
 use relative_path::RelativePath;
@@ -22,7 +22,7 @@ pub(crate) struct Opts {
 pub(crate) fn binary_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
     let filenames = opts.files.gather_input_files()?;
     let dp_opts = hackc_opts.decl_opts();
-    let mut parsed_files: IndexMap<PathBuf, ParsedFile<'_>> = Default::default();
+    let mut parsed_files: IndexMap<PathBuf, ParsedFileObr<'_>> = Default::default();
     let arena = bumpalo::Bump::new();
     for path in filenames {
         // Parse decls

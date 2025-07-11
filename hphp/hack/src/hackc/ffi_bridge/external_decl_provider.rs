@@ -13,7 +13,7 @@ use decl_provider::FunDecl;
 use decl_provider::ModuleDecl;
 use decl_provider::Result;
 use decl_provider::TypeDecl;
-use direct_decl_parser::Decls;
+use direct_decl_parser::DeclsObr;
 use hash::HashMap;
 use libc::c_char;
 
@@ -73,7 +73,7 @@ unsafe extern "C" {
 pub struct ExternalDeclProvider<'a> {
     pub provider: *const c_void,
     pub arena: &'a bumpalo::Bump,
-    decls: RefCell<HashMap<Box<[u8]>, &'a Decls<'a>>>,
+    decls: RefCell<HashMap<Box<[u8]>, &'a DeclsObr<'a>>>,
 }
 
 impl<'a> ExternalDeclProvider<'a> {
@@ -127,7 +127,7 @@ impl<'a> ExternalDeclProvider<'a> {
     fn find_decl<T>(
         &self,
         result: ExternalDeclProviderResult,
-        mut find: impl FnMut(&Decls<'a>) -> Result<T>,
+        mut find: impl FnMut(&DeclsObr<'a>) -> Result<T>,
     ) -> Result<T> {
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
@@ -151,7 +151,7 @@ impl<'a> ExternalDeclProvider<'a> {
     /// Either deserialize the given data, or access a memoized copy of previously
     /// deserialized decls from identical data. The memo key is a content hash
     /// appended to data at serialization time.
-    fn deser(&self, data: &[u8]) -> Result<&'a Decls<'a>> {
+    fn deser(&self, data: &[u8]) -> Result<&'a DeclsObr<'a>> {
         use std::collections::hash_map::Entry::*;
         let content_hash = decl_provider::decls_content_hash(data);
         match self.decls.borrow_mut().entry(content_hash.into()) {

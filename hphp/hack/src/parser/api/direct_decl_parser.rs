@@ -13,10 +13,10 @@ use direct_decl_smart_constructors_obr::NoSourceTextAllocator;
 use direct_decl_smart_constructors_obr::SourceTextAllocator;
 use mode_parser::parse_mode;
 pub use oxidized::decl_parser_options::DeclParserOptions;
-pub use oxidized::direct_decl_parser::Decls as DeclsO;
-pub use oxidized::direct_decl_parser::ParsedFile as ParsedFileO;
-pub use oxidized_by_ref::direct_decl_parser::Decls;
-pub use oxidized_by_ref::direct_decl_parser::ParsedFile;
+pub use oxidized::direct_decl_parser::Decls;
+pub use oxidized::direct_decl_parser::ParsedFile;
+pub use oxidized_by_ref::direct_decl_parser::Decls as DeclsObr;
+pub use oxidized_by_ref::direct_decl_parser::ParsedFile as ParsedFileObr;
 use oxidized_by_ref::file_info;
 pub use oxidized_by_ref::typing_defs::UserAttribute;
 use parser::parser::Parser;
@@ -38,7 +38,7 @@ pub fn parse_decls_for_typechecking_obr<'a>(
     filename: RelativePath,
     text: &'a [u8],
     arena: &'a Bump,
-) -> ParsedFile<'a> {
+) -> ParsedFileObr<'a> {
     parse_script_with_text_allocator(
         opts,
         filename,
@@ -54,7 +54,7 @@ pub fn parse_decls_for_typechecking(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &[u8],
-) -> ParsedFileO {
+) -> ParsedFile {
     parse_script(
         opts, filename, text, false, // elaborate_xhp_namespaces_for_facts
     )
@@ -71,7 +71,7 @@ pub fn parse_decls_for_bytecode_obr<'a, 'text>(
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
-) -> ParsedFile<'a> {
+) -> ParsedFileObr<'a> {
     parse_script_with_text_allocator(
         opts,
         filename,
@@ -87,7 +87,7 @@ pub fn parse_decls_for_bytecode(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &[u8],
-) -> ParsedFileO {
+) -> ParsedFile {
     parse_script(
         opts, filename, text, true, // elaborate_xhp_namespaces_for_facts
     )
@@ -112,7 +112,7 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
     arena: &'a Bump,
     source_text_allocator: S,
     elaborate_xhp_namespaces_for_facts: bool,
-) -> ParsedFile<'a> {
+) -> ParsedFileObr<'a> {
     let source = SourceText::make(Arc::new(filename), text);
     let env = ParserEnv::from(opts);
     let (_, mode_opt) = parse_mode(&source);
@@ -131,7 +131,7 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
 
-    ParsedFile {
+    ParsedFileObr {
         mode: mode_opt,
         file_attributes: collect_file_attributes(
             arena,
@@ -150,7 +150,7 @@ fn parse_script<'o, 't>(
     filename: RelativePath,
     text: &'t [u8],
     elaborate_xhp_namespaces_for_facts: bool,
-) -> ParsedFileO {
+) -> ParsedFile {
     let source = SourceText::make(Arc::new(filename), text);
     let env = ParserEnv::from(opts);
     let (_, mode_opt) = parse_mode(&source);
@@ -167,7 +167,7 @@ fn parse_script<'o, 't>(
     // syntactic order, so reverse it.
     sc_state.file_attributes.reverse();
 
-    ParsedFileO {
+    ParsedFile {
         mode: mode_opt,
         file_attributes: sc_state.file_attributes,
         decls,

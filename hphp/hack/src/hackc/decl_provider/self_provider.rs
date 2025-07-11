@@ -5,7 +5,7 @@
 
 use std::sync::Arc;
 
-use direct_decl_parser::Decls;
+use direct_decl_parser::DeclsObr;
 use direct_decl_parser::parse_decls_for_bytecode_obr;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
@@ -26,7 +26,7 @@ use crate::TypeDecl;
 /// or similar circumstances.
 pub struct SelfProvider<'d> {
     fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
-    decls: Decls<'d>,
+    decls: DeclsObr<'d>,
 }
 
 impl<'d> SelfProvider<'d> {

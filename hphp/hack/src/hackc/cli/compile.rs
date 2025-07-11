@@ -27,7 +27,7 @@ use decl_provider::FunDecl;
 use decl_provider::ModuleDecl;
 use decl_provider::SelfProvider;
 use decl_provider::TypeDecl;
-use direct_decl_parser::Decls;
+use direct_decl_parser::DeclsObr;
 use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hhvm_options::HhvmOptions;
@@ -304,7 +304,7 @@ pub(crate) fn auto_namespace_map() -> impl Iterator<Item = (String, String)> {
 
 #[derive(Debug)]
 enum DeclsHolder<'a> {
-    ByRef(Decls<'a>),
+    ByRef(DeclsObr<'a>),
     Ser(Vec<u8>),
 }
 
@@ -444,7 +444,11 @@ fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
 }
 
 impl<'a, R: Reason> SingleDeclProvider<'a, R> {
-    fn make(arena: &'a bumpalo::Bump, decls: Decls<'a>, hackc_opts: &crate::Opts) -> Result<Self> {
+    fn make(
+        arena: &'a bumpalo::Bump,
+        decls: DeclsObr<'a>,
+        hackc_opts: &crate::Opts,
+    ) -> Result<Self> {
         Ok(SingleDeclProvider {
             arena,
             decls: match hackc_opts.use_serialized_decls {
@@ -469,7 +473,7 @@ impl<'a, R: Reason> SingleDeclProvider<'a, R> {
 
     fn find_decl<T>(
         &self,
-        mut find: impl FnMut(&Decls<'a>) -> Result<T, Error>,
+        mut find: impl FnMut(&DeclsObr<'a>) -> Result<T, Error>,
     ) -> Result<T, Error> {
         match &self.decls {
             DeclsHolder::ByRef(decls) => find(decls),

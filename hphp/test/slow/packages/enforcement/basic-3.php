@@ -6,8 +6,8 @@ module z.z; // outside the active deployment
 function main_3(): void {
   // functions
   foo();
-  $f = "foo"; $f();
-  __hhvm_intrinsics\launder_value("foo")();
+  $f = "foo"; HH\dynamic_fun($f)();
+  HH\dynamic_fun(__hhvm_intrinsics\launder_value("foo"))();
 
   // classes
   new Foo();

@@ -67,7 +67,7 @@ function f()[defaults]: mixed{
   $klass_b = new B(0);
   $tryout = function($memo_function, $a, $b) use ($klass_b) {
     try {
-      $memo_function($a, $b);
+      HH\dynamic_fun($memo_function)($a, $b);
     } catch (Exception $e) {
       echo "Function $memo_function throws: ".$e->getMessage() . "\n";
     }

@@ -15,6 +15,6 @@ namespace B {
 namespace B {
   <<__EntryPoint>> function main(): void {
     $a = 'foo';
-    $a();
+    \HH\dynamic_fun($a)();
   }
 }

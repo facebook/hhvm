@@ -73,7 +73,7 @@ async function condition_block_nice_fail() :Awaitable<mixed>{
 async function run_one(string $name) :Awaitable<mixed>{
   try {
     echo "running $name...\n";
-    $res = await $name();
+    $res = await HH\dynamic_fun($name)();
     echo "succeeded: $res\n";
   } catch (Exception $e) {
     echo "failed: {$e->getMessage()}\n";

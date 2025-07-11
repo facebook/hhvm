@@ -21,7 +21,7 @@ namespace N {
 <<__EntryPoint>> function main(): void {
   $c = new C;
 
-  M\call('N\sayHi');
+  M\call(\HH\dynamic_fun('N\sayHi'));
   M\call(vec['N\C', 'sm']);
   M\call(vec[$c, 'm']);
 }

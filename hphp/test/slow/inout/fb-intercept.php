@@ -21,8 +21,8 @@ function meep(inout $f, $g, inout $r) :mixed{
 }
 
 function main() :mixed{
-  fb_intercept2('meep', 'io_intercept');
-  fb_intercept2('Foo::bar', 'io_intercept');
+  fb_intercept2('meep', HH\dynamic_fun('io_intercept'));
+  fb_intercept2('Foo::bar', HH\dynamic_fun('io_intercept'));
   $a = 1; $b = true; $c = 'c';
   Foo::bar($a, inout $b, inout $c);
   var_dump($a, $b, $c);

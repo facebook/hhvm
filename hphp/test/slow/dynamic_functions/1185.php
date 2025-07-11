@@ -8,5 +8,5 @@ function test($a, $b) :mixed{
 function main_1185() :mixed{
 $a = 'test';
  $y = 'kqq';
- $a('o',$y[0]);
+ HH\dynamic_fun($a)('o',$y[0]);
 }

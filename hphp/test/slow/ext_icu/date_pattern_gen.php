@@ -324,6 +324,6 @@ $tests = vec[
 
 foreach ($tests as $test) {
   echo "Running $test\n";
-  $test();
+  HH\dynamic_fun($test)();
 }
 }

@@ -26,7 +26,7 @@ echo "-- checking binary safe array with one parameter callback function --\n";
 var_dump( array_map(callback1<>, $arr1) );
 
 echo "-- checking binary safe array with two parameter callback function --\n";
-try { var_dump( array_map(b"callback2", $arr1) ); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { var_dump( array_map(HH\dynamic_fun(b"callback2"), $arr1) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "Done";
 }

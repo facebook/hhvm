@@ -8,5 +8,5 @@ function test($a, $b) :mixed{
 function main_1186() :mixed{
 $a = 'test';
  $y = vec['k','q','q'];
- $a('o',$y[0]);
+ HH\dynamic_fun($a)('o',$y[0]);
 }

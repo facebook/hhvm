@@ -6,5 +6,5 @@ function foo() :mixed{
 }
 <<__EntryPoint>> function main(): void {
 $x = __NAMESPACE__ . "\\foo";
-echo $x(),"\n";
+echo \HH\dynamic_fun($x)(),"\n";
 }

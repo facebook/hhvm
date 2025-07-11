@@ -10,6 +10,6 @@ function foo() :mixed{}
 
 <<__EntryPoint>>
 function main() :mixed{
-  fb_intercept2('foo', 'intercept');
+  fb_intercept2('foo', HH\dynamic_fun('intercept'));
   foo();
 }

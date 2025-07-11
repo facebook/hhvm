@@ -33,13 +33,13 @@ function main_entry(): void {
 
   // Call all 3 functions indirectly through table
 
-  $funcTable[0](1,2,3,4,5);
-  $funcTable[1](10,20,30,40,50);
-  $funcTable[2](100,200,300,400,500);
+  HH\dynamic_fun($funcTable[0])(1,2,3,4,5);
+  HH\dynamic_fun($funcTable[1])(10,20,30,40,50);
+  HH\dynamic_fun($funcTable[2])(100,200,300,400,500);
 
   // Put a side effect in the function designator and see the order of evaluation of
   // that compared with the argument list expressions.
 
   $i = 1;
-  $funcTable[$i++]($i, ++$i, $i, $i = 12, --$i);  // function designator side effect done first
+  HH\dynamic_fun($funcTable[$i++])($i, ++$i, $i, $i = 12, --$i);  // function designator side effect done first
 }

@@ -25,9 +25,9 @@
 function main(): void {
   $funcs = vec['foo', 'bar'];
   foreach ($funcs as $func) {
-    fb_intercept2($func, 'handler');
+    fb_intercept2($func, HH\dynamic_fun('handler'));
     try {
-      $func(1, 2);
+      HH\dynamic_fun($func)(1, 2);
       echo "lol\n";
     } catch (Exception $e) {
       echo $e->getMessage() . "\n";

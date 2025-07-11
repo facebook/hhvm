@@ -117,8 +117,8 @@ class F extends A {
 }
 
 async function positive_tests() :Awaitable<mixed>{
-  try { $x = 'func'; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'async_func'; await $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = HH\dynamic_fun('func'); $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = HH\dynamic_fun('async_func'); await $x(); } catch (Exception $e) { wrap($e); }
   //try { $x = 'A::func'; $x(); } catch (Exception $e) { wrap($e); } // fatal
   try { $x = 'A::static_func'; $x(); } catch (Exception $e) { wrap($e); }
   //try { $x = 'A::async_func'; await $x(); } catch (Exception $e) { wrap($e); } // fatal
@@ -152,7 +152,7 @@ async function positive_tests() :Awaitable<mixed>{
 
   try { $obj = new A; $x = 'async_func'; await $obj->$x(); } catch (Exception $e) { wrap($e); }
 
-  try { array_map('func', vec[true]); } catch (Exception $e) { wrap($e); }
+  try { array_map(HH\dynamic_fun('func'), vec[true]); } catch (Exception $e) { wrap($e); }
   //try { array_map('A::func', vec[true]); } catch (Exception $e) { wrap($e); }
   try { array_map('A::static_func', vec[true]); } catch (Exception $e) { wrap($e); }
 
@@ -163,7 +163,7 @@ async function positive_tests() :Awaitable<mixed>{
   try { array_map(vec[new A, 'static_func'], vec[true]); } catch (Exception $e) { wrap($e); }
 
   $x = Vector::fromItems(vec[vec[]]);
-  try { $x->map('func'); } catch (Exception $e) { wrap($e); }
+  try { $x->map(HH\dynamic_fun('func')); } catch (Exception $e) { wrap($e); }
 
   try { $x->map('A::static_func'); } catch (Exception $e) { wrap($e); }
 
@@ -173,7 +173,7 @@ async function positive_tests() :Awaitable<mixed>{
   try { $x->map(vec[new A, 'func']); } catch (Exception $e) { wrap($e); }
   try { $x->map(vec[new A, 'static_func']); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func('func'); } catch (Exception $e) { wrap($e); }
+  try { call_user_func(HH\dynamic_fun('func')); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func('A::static_func'); } catch (Exception $e) { wrap($e); }
 
@@ -183,7 +183,7 @@ async function positive_tests() :Awaitable<mixed>{
   try { call_user_func(vec[new A, 'func']); } catch (Exception $e) { wrap($e); }
   try { call_user_func(vec[new A, 'static_func']); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func_array('func', vec[]); } catch (Exception $e) { wrap($e); }
+  try { call_user_func_array(HH\dynamic_fun('func'), vec[]); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func_array('A::static_func', vec[]); } catch (Exception $e) { wrap($e); }
 
@@ -191,7 +191,7 @@ async function positive_tests() :Awaitable<mixed>{
   try { call_user_func_array(vec[new A, 'func'], vec[]); } catch (Exception $e) { wrap($e); }
   try { call_user_func_array(vec[new A, 'static_func'], vec[]); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'cmp'; $y = vec[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = HH\dynamic_fun('cmp'); $y = vec[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 
   try { $x = 'A::static_cmp'; $y = vec[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 
@@ -246,11 +246,11 @@ async function negative_tests() :Awaitable<mixed>{
   $x = vec[2, 1];
   usort(inout $x, new InvokableCmp);
 
-  $x = 'count'; $x(vec[]);
-  array_map('count', vec[vec[]]);
-  $x = Vector::fromItems(vec[true]); $x->map('count');
-  call_user_func('count', vec[]);
-  call_user_func_array('count', vec[vec[]]);
+  $x = HH\dynamic_fun('count'); $x(vec[]);
+  array_map(HH\dynamic_fun('count'), vec[vec[]]);
+  $x = Vector::fromItems(vec[true]); $x->map(HH\dynamic_fun('count'));
+  call_user_func(HH\dynamic_fun('count'), vec[]);
+  call_user_func_array(HH\dynamic_fun('count'), vec[vec[]]);
 
   $x = 'HH\Vector::fromItems'; $x(vec[]);
   $x = vec['HH\Vector', 'fromItems']; $x(vec[]);
@@ -276,15 +276,15 @@ async function negative_tests() :Awaitable<mixed>{
   call_user_func_array(vec[new Vector, 'firstValue'], vec[]);
   call_user_func_array(vec[new Vector, 'fromItems'], vec[vec[]]);
 
-  $x = 'array_map';
-  $x('count', vec[]);
+  $x = HH\dynamic_fun('array_map');
+  $x(HH\dynamic_fun('count'), vec[]);
 
   $obj = null; $obj?->foobar();
 
   idx('foobar', 'key');
 
-  $x = 'func2'; $x();
-  $x = 'async_func2'; await $x();
+  $x = HH\dynamic_fun('func2'); $x();
+  $x = HH\dynamic_fun('async_func2'); await $x();
   //$x = 'A::func2'; $x(); // fatal
   $x = 'A::static_func2'; $x();
   //$x = 'A::async_func2'; await $x(); // fatal
@@ -315,7 +315,7 @@ async function negative_tests() :Awaitable<mixed>{
 
   $obj = new A; $x = 'async_func2'; await $obj->$x();
 
-  array_map('func2', vec[true]);
+  array_map(HH\dynamic_fun('func2'), vec[true]);
   //array_map('A::func2', vec[true]); // fatal
   array_map('A::static_func2', vec[true]);
 
@@ -326,7 +326,7 @@ async function negative_tests() :Awaitable<mixed>{
   array_map(vec[new A, 'static_func2'], vec[true]);
 
   $x = Vector::fromItems(vec[vec[]]);
-  $x->map('func2');
+  $x->map(HH\dynamic_fun('func2'));
 
   $x->map('A::static_func2');
 
@@ -336,7 +336,7 @@ async function negative_tests() :Awaitable<mixed>{
   $x->map(vec[new A, 'func2']);
   $x->map(vec[new A, 'static_func2']);
 
-  call_user_func('func2');
+  call_user_func(HH\dynamic_fun('func2'));
 
   call_user_func('A::static_func2');
 
@@ -346,7 +346,7 @@ async function negative_tests() :Awaitable<mixed>{
   call_user_func(vec[new A, 'func2']);
   call_user_func(vec[new A, 'static_func2']);
 
-  call_user_func_array('func2', vec[]);
+  call_user_func_array(HH\dynamic_fun('func2'), vec[]);
 
   call_user_func_array('A::static_func2', vec[]);
 
@@ -354,7 +354,7 @@ async function negative_tests() :Awaitable<mixed>{
   call_user_func_array(vec[new A, 'func2'], vec[]);
   call_user_func_array(vec[new A, 'static_func2'], vec[]);
 
-  $x = 'cmp2'; $y = vec[2, 1]; usort(inout $y, $x);
+  $x = HH\dynamic_fun('cmp2'); $y = vec[2, 1]; usort(inout $y, $x);
 
   $x = 'A::static_cmp2'; $y = vec[2, 1]; usort(inout $y, $x);
 

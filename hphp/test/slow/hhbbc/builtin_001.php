@@ -3,7 +3,7 @@
 function heh() :mixed{ return 'sscanf'; }
 function foo(string $s) :mixed{
   $fn = heh();
-  list($i) = $fn($s, "%d");
+  list($i) = HH\dynamic_fun($fn)($s, "%d");
   echo $i;
   echo "\n";
 }

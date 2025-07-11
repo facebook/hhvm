@@ -13,12 +13,12 @@ function f() :mixed{
   echo "========\n";
   $x = 'array_key_exists';
   $x[0] = 'a';
-  var_dump($x(1, $m));
-  var_dump($x('1', $m));
-  var_dump($x(2, $m));
-  var_dump($x('2', $m));
-  var_dump($x(3, $m));
-  var_dump($x('3', $m));
+  var_dump(HH\dynamic_fun($x)(1, $m));
+  var_dump(HH\dynamic_fun($x)('1', $m));
+  var_dump(HH\dynamic_fun($x)(2, $m));
+  var_dump(HH\dynamic_fun($x)('2', $m));
+  var_dump(HH\dynamic_fun($x)(3, $m));
+  var_dump(HH\dynamic_fun($x)('3', $m));
 }
 
 <<__EntryPoint>>

@@ -8,9 +8,9 @@ class foo {
   function __construct() {
     $function = 'bar';
     print($function);
-    print($function());
+    print(HH\dynamic_fun($function)());
     $this->functions['test'] = $function;
-    print($this->functions['test']());
+    print(HH\dynamic_fun($this->functions['test'])());
   }
 }
 

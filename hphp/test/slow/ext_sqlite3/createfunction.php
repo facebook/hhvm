@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main_createfunction() :mixed{
 $db = new PDO('sqlite::memory:');
-$db->sqliteCreateFunction('length', 'strlen', 1);
+$db->sqliteCreateFunction('length', HH\dynamic_fun('strlen'), 1);
 
 $db->exec("DROP TABLE IF EXISTS test_table;");
 $db->exec("CREATE TABLE test_table (test_field TEXT);");

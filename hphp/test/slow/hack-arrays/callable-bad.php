@@ -43,7 +43,7 @@ function main_callable_bad() :mixed{
     apc_store($key, $count);
     printf("===== %s/%02d =====\n", $test[0], $test[1]);
     try {
-      var_dump($test[0]($test[2], 42));
+      var_dump(HH\dynamic_fun($test[0])($test[2], 42));
     } catch (BadMethodCallException $ex) {
       echo "Caught: ".$ex->getMessage()."\n";
       return;

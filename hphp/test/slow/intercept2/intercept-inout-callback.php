@@ -21,7 +21,7 @@ function foo($arg, inout $a) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  fb_intercept2('foo', 'handler');
+  fb_intercept2('foo', HH\dynamic_fun('handler'));
   $x = 1;
   foo("Hey!", inout $x);
   var_dump($x);

@@ -3,13 +3,13 @@ function foo(inout $a) :mixed{ var_dump($a++); }
 function test($cuf, $f) :mixed{
   $a = vec[1];
   try {
-    $cuf($f, $a);
+    HH\dynamic_fun($cuf)($f, $a);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   var_dump($a, vec[1]);
   try {
-    $cuf($f, vec[1]);
+    HH\dynamic_fun($cuf)($f, vec[1]);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

@@ -12,6 +12,6 @@ namespace B {
 }
 namespace B {
   <<__EntryPoint>> function main(): void {
-    \call_user_func('foo');
+    \call_user_func(\HH\dynamic_fun('foo'));
   }
 }

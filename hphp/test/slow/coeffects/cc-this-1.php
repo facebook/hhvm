@@ -22,7 +22,7 @@ function main() :mixed{
   $callers = vec['pure', 'rx', 'defaults'];
   foreach ($callers as $caller) {
     foreach ($classes as $cls) {
-      $caller($cls);
+      HH\dynamic_fun($caller)($cls);
     }
   }
 }

@@ -69,7 +69,7 @@ function memo_inaccessible_sc($a, $b)[defaults]: mixed{
 function f()[defaults]: mixed{
   $klass_b = new B(0);
   $tryout = function($memo_function, $a, $b) use ($klass_b) {
-    $memo_function($a, $b);
+    HH\dynamic_fun($memo_function)($a, $b);
 
     $klass_b->$memo_function($a, $b);
   };

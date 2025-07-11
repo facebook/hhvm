@@ -59,7 +59,7 @@ class MyArrayIterator extends ArrayIterator
         {
             try
             {
-                var_dump($func(new MyArrayIterator()));
+                var_dump(HH\dynamic_fun($func)(new MyArrayIterator()));
                 break;
             }
             catch (Exception $e)

@@ -254,11 +254,11 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) :mixed{
 function runFreeFuncs() :mixed{
   echo "==========================================\n";
   echo "Testing free functions....\n\n";
-  runFuncs('freeFunc1',
-           'freeFunc2',
-           'freeFunc3',
-           'freeFunc4',
-           'freeFunc5');
+  runFuncs(HH\dynamic_fun('freeFunc1'),
+           HH\dynamic_fun('freeFunc2'),
+           HH\dynamic_fun('freeFunc3'),
+           HH\dynamic_fun('freeFunc4'),
+           HH\dynamic_fun('freeFunc5'));
 }
 
 function runStaticFuncs() :mixed{

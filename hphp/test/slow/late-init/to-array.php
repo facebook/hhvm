@@ -23,21 +23,21 @@ function run_test($func) :mixed{
 
   $a = new A();
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   $a->y = 700;
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   unset($a->y);
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }

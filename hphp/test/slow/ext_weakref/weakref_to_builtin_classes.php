@@ -6,7 +6,7 @@
 function test($what) :mixed{
   echo "==== $what ====\n";
   $producer = 'produce_' . $what;
-  $foo = $producer();
+  $foo = HH\dynamic_fun($producer)();
   $w = new WeakRef($foo);
   var_dump($w->valid());
   __hhvm_intrinsics\launder_value($foo);

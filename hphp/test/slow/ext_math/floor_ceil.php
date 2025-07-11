@@ -1,7 +1,7 @@
 <?hh
 
 function x($y, $k) :mixed{
-  var_dump($k($y));
+  var_dump(HH\dynamic_fun($k)($y));
   var_dump(floor($y));
 }
 

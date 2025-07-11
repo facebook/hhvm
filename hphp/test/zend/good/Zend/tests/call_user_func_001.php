@@ -17,7 +17,7 @@ namespace testing {
     }
 
     <<__EntryPoint>> function main(): void {
-    \call_user_func(__NAMESPACE__ .'\foobar', 'foobar');
+    \call_user_func(\HH\dynamic_fun(__NAMESPACE__ .'\foobar'), 'foobar');
     $class =  __NAMESPACE__ .'\foo';
     \call_user_func(vec[new $class, 'priv'], 'foobar');
     \call_user_func(vec[new $class, 'prot'], 'foobar');

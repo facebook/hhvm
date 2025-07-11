@@ -20,7 +20,7 @@ function do_function($fn) :mixed{
   $fn .= '_eval';
   eval(sprintf('<<__DynamicallyCallable>> function %s($v = %s) { var_dump($v); }',
                $fn, $str));
-  $fn();
+  HH\dynamic_fun($fn)();
 }
 
 <<__EntryPoint>> function main(): void {

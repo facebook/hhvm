@@ -21,7 +21,7 @@ function test2() :mixed{
 }
 function test($f) :mixed{
   try {
-    $f();
+    HH\dynamic_fun($f)();
   }
  catch (Exception $e) {
     var_dump($f.':Caught');

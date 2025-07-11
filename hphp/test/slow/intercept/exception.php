@@ -12,7 +12,7 @@ class Interceptor {
       return shape();
     }
     self::$recurse = true;
-    return shape('callback' => 'meep');
+    return shape('callback' => HH\dynamic_fun('meep'));
   }
 }
 

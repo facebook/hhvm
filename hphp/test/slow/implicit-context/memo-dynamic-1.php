@@ -38,7 +38,7 @@ function f(bool $has_ctx) :mixed{
     }
 
     try {
-      $f();
+      HH\dynamic_fun($f)();
       echo $f . " passed\n";
     } catch (Exception $e) {
       echo $f . " failed with: " . $e->getMessage() . "\n";

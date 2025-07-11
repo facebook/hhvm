@@ -17,11 +17,11 @@ function main_entry(): void {
   namespace\f1();
 
   $v = 'f1';
-  $v();
+  HH\dynamic_fun($v)();
   $v = '\\f1';
-  $v();
+  HH\dynamic_fun($v)();
   //'f1'();           // can't be a literal
 
   $v = '\\NS1\\f2';
-  $v();
+  HH\dynamic_fun($v)();
 }

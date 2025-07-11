@@ -21,7 +21,7 @@ foreach ($algos as $algo) {
   $fun = $base.'_keygen';
   $const = strtoupper($base.'_KEYBYTES');
 
-  $key = $fun();
+  $key = HH\dynamic_fun($fun)();
   printf("%s %d %d\n", gettype($key), strlen($key), constant($const));
 }
 }

@@ -5,7 +5,7 @@ function run_tests($tests) :mixed{
   foreach ($tests as $test) {
     list($func, $val) = $test;
     try {
-      var_dump($func($val));
+      var_dump(HH\dynamic_fun($func)($val));
     } catch (Exception $e) {
       echo "Exception: " . $e->getMessage() . "\n";
     }

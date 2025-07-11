@@ -50,7 +50,7 @@ foreach ($typeMap as $type => $inputs) {
   foreach ($callMap as $call => $cgen) {
     foreach ($wrapMap as $wrap => $wgen) {
       $func = "HH\\Asio\\{$type}{$call}{$wrap}";
-      $wh = $cgen($func, $inputs);
+      $wh = $cgen(HH\dynamic_fun($func), $inputs);
       echo "{$func}() => ";
       var_dump($wgen(\HH\Asio\join($wh)));
     }

@@ -73,7 +73,7 @@ function test_darray($v) :mixed{
 function test_indirect($c, $v) :mixed{
   echo "============== test_indirect ($c) ==================\n";
   try {
-    $v2 = $c($v);
+    $v2 = HH\dynamic_fun($c)($v);
     var_dump($v2);
     var_dump(is_varray($v2));
     var_dump(is_darray($v2));

@@ -2,7 +2,7 @@
 
 class A {
   public function f($x) :mixed{
-    var_dump($x($this));
+    var_dump(HH\dynamic_fun($x)($this));
     var_dump(get_class($this));
   }
 }

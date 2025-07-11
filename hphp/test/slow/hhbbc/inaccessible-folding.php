@@ -45,6 +45,6 @@ if ($count < count($tests)) {
   ++$count;
   apc_store('count', $count);
   echo "====================== $test =======================\n";
-  var_dump($test());
+  var_dump(HH\dynamic_fun($test)());
 }
 }

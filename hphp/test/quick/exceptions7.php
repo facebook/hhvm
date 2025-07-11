@@ -30,7 +30,7 @@ class Blark {
 function main_entry(): void {
 
   // Intercept a function
-  fb_intercept2('frap', 'handler');
+  fb_intercept2('frap', HH\dynamic_fun('handler'));
   try {
     call_user_func(frap<>, 'callfunc');
   } catch (Exception $e) {
@@ -49,7 +49,7 @@ function main_entry(): void {
   }
 
   // Intercept static method
-  fb_intercept2('Blark::sfrap', 'handler');
+  fb_intercept2('Blark::sfrap', HH\dynamic_fun('handler'));
   try {
     call_user_func(vec['Blark', 'sfrap']);
   } catch (Exception $e) {
@@ -58,7 +58,7 @@ function main_entry(): void {
 
   // Intercept non-static method
   $b = new Blark();
-  fb_intercept2('Blark::frap', 'handler');
+  fb_intercept2('Blark::frap', HH\dynamic_fun('handler'));
   try {
     call_user_func(vec[$b, 'frap']);
   } catch (Exception $e) {
@@ -66,8 +66,8 @@ function main_entry(): void {
   }
 
   // MULTI-INTERCEPT!
-  fb_intercept2('frap', 'handler');
-  fb_intercept2('handler', 'another_handler');
+  fb_intercept2('frap', HH\dynamic_fun('handler'));
+  fb_intercept2('handler', HH\dynamic_fun('another_handler'));
   try {
     call_user_func(frap<>, 'claptrap');
   } catch (Exception $e) {

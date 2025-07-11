@@ -24,9 +24,9 @@ class Foo3 implements I {
   echo "in f2\n";
 }
 
-<<__DynamicallyCallable>> function pure($f, $a)[] :mixed{ $f($a); }
-<<__DynamicallyCallable>> function rx($f, $a)[rx] :mixed{ $f($a); }
-<<__DynamicallyCallable>> function defaults($f, $a) :mixed{ $f($a); }
+<<__DynamicallyCallable>> function pure($f, $a)[] :mixed{ HH\dynamic_fun($f)($a); }
+<<__DynamicallyCallable>> function rx($f, $a)[rx] :mixed{ HH\dynamic_fun($f)($a); }
+<<__DynamicallyCallable>> function defaults($f, $a) :mixed{ HH\dynamic_fun($f)($a); }
 
 <<__EntryPoint>>
 function main() :mixed{
@@ -43,7 +43,7 @@ function main() :mixed{
     echo "=== $caller ===\n";
     foreach ($callees as $callee_pair) {
       list($callee, $arg) = $callee_pair;
-      $caller($callee, $arg);
+      HH\dynamic_fun($caller)($callee, $arg);
       echo "$callee: ok\n";
     }
   }

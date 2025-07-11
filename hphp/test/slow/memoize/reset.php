@@ -195,12 +195,12 @@ function testTraitSingleMethods() :mixed{
 function testFreeFuncs() :mixed{
   echo "================================\n";
   echo "Testing free functions....\n\n";
-  runFuncs('func1', 'func2');
-  runFuncs('func1', 'func2');
+  runFuncs(HH\dynamic_fun('func1'), HH\dynamic_fun('func2'));
+  runFuncs(HH\dynamic_fun('func1'), HH\dynamic_fun('func2'));
   HH\clear_static_memoization(null, 'func1');
-  runFuncs('func1', 'func2');
+  runFuncs(HH\dynamic_fun('func1'), HH\dynamic_fun('func2'));
   HH\clear_static_memoization(null, 'func2');
-  runFuncs('func1', 'func2');
+  runFuncs(HH\dynamic_fun('func1'), HH\dynamic_fun('func2'));
 }
 
 function main() :mixed{

@@ -6,5 +6,5 @@ function strlen($x) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 $x = "test\\ns1\\strlen";
-echo $x("Hello"),"\n";
+echo \HH\dynamic_fun($x)("Hello"),"\n";
 }

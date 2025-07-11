@@ -24,11 +24,11 @@ function test_standard_function() :mixed{
   frap('claptrap');
 
   // Intercept a function
-  fb_intercept2('frap', 'handler');
+  fb_intercept2('frap', HH\dynamic_fun('handler'));
   frap('claptrap');
   call_user_func(frap<>, 'callfunc');
 
-  fb_intercept2('frap', 'passthrough_handler');
+  fb_intercept2('frap', HH\dynamic_fun('passthrough_handler'));
   frap('claptrap');
   call_user_func(frap<>, 'callfunc');
 
@@ -52,11 +52,11 @@ function test_variadic_function() :mixed{
   var_frap('claptrap', 'blah');
 
   // Intercept a function
-  fb_intercept2('var_frap', 'handler');
+  fb_intercept2('var_frap', HH\dynamic_fun('handler'));
   var_frap('claptrap', 'blah');
   call_user_func(var_frap<>, 'callfunc');
 
-  fb_intercept2('var_frap', 'passthrough_handler');
+  fb_intercept2('var_frap', HH\dynamic_fun('passthrough_handler'));
   var_frap('claptrap', 'blah');
   call_user_func(var_frap<>, 'callfunc');
 
@@ -85,7 +85,7 @@ function test_methods() :mixed{
   echo '---------- ', __FUNCTION__, ' ----------', "\n";
 
   // Intercept static method
-  fb_intercept2('SubBlark2::sfrap', 'handler');
+  fb_intercept2('SubBlark2::sfrap', HH\dynamic_fun('handler'));
   Blark::sfrap();
   call_user_func(vec['Blark', 'sfrap']);
   SubBlark::sfrap();
@@ -93,7 +93,7 @@ function test_methods() :mixed{
   SubBlark2::sfrap();
   call_user_func(vec['SubBlark2', 'sfrap']);
 
-  fb_intercept2('Blark::sfrap', 'handler');
+  fb_intercept2('Blark::sfrap', HH\dynamic_fun('handler'));
   Blark::sfrap();
   call_user_func(vec['Blark', 'sfrap']);
   SubBlark::sfrap();
@@ -101,23 +101,23 @@ function test_methods() :mixed{
   SubBlark2::sfrap();
   call_user_func(vec['SubBlark2', 'sfrap']);
 
-  fb_intercept2('Blark::sfrap', 'passthrough_handler');
+  fb_intercept2('Blark::sfrap', HH\dynamic_fun('passthrough_handler'));
   Blark::sfrap();
   call_user_func(vec['Blark', 'sfrap']);
 
   // Intercept non-static method
   $b = new Blark();
-  fb_intercept2('Blark::frap', 'handler');
+  fb_intercept2('Blark::frap', HH\dynamic_fun('handler'));
   $b->frap();
   call_user_func(vec[$b, 'frap']);
 
-  fb_intercept2('Blark::frap', 'passthrough_handler');
+  fb_intercept2('Blark::frap', HH\dynamic_fun('passthrough_handler'));
   $b->frap();
   call_user_func(vec[$b, 'frap']);
 
   // MULTI-INTERCEPT!
-  fb_intercept2('frap', 'handler');
-  fb_intercept2('handler', 'passthrough_handler');
+  fb_intercept2('frap', HH\dynamic_fun('handler'));
+  fb_intercept2('handler', HH\dynamic_fun('passthrough_handler'));
   frap('claptrap');
 
   // Reset all

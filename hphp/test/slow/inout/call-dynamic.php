@@ -19,9 +19,9 @@ function main($a, $b, $c) :mixed{
   $bar1 = 'a';
   $bar2 = 'b';
   $baz = null;
-  $a(inout $foo);
-  $b(inout $bar1, inout $bar2);
-  $c(inout $baz);
+  HH\dynamic_fun($a)(inout $foo);
+  HH\dynamic_fun($b)(inout $bar1, inout $bar2);
+  HH\dynamic_fun($c)(inout $baz);
 
   var_dump($foo, $bar1, $bar2, $baz);
 }

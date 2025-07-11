@@ -12,7 +12,7 @@ function hello() :mixed{
 // tests FCallFunc
 function doCall($f) :mixed{
   echo "doCall(";
-  if ($f()) {
+  if (HH\dynamic_fun($f)()) {
     echo ") -- doCall got true\n";
   } else {
     echo ") -- doCall got false\n";

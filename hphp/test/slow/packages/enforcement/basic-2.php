@@ -5,7 +5,7 @@ module a.b; // in the active deployment
 <<__EntryPoint>>
 function main_2() : mixed {
   default_foo();
-  __hhvm_intrinsics\launder_value("default_foo")();
+  HH\dynamic_fun(__hhvm_intrinsics\launder_value("default_foo"))();
 
   new DefaultFoo();
 

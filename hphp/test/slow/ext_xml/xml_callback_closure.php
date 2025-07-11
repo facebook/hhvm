@@ -19,7 +19,7 @@ var_dump( is_callable( $closure ) );
 $parser = xml_parser_create();
 xml_set_element_handler(
     $parser,
-    'elementOpen',
+    HH\dynamic_fun('elementOpen'),
     function ( $parser, $name ) {
         print "</$name>";
     }

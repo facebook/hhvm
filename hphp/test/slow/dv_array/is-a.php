@@ -20,8 +20,8 @@ function indirect_test_dv_arrays($v, $tests) :mixed{
   $v2 = __hhvm_intrinsics\launder_value($v);
   foreach ($tests as $c) {
     echo "$c => " . (($c === "gettype")
-                     ? __hhvm_intrinsics\launder_value($c)($v2)
-                     : boolstr(__hhvm_intrinsics\launder_value($c)($v2)))
+                     ? HH\dynamic_fun(__hhvm_intrinsics\launder_value($c))($v2)
+                     : boolstr(HH\dynamic_fun(__hhvm_intrinsics\launder_value($c))($v2)))
                   . "\n";
   }
 }
@@ -52,7 +52,7 @@ function indirect_test_others($v, $tests) :mixed{
   $v2 = __hhvm_intrinsics\launder_value($v);
   foreach ($tests as $c) {
     $c2 = __hhvm_intrinsics\launder_value($c);
-    echo "$c => " . boolstr($c2($v)) . "\n";
+    echo "$c => " . boolstr(HH\dynamic_fun($c2)($v)) . "\n";
   }
 }
 

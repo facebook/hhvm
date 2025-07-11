@@ -20,9 +20,9 @@ function h(int $x, int $y = 20, ...$z) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  fb_intercept2('f', 'handler');
-  fb_intercept2('g', 'handler');
-  fb_intercept2('h', 'handler');
+  fb_intercept2('f', HH\dynamic_fun('handler'));
+  fb_intercept2('g', HH\dynamic_fun('handler'));
+  fb_intercept2('h', HH\dynamic_fun('handler'));
   echo "Regular with default args\n";
   f(1);
   f(1, 2);

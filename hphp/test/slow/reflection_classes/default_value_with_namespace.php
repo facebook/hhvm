@@ -29,7 +29,7 @@ namespace {
     \var_dump($rc->getParameters()[0]->getDefaultValueConstantName());
     echo "\n";
     echo "A\\$func call:\n";
-    call_user_func("A\\$func");
+    call_user_func(HH\dynamic_fun("A\\$func"));
     echo "\n";
   }
 }

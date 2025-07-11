@@ -50,21 +50,21 @@ function test($a, $func) :mixed{
   echo "=============== $func ================\n";
 
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   $a->y = 777;
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   unset($a->y);
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }

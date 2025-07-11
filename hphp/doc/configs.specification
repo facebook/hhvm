@@ -559,7 +559,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   can only be set if the repo was built with the option
   Eval.BuildMayNoticeOnMethCallerHelperIsObject set to true.
 
-- int32_t Eval.ForbidDynamicCallsToFunc = 1, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToFunc)|unitcacheflag
+- int32_t Eval.ForbidDynamicCallsToFunc = 2, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToFunc)|unitcacheflag
 
   Control dynamic calls to functions and dynamic constructs of
   classes which haven't opted into being called that way.

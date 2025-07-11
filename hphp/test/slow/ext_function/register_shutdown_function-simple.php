@@ -21,7 +21,7 @@ class Test {
 
 <<__EntryPoint>>
 function main_register_shutdown_function_simple() :mixed{
-  \register_shutdown_function(__NAMESPACE__ . '\test');
+  \register_shutdown_function(\HH\dynamic_fun(__NAMESPACE__ . '\test'));
   \register_shutdown_function(vec[new Test, 'handleInstance']);
   \register_shutdown_function(vec[__NAMESPACE__ . '\Test', 'handleStatic']);
   \register_shutdown_function(function () {

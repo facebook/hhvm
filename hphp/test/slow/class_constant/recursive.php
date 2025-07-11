@@ -142,5 +142,5 @@ function main() :mixed{
   apc_store("count", $count);
 
   echo "================ $test ===================\n";
-  $test();
+  HH\dynamic_fun($test)();
 }

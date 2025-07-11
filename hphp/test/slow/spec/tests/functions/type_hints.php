@@ -46,7 +46,7 @@ function f5(callable $p1)
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);
-    $p1();
+    HH\dynamic_fun($p1)();
 }
 
 function f6(inout C1 $p1)

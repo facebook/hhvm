@@ -37,8 +37,8 @@ class C {
     foo();
     $c->snoot();
     if ($i == 1) {
-      fb_intercept2('foo', 'bar');
-      fb_intercept2('C::snoot', 'swizzle');
+      fb_intercept2('foo', HH\dynamic_fun('bar'));
+      fb_intercept2('C::snoot', HH\dynamic_fun('swizzle'));
     }
   }
 }

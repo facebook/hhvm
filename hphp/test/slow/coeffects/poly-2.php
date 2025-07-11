@@ -12,9 +12,9 @@ interface I {
   echo "in f2\n";
 }
 
-<<__DynamicallyCallable>> function pure($f)[] :mixed{ $f(); }
-<<__DynamicallyCallable>> function rx($f)[rx] :mixed{ $f(); }
-<<__DynamicallyCallable>> function defaults($f) :mixed{ $f(); }
+<<__DynamicallyCallable>> function pure($f)[] :mixed{ HH\dynamic_fun($f)(); }
+<<__DynamicallyCallable>> function rx($f)[rx] :mixed{ HH\dynamic_fun($f)(); }
+<<__DynamicallyCallable>> function defaults($f) :mixed{ HH\dynamic_fun($f)(); }
 
 <<__EntryPoint>>
 function main() :mixed{
@@ -23,7 +23,7 @@ function main() :mixed{
   foreach ($callers as $caller) {
     echo "=== $caller ===\n";
     foreach ($callees as $callee) {
-      $caller($callee);
+      HH\dynamic_fun($caller)($callee);
       echo "$callee: ok\n";
     }
   }

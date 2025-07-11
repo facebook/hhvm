@@ -41,11 +41,11 @@ function main_preg_replace_callback_array_errors(): void {
     dict["xx" => "notValid1", "yy" => "notValid2"], $a, -1,
     inout $b,
   )));
-  test(() ==> var_dump(preg_replace_callback_array(dict['/\w' => 'f'], 'z', -1, inout $count)));
+  test(() ==> var_dump(preg_replace_callback_array(dict['/\w' => HH\dynamic_fun('f')], 'z', -1, inout $count)));
   try {
     var_dump(
       preg_replace_callback_array(
-        dict['/\w/' => 'f', '/.*/' => 'f'],
+        dict['/\w/' => HH\dynamic_fun('f'), '/.*/' => HH\dynamic_fun('f')],
         'z',
         -1,
         inout $count

@@ -93,20 +93,20 @@ function main() :mixed{
       }
       $f = 'f' . $i . $suffix;
       echo "\ncalling $f\n";
-      call_wrapper($f, null);
-      call_wrapper($f, 42);
-      call_wrapper($f, 'foobar');
-      call_wrapper($f, true);
-      call_wrapper($f, 14.1);
-      call_wrapper($f, imagecreate(10, 10));
-      call_wrapper($f, vec[]);
-      call_wrapper($f, function($x){return $x*$x;});
-      call_wrapper($f, new Figure());
-      call_wrapper($f, new Square());
-      call_wrapper($f, new Fractal());
-      call_wrapper($f, <div/>);
-      call_wrapper($f, 'testfunc');
-      call_wrapper($f, vec['C', 'testfunc']);
+      call_wrapper(HH\dynamic_fun($f), null);
+      call_wrapper(HH\dynamic_fun($f), 42);
+      call_wrapper(HH\dynamic_fun($f), 'foobar');
+      call_wrapper(HH\dynamic_fun($f), true);
+      call_wrapper(HH\dynamic_fun($f), 14.1);
+      call_wrapper(HH\dynamic_fun($f), imagecreate(10, 10));
+      call_wrapper(HH\dynamic_fun($f), vec[]);
+      call_wrapper(HH\dynamic_fun($f), function($x){return $x*$x;});
+      call_wrapper(HH\dynamic_fun($f), new Figure());
+      call_wrapper(HH\dynamic_fun($f), new Square());
+      call_wrapper(HH\dynamic_fun($f), new Fractal());
+      call_wrapper(HH\dynamic_fun($f), <div/>);
+      call_wrapper(HH\dynamic_fun($f), 'testfunc');
+      call_wrapper(HH\dynamic_fun($f), vec['C', 'testfunc']);
     }
   }
 

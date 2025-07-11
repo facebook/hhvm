@@ -7,6 +7,6 @@ function t($a = 'k') :mixed{
  <<__EntryPoint>>
 function main_1174() :mixed{
 $a = 't';
- $a();
- $a('o');
+ HH\dynamic_fun($a)();
+ HH\dynamic_fun($a)('o');
 }

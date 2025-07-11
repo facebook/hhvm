@@ -7,7 +7,7 @@ function foo() :mixed{ var_dump(__METHOD__); }
 }
 
 <<__EntryPoint>> function boo(): void {
-  fb_intercept2('foo', 'bar');
+  fb_intercept2('foo', HH\dynamic_fun('bar'));
   try {
     foo();
   } catch (Exception $e) {

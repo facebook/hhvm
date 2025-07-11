@@ -28,5 +28,5 @@ B::foo();
 $class = 'B';
 $c = 'call_user_fun';
 $c .= 'c';
-$c(vec[$class, 'foo']);
+HH\dynamic_fun($c)(vec[$class, 'foo']);
 }

@@ -105,7 +105,7 @@ function test1() :mixed{
     foreach ($funcs as $f) {
       try {
         echo "================ $f ============================\n";
-        $f($v);
+        HH\dynamic_fun($f)($v);
         echo "PASSES\n";
       } catch (Exception $e) {
         var_dump($e->getMessage());
@@ -160,7 +160,7 @@ function test2() :mixed{
     foreach ($funcs as $f) {
       try {
         echo "================ $f ============================\n";
-        $f($v);
+        HH\dynamic_fun($f)($v);
         echo "PASSES\n";
       } catch (Exception $e) {
         var_dump($e->getMessage());

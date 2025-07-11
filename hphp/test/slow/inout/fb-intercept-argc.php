@@ -33,8 +33,8 @@ function meep(inout $f, $g, inout $r) :mixed{
 }
 
 function main() :mixed{
-  fb_intercept2('meep', 'too_many');
-  fb_intercept2('Foo::bar', 'too_few');
+  fb_intercept2('meep', HH\dynamic_fun('too_many'));
+  fb_intercept2('Foo::bar', HH\dynamic_fun('too_few'));
   $a = 1; $b = true; $c = 'c';
   Foo::bar($a, inout $b, inout $c);
   var_dump($a, $b, $c);
@@ -43,7 +43,7 @@ function main() :mixed{
   meep(inout $a, $b, inout $c);
   var_dump($a, $b, $c);
 
-  fb_intercept2('meep', 'wrong_type');
+  fb_intercept2('meep', HH\dynamic_fun('wrong_type'));
   $a = 1; $b = true; $c = 'c';
   meep(inout $a, $b, inout $c);
   var_dump($a, $b, $c);

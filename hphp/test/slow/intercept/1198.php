@@ -14,7 +14,7 @@ function bar(inout $a) :mixed{
 
 <<__EntryPoint>>
 function main_1198() :mixed{
-fb_intercept2('foo', 'goo');
+fb_intercept2('foo', HH\dynamic_fun('goo'));
 $a = 0;
 foo(inout $a);
 var_dump($a);

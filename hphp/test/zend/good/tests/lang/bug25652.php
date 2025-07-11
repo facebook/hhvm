@@ -7,7 +7,7 @@ function testfunc ($var) :mixed{
 class foo {
     public $arr = vec['testfunc'];
     function bar () :mixed{
-        $this->arr[0]('testvalue');
+        HH\dynamic_fun($this->arr[0])('testvalue');
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -58,7 +58,7 @@ function test_invocation_syntaxes() :mixed{
   $call_invalid = vec['C', 'noSuchMethod'];
 
   echo "* call_user_func ********************\n";
-  var_dump(call_user_func($call_func_string, $test));
+  var_dump(call_user_func(HH\dynamic_fun($call_func_string), $test));
   var_dump(call_user_func($call_functor, $test));
   var_dump(call_user_func($call_closure, $test));
   var_dump(call_user_func($call_static_string, $test));
@@ -67,7 +67,7 @@ function test_invocation_syntaxes() :mixed{
   var_dump(call_user_func($call_static_on_instance, $test));
 
   echo "* ()-invoke ********************\n";
-  var_dump($call_func_string($test));
+  var_dump(HH\dynamic_fun($call_func_string)($test));
   var_dump($call_functor($test));
   var_dump($call_closure($test));
   var_dump($call_static_arr($test));

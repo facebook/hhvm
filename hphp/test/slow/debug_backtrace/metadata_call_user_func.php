@@ -5,7 +5,7 @@ function bar($options) :mixed{
 }
 
 function foo($fn, $options) :mixed{
-  call_user_func($fn, 'I am foo');
+  call_user_func(HH\dynamic_fun($fn), 'I am foo');
   bar($options);
 }
 

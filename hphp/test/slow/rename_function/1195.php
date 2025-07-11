@@ -9,7 +9,7 @@
 function test($test) :mixed{
   test1();
   test1();
-  $test();
+  HH\dynamic_fun($test)();
 }
 
 <<__EntryPoint>>

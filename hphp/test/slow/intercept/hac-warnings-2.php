@@ -13,6 +13,6 @@ function takes_varray(varray $x) :mixed{}
 
 <<__EntryPoint>>
 function main() :mixed{
-  fb_intercept2('foo', 'handler');
+  fb_intercept2('foo', HH\dynamic_fun('handler'));
   $x = 'fail'; foo(inout $x); var_dump($x);
 }

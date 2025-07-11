@@ -7,5 +7,5 @@ function test($a) :mixed{
  <<__EntryPoint>>
 function main_1172() :mixed{
   $a = 'test';
-  $a('ok');
+  HH\dynamic_fun($a)('ok');
 }

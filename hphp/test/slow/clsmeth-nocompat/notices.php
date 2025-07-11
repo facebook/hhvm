@@ -57,20 +57,20 @@ function is_functions_dynamic() :mixed{
   echo '$m is Container:'             ;C($m is Container);
   echo '$m is KeyedContainer:'        ;C($m is KeyedContainer);
 
-  echo 'is_a($m, HH\Traversable):'   ;C(LV('is_a')($m, 'HH\Traversable'));
-  echo 'is_a($m, Traversable):'      ;C(LV('is_a')($m, 'Traversable'));
-  echo 'is_a($m, KeyedTraversable):' ;C(LV('is_a')($m, 'KeyedTraversable'));
-  echo 'is_a($m, Container):'        ;C(LV('is_a')($m, 'Container'));
-  echo 'is_a($m, KeyedContainer):'   ;C(LV('is_a')($m, 'KeyedContainer'));
+  echo 'is_a($m, HH\Traversable):'   ;C(HH\dynamic_fun(LV('is_a'))($m, 'HH\Traversable'));
+  echo 'is_a($m, Traversable):'      ;C(HH\dynamic_fun(LV('is_a'))($m, 'Traversable'));
+  echo 'is_a($m, KeyedTraversable):' ;C(HH\dynamic_fun(LV('is_a'))($m, 'KeyedTraversable'));
+  echo 'is_a($m, Container):'        ;C(HH\dynamic_fun(LV('is_a'))($m, 'Container'));
+  echo 'is_a($m, KeyedContainer):'   ;C(HH\dynamic_fun(LV('is_a'))($m, 'KeyedContainer'));
 }
 
 function is_functions_builtins() :mixed{
   $m = LV(Foo::bar<>);
 
-  echo 'is_array($m):'       ;C(LV('is_array')($m));
-  echo 'HH\is_any_array($m):';C(LV('HH\is_any_array')($m));
-  echo 'HH\is_varray($m):'   ;C(LV('HH\is_varray')($m));
-  echo 'HH\is_vec_or_varray($m):'   ;C(LV('HH\is_vec_or_varray')($m));
+  echo 'is_array($m):'       ;C(HH\dynamic_fun(LV('is_array'))($m));
+  echo 'HH\is_any_array($m):';C(HH\dynamic_fun(LV('HH\is_any_array'))($m));
+  echo 'HH\is_varray($m):'   ;C(HH\dynamic_fun(LV('HH\is_varray'))($m));
+  echo 'HH\is_vec_or_varray($m):'   ;C(HH\dynamic_fun(LV('HH\is_vec_or_varray'))($m));
 }
 
 <<__EntryPoint>>

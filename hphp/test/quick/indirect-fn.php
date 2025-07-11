@@ -6,5 +6,5 @@ function f($a) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 $name = "f";
-$name("param");
+HH\dynamic_fun($name)("param");
 }

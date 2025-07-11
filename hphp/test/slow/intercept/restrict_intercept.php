@@ -17,7 +17,7 @@ function foo1($i = 10) :mixed{
 <<__EntryPoint>>
 function main(): void {
   foo();
-  fb_intercept2('foo', 'bar');
+  fb_intercept2('foo', HH\dynamic_fun('bar'));
   foo();
-  fb_intercept2('foo1', 'bar');
+  fb_intercept2('foo1', HH\dynamic_fun('bar'));
 }

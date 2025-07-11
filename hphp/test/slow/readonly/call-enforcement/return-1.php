@@ -10,6 +10,6 @@ function main() :mixed{
   try { f(1); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
 
   $f = __hhvm_intrinsics\launder_value('f');
-  readonly $f(1);
-  try { $f(1); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
+  readonly HH\dynamic_fun($f)(1);
+  try { HH\dynamic_fun($f)(1); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
 }

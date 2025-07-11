@@ -23,7 +23,7 @@ function main() :mixed{
 
 <<__EntryPoint>>
 function main_extra_args() :mixed{
-fb_intercept2('foo', 'bar');
+fb_intercept2('foo', HH\dynamic_fun('bar'));
 
 main();
 echo "done\n";

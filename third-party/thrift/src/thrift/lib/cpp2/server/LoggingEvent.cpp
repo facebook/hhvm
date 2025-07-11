@@ -19,8 +19,6 @@
 #include <folly/Indestructible.h>
 #include <folly/Portability.h>
 #include <folly/Random.h>
-#include <folly/Synchronized.h>
-#include <folly/io/async/AsyncSSLSocket.h>
 
 namespace apache::thrift {
 namespace {

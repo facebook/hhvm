@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <atomic>
 #include <folly/Indestructible.h>
 #include <folly/Synchronized.h>
 #include <folly/synchronization/CallOnce.h>

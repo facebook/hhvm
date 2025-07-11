@@ -1734,6 +1734,11 @@ impl RewriteState {
                     desugar_expr,
                 }
             }
+            Is(_) => {
+                self.errors
+                    .push((pos, "`is` is not supported in expression trees.".into()));
+                unchanged_result
+            }
             ClassConst(_) => {
                 self.errors.push((
                 pos,

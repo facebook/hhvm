@@ -1,0 +1,6 @@
+ERROR: File "vec_called_on_int_map.php", line 3, characters 3-21:
+Invalid index type for this Map (Typing[4324])
+  File "vec_called_on_int_map.php", line 3, characters 3-14:
+  Expected `arraykey`
+  File "vec_called_on_int_map.php", line 3, characters 16-20:
+  But got `vec<nothing>`

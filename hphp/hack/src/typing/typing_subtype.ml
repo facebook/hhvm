@@ -6182,13 +6182,22 @@ end = struct
       Subtype.simplify
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = lhs }
+          (* sub_supportdyn is not plumbed along because simplify_default is used in different context. *)
+        ~lhs:{ sub_supportdyn = None; ty_sub = lhs }
         ~rhs:{ super_like = false; super_supportdyn = false; ty_super = rhs }
         env
     in
-    let is_container tk tv =
+    let unify_default ~subtype_env lhs rhs env =
+      simplify_default ~subtype_env lhs rhs env
+      &&& simplify_default ~subtype_env rhs lhs
+    in
+    let is_immutable_container tk tv =
       simplify_default ~subtype_env can_index.ci_key tk env
       &&& simplify_default ~subtype_env tv can_index.ci_val
+    in
+    let is_mutable_container tk tv =
+      unify_default ~subtype_env can_index.ci_key tk env
+      &&& unify_default ~subtype_env tv can_index.ci_val
     in
     let do_tuple tup =
       match can_index.ci_shape with
@@ -6290,27 +6299,43 @@ end = struct
       else
         valid
     | (_, Tclass ((_, n), _, [tv]))
-      when String.equal n SN.Collections.cVector
-           || String.equal n SN.Collections.cVec
+      when String.equal n SN.Collections.cVec
            || String.equal n SN.Collections.cImmVector
-           || String.equal n SN.Collections.cConstVector
+           || String.equal n SN.Collections.cConstVector ->
+      let pos = get_pos ty_sub in
+      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
+      is_immutable_container tk tv
+    | (_, Tclass ((_, n), _, [tv]))
+      when String.equal n SN.Collections.cVector
            || String.equal n SN.Collections.cMutableVector ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
-      is_container tk tv
+      is_mutable_container tk tv
+    | (_, Tclass ((_, n), _, [tk; tv]))
+      when String.equal n SN.Collections.cMutableMap
+           || String.equal n SN.Collections.cImmMap
+           || String.equal n SN.Collections.cConstMap ->
+      unify_default ~subtype_env can_index.ci_key tk env
+      &&& simplify_default ~subtype_env tv can_index.ci_val
+    | (_, Tclass ((_, n), _, [tk; tv]))
+      when String.equal n SN.Collections.cMap
+           || String.equal n SN.Collections.cMutableMap ->
+      is_mutable_container tk tv
     | (_, Tclass ((_, n), _, [tk; tv])) when String.equal n SN.Collections.cDict
       ->
       simplify_default ~subtype_env tk can_index.ci_key env
       &&& simplify_default ~subtype_env tv can_index.ci_val
     | (_, Tclass ((_, n), _, [tkv])) when String.equal n SN.Collections.cKeyset
       ->
-      is_container tkv tkv
-    | (_, Tvec_or_dict (tk, tv)) -> is_container tk tv
+      is_immutable_container tkv tkv
+    | (_, Tvec_or_dict (tk, tv)) ->
+      unify_default ~subtype_env can_index.ci_key tk env
+      &&& simplify_default ~subtype_env tv can_index.ci_val
     | (_, Tprim Tstring) ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
-      is_container tk tv
+      is_immutable_container tk tv
     | (r, Tprim Tnull) ->
       let pos = get_pos ty_sub in
       if can_index.ci_lhs_of_null_coalesce then

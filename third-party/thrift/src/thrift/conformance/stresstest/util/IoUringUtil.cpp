@@ -22,6 +22,9 @@ DEFINE_int32(io_submit_sqe, 0, "");
 DEFINE_int32(io_max_get, 0, "");
 DEFINE_bool(set_iouring_defer_taskrun, true, "");
 DEFINE_int32(io_max_submit, 0, "");
+DEFINE_bool(task_run_coop, false, "");
+DEFINE_int32(batch_size, 0, "");
+DEFINE_int32(timeout_us, 0, "");
 DEFINE_int32(io_registers, 2048, "");
 DEFINE_int32(io_prov_buffs_size, 2048, "");
 DEFINE_int32(io_prov_buffs, 2000, "");
@@ -77,6 +80,18 @@ folly::IoUringBackend::Options getIoUringOptions() {
     } else {
       LOG(ERROR) << "not setting DeferTaskRun as not supported on this kernel";
     }
+  }
+
+  if (FLAGS_task_run_coop) {
+    options.setTaskRunCoop(FLAGS_task_run_coop);
+  }
+
+  if (FLAGS_batch_size > 0) {
+    options.setBatchSize(FLAGS_batch_size);
+  }
+
+  if (FLAGS_timeout_us > 0) {
+    options.setTimeout(std::chrono::microseconds(FLAGS_timeout_us));
   }
 
   static std::atomic<int32_t> currQueueId{FLAGS_io_zcrx_queue_id};

@@ -16,9 +16,6 @@
 
 #pragma once
 
-#include <cstdlib>
-#include <vector>
-
 #include <thrift/compiler/ast/t_type.h>
 
 namespace apache::thrift::compiler {
@@ -85,22 +82,6 @@ class t_primitive_type : public t_type {
   // TODO(afuller): Remove everything below here. It is provided only for
   // backwards compatibility.
  public:
-  using t_primitive = type;
-  constexpr static t_primitive TYPE_VOID = type::t_void;
-  constexpr static t_primitive TYPE_STRING = type::t_string;
-  constexpr static t_primitive TYPE_BOOL = type::t_bool;
-  constexpr static t_primitive TYPE_BYTE = type::t_byte;
-  constexpr static t_primitive TYPE_I16 = type::t_i16;
-  constexpr static t_primitive TYPE_I32 = type::t_i32;
-  constexpr static t_primitive TYPE_I64 = type::t_i64;
-  constexpr static t_primitive TYPE_DOUBLE = type::t_double;
-  constexpr static t_primitive TYPE_FLOAT = type::t_float;
-  constexpr static t_primitive TYPE_BINARY = type::t_binary;
-
-  static std::string t_primitive_name(t_primitive t) { return type_name(t); }
-
-  t_primitive get_base() const { return primitive_type(); }
-
   /**
    * t_type overrides
    */

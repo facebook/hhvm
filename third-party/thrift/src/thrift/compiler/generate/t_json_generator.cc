@@ -235,28 +235,27 @@ string t_json_generator::to_string(const t_type* type) {
     type = type->get_true_type();
   }
 
-  if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+  if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
-      case t_primitive_type::TYPE_VOID:
+      case t_primitive_type::type::t_void:
         return "VOID";
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         return "STRING";
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_bool:
         return "BOOL";
-      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::type::t_byte:
         return "BYTE";
-      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::type::t_i16:
         return "I16";
-      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::type::t_i32:
         return "I32";
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_i64:
         return "I64";
-      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::type::t_double:
         return "DOUBLE";
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_float:
         return "FLOAT";
     }
   } else if (type->is<t_enum>()) {

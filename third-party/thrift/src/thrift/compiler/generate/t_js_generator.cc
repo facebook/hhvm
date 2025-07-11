@@ -373,24 +373,23 @@ string t_js_generator::render_const_value(
 
   type = type->get_true_type();
 
-  if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+  if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         out << "'" << value->get_string() << "'";
         break;
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_bool:
         out << (value->get_integer() > 0 ? "true" : "false");
         break;
-      case t_primitive_type::TYPE_BYTE:
-      case t_primitive_type::TYPE_I16:
-      case t_primitive_type::TYPE_I32:
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_byte:
+      case t_primitive_type::type::t_i16:
+      case t_primitive_type::type::t_i32:
+      case t_primitive_type::type::t_i64:
         out << value->get_integer();
         break;
-      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::type::t_double:
         if (value->kind() == t_const_value::CV_INTEGER) {
           out << value->get_integer();
         } else {
@@ -400,7 +399,7 @@ string t_js_generator::render_const_value(
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_primitive_type::t_primitive_name(tbase));
+            t_primitive_type::type_name(tbase));
     }
   } else if (type->is<t_enum>()) {
     out << value->get_integer();
@@ -1241,40 +1240,39 @@ void t_js_generator::generate_deserialize_field(
   } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << name << " = input.";
 
-    if (type->is<t_primitive_type>()) {
-      t_primitive_type::t_primitive tbase =
-          ((t_primitive_type*)type)->primitive_type();
+    if (const auto* primitive = type->try_as<t_primitive_type>()) {
+      t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {
-        case t_primitive_type::TYPE_VOID:
+        case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
               name);
-        case t_primitive_type::TYPE_STRING:
-        case t_primitive_type::TYPE_BINARY:
+        case t_primitive_type::type::t_string:
+        case t_primitive_type::type::t_binary:
           out << "readString()";
           break;
-        case t_primitive_type::TYPE_BOOL:
+        case t_primitive_type::type::t_bool:
           out << "readBool()";
           break;
-        case t_primitive_type::TYPE_BYTE:
+        case t_primitive_type::type::t_byte:
           out << "readByte()";
           break;
-        case t_primitive_type::TYPE_I16:
+        case t_primitive_type::type::t_i16:
           out << "readI16()";
           break;
-        case t_primitive_type::TYPE_I32:
+        case t_primitive_type::type::t_i32:
           out << "readI32()";
           break;
-        case t_primitive_type::TYPE_I64:
+        case t_primitive_type::type::t_i64:
           out << "readI64()";
           break;
-        case t_primitive_type::TYPE_DOUBLE:
+        case t_primitive_type::type::t_double:
           out << "readDouble()";
           break;
         default:
           throw std::runtime_error(
               "compiler error: no JS name for base type " +
-              t_primitive_type::t_primitive_name(tbase));
+              t_primitive_type::type_name(tbase));
       }
     } else if (type->is<t_enum>()) {
       out << "readI32()";
@@ -1461,40 +1459,39 @@ void t_js_generator::generate_serialize_field(
 
     indent(out) << "output.";
 
-    if (type->is<t_primitive_type>()) {
-      t_primitive_type::t_primitive tbase =
-          ((t_primitive_type*)type)->primitive_type();
+    if (const auto* primitive = type->try_as<t_primitive_type>()) {
+      t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {
-        case t_primitive_type::TYPE_VOID:
+        case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
               name);
-        case t_primitive_type::TYPE_STRING:
-        case t_primitive_type::TYPE_BINARY:
+        case t_primitive_type::type::t_string:
+        case t_primitive_type::type::t_binary:
           out << "writeString(" << name << ")";
           break;
-        case t_primitive_type::TYPE_BOOL:
+        case t_primitive_type::type::t_bool:
           out << "writeBool(" << name << ")";
           break;
-        case t_primitive_type::TYPE_BYTE:
+        case t_primitive_type::type::t_byte:
           out << "writeByte(" << name << ")";
           break;
-        case t_primitive_type::TYPE_I16:
+        case t_primitive_type::type::t_i16:
           out << "writeI16(" << name << ")";
           break;
-        case t_primitive_type::TYPE_I32:
+        case t_primitive_type::type::t_i32:
           out << "writeI32(" << name << ")";
           break;
-        case t_primitive_type::TYPE_I64:
+        case t_primitive_type::type::t_i64:
           out << "writeI64(" << name << ")";
           break;
-        case t_primitive_type::TYPE_DOUBLE:
+        case t_primitive_type::type::t_double:
           out << "writeDouble(" << name << ")";
           break;
         default:
           throw std::runtime_error(
               "compiler error: no JS name for base type " +
-              t_primitive_type::t_primitive_name(tbase));
+              t_primitive_type::type_name(tbase));
       }
     } else if (type->is<t_enum>()) {
       out << "writeI32(" << name << ")";
@@ -1637,26 +1634,25 @@ string t_js_generator::declare_field(
 
   if (init) {
     const t_type* type = tfield->get_type()->get_true_type();
-    if (type->is<t_primitive_type>()) {
-      t_primitive_type::t_primitive tbase =
-          ((t_primitive_type*)type)->primitive_type();
+    if (const auto* primitive = type->try_as<t_primitive_type>()) {
+      t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {
-        case t_primitive_type::TYPE_VOID:
+        case t_primitive_type::type::t_void:
           break;
-        case t_primitive_type::TYPE_STRING:
-        case t_primitive_type::TYPE_BINARY:
-        case t_primitive_type::TYPE_BOOL:
-        case t_primitive_type::TYPE_BYTE:
-        case t_primitive_type::TYPE_I16:
-        case t_primitive_type::TYPE_I32:
-        case t_primitive_type::TYPE_I64:
-        case t_primitive_type::TYPE_DOUBLE:
+        case t_primitive_type::type::t_string:
+        case t_primitive_type::type::t_binary:
+        case t_primitive_type::type::t_bool:
+        case t_primitive_type::type::t_byte:
+        case t_primitive_type::type::t_i16:
+        case t_primitive_type::type::t_i32:
+        case t_primitive_type::type::t_i64:
+        case t_primitive_type::type::t_double:
           result += " = null";
           break;
         default:
           throw std::runtime_error(
               "compiler error: no JS initializer for base type " +
-              t_primitive_type::t_primitive_name(tbase));
+              t_primitive_type::type_name(tbase));
       }
     } else if (type->is<t_enum>()) {
       result += " = null";
@@ -1731,28 +1727,27 @@ string t_js_generator::argument_list(
 string t_js_generator ::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+  if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
-      case t_primitive_type::TYPE_VOID:
+      case t_primitive_type::type::t_void:
         throw std::runtime_error("NO T_VOID CONSTRUCT");
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         return "Thrift.Type.STRING";
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_bool:
         return "Thrift.Type.BOOL";
-      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::type::t_byte:
         return "Thrift.Type.BYTE";
-      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::type::t_i16:
         return "Thrift.Type.I16";
-      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::type::t_i32:
         return "Thrift.Type.I32";
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_i64:
         return "Thrift.Type.I64";
-      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::type::t_double:
         return "Thrift.Type.DOUBLE";
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_float:
         throw std::runtime_error("Float type is not supported");
     }
   } else if (type->is<t_enum>()) {

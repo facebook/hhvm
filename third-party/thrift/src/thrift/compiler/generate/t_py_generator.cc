@@ -409,41 +409,40 @@ void t_py_generator::generate_json_field(
     generate_json_container(out, (t_container*)type, name, prefix_json);
   } else if (type->is<t_enum>()) {
     generate_json_enum(out, (t_enum*)type, name, prefix_json);
-  } else if (type->is<t_primitive_type>()) {
+  } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     string conversion_function;
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+    t_primitive_type::type tbase = primitive->primitive_type();
     string number_limit;
     string number_negative_limit;
     switch (tbase) {
-      case t_primitive_type::TYPE_VOID:
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_void:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
+      case t_primitive_type::type::t_bool:
         break;
-      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::type::t_byte:
         number_limit = "0x7f";
         number_negative_limit = "-0x80";
         break;
-      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::type::t_i16:
         number_limit = "0x7fff";
         number_negative_limit = "-0x8000";
         break;
-      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::type::t_i32:
         number_limit = "0x7fffffff";
         number_negative_limit = "-0x80000000";
         break;
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_i64:
         conversion_function = "long";
         break;
-      case t_primitive_type::TYPE_DOUBLE:
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_double:
+      case t_primitive_type::type::t_float:
         conversion_function = "float";
         break;
       default:
         throw std::runtime_error(
             "compiler error: no python reader for base type " +
-            t_primitive_type::t_primitive_name(tbase) + name);
+            t_primitive_type::type_name(tbase) + name);
     }
 
     string value = prefix_json;
@@ -574,14 +573,13 @@ void t_py_generator::generate_json_collection_element(
   string to_parse = prefix_json;
   type = type->get_true_type();
 
-  if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+  if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
       // Explicitly cast into float because there is an asymetry
       // between serializing and deserializing NaN.
-      case t_primitive_type::TYPE_DOUBLE:
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_double:
+      case t_primitive_type::type::t_float:
         to_act_on = "float(" + to_act_on + ")";
         break;
       default:
@@ -623,18 +621,17 @@ void t_py_generator::generate_json_map_key(
     indent(out) << parsed_key << " = ThriftEnumWrapper(" << type_name(type)
                 << ", " << parsed_key << ")" << endl;
     indent_down();
-  } else if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+  } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
     string conversion_function;
     string number_limit;
     string number_negative_limit;
     bool generate_assignment = true;
     switch (tbase) {
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         break;
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_bool:
         indent(out) << "if " << raw_key << " == 'true':" << endl;
         indent_up();
         indent(out) << parsed_key << " = True" << endl;
@@ -651,32 +648,32 @@ void t_py_generator::generate_json_map_key(
         indent_down();
         generate_assignment = false;
         break;
-      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::type::t_byte:
         conversion_function = "int";
         number_limit = "0x7f";
         number_negative_limit = "-0x80";
         break;
-      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::type::t_i16:
         conversion_function = "int";
         number_limit = "0x7fff";
         number_negative_limit = "-0x8000";
         break;
-      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::type::t_i32:
         conversion_function = "int";
         number_limit = "0x7fffffff";
         number_negative_limit = "-0x80000000";
         break;
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_i64:
         conversion_function = "long";
         break;
-      case t_primitive_type::TYPE_DOUBLE:
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_double:
+      case t_primitive_type::type::t_float:
         conversion_function = "float";
         break;
       default:
         throw std::runtime_error(
             "compiler error: no C++ reader for base type " +
-            t_primitive_type::t_primitive_name(tbase));
+            t_primitive_type::type_name(tbase));
     }
 
     string value = raw_key;
@@ -1164,25 +1161,24 @@ string t_py_generator::render_const_value(
   type = type->get_true_type();
   std::ostringstream out;
 
-  if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
+  if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         out << render_string(value->get_string());
         break;
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_bool:
         out << (value->get_integer() > 0 ? "True" : "False");
         break;
-      case t_primitive_type::TYPE_BYTE:
-      case t_primitive_type::TYPE_I16:
-      case t_primitive_type::TYPE_I32:
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_byte:
+      case t_primitive_type::type::t_i16:
+      case t_primitive_type::type::t_i32:
+      case t_primitive_type::type::t_i64:
         out << value->get_integer();
         break;
-      case t_primitive_type::TYPE_DOUBLE:
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_double:
+      case t_primitive_type::type::t_float:
         out << std::showpoint;
         if (value->kind() == t_const_value::CV_INTEGER) {
           out << value->get_integer();
@@ -1193,7 +1189,7 @@ string t_py_generator::render_const_value(
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_primitive_type::t_primitive_name(tbase));
+            t_primitive_type::type_name(tbase));
     }
   } else if (type->is<t_enum>()) {
     indent(out) << value->get_integer();
@@ -3254,46 +3250,45 @@ void t_py_generator::generate_deserialize_field(
   } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << name << " = iprot.";
 
-    if (type->is<t_primitive_type>()) {
-      t_primitive_type::t_primitive tbase =
-          ((t_primitive_type*)type)->primitive_type();
+    if (const auto* primitive = type->try_as<t_primitive_type>()) {
+      t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {
-        case t_primitive_type::TYPE_VOID:
+        case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
               name);
-        case t_primitive_type::TYPE_STRING:
+        case t_primitive_type::type::t_string:
           out << "readString().decode('utf-8') "
               << "if UTF8STRINGS else iprot.readString()";
           break;
-        case t_primitive_type::TYPE_BINARY:
+        case t_primitive_type::type::t_binary:
           out << "readString()";
           break;
-        case t_primitive_type::TYPE_BOOL:
+        case t_primitive_type::type::t_bool:
           out << "readBool()";
           break;
-        case t_primitive_type::TYPE_BYTE:
+        case t_primitive_type::type::t_byte:
           out << "readByte()";
           break;
-        case t_primitive_type::TYPE_I16:
+        case t_primitive_type::type::t_i16:
           out << "readI16()";
           break;
-        case t_primitive_type::TYPE_I32:
+        case t_primitive_type::type::t_i32:
           out << "readI32()";
           break;
-        case t_primitive_type::TYPE_I64:
+        case t_primitive_type::type::t_i64:
           out << "readI64()";
           break;
-        case t_primitive_type::TYPE_DOUBLE:
+        case t_primitive_type::type::t_double:
           out << "readDouble()";
           break;
-        case t_primitive_type::TYPE_FLOAT:
+        case t_primitive_type::type::t_float:
           out << "readFloat()";
           break;
         default:
           throw std::runtime_error(
               "compiler error: no Python name for base type " +
-              t_primitive_type::t_primitive_name(tbase));
+              t_primitive_type::type_name(tbase));
       }
     } else if (type->is<t_enum>()) {
       out << "readI32()";
@@ -3480,47 +3475,46 @@ void t_py_generator::generate_serialize_field(
   } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << "oprot.";
 
-    if (type->is<t_primitive_type>()) {
-      t_primitive_type::t_primitive tbase =
-          ((t_primitive_type*)type)->primitive_type();
+    if (const auto* primitive = type->try_as<t_primitive_type>()) {
+      t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {
-        case t_primitive_type::TYPE_VOID:
+        case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
               name);
-        case t_primitive_type::TYPE_STRING:
+        case t_primitive_type::type::t_string:
           out << "writeString(" << name << ".encode('utf-8')) "
               << "if UTF8STRINGS and not isinstance(" << name << ", bytes) "
               << "else oprot.writeString(" << name << ")";
           break;
-        case t_primitive_type::TYPE_BINARY:
+        case t_primitive_type::type::t_binary:
           out << "writeString(" << name << ")";
           break;
-        case t_primitive_type::TYPE_BOOL:
+        case t_primitive_type::type::t_bool:
           out << "writeBool(" << name << ")";
           break;
-        case t_primitive_type::TYPE_BYTE:
+        case t_primitive_type::type::t_byte:
           out << "writeByte(" << name << ")";
           break;
-        case t_primitive_type::TYPE_I16:
+        case t_primitive_type::type::t_i16:
           out << "writeI16(" << name << ")";
           break;
-        case t_primitive_type::TYPE_I32:
+        case t_primitive_type::type::t_i32:
           out << "writeI32(" << name << ")";
           break;
-        case t_primitive_type::TYPE_I64:
+        case t_primitive_type::type::t_i64:
           out << "writeI64(" << name << ")";
           break;
-        case t_primitive_type::TYPE_DOUBLE:
+        case t_primitive_type::type::t_double:
           out << "writeDouble(" << name << ")";
           break;
-        case t_primitive_type::TYPE_FLOAT:
+        case t_primitive_type::type::t_float:
           out << "writeFloat(" << name << ")";
           break;
         default:
           throw std::runtime_error(
               "compiler error: no Python name for base type " +
-              t_primitive_type::t_primitive_name(tbase));
+              t_primitive_type::type_name(tbase));
       }
     } else if (type->is<t_enum>()) {
       out << "writeI32(" << name << ")";
@@ -3809,28 +3803,26 @@ string t_py_generator::type_name(const t_type* ttype) {
 string t_py_generator::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)type)->primitive_type();
-    switch (tbase) {
-      case t_primitive_type::TYPE_VOID:
+  if (const auto* primitive = type->try_as<t_primitive_type>()) {
+    switch (primitive->primitive_type()) {
+      case t_primitive_type::type::t_void:
         throw std::runtime_error("NO T_VOID CONSTRUCT");
-      case t_primitive_type::TYPE_STRING:
-      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         return "TType.STRING";
-      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::type::t_bool:
         return "TType.BOOL";
-      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::type::t_byte:
         return "TType.BYTE";
-      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::type::t_i16:
         return "TType.I16";
-      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::type::t_i32:
         return "TType.I32";
-      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::type::t_i64:
         return "TType.I64";
-      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::type::t_double:
         return "TType.DOUBLE";
-      case t_primitive_type::TYPE_FLOAT:
+      case t_primitive_type::type::t_float:
         return "TType.FLOAT";
     }
   } else if (type->is<t_enum>()) {
@@ -3853,12 +3845,11 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
   const auto* adapter = get_py_adapter(ttype); // Do this before get_true_type.
   ttype = ttype->get_true_type();
 
-  if (ttype->is<t_primitive_type>()) {
-    t_primitive_type::t_primitive tbase =
-        ((t_primitive_type*)ttype)->primitive_type();
-    if (tbase == t_primitive_type::TYPE_STRING) {
+  if (const auto* primitive = ttype->try_as<t_primitive_type>()) {
+    t_primitive_type::type tbase = primitive->primitive_type();
+    if (tbase == t_primitive_type::type::t_string) {
       return "True";
-    } else if (tbase == t_primitive_type::TYPE_BINARY) {
+    } else if (tbase == t_primitive_type::type::t_binary) {
       return "False";
     }
     return "None";

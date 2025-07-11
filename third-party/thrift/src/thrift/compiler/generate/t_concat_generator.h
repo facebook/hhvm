@@ -93,9 +93,8 @@ class t_concat_generator : public t_generator {
    * Get the full thrift typename of a (possibly complex) type.
    */
   virtual std::string thrift_type_name(const t_type* ttype) {
-    if (ttype->is<t_primitive_type>()) {
-      t_primitive_type* tbase = (t_primitive_type*)ttype;
-      return t_primitive_type::t_primitive_name(tbase->primitive_type());
+    if (const auto* tbase = ttype->try_as<t_primitive_type>()) {
+      return t_primitive_type::type_name(tbase->primitive_type());
     }
 
     if (ttype->is<t_container>()) {

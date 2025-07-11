@@ -1,3 +1,2 @@
 -vEval.JitPGODecRefNZReleasePercentCOW=0 -vEval.JitPGODecRefNZReleasePercent=0
 -vEval.CoeffectEnforcementLevels.zoned=0
--vEval.ForbidDynamicCallsToFunc=1

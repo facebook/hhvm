@@ -5,6 +5,6 @@ class X { static function y() :mixed{} }
 
 <<__EntryPoint>>
 function main() :mixed{
-  (new ReflectionFunction('t'))->invoke();
-  var_dump(HH\classname_to_class(HH\classname_to_class('X')));
+  HH\dynamic_fun('t')();
+  var_dump(HH\classname_to_class('X'));
 }

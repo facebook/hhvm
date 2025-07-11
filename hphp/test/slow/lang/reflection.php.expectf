@@ -178,12 +178,6 @@ Function [ <user> function f ] {
 }
 "
 
---- invoke("g") ---
-In g(a, b, some string)
-NULL
-In g(a, b, some string)
-NULL
-
 --- export("g") ---
 string(%d) "/**
  * This is g's doc comment.

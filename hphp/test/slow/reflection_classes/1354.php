@@ -123,8 +123,6 @@ function dump_param($param) :mixed{
 function main_1354() :mixed{
 $func = new ReflectionFunction('func1');
  dump_func($func);
- $func = new ReflectionFunction('func2');
- $func->invoke('invoked');
 $cls = new ReflectionClass('cls1');
  $obj = $cls->newInstance();
  dump_class($cls, $obj);

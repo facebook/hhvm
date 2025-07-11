@@ -47,10 +47,6 @@ var_dump(call_user_func($rf->getClosure(), 1));
 $rf = new ReflectionMethod('Bar::foo');
 var_dump(call_user_func($rf->getClosure(), 1));
 
-// Function
-$rf = new ReflectionFunction('foo');
-var_dump(call_user_func($rf->getClosure(), 1));
-
 // Closure
 $rf = new ReflectionFunction($foo);
 var_dump(call_user_func($rf->getClosure(), 1));

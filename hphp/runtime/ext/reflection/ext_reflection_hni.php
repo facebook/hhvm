@@ -595,7 +595,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       return hphp_invoke_method($this->closure, get_class($this->closure),
                                 '__invoke', $args);
     }
-    return hphp_invoke($this->getName(), $args);
+    throw new ReflectionException(__FUNCTION__."() on top-level functions is no longer supported");
   }
 
   /**
@@ -614,7 +614,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       return hphp_invoke_method($this->closure, get_class($this->closure),
                                 '__invoke', array_values($args));
     }
-    return hphp_invoke($this->getName(), array_values($args));
+    throw new ReflectionException(__FUNCTION__."() on top-level functions is no longer supported");
   }
 
   /**

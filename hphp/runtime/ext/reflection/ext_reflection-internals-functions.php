@@ -12,16 +12,6 @@
 function hphp_get_extension_info(string $name)[]: darray<string, mixed>;
 
 /**
- * hphp_invoke() - Used by ReflectionFunction to invoke a function.
- *
- * @param string $name        - The name of the function.
- * @param Traversable $params - The parameters to pass to the function.
- * @return mixed - The result of the invoked function.
- */
-<<__Native("NoInjection", "NoRecording")>>
-function hphp_invoke(string $name, mixed $params): mixed;
-
-/**
  * hphp_invoke_method() - Used by ReflectionMethod to invoke a method and by
  *                        ReflectionFunction to invoke a closure.
  *

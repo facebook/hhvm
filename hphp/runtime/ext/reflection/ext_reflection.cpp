@@ -373,10 +373,6 @@ static const Class* get_prototype_class_from_interfaces(const Class *cls,
   return nullptr;
 }
 
-Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
-  return invoke(name, params);
-}
-
 static const StaticString s_invoke_not_instanceof_error(
   "Given object is not an instance of the class this method was declared in"
 );
@@ -2390,7 +2386,6 @@ struct ReflectionExtension final : Extension {
     HHVM_FE(hphp_get_extension_info);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);
-    HHVM_FE(hphp_invoke);
     HHVM_FE(hphp_invoke_method);
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);

@@ -135,13 +135,6 @@ function entrypoint_reflection(): void {
   var_dump(ReflectionFunction::export('f', true));
   print "\n";
 
-  $rg = new ReflectionFunction("g");
-
-  print "--- invoke(\"g\") ---\n";
-  var_dump($rg->invoke("a", "b"));
-  var_dump($rg->invoke("a", "b"));
-  print "\n";
-
   print "--- export(\"g\") ---\n";
   var_dump(ReflectionFunction::export('g', true));
   print "\n";

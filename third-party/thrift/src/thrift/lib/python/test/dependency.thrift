@@ -16,7 +16,7 @@
 
 namespace py3 testing
 
-include "thrift/lib/py3/test/sub_dependency.thrift"
+include "thrift/lib/python/test/sub_dependency.thrift"
 
 struct IncludedStruct {
   1: sub_dependency.Basic val;

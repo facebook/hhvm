@@ -17,8 +17,8 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
-include "thrift/lib/py3/test/dependency.thrift"
-include "thrift/lib/py3/test/sub_dependency.thrift"
+include "thrift/lib/python/test/dependency.thrift"
+include "thrift/lib/python/test/sub_dependency.thrift"
 
 cpp_include "<deque>"
 cpp_include "folly/container/F14Map.h"

@@ -17,7 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
-#include <thrift/lib/py3/test/gen-cpp2/TestingService.tcc>
+#include <thrift/lib/python/test/gen-cpp2/TestingService.tcc>
 
 namespace thrift::py3::test {
 

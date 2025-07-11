@@ -79,6 +79,7 @@ void printUsage() {
     << " -vmodule m1=N,...        (set per-module verbose log level for VLOG macros. Default: none)\n"
     << " -http                    (run a crude HTTP server that returns stats for GET requests. Default: false)\n"
     << " -delegatedcred cred      (use a delegated credential. If set, -cert and -key must also be set. Default: none)\n"
+    << " -no_session_tickets      (disable sending session tickets after handshake. Default: false)\n"
     << " -ech                     (use default values to simulate the sending of an encrypted client hello.)\n"
     << " -echconfigs file         (path to read ECH configs to use when decrypting an encrypted client hello.)\n"
     << "                          (If more than 1 ECH config is provided, the first config will be used.)\n"
@@ -672,6 +673,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
   bool ech = false;
   std::string echConfigsFile;
   std::string echPrivateKeyFile;
+  bool noSessionTickets = false;
   bool uring = false;
   bool uringAsync = false;
   bool uringRegisterFds = false;
@@ -744,6 +746,9 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     }}},
     {"-delegatedcred", {true, [&credPath](const std::string& arg) {
         credPath = arg;
+    }}},
+    {"-no_session_tickets", {false, [&noSessionTickets](const std::string&) {
+        noSessionTickets = true;
     }}},
     {"-ech", {false, [&ech](const std::string&) {
         ech = true;
@@ -1161,6 +1166,11 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
   serverContext->setSupportedVersions(
       {ProtocolVersion::tls_1_3, ProtocolVersion::tls_1_3_28});
+
+  if (noSessionTickets) {
+    serverContext->setSendNewSessionTicket(false);
+  }
+
   FizzServerAcceptor acceptor(
       port, serverContext, loop, &evb, sslContext, uringAsync);
   if (!keyLogFile.empty()) {

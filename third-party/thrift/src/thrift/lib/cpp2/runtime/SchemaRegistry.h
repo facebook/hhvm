@@ -145,15 +145,12 @@ class SchemaRegistry : public type_system::TypeSystem {
       type_system::UriView uri) const override {
     return getTypeSystemDefinitionRefByUri(uri);
   }
-  // Only types defined in a file with the `any` cpp2 compiler option enabled
-  // will be included here.
-  folly::F14FastSet<type_system::Uri> getKnownUris() const override {
-    folly::F14FastSet<type_system::Uri> ret;
-    ret.reserve(base_.rawSchemasByUri_.size());
-    for (const auto& [uri, _] : base_.rawSchemasByUri_) {
-      ret.insert(type_system::Uri(uri));
-    }
-    return ret;
+  std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
+      const override {
+    // The SchemaRegistry should not be serialized. So we pessimitically return
+    // an empty optional even though we can enumerate all URIs for files with
+    // the `any` cpp2 compiler option enabled.
+    return std::nullopt;
   }
 
   using Ptr = std::shared_ptr<type::Schema>;

@@ -124,7 +124,7 @@ SerializableThriftSourceInfo makeSourceInfo(
 void expectKnownUris(
     const TypeSystem& typeSystem, std::initializer_list<Uri> uris) {
   folly::F14FastSet<Uri> expectedUris{uris.begin(), uris.end()};
-  const auto knownUris = typeSystem.getKnownUris();
+  const auto knownUris = *typeSystem.getKnownUris();
   EXPECT_EQ(expectedUris, knownUris);
 }
 

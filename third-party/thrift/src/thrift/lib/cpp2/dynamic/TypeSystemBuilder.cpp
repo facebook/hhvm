@@ -50,7 +50,7 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
     return std::nullopt;
   }
 
-  folly::F14FastSet<Uri> getKnownUris() const final {
+  std::optional<folly::F14FastSet<Uri>> getKnownUris() const final {
     folly::F14FastSet<Uri> result;
     result.reserve(definitions.size());
     for (const auto& [uri, _] : definitions) {

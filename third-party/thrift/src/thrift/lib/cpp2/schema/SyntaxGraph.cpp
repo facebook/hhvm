@@ -715,11 +715,12 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     return const_cast<TypeSystemFacade&>(*this).convertUserDefinedType(def);
   }
 
-  folly::F14FastSet<type_system::Uri> getKnownUris() const override {
+  std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
+      const override {
     // This is only used for serializing the type system, which is already not
     // guaranteed to be possible as we don't require URIs for all user-defined
     // types.
-    return {};
+    return std::nullopt;
   }
 
   // Convert the definition to TypeSystem's representation.

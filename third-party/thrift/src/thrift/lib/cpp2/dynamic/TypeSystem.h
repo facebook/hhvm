@@ -34,6 +34,7 @@
 #include <fmt/core.h>
 
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -208,15 +209,15 @@ class TypeSystem {
    * Generates a set of all user-defined type URIs currently known to the type
    * system.
    *
-   * For every URI returned by this method, `getUserDefinedType` must succeed.
-   * However, the converse is not true — `getUserDefinedType` may succeed for
-   * types whose URI is not returned by this method.
+   * For every URI returned by this function, `getUserDefinedType` must succeed.
+   * For every URI that is NOT returned by this function, `getUserDefinedType`
+   * must fail.
    *
-   * In practice, many `TypeSystem` implementations will have a direct 1:1
-   * mapping between `getKnownUris` and `getUserDefinedType`. This is a useful
-   * guarantee because it allows the caller to traverse the full `TypeSystem`.
+   * If the set of URIs is not finitely enumerable, then this function should
+   * return an empty optional. Note that such TypeSystem implementations are not
+   * serializable.
    */
-  virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
+  virtual std::optional<folly::F14FastSet<Uri>> getKnownUris() const = 0;
 };
 
 /**

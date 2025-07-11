@@ -78,9 +78,9 @@ async function main(): Awaitable<void> {
     };
 
     $tasks = vec[
-      async () ==> await $create_task(0, 300),
-      async () ==> await $create_task(1, 100),
-      async () ==> await $create_task(2, 200),
+      async () ==> await $create_task(0, 3000),
+      async () ==> await $create_task(1, 1000),
+      async () ==> await $create_task(2, 2000),
     ];
 
     $runner = new PrioritizedTasks<int>($tasks);

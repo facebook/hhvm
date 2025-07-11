@@ -11,7 +11,7 @@ function main_test_curl_multi_except() :mixed{
 
   curl_setopt($ch1, CURLOPT_URL, $url);
   curl_setopt($ch1, CURLOPT_HEADER, 0);
-  curl_setopt($ch1, CURLOPT_WRITEFUNCTION, 'except');
+  curl_setopt($ch1, CURLOPT_WRITEFUNCTION, HH\dynamic_fun('except'));
   curl_setopt($ch2, CURLOPT_URL, $url);
   curl_setopt($ch2, CURLOPT_HEADER, 0);
 

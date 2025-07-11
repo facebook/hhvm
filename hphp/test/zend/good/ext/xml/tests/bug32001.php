@@ -15,7 +15,7 @@ class testcase {
 	}
 
 	function start_element($parser, $name, $attrs) :mixed{
-		$attrs = array_map('bin2hex', $attrs);
+		$attrs = array_map(HH\dynamic_fun('bin2hex'), $attrs);
 		$this->tags[] = bin2hex($name).": ".implode(', ', $attrs);
 	}
 

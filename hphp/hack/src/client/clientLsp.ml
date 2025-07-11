@@ -1087,7 +1087,7 @@ let document_symbol_location_of_symbol
     Lsp.Location.t =
   let full_pos = symbol.span in
   (* By convention, symbol.pos is the position of the name. See FileOutline.ml *)
-  let line_with_name_pos = Pos.set_col_start 0 symbol.pos in
+  let line_with_name_pos = symbol.pos in
   let pos =
     (* By convention, symbol.span position of the full decl, including attributes. *)
     if Pos.start_offset line_with_name_pos < Pos.start_offset symbol.span then

@@ -2361,7 +2361,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 63, "character": 0},
+                                "start": {"line": 63, "character": 9},
                                 "end": {"line": 65, "character": 1},
                             },
                         },
@@ -2386,7 +2386,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 57, "character": 0},
+                                "start": {"line": 57, "character": 18},
                                 "end": {"line": 57, "character": 32},
                             },
                         },
@@ -2399,7 +2399,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 55, "character": 0},
+                                "start": {"line": 55, "character": 10},
                                 "end": {"line": 61, "character": 1},
                             },
                         },
@@ -2422,7 +2422,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 48, "character": 0},
+                                "start": {"line": 48, "character": 6},
                                 "end": {"line": 48, "character": 24},
                             },
                         },
@@ -2433,7 +2433,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 28, "character": 0},
+                                "start": {"line": 28, "character": 9},
                                 "end": {"line": 34, "character": 1},
                             },
                         },
@@ -2445,7 +2445,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 17, "character": 0},
+                                "start": {"line": 17, "character": 6},
                                 "end": {"line": 18, "character": 1},
                             },
                         },
@@ -2456,7 +2456,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 6, "character": 0},
+                                "start": {"line": 6, "character": 9},
                                 "end": {"line": 8, "character": 1},
                             },
                         },
@@ -2468,7 +2468,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 2, "character": 0},
+                                "start": {"line": 2, "character": 9},
                                 "end": {"line": 4, "character": 1},
                             },
                         },
@@ -2480,7 +2480,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 10, "character": 0},
+                                "start": {"line": 10, "character": 6},
                                 "end": {"line": 12, "character": 1},
                             },
                         },
@@ -2491,7 +2491,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 11, "character": 2},
+                                "start": {"line": 11, "character": 18},
                                 "end": {"line": 11, "character": 40},
                             },
                         },
@@ -2504,7 +2504,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 14, "character": 0},
+                                "start": {"line": 14, "character": 6},
                                 "end": {"line": 15, "character": 1},
                             },
                         },
@@ -2515,7 +2515,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 20, "character": 0},
+                                "start": {"line": 20, "character": 6},
                                 "end": {"line": 24, "character": 1},
                             },
                         },
@@ -2526,7 +2526,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 21, "character": 2},
+                                "start": {"line": 21, "character": 18},
                                 "end": {"line": 23, "character": 3},
                             },
                         },
@@ -2539,7 +2539,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 26, "character": 0},
+                                "start": {"line": 26, "character": 6},
                                 "end": {"line": 26, "character": 11},
                             },
                         },
@@ -2550,7 +2550,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 36, "character": 0},
+                                "start": {"line": 36, "character": 6},
                                 "end": {"line": 38, "character": 1},
                             },
                         },
@@ -2561,7 +2561,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 37, "character": 2},
+                                "start": {"line": 37, "character": 18},
                                 "end": {"line": 37, "character": 43},
                             },
                         },
@@ -2574,7 +2574,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 40, "character": 0},
+                                "start": {"line": 40, "character": 6},
                                 "end": {"line": 42, "character": 1},
                             },
                         },
@@ -2598,7 +2598,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 44, "character": 0},
+                                "start": {"line": 44, "character": 9},
                                 "end": {"line": 46, "character": 1},
                             },
                         },
@@ -2610,7 +2610,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 49, "character": 0},
+                                "start": {"line": 49, "character": 11},
                                 "end": {"line": 52, "character": 1},
                             },
                         },
@@ -2633,7 +2633,7 @@ class TestLsp(LspTestBase):
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 60, "character": 25},
+                                "start": {"line": 60, "character": 55},
                                 "end": {"line": 60, "character": 69},
                             },
                         },
@@ -6798,7 +6798,7 @@ function aaa(): string {
                         "location": {
                             "uri": "file://${root_path}/beforeInit2.php",
                             "range": {
-                                "start": {"line": 1, "character": 0},
+                                "start": {"line": 1, "character": 9},
                                 "end": {"line": 3, "character": 1},
                             },
                         },
@@ -7726,7 +7726,7 @@ function baz<T>(readonly T $x): readonly T {
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 11, "character": 0},
+                                "start": {"line": 11, "character": 9},
                                 "end": {"line": 13, "character": 1},
                             },
                         },
@@ -7738,7 +7738,7 @@ function baz<T>(readonly T $x): readonly T {
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 8, "character": 2},
+                                "start": {"line": 8, "character": 31},
                                 "end": {"line": 8, "character": 56},
                             },
                         },
@@ -7777,7 +7777,7 @@ function baz<T>(readonly T $x): readonly T {
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 1, "character": 0},
+                                "start": {"line": 1, "character": 6},
                                 "end": {"line": 9, "character": 1},
                             },
                         },
@@ -7788,7 +7788,7 @@ function baz<T>(readonly T $x): readonly T {
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 3, "character": 2},
+                                "start": {"line": 3, "character": 13},
                                 "end": {"line": 3, "character": 21},
                             },
                         },
@@ -7801,7 +7801,7 @@ function baz<T>(readonly T $x): readonly T {
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 5, "character": 2},
+                                "start": {"line": 5, "character": 27},
                                 "end": {"line": 7, "character": 3},
                             },
                         },

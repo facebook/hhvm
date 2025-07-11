@@ -22,7 +22,7 @@
 #include <folly/executors/GlobalExecutor.h>
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
-#include <thrift/lib/cpp2/async/ServerGeneratorStream.h>
+#include <thrift/lib/cpp2/async/ServerGeneratorStreamBridge.h>
 #include <thrift/lib/cpp2/async/ServerPublisherStream.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
@@ -48,12 +48,12 @@ class ServerStream {
 
 #if FOLLY_HAS_COROUTINES
   /* implicit */ ServerStream(folly::coro::AsyncGenerator<T&&>&& gen)
-      : fn_(apache::thrift::detail::ServerGeneratorStream::
+      : fn_(apache::thrift::detail::ServerGeneratorStreamBridge::
                 fromAsyncGenerator<false, T>(std::move(gen))) {}
 
   /* implicit */ ServerStream(
       folly::coro::AsyncGenerator<MessageVariant&&>&& gen)
-      : fn_(apache::thrift::detail::ServerGeneratorStream::
+      : fn_(apache::thrift::detail::ServerGeneratorStreamBridge::
                 fromAsyncGenerator<true, T>(std::move(gen))) {}
 
   using promise_type = folly::coro::detail::AsyncGeneratorPromise<T&&, T>;

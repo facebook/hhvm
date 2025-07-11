@@ -310,7 +310,8 @@ ServerStream<int32_t> TestStreamMultiPublisherWithHeaderService::range(
   return stream;
 }
 
-class TestProducerCallback : public ServerGeneratorStream::ProducerCallback {
+class TestProducerCallback
+    : public ServerGeneratorStreamBridge::ProducerCallback {
  public:
   TestProducerCallback(
       int32_t from,
@@ -324,7 +325,7 @@ class TestProducerCallback : public ServerGeneratorStream::ProducerCallback {
         executor_(executor),
         encoder_(encoder) {}
 
-  void provideStream(ServerGeneratorStream::Ptr stream) override {
+  void provideStream(ServerGeneratorStreamBridge::Ptr stream) override {
     stream_ = std::move(stream);
     executor_->add([this] { run(); });
   }
@@ -379,7 +380,7 @@ class TestProducerCallback : public ServerGeneratorStream::ProducerCallback {
   int32_t to_;
   uint64_t credits_{0};
   folly::exception_wrapper ew_;
-  ServerGeneratorStream::Ptr stream_;
+  ServerGeneratorStreamBridge::Ptr stream_;
   folly::Executor::KeepAlive<> executor_;
   StreamElementEncoder<int32_t>* encoder_;
 };
@@ -390,24 +391,26 @@ ServerStream<int32_t> TestStreamProducerCallbackService::range(
       [from, to](
           folly::Executor::KeepAlive<> executor,
           StreamElementEncoder<int32_t>* encoder) mutable {
-        return ServerGeneratorStream::fromProducerCallback(
+        return ServerGeneratorStreamBridge::fromProducerCallback(
             new TestProducerCallback(from, to, {}, executor, encoder));
       });
 }
 
 ServerStream<int32_t> TestStreamProducerCallbackService::rangeThrow(
     int32_t from, int32_t to) {
-  return ServerStream<int32_t>([from, to](
-                                   folly::Executor::KeepAlive<> executor,
-                                   StreamElementEncoder<int32_t>*
-                                       encoder) mutable {
-    return ServerGeneratorStream::fromProducerCallback(new TestProducerCallback(
-        from,
-        to,
-        folly::make_exception_wrapper<std::runtime_error>("I am a search bar"),
-        executor,
-        encoder));
-  });
+  return ServerStream<int32_t>(
+      [from, to](
+          folly::Executor::KeepAlive<> executor,
+          StreamElementEncoder<int32_t>* encoder) mutable {
+        return ServerGeneratorStreamBridge::fromProducerCallback(
+            new TestProducerCallback(
+                from,
+                to,
+                folly::make_exception_wrapper<std::runtime_error>(
+                    "I am a search bar"),
+                executor,
+                encoder));
+      });
 }
 
 ServerStream<int32_t> TestStreamProducerCallbackService::rangeThrowUDE(
@@ -416,7 +419,7 @@ ServerStream<int32_t> TestStreamProducerCallbackService::rangeThrowUDE(
       [from, to](
           folly::Executor::KeepAlive<> executor,
           StreamElementEncoder<int32_t>* encoder) mutable {
-        return ServerGeneratorStream::fromProducerCallback(
+        return ServerGeneratorStreamBridge::fromProducerCallback(
             new TestProducerCallback(
                 from,
                 to,

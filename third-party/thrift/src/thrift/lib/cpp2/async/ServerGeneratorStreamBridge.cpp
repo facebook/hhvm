@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/async/ServerGeneratorStream.h>
+#include <thrift/lib/cpp2/async/ServerGeneratorStreamBridge.h>
 
 namespace apache::thrift::detail {
 
-// Explicitly instantiate the base of ServerGeneratorStream
+// Explicitly instantiate the base of ServerGeneratorStreamBridge
 template class TwoWayBridge<
-    ServerGeneratorStream,
+    ServerGeneratorStreamBridge,
     folly::Try<StreamPayload>,
     ServerStreamConsumer,
     int64_t,
-    ServerGeneratorStream>;
+    ServerGeneratorStreamBridge>;
 
-ServerGeneratorStream::ServerGeneratorStream(
+ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
     StreamClientCallback* clientCallback, folly::EventBase* clientEb)
     : streamClientCallback_(clientCallback), clientEventBase_(clientEb) {}
 
-ServerGeneratorStream::~ServerGeneratorStream() {}
+ServerGeneratorStreamBridge::~ServerGeneratorStreamBridge() {}
 
-/* static */ ServerStreamFactory ServerGeneratorStream::fromProducerCallback(
-    ProducerCallback* cb) {
+/* static */ ServerStreamFactory
+ServerGeneratorStreamBridge::fromProducerCallback(ProducerCallback* cb) {
   return ServerStreamFactory([cb](
                                  FirstResponsePayload&& payload,
                                  StreamClientCallback* callback,
@@ -41,7 +41,7 @@ ServerGeneratorStream::~ServerGeneratorStream() {}
                                  TilePtr&&,
                                  ContextStack::UniquePtr) mutable {
     DCHECK(clientEb->isInEventBaseThread());
-    auto stream = new ServerGeneratorStream(callback, clientEb);
+    auto stream = new ServerGeneratorStreamBridge(callback, clientEb);
     std::ignore =
         callback->onFirstResponse(std::move(payload), clientEb, stream);
     cb->provideStream(stream->copy());
@@ -49,31 +49,32 @@ ServerGeneratorStream::~ServerGeneratorStream() {}
   });
 }
 
-void ServerGeneratorStream::consume() {
+void ServerGeneratorStreamBridge::consume() {
   clientEventBase_->add([this]() { processPayloads(); });
 }
-void ServerGeneratorStream::canceled() {
+void ServerGeneratorStreamBridge::canceled() {
   Ptr(this);
 }
 
-bool ServerGeneratorStream::wait(ServerStreamConsumer* consumer) {
+bool ServerGeneratorStreamBridge::wait(ServerStreamConsumer* consumer) {
   return serverWait(consumer);
 }
 
-void ServerGeneratorStream::publish(folly::Try<StreamPayload>&& payload) {
+void ServerGeneratorStreamBridge::publish(folly::Try<StreamPayload>&& payload) {
   serverPush(std::move(payload));
 }
 
-ServerGeneratorStream::ServerQueue ServerGeneratorStream::getMessages() {
+ServerGeneratorStreamBridge::ServerQueue
+ServerGeneratorStreamBridge::getMessages() {
   return serverGetMessages();
 }
 
-bool ServerGeneratorStream::onStreamRequestN(uint64_t credits) {
+bool ServerGeneratorStreamBridge::onStreamRequestN(uint64_t credits) {
   clientPush(std::move(credits));
   return true;
 }
 
-void ServerGeneratorStream::onStreamCancel() {
+void ServerGeneratorStreamBridge::onStreamCancel() {
 #if FOLLY_HAS_COROUTINES
   cancelSource_.requestCancellation();
 #endif
@@ -81,20 +82,20 @@ void ServerGeneratorStream::onStreamCancel() {
   clientClose();
 }
 
-void ServerGeneratorStream::resetClientCallback(
+void ServerGeneratorStreamBridge::resetClientCallback(
     StreamClientCallback& clientCallback) {
   streamClientCallback_ = &clientCallback;
 }
 
-void ServerGeneratorStream::pauseStream() {
+void ServerGeneratorStreamBridge::pauseStream() {
   clientPush(detail::StreamControl::PAUSE);
 }
 
-void ServerGeneratorStream::resumeStream() {
+void ServerGeneratorStreamBridge::resumeStream() {
   clientPush(detail::StreamControl::RESUME);
 }
 
-void ServerGeneratorStream::processPayloads() {
+void ServerGeneratorStreamBridge::processPayloads() {
   clientEventBase_->dcheckIsInEventBaseThread();
   while (!clientWait(this)) {
     for (auto messages = clientGetMessages(); !messages.empty();
@@ -122,7 +123,7 @@ void ServerGeneratorStream::processPayloads() {
   }
 }
 
-void ServerGeneratorStream::close() {
+void ServerGeneratorStreamBridge::close() {
   serverClose();
 }
 } // namespace apache::thrift::detail

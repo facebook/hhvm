@@ -18,8 +18,8 @@ namespace apache::thrift::detail {
 
 #if FOLLY_HAS_COROUTINES
 template <bool WithHeader, typename T>
-folly::coro::Task<> ServerGeneratorStream::fromAsyncGeneratorImpl(
-    std::unique_ptr<ServerGeneratorStream, Deleter> stream,
+folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
+    std::unique_ptr<ServerGeneratorStreamBridge, Deleter> stream,
     StreamElementEncoder<T>* encode,
     folly::coro::AsyncGenerator<
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
@@ -129,7 +129,7 @@ folly::coro::Task<> ServerGeneratorStream::fromAsyncGeneratorImpl(
 }
 
 template <bool WithHeader, typename T>
-ServerStreamFn<T> ServerGeneratorStream::fromAsyncGenerator(
+ServerStreamFn<T> ServerGeneratorStreamBridge::fromAsyncGenerator(
     folly::coro::AsyncGenerator<
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&>&& gen) {
   return [gen = std::move(gen)](
@@ -145,7 +145,7 @@ ServerStreamFn<T> ServerGeneratorStream::fromAsyncGenerator(
                                    ContextStack::UniquePtr
                                        contextStack) mutable {
       DCHECK(clientEb->isInEventBaseThread());
-      auto stream = new ServerGeneratorStream(callback, clientEb);
+      auto stream = new ServerGeneratorStreamBridge(callback, clientEb);
       auto streamPtr = stream->copy();
       fromAsyncGeneratorImpl<WithHeader>(
           std::move(streamPtr),

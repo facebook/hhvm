@@ -50,23 +50,23 @@ struct StreamControl {
   enum Code : int32_t { CANCEL = -1, PAUSE = -2, RESUME = -3 };
 };
 
-class ServerGeneratorStream;
+class ServerGeneratorStreamBridge;
 
-// This template explicitly instantiated in ServerGeneratorStream.cpp
+// This template explicitly instantiated in ServerGeneratorStreamBridge.cpp
 extern template class TwoWayBridge<
-    ServerGeneratorStream,
+    ServerGeneratorStreamBridge,
     folly::Try<StreamPayload>,
     ServerStreamConsumer,
     int64_t,
-    ServerGeneratorStream>;
+    ServerGeneratorStreamBridge>;
 
-class ServerGeneratorStream : public TwoWayBridge<
-                                  ServerGeneratorStream,
-                                  folly::Try<StreamPayload>,
-                                  ServerStreamConsumer,
-                                  int64_t,
-                                  ServerGeneratorStream>,
-                              private StreamServerCallback {
+class ServerGeneratorStreamBridge : public TwoWayBridge<
+                                        ServerGeneratorStreamBridge,
+                                        folly::Try<StreamPayload>,
+                                        ServerStreamConsumer,
+                                        int64_t,
+                                        ServerGeneratorStreamBridge>,
+                                    private StreamServerCallback {
  public:
   class ProducerCallback {
    public:
@@ -81,13 +81,13 @@ class ServerGeneratorStream : public TwoWayBridge<
   };
   static ServerStreamFactory fromProducerCallback(ProducerCallback* cb);
 
-  ~ServerGeneratorStream() override;
+  ~ServerGeneratorStreamBridge() override;
 
 #if FOLLY_HAS_COROUTINES
  private:
   template <bool WithHeader, typename T>
   static folly::coro::Task<> fromAsyncGeneratorImpl(
-      std::unique_ptr<ServerGeneratorStream, Deleter> stream,
+      std::unique_ptr<ServerGeneratorStreamBridge, Deleter> stream,
       StreamElementEncoder<T>* encode,
       folly::coro::AsyncGenerator<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
@@ -114,7 +114,7 @@ class ServerGeneratorStream : public TwoWayBridge<
   void publish(folly::Try<StreamPayload>&& payload);
 
  private:
-  ServerGeneratorStream(
+  ServerGeneratorStreamBridge(
       StreamClientCallback* clientCallback, folly::EventBase* clientEb);
 
   bool onStreamRequestN(uint64_t credits) override;
@@ -140,4 +140,4 @@ class ServerGeneratorStream : public TwoWayBridge<
 
 } // namespace apache::thrift::detail
 
-#include <thrift/lib/cpp2/async/ServerGeneratorStream-inl.h>
+#include <thrift/lib/cpp2/async/ServerGeneratorStreamBridge-inl.h>

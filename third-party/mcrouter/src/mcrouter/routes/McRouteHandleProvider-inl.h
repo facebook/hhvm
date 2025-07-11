@@ -616,6 +616,12 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
         jHashRoute["bucketize"] = true;
       }
     }
+    if (auto* jWeightsRvSalt = json.get_ptr("weights_rv_salt")) {
+      checkLogic(
+          jWeightsRvSalt->isString(),
+          "SRRoute: 'weights_rv_salt' is not string");
+      jHashRoute["salt"] = jWeightsRvSalt->getString();
+    }
     route = createHashRoute<RouterInfo>(
         std::move(jHashRoute),
         {route, makeNullRoute(factory, folly::dynamic::object())},

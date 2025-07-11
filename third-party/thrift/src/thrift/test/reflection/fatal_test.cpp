@@ -20,8 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 FATAL_S(cpp_s, "cpp");
 FATAL_S(cpp_ns, "test_cpp1::cpp_reflection");
@@ -141,13 +140,11 @@ TEST(fatal, tags) {
       reflection_tags::services::service_with_special_names>();
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection
 
 #include <thrift/test/reflection/gen-cpp2/reflection_fatal_all.h>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 TEST(reflection, is_reflectable_struct) {
   EXPECT_SAME<
@@ -330,5 +327,4 @@ TEST(reflection, reflect_type_class_of_thrift_class) {
       apache::thrift::reflect_type_class_of_thrift_class<struct3>>();
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

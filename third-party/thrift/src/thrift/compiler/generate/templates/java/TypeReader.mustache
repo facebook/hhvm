@@ -27,7 +27,7 @@
     }}{{#type:set?}}Readers.setReader({{!
         }}{{#type:set_elem_type}}{{> TypeReader }}{{/type:set_elem_type}}{{!
     }}){{/type:set?}}{{!
-    }}{{#type:struct?}}Readers.wrap({{> BoxedType}}.asReader()){{/type:struct?}}{{!
+    }}{{#type:structured?}}Readers.wrap({{> BoxedType}}.asReader()){{/type:structured?}}{{!
     }}{{#type:enum?}}Readers.wrap({{> BoxedType}}.asReader()){{/type:enum?}}{{!
     }}{{#type:binary?}}Readers.binaryReader(){{/type:binary?}}{{!
     }}{{#type:string?}}Readers.stringReader(){{/type:string?}}{{!

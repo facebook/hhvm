@@ -40,7 +40,7 @@ var GoUnusedProtection__ int
 }}{{^constant:var?}}const {{/constant:var?}}{{!
 }}{{constant:go_name}} {{!
   }}{{#constant:type}}{{!
-    }}{{#type:struct?}}*{{/type:struct?}}{{> common/type}} = {{!
+    }}{{#type:structured?}}*{{/type:structured?}}{{> common/type}} = {{!
     }}{{#constant:value}}{{!
       }}{{> const/value}}{{!
     }}{{/constant:value}}

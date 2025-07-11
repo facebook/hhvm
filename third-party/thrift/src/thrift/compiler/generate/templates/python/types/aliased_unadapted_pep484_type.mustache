@@ -22,10 +22,10 @@ This is useful for typing call paterns since it allows python container types OR
 thrift-python specific container types.
 
 }}{{> types/unadapted_builtin_pep484_type}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
     }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{> private/alias_prefix}}{{struct:py_name}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:list?}}{{> types/sequence }}[{{!
     }}{{#type:list_elem_type}}{{> types/aliased_pep484_type}}{{/type:list_elem_type}}{{!
 }}]{{/type:list?}}{{!

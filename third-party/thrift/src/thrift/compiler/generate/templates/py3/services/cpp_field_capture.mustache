@@ -37,6 +37,6 @@ need to be moved to the called function.
         }}{{^function:stack_arguments?}}std::move({{field:cppName}}){{/function:stack_arguments?}}{{!
     }}{{/type:iobufRef?}}{{!
 }}{{/type:binary?}}{{!
-}}{{#type:struct?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:struct?}}{{!
+}}{{#type:structured?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:structured?}}{{!
 }}{{#type:container?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:container?}}{{!
 }}{{#type:enum?}}{{field:cppName}}{{/type:enum?}}

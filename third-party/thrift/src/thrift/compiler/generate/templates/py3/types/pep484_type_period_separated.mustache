@@ -21,10 +21,10 @@ This is for pep 484 typing but with period separated module path
 This is useful for typing call paterns since it allows python container types OR
 thrift-py3 specific container types.
 
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
   }}{{struct:name}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/pep484_containers_period_separated}}{{!
 }}{{/type:container?}}{{!
@@ -32,4 +32,4 @@ thrift-py3 specific container types.
   }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
   }}{{enum:name}}{{!
 }}{{/type:enum}}{{!
-}}{{^type:struct}}{{^type:container?}}{{^type:enum}}{{> types/pep484_type }}{{/type:enum}}{{/type:container?}}{{/type:struct}}
+}}{{^type:structured}}{{^type:container?}}{{^type:enum}}{{> types/pep484_type }}{{/type:enum}}{{/type:container?}}{{/type:structured}}

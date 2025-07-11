@@ -36,14 +36,14 @@
     }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
     }}{{^type:rust}}::std::vec::Vec<::std::primitive::u8>{{/type:rust}}{{!
 }}{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
     }}{{#struct:has_adapter?}}{{!
         }}{{struct:package}}::unadapted::{{struct:rust_name}}{{!
     }}{{/struct:has_adapter?}}{{!
     }}{{^struct:has_adapter?}}{{!
         }}{{struct:package}}::{{struct:rust_name}}{{!
     }}{{/struct:has_adapter?}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:enum}}{{!
     }}{{enum:package}}::{{enum:rust_name}}{{!
 }}{{/type:enum}}{{!

@@ -24,9 +24,9 @@ pub mod adapters {
         }}{{#typedef:has_adapter?}}{{> lib/adapter/name}}{{/typedef:has_adapter?}}{{!
       }}{{/type:typedef}}{{!
       }}{{^type:typedef}}{{!
-          }}{{#type:struct}}{{!
+          }}{{#type:structured}}{{!
               }}{{#struct:has_adapter?}}{{> lib/adapter/name}}{{/struct:has_adapter?}}{{!
-          }}{{/type:struct}}{{!
+          }}{{/type:structured}}{{!
       }}{{/type:typedef}}{{!
   }};
   {{/program:adapters}}

@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}{{#value:const_struct?}}cvStruct({{!
-}}{{#value:const_struct_type}}{{#type:struct}}"{{type:program_name}}.{{struct:name}}"{{/type:struct}}{{/value:const_struct_type}}, {{!
+}}{{#value:const_struct_type}}{{#type:structured}}"{{type:program_name}}.{{struct:name}}"{{/type:structured}}{{/value:const_struct_type}}, {{!
 }}{ {{#value:const_struct}}{"{{constant:name}}", {{#constant:value}}{{> metadata/const_value}}{{/constant:value}} }{{^last?}}, {{/last?}}{{!
 }}{{/value:const_struct}} }{{!
 }}){{/value:const_struct?}}{{^value:const_struct?}}{{!

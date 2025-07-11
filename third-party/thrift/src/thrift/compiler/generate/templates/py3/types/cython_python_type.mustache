@@ -34,13 +34,13 @@ in the client or server source rather than the type definition source.
 }}{{#type:float?}}float{{/type:float?}}{{!
 }}{{#type:string?}}str{{/type:string?}}{{!
 }}{{#type:binary?}}bytes{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#program:inplace_migrate?}}object{{/program:inplace_migrate?}}{{!
   }}{{^program:inplace_migrate?}}{{!
     }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
     }}{{struct:name}}{{!
   }}{{/program:inplace_migrate?}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}object{{/type:container?}}{{!
 }}{{#type:void?}}object{{/type:void?}}{{!
 }}{{#type:enum}}object{{/type:enum}}{{!

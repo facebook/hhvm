@@ -94,12 +94,12 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
         {{/type:enum?}}
         {{^type:enum?}}
         if not isinstance(_fbthrift_value, {{> types/python_is_instance_type}}):
-            {{#type:struct?}}
+            {{#type:structured?}}
             _fbthrift_value = _from_python_or_raise(_fbthrift_value, "{{field:py_name}}", {{> types/python_is_instance_type}})
-            {{/type:struct?}}
-            {{^type:struct?}}
+            {{/type:structured?}}
+            {{^type:structured?}}
             raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
-            {{/type:struct?}}
+            {{/type:structured?}}
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         _fbthrift_value = <{{> types/cython_python_type}}> _fbthrift_value

@@ -28,9 +28,9 @@ aliases for container flat names, i.e., List__i32
 }}{{#type:float?}}_fbthrift_python_types.typeinfo_float{{/type:float?}}{{!
 }}{{#type:string?}}_fbthrift_python_types.typeinfo_string{{/type:string?}}{{!
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{/type:iobuf?}}{{^type:iobuf?}}_fbthrift_python_types.typeinfo_binary{{/type:iobuf?}}{{/type:binary?}}{{!
-}}{{#type:struct}}_fbthrift_python_types.StructTypeInfo({{!
+}}{{#type:structured}}_fbthrift_python_types.StructTypeInfo({{!
   }}{{type:module_auto_migrate_path}}.{{struct:name}}){{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:list?}}_fbthrift_python_types.ListTypeInfo({{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
 }}{{#type:set?}}_fbthrift_python_types.SetTypeInfo({{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
 }}{{#type:map?}}_fbthrift_python_types.MapTypeInfo({{!

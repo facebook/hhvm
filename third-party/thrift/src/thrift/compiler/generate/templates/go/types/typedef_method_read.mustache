@@ -26,8 +26,8 @@
   Read function (with no receiver) which takes the alias (typedef) as an argument.
 
 }}
-func {{typedef:go_qualified_read_func}}(p thrift.Decoder) ({{#typedef:type}}{{#type:struct?}}*{{/type:struct?}}{{/typedef:type}}{{typedef:go_name}}, error) {
-    var decodeResult {{#typedef:type}}{{#type:struct?}}*{{/type:struct?}}{{/typedef:type}}{{typedef:go_name}}
+func {{typedef:go_qualified_read_func}}(p thrift.Decoder) ({{#typedef:type}}{{#type:structured?}}*{{/type:structured?}}{{/typedef:type}}{{typedef:go_name}}, error) {
+    var decodeResult {{#typedef:type}}{{#type:structured?}}*{{/type:structured?}}{{/typedef:type}}{{typedef:go_name}}
     decodeErr := func() error {
         {{#typedef:type}}
         {{> codec/decode}}

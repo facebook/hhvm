@@ -842,7 +842,7 @@ class mstch_type : public mstch_base {
             {"type:double?", &mstch_type::is_double},
             {"type:float?", &mstch_type::is_float},
             {"type:floating_point?", &mstch_type::is_floating_point},
-            {"type:struct?", &mstch_type::is_struct},
+            {"type:structured?", &mstch_type::is_structured},
             {"type:union?", &mstch_type::is_union},
             {"type:enum?", &mstch_type::is_enum},
             {"type:base?", &mstch_type::is_base},
@@ -851,7 +851,7 @@ class mstch_type : public mstch_base {
             {"type:set?", &mstch_type::is_set},
             {"type:map?", &mstch_type::is_map},
             {"type:typedef?", &mstch_type::is_typedef},
-            {"type:struct", &mstch_type::get_struct},
+            {"type:structured", &mstch_type::get_structured},
             {"type:enum", &mstch_type::get_enum},
             {"type:list_elem_type", &mstch_type::get_list_type},
             {"type:set_elem_type", &mstch_type::get_set_type},
@@ -884,9 +884,7 @@ class mstch_type : public mstch_base {
   mstch::node is_floating_point() {
     return resolved_type_->is_floating_point();
   }
-  // TODO(T219861020): Evaluate if unions should be here and rename method as
-  // neccessary.
-  mstch::node is_struct() { return resolved_type_->is<t_structured>(); }
+  mstch::node is_structured() { return resolved_type_->is<t_structured>(); }
   mstch::node is_union() { return resolved_type_->is<t_union>(); }
   mstch::node is_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node is_base() { return resolved_type_->is<t_primitive_type>(); }
@@ -896,7 +894,7 @@ class mstch_type : public mstch_base {
   mstch::node is_map() { return resolved_type_->is<t_map>(); }
   mstch::node is_typedef() { return type_->is<t_typedef>(); }
   virtual std::string get_type_namespace(const t_program*) { return ""; }
-  mstch::node get_struct();
+  mstch::node get_structured();
   mstch::node get_enum();
   mstch::node get_list_type();
   mstch::node get_set_type();

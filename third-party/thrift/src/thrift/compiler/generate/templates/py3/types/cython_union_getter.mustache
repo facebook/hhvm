@@ -74,11 +74,11 @@ else:
     }}{{> types/python_type}}, {{!
     }}<int>deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
 }}{{/type:enum}}{{!
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}self.py_value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value())){{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
 }}self.py_value = {{> types/container_from_cpp }}({{!
   }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
@@ -140,11 +140,11 @@ else:
     }}{{> types/python_type}}, {{!
     }}<int>deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!
 }}{{/type:enum}}{{!
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}self.py_value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}())){{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
 }}self.py_value = {{> types/container_from_cpp}}({{!
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!

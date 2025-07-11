@@ -57,9 +57,9 @@
   }}{{#type:list?}}make({{> common/type}}, 0){{/type:list?}}{{!
   }}{{#type:set?}}make({{> common/type}}, 0){{/type:set?}}{{!
   }}{{#type:map?}}make({{> common/type}}){{/type:map?}}{{!
-  }}{{#type:struct?}}{{!
-    }}{{#type:struct}}{{!
+  }}{{#type:structured?}}{{!
+    }}{{#type:structured}}{{!
       }}{{struct:go_qualified_new_func}}(){{!
-    }}{{/type:struct}}{{!
-  }}{{/type:struct?}}{{!
+    }}{{/type:structured}}{{!
+  }}{{/type:structured?}}{{!
 }}{{/type:typedef?}}

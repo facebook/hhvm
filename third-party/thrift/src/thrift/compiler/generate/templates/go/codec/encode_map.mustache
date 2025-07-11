@@ -39,7 +39,7 @@ for k, v := range item {
     {{! Use scopes to avoid multiple 'item' variable collisions }}
     {
         {{#type:key_type}}
-        item := {{^type:go_comparable?}}{{^type:struct?}}*{{/type:struct?}}{{/type:go_comparable?}}k
+        item := {{^type:go_comparable?}}{{^type:structured?}}*{{/type:structured?}}{{/type:go_comparable?}}k
         {{> codec/encode}}
         {{/type:key_type}}
     }

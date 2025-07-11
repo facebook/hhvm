@@ -403,15 +403,15 @@ class {{type:flat_name}}(thrift.py3.types.Map):
         )
     {{/type:is_container_of_struct?}}
     {{^type:is_container_of_struct?}}
-    {{#type:struct?}}
+    {{#type:structured?}}
         _keys = (
             _ensure_py3_or_raise(key, "key", {{> types/python_is_instance_type}})
             for key in python_map.keys()
         )
-    {{/type:struct?}}
-    {{^type:struct?}}
+    {{/type:structured?}}
+    {{^type:structured?}}
         _keys = python_map.keys()
-    {{/type:struct?}}
+    {{/type:structured?}}
     {{/type:is_container_of_struct?}}
     {{/type:key_type}}
     {{#type:value_type}}
@@ -422,15 +422,15 @@ class {{type:flat_name}}(thrift.py3.types.Map):
         )
     {{/type:is_container_of_struct?}}
     {{^type:is_container_of_struct?}}
-    {{#type:struct?}}
+    {{#type:structured?}}
         _values = (
             _ensure_py3_or_raise(value, "value", {{> types/python_is_instance_type}})
             for value in python_map.values()
         )
-    {{/type:struct?}}
-    {{^type:struct?}}
+    {{/type:structured?}}
+    {{^type:structured?}}
         _values = python_map.values()
-    {{/type:struct?}}
+    {{/type:structured?}}
     {{/type:is_container_of_struct?}}
     {{/type:value_type}}
         return {{type:flat_name}}(

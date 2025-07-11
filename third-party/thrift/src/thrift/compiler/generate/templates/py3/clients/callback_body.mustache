@@ -23,12 +23,12 @@ if {{#function:exceptions}}{{!
         exc = {{^program:inplace_migrate?}}{{!
 }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
             }}try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()))
-{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{#type:struct}}{{!
+{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{#type:structured}}{{!
         }}{{> types/python_type}}.from_python({{!
         }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp(
             unwrap_exception[{{> types/cython_cpp_type}}](result.exception())
         ))
-{{/type:struct}}{{/program:inplace_migrate?}}
+{{/type:structured}}{{/program:inplace_migrate?}}
     except Exception as ex:
         {{! This is probably a UnicodeDecodeError }}
         pyfuture.set_exception(ex.with_traceback(None))

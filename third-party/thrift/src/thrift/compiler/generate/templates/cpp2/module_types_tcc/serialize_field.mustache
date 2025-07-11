@@ -58,12 +58,12 @@
       xfer += prot_->write{{> module_types_tcc/struct_field_type}}Begin({{> module_types_tcc/container_struct_type}}, 0);
       xfer += prot_->write{{> module_types_tcc/struct_field_type}}End();
 {{/type:resolves_to_container_or_enum?}}
-{{#type:struct?}}
+{{#type:structured?}}
     } else {
       xfer += prot_->writeStructBegin("{{type:name}}");
       xfer += prot_->writeFieldStop();
       xfer += prot_->writeStructEnd();
-{{/type:struct?}}
+{{/type:structured?}}
     }
 {{/field:non_opt_cpp_ref?}}
 {{#field:lazy?}}

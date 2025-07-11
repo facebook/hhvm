@@ -38,19 +38,19 @@
       }}{{enum:go_qualified_name}}{{!
     }}{{/type:enum}}{{!
   }}{{/type:enum?}}{{!
-  }}{{#type:struct?}}{{!
-    }}{{#type:struct}}{{!
+  }}{{#type:structured?}}{{!
+    }}{{#type:structured}}{{!
       }}{{struct:go_qualified_name}}{{!
-    }}{{/type:struct}}{{!
-  }}{{/type:struct?}}{{!
+    }}{{/type:structured}}{{!
+  }}{{/type:structured?}}{{!
   }}{{#type:list?}}{{!
     }}[]{{#type:list_elem_type}}{{!
-      }}{{#type:struct?}}{{!
+      }}{{#type:structured?}}{{!
         }}*{{> common/type}}{{!
-      }}{{/type:struct?}}{{!
-      }}{{^type:struct?}}{{!
+      }}{{/type:structured?}}{{!
+      }}{{^type:structured?}}{{!
         }}{{> common/type}}{{!
-      }}{{/type:struct?}}{{!
+      }}{{/type:structured?}}{{!
     }}{{/type:list_elem_type}}{{!
   }}{{/type:list?}}{{!
   }}{{#type:map?}}{{!
@@ -65,22 +65,22 @@
       }}{{/type:key_type}}{{!
     }}]{{!
       }}{{#type:value_type}}{{!
-        }}{{#type:struct?}}{{!
+        }}{{#type:structured?}}{{!
           }}*{{> common/type}}{{!
-        }}{{/type:struct?}}{{!
-        }}{{^type:struct?}}{{!
+        }}{{/type:structured?}}{{!
+        }}{{^type:structured?}}{{!
           }}{{> common/type}}{{!
-        }}{{/type:struct?}}{{!
+        }}{{/type:structured?}}{{!
       }}{{/type:value_type}}{{!
   }}{{/type:map?}}{{!
   }}{{#type:set?}}{{!
     }}[]{{#type:set_elem_type}}{{!
-      }}{{#type:struct?}}{{!
+      }}{{#type:structured?}}{{!
         }}*{{> common/type}}{{!
-      }}{{/type:struct?}}{{!
-      }}{{^type:struct?}}{{!
+      }}{{/type:structured?}}{{!
+      }}{{^type:structured?}}{{!
         }}{{> common/type}}{{!
-      }}{{/type:struct?}}{{!
+      }}{{/type:structured?}}{{!
     }}{{/type:set_elem_type}}{{!
   }}{{/type:set?}}{{!
 }}{{/type:typedef?}}

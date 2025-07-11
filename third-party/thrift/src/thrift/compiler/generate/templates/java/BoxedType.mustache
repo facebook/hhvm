@@ -52,9 +52,9 @@
         }}Set<{{#type:set_elem_type}}{{> BoxedType}}{{/type:set_elem_type}}>{{!
       }}{{/type:set?}}{{!
 
-      }}{{#type:struct?}}{{!
-        }}{{#type:struct}}{{struct:javaPackage}}.{{struct:javaCapitalName}}{{/type:struct}}{{!
-      }}{{/type:struct?}}{{!
+      }}{{#type:structured?}}{{!
+        }}{{#type:structured}}{{struct:javaPackage}}.{{struct:javaCapitalName}}{{/type:structured}}{{!
+      }}{{/type:structured?}}{{!
 
       }}{{#type:enum?}}{{!
         }}{{#type:enum}}{{enum:javaPackage}}.{{enum:javaCapitalName}}{{/type:enum}}{{!

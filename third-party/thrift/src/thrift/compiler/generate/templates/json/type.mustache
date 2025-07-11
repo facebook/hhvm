@@ -25,11 +25,11 @@
 }}{{#type:i64?}}"i64"{{/type:i64?}}{{!
 }}{{#type:double?}}"double"{{/type:double?}}{{!
 }}{{#type:float?}}"float"{{/type:float?}}{{!
-}}{{#type:struct?}}{
+}}{{#type:structured?}}{
   "type" : "struct",
   "name" : "{{type:name}}"{{#type:external?}},
   "path" : "{{type:path}}"{{/type:external?}}
-}{{/type:struct?}}{{!
+}{{/type:structured?}}{{!
 }}{{#type:enum?}}{
   "type" : "enum",
   "name" : "{{type:name}}"{{#type:external?}},

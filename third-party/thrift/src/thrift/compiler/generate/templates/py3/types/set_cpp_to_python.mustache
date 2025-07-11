@@ -37,7 +37,7 @@ Used to convert C++ `citem` to python object.
 }}{{#type:float?}}citem{{/type:float?}}{{!
 }}{{#type:string?}}__init_unicode_from_cpp(citem){{/type:string?}}{{!
 }}{{#type:binary?}}bytes(<string>citem){{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#program:inplace_migrate?}}{{!
     }}{{> types/python_type}}.from_python({{!
     }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
@@ -45,7 +45,7 @@ Used to convert C++ `citem` to python object.
   }}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(citem)){{!
   }}{{/program:inplace_migrate?}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}{{> types/container_from_cpp }}(citem){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type}}, <int> citem){{/type:enum}}{{!

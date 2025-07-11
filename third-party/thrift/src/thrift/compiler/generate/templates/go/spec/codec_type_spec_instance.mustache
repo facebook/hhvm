@@ -47,15 +47,15 @@
 },
 {{/type:enum}}
 {{/type:enum?}}
-{{#type:struct?}}
-{{#type:struct}}
+{{#type:structured?}}
+{{#type:structured}}
 &thrift.CodecStructSpec{
     ScopedName: "{{struct:scoped_name}}",
     IsUnion:    {{struct:union?}},
     NewFunc:    func() thrift.Struct { return {{struct:go_qualified_new_func}}() },
 },
-{{/type:struct}}
-{{/type:struct?}}
+{{/type:structured}}
+{{/type:structured?}}
 {{#type:list?}}
 &thrift.CodecListSpec{
     ElementWireType: {{#type:list_elem_type}}{{> common/ttype}}{{/type:list_elem_type}},

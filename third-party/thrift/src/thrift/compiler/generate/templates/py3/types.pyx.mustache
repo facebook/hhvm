@@ -275,11 +275,11 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
     def __init__(
         self, *{{#struct:py3_fields}},
-        {{#field:type}}{{^type:struct?}}{{!
+        {{#field:type}}{{^type:structured?}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
                 }}{{> types/cython_python_type}} {{!
             }}{{/type:cythonTypeNoneable?}}{{!
-        }}{{/type:struct?}}{{/field:type}}{{!
+        }}{{/type:structured?}}{{/field:type}}{{!
             }}{{field:py_name}}=None{{!
         }}{{/struct:py3_fields}}
     ):
@@ -287,22 +287,22 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{#field:type}}
         {{^type:container?}}
         {{^type:cythonTypeNoneable?}}
-        {{^type:struct?}}
+        {{^type:structured?}}
         if {{field:py_name}} is not None:
             if not isinstance({{field:py_name}}, {{> types/python_is_instance_type}}):
                 raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
 
-        {{/type:struct?}}
+        {{/type:structured?}}
         {{/type:cythonTypeNoneable?}}
         {{#type:integer?}}
             {{! inject cython int overflow checks }}
             {{field:py_name}} = <{{> types/cython_python_type}}> {{field:py_name}}
 
         {{/type:integer?}}
-        {{#type:struct?}}
+        {{#type:structured?}}
         {{field:py_name}} = _ensure_py3_or_raise({{field:py_name}}, "{{field:py_name}}", {{> types/python_is_instance_type}})
 
-        {{/type:struct?}}
+        {{/type:structured?}}
         {{/type:container?}}
         {{#type:is_container_of_struct?}}
         {{field:py_name}} = _ensure_py3_container_or_raise({{field:py_name}}, {{type:flat_name}})
@@ -595,11 +595,11 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
         if {{#program:stream_exceptions}}{{!
         }}result.hasException[{{> types/cython_cpp_type}}]():
             pyfuture.set_exception({{!
-            }}{{#program:inplace_migrate?}}{{#type:struct}}{{!
+            }}{{#program:inplace_migrate?}}{{#type:structured}}{{!
                 }}{{> types/python_type}}.from_python({{!
                 }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
                 }}thrift.py3.exceptions.unwrap_exception[{{> types/cython_cpp_type}}](result.exception()))){{!
-            }}{{/type:struct}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
+            }}{{/type:structured}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
                 }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
                 }}thrift.py3.exceptions.try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception())){{!
             }}{{/program:inplace_migrate?}}{{!

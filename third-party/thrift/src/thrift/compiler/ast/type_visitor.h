@@ -58,16 +58,12 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
     case t_type::type::t_enum:
       return std::invoke(f, dynamic_cast<const t_enum&>(ty));
     case t_type::type::t_structured: {
-      const t_structured* s = dynamic_cast<const t_structured*>(&ty);
-      if (s->is<t_struct>() || s->is<t_union>()) {
-        return std::invoke(f, dynamic_cast<const t_structured&>(ty));
-      } else if (s->is<t_union>()) {
-        // TODO(T219861020): A union is_struct_or_union method returns true,
-        // hence this case is unreachable. After the todo is finished, the
-        // is_struct case can be downscorped back to casting to a t_struct
-        return std::invoke(f, dynamic_cast<const t_union&>(ty));
-      } else if (s->is<t_exception>()) {
-        return std::invoke(f, dynamic_cast<const t_exception&>(ty));
+      if (const auto* s = ty.try_as<t_struct>()) {
+        return std::invoke(f, static_cast<const t_struct&>(*s));
+      } else if (const auto* u = ty.try_as<t_union>()) {
+        return std::invoke(f, static_cast<const t_union&>(*u));
+      } else if (const auto* ex = ty.try_as<t_exception>()) {
+        return std::invoke(f, static_cast<const t_exception&>(*ex));
       }
       throw std::logic_error("Missing visitor specialization for t_structured");
     }

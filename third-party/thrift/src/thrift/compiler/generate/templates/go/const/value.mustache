@@ -66,8 +66,8 @@
   }}{{/type:enum?}}{{!
 
   Structs
-  }}{{#type:struct?}}{{!
-    }}{{#type:struct}}{{!
+  }}{{#type:structured?}}{{!
+    }}{{#type:structured}}{{!
       }}{{#value:referenceable?}}{{!
         }}{{#value:owning_const}}{{!
           }}{{#constant:program}}{{!
@@ -78,8 +78,8 @@
       }}{{^value:referenceable?}}{{!
         }}{{> const/struct_value}}{{!
       }}{{/value:referenceable?}}{{!
-    }}{{/type:struct}}{{!
-  }}{{/type:struct?}}{{!
+    }}{{/type:structured}}{{!
+  }}{{/type:structured?}}{{!
 
   Map constants
 }}{{#type:map?}}{{!

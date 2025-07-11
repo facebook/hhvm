@@ -21,10 +21,10 @@ and complex types are boxed in `std::unique_ptr`s.
 
 }}{{#type:string?}}std::unique_ptr<{{/type:string?}}{{!
 }}{{#type:binary?}}std::unique_ptr<{{/type:binary?}}{{!
-}}{{#type:struct}}std::unique_ptr<{{/type:struct}}{{!
+}}{{#type:structured}}std::unique_ptr<{{/type:structured}}{{!
 }}{{#type:container?}}std::unique_ptr<{{/type:container?}}{{!
 }}{{> types/cpp_value_type}}{{!
 }}{{#type:string?}}>{{/type:string?}}{{!
 }}{{#type:binary?}}>{{/type:binary?}}{{!
-}}{{#type:struct}}>{{/type:struct}}{{!
+}}{{#type:structured}}>{{/type:structured}}{{!
 }}{{#type:container?}}>{{/type:container?}}

@@ -32,11 +32,11 @@
 {{/type:typedef}}
 {{/type:typedef?}}
 {{^type:typedef?}}
-{{#type:struct?}}
-{{#type:struct}}
+{{#type:structured?}}
+{{#type:structured}}
 {{> codec/decode_struct}}
-{{/type:struct}}
-{{/type:struct?}}
+{{/type:structured}}
+{{/type:structured?}}
 {{#type:enum?}}
 {{#type:enum}}
 {{> codec/decode_enum}}

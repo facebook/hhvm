@@ -45,8 +45,8 @@ thrift.Pointerize({{program:metadata_qualifier}}ThriftPrimitiveType_{{> metadata
 },
 {{/type:enum}}
 {{/type:enum?}}
-{{#type:struct?}}
-{{#type:struct}}
+{{#type:structured?}}
+{{#type:structured}}
 {{#struct:union?}}
 &{{program:metadata_qualifier}}ThriftUnionType{
     Name: "{{struct:scoped_name}}",
@@ -57,8 +57,8 @@ thrift.Pointerize({{program:metadata_qualifier}}ThriftPrimitiveType_{{> metadata
     Name: "{{struct:scoped_name}}",
 },
 {{/struct:union?}}
-{{/type:struct}}
-{{/type:struct?}}
+{{/type:structured}}
+{{/type:structured?}}
 {{#type:list?}}
 {{#type:list_elem_type}}
 &{{program:metadata_qualifier}}ThriftListType{

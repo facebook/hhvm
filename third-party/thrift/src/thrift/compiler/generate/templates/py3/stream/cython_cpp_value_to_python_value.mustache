@@ -38,7 +38,7 @@ to a python type.
 }}{{#type:float?}}_value{{/type:float?}}{{!
 }}{{#type:string?}}_value.data().decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}_value{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#program:inplace_migrate?}}{{!
     }}{{> types/python_type}}.from_python({{!
     }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
@@ -47,7 +47,7 @@ to a python type.
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
     }}make_shared[{{> types/cython_cpp_type}}](_value)){{!
   }}{{/program:inplace_migrate?}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/container_from_cpp }}(_value){{!
 }}{{/type:container?}}{{!

@@ -26,10 +26,10 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#type:floating_point?}}float{{/type:floating_point?}}{{!
 }}{{#type:string?}}str{{/type:string?}}{{!
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{^type:need_module_path?}}{{> private/alias_prefix}}{{/type:need_module_path?}}{{struct:py_name}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:list?}}{{!
   }}_fbthrift_python_types.ListTypeFactory({{!
     }}{{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}{{!

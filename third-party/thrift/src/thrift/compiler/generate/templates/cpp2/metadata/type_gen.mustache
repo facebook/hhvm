@@ -36,8 +36,8 @@
 }}{{#type:set?}}std::make_unique<Set>({{#type:set_elem_type}}{{> metadata/type_gen}}{{/type:set_elem_type}}){{/type:set?}}{{!
 }}{{#type:map?}}std::make_unique<Map>({{#type:key_type}}{{> metadata/type_gen}}{{/type:key_type}}, {{#type:value_type}}{{> metadata/type_gen}}{{/type:value_type}}){{/type:map?}}{{!
 }}{{#type:enum?}}std::make_unique<Enum<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{#type:enum}}{{enum:name}}{{/type:enum}}"){{/type:enum?}}{{!
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}{{#type:union?}}std::make_unique<Union<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{type:name}}"){{/type:union?}}{{!
 }}{{^type:union?}}std::make_unique<Struct<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{type:name}}"){{/type:union?}}{{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 }}{{/type:base?}}{{/type:typedef?}}

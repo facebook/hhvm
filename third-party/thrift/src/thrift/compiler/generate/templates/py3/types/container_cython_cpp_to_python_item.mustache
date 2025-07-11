@@ -43,9 +43,9 @@ citem.
 }}{{#type:float?}}citem{{/type:float?}}{{!
 }}{{#type:string?}}bytes(citem).decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}bytes(citem){{/type:binary?}}{{!
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(citem){{!
-}}{{/type:struct?}}{{#type:map?}}{{!
+}}{{/type:structured?}}{{#type:map?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(citem){{!
 }}{{/type:map?}}{{!
 }}{{#type:list?}}{{> types/container_from_cpp }}(citem){{/type:list?}}{{!

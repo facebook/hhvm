@@ -32,10 +32,10 @@
   }}NOT_IMPLEMENTED{{!
 }}{{#else if function:stream?}}{{!
   }}{{#if function:stream_has_first_response?}}{{!
-    }}({{#function:stream_first_response_type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/function:stream_first_response_type}}, <-chan {{#function:stream_elem_type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/function:stream_elem_type}} /* elem stream */, <-chan error /* stream err */, error){{!
+    }}({{#function:stream_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}{{/function:stream_first_response_type}}, <-chan {{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}{{/function:stream_elem_type}} /* elem stream */, <-chan error /* stream err */, error){{!
   }}{{#else}}{{!
-    }}(<-chan {{#function:stream_elem_type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/function:stream_elem_type}} /* elem stream */, <-chan error /* stream err */, error){{!
+    }}(<-chan {{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}{{/function:stream_elem_type}} /* elem stream */, <-chan error /* stream err */, error){{!
   }}{{/if function:stream_has_first_response?}}{{!
 }}{{#else}}{{!
-  }}({{#function:return_type}}{{^type:void?}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}, {{/type:void?}}{{/function:return_type}}error){{!
+  }}({{#function:return_type}}{{^type:void?}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}, {{/type:void?}}{{/function:return_type}}error){{!
 }}{{/if function:oneway?}}

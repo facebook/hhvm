@@ -33,9 +33,9 @@ anywhere else the type is used as a value directly.
 }}{{#type:enum}}{{!
   }}::{{#type:cppNamespaces}}{{value}}::{{/type:cppNamespaces}}{{enum:cpp_name}}{{!
   }}{{/type:enum}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}::{{#type:cppNamespaces}}{{value}}::{{/type:cppNamespaces}}{{struct:name}}{{!
-  }}{{/type:struct}}{{!
+  }}{{/type:structured}}{{!
 }}{{#type:list?}}{{!
   }}{{type:cppTemplate}}<{{!
   }}{{#type:list_elem_type}}{{> types/cpp_value_type}}{{/type:list_elem_type}}{{!

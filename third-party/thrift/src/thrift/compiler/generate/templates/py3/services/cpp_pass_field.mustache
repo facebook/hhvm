@@ -31,6 +31,6 @@ need to be moved to the called function.
 }}{{#type:float?}}{{field:cppName}}{{/type:float?}}{{!
 }}{{#type:string?}}std::move({{field:cppName}}){{/type:string?}}{{!
 }}{{#type:binary?}}std::move({{field:cppName}}){{/type:binary?}}{{!
-}}{{#type:struct?}}std::move({{field:cppName}}){{/type:struct?}}{{!
+}}{{#type:structured?}}std::move({{field:cppName}}){{/type:structured?}}{{!
 }}{{#type:container?}}std::move({{field:cppName}}){{/type:container?}}{{!
 }}{{#type:enum?}}{{field:cppName}}{{/type:enum?}}

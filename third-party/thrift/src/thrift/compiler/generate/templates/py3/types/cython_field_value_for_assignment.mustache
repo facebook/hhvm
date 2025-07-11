@@ -54,9 +54,9 @@ on a struct.
   }}{{#type:binary?}})){{/type:binary?}}{{!
 }}{{/type:base?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>_fbthrift_value{{/type:enum?}}{{!
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
     }}deref((<{{> types/cython_python_type }}?> _fbthrift_value).{{> types/cpp_obj}}){{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
     }}{{> types/container_to_cpp }}(_fbthrift_value){{!
 }}{{/type:container?}}{{!

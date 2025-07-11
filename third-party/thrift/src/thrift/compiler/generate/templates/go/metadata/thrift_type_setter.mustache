@@ -37,16 +37,16 @@
   }}{{#type:enum?}}{{!
     }}TEnum{{!
   }}{{/type:enum?}}{{!
-  }}{{#type:struct?}}{{!
-    }}{{#type:struct}}{{!
+  }}{{#type:structured?}}{{!
+    }}{{#type:structured}}{{!
       }}{{#struct:union?}}{{!
         }}TUnion{{!
       }}{{/struct:union?}}{{!
       }}{{^struct:union?}}{{!
         }}TStruct{{!
       }}{{/struct:union?}}{{!
-    }}{{/type:struct}}{{!
-  }}{{/type:struct?}}{{!
+    }}{{/type:structured}}{{!
+  }}{{/type:structured?}}{{!
   }}{{#type:list?}}{{!
     }}TList{{!
   }}{{/type:list?}}{{!

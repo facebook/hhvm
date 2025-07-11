@@ -33,10 +33,10 @@
 
 }}{{#type:map?}}{{> ReadTypeContainer}}{{/type:map?}}{{!
 
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}{{#field:isNested?}}{{> BoxedType}}.read0(oprot){{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{#field:hasAdapter?}}{{> ThriftBoxedType}} {{field:javaName}} = {{> ThriftBoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = {{> ThriftBoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{/field:isNested?}}{{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 
 }}{{#type:enum?}}{{!
 }}{{#field:isNested?}}{{> BoxedType}}.fromInteger(oprot.readI32()){{/field:isNested?}}{{!

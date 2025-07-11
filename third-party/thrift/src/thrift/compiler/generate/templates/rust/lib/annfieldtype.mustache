@@ -17,14 +17,14 @@
 }}{{#type:numeric_or_void?}}::{{field:type_rust}}{{/type:numeric_or_void?}}{{!
 }}{{#type:string?}}::std::string::String{{/type:string?}}{{!
 }}{{#type:binary?}}::{{field:type_rust}}{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
     }}{{#struct:has_adapter?}}{{!
         }}{{struct:package}}::unadapted::{{struct:rust_name}}{{!
     }}{{/struct:has_adapter?}}{{!
     }}{{^struct:has_adapter?}}{{!
         }}{{struct:package}}::{{struct:rust_name}}{{!
     }}{{/struct:has_adapter?}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:enum}}{{enum:package}}::{{enum:rust_name}}{{/type:enum}}{{!
 }}{{#type:list?}}
     }}::std::vec::Vec{{> lib/type_generics}}{{!

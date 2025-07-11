@@ -72,12 +72,12 @@ oprot.writeMapBegin(new TMap(TType.{{#type:key_type}}{{> TType}}{{/type:key_type
         oprot.writeMapEnd();{{!
 }}{{/type:map?}}{{!
 
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}{{#function:isNested?}}_iter{{function:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.write0(oprot);
 {{/function:isNested?}}{{!
 }}{{^function:isNested?}}oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRUCT_FIELD);
 {{^struct:isUnion?}}{{/struct:isUnion?}}_iter0.write0(oprot);{{/function:isNested?}}{{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 
 }}{{#type:enum?}}{{!
 }}{{#function:isNested?}}oprot.writeI32(_iter{{function:nestedDepth}} == null ? 0 : _iter{{function:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.getValue());

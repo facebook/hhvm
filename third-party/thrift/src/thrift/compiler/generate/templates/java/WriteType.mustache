@@ -70,11 +70,11 @@
         oprot.writeMapEnd();{{!
 }}{{/type:map?}}{{!
 
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}{{#field:isNested?}}{{> WriteNestedType}}.write0(oprot);{{!
 }}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}}.write0(oprot);{{/field:isNested?}}{{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 
 }}{{#type:enum?}}{{!
 }}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue({{> WriteNestedType}}));{{!

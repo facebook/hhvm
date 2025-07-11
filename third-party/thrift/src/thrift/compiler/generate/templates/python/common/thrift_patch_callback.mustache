@@ -59,6 +59,6 @@ def cast_dynamic_patch_to_typed_map_value_patch(patch: DynamicPatch, type_info) 
 {{/type:value_type}}
 return MapPatch(cast_dynamic_patch_to_typed_map_value_patch, patch.as_map_patch(), type_info)
 {{/type:map?}}
-{{#type:struct}}
+{{#type:structured}}
 return {{#type:need_patch_module_path?}}{{type:patch_module_path}}.{{/type:need_patch_module_path?}}{{struct:py_name}}Patch(patch)
-{{/type:struct}}
+{{/type:structured}}

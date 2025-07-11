@@ -51,10 +51,10 @@ class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
         }}{{#type:set?}}_typing.Optional[set]{{/type:set?}}{{!
         }}{{#type:integer?}}_typing.Optional[int]{{/type:integer?}}{{!
         }}{{#type:floating_point?}}_typing.Optional[float]{{/type:floating_point?}}{{!
-        }}{{#type:cythonTypeNoneable?}}{{^type:struct?}}{{!
+        }}{{#type:cythonTypeNoneable?}}{{^type:structured?}}{{!
             }}_typing.Optional[{{> types/pep484_type}}]{{!
-        }}{{/type:struct?}}{{/type:cythonTypeNoneable?}}{{!
-        }}{{#type:struct?}}_typing.Any{{/type:struct?}}{{!
+        }}{{/type:structured?}}{{/type:cythonTypeNoneable?}}{{!
+        }}{{#type:structured?}}_typing.Any{{/type:structured?}}{{!
         }}{{/field:type}} = None
     {{/struct:py3_fields}}
 

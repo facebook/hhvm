@@ -20,7 +20,7 @@
 
 }}
 {{#field:type}}
-{{#type:struct?}}
+{{#type:structured?}}
 // Deprecated: Use {{struct:go_qualified_new_func}}().Get{{field:go_name}}() instead.
 func (x *{{struct:go_name}}) DefaultGet{{field:go_name}}() *{{> common/type}} {
     if !x.IsSet{{field:go_name}}() {
@@ -28,6 +28,6 @@ func (x *{{struct:go_name}}) DefaultGet{{field:go_name}}() *{{> common/type}} {
     }
     return x.{{field:go_name}}
 }
-{{/type:struct?}}
+{{/type:structured?}}
 {{/field:type}}
 {{! new line }}

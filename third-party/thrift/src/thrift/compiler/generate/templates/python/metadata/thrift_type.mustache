@@ -33,7 +33,7 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{#type:string?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE){{/type:string?}}{{!
     }}{{#type:binary?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE){{/type:binary?}}{{!
     }}{{#type:void?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE){{/type:void?}}{{!
-    }}{{#type:struct}}{{!
+    }}{{#type:structured}}{{!
         }}{{#struct:union?}}{{!
             }}_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType({{!
             }}name="{{type:program_name}}.{{> structs/unadapted_name}}")){{!
@@ -42,7 +42,7 @@ Used to turn a type into a thrift metadata ThriftType struct
             }}_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType({{!
             }}name="{{type:program_name}}.{{> structs/unadapted_name}}")){{!
         }}{{/struct:union?}}{{!
-    }}{{/type:struct}}{{!
+    }}{{/type:structured}}{{!
     }}{{#type:list?}}{{!
         }}_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType({{!
         }}valueType={{#type:list_elem_type}}{{> metadata/thrift_type }}{{/type:list_elem_type}})){{!

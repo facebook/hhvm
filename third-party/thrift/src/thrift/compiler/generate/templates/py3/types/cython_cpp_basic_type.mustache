@@ -38,10 +38,10 @@ annotation).
 }}{{#type:float?}}float{{/type:float?}}{{!
 }}{{#type:string?}}string{{/type:string?}}{{!
 }}{{#type:binary?}}string{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}.{{/type:need_cbinding_path?}}{{!
   }}{{> types/c_struct }}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}{{^type:defaultTemplate?}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}.{{/type:need_cbinding_path?}}{{!
 }}{{/type:defaultTemplate?}}{{/type:container?}}{{!

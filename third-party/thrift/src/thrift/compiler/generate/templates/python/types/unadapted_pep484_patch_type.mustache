@@ -27,10 +27,10 @@ This is for pep 484 typing for thrift patch types
 }}{{#type:float?}}FloatPatch{{/type:float?}}{{!
 }}{{#type:string?}}StringPatch{{/type:string?}}{{!
 }}{{#type:binary?}}BinaryPatch{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
     }}{{#type:need_patch_module_path?}}{{type:patch_module_path}}.{{/type:need_patch_module_path?}}{{!
   }}{{struct:py_name}}Patch{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:list?}}ListPatch[{{!
     }}{{#type:list_elem_type}}{{> types/unadapted_pep484_type}}{{/type:list_elem_type}}{{!
 }}]{{/type:list?}}{{!

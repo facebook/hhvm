@@ -69,11 +69,11 @@
         oprot.writeMapEnd();{{!
 }}{{/type:map?}}{{!
 
-}}{{#type:struct?}}{{!
+}}{{#type:structured?}}{{!
 }}{{#field:isNested?}}_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.write0(oprot);
 {{/field:isNested?}}{{!
 }}{{^field:isNested?}}_iter0.write0(oprot);{{/field:isNested?}}{{!
-}}{{/type:struct?}}{{!
+}}{{/type:structured?}}{{!
 
 }}{{#type:enum?}}{{!
 }}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}} == null ? 0 : _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.getValue());

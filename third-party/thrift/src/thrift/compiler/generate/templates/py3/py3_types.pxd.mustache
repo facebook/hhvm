@@ -74,9 +74,9 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{/struct:fields_and_mixin_fields}}
     {{!Memoized Python wrappers of struct fields, created lazily}}
     {{#struct:py3_fields}}
-    {{#field:type}}{{#type:struct}}
+    {{#field:type}}{{#type:structured}}
     cdef {{> types/cython_python_type}} __fbthrift_cached_{{field:py_name}}
-    {{/type:struct}}{{#type:container?}}
+    {{/type:structured}}{{#type:container?}}
     cdef {{> types/cython_python_type}} __fbthrift_cached_{{field:py_name}}
     {{/type:container?}}{{#type:enum?}}
     cdef object __fbthrift_cached_{{field:py_name}}

@@ -27,7 +27,7 @@ if err != nil {
 setResult := make({{> common/type}}, 0, size)
 for i := 0; i < size; i++ {
     {{#type:set_elem_type}}
-    var elem {{#type:struct?}}*{{/type:struct?}}{{> common/type}}
+    var elem {{#type:structured?}}*{{/type:structured?}}{{> common/type}}
     {{! Use scope to avoid multiple 'result' variable collisions }}
     {
         {{> codec/decode}}

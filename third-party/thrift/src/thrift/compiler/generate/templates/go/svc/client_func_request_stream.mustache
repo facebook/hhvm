@@ -22,7 +22,7 @@
 func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
     {{#function:stream_has_first_response?}}
     {{#function:stream_first_response_type}}
-    var fbthriftRespZero {{#type:struct?}}*{{/type:struct?}}{{> common/type}}
+    var fbthriftRespZero {{#type:structured?}}*{{/type:structured?}}{{> common/type}}
     {{/function:stream_first_response_type}}
     {{/function:stream_has_first_response?}}
     // Must be a cancellable context to prevent goroutine leaks
@@ -42,7 +42,7 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
 
     fbthriftErrChan := make(chan error, 1)
     {{#function:stream_elem_type}}
-    fbthriftElemChan := make(chan {{#type:struct?}}*{{/type:struct?}}{{> common/type}}, thrift.DefaultStreamBufferSize)
+    fbthriftElemChan := make(chan {{#type:structured?}}*{{/type:structured?}}{{> common/type}}, thrift.DefaultStreamBufferSize)
 
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStream{{service:go_name}}{{function:go_name}}()

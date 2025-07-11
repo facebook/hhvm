@@ -92,8 +92,7 @@ mstch::node mstch_enum::values() {
   return make_mstch_enum_values(enum_->get_enum_values());
 }
 
-// TODO(T219861020): Rename to get_structured
-mstch::node mstch_type::get_struct() {
+mstch::node mstch_type::get_structured() {
   if (type_->is<t_structured>()) {
     std::string id =
         type_->program()->name() + get_type_namespace(type_->program());

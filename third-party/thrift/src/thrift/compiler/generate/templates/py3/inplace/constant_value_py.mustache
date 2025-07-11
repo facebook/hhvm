@@ -37,7 +37,7 @@ file.
 }}{{#value:const_struct?}}{{!
     }}{{#value:const_struct_type}}{{!
     }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
-    }}{{#type:struct}}{{struct:name}}{{/type:struct}}{{!
+    }}{{#type:structured}}{{struct:name}}{{/type:structured}}{{!
     }}{{/value:const_struct_type}}{{!
     }}({{#value:const_struct}}{{!
         }}{{constant:name}}={{#constant:type}}{{#constant:value}}{{!

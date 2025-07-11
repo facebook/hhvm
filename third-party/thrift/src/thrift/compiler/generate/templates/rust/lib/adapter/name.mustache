@@ -27,9 +27,9 @@
         }}{{type:package}}::adapters::{{type:rust_name}}{{!
     }}{{/type:typedef}}{{!
     }}{{^type:typedef?}}{{!
-        }}{{#type:struct?}}{{!
+        }}{{#type:structured?}}{{!
             }}{{type:package}}::adapters::{{type:rust_name}}{{!
-        }}{{/type:struct?}}{{!
+        }}{{/type:structured?}}{{!
         }}{{#type:list?}}{{!
             }}::fbthrift::adapter::ListMapAdapter<{{!
             }}{{#type:list_elem_type}}{{!

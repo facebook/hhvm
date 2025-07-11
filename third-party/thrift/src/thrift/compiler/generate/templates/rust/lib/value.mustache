@@ -115,14 +115,14 @@
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
             }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_default::<{{!
-                }}{{#value:underlying_type}}{{#type:struct}}{{!
+                }}{{#value:underlying_type}}{{#type:structured}}{{!
                     }}{{#struct:has_adapter?}}{{!
                         }}{{type:package}}::unadapted::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
                     }}{{^struct:has_adapter?}}{{!
                         }}{{type:package}}::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
-                }}{{/type:struct}}{{/value:underlying_type}}{{!
+                }}{{/type:structured}}{{/value:underlying_type}}{{!
             }}>({{/field:has_adapter?}}{{!
             }}{{#field:explicit_value}}{{!
                 }}{{> lib/fieldvalue}}{{!

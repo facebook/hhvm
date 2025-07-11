@@ -37,10 +37,10 @@ This is the equivalent of CythonCpp[Basic]Type, for use as part of an identifier
 }}{{#type:float?}}float{{/type:float?}}{{!
 }}{{#type:string?}}string{{/type:string?}}{{!
 }}{{#type:binary?}}binary{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}_{{/type:need_cbinding_path?}}{{!
   }}{{> types/c_struct }}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}{{^type:defaultTemplate?}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}_{{/type:need_cbinding_path?}}{{!
 }}{{/type:defaultTemplate?}}{{/type:container?}}{{!

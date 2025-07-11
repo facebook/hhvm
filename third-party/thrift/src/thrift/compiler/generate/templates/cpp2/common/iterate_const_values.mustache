@@ -19,12 +19,12 @@
 Base Types:
 
 }}{{^value:container?}}{{!
-  }}{{^type:struct?}}{{!
+  }}{{^type:structured?}}{{!
     }}{{#value:string?}}{{!
       }}apache::thrift::StringTraits<{{type:cpp_standard_type}}>::fromStringLiteral({{> common/const_value}}){{!
     }}{{/value:string?}}{{!
     }}{{^value:string?}}{{> common/const_value}}{{/value:string?}}{{!
-  }}{{/type:struct?}}{{!
+  }}{{/type:structured?}}{{!
 }}{{/value:container?}}{{!
 Reference other constants:
 }}{{#type:resolves_to_container_or_struct?}}{{!

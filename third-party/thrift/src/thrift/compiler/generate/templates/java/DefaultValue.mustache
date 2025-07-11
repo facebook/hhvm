@@ -93,8 +93,8 @@
   }}{{#type:enum?}}{{> BoxedType}}.{{value:javaEnumValueName}}{{/type:enum?}}{{!
 
     Struct Constants
-  }}{{#type:struct?}}{{!
-    }}{{#type:struct}}{{!
+  }}{{#type:structured?}}{{!
+    }}{{#type:structured}}{{!
       }}{{#value:referenceable?}}{{!
         }}{{#value:owning_const}}{{!
           }}{{#constant:program}}{{!
@@ -106,6 +106,6 @@
         }}{{#struct:plain?}}{{> ConstantStruct}}{{/struct:plain?}}{{!
         }}{{#struct:union?}}{{> ConstantUnion}}{{/struct:union?}}{{!
       }}{{/value:referenceable?}}{{!
-    }}{{/type:struct}}{{!
-  }}{{/type:struct?}}{{!
+    }}{{/type:structured}}{{!
+  }}{{/type:structured?}}{{!
 }}{{/type:typedef?}}

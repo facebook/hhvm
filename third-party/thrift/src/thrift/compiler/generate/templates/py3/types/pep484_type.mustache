@@ -33,10 +33,10 @@ thrift-py3 specific container types.
 }}{{#type:iobufWrapper?}}_fbthrift_iobuf.IOBuf{{/type:iobufWrapper?}}{{!
   }}{{^type:iobufWrapper?}}bytes{{/type:iobufWrapper?}}{{!
 }}{{/type:binary?}}{{!
-}}{{#type:struct}}{{!
+}}{{#type:structured}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
   }}{{struct:name}}{{!
-}}{{/type:struct}}{{!
+}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/pep484_containers}}{{!
 }}{{/type:container?}}{{!

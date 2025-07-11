@@ -83,6 +83,14 @@ class t_type : public t_named {
     return dynamic_cast<const T*>(this);
   }
 
+  // Visitor API
+  // Note: this requires including the `type_visitor.h` header to prevent a
+  // circular dependency.
+  template <typename... Visitors>
+  decltype(auto) visit(Visitors&&... visitors) const {
+    return detail::visit_type(*this, std::forward<Visitors>(visitors)...);
+  }
+
  protected:
   /**
    * Default constructor for t_type
@@ -206,14 +214,6 @@ class t_type : public t_named {
   }
 
   const t_program* get_program() const { return program(); }
-
-  // Visitor API
-  // Note: this requires including the `type_visitor.h` header to prevent a
-  // circular dependency.
-  template <typename... Visitors>
-  decltype(auto) visit(Visitors&&... visitors) const {
-    return detail::visit_type(*this, std::forward<Visitors>(visitors)...);
-  }
 };
 
 /**

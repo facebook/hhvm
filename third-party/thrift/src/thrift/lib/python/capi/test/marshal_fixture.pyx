@@ -38,6 +38,7 @@ cdef extern from "thrift/lib/python/capi/test/marshal_fixture.h" namespace "apac
     cdef object __make_unicode_set(object)
     cdef object __roundtrip_pyobject[T](object)
     cdef object __roundtrip_unicode(object)
+    cdef object __roundtrip_fallible_unicode(object)
     cdef object __roundtrip_bytes(object)
     cdef object __roundtrip_list[T](object)
     cdef object __roundtrip_unicode_list(object)
@@ -90,6 +91,9 @@ def roundtrip_bytes(object x):
 
 def roundtrip_unicode(object x):
     return __roundtrip_unicode(x)
+
+def roundtrip_fallible_unicode(object x):
+    return __roundtrip_fallible_unicode(x)
 
 def make_unicode(object x):
     return __make_unicode(x)

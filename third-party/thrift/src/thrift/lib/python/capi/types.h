@@ -90,6 +90,18 @@ struct String {};
 struct BytesView {};
 struct StringView {};
 
+/**
+ * This type represents Python user-facing type `str` with internal type
+ * `str | bytes`, where deserialization attempts to make Unicode `str` but
+ * suppresses `UnicodeDecodeError`, saving `bytes` as a fallback. This mimics
+ * the behavior of `string` fields in thrift-python, where it's possible to
+ * round-trip invalid unicode through serde as long as the invalid unicode field
+ * isn't accessed from Python. Accessing the field either returns `str` or
+ * raises the `UnicodeDecodeError` from decoding the `bytes`.
+ *
+ */
+struct FallibleString {};
+
 template <>
 struct native<Bytes> {
   using type = std::string;
@@ -97,6 +109,11 @@ struct native<Bytes> {
 
 template <>
 struct native<String> {
+  using type = std::string;
+};
+
+template <>
+struct native<FallibleString> {
   using type = std::string;
 };
 

@@ -121,6 +121,21 @@ SPECIALIZE_STR(Bytes, PyBytes_FromStringAndSize);
 SPECIALIZE_STR(String, PyUnicode_FromStringAndSize);
 #undef SPECIALIZE_STR
 
+template <>
+struct Constructor<FallibleString> : public BaseConstructor<FallibleString> {
+  // The StringT param is typically std::string or std::string_view, but also
+  // supports std::string-like @cpp.Type that implement data() and size()
+  template <typename StringT>
+  PyObject* FOLLY_NULLABLE operator()(const StringT& str) {
+    PyObject* py_str = PyUnicode_FromStringAndSize(str.data(), str.size());
+    if (py_str != nullptr) {
+      return py_str;
+    }
+    PyErr_Clear();
+    return Constructor<Bytes>{}(str);
+  }
+};
+
 /*
  * Some use cases need a `const` constructor to leave thrift-cpp
  * struct in valid state; others take ownership (rvalue) to save

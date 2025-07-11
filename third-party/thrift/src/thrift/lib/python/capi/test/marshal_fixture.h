@@ -29,6 +29,7 @@
 namespace apache::thrift::python {
 
 using capi::Bytes;
+using capi::FallibleString;
 using capi::list;
 using capi::map;
 using capi::set;
@@ -49,6 +50,10 @@ inline PyObject* __roundtrip_bytes(PyObject* obj) {
 
 inline PyObject* __roundtrip_unicode(PyObject* obj) {
   return __roundtrip_pyobject<String>(obj);
+}
+
+inline PyObject* __roundtrip_fallible_unicode(PyObject* obj) {
+  return __roundtrip_pyobject<FallibleString>(obj);
 }
 
 template <typename T>

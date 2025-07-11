@@ -154,6 +154,21 @@ class TestMarshalPrimitives(MarshalFixture):
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode(b"\xe2\x82")
 
+    def test_fallible_unicode(self) -> None:
+        for x in ("", "unicode", b"\xe2\x82\xac".decode()):
+            self.assertEqual(x, fixture.roundtrip_fallible_unicode(x))
+        self.assert_type_error(fixture.roundtrip_fallible_unicode, None, 1, 1.0)
+
+        # if the unicode is valid, it gets extracted from `bytes` to std::string by Extractor
+        # then it's successfully decoded to unicode `str` by Constructor
+        for x in (b"", b"bytes", b"\xe2\x82\xac"):
+            self.assertEqual(x.decode(), fixture.roundtrip_fallible_unicode(x))
+
+        # if the unicode is invalid, it gets extracted from `bytes` to std::string by Extractor
+        # then unicode decode fails in Constructor, so it just constructs as `bytes`
+        bad_unicode = b"\xe2\x82"
+        self.assertEqual(bad_unicode, fixture.roundtrip_fallible_unicode(bad_unicode))
+
     def test_iobuf_stack(self) -> None:
         for b in (b"", b"bytes", b"\xe2\x82\xac"):
             x = IOBuf(memoryview(b))

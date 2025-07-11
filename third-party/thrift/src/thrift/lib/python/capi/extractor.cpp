@@ -143,6 +143,26 @@ SPECIALIZE_STR(
 
 #undef SPECIALIZE_STR
 
+ExtractorResult<FallibleString> Extractor<FallibleString>::operator()(
+    PyObject* obj) {
+  auto result = extractFromString<std::string>(obj);
+  if (result.hasValue()) {
+    return result;
+  }
+  CHECK(PyErr_Occurred());
+  PyErr_Clear();
+  result = extractFromBytes<std::string>(obj);
+  if (result.hasValue()) {
+    return result;
+  }
+  result = EXTRACTOR_ERROR(FallibleString, "Expected unicode `str`");
+  return result;
+}
+
+int Extractor<FallibleString>::typeCheck(PyObject* obj) {
+  return PyUnicode_CheckExact(obj) || PyBytes_CheckExact(obj);
+}
+
 ExtractorResult<folly::IOBuf> Extractor<folly::IOBuf>::operator()(
     PyObject* obj) {
   auto buf = folly::python::iobuf_from_python_iobuf(obj);

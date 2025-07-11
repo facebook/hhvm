@@ -403,6 +403,15 @@ class ReflectionTypeConstant implements Reflector {
   public function getClass()[]: ReflectionClass;
   public function getAssignedTypeText()[]: ?string;
   public function getTypeStructure()[]: darray<arraykey, mixed>;
+    /**
+   * Gets the name of the "canonical" class, where canonical means that
+   * the type constant is *actually* declared and defined on that class.
+   * This is particularly relevant when the const is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  public function getCanonicalClassname()[]: string;
 }
 
 class ReflectionTypeAlias implements Reflector {

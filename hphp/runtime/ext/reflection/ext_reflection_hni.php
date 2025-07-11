@@ -2366,6 +2366,17 @@ class ReflectionTypeConstant implements Reflector {
     return new ReflectionClass($this->getClassPtr());
   }
 
+    /**
+   * Gets the name of the "canonical" class, where canonical means that
+   * the type constant is *actually* declared and defined on that class.
+   * This is particularly relevant when the const is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  <<__Native>>
+  public function getCanonicalClassname()[]: string;
+
   public function __toString()[] {
     $abstract = $this->isAbstract() ? 'abstract ' : '';
 

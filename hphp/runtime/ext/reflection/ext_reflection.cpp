@@ -1096,7 +1096,7 @@ static bool HHVM_METHOD(ReflectionMethod, isStaticInPrologue) {
   return func->isStaticInPrologue();
 }
 
-static bool HHVM_METHOD(ReflectionMethod, isConstructor) {
+static bool HHVM_METHOD(ReflectionMethod, isConstructor) {  
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return isConstructor(func);
 }
@@ -1996,6 +1996,18 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
   return String();
 }
 
+static String HHVM_METHOD(ReflectionTypeConstant, getCanonicalClassname) {
+  if (Cfg::Eval::AuthoritativeMode) {
+    Reflection::ThrowReflectionExceptionObject(s_canonical_class_in_repo_mode);
+  }
+  auto const cnst = ReflectionConstHandle::GetConstFor(this_);
+  return String::attach(const_cast<StringData*>(
+    cnst->preConst && cnst->preConst->cls()
+     ? cnst->preConst->cls()
+     : cnst->cls->name()
+  ));
+}
+
 // private helper for getDeclaringClass
 static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
   auto const cns = ReflectionConstHandle::GetConstFor(this_);
@@ -2443,6 +2455,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
     HHVM_ME(ReflectionTypeConstant, getClassPtr);
+    HHVM_ME(ReflectionTypeConstant, getCanonicalClassname);    
 
     HHVM_ME(ReflectionProperty, __construct);
     HHVM_ME(ReflectionProperty, isPublic);

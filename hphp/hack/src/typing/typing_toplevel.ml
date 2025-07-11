@@ -355,9 +355,7 @@ let gconst_def ctx cst =
         Phase.localize_no_subst env ~ignore_errors:false ty
       in
       let (env, te, value_type) =
-        let expected =
-          ExpectedTy.make_and_allow_coercion (fst hint) Reason.URhint dty
-        in
+        let expected = ExpectedTy.make (fst hint) Reason.URhint dty in
         Typing.expr_with_pure_coeffects env ~expected value
       in
       let (env, ty_err_opt2) =

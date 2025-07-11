@@ -6992,12 +6992,12 @@ end = struct
                   | _ -> (env, param.fp_type)
                 in
                 let expected =
-                  ExpectedTy.make_and_allow_coercion_opt
-                    ~ignore_readonly:(get_fp_ignore_readonly_error param)
-                    env
-                    (Aast_utils.get_expr_pos e)
-                    Reason.URparam
-                    pess_type
+                  Some
+                    (ExpectedTy.make
+                       ~ignore_readonly:(get_fp_ignore_readonly_error param)
+                       (Aast_utils.get_expr_pos e)
+                       Reason.URparam
+                       pess_type)
                 in
                 expr
                   ~expected
@@ -9049,7 +9049,7 @@ end = struct
       Typing_class_pointers.check_string_coercion_point env e return_type;
       let expected =
         Some
-          (ExpectedTy.make_and_allow_coercion
+          (ExpectedTy.make
              (Aast_utils.get_expr_pos e)
              Reason.URreturn
              return_type)
@@ -9868,11 +9868,7 @@ end = struct
           match opt_ty1 with
           | None -> None
           | Some ty1 ->
-            ExpectedTy.make_and_allow_coercion_opt
-              env
-              param.param_pos
-              Reason.URparam
-              ty1
+            Some (ExpectedTy.make param.param_pos Reason.URparam ty1)
         in
         let (env, (te, ty2)) =
           let reason = Reason.witness param.param_pos in

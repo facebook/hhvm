@@ -17,21 +17,11 @@ module ExpectedTy : sig
 
   val make :
     ?coerce:Typing_logic.coercion_direction option ->
+    ?ignore_readonly:bool ->
     Pos.t ->
     Typing_reason.ureason ->
     Typing_defs.locl_ty ->
     t
-
-  val make_and_allow_coercion :
-    Pos.t -> Typing_reason.ureason -> Typing_defs.locl_ty -> t
-
-  val make_and_allow_coercion_opt :
-    ?ignore_readonly:bool ->
-    Typing_env_types.env ->
-    Pos.t ->
-    Typing_reason.ureason ->
-    Typing_defs.locl_ty ->
-    t option
 end
 
 val set_tyvars_variance_in_callable :

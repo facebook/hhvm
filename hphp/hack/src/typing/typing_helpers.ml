@@ -40,22 +40,11 @@ module ExpectedTy : sig
 
   val make :
     ?coerce:Typing_logic.coercion_direction option ->
+    ?ignore_readonly:bool ->
     Pos.t ->
     Typing_reason.ureason ->
     locl_ty ->
     t
-
-  (* We will allow coercion to this expected type, if et_enforced=Enforced *)
-  val make_and_allow_coercion : Pos.t -> Typing_reason.ureason -> locl_ty -> t
-
-  (* If type is an unsolved type variable, don't create an expected type *)
-  val make_and_allow_coercion_opt :
-    ?ignore_readonly:bool ->
-    Typing_env_types.env ->
-    Pos.t ->
-    Typing_reason.ureason ->
-    locl_ty ->
-    t option
 end = struct
   (* Some mutually recursive inference functions in typing.ml pass around an ~expected argument that
    * enables bidirectional type checking. This module abstracts away that type so that it can be
@@ -69,22 +58,8 @@ end = struct
   }
   [@@deriving show]
 
-  let make_and_allow_coercion_opt ?(ignore_readonly = false) env pos reason ty =
-    let (_env, ety) = Env.expand_type env ty in
-    match get_node ety with
-    | Tvar v when Internal_type_set.is_empty (Env.get_tyvar_upper_bounds env v)
-      ->
-      None
-    | _ -> Some { pos; reason; ty; coerce = None; ignore_readonly }
-
-  let make_and_allow_coercion pos reason ty =
-    { pos; reason; ty; coerce = None; ignore_readonly = false }
-
-  let make ?coerce pos reason locl_ty =
-    let res = make_and_allow_coercion pos reason locl_ty in
-    match coerce with
-    | None -> res
-    | Some coerce -> { res with coerce }
+  let make ?(coerce = None) ?(ignore_readonly = false) pos reason ty =
+    { pos; reason; ty; coerce; ignore_readonly }
 end
 
 let decl_error_to_typing_error decl_error =

@@ -1166,7 +1166,7 @@ let class_const_def ~in_enum_class c cls env cc =
       in
       ( env,
         ty,
-        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty),
+        Some (ExpectedTy.make (fst id) Reason.URhint opt_ty),
         et_enforced )
   in
   let check env ty' =
@@ -1304,9 +1304,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
           )
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-      let expected =
-        Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)
-      in
+      let expected = Some (ExpectedTy.make cv.cv_span Reason.URhint cty) in
       (env, expected)
   in
   (* Next check the expression, passing in expected type if present *)

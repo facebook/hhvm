@@ -2,10 +2,6 @@ function(foo)
 foo(1)
 function(foo)
 foo(2)
-string(3) "foo"
-foo(1)
-string(3) "foo"
-foo(2)
 classMeth{
   class(A)
   function(b)

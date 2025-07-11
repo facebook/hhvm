@@ -7,14 +7,20 @@
   NullUninit
   NullUninit
   CGetL $arg
+  NullUninit
+  NullUninit
   CGetL $who
+  FCallFuncD <> 1 1 "" "" - "" "HH\\dynamic_fun"
   FCallFunc <> 1 1 "" "" - ""
 
   SetL $ret
   PopC
   NullUninit
   NullUninit
+  NullUninit
+  NullUninit
   CGetL $ret
+  FCallFuncD <> 1 1 "" "" - "" "HH\\dynamic_fun"
   FCallFunc <> 0 1 "" "" - ""
   PopC
 

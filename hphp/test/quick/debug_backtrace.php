@@ -17,7 +17,7 @@ class A {
   hphp_invoke_method($a, "A", "bar", Map {'a' => 1, 'b' => 2});
 }
 function foo() :mixed{
-  call_user_func("bar");
+  call_user_func(HH\dynamic_fun("bar"));
 }
 
 function error_handler($errno, $errstr, $errfile, $errline, $errcontext) :mixed{

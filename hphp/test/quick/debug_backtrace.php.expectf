@@ -55,7 +55,7 @@ vec(7) {
     string(14) "call_user_func"
     ["args"]=>
     vec(1) {
-      string(3) "bar"
+      function(bar)
     }
   }
   dict(4) {
@@ -137,7 +137,7 @@ vec(7) {
     string(14) "call_user_func"
     ["args"]=>
     vec(1) {
-      string(3) "bar"
+      function(bar)
     }
   }
   dict(4) {
@@ -219,7 +219,7 @@ vec(7) {
     string(14) "call_user_func"
     ["args"]=>
     vec(1) {
-      string(3) "bar"
+      function(bar)
     }
   }
   dict(4) {

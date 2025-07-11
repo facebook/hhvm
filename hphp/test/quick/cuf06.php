@@ -1,13 +1,9 @@
 <?hh
 
-function handler($a, $b) :mixed{
-  var_dump($a, $b);
-}
-
-<<__DynamicallyCallable>> function foo() :mixed{}
+<<__DynamicallyCallable>> function foo() :mixed{ echo __FUNCTION__,"\n"; }
 
 function test() :mixed{
-  call_user_func_array('foo', vec[]);
+  call_user_func_array(HH\dynamic_fun('foo'), vec[]);
 }
 
 function main() :mixed{
@@ -17,8 +13,5 @@ function main() :mixed{
 }
 <<__EntryPoint>>
 function main_entry(): void {
-
-  set_error_handler(handler<>);
-
   main();
 }

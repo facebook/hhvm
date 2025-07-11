@@ -1,0 +1,9 @@
+foo
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Unable to find function foo' in %s/cuf06.php:6
+Stack trace:
+#0 %s/cuf06.php(6): HH\dynamic_fun()
+#1 %s/cuf06.php(12): test()
+#2 %s/cuf06.php(16): main()
+#3 (): main_entry()
+#4 {main}

@@ -135,7 +135,10 @@ on_three:    String "three\n"
          PopC
          NullUninit
          NullUninit
+         NullUninit
+         NullUninit
          String "foo"
+         FCallFuncD <> 1 1 "" "" - "" "HH\\dynamic_fun"
 
 resume:  .try {
            FCallFunc <> 0 1 "" "" - ""
@@ -161,7 +164,10 @@ resume:  .try {
            JmpNZ resume2
            NullUninit
            NullUninit
+           NullUninit
+           NullUninit
            String "throw_various"
+           FCallFuncD <> 1 1 "" "" - "" "HH\\dynamic_fun"
            Jmp resume
          }
 

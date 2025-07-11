@@ -16,7 +16,7 @@ class C {
 
 <<__EntryPoint>>
 function main() :mixed{
-  $x = 'f';
+  $x = HH\dynamic_fun('f');
   $x();
   C::fs();
   (new C())->f();

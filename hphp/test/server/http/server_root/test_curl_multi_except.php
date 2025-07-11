@@ -42,6 +42,6 @@ function main_test_curl_multi_except() :mixed{
   echo $ret;
 }
 
-function except() :mixed{
+<<__DynamicallyCallable>> function except() :mixed{
   throw new Exception("oops");
 }

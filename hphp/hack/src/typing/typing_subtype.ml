@@ -6335,6 +6335,30 @@ end = struct
                                r);
                       }))
           env
+    | (r, Toption t) ->
+      if can_index.ci_lhs_of_null_coalesce then
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = t }
+          ~rhs
+          env
+      else
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Null_container
+                      {
+                        pos = can_index.ci_expr_pos;
+                        null_witness =
+                          lazy
+                            (Reason.to_string
+                               "This is what makes me believe it can be `null`"
+                               r);
+                      }))
+          env
     | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env
@@ -6351,7 +6375,6 @@ end = struct
       (match Subtype_negation.find_type_with_exact_negation env ty_subs with
       | (env, Some non_ty, tyl) ->
         let ty_sub = MakeType.intersection r_sub tyl in
-
         let mk_prop = simplify
         and lift_rhs { reason_super; can_index } =
           mk_constraint_type (reason_super, Tcan_index can_index)

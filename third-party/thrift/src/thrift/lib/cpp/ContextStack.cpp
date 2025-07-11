@@ -499,6 +499,21 @@ void ContextStack::onSinkNext() {
   }
 }
 
+void ContextStack::onSinkConsumed() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_sink_item,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onSinkConsumed(contextAt(i));
+      }
+    }
+  }
+}
+
 void ContextStack::onSinkCancel() {
   FOLLY_SDT(
       thrift,

@@ -118,6 +118,7 @@ class ContextStack {
 
   void onSinkSubscribe();
   void onSinkNext();
+  void onSinkConsumed();
   void onSinkCancel();
   void onSinkCredit(uint32_t credits);
   void onSinkFinally(details::SINK_ENDING_TYPES endReason);

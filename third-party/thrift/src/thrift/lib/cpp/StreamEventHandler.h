@@ -48,6 +48,7 @@ class StreamEventHandler {
 
   virtual void onSinkSubscribe(void*) {}
   virtual void onSinkNext(void*) {}
+  virtual void onSinkConsumed(void*) {}
   virtual void onSinkCancel(void*) {}
   virtual void onSinkCredit(void*, uint32_t) {}
   virtual void handleSinkError(void*, const folly::exception_wrapper&) {}

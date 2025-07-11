@@ -138,6 +138,9 @@ ServerSinkBridge::makeGenerator() {
       }
 
       co_yield std::move(payload);
+      if (const auto& contextStack = consumer_.contextStack) {
+        contextStack->onSinkConsumed();
+      }
       counter++;
       if (counter > consumer_.bufferSize / 2) {
         serverPush(counter);

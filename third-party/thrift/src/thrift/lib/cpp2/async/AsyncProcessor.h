@@ -52,6 +52,7 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/processor/AsyncProcessor.h>
+#include <thrift/lib/cpp2/async/processor/AsyncProcessorFunc.h>
 #include <thrift/lib/cpp2/async/processor/EventTask.h>
 #include <thrift/lib/cpp2/async/processor/RequestParams.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
@@ -82,36 +83,9 @@ class ServerRequest;
 class IResourcePoolAcceptor;
 class ServerInterface;
 
-class GeneratedAsyncProcessorBase : public AsyncProcessor {
+class GeneratedAsyncProcessorBase : public AsyncProcessor,
+                                    public AsyncProcessorFunc {
  public:
-  template <typename Derived>
-  using ProcessFunc = void (Derived::*)(
-      ResponseChannelRequest::UniquePtr,
-      SerializedCompressedRequest&&,
-      Cpp2RequestContext* context,
-      folly::EventBase* eb,
-      concurrency::ThreadManager* tm);
-
-  template <typename Derived>
-  using ExecuteFunc = void (Derived::*)(ServerRequest&& request);
-
-  template <typename Derived>
-  struct ProcessFuncs {
-    ProcessFunc<Derived> compact;
-    ProcessFunc<Derived> binary;
-    ExecuteFunc<Derived> compactExecute;
-    ExecuteFunc<Derived> binaryExecute;
-  };
-
-  template <typename ProcessFuncs>
-  using ProcessMap = folly::F14ValueMap<std::string, ProcessFuncs>;
-
-  template <typename Derived>
-  using InteractionConstructor = std::unique_ptr<Tile> (Derived::*)();
-  template <typename InteractionConstructor>
-  using InteractionConstructorMap =
-      folly::F14ValueMap<std::string, InteractionConstructor>;
-
   // Sends an error response if validation fails.
   static bool validateRpcKind(
       const ResponseChannelRequest::UniquePtr& req, RpcKind kind);

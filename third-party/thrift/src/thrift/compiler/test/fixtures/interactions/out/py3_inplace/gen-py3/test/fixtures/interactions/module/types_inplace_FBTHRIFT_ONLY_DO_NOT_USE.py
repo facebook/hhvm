@@ -70,8 +70,8 @@ class CustomException(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> CustomException:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> CustomException:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     @staticmethod
@@ -172,8 +172,8 @@ class ShouldBeBoxed(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.ShouldBeBoxed(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> ShouldBeBoxed:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> ShouldBeBoxed:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> ShouldBeBoxed:

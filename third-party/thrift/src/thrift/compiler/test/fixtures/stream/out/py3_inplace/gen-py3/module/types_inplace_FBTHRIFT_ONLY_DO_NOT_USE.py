@@ -68,8 +68,8 @@ class FooStreamEx(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> FooStreamEx:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> FooStreamEx:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     @staticmethod
@@ -166,8 +166,8 @@ class FooEx(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> FooEx:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> FooEx:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     @staticmethod
@@ -264,8 +264,8 @@ class FooEx2(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> FooEx2:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> FooEx2:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     @staticmethod

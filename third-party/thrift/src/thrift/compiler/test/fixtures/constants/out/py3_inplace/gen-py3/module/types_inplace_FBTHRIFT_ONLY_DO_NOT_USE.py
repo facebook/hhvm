@@ -838,8 +838,8 @@ class Internship(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.Internship(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> Internship:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> Internship:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> Internship:
@@ -956,8 +956,8 @@ class Range(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.Range(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> Range:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> Range:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> Range:
@@ -1062,8 +1062,8 @@ class struct1(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.struct1(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> struct1:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> struct1:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> struct1:
@@ -1174,8 +1174,8 @@ class struct2(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.struct2(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> struct2:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> struct2:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__c = None
         instance._fbthrift_inner__d = None
         return instance
@@ -1301,8 +1301,8 @@ class struct3(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.struct3(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> struct3:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> struct3:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__c = None
         return instance
 
@@ -1417,8 +1417,8 @@ class struct4(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.struct4(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> struct4:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> struct4:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> struct4:
@@ -1532,8 +1532,8 @@ class union1(thrift.py3.types.Union):
             self._fbthrift__inner = _fbthrift_python_types.union1(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> union1:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> union1:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__type = None
         instance._fbthrift_inner__value = None
         return instance
@@ -1680,8 +1680,8 @@ class union2(thrift.py3.types.Union):
             self._fbthrift__inner = _fbthrift_python_types.union2(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> union2:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> union2:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__s = None
         instance._fbthrift_inner__u = None
         instance._fbthrift_inner__type = None

@@ -157,8 +157,8 @@ class {{struct:name}}({{> types/python_struct_class }}):
         {{/struct:exception?}}
         {{! There's an optimization opportunity here if convertible objects are already correct type}}
 
-    def __new__(cls, *args, **kwargs) -> {{struct:name}}:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> {{struct:name}}:
+        instance = super().__new__(_fbthrift__cls)
         {{#struct:fields_and_mixin_fields}}
         {{#field:type}}{{#type:needs_convert?}}
         instance._fbthrift_inner__{{field:py_name}} = None

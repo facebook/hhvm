@@ -69,8 +69,8 @@ class DoSomethingResult(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.DoSomethingResult(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> DoSomethingResult:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> DoSomethingResult:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> DoSomethingResult:

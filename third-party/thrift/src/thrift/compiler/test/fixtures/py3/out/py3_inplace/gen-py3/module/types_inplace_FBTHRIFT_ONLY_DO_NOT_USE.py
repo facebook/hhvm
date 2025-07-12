@@ -1831,8 +1831,8 @@ class SimpleException(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> SimpleException:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> SimpleException:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     @staticmethod
@@ -1933,8 +1933,8 @@ class OptionalRefStruct(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.OptionalRefStruct(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> OptionalRefStruct:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> OptionalRefStruct:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> OptionalRefStruct:
@@ -2048,8 +2048,8 @@ class SimpleStruct(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.SimpleStruct(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> SimpleStruct:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> SimpleStruct:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__smaller_real = None
         instance._fbthrift_inner__something = None
         return instance
@@ -2197,8 +2197,8 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.HiddenTypeFieldsStruct(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> HiddenTypeFieldsStruct:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> HiddenTypeFieldsStruct:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> HiddenTypeFieldsStruct:
@@ -2296,8 +2296,8 @@ class ComplexStruct(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.ComplexStruct(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> ComplexStruct:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> ComplexStruct:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__structOne = None
         instance._fbthrift_inner__structTwo = None
         return instance
@@ -2434,8 +2434,8 @@ class BinaryUnion(thrift.py3.types.Union):
             self._fbthrift__inner = _fbthrift_python_types.BinaryUnion(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> BinaryUnion:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> BinaryUnion:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__type = None
         instance._fbthrift_inner__value = None
         return instance
@@ -2553,8 +2553,8 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.BinaryUnionStruct(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> BinaryUnionStruct:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> BinaryUnionStruct:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__u = None
         return instance
 
@@ -2675,8 +2675,8 @@ class CustomFields(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.CustomFields(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> CustomFields:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> CustomFields:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__list_field = None
         instance._fbthrift_inner__set_field = None
         instance._fbthrift_inner__map_field = None
@@ -2834,8 +2834,8 @@ class CustomTypedefFields(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.CustomTypedefFields(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> CustomTypedefFields:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> CustomTypedefFields:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__list_field = None
         instance._fbthrift_inner__set_field = None
         instance._fbthrift_inner__map_field = None
@@ -2993,8 +2993,8 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.AdaptedTypedefFields(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> AdaptedTypedefFields:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> AdaptedTypedefFields:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__list_field = None
         instance._fbthrift_inner__set_field = None
         instance._fbthrift_inner__map_field = None

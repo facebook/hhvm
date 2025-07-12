@@ -397,8 +397,8 @@ class MyStruct(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> MyStruct:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> MyStruct:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__MyDataField = None
         instance._fbthrift_inner__floatSet = None
         return instance
@@ -548,8 +548,8 @@ class Containers(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.Containers(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> Containers:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> Containers:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__I32List = None
         instance._fbthrift_inner__StringSet = None
         instance._fbthrift_inner__StringToI64Map = None
@@ -671,8 +671,8 @@ class MyDataItem(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.MyDataItem(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> MyDataItem:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> MyDataItem:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> MyDataItem:
@@ -782,8 +782,8 @@ class MyUnion(thrift.py3.types.Union):
             self._fbthrift__inner = _fbthrift_python_types.MyUnion(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> MyUnion:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> MyUnion:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__myStruct = None
         instance._fbthrift_inner__myDataItem = None
         instance._fbthrift_inner__floatSet = None
@@ -952,8 +952,8 @@ class MyException(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> MyException:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> MyException:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__myStruct = None
         instance._fbthrift_inner__myUnion = None
         return instance
@@ -1084,8 +1084,8 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
-    def __new__(cls, *args, **kwargs) -> MyExceptionWithMessage:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> MyExceptionWithMessage:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__myStruct = None
         instance._fbthrift_inner__myUnion = None
         return instance
@@ -1211,8 +1211,8 @@ class ReservedKeyword(thrift.py3.types.Struct):
             self._fbthrift__inner = _fbthrift_python_types.ReservedKeyword(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> ReservedKeyword:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> ReservedKeyword:
+        instance = super().__new__(_fbthrift__cls)
         return instance
 
     def __call__(self, **kwargs) -> ReservedKeyword:
@@ -1317,8 +1317,8 @@ class UnionToBeRenamed(thrift.py3.types.Union):
             self._fbthrift__inner = _fbthrift_python_types.UnionToBeRenamed(*args, **kwargs)
 
 
-    def __new__(cls, *args, **kwargs) -> UnionToBeRenamed:
-        instance = super().__new__(cls)
+    def __new__(_fbthrift__cls, *args, **kwargs) -> UnionToBeRenamed:
+        instance = super().__new__(_fbthrift__cls)
         instance._fbthrift_inner__type = None
         instance._fbthrift_inner__value = None
         return instance

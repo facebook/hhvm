@@ -22,7 +22,11 @@ import unittest
 
 import testing.thrift_metadata
 from apache.thrift.metadata.thrift_types import ThriftPrimitiveType
-from testing.thrift_clients import TestingService, TestingServiceChild
+from testing.thrift_clients import (
+    ExtendServiceWithNoTypes,
+    TestingService,
+    TestingServiceChild,
+)
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Complex, hard, HardError, mixed, Perm
 from thrift.python.metadata import gen_metadata
@@ -225,6 +229,14 @@ class MetadataTests(unittest.TestCase):
             streamFunc.return_type.as_stream().elemType.as_primitive(),
             ThriftPrimitiveType.THRIFT_I32_TYPE,
         )
+
+        extend_service = gen_metadata(ExtendServiceWithNoTypes)
+        self.assertEqual(extend_service.name, "testing.ExtendServiceWithNoTypes")
+        base_service = extend_service.parent
+        # Assert not None so pyre doesn't complain that
+        # Optional type has no attribute `name`
+        self.assertIsNotNone(base_service)
+        self.assertEqual(base_service.name, "base_service_only.BaseService")
 
     def test_metadata_structured_annotations(self) -> None:
         annotations = gen_metadata(TestingService).structuredAnnotations

@@ -19,6 +19,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/lib/python/test/dependency.thrift"
 include "thrift/lib/python/test/sub_dependency.thrift"
+include "thrift/lib/python/test/base_service_only.thrift"
 
 cpp_include "<deque>"
 cpp_include "folly/container/F14Map.h"
@@ -546,6 +547,10 @@ service TestingService {
 @cpp.Name{value = "TestingServiceChildRenamed"}
 service TestingServiceChild extends TestingService {
   stream<i32> stream_func();
+}
+
+service ExtendServiceWithNoTypes extends base_service_only.BaseService {
+  void do_nothing();
 }
 
 struct ListNode {

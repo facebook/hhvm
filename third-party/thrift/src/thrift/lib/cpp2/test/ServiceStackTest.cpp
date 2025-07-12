@@ -35,5 +35,5 @@ TEST(ServiceStackTest, example) {
   auto handler = make_shared<ServiceStackHandler>();
   ScopedServerInterfaceThread ssit(handler);
   auto client = ssit.newClient<TestServiceStackAsyncClient>();
-  client->sync_noResponse(/* size = */ 77);
+  client->sync_noResponse(/* p_size = */ 77);
 }

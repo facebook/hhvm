@@ -456,7 +456,7 @@ void SingleRpcChannel::onThriftResponse() noexcept {
   auto evb = callback_->getEventBase();
   ResponseRpcMetadata metadata;
   transport::THeader::StringToStringMap headers;
-  decodeHeaders(*headers_, headers, /*requestMetadata=*/nullptr);
+  decodeHeaders(*headers_, headers, /*metadata=*/nullptr);
   if (!headers.empty()) {
     metadata.otherMetadata() = std::move(headers);
   }

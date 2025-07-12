@@ -110,10 +110,10 @@ class MyStruct:
 
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'
@@ -630,10 +630,10 @@ class MyUnion(object):
   
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'
@@ -807,10 +807,10 @@ class MyStructWithCustomDefault:
 
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'
@@ -1109,10 +1109,10 @@ class StructLevelTerseStruct:
 
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'
@@ -1734,10 +1734,10 @@ class FieldLevelTerseStruct:
 
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'
@@ -2137,10 +2137,10 @@ class AdaptedFields:
 
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'
@@ -2275,10 +2275,10 @@ class TerseException(TException):
 
   def readFromJson(self, json, is_text=True, **kwargs):
     kwargs_copy = dict(kwargs)
-    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
     set_cls = kwargs_copy.pop('custom_set_cls', set)
     dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
-    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
     if wrap_enum_constants and relax_enum_validation:
         raise ValueError(
             'wrap_enum_constants cannot be used together with relax_enum_validation'

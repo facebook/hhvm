@@ -705,14 +705,15 @@ void t_py_generator::generate_json_reader_fn_signature(ofstream& out) {
               << endl;
   indent_up();
   indent(out) << "kwargs_copy = dict(kwargs)" << endl;
-  indent(out) << "relax_enum_validation = "
-                 "bool(kwargs_copy.pop('relax_enum_validation', False))"
-              << endl;
-  indent(out) << "set_cls = kwargs_copy.pop('custom_set_cls', set)" << endl;
-  indent(out) << "dict_cls = kwargs_copy.pop('custom_dict_cls', dict)" << endl;
   indent(out)
       << "wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)"
       << endl;
+  indent(out)
+      << "relax_enum_validation = "
+         "bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))"
+      << endl;
+  indent(out) << "set_cls = kwargs_copy.pop('custom_set_cls', set)" << endl;
+  indent(out) << "dict_cls = kwargs_copy.pop('custom_dict_cls', dict)" << endl;
   indent(out) << "if wrap_enum_constants and relax_enum_validation:" << endl;
   indent(out) << "    raise ValueError(" << endl;
   indent(out)

@@ -48,9 +48,14 @@ class TestJSONReader(unittest.TestCase):
         self.assertIn("bad_kwarg", str(ex.exception))
 
     def testUnrecognizedEnum(self):
+        # Unrecognized enum values are allowed by default
+        struct = StructContainingEnum()
+        struct.readFromJson('{ "data": 100}')
+
+    def testUnrecognizedEnumNoRelaxedValidation(self):
+        struct = StructContainingEnum()
         with self.assertRaises(TProtocolException) as ex:
-            struct = StructContainingEnum()
-            struct.readFromJson('{ "data": 100}')
+            struct.readFromJson('{ "data": 100}', relax_enum_validation=False)
 
         self.assertIn(
             "100 is not a recognized value of enum type EnumZeroToTen",
@@ -65,14 +70,14 @@ class TestJSONReader(unittest.TestCase):
         json_data = '{"nested_struct": {"data": 100}}'
         struct = Container()
         with self.assertRaises(TProtocolException) as ex:
-            struct.readFromJson(json_data)
+            struct.readFromJson(json_data, relax_enum_validation=False)
 
         self.assertIn(
             "100 is not a recognized value of enum type EnumZeroToTen",
             str(ex.exception),
         )
 
-        struct.readFromJson(json_data, relax_enum_validation=True)
+        struct.readFromJson(json_data)
 
     def testReadFromJsonWrappingEnumValues(self):
         struct = StructContainingEnum()

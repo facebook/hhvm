@@ -57,6 +57,7 @@
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestTask.h>
+#include <thrift/lib/cpp2/async/processor/ServiceHandlerBase.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>
@@ -70,14 +71,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace folly::coro {
-class CancellableAsyncScope;
-}
-
 namespace apache::thrift {
-
-class ThriftServer;
-class ThriftServerStopController;
 
 namespace detail {
 template <typename T>
@@ -252,78 +246,6 @@ class RequestTask final : public EventTask {
  private:
   ChildType* childClass_;
   GeneratedAsyncProcessorBase::ExecuteFunc<ChildType> executeFunc_;
-};
-
-/**
- * Base-class for user-implemented service handlers. This serves as a channel
- * user code to be notified by ThriftServer and respond to events (via
- * callbacks).
- */
-class ServiceHandlerBase {
- private:
-#if FOLLY_HAS_COROUTINES
-  class MethodNotImplemented : public std::logic_error {
-   public:
-    MethodNotImplemented() : std::logic_error("Method not implemented") {}
-  };
-#endif
-
- public:
-#if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task<void> co_onStartServing() { co_return; }
-  virtual folly::coro::Task<void> co_onStopRequested() {
-    throw MethodNotImplemented();
-  }
-#endif
-
-  virtual folly::SemiFuture<folly::Unit> semifuture_onStartServing() {
-#if FOLLY_HAS_COROUTINES
-    return co_onStartServing().semi();
-#else
-    return folly::makeSemiFuture();
-#endif
-  }
-
-  virtual folly::SemiFuture<folly::Unit> semifuture_onStopRequested() {
-#if FOLLY_HAS_COROUTINES
-    // TODO(srir): onStopRequested should be implemented similar to
-    // onStartServing
-    try {
-      return co_onStopRequested().semi();
-    } catch (MethodNotImplemented&) {
-      // If co_onStopRequested() is not implemented we just return
-    }
-#endif
-    return folly::makeSemiFuture();
-  }
-
-  ThriftServer* getServer() { return server_; }
-  const ThriftServer* getServer() const { return server_; }
-  void attachServer(ThriftServer& server);
-  void detachServer();
-
-  /**
-   * Asynchronously begins shutting down the Thrift server this handler is
-   * attached to.
-   *
-   * This function is idempotent for the duration of a server lifecycle -- so
-   * it's safe to call multiple times (e.g. from folly::AsyncSignalHandler).
-   */
-  void shutdownServer();
-
-  virtual ~ServiceHandlerBase() = default;
-
- protected:
-#if FOLLY_HAS_COROUTINES
-  folly::coro::CancellableAsyncScope* getAsyncScope();
-#endif
-
- private:
-  ThriftServer* server_{nullptr};
-  folly::Synchronized<
-      std::optional<folly::PrimaryPtrRef<ThriftServerStopController>>,
-      std::mutex>
-      serverStopController_;
 };
 
 /**

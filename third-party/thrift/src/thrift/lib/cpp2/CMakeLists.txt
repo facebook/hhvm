@@ -254,6 +254,7 @@ add_library(
   async/processor/ServerRequest.cpp
   async/processor/ServerRequestHelper.cpp
   async/processor/ServerRequestTask.cpp
+  async/processor/ServiceHandlerBase.cpp
   gen/module_constants_cpp.cpp
   gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp

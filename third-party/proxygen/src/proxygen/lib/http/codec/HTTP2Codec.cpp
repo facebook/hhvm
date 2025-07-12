@@ -441,7 +441,7 @@ ErrorCode HTTP2Codec::parseHeadersImpl(
     }
   }
   curHeaderBlock_.append(
-      std::move(headerBuf), /*pack=*/true, /*reuseTail=*/false);
+      std::move(headerBuf), /*pack=*/true, /*allowTailReuse=*/false);
   std::unique_ptr<HTTPMessage> msg;
   uint32_t headersCompleteStream = curHeader_.stream;
 

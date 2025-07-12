@@ -51,43 +51,6 @@ namespace apache::thrift {
 
 thread_local RequestParams ServerInterface::requestParams_;
 
-ServerRequestTask::~ServerRequestTask() {
-  // only expire req_ once
-  if (!req_.request()) {
-    return;
-  }
-  failWith(
-      TApplicationException{"Task expired without processing"},
-      kTaskExpiredErrorCode);
-}
-
-void ServerRequestTask::failWith(
-    folly::exception_wrapper ex, std::string exCode) {
-  auto cleanUp = [req = apache::thrift::detail::ServerRequestHelper::request(
-                      std::move(req_)),
-                  ex = std::move(ex),
-                  exCode = std::move(exCode)]() mutable {
-    req->sendErrorWrapped(std::move(ex), std::move(exCode));
-  };
-
-  auto eb = apache::thrift::detail::ServerRequestHelper::eventBase(req_);
-
-  if (eb->inRunningEventBaseThread()) {
-    cleanUp();
-  } else {
-    eb->runInEventBaseThread(std::move(cleanUp));
-  }
-}
-
-void ServerRequestTask::setTile(TilePtr&& tile) {
-  req_.requestContext()->setTile(std::move(tile));
-}
-
-void ServerRequestTask::acceptIntoResourcePool(int8_t priority) {
-  detail::ServerRequestHelper::setInternalPriority(req_, priority);
-  detail::ServerRequestHelper::resourcePool(req_)->accept(std::move(req_));
-}
-
 void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
   if (!setUpRequestProcessing(req)) {
     return;

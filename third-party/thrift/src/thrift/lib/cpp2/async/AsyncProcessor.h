@@ -56,6 +56,7 @@
 #include <thrift/lib/cpp2/async/processor/RequestParams.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
+#include <thrift/lib/cpp2/async/processor/ServerRequestTask.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>
@@ -224,31 +225,6 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
       int64_t id, Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
   void destroyAllInteractions(
       Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
-};
-
-class ServerRequestTask : public concurrency::Runnable, public InteractionTask {
- public:
-  explicit ServerRequestTask(ServerRequest&& req) : req_(std::move(req)) {}
-  ~ServerRequestTask() override;
-
-  void failWith(folly::exception_wrapper ex, std::string exCode) override;
-
-  void setTile(TilePtr&& tile) override;
-
-  void run() override {
-    // This override exists because these tasks are stored as Runnable in the
-    // interaction queues.
-    LOG(FATAL) << "Should never be called";
-  }
-
-  void acceptIntoResourcePool(int8_t priority) override;
-
-  friend class Tile;
-  friend class TilePromise;
-  friend class GeneratedAsyncProcessorBase;
-
- private:
-  ServerRequest req_;
 };
 
 template <typename ChildType>

@@ -111,7 +111,7 @@ bool FileDataProvider::hasUpdate() {
   struct pollfd pollfd;
   pollfd.fd = inotify_.fd();
   pollfd.events = POLLIN;
-  auto retval = poll(&pollfd, /* nfds = */ 1, /* timeout = */ 0);
+  auto retval = poll(&pollfd, /* __nfds = */ 1, /* timeout = */ 0);
   if (retval < 0) {
     throw std::runtime_error(
         folly::format("poll on inotifyFD for '{}' failed", filePath_.data())

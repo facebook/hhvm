@@ -99,7 +99,8 @@ void writeChainWithFds(
     folly::AsyncTransport* transport,
     folly::AsyncTransport::WriteCallback* callback,
     std::unique_ptr<folly::IOBuf> buf,
-    folly::SocketFds fds) {
+    folly::SocketFds fds,
+    folly::WriteFlags flags) {
   auto fdSocket = transport->getUnderlyingTransport<folly::AsyncFdSocket>();
   if (!fdSocket) {
     LOG(DFATAL) << "`writeChainWithFds` called when the underlying socket "
@@ -107,10 +108,10 @@ void writeChainWithFds(
     // Fail back to sending data without FDs, and discard the FDs right
     // away.  The recipient will see a request that needs FDs without the
     // corresponding FDs on the wire, and fail out.
-    transport->writeChain(callback, std::move(buf));
+    transport->writeChain(callback, std::move(buf), flags);
     return;
   }
-  fdSocket->writeChainWithFds(callback, std::move(buf), std::move(fds));
+  fdSocket->writeChainWithFds(callback, std::move(buf), std::move(fds), flags);
 }
 
 folly::SocketFds::SeqNum injectFdSocketSeqNumIntoFdsToSend(

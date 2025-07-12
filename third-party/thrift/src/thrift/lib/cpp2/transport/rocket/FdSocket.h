@@ -38,7 +38,8 @@ void writeChainWithFds(
     folly::AsyncTransport* transport,
     folly::AsyncTransport::WriteCallback* callback,
     std::unique_ptr<folly::IOBuf> buf,
-    folly::SocketFds fds);
+    folly::SocketFds fds,
+    folly::WriteFlags flags = folly::WriteFlags::NONE);
 
 // Must be used to commit `SocketFds` to be written to `AsyncFdSocket`
 // before actually calling `writeChainWithFds`.  Writes must be done in the

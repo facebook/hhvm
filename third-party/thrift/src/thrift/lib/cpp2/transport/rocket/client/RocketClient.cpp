@@ -51,6 +51,7 @@
 THRIFT_FLAG_DEFINE_bool(rocket_client_new_protocol_key, true);
 THRIFT_FLAG_DEFINE_bool(rocket_client_binary_rpc_metadata_encoding, false);
 THRIFT_FLAG_DEFINE_bool(rocket_client_rocket_skip_protocol_key, false);
+THRIFT_FLAG_DEFINE_bool(rocket_client_set_eor_flag, false);
 
 namespace apache::thrift {
 
@@ -1309,6 +1310,9 @@ void RocketClient::scheduleWriteLoopCallback() {
 void RocketClient::writeScheduledRequestsToSocket() noexcept {
   DestructorGuard dg(this);
 
+  folly::WriteFlags wflags = THRIFT_FLAG(rocket_client_set_eor_flag)
+      ? folly::WriteFlags::EOR
+      : folly::WriteFlags::NONE;
   if (clientState_.connState == ConnectionState::CONNECTED) {
     size_t endOffset = 0;
     std::unique_ptr<folly::IOBuf> buf;
@@ -1339,12 +1343,12 @@ void RocketClient::writeScheduledRequestsToSocket() noexcept {
       // invariant must be preserved going forward.
       prepareWriteEvent();
       writeChainWithFds(
-          socket_.get(), this, std::move(buf), std::move(req.fds));
+          socket_.get(), this, std::move(buf), std::move(req.fds), wflags);
     });
     // This batch didn't have any FDs attached.
     if (buf) {
       prepareWriteEvent();
-      socket_->writeChain(this, std::move(buf));
+      socket_->writeChain(this, std::move(buf), wflags);
     }
   }
 

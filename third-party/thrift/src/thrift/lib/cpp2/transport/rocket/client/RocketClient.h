@@ -48,6 +48,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_client_binary_rpc_metadata_encoding);
+THRIFT_FLAG_DECLARE_bool(rocket_client_set_eor_flag);
 
 namespace folly {
 class IOBuf;

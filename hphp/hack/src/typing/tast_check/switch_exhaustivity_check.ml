@@ -264,6 +264,7 @@ module AlternativeSet = struct
       `~null`. *)
   let expand_type env ty =
     let (env, ty) = Tast_env.expand_type env ty in
+    let (_, ty) = Tast_env.strip_supportdyn env ty in
     match T.get_node ty with
     | T.Tunion tyl ->
       let (env, tyl) = List.fold_map ~init:env tyl ~f:Tast_env.expand_type in

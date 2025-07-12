@@ -223,7 +223,6 @@ class SerializerTests(unittest.TestCase):
 
     def pickle_round_trip(
         self,
-        # pyre-ignore[2]
         control: Union[
             StructOrUnion, MutableStructOrUnion, Sequence, Set, Mapping[Any, Any]
         ],

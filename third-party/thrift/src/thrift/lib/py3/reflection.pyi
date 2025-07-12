@@ -25,15 +25,12 @@ from thrift.py3.types import Struct
 def inspect(cls: Union[Struct, Type[Struct], Error, Type[Error]]) -> StructSpec: ...
 @overload
 def inspect(
-    # pyre-ignore[2] : it may return anything
     cls: Union[Sequence[Any], Type[Sequence[Any]]],
 ) -> ListSpec: ...
 @overload
 def inspect(cls: Union[Set[Any], Type[Set[Any]]]) -> SetSpec: ...
 @overload
 def inspect(cls: Union[Mapping[Any, Any], Type[Mapping[Any, Any]]]) -> MapSpec: ...
-
-# pyre-ignore[2]: it can be anything
 def inspectable(cls: Any) -> bool: ...
 
 class NumberType(Enum):
@@ -73,52 +70,40 @@ class FieldSpec:
     id: int
     name: str
     py_name: str
-    # pyre-ignore[4]: it can be any type
     type: Type[Any]
     kind: NumberType
     qualifier: Qualifier
-    # pyre-ignore[4]: it can be anything
     default: Any
     annotations: Mapping[str, str] = {}
     def __init__(
         self,
         name: str,
-        # pyre-ignore[2]: it can be any type
         type: Type[Any],
         kind: NumberType,
         qualifier: Qualifier,
-        # pyre-ignore[2]: it can be anything
         default: Any,
         annotations: Mapping[str, str] = {},
     ) -> None: ...
 
 class ListSpec:
-    # pyre-ignore[4]: it can be any type
     value: Type[Any]
     kind: NumberType
-    # pyre-ignore[2]: it can be any type
     def __init__(self, value: Type[Any], kind: NumberType) -> None: ...
 
 class SetSpec:
-    # pyre-ignore[4]: it can be any type
     value: Type[Any]
     kind: NumberType
-    # pyre-ignore[2]: it can be any type
     def __init__(self, value: Type[Any], kind: NumberType) -> None: ...
 
 class MapSpec:
-    # pyre-ignore[4]: it can be any type
     key: Type[Any]
     key_kind: NumberType
-    # pyre-ignore[4]: it can be any type
     value: Type[Any]
     value_kind: NumberType
     def __init__(
         self,
-        # pyre-ignore[2]: it can be any type
         key: Type[Any],
         key_kind: NumberType,
-        # pyre-ignore[2]: it can be any type
         value: Type[Any],
         value_kind: NumberType,
     ) -> None: ...

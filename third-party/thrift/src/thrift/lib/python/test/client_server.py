@@ -116,7 +116,7 @@ class TestServer:
         handler: ServiceInterface = Handler(),  # noqa: B008
     ) -> None:
         self.server = ThriftServer(handler, ip=ip, path=path)
-        # pyre-fixme[4, 8]: The initialization below eliminates
+        # pyre-fixme[8]: The initialization below eliminates
         #                   the pyre[13] error, but results in
         #                   pyre[4] and pyre[8] errors.
         #                   __aenter__ sets the required value.

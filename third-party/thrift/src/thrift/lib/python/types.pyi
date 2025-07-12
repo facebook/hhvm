@@ -231,7 +231,6 @@ class ServiceInterface:
     def getFunctionTable(
         self,
     ) -> typing.Mapping[bytes, typing.Callable[..., object]]: ...
-    # pyre-ignore[3]: it can return anything
     async def __aenter__(self) -> typing.Any: ...
     async def __aexit__(
         self,

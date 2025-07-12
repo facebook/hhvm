@@ -102,7 +102,6 @@ from thrift.test.thrift_python.union_test.thrift_types import (
 class ThriftPythonAbstractTypesTest(unittest.TestCase):
     @staticmethod
     # pyre-ignore[2]
-    # pyre-ignore[3]
     def _get_property_type(property_descriptor) -> typing.Type[typing.Any]:
         type_hints = typing.get_type_hints(property_descriptor.fget)
 

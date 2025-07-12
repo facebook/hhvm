@@ -75,11 +75,8 @@ def get_client(
     ssl_timeout: float = ...,
 ) -> TClient: ...
 def install_proxy_factory(
-    # pyre-ignore[2] : it may return anything
     factory: Optional[Callable[[Type[TClient]], Callable[[TClient], Any]]],
 ) -> None: ...
-
-# pyre-ignore[3] : it may return anything
 def get_proxy_factory() -> (
     Optional[Callable[[Type[Client]], Callable[[Client], Any]]]
 ): ...

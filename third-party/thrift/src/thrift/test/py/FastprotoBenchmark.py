@@ -23,7 +23,6 @@ from multiprocessing import Process, Queue
 
 import psutil
 
-# pyre-fixme[21]: Could not find name `fastproto` in `thrift.protocol`.
 from thrift.protocol import fastproto, TBinaryProtocol, TCompactProtocol
 from thrift.transport import TTransport
 

@@ -49,7 +49,6 @@ _servers = []
 _ports = {}
 
 try:
-    # pyre-fixme[21]: Could not find name `fastproto` in `thrift.protocol`.
     from thrift.protocol import fastproto
 except ImportError:
     fastproto = None

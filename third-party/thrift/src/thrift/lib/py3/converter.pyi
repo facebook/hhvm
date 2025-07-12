@@ -22,7 +22,6 @@ from thrift.python.types import StructOrUnion as PythonStruct
 # thrift-py-deprecated struct doesn't have a base class,
 # thus this hacky way to do type checking
 class PyDeprecatedStruct(typing.Protocol):
-    # pyre-ignore[4]: Attribute annotation cannot be `Any`.
     thrift_spec: typing.Any
 
 T = typing.TypeVar("T", bound=Py3Struct)

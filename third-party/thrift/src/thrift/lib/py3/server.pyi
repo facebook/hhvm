@@ -38,7 +38,6 @@ from thrift.py3.common import Headers, Priority
 from thrift.python.server_impl.interceptor.server_module import PythonServerModule
 from thrift.python.types import ServiceInterface as PythonServiceInterface
 
-# pyre-ignore[33]: the callable can be any function
 mT = TypeVar("mT", bound=Callable[..., Any])
 T = TypeVar("T")
 IPAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
@@ -64,7 +63,6 @@ class SSLPolicy(Enum):
 
 class AsyncProcessorFactory:
     annotations: ClassVar[Mapping[str, str]] = ...
-    # pyre-ignore[3]: it can return anything
     async def __aenter__(self) -> Any: ...
     async def __aexit__(
         self,

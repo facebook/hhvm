@@ -176,7 +176,6 @@ class ClientBinaryServerTests(unittest.IsolatedAsyncioTestCase):
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(BinaryService, host=ip, port=port) as client:
-                # pyre-fixme[33]: Given annotation cannot be `Any`.
                 val: Any
                 val = await client.sendRecvBinaries(
                     # pyre-ignore[6]: got Union[BinariesImmutable, BinariesMutable]

@@ -1052,20 +1052,59 @@ where
             ::fbthrift::Field::new("tags", ::fbthrift::TType::Set, 4),
         ];
 
-
         let mut output = SomeStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SomeStruct")?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?,
-                (::fbthrift::TType::I32, 2) => output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?,
-                (::fbthrift::TType::I32, 3) => output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?,
-                (::fbthrift::TType::Set, 4) => output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?,
-                (fty, _) => p.skip(fty)?,
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I32, 1) {
+                output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_field_end()?;
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 2) {
+                output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 3) {
+                output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Set, 4) {
+                output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            if fty != ::fbthrift::TType::Stop {
+                true
+            } else {
+                false
+            }
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I32, 1) => output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?,
+                    (::fbthrift::TType::I32, 2) => output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?,
+                    (::fbthrift::TType::I32, 3) => output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?,
+                    (::fbthrift::TType::Set, 4) => output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(output)
@@ -1188,20 +1227,59 @@ where
             ::fbthrift::Field::new("me3_n3", ::fbthrift::TType::I32, 2),
         ];
 
-
         let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?,
-                (::fbthrift::TType::I32, 2) => output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?,
-                (::fbthrift::TType::I32, 4) => output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?,
-                (::fbthrift::TType::I32, 6) => output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?,
-                (fty, _) => p.skip(fty)?,
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I32, 1) {
+                output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_field_end()?;
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 2) {
+                output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 4) {
+                output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 6) {
+                output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            if fty != ::fbthrift::TType::Stop {
+                true
+            } else {
+                false
+            }
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I32, 1) => output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?,
+                    (::fbthrift::TType::I32, 2) => output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?,
+                    (::fbthrift::TType::I32, 4) => output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?,
+                    (::fbthrift::TType::I32, 6) => output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(output)

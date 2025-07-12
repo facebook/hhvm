@@ -90,18 +90,43 @@ where
             ::fbthrift::Field::new("super", ::fbthrift::TType::Bool, 2),
         ];
 
-
         let mut output = ThereAreNoPascalCaseKeywords::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ThereAreNoPascalCaseKeywords")?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => output.r#return = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "return", strct: "ThereAreNoPascalCaseKeywords"})?,
-                (::fbthrift::TType::Bool, 2) => output.super_ = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "super", strct: "ThereAreNoPascalCaseKeywords"})?,
-                (fty, _) => p.skip(fty)?,
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Bool, 1) {
+                output.r#return = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "return", strct: "ThereAreNoPascalCaseKeywords"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_field_end()?;
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Bool, 2) {
+                output.super_ = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "super", strct: "ThereAreNoPascalCaseKeywords"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            if fty != ::fbthrift::TType::Stop {
+                true
+            } else {
+                false
+            }
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Bool, 1) => output.r#return = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "return", strct: "ThereAreNoPascalCaseKeywords"})?,
+                    (::fbthrift::TType::Bool, 2) => output.super_ = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "super", strct: "ThereAreNoPascalCaseKeywords"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(output)

@@ -104,20 +104,59 @@ where
             ::fbthrift::Field::new("myString", ::fbthrift::TType::String, 2),
         ];
 
-
         let mut output = Foo::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Foo")?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => output.myInteger = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myInteger", strct: "Foo"})?,
-                (::fbthrift::TType::String, 2) => output.myString = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myString", strct: "Foo"})?),
-                (::fbthrift::TType::List, 3) => output.myBools = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myBools", strct: "Foo"})?,
-                (::fbthrift::TType::List, 4) => output.myNumbers = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myNumbers", strct: "Foo"})?,
-                (fty, _) => p.skip(fty)?,
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I32, 1) {
+                output.myInteger = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myInteger", strct: "Foo"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_field_end()?;
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 2) {
+                output.myString = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myString", strct: "Foo"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::List, 3) {
+                output.myBools = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myBools", strct: "Foo"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::List, 4) {
+                output.myNumbers = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myNumbers", strct: "Foo"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            if fty != ::fbthrift::TType::Stop {
+                true
+            } else {
+                false
+            }
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I32, 1) => output.myInteger = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myInteger", strct: "Foo"})?,
+                    (::fbthrift::TType::String, 2) => output.myString = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myString", strct: "Foo"})?),
+                    (::fbthrift::TType::List, 3) => output.myBools = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myBools", strct: "Foo"})?,
+                    (::fbthrift::TType::List, 4) => output.myNumbers = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myNumbers", strct: "Foo"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(output)

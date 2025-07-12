@@ -133,24 +133,91 @@ where
             ::fbthrift::Field::new("min_i64_field", ::fbthrift::TType::I64, 2),
         ];
 
-
         let mut output = Limits::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Limits")?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?,
-                (::fbthrift::TType::I64, 2) => output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?,
-                (::fbthrift::TType::I32, 3) => output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?,
-                (::fbthrift::TType::I32, 4) => output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?,
-                (::fbthrift::TType::I16, 5) => output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?,
-                (::fbthrift::TType::I16, 6) => output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?,
-                (::fbthrift::TType::Byte, 7) => output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?,
-                (::fbthrift::TType::Byte, 8) => output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?,
-                (fty, _) => p.skip(fty)?,
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I64, 1) {
+                output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_field_end()?;
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I64, 2) {
+                output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 3) {
+                output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 4) {
+                output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I16, 5) {
+                output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I16, 6) {
+                output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Byte, 7) {
+                output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Byte, 8) {
+                output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            if fty != ::fbthrift::TType::Stop {
+                true
+            } else {
+                false
+            }
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I64, 1) => output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I64, 2) => output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I32, 3) => output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I32, 4) => output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I16, 5) => output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I16, 6) => output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?,
+                    (::fbthrift::TType::Byte, 7) => output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?,
+                    (::fbthrift::TType::Byte, 8) => output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(output)

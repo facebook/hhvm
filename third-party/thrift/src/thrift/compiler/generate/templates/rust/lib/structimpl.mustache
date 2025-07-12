@@ -151,6 +151,68 @@ where
             {{/struct:fields_by_name}}
         ];
 
+        {{^program:deprecated_optional_with_default_is_some?}}
+        let mut output = {{struct:rust_name}}::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        let fallback  = 'fastpath: {
+            {{#struct:fields}}
+            if (fty, fid) == ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}) {
+                output.{{field:rust_name}} = {{!
+                }}{{#field:optional?}}{{!
+                }}::std::option::Option::Some({{!
+                }}{{/field:optional?}}{{!
+                }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
+                }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
+                }}{{#field:optional?}}{{!
+                }}){{!
+                }}{{/field:optional?}}{{!
+                }};
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            {{/struct:fields}}
+
+            if fty != ::fbthrift::TType::Stop {
+                true
+            } else {
+                false
+            }
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,{{!
+                    }}{{#struct:fields}}
+                    ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
+                        }}output.{{field:rust_name}} = {{!
+                        }}{{#field:optional?}}{{!
+                        }}::std::option::Option::Some({{!
+                        }}{{/field:optional?}}{{!
+                        }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
+                        }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                        }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
+                        }}{{#field:optional?}}{{!
+                        }}){{!
+                        }}{{/field:optional?}}{{!
+                        }},{{!
+                    }}{{/struct:fields}}
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+        {{/program:deprecated_optional_with_default_is_some?}}
+
+        {{!TODO: Remove this when we remove the legacy option}}
+        {{#program:deprecated_optional_with_default_is_some?}}
         {{#struct:all_optional?}}
         #[allow(unused_mut)]
         let mut output = Self {{> lib/block}}{{!
@@ -161,40 +223,6 @@ where
 
         };
         {{/struct:all_optional?}}
-
-        {{^program:deprecated_optional_with_default_is_some?}}
-        {{^struct:all_optional?}}
-        let mut output = {{struct:rust_name}}::default();
-        {{/struct:all_optional?}}
-        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,{{!
-                }}{{#struct:fields}}
-                ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
-                    }}output.{{field:rust_name}} = {{!
-                    }}{{#field:optional?}}{{!
-                    }}::std::option::Option::Some({{!
-                    }}{{/field:optional?}}{{!
-                    }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
-                    }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
-                    }}{{#field:optional?}}{{!
-                    }}){{!
-                    }}{{/field:optional?}}{{!
-                    }},{{!
-                }}{{/struct:fields}}
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(output)
-        {{/program:deprecated_optional_with_default_is_some?}}
-
-        {{!TODO: Remove this when we remove the legacy option}}
-        {{#program:deprecated_optional_with_default_is_some?}}
         {{^struct:all_optional?}}
         {{#struct:fields}}
         let mut field_{{field:name}} = ::std::option::Option::None;

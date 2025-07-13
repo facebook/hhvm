@@ -220,6 +220,7 @@ add_library(
   TrustedServerException.cpp
   async/AsyncClient.cpp
   async/AsyncProcessor.cpp
+  async/AsyncProcessorFactory.cpp
   async/AsyncProcessorHelper.cpp
   async/ClientChannel.cpp
   async/ClientSinkBridge.cpp

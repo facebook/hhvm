@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <variant>
+
 #include <folly/io/async/Request.h>
 #include <folly/memory/not_null.h>
 #include <thrift/lib/cpp/TApplicationException.h>

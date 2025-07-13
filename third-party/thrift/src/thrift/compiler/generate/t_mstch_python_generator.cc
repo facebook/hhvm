@@ -895,6 +895,8 @@ class python_mstch_struct : public mstch_struct {
             {"struct:num_fields", &python_mstch_struct::num_fields},
             {"struct:allow_inheritance?",
              &python_mstch_struct::allow_inheritance},
+            {"struct:disable_field_caching?",
+             &python_mstch_struct::disable_field_caching},
         });
   }
 
@@ -940,6 +942,10 @@ class python_mstch_struct : public mstch_struct {
   mstch::node allow_inheritance() {
     return struct_->has_structured_annotation(
         kPythonMigrationBlockingAllowInheritanceUri);
+  }
+
+  mstch::node disable_field_caching() {
+    return struct_->has_structured_annotation(kPythonDisableFieldCacheUri);
   }
 
  private:

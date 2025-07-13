@@ -77,20 +77,21 @@ cdef _is_py3_structured(obj):
 
 
 
-cdef _make_cached_property(struct_class, int field_index, str field_name):
+cdef _make_non_primitive_property(struct_class, int field_index, str field_name, pbool disabled_caching):
     if _fbthrift_is_cinder_runtime:
         getter_fn = lambda self: (<Struct>self)._fbthrift_py_value_from_internal_data(field_index)
         return cinder.cached_property(
-            getter_fn, 
+            getter_fn,
             getattr(struct_class, field_name),
         )
+    # there are two cases where cinder.cached_property is not used:
+    # 1. On MacOs/Windows, cinder is not available.
+    # 2. On Linux, in python_binary where use_cinder = False (the default)
+    #    cinder is available but cinder.cached_property is very slow.
+    elif disabled_caching:
+        return _StructUncachedField(field_index, field_name)
     else:
-        # there are two cases where cinder.cached_property is not used:
-        # 1. On MacOs/Windows, cinder is not available.
-        # 2. On Linux, in python_binary where use_cinder = False (the default)
-        #    cinder is available but cinder.cached_property is very slow. 
         return _StructCachedField(field_index, field_name)
-    
 
 
 cdef public api object deepcopy(object obj):
@@ -1120,7 +1121,7 @@ cdef class Struct(StructOrUnion):
                 arguments during initialization.
         """
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        if _fbthrift_is_cinder_runtime:
+        if _fbthrift_is_cinder_runtime or hasattr(self, '_fbthrift_diable_field_cache_DO_NOT_USE') :
             # in cinder, caching happens in property layer
             self._fbthrift_field_cache = None
         else:
@@ -1330,7 +1331,7 @@ cdef class Struct(StructOrUnion):
     # On completion:
     #   - iternal data `_fbthrift_data` is valid
     #   - `_fbthrift_field_cache` contains no cached values
-    #   - primitive attributes are set 
+    #   - primitive attributes are set
     @classmethod
     def _fbthrift_from_internal_data(cls, tuple fbthrift_data not None):
         cdef Struct inst = cls.__new__(cls)
@@ -1718,8 +1719,8 @@ def _make_readonly_mutate_attr():
     return _readonly_setattr, _readonly_delattr
 
 cdef class _FieldDescriptorBase:
-    """ 
-    A descriptor parent class that enforces immutability. 
+    """
+    A descriptor parent class that enforces immutability.
     """
     cdef str _field_name
 
@@ -1727,15 +1728,15 @@ cdef class _FieldDescriptorBase:
         self._field_name = field_name
 
     def __set__(self, obj, value):
-        raise AttributeError(f"Cannot set attribute {self._field_name}: thrift-python structs are immutable") 
+        raise AttributeError(f"Cannot set attribute {self._field_name}: thrift-python structs are immutable")
 
     def __delete__(self, obj):
-        raise AttributeError(f"Cannot delete attribute {self._field_name}: thrift-python structs are immutable") 
+        raise AttributeError(f"Cannot delete attribute {self._field_name}: thrift-python structs are immutable")
 
 
 @_cython__final
 cdef class _StructCachedField(_FieldDescriptorBase):
-    """ 
+    """
     A descriptor that enforces immutability and implements cached field access.
     """
     cdef int16_t _field_index
@@ -1750,13 +1751,28 @@ cdef class _StructCachedField(_FieldDescriptorBase):
 
         return obj._fbthrift_get_cached_field_value(self._field_index)
 
+@cython.final
+cdef class _StructUncachedField(_FieldDescriptorBase):
+    """ A descriptor that for UncachedField.
+        Return _fbthrift_py_value_from_internal_data directly.
+    """
+    cdef int16_t _field_index
+
+    def __init__(self, int16_t field_index, str field_name):
+        self._field_index = field_index
+        super().__init__(field_name)
+
+    def __get__(self, Struct obj, objtype):
+        if obj is None:
+            return None
+        return obj._fbthrift_py_value_from_internal_data(self._field_index)
+
 
 @_cython__final
 cdef class _StructPrimitiveField(_FieldDescriptorBase):
     """
     A descriptor that enforces immutability and implements field access for
     types where the internal data type is exactly the python value type.
-                
     """
     cdef int16_t _tuple_index
 
@@ -1809,6 +1825,8 @@ class StructMeta(type):
         # Set[Tuple (field spec)]. See `StructInfo` class docstring for the
         # contents of the field spec tuples.
         fields = dct.pop('_fbthrift_SPEC', ())
+        # boolean
+        disabled_caching = dct.get('_fbthrift_diable_field_cache_DO_NOT_USE', False)
 
         num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
@@ -1839,7 +1857,7 @@ class StructMeta(type):
             type.__setattr__(
                 klass,
                 field_name,
-                _make_cached_property(klass, field_index, field_name),
+                _make_non_primitive_property(klass, field_index, field_name, disabled_caching),
             )
         for field_index, field_name, field_type_info in primitive_types:
             descriptor = _StructPrimitiveField(field_index, field_name)

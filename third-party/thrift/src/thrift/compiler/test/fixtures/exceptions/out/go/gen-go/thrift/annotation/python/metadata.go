@@ -99,6 +99,13 @@ var (
                     Name: "python.DeprecatedKeySortMapOnSerialize",
                 },
         }
+    premadeThriftType_python_DisableFieldCache =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.DisableFieldCache",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
@@ -115,6 +122,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["python.MigrationBlockingAllowInheritance"] = premadeThriftType_python_MigrationBlockingAllowInheritance
     fbthriftThriftTypesMap["python.DeprecatedSortSetOnSerialize"] = premadeThriftType_python_DeprecatedSortSetOnSerialize
     fbthriftThriftTypesMap["python.DeprecatedKeySortMapOnSerialize"] = premadeThriftType_python_DeprecatedKeySortMapOnSerialize
+    fbthriftThriftTypesMap["python.DisableFieldCache"] = premadeThriftType_python_DisableFieldCache
     return fbthriftThriftTypesMap
 }()
 
@@ -244,6 +252,16 @@ var structMetadatas = func() []*metadata.ThriftStruct {
         fbthriftResults = append(fbthriftResults,
             &metadata.ThriftStruct{
                 Name:    "python.DeprecatedKeySortMapOnSerialize",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.DisableFieldCache",
                 IsUnion: false,
                 Fields:  []*metadata.ThriftField{
                 },

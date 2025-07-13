@@ -604,3 +604,17 @@ union _UnderscoreUnion {
 
 struct EmptyStruct {}
 exception EmptyError {}
+
+@python.DisableFieldCache
+struct StructDisabledFieldCache {
+  1: i32 int_field;
+  2: string str_field;
+  3: bool bool_field;
+  4: map<string, i32> map_field;
+  5: set<string> set_field;
+  6: list<i32> list_field;
+  7: list<list<i32>> list_of_list_field;
+  #nested struct
+  8: EmptyStruct empty_struct_field;
+  9: easy easy_field;
+}

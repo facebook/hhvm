@@ -66,6 +66,7 @@ from testing.thrift_types import (
     Reserved,
     Runtime,
     StringBucket,
+    StructDisabledFieldCache,
     StructuredAnnotation,
     UnusedError,
 )
@@ -430,6 +431,47 @@ class StructTestsParameterized(unittest.TestCase):
         e = self.easy(val=1, an_int=self.Integers(small=300), name="foo")
         for name, value in e:
             self.assertEqual(getattr(e, name), value)
+
+    def test_getattr_disable_cached(self) -> None:
+        # check the argument is set
+        self.assertTrue(
+            hasattr(StructDisabledFieldCache, "_fbthrift_diable_field_cache_DO_NOT_USE")
+        )
+
+        s = StructDisabledFieldCache(
+            int_field=2,
+            set_field=({"1", "2", "3"}),
+            list_field=[1, 2, 3],
+            map_field={"key": 3},
+            empty_struct_field=EmptyStruct(),
+            easy_field=easy(name="easy"),
+        )
+        # to access the non-primitive fields and ensureing they have the right value
+        self.assertEqual(len(s.set_field), 3)
+        self.assertEqual(s.list_field[0], 1)
+        self.assertEqual(s.map_field["key"], 3)
+        self.assertEqual(s.easy_field.name, "easy")
+
+        # get the non-primitive fields
+        first_int = s.int_field
+        first_empty = s.empty_struct_field
+        first_easy = s.easy_field
+        first_set = s.set_field
+        first_list = s.list_field
+        first_map = s.map_field
+
+        # pyre-ignore[16]: private method only for thrift tests
+        if thrift.python.types._fbthrift__runtime_is_cinder():
+            # cinder will cache the field
+            return
+
+        self.assertIs(first_int, s.int_field)
+        # Get the different non-primitive objects when calling get() because now the struct field is not cached.
+        self.assertIsNot(first_empty, s.empty_struct_field)
+        self.assertIsNot(first_easy, s.easy_field)
+        self.assertIsNot(first_set, s.set_field)
+        self.assertIsNot(first_list, s.list_field)
+        self.assertIsNot(first_map, s.map_field)
 
 
 class StructTestsImmutable(unittest.TestCase):

@@ -104,6 +104,13 @@ inline void reset_field<::facebook::thrift::annotation::python::DeprecatedKeySor
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::python::DisableFieldCache>(
+    ::facebook::thrift::annotation::python::DisableFieldCache& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::Py3Hidden>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -196,6 +203,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::DeprecatedKeySortMapOnSerialize>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::python::DisableFieldCache>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

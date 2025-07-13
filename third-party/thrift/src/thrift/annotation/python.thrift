@@ -126,3 +126,7 @@ struct DeprecatedSortSetOnSerialize {}
 /// DO NOT RELY on this. Brittle tests that rely on this will eventually be disabled.
 @scope.Field
 struct DeprecatedKeySortMapOnSerialize {}
+
+/// Disable caching all fields for a struct.
+@scope.Struct
+struct DisableFieldCache {}

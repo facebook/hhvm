@@ -36,7 +36,6 @@ struct ProfDataSerializer;
 struct ProfDataDeserializer;
 
 struct MethProfile {
-  using RawType = LowPtr<Class>::storage_type;
 
   enum class Tag : uint8_t {
     UniqueClass = 0,

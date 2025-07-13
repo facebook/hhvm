@@ -7,7 +7,7 @@ function main_resolve_soft_1() :mixed{
   soft_baz1();
 
   $f = soft_baz2();
-  $f();
+  HH\dynamic_fun($f)();
 
   $f = soft_baz3();
   $f();

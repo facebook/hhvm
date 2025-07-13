@@ -873,7 +873,10 @@ enum class DynamicAttr : int8_t { Ignore, Require };
 
 template <DynamicAttr DA = DynamicAttr::Require>
 TypedValue dynamicFun(const StringData* fun) {
-  auto const func = Func::load(fun);
+  auto const caller = fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
+  );
+  auto const func = Func::resolve(fun, caller);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unable to find function {}", fun->data())

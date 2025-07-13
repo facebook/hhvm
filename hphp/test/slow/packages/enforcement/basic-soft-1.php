@@ -6,7 +6,7 @@ module a.b;
 function main_soft() :mixed{
   soft_foo();
 
-  __hhvm_intrinsics\launder_value("soft_foo")();
+  HH\dynamic_fun(__hhvm_intrinsics\launder_value("soft_foo"))();
 
   new SoftFoo();
 

@@ -17,5 +17,5 @@ function main_call_soft_1() {
   var_dump(HH\dynamic_class_meth($a, $b)());
 
   var_dump(f());
-  var_dump($f());
+  var_dump(HH\dynamic_fun($f)());
 }

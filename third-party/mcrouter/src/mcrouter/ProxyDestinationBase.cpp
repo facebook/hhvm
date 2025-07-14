@@ -329,7 +329,6 @@ void ProxyDestinationBase::onTransitionImpl(State st, bool to) {
     }
     case ProxyDestinationBase::State::NumStates: {
       CHECK(false);
-      break;
     }
   }
 }

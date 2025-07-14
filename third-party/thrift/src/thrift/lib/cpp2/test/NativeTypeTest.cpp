@@ -19,7 +19,6 @@
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/NativeTypeTest_types.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
-#include <thrift/lib/cpp2/type/Testing.h>
 
 namespace apache::thrift::type::test {
 

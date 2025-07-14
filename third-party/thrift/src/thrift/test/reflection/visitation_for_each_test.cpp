@@ -31,8 +31,7 @@ using std::string;
 using std::type_index;
 using std::vector;
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 namespace {
 
 struct ForEachFieldAdapter {
@@ -350,5 +349,4 @@ TYPED_TEST(ForEachFieldTest, PassCallableByValue) {
 }
 
 } // namespace
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

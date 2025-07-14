@@ -15,7 +15,7 @@ anyhow = "1.0.98"
 hash = { version = "0.0.0", path = "../../utils/hash" }
 once_cell = "1.12"
 serde = { version = "1.0.185", features = ["derive", "rc"] }
-toml = "0.8.22"
+toml = { version = "0.8.22", features = ["preserve_order"] }
 
 [dev-dependencies]
 lazy_static = "1.5"

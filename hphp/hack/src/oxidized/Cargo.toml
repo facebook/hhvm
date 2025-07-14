@@ -38,7 +38,7 @@ serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "unbounded_depth"] }
 strum = { version = "0.27.1", features = ["derive"] }
 thiserror = "2.0.12"
-toml = "0.8.22"
+toml = { version = "0.8.22", features = ["preserve_order"] }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

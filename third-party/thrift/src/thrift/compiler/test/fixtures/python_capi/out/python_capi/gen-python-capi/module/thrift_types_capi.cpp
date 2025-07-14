@@ -82,7 +82,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.inty_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[0]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.stringy_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[1]),
       error);
@@ -102,7 +102,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.floatListy_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[5]),
       error);
-  Extractor<map<Bytes, Bytes>>{}.extractInto(
+  Extractor<map<Bytes, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.strMappy_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[6]),
       error);
@@ -162,7 +162,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__stringy(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.stringy_ref()));
   if (!_fbthrift__stringy ||
       setStructField(
@@ -212,7 +212,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__strMappy(
-    Constructor<map<Bytes, Bytes>>{}
+    Constructor<map<Bytes, ::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.strMappy_ref()));
   if (!_fbthrift__strMappy ||
       setStructField(
@@ -255,7 +255,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::MyDataItem, ::test__fixtures__python_capi__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::MyDataItem cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.s_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyDataItem__tuple_pos[0]),
       error);
@@ -301,7 +301,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::MyDataItem& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__s(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.s_ref()));
   if (!_fbthrift__s ||
       setStructField(
@@ -394,7 +394,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::detail::DoubledPair, ::test__fixtures__python_capi__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::detail::DoubledPair cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.s_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__DoubledPair__tuple_pos[0]),
       error);
@@ -444,7 +444,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::detail::DoubledPair& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__s(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.s_ref()));
   if (!_fbthrift__s ||
       setStructField(
@@ -487,11 +487,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::StringPair, ::test__fixtures__python_capi__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::StringPair cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.normal_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StringPair__tuple_pos[0]),
       error);
-  Extractor<::apache::thrift::python::capi::AdaptedThrift<::thrift::test::lib::StringDoubler, Bytes>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::AdaptedThrift<::thrift::test::lib::StringDoubler, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.doubled_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StringPair__tuple_pos[1]),
       error);
@@ -537,7 +537,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::StringPair& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__normal(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.normal_ref()));
   if (!_fbthrift__normal ||
       setStructField(
@@ -547,7 +547,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__doubled(
-    Constructor<::apache::thrift::python::capi::AdaptedThrift<::thrift::test::lib::StringDoubler, Bytes>>{}
+    Constructor<::apache::thrift::python::capi::AdaptedThrift<::thrift::test::lib::StringDoubler, ::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.doubled_ref()));
   if (!_fbthrift__doubled ||
       setStructField(
@@ -668,7 +668,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.dubby_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__PrimitiveStruct__tuple_pos[6]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.stringy_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__PrimitiveStruct__tuple_pos[7]),
       error);
@@ -696,7 +696,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.fbstring_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__PrimitiveStruct__tuple_pos[13]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.managed_string_view_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__PrimitiveStruct__tuple_pos[14]),
       error);
@@ -830,7 +830,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__stringy(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.stringy_ref()));
   if (_fbthrift__stringy.isNone()) {
     Py_INCREF(Py_None);
@@ -914,7 +914,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__managed_string_view(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.managed_string_view_ref()));
   if (!_fbthrift__managed_string_view ||
       setStructField(
@@ -1086,7 +1086,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.intz_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ListStruct__tuple_pos[1]),
       error);
-  Extractor<list<Bytes>>{}.extractInto(
+  Extractor<list<::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.stringz_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ListStruct__tuple_pos[2]),
       error);
@@ -1183,7 +1183,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__stringz(
-    Constructor<list<Bytes>>{}
+    Constructor<list<::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.stringz_ref()));
   if (_fbthrift__stringz.isNone()) {
     Py_INCREF(Py_None);
@@ -1460,11 +1460,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::MapStruct, ::test__fixtures__python_capi__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::MapStruct cpp;
   std::optional<std::string_view> error;
-  Extractor<map<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>, Bytes>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.enumz_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MapStruct__tuple_pos[0]),
       error);
-  Extractor<map<int32_t, Bytes>>{}.extractInto(
+  Extractor<map<int32_t, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.intz_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MapStruct__tuple_pos[1]),
       error);
@@ -1472,7 +1472,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.binnaz_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MapStruct__tuple_pos[2]),
       error);
-  Extractor<map<Bytes, double, std::unordered_map<native_t<Bytes>, native_t<double>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, double, std::unordered_map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<double>>>>{}.extractInto(
       cpp.encoded_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MapStruct__tuple_pos[3]),
       error);
@@ -1542,7 +1542,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::MapStruct& val) {
   StrongRef fbthrift_data(createStructTuple(10));
   StrongRef _fbthrift__enumz(
-    Constructor<map<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>, Bytes>>{}
+    Constructor<map<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>, ::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.enumz_ref()));
   if (!_fbthrift__enumz ||
       setStructField(
@@ -1552,7 +1552,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__intz(
-    Constructor<map<int32_t, Bytes>>{}
+    Constructor<map<int32_t, ::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.intz_ref()));
   if (_fbthrift__intz.isNone()) {
     Py_INCREF(Py_None);
@@ -1586,7 +1586,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__encoded(
-    Constructor<map<Bytes, double, std::unordered_map<native_t<Bytes>, native_t<double>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, double, std::unordered_map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<double>>>>{}
     .constructFrom(val.encoded_ref()));
   if (!_fbthrift__encoded ||
       setStructField(
@@ -1904,7 +1904,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.intSet_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 4:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.myString_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 8:
@@ -1912,7 +1912,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.doubleList_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 9:
-      Extractor<map<Bytes, Bytes>>{}.extractInto(
+      Extractor<map<Bytes, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
           cpp.strMap_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 10:
@@ -1986,7 +1986,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 4:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.myString_ref()));
       break;
     case 8:
@@ -1996,7 +1996,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 9:
       py_val = StrongRef(
-          Constructor<map<Bytes, Bytes>>{}
+          Constructor<map<Bytes, ::apache::thrift::python::capi::FallibleString>>{}
           .constructFrom(val.strMap_ref()));
       break;
     case 10:

@@ -47,15 +47,15 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Fields, ::foo::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Fields cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.injected_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fields__tuple_pos[0]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.injected_structured_annotation_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fields__tuple_pos[1]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.injected_unstructured_annotation_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fields__tuple_pos[2]),
       error);
@@ -101,7 +101,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Fields& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__injected_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.injected_field_ref()));
   if (!_fbthrift__injected_field ||
       setStructField(
@@ -111,7 +111,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__injected_structured_annotation_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.injected_structured_annotation_field_ref()));
   if (_fbthrift__injected_structured_annotation_field.isNone()) {
     Py_INCREF(Py_None);
@@ -128,7 +128,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__injected_unstructured_annotation_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.injected_unstructured_annotation_field_ref()));
   if (_fbthrift__injected_unstructured_annotation_field.isNone()) {
     Py_INCREF(Py_None);

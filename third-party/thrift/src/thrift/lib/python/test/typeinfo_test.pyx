@@ -175,7 +175,7 @@ cdef class TypeInfoTests():
             typeinfo_string.to_internal_data(b"AbC")
 
         data = typeinfo_string.to_internal_data("AbC")
-        self.ut.assertEqual(data, b"AbC")
+        self.ut.assertEqual(data, "AbC")
 
         self.assertEqual(
             (<StringTypeInfo>typeinfo_string).cpp_obj,
@@ -308,7 +308,7 @@ cdef class TypeInfoTests():
             map_type_info.to_internal_data(None)
 
         data = map_type_info.to_internal_data({"a":1, "b":2})
-        self.ut.assertEqual(data, ((b"a", 1), (b"b", 2)))
+        self.ut.assertEqual(data, (("a", 1), ("b", 2)))
         expected_python_val = Map(typeinfo_string, typeinfo_i64, {"a": 1, "b":2})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
 
@@ -334,7 +334,7 @@ cdef class TypeInfoTests():
             map_type_info.to_internal_data(None)
 
         data = map_type_info.to_internal_data({"a":{1:[1,2]}, "b":{}})
-        self.ut.assertEqual(data, ((b"a", ((1, (1, 2)),)), (b"b", ())))
+        self.ut.assertEqual(data, (("a", ((1, (1, 2)),)), ("b", ())))
         expected_python_val = Map(typeinfo_string, value_type_info, {"a": {1: [1, 2]}, "b":{}})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
 
@@ -405,8 +405,8 @@ cdef class TypeInfoTests():
             map_type_info.to_internal_data(None)
 
         data = map_type_info.to_internal_data(_ThriftMapWrapper({"a":1, "b":2}))
-        self.ut.assertEqual(data, {b"a":1, b"b":2})
-        expected_python_val = MutableMap(typeinfo_string, typeinfo_i64, {b"a": 1, b"b":2})
+        self.ut.assertEqual(data, {"a":1, "b":2})
+        expected_python_val = MutableMap(typeinfo_string, typeinfo_i64, {"a": 1, "b":2})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
 
         self.assertEqual(

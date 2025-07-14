@@ -264,7 +264,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.opt_default_int_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[9]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.opt_default_str_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[10]),
       error);
@@ -421,7 +421,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__opt_default_str(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.opt_default_str_ref()));
   if (_fbthrift__opt_default_str.isNone()) {
     Py_INCREF(Py_None);

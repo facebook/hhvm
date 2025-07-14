@@ -50,11 +50,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::AnnotationWithContainers, ::with_containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::AnnotationWithContainers cpp;
   std::optional<std::string_view> error;
-  Extractor<list<Bytes>>{}.extractInto(
+  Extractor<list<::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.names_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__AnnotationWithContainers__tuple_pos[0]),
       error);
-  Extractor<map<Bytes, int32_t>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, int32_t>>{}.extractInto(
       cpp.counts_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__AnnotationWithContainers__tuple_pos[1]),
       error);
@@ -100,7 +100,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::AnnotationWithContainers& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__names(
-    Constructor<list<Bytes>>{}
+    Constructor<list<::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.names_ref()));
   if (!_fbthrift__names ||
       setStructField(
@@ -110,7 +110,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__counts(
-    Constructor<map<Bytes, int32_t>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, int32_t>>{}
     .constructFrom(val.counts_ref()));
   if (!_fbthrift__counts ||
       setStructField(

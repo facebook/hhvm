@@ -62,7 +62,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.intValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 5:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.stringValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 2:
@@ -70,15 +70,15 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.intListValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 3:
-      Extractor<list<Bytes>>{}.extractInto(
+      Extractor<list<::apache::thrift::python::capi::FallibleString>>{}.extractInto(
           cpp.stringListValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 9:
-      Extractor<map<int16_t, Bytes>>{}.extractInto(
+      Extractor<map<int16_t, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
           cpp.typedefValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 14:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.stringRef_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     default:
@@ -138,7 +138,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 5:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.stringValue_ref()));
       break;
     case 2:
@@ -148,17 +148,17 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 3:
       py_val = StrongRef(
-          Constructor<list<Bytes>>{}
+          Constructor<list<::apache::thrift::python::capi::FallibleString>>{}
           .constructFrom(val.stringListValue_ref()));
       break;
     case 9:
       py_val = StrongRef(
-          Constructor<map<int16_t, Bytes>>{}
+          Constructor<map<int16_t, ::apache::thrift::python::capi::FallibleString>>{}
           .constructFrom(val.typedefValue_ref()));
       break;
     case 14:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.stringRef_ref()));
       break;
     default:
@@ -203,7 +203,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.intListValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 3:
-      Extractor<list<Bytes>>{}.extractInto(
+      Extractor<list<::apache::thrift::python::capi::FallibleString>>{}.extractInto(
           cpp.stringListValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     default:
@@ -263,7 +263,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 3:
       py_val = StrongRef(
-          Constructor<list<Bytes>>{}
+          Constructor<list<::apache::thrift::python::capi::FallibleString>>{}
           .constructFrom(val.stringListValue_ref()));
       break;
     default:
@@ -308,7 +308,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.binaryData_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 2:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.stringData_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     default:
@@ -368,7 +368,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 2:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.stringData_ref()));
       break;
     default:
@@ -401,7 +401,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Val, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Val cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.strVal_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Val__tuple_pos[0]),
       error);
@@ -409,7 +409,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.intVal_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Val__tuple_pos[1]),
       error);
-  Extractor<map<int16_t, Bytes>>{}.extractInto(
+  Extractor<map<int16_t, ::apache::thrift::python::capi::FallibleString>>{}.extractInto(
       cpp.typedefValue_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Val__tuple_pos[2]),
       error);
@@ -455,7 +455,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Val& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__strVal(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.strVal_ref()));
   if (!_fbthrift__strVal ||
       setStructField(
@@ -475,7 +475,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__typedefValue(
-    Constructor<map<int16_t, Bytes>>{}
+    Constructor<map<int16_t, ::apache::thrift::python::capi::FallibleString>>{}
     .constructFrom(val.typedefValue_ref()));
   if (!_fbthrift__typedefValue ||
       setStructField(
@@ -621,11 +621,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 0:
       break; // union is unset
     case 1:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.thingOne_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 2:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.thingTwo_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     default:
@@ -680,12 +680,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 1:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.thingOne_ref()));
       break;
     case 2:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.thingTwo_ref()));
       break;
     default:

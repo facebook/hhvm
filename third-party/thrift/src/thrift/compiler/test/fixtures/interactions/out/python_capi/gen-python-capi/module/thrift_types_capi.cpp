@@ -51,7 +51,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::CustomException cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__CustomException__tuple_pos[0]),
       error);
@@ -97,7 +97,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::CustomException& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.message_ref()));
   if (!_fbthrift__message ||
       setStructField(
@@ -130,7 +130,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ShouldBeBoxed cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.sessionId_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ShouldBeBoxed__tuple_pos[0]),
       error);
@@ -176,7 +176,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::ShouldBeBoxed& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__sessionId(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.sessionId_ref()));
   if (!_fbthrift__sessionId ||
       setStructField(

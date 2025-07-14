@@ -65,7 +65,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TemplateLists cpp;
   std::optional<std::string_view> error;
-  Extractor<list<Bytes, std::vector<native_t<Bytes>>>>{}.extractInto(
+  Extractor<list<::apache::thrift::python::capi::FallibleString, std::vector<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.std_string_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[0]),
       error);
@@ -77,11 +77,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.small_vector_iobuf_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[2]),
       error);
-  Extractor<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::small_vector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>{}.extractInto(
+  Extractor<list<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>, folly::small_vector<native_t<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>>>>>{}.extractInto(
       cpp.nested_small_vector_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[3]),
       error);
-  Extractor<list<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>, folly::fbvector<native_t<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>>>>{}.extractInto(
+  Extractor<list<list<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>, folly::fbvector<native_t<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>>>>, folly::fbvector<native_t<list<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>, folly::fbvector<native_t<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>>>>>>>>{}.extractInto(
       cpp.small_vector_tensor_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[4]),
       error);
@@ -127,7 +127,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::TemplateLists& val) {
   StrongRef fbthrift_data(createStructTuple(5));
   StrongRef _fbthrift__std_string(
-    Constructor<list<Bytes, std::vector<native_t<Bytes>>>>{}
+    Constructor<list<::apache::thrift::python::capi::FallibleString, std::vector<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.std_string_ref()));
   if (_fbthrift__std_string.isNone()) {
     Py_INCREF(Py_None);
@@ -164,7 +164,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__nested_small_vector(
-    Constructor<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::small_vector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>{}
+    Constructor<list<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>, folly::small_vector<native_t<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>>>>>{}
     .constructFrom(val.nested_small_vector_ref()));
   if (!_fbthrift__nested_small_vector ||
       setStructField(
@@ -174,7 +174,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__small_vector_tensor(
-    Constructor<list<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>, folly::fbvector<native_t<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>>>>{}
+    Constructor<list<list<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>, folly::fbvector<native_t<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>>>>, folly::fbvector<native_t<list<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>, folly::fbvector<native_t<list<::apache::thrift::python::capi::FallibleString, folly::fbvector<native_t<::apache::thrift::python::capi::FallibleString>>>>>>>>>>{}
     .constructFrom(val.small_vector_tensor_ref()));
   if (!_fbthrift__small_vector_tensor ||
       setStructField(
@@ -207,31 +207,31 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TemplateSets cpp;
   std::optional<std::string_view> error;
-  Extractor<set<Bytes, std::set<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, std::set<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.std_set_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[0]),
       error);
-  Extractor<set<Bytes, std::unordered_set<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, std::unordered_set<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.std_unordered_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[1]),
       error);
-  Extractor<set<Bytes, folly::F14FastSet<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, folly::F14FastSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_fast_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[2]),
       error);
-  Extractor<set<Bytes, folly::F14NodeSet<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, folly::F14NodeSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_node_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[3]),
       error);
-  Extractor<set<Bytes, folly::F14ValueSet<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, folly::F14ValueSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_value_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[4]),
       error);
-  Extractor<set<Bytes, folly::F14VectorSet<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, folly::F14VectorSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_vector_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[5]),
       error);
-  Extractor<set<Bytes, folly::sorted_vector_set<native_t<Bytes>>>>{}.extractInto(
+  Extractor<set<::apache::thrift::python::capi::FallibleString, folly::sorted_vector_set<native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_sorted_vector_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[6]),
       error);
@@ -277,7 +277,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::TemplateSets& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__std_set(
-    Constructor<set<Bytes, std::set<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, std::set<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.std_set_ref()));
   if (!_fbthrift__std_set ||
       setStructField(
@@ -287,7 +287,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__std_unordered(
-    Constructor<set<Bytes, std::unordered_set<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, std::unordered_set<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.std_unordered_ref()));
   if (!_fbthrift__std_unordered ||
       setStructField(
@@ -297,7 +297,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_fast(
-    Constructor<set<Bytes, folly::F14FastSet<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, folly::F14FastSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_fast_ref()));
   if (!_fbthrift__folly_fast ||
       setStructField(
@@ -307,7 +307,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_node(
-    Constructor<set<Bytes, folly::F14NodeSet<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, folly::F14NodeSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_node_ref()));
   if (!_fbthrift__folly_node ||
       setStructField(
@@ -317,7 +317,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_value(
-    Constructor<set<Bytes, folly::F14ValueSet<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, folly::F14ValueSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_value_ref()));
   if (!_fbthrift__folly_value ||
       setStructField(
@@ -327,7 +327,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_vector(
-    Constructor<set<Bytes, folly::F14VectorSet<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, folly::F14VectorSet<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_vector_ref()));
   if (!_fbthrift__folly_vector ||
       setStructField(
@@ -337,7 +337,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_sorted_vector(
-    Constructor<set<Bytes, folly::sorted_vector_set<native_t<Bytes>>>>{}
+    Constructor<set<::apache::thrift::python::capi::FallibleString, folly::sorted_vector_set<native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_sorted_vector_ref()));
   if (!_fbthrift__folly_sorted_vector ||
       setStructField(
@@ -370,31 +370,31 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TemplateMaps cpp;
   std::optional<std::string_view> error;
-  Extractor<map<Bytes, Bytes, std::map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, std::map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.std_map_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[0]),
       error);
-  Extractor<map<Bytes, Bytes, std::unordered_map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, std::unordered_map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.std_unordered_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[1]),
       error);
-  Extractor<map<Bytes, Bytes, folly::F14FastMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14FastMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_fast_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[2]),
       error);
-  Extractor<map<Bytes, Bytes, folly::F14NodeMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14NodeMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_node_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[3]),
       error);
-  Extractor<map<Bytes, Bytes, folly::F14ValueMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14ValueMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_value_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[4]),
       error);
-  Extractor<map<Bytes, Bytes, folly::F14VectorMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14VectorMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_vector_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[5]),
       error);
-  Extractor<map<Bytes, Bytes, folly::sorted_vector_map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+  Extractor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::sorted_vector_map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}.extractInto(
       cpp.folly_sorted_vector_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[6]),
       error);
@@ -440,7 +440,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::TemplateMaps& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__std_map(
-    Constructor<map<Bytes, Bytes, std::map<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, std::map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.std_map_ref()));
   if (!_fbthrift__std_map ||
       setStructField(
@@ -450,7 +450,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__std_unordered(
-    Constructor<map<Bytes, Bytes, std::unordered_map<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, std::unordered_map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.std_unordered_ref()));
   if (!_fbthrift__std_unordered ||
       setStructField(
@@ -460,7 +460,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_fast(
-    Constructor<map<Bytes, Bytes, folly::F14FastMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14FastMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_fast_ref()));
   if (!_fbthrift__folly_fast ||
       setStructField(
@@ -470,7 +470,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_node(
-    Constructor<map<Bytes, Bytes, folly::F14NodeMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14NodeMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_node_ref()));
   if (!_fbthrift__folly_node ||
       setStructField(
@@ -480,7 +480,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_value(
-    Constructor<map<Bytes, Bytes, folly::F14ValueMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14ValueMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_value_ref()));
   if (!_fbthrift__folly_value ||
       setStructField(
@@ -490,7 +490,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_vector(
-    Constructor<map<Bytes, Bytes, folly::F14VectorMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::F14VectorMap<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_vector_ref()));
   if (!_fbthrift__folly_vector ||
       setStructField(
@@ -500,7 +500,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__folly_sorted_vector(
-    Constructor<map<Bytes, Bytes, folly::sorted_vector_map<native_t<Bytes>, native_t<Bytes>>>>{}
+    Constructor<map<::apache::thrift::python::capi::FallibleString, ::apache::thrift::python::capi::FallibleString, folly::sorted_vector_map<native_t<::apache::thrift::python::capi::FallibleString>, native_t<::apache::thrift::python::capi::FallibleString>>>>{}
     .constructFrom(val.folly_sorted_vector_ref()));
   if (!_fbthrift__folly_sorted_vector ||
       setStructField(
@@ -533,7 +533,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TWrapped cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.fieldA_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TWrapped__tuple_pos[0]),
       error);
@@ -583,7 +583,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::test::fixtures::python_capi::TWrapped& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__fieldA(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.fieldA_ref()));
   if (!_fbthrift__fieldA ||
       setStructField(

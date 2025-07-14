@@ -152,7 +152,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.double_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 8:
-      Extractor<Bytes>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
           cpp.string_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 9:
@@ -266,7 +266,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 8:
       py_val = StrongRef(
-          Constructor<Bytes>{}
+          Constructor<::apache::thrift::python::capi::FallibleString>{}
           .constructFrom(val.string_field_ref()));
       break;
     case 9:
@@ -436,7 +436,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.double_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StructLevelTerseStruct__tuple_pos[6]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.string_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StructLevelTerseStruct__tuple_pos[7]),
       error);
@@ -580,7 +580,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__string_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.string_field_ref()));
   if (!_fbthrift__string_field ||
       setStructField(
@@ -711,7 +711,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.terse_double_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[6]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.terse_string_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[7]),
       error);
@@ -771,7 +771,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.double_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[21]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.string_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[22]),
       error);
@@ -915,7 +915,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__terse_string_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.terse_string_field_ref()));
   if (!_fbthrift__terse_string_field ||
       setStructField(
@@ -1065,7 +1065,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__string_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.string_field_ref()));
   if (!_fbthrift__string_field ||
       setStructField(
@@ -1249,7 +1249,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::TerseException cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.msg_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__TerseException__tuple_pos[0]),
       error);
@@ -1295,7 +1295,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::TerseException& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__msg(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.msg_ref()));
   if (!_fbthrift__msg ||
       setStructField(

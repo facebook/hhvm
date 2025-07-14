@@ -473,6 +473,11 @@ class SerializerTests(unittest.TestCase):
             # Accessing the property is when the string is decoded as UTF-8.
             sb.one
 
+        # curiously, thrift-python can retain non-unicode string without
+        # data loss on serialization roundtrip
+        reserialized = self.serializer.serialize(sb, protocol=Protocol.BINARY)
+        self.assertEqual(encoded, reserialized)
+
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:
         json_bytes = b'{"val_bool":false,"val_i32":0,"val_i64":0,"val_string":"abcdef","val_binary":"YWJjZGU","val_iobuf":"YWJjZGVm","val_enum":0,"val_union":{},"val_list":[],"val_map":{},"val_struct_with_containers":{"color_list":[],"color_set":[],"color_map":{}}}'

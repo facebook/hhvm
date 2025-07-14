@@ -80,7 +80,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::MyAnnotation cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.signature_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyAnnotation__tuple_pos[0]),
       error);
@@ -130,7 +130,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::facebook::thrift::test::MyAnnotation& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__signature(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.signature_ref()));
   if (!_fbthrift__signature ||
       setStructField(
@@ -877,7 +877,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::Config cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.path_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Config__tuple_pos[0]),
       error);
@@ -923,7 +923,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::facebook::thrift::test::Config& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__path(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.path_ref()));
   if (!_fbthrift__path ||
       setStructField(
@@ -2480,7 +2480,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::Person cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.name_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Person__tuple_pos[0]),
       error);
@@ -2526,7 +2526,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::facebook::thrift::test::Person& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__name(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.name_ref()));
   if (!_fbthrift__name ||
       setStructField(
@@ -2559,7 +2559,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::Person2 cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.name_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Person2__tuple_pos[0]),
       error);
@@ -2605,7 +2605,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::facebook::thrift::test::Person2& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__name(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.name_ref()));
   if (!_fbthrift__name ||
       setStructField(

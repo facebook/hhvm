@@ -290,7 +290,7 @@ class MutableMapTest(unittest.TestCase):
         # Mapping should be string -> i32, but initialized with i32 -> string
         mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {1: "a", 2: "b"})
         with self.assertRaisesRegex(
-            TypeError, "decoding to str: need a bytes-like object, int found"
+            TypeError, "Expected a str, encountered <class 'int'>"
         ):
             for _, _ in mutable_map:
                 pass

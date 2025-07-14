@@ -62,7 +62,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Fiery, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Fiery cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fiery__tuple_pos[0]),
       error);
@@ -108,7 +108,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Fiery& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.message_ref()));
   if (!_fbthrift__message ||
       setStructField(
@@ -141,7 +141,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Serious, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Serious cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.sonnet_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Serious__tuple_pos[0]),
       error);
@@ -187,7 +187,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Serious& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__sonnet(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.sonnet_ref()));
   if (_fbthrift__sonnet.isNone()) {
     Py_INCREF(Py_None);
@@ -227,11 +227,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::ComplexFieldNames, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ComplexFieldNames cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.error_message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ComplexFieldNames__tuple_pos[0]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.internal_error_message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ComplexFieldNames__tuple_pos[1]),
       error);
@@ -277,7 +277,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::ComplexFieldNames& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__error_message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.error_message_ref()));
   if (!_fbthrift__error_message ||
       setStructField(
@@ -287,7 +287,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__internal_error_message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.internal_error_message_ref()));
   if (!_fbthrift__internal_error_message ||
       setStructField(
@@ -320,11 +320,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::CustomFieldNames, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::CustomFieldNames cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.error_message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__CustomFieldNames__tuple_pos[0]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.internal_error_message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__CustomFieldNames__tuple_pos[1]),
       error);
@@ -370,7 +370,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::CustomFieldNames& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__error_message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.error_message_ref()));
   if (!_fbthrift__error_message ||
       setStructField(
@@ -380,7 +380,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__internal_error_message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.internal_error_message_ref()));
   if (!_fbthrift__internal_error_message ||
       setStructField(
@@ -413,7 +413,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::ExceptionWithPrimitiveField, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ExceptionWithPrimitiveField cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.message_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ExceptionWithPrimitiveField__tuple_pos[0]),
       error);
@@ -463,7 +463,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::ExceptionWithPrimitiveField& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.message_ref()));
   if (!_fbthrift__message ||
       setStructField(
@@ -506,7 +506,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::ExceptionWithStructuredAnnotation, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ExceptionWithStructuredAnnotation cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.message_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__ExceptionWithStructuredAnnotation__tuple_pos[0]),
       error);
@@ -556,7 +556,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::ExceptionWithStructuredAnnotation& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__message_field(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.message_field_ref()));
   if (!_fbthrift__message_field ||
       setStructField(

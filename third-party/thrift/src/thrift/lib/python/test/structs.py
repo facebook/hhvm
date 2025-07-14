@@ -183,6 +183,15 @@ class StructTestsParameterized(unittest.TestCase):
         y = z(values=None)
         self.assertIsNone(y.values)
 
+    def test_str_subclass_param(self) -> None:
+        class MyStr(str):
+            pass
+
+        e = self.easy(name=MyStr("foo"))
+        self.assertIsInstance(e.name, str)
+        self.assertIs(type(e.name), str)
+        self.assertEqual(e.name, "foo")
+
     def test_runtime_checks(self) -> None:
         x = self.Runtime()
         with self.assertRaises(TypeError):

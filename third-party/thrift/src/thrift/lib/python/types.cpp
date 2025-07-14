@@ -471,6 +471,8 @@ UniquePyObjectPtr getStandardDefaultValueForType(
       switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
         case detail::StringFieldType::String:
         case detail::StringFieldType::StringView:
+          ptr = PyUnicode_FromString("");
+          break;
         case detail::StringFieldType::Binary:
         case detail::StringFieldType::BinaryStringView:
           ptr = PyBytes_FromString("");
@@ -917,6 +919,43 @@ detail::OptionalThriftValue getString(
 }
 
 /**
+ * Returns a view into the string contained in the given Python unicode `str`
+ * referred to by `objectPtr`.
+ *
+ * Note that, if this method returns, the returned optional always holds a
+ * `ThriftValue` with a `stringViewValue`.
+ *
+ * @param objectPtr double pointer to a Python `str` object (i.e., a
+ *
+ [`PyUnicodeObject**`](https://docs.python.org/3/c-api/unicode.html#c.PyUnicodeObject))
+          If the object was deserialized from invalid unicode, then the
+          `objectPtr` will be a ``PyBytesObject**`: see `getString()`.
+ *
+ * @throws if `objectPtr` does not contain a valid string.
+ */
+detail::OptionalThriftValue getUnicodeString(
+    const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  // NB: `PyObject` is a parent class of `PyUnicodeObject`, so the following
+  // assignment is correct.
+  PyObject* pyStrObject = *toPyObjectPtr(objectPtr);
+
+  // If the object was deserialized from invalid unicode, then the
+  // internal data object is a python `bytes` object.
+  if (PyUnicode_CheckExact(pyStrObject) != 1) {
+    return getString(objectPtr, detail::TypeInfo{});
+  }
+
+  Py_ssize_t len = 0;
+  // buffer is internal to python `str` and owned by python str,
+  const char* buf = PyUnicode_AsUTF8AndSize(pyStrObject, &len);
+  if (buf == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return folly::make_optional<detail::ThriftValue>(
+      folly::StringPiece{buf, static_cast<std::size_t>(len)});
+}
+
+/**
  * Copies the given string `value` into a new `PyBytesObject` instance, and
  * updates the given `object` to hold a pointer to that instance.
  *
@@ -933,6 +972,33 @@ void* setString(void* objectPtr, const std::string& value) {
   }
   setPyObject(objectPtr, std::move(bytesObj));
   return nullptr;
+}
+
+/**
+ * Copies the given unicode-decodable string `value` into a new
+ * `PyUnicodeObject` instance, and updates the given `object` to hold a pointer
+ * to that instance.
+ *
+ * @param objectPtr a `PyUnicodeObject**` (see `getUnicodeString()` above).
+ *                  If there's a UnicodeDecodeError, we clear it and instead
+ *                  set `bytes` in `objectPtr`.
+ *                  `StringTypeInfo.to_python_value` is
+ *                  responsible for raising UnicodeDecodeError on field access
+ * @param value String whose copy will be in a new Python `str` object.
+ *
+ * @throws if `value` cannot be copied to a new `PyUnicodeObject`.
+ */
+void* FOLLY_NULLABLE
+setUnicodeString(void* objectPtr, const std::string& value) {
+  UniquePyObjectPtr unicodeObj{
+      PyUnicode_FromStringAndSize(value.data(), value.size())};
+  if (unicodeObj != nullptr) {
+    setPyObject(objectPtr, std::move(unicodeObj));
+    return nullptr;
+  }
+  // Clear the exception and try setting the object as `bytes` instead
+  PyErr_Clear();
+  return setString(objectPtr, value);
 }
 
 detail::OptionalThriftValue getIOBuf(
@@ -1762,8 +1828,8 @@ const detail::StringFieldType ioBufFieldType =
 
 const detail::TypeInfo stringTypeInfo{
     /* .type */ protocol::TType::T_STRING,
-    /* .get */ getString,
-    /* .set */ reinterpret_cast<detail::VoidPtrFuncPtr>(setString),
+    /* .get */ getUnicodeString,
+    /* .set */ reinterpret_cast<detail::VoidPtrFuncPtr>(setUnicodeString),
     /* .typeExt */ &stringFieldType,
 };
 

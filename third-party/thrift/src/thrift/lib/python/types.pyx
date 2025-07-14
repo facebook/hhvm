@@ -264,31 +264,41 @@ cdef class StringTypeInfo(TypeInfoBase):
     # validate and convert to format serializer may understand
     cpdef to_internal_data(self, object value):
         """
-        Returns a new Python bytes object (i.e. string) containing the UTF-8
-        encoding of the given unicode object.
+        Validates that `value` is a `str` and returns it. From python,
+        only possible to set `string` fields to valid unicode `str` objects.
         """
-        try:
-            return PyUnicode_AsUTF8String(value)
-        except TypeError as e:
-            raise TypeError(
-                "Cannot create internal string data representation. "
-                f"Expected type <class 'str'>, got: {type(value)}."
-            ) from e
+        if type(value) is str:
+            return value
+        # it is legal to set string field to `str` subclass
+        if isinstance(value, str):
+            return str(value)
+
+        raise TypeError(
+            "Cannot create internal string data representation. "
+            f"Expected type <class 'str'>, got: {type(value)}."
+        )
 
     # convert deserialized data to user format
     cpdef to_python_value(self, object value):
         """
-        Returns a Unicode object decoded from the given encoded string.
+        Returns the internal data `str`. If the string was deserialized from
+        invalid unicode, then the internal data is `bytes` and this method
+        will raise a `UnicodeDecodeError`.
 
         Args:
-            value: A Python bytes object containing a UTF-8 encoded unicode
-                 object.
+            value: `str | bytes`: Typically a `str` created by decoding
+            UTF-8 during deserialization. If that failed, then a `bytes` object
+            containing the original serialized data.
         """
-        return PyUnicode_FromEncodedObject(
-                value,
-                NULL, # encoding
-                NULL, # errors
-        )
+        cdef value_type = type(value)
+        if value_type is str:
+            return value
+        if value_type is bytes:
+            # this should only happen when UnicodeDecodeError occurred during
+            # deserialize, so this should raise UnicodeDecodeError
+            return value.decode("utf-8")
+        raise TypeError(f"Expected a str, encountered {value_type}")
+
 
     def to_container_value(self, object value not None):
         if not isinstance(value, str):

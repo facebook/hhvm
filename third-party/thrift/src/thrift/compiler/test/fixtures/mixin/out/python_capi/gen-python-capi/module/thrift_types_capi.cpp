@@ -56,7 +56,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Mixin1, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Mixin1 cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.field1_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Mixin1__tuple_pos[0]),
       error);
@@ -102,7 +102,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Mixin1& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field1(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.field1_ref()));
   if (!_fbthrift__field1 ||
       setStructField(
@@ -139,7 +139,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.m1_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Mixin2__tuple_pos[0]),
       error);
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.field2_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Mixin2__tuple_pos[1]),
       error);
@@ -195,7 +195,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__field2(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.field2_ref()));
   if (_fbthrift__field2.isNone()) {
     Py_INCREF(Py_None);
@@ -235,7 +235,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Mixin3Base, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Mixin3Base cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.field3_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Mixin3Base__tuple_pos[0]),
       error);
@@ -281,7 +281,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Mixin3Base& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field3(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.field3_ref()));
   if (!_fbthrift__field3 ||
       setStructField(
@@ -314,7 +314,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Foo, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Foo cpp;
   std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.field4_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Foo__tuple_pos[0]),
       error);
@@ -368,7 +368,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const ::cpp2::Foo& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__field4(
-    Constructor<Bytes>{}
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.field4_ref()));
   if (!_fbthrift__field4 ||
       setStructField(

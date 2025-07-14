@@ -274,8 +274,9 @@ std::string format_marshal_type_unadapted(
     return override_or("double");
   } else if (true_type->is_binary() && is_type_iobuf(t_override)) {
     return std::string(t_override);
-  } else if (true_type->is_string_or_binary()) {
-    // unicode's internal_data representation is binary
+  } else if (true_type->is_string()) {
+    return "::apache::thrift::python::capi::FallibleString";
+  } else if (true_type->is_binary()) {
     return "Bytes";
   } else if (true_type->is<t_enum>()) {
     return fmt::format(

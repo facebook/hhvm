@@ -42,15 +42,15 @@ namespace {
 // the string key will one of these values:
 //  * a valid LowPtr<StringData>, or
 //  * -1, -2, or -3 AHM magic values.
-// Note that only the magic values have 1s in the low 3 bits
-// since StringData's are at least 8-aligned.
-
 using StrInternKey = LowStringPtr::storage_type;
 
-// Return true if k is one of AHM's magic values. Valid pointers are
-// 8-aligned, so test the low 3 bits.
+// Return true if k is one of AHM's magic values.
+// https://fburl.com/code/axj01lio
+// -1, -2, -3 are used to represent empty/locked/erased keys
+// in AtomicHashArrays/AtomicHashMaps, so make sure we don't
+// use those values.
 bool isMagicKey(StrInternKey k) {
-  return (k & 7) != 0;
+  return k >= (StrInternKey)-3;
 }
 
 const StringData* to_sdata(StrInternKey key) {

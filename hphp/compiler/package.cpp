@@ -641,8 +641,7 @@ coro::Task<void> Package::parseGroups(
   std::vector<coro::TaskWithExecutor<void>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
-      parseGroup(std::move(group), callback, index)
-        .scheduleOn(m_executor.sticky())
+      co_withExecutor(m_executor.sticky(), parseGroup(std::move(group), callback, index))
     );
   }
 
@@ -1216,7 +1215,7 @@ coro::Task<void> Package::indexGroups(const IndexCallback& callback,
   std::vector<coro::TaskWithExecutor<void>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
-      indexGroup(callback, std::move(group)).scheduleOn(m_executor.sticky())
+      co_withExecutor(m_executor.sticky(), indexGroup(callback, std::move(group)))
     );
   }
   co_await coro::collectAllRange(std::move(tasks));
@@ -1422,12 +1421,11 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
   }
   if (Cfg::Eval::PackageV2) {
     tasks.emplace_back(
-      emitAllPackageV2(callback, index, edgesPath, filesInBuildPath)
-      .scheduleOn(m_executor.sticky())
+      co_withExecutor(m_executor.sticky(), emitAllPackageV2(callback, index, edgesPath, filesInBuildPath))
     );
   } else {
     tasks.emplace_back(
-      emitAll(callback, index, edgesPath).scheduleOn(m_executor.sticky())
+      co_withExecutor(m_executor.sticky(), emitAll(callback, index, edgesPath))
     );
   }
   co_await coro::collectAllRange(std::move(tasks));
@@ -1725,8 +1723,7 @@ coro::Task<Package::EmitInfo> Package::emitGroups(
   std::vector<coro::TaskWithExecutor<EmitInfo>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
-      emitGroup(std::move(group), callback, index, forceInclusion)
-        .scheduleOn(m_executor.sticky())
+      co_withExecutor(m_executor.sticky(), emitGroup(std::move(group), callback, index, forceInclusion))
     );
   }
 

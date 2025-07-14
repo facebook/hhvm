@@ -7610,12 +7610,12 @@ void check_invariants(const IndexData& index) {
   std::vector<coro::TaskWithExecutor<void>> tasks;
   for (auto& work : cinfoBuckets) {
     tasks.emplace_back(
-      runCInfo(std::move(work)).scheduleOn(index.executor->sticky())
+      co_withExecutor(index.executor->sticky(), runCInfo(std::move(work)))
     );
   }
   for (auto& work : ffBuckets) {
     tasks.emplace_back(
-      runFF(std::move(work)).scheduleOn(index.executor->sticky())
+      co_withExecutor(index.executor->sticky(), runFF(std::move(work)))
     );
   }
   coro::blockingWait(coro::collectAllRange(std::move(tasks)));
@@ -16295,12 +16295,12 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
   for (auto& work : typeBuckets) {
     tasks.emplace_back(
-      runTypes(std::move(work)).scheduleOn(index.executor->sticky())
+      co_withExecutor(index.executor->sticky(), runTypes(std::move(work)))
     );
   }
   for (auto& work : fixupBuckets) {
     tasks.emplace_back(
-      runFixups(std::move(work)).scheduleOn(index.executor->sticky())
+      co_withExecutor(index.executor->sticky(), runFixups(std::move(work)))
     );
   }
   auto subTasks = from(aggregateBuckets)
@@ -16312,9 +16312,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       })
     | as<std::vector>();
   tasks.emplace_back(
-    runAggregateCombine(
+    co_withExecutor(index.executor->sticky(), runAggregateCombine(
       std::move(subTasks)
-    ).scheduleOn(index.executor->sticky())
+    ))
   );
 
   coro::blockingWait(coro::collectAllRange(std::move(tasks)));

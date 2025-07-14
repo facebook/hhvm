@@ -760,6 +760,9 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setExecutionConcurrencyLimit(Option::ExternWorkerExecutionConcurrencyLimit)
     .setAcConnectionCount(Option::ExternWorkerAcConnectionCount)
     .setVerboseLogging(Option::ExternWorkerVerboseLogging);
+  if (!Option::ExternWorkerPlatform.empty()) {
+    options.setPlatform(Option::ExternWorkerPlatform);
+  }
   if (Option::ExternWorkerTimeoutSecs > 0) {
     options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
   }
@@ -1028,6 +1031,7 @@ bool process(CompilerOptions &po) {
   StructuredLogEntry sample;
   sample.setStr("debug", debug ? "true" : "false");
   sample.setStr("use_case", Option::ExternWorkerUseCase);
+  sample.setStr("platform", Option::ExternWorkerPlatform);
   sample.setStr("features_file", Option::ExternWorkerFeaturesFile);
   sample.setStr("worker_path", Option::ExternWorkerPath);
   sample.setInt("use_rich_client", Option::ExternWorkerUseRichClient);

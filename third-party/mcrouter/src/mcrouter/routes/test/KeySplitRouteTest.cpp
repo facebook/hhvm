@@ -195,8 +195,6 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
   bool firstHit_;
 };
 
-constexpr folly::StringPiece KeySplitRouteTest::kMemcacheReplicaSeparator;
-
 TEST_F(KeySplitRouteTest, NoAllSyncSet) {
   size_t numReplicas = 10;
   testCreate(numReplicas, false);

@@ -177,8 +177,6 @@ class t_type : public t_named {
   static constexpr uint64_t kTypeMask = (1ULL << kTypeBits) - 1;
   static const std::string& type_name(type t);
 
-  std::string get_impl_full_name() const { return get_full_name(); }
-
   // TODO: Rename function.
   virtual type get_type_value() const = 0;
 

@@ -292,7 +292,6 @@ bool runServerDual(
     const McrouterOptions& mcrouterOpts,
     const McrouterStandaloneOptions& standaloneOpts,
     StandalonePreRunCb preRunCb) {
-  using RequestHandlerType = RequestHandler<ServerOnRequest<RouterInfo>>;
   std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool;
   CarbonRouterInstance<RouterInfo>* router;
   std::shared_ptr<AsyncMcServer> asyncMcServer;

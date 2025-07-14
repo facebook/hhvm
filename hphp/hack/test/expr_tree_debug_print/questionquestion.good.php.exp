@@ -1,0 +1,603 @@
+<?hh
+<<file:
+  __EnableUnstableFeatures(
+    'expression_trees',
+    'expression_tree_coalesce_operator',
+  )>>
+
+function f(): void {
+  $x = ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 5,
+      "end_line" => 5,
+      "start_column" => 18,
+      "end_column" => 22,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitNull(darray[
+          "path" => __FILE__,
+          "start_line" => 5,
+          "end_line" => 5,
+          "start_column" => 18,
+          "end_column" => 22,
+        ]);
+      }
+    ),
+  );
+  $y = ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 6,
+      "end_line" => 6,
+      "start_column" => 18,
+      "end_column" => 19,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitInt(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 6,
+            "end_line" => 6,
+            "start_column" => 18,
+            "end_column" => 19,
+          ],
+          2,
+        );
+      }
+    ),
+  );
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 7,
+      "end_line" => 7,
+      "start_column" => 13,
+      "end_column" => 25,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitBinop(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 7,
+            "end_line" => 7,
+            "start_column" => 13,
+            "end_column" => 25,
+          ],
+          $v->visitNull(darray[
+            "path" => __FILE__,
+            "start_line" => 7,
+            "end_line" => 7,
+            "start_column" => 13,
+            "end_column" => 17,
+          ]),
+          "__questionQuestion",
+          $v->visitNull(darray[
+            "path" => __FILE__,
+            "start_line" => 7,
+            "end_line" => 7,
+            "start_column" => 21,
+            "end_column" => 25,
+          ]),
+        );
+      }
+    ),
+  );
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 8,
+      "end_line" => 8,
+      "start_column" => 13,
+      "end_column" => 22,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitBinop(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 8,
+            "end_line" => 8,
+            "start_column" => 13,
+            "end_column" => 22,
+          ],
+          $v->visitNull(darray[
+            "path" => __FILE__,
+            "start_line" => 8,
+            "end_line" => 8,
+            "start_column" => 13,
+            "end_column" => 17,
+          ]),
+          "__questionQuestion",
+          $v->visitInt(
+            darray[
+              "path" => __FILE__,
+              "start_line" => 8,
+              "end_line" => 8,
+              "start_column" => 21,
+              "end_column" => 22,
+            ],
+            1,
+          ),
+        );
+      }
+    ),
+  );
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($y)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 9,
+          "end_line" => 9,
+          "start_column" => 13,
+          "end_column" => 26,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 9,
+                "end_line" => 9,
+                "start_column" => 13,
+                "end_column" => 26,
+              ],
+              $v->visitNull(darray[
+                "path" => __FILE__,
+                "start_line" => 9,
+                "end_line" => 9,
+                "start_column" => 13,
+                "end_column" => 17,
+              ]),
+              "__questionQuestion",
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 9,
+                  "end_line" => 9,
+                  "start_column" => 21,
+                  "end_column" => 26,
+                ],
+                "$0splice0",
+                $splice0,
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($x)};
+      $splice1 = ${ExampleDsl::lift($y)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 10,
+          "end_line" => 10,
+          "start_column" => 13,
+          "end_column" => 27,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0, "$0splice1" => $splice1],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 10,
+                "end_line" => 10,
+                "start_column" => 13,
+                "end_column" => 27,
+              ],
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 10,
+                  "end_line" => 10,
+                  "start_column" => 13,
+                  "end_column" => 18,
+                ],
+                "$0splice0",
+                $splice0,
+              ),
+              "__questionQuestion",
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 10,
+                  "end_line" => 10,
+                  "start_column" => 22,
+                  "end_column" => 27,
+                ],
+                "$0splice1",
+                $splice1,
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($y)};
+      $splice1 = ${ExampleDsl::lift($x)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 11,
+          "end_line" => 11,
+          "start_column" => 13,
+          "end_column" => 27,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0, "$0splice1" => $splice1],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 11,
+                "end_line" => 11,
+                "start_column" => 13,
+                "end_column" => 27,
+              ],
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 11,
+                  "end_line" => 11,
+                  "start_column" => 13,
+                  "end_column" => 18,
+                ],
+                "$0splice0",
+                $splice0,
+              ),
+              "__questionQuestion",
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 11,
+                  "end_line" => 11,
+                  "start_column" => 22,
+                  "end_column" => 27,
+                ],
+                "$0splice1",
+                $splice1,
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+  // The coalesce operator is right-associative
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($x)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 13,
+          "end_line" => 13,
+          "start_column" => 13,
+          "end_column" => 31,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 13,
+                "end_line" => 13,
+                "start_column" => 13,
+                "end_column" => 31,
+              ],
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 13,
+                  "end_line" => 13,
+                  "start_column" => 13,
+                  "end_column" => 18,
+                ],
+                "$0splice0",
+                $splice0,
+              ),
+              "__questionQuestion",
+              $v->visitBinop(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 13,
+                  "end_line" => 13,
+                  "start_column" => 22,
+                  "end_column" => 31,
+                ],
+                $v->visitNull(darray[
+                  "path" => __FILE__,
+                  "start_line" => 13,
+                  "end_line" => 13,
+                  "start_column" => 22,
+                  "end_column" => 26,
+                ]),
+                "__questionQuestion",
+                $v->visitInt(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 13,
+                    "end_line" => 13,
+                    "start_column" => 30,
+                    "end_column" => 31,
+                  ],
+                  1,
+                ),
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($x)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 14,
+          "end_line" => 14,
+          "start_column" => 13,
+          "end_column" => 33,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 14,
+                "end_line" => 14,
+                "start_column" => 13,
+                "end_column" => 33,
+              ],
+              $v->visitBinop(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 14,
+                  "end_line" => 14,
+                  "start_column" => 14,
+                  "end_column" => 27,
+                ],
+                $v->splice(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 14,
+                    "end_line" => 14,
+                    "start_column" => 14,
+                    "end_column" => 19,
+                  ],
+                  "$0splice0",
+                  $splice0,
+                ),
+                "__questionQuestion",
+                $v->visitNull(darray[
+                  "path" => __FILE__,
+                  "start_line" => 14,
+                  "end_line" => 14,
+                  "start_column" => 23,
+                  "end_column" => 27,
+                ]),
+              ),
+              "__questionQuestion",
+              $v->visitInt(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 14,
+                  "end_line" => 14,
+                  "start_column" => 32,
+                  "end_column" => 33,
+                ],
+                1,
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($x)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 15,
+          "end_line" => 15,
+          "start_column" => 13,
+          "end_column" => 33,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 15,
+                "end_line" => 15,
+                "start_column" => 13,
+                "end_column" => 33,
+              ],
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 15,
+                  "end_line" => 15,
+                  "start_column" => 13,
+                  "end_column" => 18,
+                ],
+                "$0splice0",
+                $splice0,
+              ),
+              "__questionQuestion",
+              $v->visitBinop(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 15,
+                  "end_line" => 15,
+                  "start_column" => 23,
+                  "end_column" => 32,
+                ],
+                $v->visitNull(darray[
+                  "path" => __FILE__,
+                  "start_line" => 15,
+                  "end_line" => 15,
+                  "start_column" => 23,
+                  "end_column" => 27,
+                ]),
+                "__questionQuestion",
+                $v->visitInt(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 15,
+                    "end_line" => 15,
+                    "start_column" => 31,
+                    "end_column" => 32,
+                  ],
+                  1,
+                ),
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+  // The addition operator has a higher precedence than the coalesce operator
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($x)};
+      $splice1 = ${ExampleDsl::lift($y)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 17,
+          "end_line" => 17,
+          "start_column" => 13,
+          "end_column" => 33,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0, "$0splice1" => $splice1],
+          "functions" => vec[],
+          "static_methods" => vec[],
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 17,
+                "end_line" => 17,
+                "start_column" => 13,
+                "end_column" => 33,
+              ],
+              $v->visitBinop(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 17,
+                  "end_line" => 17,
+                  "start_column" => 14,
+                  "end_column" => 28,
+                ],
+                $v->splice(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 17,
+                    "end_line" => 17,
+                    "start_column" => 14,
+                    "end_column" => 19,
+                  ],
+                  "$0splice0",
+                  $splice0,
+                ),
+                "__questionQuestion",
+                $v->splice(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 17,
+                    "end_line" => 17,
+                    "start_column" => 23,
+                    "end_column" => 28,
+                  ],
+                  "$0splice1",
+                  $splice1,
+                ),
+              ),
+              "__plus",
+              $v->visitInt(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 17,
+                  "end_line" => 17,
+                  "start_column" => 32,
+                  "end_column" => 33,
+                ],
+                1,
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+}

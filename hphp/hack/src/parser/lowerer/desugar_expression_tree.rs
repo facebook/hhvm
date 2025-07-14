@@ -521,6 +521,15 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     Expr::new((), pos.clone(), c)
 }
 
+fn coalesce(lhs: Expr, rhs: Expr, pos: &Pos) -> Expr {
+    let c = Expr_::mk_binop(aast::Binop {
+        bop: Bop::QuestionQuestion,
+        lhs,
+        rhs,
+    });
+    Expr::new((), pos.clone(), c)
+}
+
 fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, nullsafe: bool, pos: &Pos) -> Expr {
     let meth = Expr::new(
         (),
@@ -875,12 +884,6 @@ impl RewriteState {
             }
             Binop(binop) => {
                 let aast::Binop { bop, lhs, rhs } = *binop;
-                let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
-                let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
-
-                // Source: MyDsl`... + ...`
-                // Virtualized: MyDsl::operationType(...)->__plus(...)
-                // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
                 let binop_str = match bop {
                     Bop::Plus => "__plus",
                     Bop::Minus => "__minus",
@@ -905,6 +908,22 @@ impl RewriteState {
                     Bop::Xor => "__caret",
                     Bop::Ltlt => "__lessThanLessThan",
                     Bop::Gtgt => "__greaterThanGreaterThan",
+                    // Coalesce operator ??
+                    Bop::QuestionQuestion => {
+                        if lhs.2.is_array_get() {
+                            // Array access expressions cannot be used as the left-hand side operand of the null coalesce operator (??)
+                            // because in Hack, ?? has special behavior when applied to array access: it swallows exceptions raised when
+                            // the key is not present in the container. To maintain consistency with Hack's behavior, we will re-implement
+                            // this special case in the expression tree implementation of the ArrayGet operator.
+                            self.errors.push((
+                                pos.clone(),
+                                "Expression trees do not support array access (e.g. `arr[0]`) as the left side of the null coalesce operator (`??`).".into(),
+                            ));
+                            "__unsupported"
+                        } else {
+                            "__questionQuestion"
+                        }
+                    }
                     // Explicit list of unsupported operators and error messages
                     Bop::Starstar => {
                         self.errors.push((
@@ -927,22 +946,29 @@ impl RewriteState {
                         ));
                         "__unsupported"
                     }
-                    Bop::QuestionQuestion => {
-                        self.errors.push((
-                            pos.clone(),
-                            "Expression trees do not support the null coalesce operator `??`."
-                                .into(),
-                        ));
-                        "__unsupported"
-                    }
                 };
-                let virtual_expr = virtualize_operation(
-                    rewritten_lhs.virtual_expr,
-                    binop_str,
-                    Some(rewritten_rhs.virtual_expr),
-                    visitor_name,
-                    &pos,
-                );
+                let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
+                let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
+
+                let virtual_expr = match bop {
+                    // Source: MyDsl`... ?? ...`
+                    // Virtualized: ... ?? ...
+                    // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__questionQuestion', ...)
+                    Bop::QuestionQuestion => {
+                        // Required to refine the type
+                        coalesce(rewritten_lhs.virtual_expr, rewritten_rhs.virtual_expr, &pos)
+                    }
+                    // Source: MyDsl`... + ...`
+                    // Virtualized: MyDsl::operationType(...)->__plus(...)
+                    // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
+                    _ => virtualize_operation(
+                        rewritten_lhs.virtual_expr,
+                        binop_str,
+                        Some(rewritten_rhs.virtual_expr),
+                        visitor_name,
+                        &pos,
+                    ),
+                };
                 let desugar_expr = v_meth_call(
                     et::VISIT_BINOP,
                     vec![

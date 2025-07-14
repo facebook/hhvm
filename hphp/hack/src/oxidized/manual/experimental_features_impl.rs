@@ -56,6 +56,7 @@ impl FeatureName {
             PolymorphicFunctionHints => Preview,
             ProtectedInternal => Preview,
             PolymorphicLambda => Preview,
+            ExpressionTreeCoalesceOperator => Preview,
         }
     }
 

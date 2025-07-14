@@ -358,6 +358,7 @@ class ExampleDsl {
 interface ExampleMixed {
   public function __tripleEquals(ExampleMixed $_): ExampleBool;
   public function __notTripleEquals(ExampleMixed $_): ExampleBool;
+  public function __questionQuestion(?ExampleMixed $_): ?ExampleMixed;
 }
 
 interface ExampleArraykey extends ExampleMixed {}

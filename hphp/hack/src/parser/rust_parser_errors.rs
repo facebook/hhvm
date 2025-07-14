@@ -5601,6 +5601,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             EnumDeclaration(_) => self.enum_decl_errors(node),
             Enumerator(_) => self.enumerator_errors(node),
+            BinaryExpression(x)
+                if self.context.active_expression_tree
+                    && token_kind(&x.operator) == Some(TokenKind::QuestionQuestion) =>
+            {
+                self.check_can_use_feature(node, &FeatureName::ExpressionTreeCoalesceOperator);
+                self.assignment_errors(node);
+            }
             PostfixUnaryExpression(_)
             | BinaryExpression(_)
             | ForeachStatement(_)

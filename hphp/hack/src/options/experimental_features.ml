@@ -71,6 +71,7 @@ type feature_name =
   | PolymorphicFunctionHints
   | ProtectedInternal
   | PolymorphicLambda
+  | ExpressionTreeCoalesceOperator
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -118,6 +119,7 @@ let feature_name_map =
       ("polymorphic_function_hints", PolymorphicFunctionHints);
       ("protected_internal", ProtectedInternal);
       ("polymorphic_lambda", PolymorphicLambda);
+      ("expression_tree_coalesce_operator", ExpressionTreeCoalesceOperator);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

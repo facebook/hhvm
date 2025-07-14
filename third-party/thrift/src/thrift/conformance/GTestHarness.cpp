@@ -601,7 +601,6 @@ testing::AssertionResult runStatelessRpcTest(
         } else {
           return testing::AssertionSuccess();
         }
-        break;
       case ClientInstruction::Type::requestResponseDeclaredException:
         result.requestResponseDeclaredException() =
             runRequestResponseDeclaredException(client, serverInstruction);

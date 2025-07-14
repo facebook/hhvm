@@ -448,7 +448,6 @@ void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
         break;
       default:
         folly::assume_unreachable();
-        break;
     }
   }
 }

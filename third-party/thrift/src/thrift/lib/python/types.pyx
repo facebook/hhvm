@@ -271,7 +271,8 @@ cdef class StringTypeInfo(TypeInfoBase):
             return value
         # it is legal to set string field to `str` subclass
         if isinstance(value, str):
-            return str(value)
+            # some versions of StringEnum only override __format__, not __str__
+            return f"{value}"
 
         raise TypeError(
             "Cannot create internal string data representation. "

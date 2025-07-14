@@ -260,7 +260,7 @@ class CompressionFilterTest : public Test {
   }
 };
 
-typedef ::testing::Types<ZlibTest, ZstdTest> CompressionCodecs;
+using CompressionCodecs = ::testing::Types<ZlibTest, ZstdTest>;
 
 TYPED_TEST_SUITE(CompressionFilterTest, CompressionCodecs);
 

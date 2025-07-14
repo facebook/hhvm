@@ -264,7 +264,7 @@ TEST(FieldsTest, IsReflectionMetadata) {
   static_assert(!is_id_v<IncompleteType>);
   static_assert(!is_id_v<int>);
 
-  using Struct = test_cpp2::cpp_reflection::struct3;
+  using Struct [[maybe_unused]] = test_cpp2::cpp_reflection::struct3;
   // TODO(ytj): We need to figure out a way to test compile error
   // op::get_field_id<Struct, int>{}; // compile error
   // op::get_ordinal<Struct, int>{}; // compile error

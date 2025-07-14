@@ -30,6 +30,7 @@ using namespace facebook::thrift::test;
 
 TEST(OpsTest, filter) {
   Struct s;
+  s.bool_field() = true;
   s.int_field() = 42;
   s.struct_field()->int_field() = 43;
   s.struct_field()->string_field() = "foo";
@@ -58,6 +59,7 @@ TEST(OpsTest, filter) {
 
   // Test all fields included.
   MaskBuilder<Struct> mb(noneMask());
+  mb.includes<ident::bool_field>();
   mb.includes<ident::int_field>();
   mb.includes<ident::struct_field>();
   mb.includes<ident::int_map_field>();
@@ -71,6 +73,7 @@ TEST(OpsTest, filter) {
 
   // Test all fields excluded.
   mb.reset_to_all();
+  mb.excludes<ident::bool_field>();
   mb.excludes<ident::int_field>();
   mb.excludes<ident::struct_field>();
   mb.excludes<ident::int_map_field>();

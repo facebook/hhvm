@@ -81,23 +81,26 @@ struct FilterVisitor {
       protocol::TType type,
       FieldId fieldId,
       Writer& writer) {
-    auto withFieldInfo = [&]<typename IncludeType = std::false_type>(
-                             auto&& f, IncludeType = {}) {
+    auto withFieldInfo = [&](auto&& f) {
       if constexpr (std::is_same_v<FieldId, std::nullopt_t>) {
         return f();
-      } else if constexpr (!IncludeType::value) {
-        return f(fieldId);
       } else {
-        return f(fieldId, type);
+        return f(fieldId);
       }
     };
 
     auto passThrough = [&] {
-      withFieldInfo(
-          [&](auto... maybeFieldId) {
-            writer.writeRaw(maybeFieldId..., *reader.readRaw());
-          },
-          std::true_type{});
+      withFieldInfo([&](auto... maybeFieldId) {
+        if (std::is_same_v<FilterVisitor::Reader, CompactProtocolReader> &&
+            type == protocol::TType::T_BOOL) {
+          // Bool fields are zero-width under Compact protocol so readRaw won't
+          // work.
+          writer.write(
+              maybeFieldId..., type::bool_t{}, reader.read(type::bool_t{}));
+        } else {
+          writer.writeRaw(maybeFieldId..., type, *reader.readRaw());
+        }
+      });
     };
 
     if (mask.isNoneMask()) {

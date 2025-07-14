@@ -91,6 +91,11 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     protocol_->skip(readState_.fieldType);
     auto end = protocol_->getCursor();
 
+    if (begin == end) {
+      folly::throw_exception<std::runtime_error>(
+          "readRaw doesn't support bool fields under compact protocol");
+    }
+
     auto numBytes = end - begin;
     auto ret = folly::IOBuf::create(numBytes);
     begin.clone(*ret, numBytes);
@@ -504,7 +509,7 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   void beforeWriteField(int16_t fieldId, protocol::TType type) {
     checkState(State::Active);
-    protocol_->writeFieldBegin(nullptr, type, fieldId);
+    protocol_->writeFieldBegin("", type, fieldId);
   }
   void afterWriteField() { protocol_->writeFieldEnd(); }
 
@@ -584,6 +589,10 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
     checkRemaining();
     protocol_->writeRaw(value);
     advance();
+  }
+  void writeRaw(protocol::TType type, const folly::IOBuf& value) {
+    DCHECK(type == nextTType());
+    writeRaw(value);
   }
 
   StructuredDynamicCursorWriter beginWriteStructured() {

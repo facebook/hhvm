@@ -38,6 +38,7 @@ Struct createStruct() {
       folly::IOBuf::wrapBufferAsValue(folly::Range("bar"));
   s.set_nested_field() = {{stringish}};
   s.map_field() = {{'a', 1}, {'b', 2}};
+  s.bool_field() = true;
   return s;
 }
 
@@ -65,6 +66,7 @@ TEST(DynamicCursorSerializer, UnschematizedRead) {
   EXPECT_THAT(
       reader.read(type::map<type::byte_t, type::byte_t>{}),
       UnorderedElementsAre(Pair('a', 1), Pair('b', 2)));
+  EXPECT_TRUE(reader.read(type::bool_t{}));
   wrapper.endRead(std::move(reader));
 
   // Protocol Value reads
@@ -76,6 +78,11 @@ TEST(DynamicCursorSerializer, UnschematizedRead) {
   value = reader.readValue();
   EXPECT_EQ(
       value.as_object().at(FieldId{1}).as_binary().moveToFbString(), "world");
+  reader.skip(); // list_field
+  reader.skip(); // set_nested_field
+  reader.skip(); // map_field
+  value = reader.readValue();
+  EXPECT_TRUE(value.as_bool());
   wrapper.endRead(std::move(reader));
 
   // Cursor reads
@@ -114,6 +121,10 @@ TEST(DynamicCursorSerializer, UnschematizedRead) {
   auto str = reader.readRaw();
   auto i32 = reader.readRaw();
   auto inner = reader.readRaw();
+  reader.skip(); // list_field
+  reader.skip(); // set_nested_field;
+  reader.skip(); // map_field;
+  auto boolf = reader.readRaw();
   wrapper.endRead(std::move(reader));
   auto read = [&]<typename Tag>(Tag, folly::IOBuf& buf) {
     type::native_type<Tag> ret;
@@ -125,6 +136,7 @@ TEST(DynamicCursorSerializer, UnschematizedRead) {
   EXPECT_EQ(read(type::string_t{}, *str), "hello");
   EXPECT_EQ(read(type::i32_t{}, *i32), 42);
   EXPECT_EQ(read(type::struct_t<Inner>{}, *inner).binary_field(), "world");
+  EXPECT_TRUE(read(type::bool_t{}, *boolf));
 }
 
 TEST(DynamicCursorSerializer, UnschematizedWrite) {
@@ -147,6 +159,7 @@ TEST(DynamicCursorSerializer, UnschematizedWrite) {
       5, type::list<type::set<type::union_t<Stringish>>>{}, {{stringish}});
   writer.write(
       6, type::map<type::byte_t, type::byte_t>{}, {{'a', 1}, {'b', 2}});
+  writer.write(7, type::bool_t{}, true);
   wrapper.endWrite(std::move(writer));
   EXPECT_THRIFT_EQ(wrapper.deserialize<Struct>(), createStruct())
       << debugPrint(wrapper.serializedData());
@@ -166,6 +179,7 @@ TEST(DynamicCursorSerializer, UnschematizedWrite) {
       6,
       protocol::asValueStruct<type::map<typename type::byte_t, type::byte_t>>(
           {{'a', 1}, {'b', 2}}));
+  writer.writeValue(7, protocol::asValueStruct<type::bool_t>(true));
   wrapper.endWrite(std::move(writer));
   EXPECT_THRIFT_EQ(wrapper.deserialize<Struct>(), createStruct())
       << debugPrint(wrapper.serializedData());
@@ -205,6 +219,7 @@ TEST(DynamicCursorSerializer, UnschematizedWrite) {
   mapWriter.write(type::byte_t{}, 2);
   writer.endWrite(std::move(mapWriter));
 
+  writer.write(7, type::bool_t{}, true);
   wrapper.endWrite(std::move(writer));
   EXPECT_THRIFT_EQ(wrapper.deserialize<Struct>(), createStruct())
       << debugPrint(wrapper.serializedData());
@@ -233,6 +248,7 @@ TEST(DynamicCursorSerializer, UnschematizedWrite) {
       5, type::list<type::set<type::union_t<Stringish>>>{}, {{stringish}});
   writer.write(
       6, type::map<type::byte_t, type::byte_t>{}, {{'a', 1}, {'b', 2}});
+  writer.writeRaw(7, type::bool_t{}, *serialize(true));
   wrapper.endWrite(std::move(writer));
   EXPECT_THRIFT_EQ(wrapper.deserialize<Struct>(), createStruct())
       << debugPrint(wrapper.serializedData());

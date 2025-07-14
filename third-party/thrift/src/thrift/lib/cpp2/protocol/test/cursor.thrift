@@ -43,6 +43,7 @@ struct Struct {
   5: list<set<Stringish>> set_nested_field;
   @cpp.Type{template = "std::unordered_map"}
   6: map<byte, byte> map_field;
+  7: bool bool_field;
 }
 
 struct Qualifiers {

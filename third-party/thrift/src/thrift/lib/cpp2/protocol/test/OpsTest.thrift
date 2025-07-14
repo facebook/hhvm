@@ -24,9 +24,10 @@ struct NestedStruct {
 }
 
 struct Struct {
-  1: i32 int_field;
-  2: NestedStruct struct_field;
-  3: map<i32, NestedStruct> int_map_field;
-  4: map<string, bool> string_map_field;
-  5: any.Any any_field;
+  1: bool bool_field;
+  2: i32 int_field;
+  3: NestedStruct struct_field;
+  4: map<i32, NestedStruct> int_map_field;
+  5: map<string, bool> string_map_field;
+  6: any.Any any_field;
 }

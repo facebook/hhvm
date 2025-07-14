@@ -218,6 +218,7 @@ class pyi_mstch_program : public mstch_program {
             {"program:containerTypes", &pyi_mstch_program::get_containers},
             {"program:moveContainerTypes",
              &pyi_mstch_program::get_move_containers},
+            {"program:enablePosArgs?", &pyi_mstch_program::get_enable_pos_args},
         });
     register_has_option("program:asyncio?", "asyncio");
     register_has_option("program:cpp_transport?", "cpp_transport");
@@ -259,6 +260,11 @@ class pyi_mstch_program : public mstch_program {
 
   mstch::node get_move_containers() {
     return make_mstch_types(this->move_containers_);
+  }
+
+  mstch::node get_enable_pos_args() {
+    return this->context_.options.find("enable_pos_args") !=
+        this->context_.options.end();
   }
 
  private:

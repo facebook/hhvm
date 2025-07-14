@@ -53,7 +53,7 @@ class PyDeprecatedHidden:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         reason: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -116,7 +116,7 @@ class Name:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -150,7 +150,7 @@ class Adapter:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...,
         typeHint: __T.Optional[str] = ...
     ) -> None:
@@ -189,7 +189,7 @@ class UseCAPI:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         serialize: bool = ...
     ) -> None:
         ...

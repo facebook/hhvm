@@ -64,7 +64,7 @@ class ReserveIds:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         ids: __T.Optional[__T.List[int]] = ...,
         id_ranges: __T.Optional[__T.Dict[int, int]] = ...
     ) -> None:
@@ -103,7 +103,7 @@ class RequiresBackwardCompatibility:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field_name: bool = ...
     ) -> None:
         ...
@@ -369,7 +369,7 @@ class Uri:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         value: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -403,7 +403,7 @@ class Priority:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         level: __T.Optional[RpcPriority] = ...
     ) -> None:
         ...
@@ -437,7 +437,7 @@ class DeprecatedUnvalidatedAnnotations:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         items: __T.Optional[__T.Dict[str, str]] = ...
     ) -> None:
         ...

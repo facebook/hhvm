@@ -274,3 +274,9 @@ struct Foo {
   255: i32 field255;
   256: i32 field256;
 }
+
+struct Bar {
+  1: i32 field1;
+  2: i32 field2;
+  3: i32 field3;
+}

@@ -25,7 +25,7 @@ class CustomException(Thrift.TException):
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         message: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -55,7 +55,7 @@ class ShouldBeBoxed:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         sessionId: __T.Optional[str] = ...
     ) -> None:
         ...

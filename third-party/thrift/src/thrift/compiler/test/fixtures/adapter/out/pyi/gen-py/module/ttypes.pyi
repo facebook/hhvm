@@ -44,7 +44,7 @@ class MyAnnotation:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         signature: __T.Optional[str] = ...,
         color: Color = ...
     ) -> None:
@@ -83,7 +83,7 @@ class Foo:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         intField: __T.Optional[int] = ...,
         optionalIntField: __T.Optional[int] = ...,
         intFieldWithDefault: int = ...,
@@ -240,7 +240,7 @@ class Bar:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         structField: __T.Optional[::my.Adapter1.Type] = ...,
         optionalStructField: __T.Optional[my.Adapter1.Type] = ...,
         structListField: __T.Optional[__T.List[my.Adapter1.Type]] = ...,
@@ -304,7 +304,7 @@ class DirectlyAdapted:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -338,7 +338,7 @@ class IndependentDirectlyAdapted:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -372,7 +372,7 @@ class StructWithFieldAdapter:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[int] = ...,
         shared_field: __T.Optional[int] = ...,
         opt_shared_field: __T.Optional[int] = ...,
@@ -421,7 +421,7 @@ class TerseAdaptedFields:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         int_field: __T.Optional[int] = ...,
         string_field: __T.Optional[str] = ...,
         set_field: __T.Optional[__T.Set[int]] = ...
@@ -465,7 +465,7 @@ class B:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         a: __T.Optional[A] = ...
     ) -> None:
         ...
@@ -528,7 +528,7 @@ class Config:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         path: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -562,7 +562,7 @@ class MyStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[int] = ...,
         set_string: __T.Optional[__T.Set[str]] = ...
     ) -> None:
@@ -601,7 +601,7 @@ class AdaptTestStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         delay: __T.Optional[int] = ...,
         custom: __T.Optional[bytes] = ...,
         timeout: __T.Optional[int] = ...,
@@ -680,7 +680,7 @@ class AdaptTemplatedTestStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         adaptedBool: __T.Optional[bool] = ...,
         adaptedByte: __T.Optional[int] = ...,
         adaptedShort: __T.Optional[int] = ...,
@@ -819,7 +819,7 @@ class AdaptTemplatedNestedTestStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         adaptedStruct: __T.Optional[AdaptTemplatedTestStruct] = ...
     ) -> None:
         ...
@@ -894,7 +894,7 @@ class AdaptedStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         data: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -928,7 +928,7 @@ class DirectlyAdaptedStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         data: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -962,7 +962,7 @@ class StructFieldAdaptedStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         adaptedStruct: __T.Optional[AdaptedStruct] = ...,
         adaptedTypedef: __T.Optional[AdaptedStruct] = ...,
         directlyAdapted: __T.Optional[DirectlyAdaptedStruct] = ...,
@@ -1011,7 +1011,7 @@ class CircularAdaptee:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[CircularStruct] = ...
     ) -> None:
         ...
@@ -1045,7 +1045,7 @@ class CircularStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[CircularAdaptee] = ...
     ) -> None:
         ...
@@ -1079,7 +1079,7 @@ class ReorderedStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         reordered_dependent_adapted: __T.Optional[DeclaredAfterStruct] = ...
     ) -> None:
         ...
@@ -1142,7 +1142,7 @@ class RenamedStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         data: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -1176,7 +1176,7 @@ class SameNamespaceStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         data: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -1239,7 +1239,7 @@ class MoveOnly:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         ptr: __T.Optional[HeapAllocated] = ...
     ) -> None:
         ...
@@ -1273,7 +1273,7 @@ class AlsoMoveOnly:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         ptr: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -1365,7 +1365,7 @@ class CountingStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         regularInt: __T.Optional[int] = ...,
         countingInt: __T.Optional[int] = ...,
         regularString: __T.Optional[str] = ...
@@ -1409,7 +1409,7 @@ class Person:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -1443,7 +1443,7 @@ class Person2:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -1477,7 +1477,7 @@ class RenamedStructWithStructAdapterAndFieldAdapter:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field: __T.Optional[int] = ...
     ) -> None:
         ...

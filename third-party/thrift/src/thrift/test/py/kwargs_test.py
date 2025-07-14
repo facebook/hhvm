@@ -13,17 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-unsafe
+# pyre-strict
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import unittest
 
-from thrift.test.py.kwargs.ttypes import Foo
+from thrift.test.py.kwargs.ttypes import Bar, Foo
 
 
 class KwargsTest(unittest.TestCase):
-    def test_initializer(self):
+    def test_initializer(self) -> None:
         foo = Foo(
             **{
                 "field1": 1,
@@ -290,13 +290,18 @@ class KwargsTest(unittest.TestCase):
         foo = Foo(field256=512)
         self.assertEqual(512, foo.field256)
 
-    def test_unexpected_argument(self):
+    def test_unexpected_argument(self) -> None:
         with self.assertRaises(TypeError):
+            # pyre-ignore[28]:Unexpected keyword argument `field257`
             Foo(field257=257)
 
-    def test_default_value(self):
+    def test_default_value(self) -> None:
         foo = Foo()
         self.assertEqual(1024, foo.field42)
+
+    def test_compiler_options(self) -> None:
+        # pyre didnt complain because we enabled the compiler opetion of "enable_pos_args" in buck file
+        Bar(1, 2, 3)
 
 
 if __name__ == "__main__":

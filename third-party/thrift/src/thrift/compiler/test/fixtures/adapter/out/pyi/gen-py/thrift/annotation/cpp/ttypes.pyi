@@ -44,7 +44,7 @@ class Name:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         value: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -78,7 +78,7 @@ class Type:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...,
         template: __T.Optional[str] = ...
     ) -> None:
@@ -117,7 +117,7 @@ class Ref:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         type: __T.Optional[RefType] = ...
     ) -> None:
         ...
@@ -151,7 +151,7 @@ class Lazy:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         ref: bool = ...
     ) -> None:
         ...
@@ -214,7 +214,7 @@ class Adapter:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...,
         adaptedType: __T.Optional[str] = ...,
         underlyingName: __T.Optional[str] = ...,
@@ -268,7 +268,7 @@ class PackIsset:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         atomic: bool = ...
     ) -> None:
         ...
@@ -360,7 +360,7 @@ class FieldInterceptor:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...,
         noinline: __T.Optional[bool] = ...
     ) -> None:
@@ -428,7 +428,7 @@ class EnumType:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         type: __T.Optional[EnumUnderlyingType] = ...
     ) -> None:
         ...

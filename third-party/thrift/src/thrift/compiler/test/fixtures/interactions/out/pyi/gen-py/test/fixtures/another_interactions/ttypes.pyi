@@ -24,7 +24,7 @@ class DoSomethingResult:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         s_res: __T.Optional[str] = ...,
         i_res: __T.Optional[int] = ...
     ) -> None:

@@ -24,7 +24,7 @@ class InitialResponse:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         content: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -54,7 +54,7 @@ class FinalResponse:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         content: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -84,7 +84,7 @@ class SinkPayload:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         content: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -114,7 +114,7 @@ class CompatibleWithKeywordSink:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         sink: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -144,7 +144,7 @@ class InitialException(Thrift.TException):
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         reason: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -174,7 +174,7 @@ class SinkException1(Thrift.TException):
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         reason: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -204,7 +204,7 @@ class SinkException2(Thrift.TException):
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         reason: __T.Optional[int] = ...
     ) -> None:
         ...

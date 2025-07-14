@@ -35,7 +35,7 @@ class SimpleException(Thrift.TException):
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         err_code: __T.Optional[int] = ...
     ) -> None:
         ...
@@ -69,7 +69,7 @@ class MessageException(Thrift.TException):
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         message: __T.Optional[str] = ...,
         err_code: __T.Optional[int] = ...
     ) -> None:
@@ -108,7 +108,7 @@ class SimpleStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         is_on: __T.Optional[bool] = ...,
         tiny_int: int = ...,
         small_int: __T.Optional[int] = ...,
@@ -182,7 +182,7 @@ class ComplexStruct:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         structOne: __T.Optional[SimpleStruct] = ...,
         structTwo: __T.Optional[SimpleStruct] = ...,
         an_integer: __T.Optional[int] = ...,

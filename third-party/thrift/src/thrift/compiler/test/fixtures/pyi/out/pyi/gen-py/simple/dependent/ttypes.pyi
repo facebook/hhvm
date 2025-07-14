@@ -32,7 +32,7 @@ class Item:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         key: __T.Optional[str] = ...,
         value: __T.Optional[bytes] = ...,
         enum_value: __T.Optional[ItemEnum] = ...

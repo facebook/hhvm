@@ -55,7 +55,7 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self{{#struct:fields}},
+        self{{^program:enablePosArgs?}}{{^struct:union?}}{{#struct:fields?}}, *{{/struct:fields?}}{{/struct:union?}}{{/program:enablePosArgs?}}{{#struct:fields}},
         {{field:py_name}}: {{#field:type}}{{> common/OptionalFieldType}}{{/field:type}} = ...{{/struct:fields}}
     ) -> None:
         ...

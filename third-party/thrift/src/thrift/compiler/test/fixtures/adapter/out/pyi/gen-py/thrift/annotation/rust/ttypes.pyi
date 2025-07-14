@@ -24,7 +24,7 @@ class Name:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -261,7 +261,7 @@ class Type:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -295,7 +295,7 @@ class Serde:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         enabled: bool = ...
     ) -> None:
         ...
@@ -329,7 +329,7 @@ class Mod:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -363,7 +363,7 @@ class Adapter:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -397,7 +397,7 @@ class Derive:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         derives: __T.Optional[__T.List[str]] = ...
     ) -> None:
         ...
@@ -431,7 +431,7 @@ class ServiceExn:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         anyhow_to_application_exn: __T.Optional[bool] = ...
     ) -> None:
         ...

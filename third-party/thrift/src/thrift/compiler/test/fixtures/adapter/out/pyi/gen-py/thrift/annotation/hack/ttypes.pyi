@@ -24,7 +24,7 @@ class FieldWrapper:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -58,7 +58,7 @@ class Wrapper:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...,
         underlyingName: __T.Optional[str] = ...,
         extraNamespace: str = ...
@@ -102,7 +102,7 @@ class Adapter:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -136,7 +136,7 @@ class SkipCodegen:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         reason: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -170,7 +170,7 @@ class Name:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...,
         reason: __T.Optional[str] = ...
     ) -> None:
@@ -209,7 +209,7 @@ class UnionEnumAttributes:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         attributes: __T.Optional[__T.List[str]] = ...
     ) -> None:
         ...
@@ -243,7 +243,7 @@ class StructTrait:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         name: __T.Optional[str] = ...
     ) -> None:
         ...
@@ -277,7 +277,7 @@ class Attributes:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         attributes: __T.Optional[__T.List[str]] = ...
     ) -> None:
         ...

@@ -24,7 +24,7 @@ class Foo:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field1: __T.Optional[int] = ...,
         field2: __T.Optional[int] = ...,
         field3: __T.Optional[int] = ...
@@ -68,7 +68,7 @@ class Foo2:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         field1: __T.Optional[int] = ...,
         field2: __T.Optional[int] = ...,
         field3: __T.Optional[int] = ...

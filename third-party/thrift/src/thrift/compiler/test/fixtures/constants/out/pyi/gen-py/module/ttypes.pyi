@@ -51,7 +51,7 @@ class Internship:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         weeks: __T.Optional[int] = ...,
         title: __T.Optional[str] = ...,
         employer: __T.Optional[Company] = ...,
@@ -101,7 +101,7 @@ class Range:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         min: __T.Optional[int] = ...,
         max: __T.Optional[int] = ...
     ) -> None:
@@ -136,7 +136,7 @@ class struct1:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         a: int = ...,
         b: str = ...
     ) -> None:
@@ -171,7 +171,7 @@ class struct2:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         a: __T.Optional[int] = ...,
         b: __T.Optional[str] = ...,
         c: __T.Optional[struct1] = ...,
@@ -216,7 +216,7 @@ class struct3:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         a: __T.Optional[str] = ...,
         b: __T.Optional[int] = ...,
         c: __T.Optional[struct2] = ...
@@ -256,7 +256,7 @@ class struct4:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
+        self, *,
         a: __T.Optional[int] = ...,
         b: __T.Optional[float] = ...,
         c: __T.Optional[int] = ...

@@ -3976,7 +3976,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                                             sn::classes::PARENT,
                                             sn::classes::STATIC,
                                         ];
-                                        if excludes.iter().any(|&e| txt == e) {
+                                        if excludes.contains(&txt) {
                                             self.errors.push(make_error_from_node(
                                                 &x.qualifier,
                                                 errors::sealed_qualifier_invalid,

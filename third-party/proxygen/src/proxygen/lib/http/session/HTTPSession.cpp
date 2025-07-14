@@ -14,7 +14,6 @@
 #include <folly/CppAttributes.h>
 #include <folly/Random.h>
 #include <folly/io/Cursor.h>
-#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/tracing/ScopedTraceSection.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
@@ -22,7 +21,6 @@
 #include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <wangle/acceptor/ConnectionManager.h>
-#include <wangle/acceptor/SocketOptions.h>
 
 using fizz::AsyncFizzBase;
 using folly::AsyncSocket;

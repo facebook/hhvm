@@ -13,7 +13,6 @@
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
-#include <proxygen/lib/test/TestAsyncTransport.h>
 
 using namespace proxygen;
 using namespace testing;

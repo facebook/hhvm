@@ -9,7 +9,6 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/session/HQStreamBase.h>
-#include <proxygen/lib/http/session/test/HQSessionMocks.h>
 
 using namespace proxygen;
 using namespace testing;

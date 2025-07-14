@@ -18,7 +18,6 @@
 #include <proxygen/lib/http/codec/HQControlCodec.h>
 #include <proxygen/lib/http/codec/HQStreamCodec.h>
 #include <proxygen/lib/http/codec/HQUnidirectionalCodec.h>
-#include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <proxygen/lib/http/session/test/HQSessionMocks.h>
 #include <proxygen/lib/http/session/test/HQSessionTestCommon.h>
@@ -26,10 +25,8 @@
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/session/test/MockSessionObserver.h>
-#include <proxygen/lib/http/session/test/TestUtils.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <quic/priority/HTTPPriorityQueue.h>
-#include <wangle/acceptor/ConnectionManager.h>
 
 using namespace proxygen;
 using namespace proxygen::hq;

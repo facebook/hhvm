@@ -21,7 +21,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <folly/ExceptionString.h>
 #include <folly/GLog.h>
 #include <folly/Portability.h>
 #include <folly/coro/Collect.h>

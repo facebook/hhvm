@@ -18,12 +18,8 @@
 
 #include <string>
 
-#include <folly/Overload.h>
-
-#include <fmt/core.h>
 #include <glog/logging.h>
 
-#include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>

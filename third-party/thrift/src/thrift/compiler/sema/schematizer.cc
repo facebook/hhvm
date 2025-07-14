@@ -53,24 +53,35 @@ std::unique_ptr<t_const_value> val(std::string_view s) {
   return val(std::string{s});
 }
 
-// Returns the ProtocolObject ValueType of a t_const_value
-t_type::value_type from_const_value_type(
-    t_const_value::t_const_value_kind kind) {
+const char* kBoolTypeName = "boolValue";
+const char* kBinaryTypeName = "binaryValue";
+const char* kByteTypeName = "byteValue";
+const char* kDoubleTypeName = "doubleValue";
+const char* kFloatTypeName = "floatValue";
+const char* kI16TypeName = "i16Value";
+const char* kI32TypeName = "i32Value";
+const char* kI64TypeName = "i64Value";
+const char* kStringTypeName = "stringValue";
+const char* kListTypeName = "listValue";
+const char* kMapTypeName = "mapValue";
+const char* kSetTypeName = "setValue";
+
+const char* const_value_type_name(t_const_value::t_const_value_kind kind) {
   switch (kind) {
     case t_const_value::t_const_value_kind::CV_BOOL:
-      return t_type::value_type::BOOL;
+      return kBoolTypeName;
     case t_const_value::t_const_value_kind::CV_INTEGER:
-      return t_type::value_type::I64;
+      return kI64TypeName;
     case t_const_value::t_const_value_kind::CV_DOUBLE:
-      return t_type::value_type::DOUBLE;
+      return kDoubleTypeName;
     case t_const_value::t_const_value_kind::CV_STRING:
-      return t_type::value_type::STRING;
+      return kStringTypeName;
     case t_const_value::t_const_value_kind::CV_MAP:
-      return t_type::value_type::MAP;
+      return kMapTypeName;
     case t_const_value::t_const_value_kind::CV_LIST:
-      return t_type::value_type::LIST;
+      return kListTypeName;
     case t_const_value::t_const_value_kind::CV_IDENTIFIER:
-      return t_type::value_type::STRING;
+      return kStringTypeName;
   }
   abort();
 }
@@ -754,35 +765,47 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
   return schema;
 }
 
-const char* protocol_value_type_name(t_type::value_type ty) {
-  switch (ty) {
-    case t_type::value_type::BOOL:
-      return "boolValue";
-    case t_type::value_type::BYTE:
-      return "byteValue";
-    case t_type::value_type::I16:
-      return "i16Value";
-    case t_type::value_type::I32:
-      return "i32Value";
-    case t_type::value_type::I64:
-      return "i64Value";
-    case t_type::value_type::FLOAT:
-      return "floatValue";
-    case t_type::value_type::DOUBLE:
-      return "doubleValue";
-    case t_type::value_type::STRING:
-      return "stringValue";
-    case t_type::value_type::BINARY:
-      return "binaryValue";
-    case t_type::value_type::OBJECT:
-      return "objectValue";
-    case t_type::value_type::LIST:
-      return "listValue";
-    case t_type::value_type::SET:
-      return "setValue";
-    case t_type::value_type::MAP:
-      return "mapValue";
+const char* protocol_value_type_name(const t_type& ty) {
+  if (const auto* primitive = ty.try_as<t_primitive_type>()) {
+    switch (primitive->primitive_type()) {
+      case t_primitive_type::type::t_bool:
+        return kBoolTypeName;
+      case t_primitive_type::type::t_byte:
+        return kByteTypeName;
+      case t_primitive_type::type::t_i16:
+        return kI16TypeName;
+      case t_primitive_type::type::t_i32:
+        return kI32TypeName;
+      case t_primitive_type::type::t_i64:
+        return kI64TypeName;
+      case t_primitive_type::type::t_float:
+        return kFloatTypeName;
+      case t_primitive_type::type::t_double:
+        return kDoubleTypeName;
+      case t_primitive_type::type::t_string:
+        return kStringTypeName;
+      case t_primitive_type::type::t_binary:
+        return kBinaryTypeName;
+      default:
+        break;
+    }
   }
+
+  if (const auto* container = ty.try_as<t_container>()) {
+    switch (container->container_type()) {
+      case t_container::type::t_list:
+        return kListTypeName;
+      case t_container::type::t_set:
+        return kSetTypeName;
+      case t_container::type::t_map:
+        return kMapTypeName;
+    }
+  }
+
+  if (ty.is<t_enum>()) {
+    return kI32TypeName;
+  }
+
   abort();
 }
 
@@ -890,8 +913,7 @@ std::pair<std::unique_ptr<t_const_value>, std::unique_ptr<t_const_value>>
 protocol_value_builder::to_labeled_value(
     const t_const_value& protocol_value) const {
   if (ty_ == nullptr) {
-    auto label = val(
-        protocol_value_type_name(from_const_value_type(protocol_value.kind())));
+    auto label = val(const_value_type_name(protocol_value.kind()));
     return std::make_pair(std::move(label), protocol_value.clone());
   }
 
@@ -941,9 +963,7 @@ protocol_value_builder::to_labeled_value(
 
   // Generate a protocol value label for a given `t_const_value`, based on the
   // type of the field it represents. e.g. `i64Value` for `i64`.
-  const auto obj_val_ty = ty_->as_value_type().value();
-  auto label = val(protocol_value_type_name(obj_val_ty));
-
+  auto label = val(protocol_value_type_name(*ty_));
   return std::make_pair(std::move(label), std::move(value));
 }
 
@@ -974,9 +994,7 @@ std::unique_ptr<t_const_value> protocol_value_builder::wrap(
       for (const auto& list_elem : protocol_value.get_list()) {
         list->add_list(list_ty_resolver.wrap(*list_elem, ttype));
       }
-      auto container_value_type = ty_->as_value_type().value();
-      ret->add_map(
-          val(protocol_value_type_name(container_value_type)), std::move(list));
+      ret->add_map(val(protocol_value_type_name(*ty_)), std::move(list));
       break;
     }
     case t_const_value::CV_IDENTIFIER:

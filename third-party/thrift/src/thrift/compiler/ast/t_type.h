@@ -153,23 +153,6 @@ class t_type : public t_named {
     t_service = 13,
   };
 
-  // Valid types within a ProtocolObject
-  enum class value_type {
-    BOOL,
-    BYTE,
-    I16,
-    I32,
-    I64,
-    FLOAT,
-    DOUBLE,
-    STRING,
-    BINARY,
-    OBJECT,
-    LIST,
-    SET,
-    MAP,
-  };
-
   static constexpr size_t kTypeCount = 19;
   // TODO: add description
   static constexpr size_t kTypeBits = 5;
@@ -179,9 +162,6 @@ class t_type : public t_named {
 
   // TODO: Rename function.
   virtual type get_type_value() const = 0;
-
-  // Convert a t_type to the appropriate `t_type::value_type`.
-  std::optional<value_type> as_value_type() const;
 
   /**
    * Default returns for every thrift type

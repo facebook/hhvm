@@ -119,42 +119,6 @@ const t_type_ref& t_type_ref::none() {
   return empty;
 }
 
-std::optional<t_type::value_type> t_type::as_value_type() const {
-  switch (get_type_value()) {
-    case type::t_bool:
-      return value_type::BOOL;
-    case type::t_byte:
-      return value_type::BYTE;
-    case type::t_i16:
-      return value_type::I16;
-    case type::t_i32:
-      return value_type::I32;
-    case type::t_i64:
-      return value_type::I64;
-    case type::t_float:
-      return value_type::FLOAT;
-    case type::t_double:
-      return value_type::DOUBLE;
-    case type::t_string:
-      return value_type::STRING;
-    case type::t_binary:
-      return value_type::BINARY;
-    case type::t_list:
-      return value_type::LIST;
-    case type::t_set:
-      return value_type::SET;
-    case type::t_map:
-      return value_type::MAP;
-    case type::t_enum:
-      return value_type::I32;
-    case type::t_structured:
-    case type::t_service:
-    case type::t_void:
-      return std::nullopt;
-  }
-  abort();
-}
-
 bool is_scalar(const t_type& type) {
   if (type.is<t_enum>()) {
     return true;

@@ -104,11 +104,17 @@ class t_named : public t_node {
   explicit t_named(const t_program* program = nullptr, std::string name = "");
   t_named(const t_named& named);
 
-  // TODO(afuller): make private.
+  /**
+   * Set the program for this node. This is primarily exposed for the purpose of
+   * placeholder typedefs, where the initial program that triggers placeholder
+   * generation may not be the final program the resolved type belongs to.
+   */
+  void set_program(const t_program* program) { program_ = program; }
+
+ private:
   std::string name_;
   const t_program* program_;
 
- private:
   bool generated_ = false;
   std::string uri_;
   bool explicit_uri_ = false;

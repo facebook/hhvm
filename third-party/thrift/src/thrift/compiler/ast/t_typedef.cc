@@ -64,9 +64,8 @@ bool t_placeholder_typedef::resolve() {
       // Update the type to mirror the underlying one.
       // TODO(afuller): Update codegen to always skip over placeholders via
       // type_ref instead.
-      name_ = type_->name();
-      // TODO(afuller): Make program_ const or remove it completely.
-      program_ = type_->program();
+      set_name(type_->name());
+      set_program(type_->program());
     }
   }
   return !type_.empty();

@@ -93,7 +93,7 @@ class t_field final : public t_named {
    * target language generators. Do NOT add any new usage of this method.
    */
   std::unique_ptr<t_field> clone_DO_NOT_USE() const {
-    auto clone = std::make_unique<t_field>(type_, name_, id_);
+    auto clone = std::make_unique<t_field>(type_, name(), id_);
     clone->set_src_range(src_range());
 
     if (value_) {

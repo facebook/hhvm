@@ -131,7 +131,7 @@ class t_placeholder_typedef final : public t_typedef {
   bool resolve();
 
   std::string get_full_name() const override {
-    return type_ ? type_->get_full_name() : name_;
+    return type_ ? type_->get_full_name() : name();
   }
 };
 

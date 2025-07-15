@@ -21,7 +21,7 @@
 namespace apache::thrift::compiler {
 
 std::unique_ptr<t_paramlist> t_paramlist::clone_DO_NOT_USE() const {
-  auto clone = std::make_unique<t_paramlist>(program_);
+  auto clone = std::make_unique<t_paramlist>(program());
   auto itr = fields_.begin();
   for (; itr != fields_.end(); ++itr) {
     clone->append((*itr)->clone_DO_NOT_USE());

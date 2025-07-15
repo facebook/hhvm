@@ -829,10 +829,11 @@ void ThriftServerRequestSink::sendSinkThriftResponse(
       nullptr /* evb */,
       serverCallback.get());
 
-  folly::coro::co_invoke(
-      &apache::thrift::detail::ServerSinkBridge::start,
-      std::move(serverCallback))
-      .scheduleOn(executor)
+  co_withExecutor(
+      executor,
+      folly::coro::co_invoke(
+          &apache::thrift::detail::ServerSinkBridge::start,
+          std::move(serverCallback)))
       .start();
 }
 

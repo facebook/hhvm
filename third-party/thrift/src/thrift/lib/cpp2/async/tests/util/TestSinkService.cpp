@@ -212,8 +212,8 @@ SinkConsumer<int32_t, bool> TestSinkService::rangeCancelAt(
                      cancelSource.getToken(), gen.next())) {
             EXPECT_EQ(i++, *item);
             if (i == cancelAt) {
-              cancelTask()
-                  .scheduleOn(co_await folly::coro::co_current_executor)
+              co_withExecutor(
+                  co_await folly::coro::co_current_executor, cancelTask())
                   .start();
             }
           }

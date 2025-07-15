@@ -357,11 +357,13 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
         auto sink = co_await client.co_unSubscribedSink();
         folly::CancellationSource cancelSource;
 
-        folly::coro::co_invoke([&cancelSource]() -> folly::coro::Task<void> {
-          co_await folly::coro::sleep(std::chrono::milliseconds{200});
-          cancelSource.requestCancellation();
-        })
-            .scheduleOn(co_await folly::coro::co_current_executor)
+        co_withExecutor(
+            co_await folly::coro::co_current_executor,
+            folly::coro::co_invoke(
+                [&cancelSource]() -> folly::coro::Task<void> {
+                  co_await folly::coro::sleep(std::chrono::milliseconds{200});
+                  cancelSource.requestCancellation();
+                }))
             .start();
 
         EXPECT_THROW(

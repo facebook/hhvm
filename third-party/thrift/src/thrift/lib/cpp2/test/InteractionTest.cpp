@@ -701,8 +701,8 @@ TEST(InteractionCodegenTest, SlowConstructor) {
   auto adder = client->createAddition();
   folly::EventBase eb;
 #if FOLLY_HAS_COROUTINES
-  adder.co_noop().scheduleOn(&eb).start();
-  adder.co_accumulatePrimitive(1).scheduleOn(&eb).start();
+  co_withExecutor(&eb, adder.co_noop()).start();
+  co_withExecutor(&eb, adder.co_accumulatePrimitive(1)).start();
   // only release constructor once interaction methods are queued
   folly::via(&eb, [&] { handler->b.post(); }).getVia(&eb);
   auto acc = folly::coro::blockingWait(adder.co_getPrimitive());
@@ -743,7 +743,7 @@ TEST(InteractionCodegenTest, FastTermination) {
 
   auto adder = folly::copy_to_unique_ptr(client->createAddition());
   folly::EventBase eb;
-  auto semi = adder->co_getPrimitive().scheduleOn(&eb).start();
+  auto semi = co_withExecutor(&eb, adder->co_getPrimitive()).start();
   adder->co_accumulatePrimitive(1).semi().via(&eb).getVia(&eb);
   adder->co_noop().semi().via(&eb).getVia(&eb);
   adder.reset(); // sends termination while methods in progress
@@ -959,8 +959,8 @@ TEST(InteractionCodegenTest, SerialInteraction) {
   folly::EventBase eb;
   // keep a stream alive for the rest of the test (0th serial method)
   auto stream = adder.semifuture_waitForCancel();
-  auto accSemi = adder.co_accumulatePrimitive(1).scheduleOn(&eb).start();
-  auto getSemi = adder.co_getPrimitive().scheduleOn(&eb).start();
+  auto accSemi = co_withExecutor(&eb, adder.co_accumulatePrimitive(1)).start();
+  auto getSemi = co_withExecutor(&eb, adder.co_getPrimitive()).start();
 
   // blocked on baton1 in constructor, blocks TM worker
   auto semi = client->semifuture_addPrimitive(0, 0);
@@ -980,7 +980,7 @@ TEST(InteractionCodegenTest, SerialInteraction) {
   EXPECT_FALSE(getSemi.isReady());
 
   // third method is blocked on second method completing
-  accSemi = adder.co_accumulatePrimitive(1).scheduleOn(&eb).start();
+  accSemi = co_withExecutor(&eb, adder.co_accumulatePrimitive(1)).start();
   client->co_addPrimitive(0, 0).semi().via(&eb).getVia(&eb);
   EXPECT_FALSE(accSemi.isReady());
   EXPECT_FALSE(getSemi.isReady());

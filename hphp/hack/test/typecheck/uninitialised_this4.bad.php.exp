@@ -1,0 +1,8 @@
+ERROR: File "uninitialised_this4.bad.php", line 6, characters 18-30:
+Until the initialization of `$this` is over, you can only call private methods
+The initialization is not over because `$this->i` can still potentially be null (NastCheck[3004])
+ERROR: File "uninitialised_this4.bad.php", line 7, characters 7-11:
+Until the initialization of `$this` is over, you can only call private methods
+The initialization is not over because `$this->i` can still potentially be null (NastCheck[3004])
+ERROR: File "uninitialised_this4.bad.php", line 6, characters 42-42:
+Read access to `$this->i` before initialization (Typing[4083])

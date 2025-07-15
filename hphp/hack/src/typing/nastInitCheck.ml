@@ -368,13 +368,18 @@ and stmt env acc st =
     let acc = argument_list env acc args in
     assign env acc DICheck.parent_init_prop
   | Expr e ->
+    let res = expr acc e in
     if Typing_func_terminality.expression_exits env.tenv e then
       S.Top
     else
-      expr acc e
+      res
   | Break -> acc
   | Continue -> acc
-  | Throw _ -> S.Top
+  | Throw e ->
+    (* Run on exception object but $this initialisation checks, but ignore the
+       argument as it is no return. *)
+    let _ = expr acc e in
+    S.Top
   | Return None ->
     if are_all_init env acc then
       acc
@@ -400,11 +405,24 @@ and stmt env acc st =
   | Do (b, e) ->
     let acc = block acc b in
     expr acc e
-  | While (e, _) -> expr acc e
+  | While (e, b) ->
+    (* Run on the body for $this initialisation checks but ignore the
+       accumulated initialisations because while body can run zero times. *)
+    let _ = block acc b in
+    expr acc e
   | Using us ->
     let acc = List.fold_left (snd us.us_exprs) ~f:expr ~init:acc in
     block acc us.us_block
-  | For (e1, _, _, _) -> exprl env acc e1
+  | For (el1, e_opt, el2, b) ->
+    (* Run on the body, condition, increment, for $this initialisation checks
+       but ignore the accumulated initialisations because while body can run zero
+       times. *)
+    Option.iter e_opt ~f:(fun e ->
+        let _ = expr acc e in
+        ());
+    let _ = exprl env acc el2 in
+    let _ = block acc b in
+    exprl env acc el1
   | Switch (e, cl, dfl) ->
     let acc = expr acc e in
     (* Filter out cases that fallthrough *)
@@ -430,7 +448,8 @@ and stmt env acc st =
     let arms = List.map sm_arms ~f:(stmt_match_arm acc) in
     let c = S.inter_list arms in
     S.union acc c
-  | Foreach (e, _, _) ->
+  | Foreach (e, _, b) ->
+    let _ = block acc b in
     let acc = expr acc e in
     acc
   | Try (b, cl, fb) ->

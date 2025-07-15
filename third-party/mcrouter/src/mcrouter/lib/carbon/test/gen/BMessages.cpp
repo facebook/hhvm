@@ -18,8 +18,6 @@ namespace carbon {
 namespace test {
 namespace B {
 
-constexpr const char* const TestBRequest::name;
-
 } // namespace B
 } // namespace test
 } // namespace carbon

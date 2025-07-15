@@ -17,10 +17,6 @@
 namespace carbon {
 namespace test {
 
-constexpr const char* const TestRequest::name;
-
-constexpr const char* const TestRequestStringKey::name;
-
 std::string enumEnumUInt32ToString(EnumUInt32 val) {
   switch (val) {
     case EnumUInt32::AAA:

@@ -17,43 +17,5 @@
 namespace facebook {
 namespace memcache {
 
-constexpr const char* const McGetRequest::name;
-
-constexpr const char* const McSetRequest::name;
-
-constexpr const char* const McDeleteRequest::name;
-
-constexpr const char* const McLeaseGetRequest::name;
-
-constexpr const char* const McLeaseSetRequest::name;
-
-constexpr const char* const McAddRequest::name;
-
-constexpr const char* const McReplaceRequest::name;
-
-constexpr const char* const McGetsRequest::name;
-
-constexpr const char* const McCasRequest::name;
-
-constexpr const char* const McIncrRequest::name;
-
-constexpr const char* const McDecrRequest::name;
-
-constexpr const char* const McMetagetRequest::name;
-
-constexpr const char* const McAppendRequest::name;
-
-constexpr const char* const McPrependRequest::name;
-
-constexpr const char* const McTouchRequest::name;
-
-constexpr const char* const McFlushReRequest::name;
-
-constexpr const char* const McFlushAllRequest::name;
-
-constexpr const char* const McGatRequest::name;
-
-constexpr const char* const McGatsRequest::name;
-
 } // namespace memcache
 } // namespace facebook

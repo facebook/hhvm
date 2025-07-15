@@ -28,8 +28,4 @@ std::string enumEnumUInt32ToString(EnumUInt32 val) {
   return "<INVALID_OPTION>";
 }
 
-constexpr const char* const HelloRequest::name;
-
-constexpr const char* const GoodbyeRequest::name;
-
 } // namespace hellogoodbye

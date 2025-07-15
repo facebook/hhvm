@@ -29,11 +29,5 @@ std::string enumMyEnumToString(MyEnum val) {
   return "<INVALID_OPTION>";
 }
 
-constexpr const char* const ThriftTestRequest::name;
-
-constexpr const char* const DummyThriftRequest::name;
-
-constexpr const char* const CustomRequest::name;
-
 } // namespace test
 } // namespace carbon

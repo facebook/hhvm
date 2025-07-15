@@ -17,17 +17,5 @@
 namespace facebook {
 namespace memcache {
 
-constexpr const char* const McVersionRequest::name;
-
-constexpr const char* const McStatsRequest::name;
-
-constexpr const char* const McShutdownRequest::name;
-
-constexpr const char* const McQuitRequest::name;
-
-constexpr const char* const McExecRequest::name;
-
-constexpr const char* const GoAwayAcknowledgement::name;
-
 } // namespace memcache
 } // namespace facebook

@@ -88,15 +88,14 @@ void Tile::onTermination(
   eb.dcheckIsInEventBaseThread();
   auto* tile = ptr.get();
   if (tile->executor_) {
-    tile->co_onTermination()
-        .scheduleOn(tile->executor_)
+    co_withExecutor(tile->executor_, tile->co_onTermination())
         .start([ptr = std::move(ptr)](auto&&) {});
   } else if (tile->tm_) {
-    tile->co_onTermination().scheduleOn(tile->tm_).start(
-        [ptr = std::move(ptr)](auto&&) {});
+    co_withExecutor(tile->tm_, tile->co_onTermination())
+        .start([ptr = std::move(ptr)](auto&&) {});
   } else {
-    tile->co_onTermination().scheduleOn(&eb).startInlineUnsafe(
-        [ptr = std::move(ptr)](auto&&) {});
+    co_withExecutor(&eb, tile->co_onTermination())
+        .startInlineUnsafe([ptr = std::move(ptr)](auto&&) {});
   }
 #endif
 }

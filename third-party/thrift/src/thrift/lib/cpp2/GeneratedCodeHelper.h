@@ -1691,8 +1691,7 @@ inline void async_tm_semifuture(
 template <typename T, typename CallbackPtr>
 void async_tm_coro_impl(CallbackPtr callback, folly::coro::Task<T>&& task) {
   auto ka = callback->getInternalKeepAlive();
-  std::move(task)
-      .scheduleOn(std::move(ka))
+  co_withExecutor(std::move(ka), std::move(task))
       .startInlineUnsafe([callback = std::move(callback)](
                              folly::Try<folly::lift_unit_t<T>>&& tryResult) {
         callback->complete(std::move(tryResult));

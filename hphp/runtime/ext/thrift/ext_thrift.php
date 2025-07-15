@@ -54,12 +54,14 @@ function thrift_protocol_read_compact(\HH\object $transportobj,
 <<__Native>>
 function thrift_protocol_read_compact_struct(\HH\object $transportobj,
                                              string $obj_typename,
-                                             int $options = 0): \HH\object;
+                                             int $options = 0,
+                                             int $version = 2): \HH\object;
 
 <<__Native>>
 function thrift_protocol_read_compact_struct_from_string(string $serialized,
                                                          string $obj_typename,
-                                                         int $options = 0): \HH\object;
+                                                         int $options = 0,
+                                                         int $version = 2): \HH\object;
 
 <<__NativeData>>
 class InteractionId {

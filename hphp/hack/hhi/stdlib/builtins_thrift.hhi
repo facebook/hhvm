@@ -85,4 +85,5 @@ function thrift_protocol_read_compact_struct_from_string(
   string $buffer,
   string $obj_typename,
   int $options = 0,
+  int $version = 2,
 ): HH\FIXME\MISSING_RETURN_TYPE;

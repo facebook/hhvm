@@ -102,13 +102,15 @@ Object HHVM_FUNCTION(
     thrift_protocol_read_compact_struct,
     const Object& transportobj,
     const String& obj_typename,
-    int64_t options);
+    int64_t options,
+    int64_t version = 2);
 
 Object HHVM_FUNCTION(
     thrift_protocol_read_compact_struct_from_string,
     const String& serialized,
     const String& obj_typename,
-    int64_t options);
+    int64_t options,
+    int64_t version = 2);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper functions for compact serialization and deserialization

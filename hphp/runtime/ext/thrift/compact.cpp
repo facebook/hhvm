@@ -715,6 +715,10 @@ struct CompactReader {
       containerHistory() {
     }
 
+    void setReadVersion(uint8_t _version) {
+      version = _version;
+    }
+
     Variant read(const String& resultClassName) {
       uint8_t protoId = readUByte();
       if (protoId != PROTOCOL_ID) {
@@ -1475,8 +1479,8 @@ struct CompactReader {
 ///////////////////////////////////////////////////////////////////////////////
 
 Object compact_deserialize_from_string(
-                     const String& serialized,
-                     const String& thrift_typename, int64_t options) {
+                     const String& serialized, const String& thrift_typename,
+                     int64_t options, int64_t version) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
@@ -1491,6 +1495,7 @@ Object compact_deserialize_from_string(
     CompactReader<folly::io::Cursor> reader(
       folly::io::Cursor(&iobuf),
       options);
+    reader.setReadVersion(version);
     return reader.readStruct(thrift_typename);
   } catch (const std::out_of_range& e) {
     thrift_transport_error(e.what(), TTransportError::END_OF_FILE);
@@ -1509,14 +1514,21 @@ String compact_serialize_to_string(const Object& thrift_struct,
   SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _2;
-  folly::IOBuf iobuf{folly::IOBuf::CREATE, 1024};
+  String ret = String(1024, ReserveString);
+  auto iobuf = folly::IOBuf::wrapBufferAsValue(ret.mutableData(), ret.capacity());
+  iobuf.clear();
   folly::io::Appender appender(&iobuf, 1024);
 
   CompactWriter<folly::io::Appender> writer(appender);
   try {
     writer.setWriteVersion(version);
     writer.write(thrift_struct);
-    return iobuf.toString();
+
+    if (iobuf.isChained()) {
+      return ioBufToString(iobuf);
+    }
+    ret.setSize(iobuf.length());
+    return ret;
   } catch (const std::exception& e) {
     thrift_error(e.what(), ERR_UNKNOWN);
   } catch (...) {
@@ -1604,7 +1616,8 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename,
-                     int64_t options) {
+                     int64_t options,
+                     int64_t version) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
@@ -1614,14 +1627,16 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
   CompactReader<PHPInputTransport> reader(
     PHPInputTransport(transportobj),
     options);
+  reader.setReadVersion(version);
   return reader.readStruct(obj_typename);
 }
 
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct_from_string,
                      const String& serialized,
                      const String& obj_typename,
-                     int64_t options) {
-  return compact_deserialize_from_string(serialized, obj_typename, options);
+                     int64_t options,
+                     int64_t version) {
+  return compact_deserialize_from_string(serialized, obj_typename, options, version);
 }
 
 }

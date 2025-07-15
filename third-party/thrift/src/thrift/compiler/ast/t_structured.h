@@ -81,7 +81,7 @@ class t_structured : public t_type {
 
   t_structured(const t_program* program, std::string name)
       : t_type(program, std::move(name)) {}
-  explicit t_structured(t_program* program = nullptr) : t_type(program) {}
+  explicit t_structured(const t_program* program = nullptr) : t_type(program) {}
 
   ////
   // Everyting below here is for backwards compatiblity, and will be removed.

@@ -38,7 +38,7 @@ class t_enum : public t_type {
   // An ~arbitrary, unlikely yet small number.
   static constexpr int32_t default_unused = 113;
 
-  t_enum(t_program* program, std::string name)
+  t_enum(const t_program* program, std::string name)
       : t_type(program, std::move(name)) {}
 
   void set_values(t_enum_value_list values);

@@ -51,7 +51,7 @@ t_typedef::kind t_typedef::typedef_kind() const {
 }
 
 std::unique_ptr<t_typedef> t_typedef::make_unnamed(
-    t_program* program, std::string name, t_type_ref type) {
+    const t_program* program, std::string name, t_type_ref type) {
   auto ret = std::make_unique<t_typedef>(program, std::move(name), type);
   ret->unnamed_ = true;
   return ret;

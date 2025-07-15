@@ -30,7 +30,9 @@ class t_program;
 class t_service : public t_interface {
  public:
   t_service(
-      t_program* program, std::string name, const t_service* extends = nullptr)
+      const t_program* program,
+      std::string name,
+      const t_service* extends = nullptr)
       : t_interface(program, std::move(name)), extends_(extends) {}
 
   const t_service* extends() const { return extends_; }

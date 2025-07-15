@@ -22,7 +22,9 @@
 namespace apache::thrift::compiler {
 
 t_type_ref t_global_scope::ref_type(
-    t_program& program, const std::string& name, const source_range& range) {
+    const t_program& program,
+    const std::string& name,
+    const source_range& range) {
   // Try to resolve the type.
   if (const t_type* type = program.find<t_type>(name)) {
     return {*type, range}; // We found the type!

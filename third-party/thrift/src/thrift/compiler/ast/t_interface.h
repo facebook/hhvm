@@ -35,7 +35,7 @@ class t_program;
  */
 class t_interface : public t_type {
  public:
-  t_interface(t_program* program, std::string name)
+  t_interface(const t_program* program, std::string name)
       : t_type(program, std::move(name)) {}
 
   ~t_interface() override;

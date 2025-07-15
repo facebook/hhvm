@@ -31,7 +31,7 @@ namespace apache::thrift::compiler {
  */
 class t_typedef : public t_type {
  public:
-  t_typedef(t_program* program, std::string name, t_type_ref type)
+  t_typedef(const t_program* program, std::string name, t_type_ref type)
       : t_type(program, std::move(name)), type_(std::move(type)) {}
 
   const t_type_ref& type() const { return type_; }
@@ -85,7 +85,8 @@ class t_typedef : public t_type {
   // TODO(afuller): Remove everything below here, as it is just provided for
   // backwards compatibility.
  public:
-  t_typedef(t_program* program, const t_type* type, std::string name, void*)
+  t_typedef(
+      const t_program* program, const t_type* type, std::string name, void*)
       : t_typedef(program, std::move(name), t_type_ref::from_req_ptr(type)) {}
 
   const t_type* get_type() const { return type_.get_type(); }
@@ -105,7 +106,7 @@ class t_typedef : public t_type {
   };
   kind typedef_kind() const;
   static std::unique_ptr<t_typedef> make_unnamed(
-      t_program* program, std::string name, t_type_ref type);
+      const t_program* program, std::string name, t_type_ref type);
 
  private:
   bool unnamed_{false};
@@ -121,7 +122,7 @@ class t_typedef : public t_type {
 // the order of IDL declarations.
 class t_placeholder_typedef final : public t_typedef {
  public:
-  t_placeholder_typedef(t_program* program, std::string name)
+  t_placeholder_typedef(const t_program* program, std::string name)
       : t_typedef(program, std::move(name), {}) {}
 
   /**

@@ -43,7 +43,7 @@ enum class t_function_qualifier {
 class t_function final : public t_named {
  public:
   t_function(
-      t_program* program,
+      const t_program* program,
       t_type_ref return_type,
       std::string name,
       std::unique_ptr<t_paramlist> params = {},

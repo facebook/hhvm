@@ -601,7 +601,7 @@ Array implTypeStructure(TypedValue cls_or_obj,
         auto const n = val(cls_or_obj).pstr;
         auto const c = Class::load(n);
         if (c) {
-          raise_str_to_class_notice(n);
+          raise_str_to_class_notice(n, jit::StrToClassKind::TypeStructure);
         } else {
           raise_error("Class undefined: %s", n->data());
         }
@@ -1092,7 +1092,7 @@ static bool HHVM_METHOD(ReflectionMethod, isStaticInPrologue) {
   return func->isStaticInPrologue();
 }
 
-static bool HHVM_METHOD(ReflectionMethod, isConstructor) {  
+static bool HHVM_METHOD(ReflectionMethod, isConstructor) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return isConstructor(func);
 }
@@ -2450,7 +2450,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
     HHVM_ME(ReflectionTypeConstant, getClassPtr);
-    HHVM_ME(ReflectionTypeConstant, getCanonicalClassname);    
+    HHVM_ME(ReflectionTypeConstant, getCanonicalClassname);
 
     HHVM_ME(ReflectionProperty, __construct);
     HHVM_ME(ReflectionProperty, isPublic);

@@ -918,7 +918,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
         auto const n = val(clsVal).pstr;
         auto const cls = Class::load(n);
         if (cls) {
-          raise_str_to_class_notice(n);
+          raise_str_to_class_notice(n, jit::StrToClassKind::DynamicClassMeth);
         } else {
           SystemLib::throwInvalidArgumentExceptionObject(
             folly::sformat("Unable to find class {}", n->data())

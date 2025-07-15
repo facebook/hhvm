@@ -81,7 +81,10 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
     switch (mode) {
       case ClassGetCMode::Normal:
         if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
-          gen(env, RaiseStrToClassNotice, name);
+          gen(env,
+              RaiseStrToClassNotice,
+              StrToClassData { StrToClassKind::Expression },
+              name);
         }
         break;
       case ClassGetCMode::ExplicitConversion:

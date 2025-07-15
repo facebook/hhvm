@@ -2,5 +2,5 @@ int(3)
 
 Notice: String passed to class type-hint in %s/class-ptr/reflection-attribute.php on line 17
 
-Notice: Implicit string to Class conversion for classname Foo in %s/class-ptr/reflection-attribute.php on line 17
+Notice: Implicit string to Class conversion for classname Foo for expression in %s/class-ptr/reflection-attribute.php on line 17
 int(3)

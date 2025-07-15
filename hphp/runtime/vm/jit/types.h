@@ -367,4 +367,24 @@ inline std::string show(LdClsFallback f) {
     #undef FALLBACK
   }
 }
+
+#define STRTOCLASS_KINDS                   \
+  KIND(Expression)                         \
+  KIND(StaticMethod)                       \
+  KIND(TypeStructure)                      \
+  KIND(DynamicClassMeth)
+
+enum class StrToClassKind: uint8_t {
+  #define KIND(k) k,
+  STRTOCLASS_KINDS
+  #undef KIND
+};
+
+inline std::string show(StrToClassKind f) {
+  switch (f) {
+    #define KIND(k) case StrToClassKind::k: return #k;
+    STRTOCLASS_KINDS
+    #undef KIND
+  }
+}
 }

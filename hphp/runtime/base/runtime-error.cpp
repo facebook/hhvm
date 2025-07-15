@@ -517,10 +517,22 @@ void raise_message(ErrorMode mode,
   raise_notice_helper(mode, skipTop, msg);
 }
 
-void raise_str_to_class_notice(const StringData* name) {
+void raise_str_to_class_notice(const StringData* name, jit::StrToClassKind kind) {
+  auto const source = [&] {
+    switch (kind) {
+      case jit::StrToClassKind::Expression:
+        return "expression";
+      case jit::StrToClassKind::StaticMethod:
+        return "static method call";
+      case jit::StrToClassKind::TypeStructure:
+        return "type_structure()";
+      case jit::StrToClassKind::DynamicClassMeth:
+        return "dynamic_class_meth()";
+    }
+  }();
   if (folly::Random::oneIn(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate)) {
-    raise_notice("Implicit string to Class conversion for classname %s",
-                 name->data());
+    raise_notice("Implicit string to Class conversion for classname %s for %s",
+                 name->data(), source);
   }
 }
 

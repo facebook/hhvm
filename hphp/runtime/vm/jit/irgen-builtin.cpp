@@ -741,7 +741,10 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
 
   // If we do this earlier, we might raise multiple notices
   if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0 && clsNameTmp->isA(TStr)) {
-    gen(env, RaiseStrToClassNotice, clsNameTmp);
+    gen(env,
+        RaiseStrToClassNotice,
+        StrToClassData { StrToClassKind::TypeStructure },
+        clsNameTmp);
   }
 
   if (!getName) {

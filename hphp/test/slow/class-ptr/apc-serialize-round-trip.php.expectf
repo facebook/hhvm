@@ -1,9 +1,9 @@
 ===== Basic =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 35
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 35
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 35
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 35
  called
 lazy_class: called
 class: called
@@ -11,10 +11,10 @@ class: called
 
 ===== Map =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 12
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 12
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 12
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 12
  called
 lazy_class: called
 class: called
@@ -22,10 +22,10 @@ class: called
 
 ===== dict =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 12
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 12
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 12
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 12
  called
 lazy_class: called
 class: called
@@ -33,10 +33,10 @@ class: called
 
 ===== Pair =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 53
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 53
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/apc-serialize-round-trip.php on line 53
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/apc-serialize-round-trip.php on line 53
  called
 lazy_class: called
 class: called

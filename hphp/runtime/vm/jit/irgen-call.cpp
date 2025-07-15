@@ -2263,7 +2263,10 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
       emitModuleBoundaryCheck(env, ret, false);
 
       if(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
-        gen(env, RaiseStrToClassNotice, name);
+        gen(env,
+            RaiseStrToClassNotice,
+            StrToClassData { StrToClassKind::StaticMethod },
+            name);
       }
     }
     decRef(env, name);

@@ -1,9 +1,9 @@
 ===== Basic =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/internal-serialize-round-trip.php on line 23
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/internal-serialize-round-trip.php on line 23
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/internal-serialize-round-trip.php on line 23
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/internal-serialize-round-trip.php on line 23
  called
 lazy_class: called
 class: called
@@ -11,10 +11,10 @@ class: called
 
 ===== Pair =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/internal-serialize-round-trip.php on line 39
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/internal-serialize-round-trip.php on line 39
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/internal-serialize-round-trip.php on line 39
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/internal-serialize-round-trip.php on line 39
  called
 lazy_class: called
 class: called

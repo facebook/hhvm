@@ -2342,11 +2342,12 @@ ReqBindJmp and CallFuncEntry.
   Raises a warning to indicate a deployment boundary violation resulting from caller
   attempting to call the the callee in S0 in context `ctx`.
 
-| RaiseStrToClassNotice, ND, S(Str), NF
+| RaiseStrToClassNotice<kind>, ND, S(Str), NF
 
   Raise a notice if a class is being loaded from a string e.g. in a `$c::f()`
   expression where $c is a string. S0 contains the string. Notice is sampled at
-  a rate set by `Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate`
+  a rate set by `Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate`. Takes extra
+  data to specialize the error message for different expression kinds.
 
 | CheckClsMethFunc, ND, S(Func), NF
 

@@ -9,31 +9,31 @@ object(C0) (1) {
   int(1)
 }
 
-Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
+Notice: Implicit string to Class conversion for classname C0 for expression in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(2)
 }
 
-Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
+Notice: Implicit string to Class conversion for classname C0 for expression in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(3)
 }
 
-Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
+Notice: Implicit string to Class conversion for classname C0 for expression in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(4)
 }
 
-Notice: Implicit string to Class conversion for classname C0 in %s/class-ref-warn.php on line 15
+Notice: Implicit string to Class conversion for classname C0 for expression in %s/class-ref-warn.php on line 15
 object(C0) (1) {
   ["a"]=>
   int(5)
 }
 
-Notice: Implicit string to Class conversion for classname C1 in %s/class-ref-warn.php on line 15
+Notice: Implicit string to Class conversion for classname C1 for expression in %s/class-ref-warn.php on line 15
 object(C1) (1) {
   ["a"]=>
   int(5)

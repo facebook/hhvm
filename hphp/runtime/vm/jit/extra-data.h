@@ -3083,6 +3083,21 @@ struct LdClsFallbackData : IRExtraData {
   LdClsFallback fallback;
 };
 
+struct StrToClassData : IRExtraData {
+  explicit StrToClassData(StrToClassKind kind)
+    : kind(kind) {}
+
+  std::string show() const { return HPHP::jit::show(kind); }
+  size_t hash() const { return std::hash<StrToClassKind>()(kind); }
+  size_t stableHash() const { return std::hash<StrToClassKind>()(kind); }
+
+  bool equals(const StrToClassData& o) const {
+    return kind == o.kind;
+  }
+
+  StrToClassKind kind;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -3346,6 +3361,7 @@ X(LdCoeffectFunParamNaive,      ParamData);
 X(RaiseNotice,                  SampleRateData);
 X(LdCls,                        LdClsFallbackData);
 X(LdClsCached,                  LdClsFallbackData);
+X(RaiseStrToClassNotice,        StrToClassData);
 
 #undef X
 

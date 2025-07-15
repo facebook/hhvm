@@ -21,6 +21,7 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -198,7 +199,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raise_str_to_class_notice(const StringData* name);
+void raise_str_to_class_notice(const StringData* name, jit::StrToClassKind kind);
 
 /*
  * class_meth compact notices.

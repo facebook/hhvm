@@ -1009,11 +1009,11 @@ static inline Class* classnameToClass(TypedValue* input,
   );
 }
 
-static inline Class* lookupClsRef(TypedValue* input) {
+static inline Class* lookupClsRef(TypedValue* input, jit::StrToClassKind kind) {
   if (tvIsString(input)) {
     auto const name = input->m_data.pstr;
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
-      raise_str_to_class_notice(name);
+      raise_str_to_class_notice(name, kind);
       return class_;
     }
     raise_error(Strings::UNKNOWN_CLASS, name->data());
@@ -2315,7 +2315,7 @@ OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
   auto const cls = [&] {
     switch (mode) {
       case ClassGetCMode::Normal:
-        return lookupClsRef(cell);
+        return lookupClsRef(cell, jit::StrToClassKind::Expression);
       case ClassGetCMode::ExplicitConversion:
         return classnameToClass(cell, true);
       case ClassGetCMode::UnsafeBackdoor:
@@ -4281,7 +4281,7 @@ iopFCallClsMethodM(PC origpc, PC& pc, FCallArgs fca,
                    const StringData* methName) {
   auto const cell = vmStack().topC();
   auto isString = isStringType(cell->m_type);
-  auto const cls = lookupClsRef(cell);
+  auto const cls = lookupClsRef(cell, jit::StrToClassKind::StaticMethod);
   vmStack().popC();
   auto const methNameC = const_cast<StringData*>(methName);
   assertx(cls && methNameC);

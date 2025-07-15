@@ -1,36 +1,36 @@
 ===== Basic =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 14
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 14
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 14
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 14
  called
 
 Notice: Implicit Class to string conversion for serialize() in %s/class-ptr/serialize-round-trip.php on line 11
 lazy_class:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 14
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 14
  called
 
 Notice: Implicit Class to string conversion for serialize() in %s/class-ptr/serialize-round-trip.php on line 11
 class:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 14
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 14
  called
 
 
 ===== Pair =====
 static_string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 24
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 24
  called
 string:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 24
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 24
  called
 
 Notice: Implicit Class to string conversion for serialization in %s/class-ptr/serialize-round-trip.php on line 18
 lazy_class:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 24
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 24
  called
 
 Notice: Implicit Class to string conversion for serialization in %s/class-ptr/serialize-round-trip.php on line 18
 class:
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/serialize-round-trip.php on line 24
+Notice: Implicit string to Class conversion for classname C for static method call in %s/class-ptr/serialize-round-trip.php on line 24
  called

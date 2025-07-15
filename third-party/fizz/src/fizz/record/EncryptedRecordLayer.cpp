@@ -8,7 +8,6 @@
 
 #include <fizz/crypto/aead/IOBufUtil.h>
 #include <fizz/record/EncryptedRecordLayer.h>
-#include <fizz/record/RecordLayerUtils.h>
 
 namespace fizz {
 
@@ -16,6 +15,7 @@ using ContentTypeType = typename std::underlying_type<ContentType>::type;
 using ProtocolVersionType =
     typename std::underlying_type<ProtocolVersion>::type;
 
+static constexpr uint16_t kMaxEncryptedRecordSize = 0x4000 + 256; // 16k + 256
 static constexpr size_t kEncryptedHeaderSize =
     sizeof(ContentType) + sizeof(ProtocolVersion) + sizeof(uint16_t);
 
@@ -24,47 +24,72 @@ EncryptedReadRecordLayer::getDecryptedBuf(
     folly::IOBufQueue& buf,
     Aead::AeadOptions options) {
   while (true) {
-    // Check if we have enough data for the header
-    if (buf.chainLength() < kEncryptedHeaderSize) {
+    // Cache the front buffer, calling front may invoke and update
+    // of the tail cache.
+    auto frontBuf = buf.front();
+    folly::io::Cursor cursor(frontBuf);
+
+    if (buf.empty() || !cursor.canAdvance(kEncryptedHeaderSize)) {
       return ReadResult<Buf>::noneWithSizeHint(
           kEncryptedHeaderSize - buf.chainLength());
     }
 
-    // We have the header, check if we have enough data for the full record
-    folly::io::Cursor cursor(buf.front());
-    cursor.skip(3); // Skip content type and protocol version
-    auto length = cursor.readBE<uint16_t>();
+    std::array<uint8_t, kEncryptedHeaderSize> ad;
+    folly::io::Cursor adCursor(cursor);
+    adCursor.pull(ad.data(), ad.size());
+    folly::IOBuf adBuf{folly::IOBuf::wrapBufferAsValue(folly::range(ad))};
 
-    // Check if the record is too large
+    auto contentType =
+        static_cast<ContentType>(cursor.readBE<ContentTypeType>());
+    cursor.skip(sizeof(ProtocolVersion));
+
+    auto length = cursor.readBE<uint16_t>();
+    if (length == 0) {
+      throw std::runtime_error("received 0 length encrypted record");
+    }
     if (length > kMaxEncryptedRecordSize) {
       throw std::runtime_error("received too long encrypted record");
     }
-
-    // Calculate how many more bytes we need
-    auto consumedBytes = cursor - buf.front();
+    auto consumedBytes = cursor - frontBuf;
     if (buf.chainLength() < consumedBytes + length) {
       auto remaining = (consumedBytes + length) - buf.chainLength();
       return ReadResult<Buf>::noneWithSizeHint(remaining);
     }
 
-    // Now we have enough data, parse the record
-    auto parsedRecord = RecordLayerUtils::parseEncryptedRecord(buf);
-
-    // If this is a change_cipher_spec record, continue to the next record
-    if (parsedRecord.continueReading) {
-      continue;
+    if (contentType == ContentType::alert && length == 2) {
+      auto alert = decode<Alert>(cursor);
+      throw std::runtime_error(folly::to<std::string>(
+          "received plaintext alert in encrypted record: ",
+          toString(alert.description)));
     }
 
-    // Check sequence number limit
+    // If we already know that the length of the buffer is the
+    // same as the number of bytes we need, move the entire buffer.
+    std::unique_ptr<folly::IOBuf> encrypted;
+    if (buf.chainLength() == consumedBytes + length) {
+      encrypted = buf.move();
+    } else {
+      encrypted = buf.split(consumedBytes + length);
+    }
+    trimStart(*encrypted, consumedBytes);
+
+    if (contentType == ContentType::change_cipher_spec) {
+      encrypted->coalesce();
+      if (encrypted->length() == 1 && *encrypted->data() == 0x01) {
+        continue;
+      } else {
+        throw FizzException(
+            "received ccs", AlertDescription::illegal_parameter);
+      }
+    }
+
     if (seqNum_ == std::numeric_limits<uint64_t>::max()) {
       throw std::runtime_error("max read seq num");
     }
-
-    // Handle decryption with support for skipping failed decryption
     if (skipFailedDecryption_) {
       auto decryptAttempt = aead_->tryDecrypt(
-          std::move(parsedRecord.ciphertext),
-          useAdditionalData_ ? parsedRecord.header.get() : nullptr,
+          std::move(encrypted),
+          useAdditionalData_ ? &adBuf : nullptr,
           seqNum_,
           options);
       if (decryptAttempt) {
@@ -76,8 +101,8 @@ EncryptedReadRecordLayer::getDecryptedBuf(
       }
     } else {
       return ReadResult<Buf>::from(aead_->decrypt(
-          std::move(parsedRecord.ciphertext),
-          useAdditionalData_ ? parsedRecord.header.get() : nullptr,
+          std::move(encrypted),
+          useAdditionalData_ ? &adBuf : nullptr,
           seqNum_++,
           options));
     }
@@ -93,13 +118,26 @@ EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
   }
 
   TLSMessage msg{};
-  // Use the utility function to parse and remove content type
-  auto maybeContentType =
-      RecordLayerUtils::parseAndRemoveContentType(*decryptedBuf);
-  if (!maybeContentType) {
+  // Iterate over the buffers while trying to find
+  // the first non-zero octet. This is much faster than
+  // first iterating and then trimming.
+  auto currentBuf = decryptedBuf->get();
+  bool nonZeroFound = false;
+  do {
+    currentBuf = currentBuf->prev();
+    size_t i = currentBuf->length();
+    while (i > 0 && !nonZeroFound) {
+      nonZeroFound = (currentBuf->data()[i - 1] != 0);
+      i--;
+    }
+    if (nonZeroFound) {
+      msg.type = static_cast<ContentType>(currentBuf->data()[i]);
+    }
+    currentBuf->trimEnd(currentBuf->length() - i);
+  } while (!nonZeroFound && currentBuf != decryptedBuf->get());
+  if (!nonZeroFound) {
     throw std::runtime_error("No content type found");
   }
-  msg.type = *maybeContentType;
   msg.fragment = std::move(*decryptedBuf);
 
   switch (msg.type) {
@@ -134,17 +172,37 @@ TLSContent EncryptedWriteRecordLayer::write(
   folly::IOBufQueue queue;
   queue.append(std::move(msg.fragment));
   std::unique_ptr<folly::IOBuf> outBuf;
-  std::array<uint8_t, RecordLayerUtils::kEncryptedHeaderSize> headerBuf{};
+  std::array<uint8_t, kEncryptedHeaderSize> headerBuf;
   auto header = folly::IOBuf::wrapBufferAsValue(folly::range(headerBuf));
-  aead_->setEncryptedBufferHeadroom(RecordLayerUtils::kEncryptedHeaderSize);
-
+  aead_->setEncryptedBufferHeadroom(kEncryptedHeaderSize);
   while (!queue.empty()) {
+    Buf dataBuf;
+    uint16_t paddingSize;
+    std::tie(dataBuf, paddingSize) =
+        bufAndPaddingPolicy_->getBufAndPaddingToEncrypt(queue, maxRecord_);
+
+    // check if we have enough room to add padding and the encrypted footer.
+    if (!dataBuf->isShared() &&
+        dataBuf->prev()->tailroom() >= sizeof(ContentType) + paddingSize) {
+      // extend it and add padding and footer
+      folly::io::Appender appender(dataBuf.get(), 0);
+      appender.writeBE(static_cast<ContentTypeType>(msg.type));
+      memset(appender.writableData(), 0, paddingSize);
+      appender.append(paddingSize);
+    } else {
+      // not enough or shared - let's add enough for the tag as well
+      auto encryptedFooter = folly::IOBuf::create(
+          sizeof(ContentType) + paddingSize + aead_->getCipherOverhead());
+      folly::io::Appender appender(encryptedFooter.get(), 0);
+      appender.writeBE(static_cast<ContentTypeType>(msg.type));
+      memset(appender.writableData(), 0, paddingSize);
+      appender.append(paddingSize);
+      dataBuf->prependChain(std::move(encryptedFooter));
+    }
+
     if (seqNum_ == std::numeric_limits<uint64_t>::max()) {
       throw std::runtime_error("max write seq num");
     }
-    // Use the helper function to prepare the buffer with padding
-    auto dataBuf = prepareBufferWithPadding(
-        queue, msg.type, *bufAndPaddingPolicy_, maxRecord_, aead_.get());
 
     // we will either be able to memcpy directly into the ciphertext or
     // need to create a new buf to insert before the ciphertext but we need
@@ -159,18 +217,28 @@ TLSContent EncryptedWriteRecordLayer::write(
         dataBuf->computeChainDataLength() + aead_->getCipherOverhead();
     appender.writeBE<uint16_t>(ciphertextLength);
 
-    auto recordBuf = RecordLayerUtils::writeEncryptedRecord(
+    auto cipherText = aead_->encrypt(
         std::move(dataBuf),
-        aead_.get(),
-        &header,
         useAdditionalData_ ? &header : nullptr,
         seqNum_++,
         options);
 
-    if (!outBuf) {
-      outBuf = std::move(recordBuf);
+    std::unique_ptr<folly::IOBuf> record;
+    if (!cipherText->isShared() &&
+        cipherText->headroom() >= kEncryptedHeaderSize) {
+      // prepend and then write it in
+      cipherText->prepend(kEncryptedHeaderSize);
+      memcpy(cipherText->writableData(), header.data(), header.length());
+      record = std::move(cipherText);
     } else {
-      outBuf->prependChain(std::move(recordBuf));
+      record = folly::IOBuf::copyBuffer(header.data(), header.length());
+      record->prependChain(std::move(cipherText));
+    }
+
+    if (!outBuf) {
+      outBuf = std::move(record);
+    } else {
+      outBuf->prependChain(std::move(record));
     }
   }
 

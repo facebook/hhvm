@@ -73,29 +73,15 @@ class t_const final : public t_named {
   const t_const_value* get_value_from_structured_annotation_or_null(
       const char* key) const;
 
+  std::unique_ptr<t_const> clone() const {
+    return std::make_unique<t_const>(
+        program(), type_ref(), name(), value_->clone());
+  }
+
  private:
   t_type_ref type_ref_;
 
   std::unique_ptr<t_const_value> value_;
-
-  // TODO(afuller): Delete everything below here. It is only provided for
-  // backwards compatibility.
- public:
-  t_const(
-      const t_program* program,
-      const t_type* type,
-      std::string name,
-      std::unique_ptr<t_const_value> value)
-      : t_const(
-            program,
-            t_type_ref::from_req_ptr(type),
-            std::move(name),
-            std::move(value)) {}
-
-  std::unique_ptr<t_const> clone() const {
-    return std::make_unique<t_const>(
-        program(), type(), name(), value_->clone());
-  }
 };
 
 } // namespace apache::thrift::compiler

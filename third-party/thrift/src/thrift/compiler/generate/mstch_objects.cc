@@ -316,7 +316,10 @@ mstch::node mstch_const_value::const_struct() {
       const auto* field = strct->get_field_by_name(member.first->get_string());
       assert(field != nullptr);
       constants.push_back(new t_const(
-          nullptr, field->get_type(), field->name(), member.second->clone()));
+          nullptr,
+          t_type_ref::from_req_ptr(field->get_type()),
+          field->name(),
+          member.second->clone()));
       fields.push_back(field);
     }
   }

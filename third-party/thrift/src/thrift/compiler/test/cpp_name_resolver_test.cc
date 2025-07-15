@@ -624,12 +624,12 @@ TEST_F(CppNameResolverTest, transitively_adapted_field_type) {
   auto transitive = t_struct(nullptr, "Transitive");
   transitive.set_uri(kTransitiveUri);
   annotation.add_structured_annotation(
-      std::make_unique<t_const>(&program_, &transitive, "", nullptr));
+      std::make_unique<t_const>(&program_, transitive, "", nullptr));
 
   auto i64 = t_primitive_type::t_i64();
   auto field1 = t_field(i64, "field1", 1);
   field1.add_structured_annotation(
-      std::make_unique<t_const>(&program_, &annotation, "", nullptr));
+      std::make_unique<t_const>(&program_, annotation, "", nullptr));
   EXPECT_EQ(
       get_storage_type(field1),
       "::apache::thrift::adapt_detail::adapted_field_t<"
@@ -637,7 +637,7 @@ TEST_F(CppNameResolverTest, transitively_adapted_field_type) {
 
   auto field2 = t_field(i64, "field2", 42);
   field2.add_structured_annotation(
-      std::make_unique<t_const>(&program_, &annotation, "", nullptr));
+      std::make_unique<t_const>(&program_, annotation, "", nullptr));
   EXPECT_EQ(
       get_storage_type(field2),
       "::apache::thrift::adapt_detail::adapted_field_t<"

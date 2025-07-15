@@ -54,7 +54,7 @@ struct base_annotation_builder {
       std::unique_ptr<t_const_value> value, std::string name = {}) {
     value->set_ttype(type);
     return std::make_unique<t_const>(
-        &program, &type, std::move(name), std::move(value));
+        &program, type, std::move(name), std::move(value));
   }
 };
 

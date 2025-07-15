@@ -392,7 +392,7 @@ TYPED_TEST(AstVisitorTest, enum) {
 
 TYPED_TEST(AstVisitorTest, constant) {
   auto tconst = std::make_unique<t_const>(
-      &this->program_, &t_primitive_type::t_i32(), "Const", nullptr);
+      &this->program_, t_primitive_type::t_i32(), "Const", nullptr);
   EXPECT_CALL(this->mock_, visit_const(tconst.get()));
   // Matches: root definition, definition, named
   EXPECT_CALL(this->mock_, visit_root_definition(tconst.get()));

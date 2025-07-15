@@ -45,7 +45,7 @@ void t_enum::append_value(std::unique_ptr<t_enum_value> enum_value) {
   const_val->set_enum_value(enum_value.get());
   auto tconst = std::make_unique<t_const>(
       program(),
-      &t_primitive_type::t_i32(),
+      t_primitive_type::t_i32(),
       enum_value->name(),
       std::move(const_val));
   append(std::move(enum_value), std::move(tconst));

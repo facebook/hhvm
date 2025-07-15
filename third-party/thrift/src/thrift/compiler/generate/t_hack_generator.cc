@@ -2660,7 +2660,7 @@ void t_hack_generator::append_to_t_enum(
   enum_value->set_value(value);
   auto const_value = std::make_unique<t_const>(
       program,
-      tenum,
+      t_type_ref::from_req_ptr(tenum),
       enum_value->name(),
       std::make_unique<t_const_value>(value));
   tenum->append(std::move(enum_value), std::move(const_value));

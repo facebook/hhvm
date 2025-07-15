@@ -72,11 +72,13 @@ public final class RSocketRpcClient implements RpcClient {
 
   @Override
   public Mono<Void> onClose() {
+    LOG.debug("RSocketRpcClient onClose invoked", new Exception("onClose"));
     return rsocket.onClose();
   }
 
   @Override
   public void dispose() {
+    LOG.debug("RSocketRpcClient dispose invoked", new Exception("dispose"));
     rsocket.dispose();
   }
 

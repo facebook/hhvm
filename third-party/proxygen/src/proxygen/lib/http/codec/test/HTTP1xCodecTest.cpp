@@ -1111,11 +1111,11 @@ TEST(HTTP1xCodecTest, WebsocketUpgradeDuplicate) {
   EXPECT_NO_THROW(downstreamCodec.onIngress(*reqBuf));
 }
 
-TEST(HTTP1xCodecTest, UpgradeHeaderCaseInsensitive) {
-  auto result = checkForProtocolUpgrade("h2c,WebSocket", "websocket", false);
-  ASSERT_TRUE(result.has_value());
-  // We always return the server string so compare against that.
-  EXPECT_EQ("websocket", result->second);
+TEST(HTTP1xCodecTest, UpgradeAccepted) {
+  EXPECT_TRUE(serverAcceptedUpgrade("  Websocket,,,", ",,,websocket  "));
+  EXPECT_FALSE(serverAcceptedUpgrade(",test1,test2,", ",,Test3,Test4"));
+  EXPECT_FALSE(serverAcceptedUpgrade("websocket", ""));
+  EXPECT_FALSE(serverAcceptedUpgrade("", "websocket"));
 }
 
 TEST(HTTP1xCodecTest, HugeURL) {

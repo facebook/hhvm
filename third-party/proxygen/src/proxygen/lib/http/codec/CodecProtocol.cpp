@@ -8,9 +8,7 @@
 
 #include <proxygen/lib/http/codec/CodecProtocol.h>
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/bind.hpp>
+#include <folly/String.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 
@@ -99,51 +97,31 @@ extern bool isParallelCodecProtocol(CodecProtocol protocol) {
   return isHTTP2CodecProtocol(protocol);
 }
 
-extern folly::Optional<std::pair<CodecProtocol, std::string>>
-checkForProtocolUpgrade(const std::string& clientUpgrade,
-                        const std::string& serverUpgrade,
-                        bool serverMode) {
-  CodecProtocol protocol;
+extern bool serverAcceptedUpgrade(const std::string& clientUpgrade,
+                                  const std::string& serverUpgrade) {
   if (clientUpgrade.empty() || serverUpgrade.empty()) {
-    return folly::none;
+    return false;
   }
 
   // Should be a comma separated list of protocols, like NPN
   std::vector<folly::StringPiece> clientProtocols;
-  folly::split(',', clientUpgrade, clientProtocols, true /* ignore empty */);
-  for (auto& clientProtocol : clientProtocols) {
-    boost::algorithm::trim(clientProtocol);
-  }
+  folly::split(',', clientUpgrade, clientProtocols, /*ignoreEmpty=*/true);
 
-  // List of server chosen protocols in layer-ascending order.  We can
-  // only support one layer right now.  We just skip anything that
-  // isn't an HTTP transport protocol
   std::vector<folly::StringPiece> serverProtocols;
-  folly::split(',', serverUpgrade, serverProtocols, true /* ignore empty */);
-
-  for (auto& testProtocol : serverProtocols) {
-    // Get rid of leading/trailing LWS
-    boost::algorithm::trim(testProtocol);
-    if (std::find_if(
-            clientProtocols.begin(),
-            clientProtocols.end(),
-            boost::bind(&boost::iequals<folly::StringPiece, folly::StringPiece>,
-                        testProtocol,
-                        _1,
-                        std::locale())) == clientProtocols.end()) {
-      if (serverMode) {
-        // client didn't offer this, try the next
-        continue;
-      } else {
-        // The server returned a protocol the client didn't ask for
-        return folly::none;
-      }
-    }
-    protocol = getCodecProtocolFromStr(testProtocol);
-    // Non-native upgrades get returned as HTTP_1_1/<actual protocol>
-    return std::make_pair(protocol, testProtocol.str());
+  folly::split(',', serverUpgrade, serverProtocols, /*ignoreEmpty=*/true);
+  for (auto& sp : serverProtocols) {
+    sp = folly::trimWhitespace(sp);
   }
-  return folly::none;
+
+  for (const auto& cp : clientProtocols) {
+    auto cpt = folly::trimWhitespace(cp);
+    return std::any_of(
+        serverProtocols.begin(), serverProtocols.end(), [cpt](const auto& sp) {
+          return cpt.equals(sp, folly::AsciiCaseInsensitive{});
+        });
+  }
+
+  return false;
 }
 
 const folly::Optional<HTTPCodec::ExAttributes> HTTPCodec::NoExAttributes =

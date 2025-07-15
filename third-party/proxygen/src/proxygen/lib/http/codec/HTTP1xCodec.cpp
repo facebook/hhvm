@@ -1076,35 +1076,13 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
       // Set the upgrade flags if the server has upgraded.
       const std::string& serverUpgrade =
           msg_->getHeaders().getSingleOrEmpty(HTTP_HEADER_UPGRADE);
-      if (serverUpgrade.empty() || upgradeHeader_.empty()) {
-        LOG(ERROR) << "Invalid 101 response, empty upgrade headers";
-        return -1;
-      }
-      auto result = checkForProtocolUpgrade(
-          upgradeHeader_, serverUpgrade, false /* client mode */);
-      if (result) {
-        ingressUpgrade_ = true;
-        egressUpgrade_ = true;
-        if (result->first != CodecProtocol::HTTP_1_1) {
-          bool success = callback_->onNativeProtocolUpgrade(
-              ingressTxnID_, result->first, result->second, *msg_);
-          if (success) {
-            nativeUpgrade_ = true;
-            msg_->setIsUpgraded(ingressUpgrade_);
-            return 1; // no message body if successful
-          }
-        } else if (result->second == getCodecProtocolString(result->first)) {
-          // someone upgraded to http/1.1?  Reset upgrade flags
-          ingressUpgrade_ = false;
-          egressUpgrade_ = false;
-        }
-        // else, there's some non-native upgrade
-      } else {
+      if (!serverAcceptedUpgrade(upgradeHeader_, serverUpgrade)) {
         LOG(ERROR) << "Invalid 101 response, client/server upgrade mismatch "
                       "client="
                    << upgradeHeader_ << " server=" << serverUpgrade;
         return -1;
       }
+      ingressUpgrade_ = egressUpgrade_ = true;
     } else if (parser_.upgrade || parser_.flags & F_UPGRADE) {
       // Ignore upgrade header for upstream response messages with status code
       // different from 101 in case if it was not a response to CONNECT.

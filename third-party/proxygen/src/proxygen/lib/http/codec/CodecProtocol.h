@@ -67,12 +67,9 @@ extern bool isHTTPBinaryCodecProtocol(CodecProtocol protocol);
 extern bool isParallelCodecProtocol(CodecProtocol protocol);
 
 /**
- * Search the client and server protocol lists for a matching native
- * CodecProtocol
+ * Check whether server has accepted client's upgrade request
  */
-extern folly::Optional<std::pair<CodecProtocol, std::string>>
-checkForProtocolUpgrade(const std::string& clientUpgrade,
-                        const std::string& serverUpgrade,
-                        bool serverMode);
+extern bool serverAcceptedUpgrade(const std::string& clientUpgrade,
+                                  const std::string& serverUpgrade);
 
 } // namespace proxygen

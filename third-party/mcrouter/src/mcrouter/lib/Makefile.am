@@ -82,6 +82,7 @@ libmcrouter_a_SOURCES = \
   carbon/NoopAdditionalLogger.h \
   carbon/NoopExternalConnectionLogger.h \
   carbon/ReplyCommon.h \
+  carbon/RequestCommon.cpp \
   carbon/RequestCommon.h \
   carbon/RequestReplyUtil.h \
   carbon/Result.cpp \

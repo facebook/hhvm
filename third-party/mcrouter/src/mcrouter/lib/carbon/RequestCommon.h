@@ -9,7 +9,6 @@
 
 #include <bitset>
 #include <optional>
-#include <utility>
 
 #include <folly/IPAddress.h>
 #include <folly/io/IOBuf.h>
@@ -21,35 +20,20 @@ namespace carbon {
 class RequestCommon : public MessageCommon {
  public:
 #ifndef LIBMC_FBTRACE_DISABLE
-  RequestCommon() = default;
+  RequestCommon();
 
-  RequestCommon(const RequestCommon& other) {
-    traceContext_ = other.traceContext_;
-    cryptoAuthToken_ = other.cryptoAuthToken_;
-    replyBitMask_ = other.replyBitMask_;
-    clientIdentifier_ = other.clientIdentifier_;
-  }
-  RequestCommon& operator=(const RequestCommon& other) {
-    if (this != &other) {
-      traceContext_ = other.traceContext_;
-      cryptoAuthToken_ = other.cryptoAuthToken_;
-      replyBitMask_ = other.replyBitMask_;
-      clientIdentifier_ = other.clientIdentifier_;
-    }
-    return *this;
-  }
+  RequestCommon(const RequestCommon& other);
+  RequestCommon& operator=(const RequestCommon& other);
 
-  RequestCommon(RequestCommon&&) = default;
-  RequestCommon& operator=(RequestCommon&&) = default;
+  RequestCommon(RequestCommon&& other) noexcept;
+  RequestCommon& operator=(RequestCommon&& other) noexcept;
 #endif
 
   /**
    * Tells whether or not "serializedBuffer()" is dirty, in which case it can't
    * be used.
    */
-  bool isBufferDirty() const {
-    return serializedBuffer_ == nullptr;
-  }
+  bool isBufferDirty() const;
 
   /**
    * Sets a buffer that can be used to avoid reserializing the request.
@@ -60,73 +44,43 @@ class RequestCommon : public MessageCommon {
    * NOTE: The caller is responsible for keeping the buffer alive until the
    * reply is received.
    */
-  void setSerializedBuffer(const folly::IOBuf& buffer) {
-    if (buffer.empty()) {
-      serializedBuffer_ = nullptr;
-    } else {
-      serializedBuffer_ = &buffer;
-    }
-  }
+  void setSerializedBuffer(const folly::IOBuf& buffer);
 
   /**
    * Gets the buffer with this request serialized.
    * Will return nullptr if the buffer is dirty and can't be used.
    */
-  const folly::IOBuf* serializedBuffer() const {
-    return serializedBuffer_;
-  }
+  const folly::IOBuf* serializedBuffer() const;
 
   // Store CAT token in an optional field.
-  void setCryptoAuthToken(std::string&& token) {
-    cryptoAuthToken_.emplace(std::move(token));
-  }
+  void setCryptoAuthToken(std::string&& token);
 
   // Store region string in an optional field.
-  void setRegionFlag() {
-    replyBitMask_.set(ReplyMetadataFlags::Region);
-  }
+  void setRegionFlag();
 
   /**
    * get the optional field that may store a CAT token
    * Used by mcrouter transport layer to pass the value to thrift header
    */
-  const std::optional<std::string>& getCryptoAuthToken() const {
-    return cryptoAuthToken_;
-  }
+  const std::optional<std::string>& getCryptoAuthToken() const;
 
   // Check if region flag is set
-  bool hasRegionFlag() const noexcept {
-    return replyBitMask_.test(ReplyMetadataFlags::Region);
-  }
+  bool hasRegionFlag() const noexcept;
 
-  const std::optional<std::string>& getClientIdentifier() const noexcept {
-    return clientIdentifier_;
-  }
+  const std::optional<std::string>& getClientIdentifier() const noexcept;
 
-  void setClientIdentifier(folly::StringPiece clientIdentifier) noexcept {
-    clientIdentifier_ = clientIdentifier.str();
-  }
+  void setClientIdentifier(folly::StringPiece clientIdentifier) noexcept;
 
-  const std::optional<folly::IPAddress>& getSourceIpAddr() const noexcept {
-    return sourceIpAddr_;
-  }
+  const std::optional<folly::IPAddress>& getSourceIpAddr() const noexcept;
 
-  void setSourceIpAddr(const folly::IPAddress& sourceIpAddr) noexcept {
-    sourceIpAddr_ = sourceIpAddr;
-  }
+  void setSourceIpAddr(const folly::IPAddress& sourceIpAddr) noexcept;
 
-  void setWriteTimestampNs(uint64_t writeTimestamp) noexcept {
-    writeTimestamp_ = writeTimestamp;
-  }
+  void setWriteTimestampNs(uint64_t writeTimestamp) noexcept;
 
-  std::optional<uint64_t> getWriteTimestampNs() const noexcept {
-    return writeTimestamp_;
-  }
+  std::optional<uint64_t> getWriteTimestampNs() const noexcept;
 
  protected:
-  void markBufferAsDirty() {
-    serializedBuffer_ = nullptr;
-  }
+  void markBufferAsDirty();
 
  private:
   const folly::IOBuf* serializedBuffer_{nullptr};

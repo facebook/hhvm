@@ -53,9 +53,9 @@ impl FeatureName {
             ExpressionTreeShapeCreation => OngoingRelease,
             NoDisjointUnion => OngoingRelease,
             SimpliHack => Preview,
-            PolymorphicFunctionHints => Preview,
+            PolymorphicFunctionHints => OngoingRelease,
             ProtectedInternal => Preview,
-            PolymorphicLambda => Preview,
+            PolymorphicLambda => OngoingRelease,
             ExpressionTreeCoalesceOperator => Preview,
         }
     }

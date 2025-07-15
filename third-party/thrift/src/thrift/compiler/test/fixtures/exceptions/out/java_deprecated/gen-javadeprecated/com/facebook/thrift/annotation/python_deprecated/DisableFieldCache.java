@@ -25,6 +25,16 @@ import com.facebook.thrift.protocol.*;
 
 /**
  * Disable caching all fields for a struct.
+ * Also available as a thrift_library compiler option:
+ *     thrift_library(..., thrift_python_options = ["disable_field_cache"])
+ * 
+ * Has NO effect in cinder runtime (e.g., IG Django)
+ * Only affects thrift-python, not older deprecated variants.
+ * 
+ * Usage guidelines:
+ *   - Improves latency/throughput when struct fields accessed only once.
+ *   - Reduces memory usage for most use cases; try this to resolve OOMs.
+ *   - Worsens latency for subsequent field accesses relative to default.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class DisableFieldCache implements TBase, java.io.Serializable, Cloneable, Comparable<DisableFieldCache> {

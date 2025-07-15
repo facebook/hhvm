@@ -45,7 +45,11 @@ class MixinTest(unittest.TestCase):
     @brokenInAutoMigrate()
     def test_foo_mixin(self) -> None:
         foo = self.make_foo()
+        # pyre-ignore[16]: removed in next diff
         self.assertIsNone(foo.field2)
+        # pyre-ignore[16]: removed in next diff
         self.assertEqual(foo.field1, "1")
+        # pyre-ignore[16]: removed in next diff
         self.assertEqual(foo.field3, "3")
+        # pyre-ignore[16]: removed in next diff
         self.assertEqual(foo.field5, "5")

@@ -24,24 +24,16 @@ namespace carbon {
 class ReplyCommon : public MessageCommon {
  public:
   const std::shared_ptr<const facebook::memcache::AccessPoint>& destination()
-      const noexcept {
-    return destination_;
-  }
+      const noexcept;
 
   void setDestination(
-      std::shared_ptr<const facebook::memcache::AccessPoint> ap) noexcept {
-    destination_ = std::move(ap);
-  }
+      std::shared_ptr<const facebook::memcache::AccessPoint> ap) noexcept;
 
   // Store region string in an optional field.
-  void setRegion(const std::string& region) {
-    region_.emplace(region);
-  }
+  void setRegion(const std::string& region);
 
   // Get region string if set
-  const std::optional<std::string>& getRegion() const {
-    return region_;
-  }
+  const std::optional<std::string>& getRegion() const;
 
  private:
   std::shared_ptr<const facebook::memcache::AccessPoint> destination_;
@@ -50,16 +42,11 @@ class ReplyCommon : public MessageCommon {
 
 class ReplyCommonThrift : public ReplyCommon {
  public:
-  explicit ReplyCommonThrift(carbon::Result result__ = carbon::Result::UNKNOWN)
-      : result_(result__) {}
+  explicit ReplyCommonThrift(carbon::Result result__ = carbon::Result::UNKNOWN);
 
-  carbon::Result result() const {
-    return result_;
-  }
+  carbon::Result result() const;
 
-  carbon::Result& result() {
-    return result_;
-  }
+  carbon::Result& result();
 
   auto result_ref() const& {
     return apache::thrift::detail::make_field_ref(

@@ -1813,13 +1813,31 @@ let check_arity
           @@ Primary.Typing_too_many_args
                { expected = exp_max; actual = arity; pos; decl_pos = pos_def })
 
+(* The last parameter of a function can be
+ *    variadic (written t...), meaning any number of t's
+ * or
+ *    splat (written ...t), meaning further parameters corresponding to the elements of tuple type t
+ *)
+let get_variadic_or_splat_param ft :
+    'a fun_params
+    * [ `Splat of 'a fun_param | `Variadic of 'a fun_param ] option =
+  match List.last ft.ft_params with
+  | Some fp when get_fp_splat fp ->
+    (List.drop_last_exn ft.ft_params, Some (`Splat fp))
+  | Some fp when get_ft_variadic ft ->
+    (List.drop_last_exn ft.ft_params, Some (`Variadic fp))
+  | _ -> (ft.ft_params, None)
+
 let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
-  match (get_ft_variadic lambda_ft, get_ft_variadic expected_ft) with
-  | (false, false) ->
+  match
+    ( get_variadic_or_splat_param lambda_ft,
+      get_variadic_or_splat_param expected_ft )
+  with
+  | ((_, None), (_, None)) ->
     (* what's the fewest arguments this type can take *)
     let expected_min = Typing_defs.arity_required expected_ft in
     let actual_min = Typing_defs.arity_required lambda_ft in
-    (* what's the most arguments this type can take (assuming no variadics) *)
+    (* what's the most arguments this type can take (assuming no splat or variadics) *)
     let expected_max = List.length expected_ft.ft_params in
     let actual_max = List.length lambda_ft.ft_params in
     (* actual must be able to take at least as many args as expected expects
@@ -1849,21 +1867,6 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
     not (too_few || too_many)
     (* Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
   | (_, _) -> true
-
-(* The last parameter of a function can be
- *    variadic (written t...), meaning any number of t's
- * or
- *    splat (written ...t), meaning further parameters corresponding to the elements of tuple type t
- *)
-let get_variadic_or_splat_param ft :
-    'a fun_params
-    * [ `Splat of 'a fun_param | `Variadic of 'a fun_param ] option =
-  match List.last ft.ft_params with
-  | Some fp when get_fp_splat fp ->
-    (List.drop_last_exn ft.ft_params, Some (`Splat fp))
-  | Some fp when get_ft_variadic ft ->
-    (List.drop_last_exn ft.ft_params, Some (`Variadic fp))
-  | _ -> (ft.ft_params, None)
 
 let param_modes
     ?(is_variadic = false) ({ fp_pos; _ } as fp) (_, pos, _) param_kind ~env =

@@ -498,7 +498,11 @@ and expr_ env acc p e =
   | Dollardollar _ ->
     acc
   | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, Is_prop) ->
-    if SMap.mem vx env.props && not (S.mem vx acc) then (
+    if
+      SMap.mem vx env.props
+      && (not (S.mem vx acc))
+      && not (SSet.mem vx env.init_not_required_props)
+    then (
       let (pos, member_name) = v in
       Errors.add_error
         Nast_check_error.(

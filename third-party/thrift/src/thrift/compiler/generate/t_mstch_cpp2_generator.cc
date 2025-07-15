@@ -552,9 +552,9 @@ class cpp_mstch_program : public mstch_program {
   template <typename Node>
   void collect_fatal_string_annotated(
       std::map<std::string, std::string>& fatal_strings, const Node* node) {
-    fatal_strings.emplace(get_fatal_string_short_id(node), node->get_name());
-    auto hash = cpp2::sha256_hex(node->get_name());
-    fatal_strings.emplace("__fbthrift_hash_" + hash, node->get_name());
+    fatal_strings.emplace(get_fatal_string_short_id(node), node->name());
+    auto hash = cpp2::sha256_hex(node->name());
+    fatal_strings.emplace("__fbthrift_hash_" + hash, node->name());
     for (const auto& a : node->unstructured_annotations()) {
       if (!is_annotation_blacklisted_in_fatal(a.first)) {
         fatal_strings.emplace(get_fatal_string_short_id(a.first), a.first);
@@ -771,7 +771,7 @@ class cpp_mstch_program : public mstch_program {
     // enums
     for (const auto* enm : program_->enums()) {
       collect_fatal_string_annotated(unique_names, enm);
-      unique_names.emplace(get_fatal_string_short_id(enm), enm->get_name());
+      unique_names.emplace(get_fatal_string_short_id(enm), enm->name());
       for (const auto& i : enm->get_enum_values()) {
         collect_fatal_string_annotated(unique_names, i);
       }
@@ -790,15 +790,14 @@ class cpp_mstch_program : public mstch_program {
     }
     // consts
     for (const auto* cnst : program_->consts()) {
-      unique_names.emplace(get_fatal_string_short_id(cnst), cnst->get_name());
+      unique_names.emplace(get_fatal_string_short_id(cnst), cnst->name());
     }
     // services
     for (const auto* service : program_->services()) {
       // function annotations are not currently included.
-      unique_names.emplace(
-          get_fatal_string_short_id(service), service->get_name());
+      unique_names.emplace(get_fatal_string_short_id(service), service->name());
       for (const auto* f : service->get_functions()) {
-        unique_names.emplace(get_fatal_string_short_id(f), f->get_name());
+        unique_names.emplace(get_fatal_string_short_id(f), f->name());
         for (const auto& p : f->params().fields()) {
           unique_names.emplace(get_fatal_string_short_id(&p), p.name());
         }
@@ -806,7 +805,7 @@ class cpp_mstch_program : public mstch_program {
     }
     // typedefs resolve to struct
     for (const t_typedef* i : alias_to_struct()) {
-      unique_names.emplace(get_fatal_string_short_id(i), i->get_name());
+      unique_names.emplace(get_fatal_string_short_id(i), i->name());
     }
 
     mstch::array a;
@@ -1037,7 +1036,7 @@ class cpp_mstch_service : public mstch_service {
     return false;
   }
   mstch::node metadata_name() {
-    return service_->program()->name() + "_" + service_->get_name();
+    return service_->program()->name() + "_" + service_->name();
   }
   mstch::node cpp_name() {
     return service_->is_interaction() ? service_->name()
@@ -1128,7 +1127,7 @@ class cpp_mstch_function : public mstch_function {
   mstch::node prefixed_name() {
     const std::string& name = cpp2::get_name(function_);
     return interface_->is_interaction()
-        ? fmt::format("{}_{}", interface_->get_name(), name)
+        ? fmt::format("{}_{}", interface_->name(), name)
         : name;
   }
 
@@ -1482,9 +1481,9 @@ class cpp_mstch_struct : public mstch_struct {
           ? "_ref"
           : "";
       fields.push_back(mstch::map{
-          {"mixin:name", i.mixin->get_name()},
-          {"mixin:field_name", i.member->get_name()},
-          {"mixin:accessor", i.member->get_name() + suffix}});
+          {"mixin:name", i.mixin->name()},
+          {"mixin:field_name", i.member->name()},
+          {"mixin:accessor", i.member->name() + suffix}});
     }
     return fields;
   }
@@ -1710,7 +1709,7 @@ class cpp_mstch_struct : public mstch_struct {
     return ::apache::thrift::compiler::generate_legacy_api(*struct_);
   }
   mstch::node metadata_name() {
-    return struct_->program()->name() + "_" + struct_->get_name();
+    return struct_->program()->name() + "_" + struct_->name();
   }
 
   mstch::node get_num_union_members() {
@@ -1999,7 +1998,7 @@ class cpp_mstch_field : public mstch_field {
     register_has_option("field:deprecated_clear?", "deprecated_clear");
   }
   mstch::node name_hash() {
-    return "__fbthrift_hash_" + cpp2::sha256_hex(field_->get_name());
+    return "__fbthrift_hash_" + cpp2::sha256_hex(field_->name());
   }
   mstch::node index_plus_one() { return pos_.index + 1; }
   mstch::node ordinal() { return index_plus_one(); }
@@ -2220,7 +2219,7 @@ class cpp_mstch_field : public mstch_field {
   mstch::node metadata_name() {
     auto key = field_->get_key();
     auto suffix = key >= 0 ? std::to_string(key) : "_" + std::to_string(-key);
-    return field_->get_name() + "_" + suffix;
+    return field_->name() + "_" + suffix;
   }
 
   mstch::node type_tag() {
@@ -2338,7 +2337,7 @@ class cpp_mstch_const : public mstch_const {
       const auto* enm = static_cast<const t_enum*>(const_->type());
       const auto* enum_val = enm->find_value(const_->value()->get_integer());
       if (enum_val) {
-        return enum_val->get_name();
+        return enum_val->name();
       } else {
         return std::to_string(const_->value()->get_integer());
       }
@@ -2590,7 +2589,7 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
 
 void t_mstch_cpp2_generator::generate_out_of_line_service(
     const t_service* service) {
-  const auto& name = service->get_name();
+  const auto& name = service->name();
   auto mstch_service =
       make_mstch_service_cached(get_program(), service, mstch_context_);
 
@@ -2798,7 +2797,7 @@ void validate_struct_annotations(
           "tablebased-isset-bitpacking-rule",
           diagnostic_level::error,
           "Tablebased serialization is incompatible with isset bitpacking for struct `{}`",
-          s.get_name());
+          s.name());
     }
   }
 
@@ -2857,7 +2856,7 @@ class validate_splits {
       return;
     }
     for (const t_service* s : services) {
-      auto iter = client_name_to_split_count_.find(s->get_name());
+      auto iter = client_name_to_split_count_.find(s->name());
       if (iter != client_name_to_split_count_.end() &&
           iter->second > static_cast<int32_t>(s->get_functions().size())) {
         ctx.report(
@@ -2867,7 +2866,7 @@ class validate_splits {
             "`client_cpp_splits={}` (For service {}) is misconfigured: it "
             "can not be greater than the number of functions, which is {}.",
             iter->second,
-            s->get_name(),
+            s->name(),
             s->get_functions().size());
       }
     }
@@ -2938,7 +2937,7 @@ void validate_lazy_fields(sema_context& ctx, const t_field& field) {
           "{} `{}` can not be marked as lazy, since doing so won't bring "
           "any benefit.",
           field_type,
-          field.get_name());
+          field.name());
     }
   }
 }

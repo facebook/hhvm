@@ -169,7 +169,7 @@ void t_java_deprecated_generator::generate_typedef(
  */
 void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
   // Make output file
-  string f_enum_name = get_package_dir() + "/" + (tenum->get_name()) + ".java";
+  string f_enum_name = get_package_dir() + "/" + (tenum->name()) + ".java";
   ofstream f_enum;
   f_enum.open(f_enum_name.c_str());
   record_genfile(f_enum_name);
@@ -182,7 +182,7 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
           +"import java.util.Map;\n" + "import java.util.HashMap;\n"
          << endl;
 
-  f_enum << java_suppress_warnings_enum() << "public enum " << tenum->get_name()
+  f_enum << java_suppress_warnings_enum() << "public enum " << tenum->name()
          << " implements com.facebook.thrift.TEnum ";
   scope_up(f_enum);
 
@@ -194,19 +194,19 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
       f_enum << ",\n";
     }
     generate_java_doc(f_enum, t_enum_value);
-    indent(f_enum) << t_enum_value->get_name() << "(" << value << ")";
+    indent(f_enum) << t_enum_value->name() << "(" << value << ")";
     first = false;
   }
   f_enum << ";" << endl << endl;
   const uint32_t LARGE_ENUMS_THRESHOLD = 16;
 
   if (enums.size() > LARGE_ENUMS_THRESHOLD) {
-    f_enum << indent() << "private static final Map<Integer, "
-           << tenum->get_name() << "> INDEXED_VALUES = new HashMap<Integer, "
-           << tenum->get_name() << ">();" << endl
+    f_enum << indent() << "private static final Map<Integer, " << tenum->name()
+           << "> INDEXED_VALUES = new HashMap<Integer, " << tenum->name()
+           << ">();" << endl
            << endl
            << indent() << "static {" << endl
-           << indent() << "  for (" << tenum->get_name() << " e: values()) {"
+           << indent() << "  for (" << tenum->name() << " e: values()) {"
            << endl
            << indent() << "    INDEXED_VALUES.put(e.getValue(), e);" << endl
            << indent() << "  }" << endl
@@ -217,7 +217,7 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
   // Field for thriftCode
   indent(f_enum) << "private final int value;" << endl << endl;
 
-  indent(f_enum) << "private " << tenum->get_name() << "(int value) {" << endl;
+  indent(f_enum) << "private " << tenum->name() << "(int value) {" << endl;
   indent(f_enum) << "  this.value = value;" << endl;
   indent(f_enum) << "}" << endl << endl;
 
@@ -236,7 +236,7 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
                  << endl;
   indent(f_enum) << " * @return null if the value is not found." << endl;
   indent(f_enum) << " */" << endl;
-  indent(f_enum) << "public static " + tenum->get_name() +
+  indent(f_enum) << "public static " + tenum->name() +
           " findByValue(int value) { "
                  << endl;
 
@@ -251,7 +251,7 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
     for (auto t_enum_value : enums) {
       auto value = t_enum_value->get_value();
       indent(f_enum) << "case " << value << ":" << endl;
-      indent(f_enum) << "  return " << t_enum_value->get_name() << ";" << endl;
+      indent(f_enum) << "  return " << t_enum_value->name() << ";" << endl;
     }
 
     indent(f_enum) << "default:" << endl;
@@ -293,7 +293,7 @@ void t_java_deprecated_generator::generate_consts(
   indent_up();
   for (const auto* tconst : consts) {
     print_const_value(
-        f_consts, tconst->get_name(), tconst->type(), tconst->value(), false);
+        f_consts, tconst->name(), tconst->type(), tconst->value(), false);
   }
   indent_down();
   indent(f_consts) << "}" << endl;
@@ -338,13 +338,13 @@ void t_java_deprecated_generator::print_const_value(
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
       const t_type* field_type = nullptr;
       for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-        if ((*f_iter)->get_name() == v_iter->first->get_string()) {
+        if ((*f_iter)->name() == v_iter->first->get_string()) {
           field_type = (*f_iter)->get_type();
         }
       }
       if (field_type == nullptr) {
         throw std::runtime_error(
-            "type error: " + type->get_name() + " has no field " +
+            "type error: " + type->name() + " has no field " +
             v_iter->first->get_string());
       }
       string val_2 = render_const_value(out, name, field_type, v_iter->second);
@@ -402,7 +402,7 @@ void t_java_deprecated_generator::print_const_value(
     out << endl;
   } else {
     throw std::runtime_error(
-        "compiler error: no const of type " + type->get_name());
+        "compiler error: no const of type " + type->name());
   }
 }
 
@@ -485,11 +485,11 @@ string t_java_deprecated_generator::render_const_value(
       namespace_prefix += ".";
     }
     if (value->get_enum_value() == nullptr) {
-      render << namespace_prefix << type->get_name() << ".findByValue("
+      render << namespace_prefix << type->name() << ".findByValue("
              << value->get_integer() << ")";
     } else {
-      render << namespace_prefix << value->get_enum()->get_name() << "."
-             << value->get_enum_value()->get_name();
+      render << namespace_prefix << value->get_enum()->name() << "."
+             << value->get_enum_value()->name();
     }
   } else {
     string t = tmp("tmp");
@@ -532,8 +532,7 @@ void t_java_deprecated_generator::generate_xception(
 void t_java_deprecated_generator::generate_java_struct(
     const t_structured* tstruct, bool is_exception) {
   // Make output file
-  string f_struct_name =
-      get_package_dir() + "/" + (tstruct->get_name()) + ".java";
+  string f_struct_name = get_package_dir() + "/" + (tstruct->name()) + ".java";
   ofstream f_struct;
   f_struct.open(f_struct_name.c_str());
   record_genfile(f_struct_name);
@@ -558,8 +557,7 @@ void t_java_deprecated_generator::generate_java_struct(
 void t_java_deprecated_generator::generate_java_union(
     const t_structured* tstruct) {
   // Make output file
-  string f_struct_name =
-      get_package_dir() + "/" + (tstruct->get_name()) + ".java";
+  string f_struct_name = get_package_dir() + "/" + (tstruct->name()) + ".java";
   ofstream f_struct;
   f_struct.open(f_struct_name.c_str());
   record_genfile(f_struct_name);
@@ -572,9 +570,8 @@ void t_java_deprecated_generator::generate_java_union(
   bool is_final = tstruct->has_unstructured_annotation("final");
 
   indent(f_struct) << java_suppress_warnings_union() << "public "
-                   << (is_final ? "final " : "") << "class "
-                   << tstruct->get_name()
-                   << " extends TUnion<" + tstruct->get_name() + "> ";
+                   << (is_final ? "final " : "") << "class " << tstruct->name()
+                   << " extends TUnion<" + tstruct->name() + "> ";
 
   if (is_comparable(tstruct)) {
     f_struct << "implements Comparable<" << type_name(tstruct) << "> ";
@@ -641,8 +638,8 @@ void t_java_deprecated_generator::generate_union_constructor(
   indent(out) << "  super(other);" << endl;
   indent(out) << "}" << endl << endl;
 
-  indent(out) << "public " << tstruct->get_name() << " deepCopy() {" << endl;
-  indent(out) << "  return new " << tstruct->get_name() << "(this);" << endl;
+  indent(out) << "public " << tstruct->name() << " deepCopy() {" << endl;
+  indent(out) << "  return new " << tstruct->name() << "(this);" << endl;
   indent(out) << "}" << endl << endl;
 
   // generate "constructors" for each field
@@ -650,12 +647,12 @@ void t_java_deprecated_generator::generate_union_constructor(
   vector<t_field*>::const_iterator m_iter;
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     indent(out) << "public static " << type_name(tstruct) << " "
-                << (*m_iter)->get_name() << "("
-                << type_name((*m_iter)->get_type()) << " __value) {" << endl;
+                << (*m_iter)->name() << "(" << type_name((*m_iter)->get_type())
+                << " __value) {" << endl;
     indent(out) << "  " << type_name(tstruct) << " x = new "
                 << type_name(tstruct) << "();" << endl;
-    indent(out) << "  x.set" << get_cap_name((*m_iter)->get_name())
-                << "(__value);" << endl;
+    indent(out) << "  x.set" << get_cap_name((*m_iter)->name()) << "(__value);"
+                << endl;
     indent(out) << "  return x;" << endl;
     indent(out) << "}" << endl << endl;
   }
@@ -702,20 +699,20 @@ void t_java_deprecated_generator::generate_union_getters_and_setters(
     indent(out) << "public " << type_name(field->get_type()) << " "
                 << get_simple_getter_name(field) << "() {" << endl;
     indent(out) << "  return (" << type_name(field->get_type(), true)
-                << ") __getValue(" << upcase_string(field->get_name()) << ");"
+                << ") __getValue(" << upcase_string(field->name()) << ");"
                 << endl;
     indent(out) << "}" << endl;
 
     out << endl;
 
     generate_java_doc(out, field);
-    indent(out) << "public void set" << get_cap_name(field->get_name()) << "("
+    indent(out) << "public void set" << get_cap_name(field->name()) << "("
                 << type_name(field->get_type()) << " __value) {" << endl;
     if (type_can_be_null(field->get_type())) {
-      indent(out) << "  __setValue(" << upcase_string(field->get_name())
+      indent(out) << "  __setValue(" << upcase_string(field->name())
                   << ", __value);" << endl;
     } else {
-      indent(out) << "  setField_ = " << upcase_string(field->get_name()) << ";"
+      indent(out) << "  setField_ = " << upcase_string(field->name()) << ";"
                   << endl;
       indent(out) << "  value_ = __value;" << endl;
     }
@@ -766,7 +763,7 @@ void t_java_deprecated_generator::generate_check_type(
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_field* field = (*m_iter);
 
-    indent(out) << "case " << upcase_string(field->get_name()) << ":" << endl;
+    indent(out) << "case " << upcase_string(field->name()) << ":" << endl;
     indent(out) << "  if (__value instanceof "
                 << type_name(field->get_type(), true, false, true) << ") {"
                 << endl;
@@ -775,7 +772,7 @@ void t_java_deprecated_generator::generate_check_type(
     indent(out)
         << "  throw new ClassCastException(\"Was expecting value of type "
         << type_name(field->get_type(), true, false) << " for field '"
-        << field->get_name()
+        << field->name()
         << "', but got \" + __value.getClass().getSimpleName());" << endl;
     // do the real check here
   }
@@ -831,9 +828,9 @@ void t_java_deprecated_generator::generate_union_reader(
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_field* field = (*m_iter);
-    indent(out) << "case " << upcase_string(field->get_name()) << ":" << endl;
+    indent(out) << "case " << upcase_string(field->name()) << ":" << endl;
     indent_up();
-    indent(out) << "if (__field.type == " << constant_name(field->get_name())
+    indent(out) << "if (__field.type == " << constant_name(field->name())
                 << "_FIELD_DESC.type) {" << endl;
     indent_up();
     indent(out) << "setField_ = __field.id;" << endl;
@@ -854,7 +851,7 @@ void t_java_deprecated_generator::generate_union_reader(
   indent(out)
       << "  throw new TProtocolException(TProtocolException.INVALID_DATA, "
          "\"Union '" +
-          tstruct->get_name() + "' is missing a STOP byte\");"
+          tstruct->name() + "' is missing a STOP byte\");"
       << endl;
   indent(out) << "}" << endl;
   indent_down();
@@ -884,15 +881,15 @@ void t_java_deprecated_generator::generate_read_value(
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_field* field = (*m_iter);
 
-    indent(out) << "case " << upcase_string(field->get_name()) << ":" << endl;
+    indent(out) << "case " << upcase_string(field->name()) << ":" << endl;
     indent_up();
-    indent(out) << "if (__field.type == " << constant_name(field->get_name())
+    indent(out) << "if (__field.type == " << constant_name(field->name())
                 << "_FIELD_DESC.type) {" << endl;
     indent_up();
     indent(out) << type_name(field->get_type(), true, false) << " "
-                << field->get_name() << ";" << endl;
+                << field->name() << ";" << endl;
     generate_deserialize_field(out, field, "");
-    indent(out) << "return " << field->get_name() << ";" << endl;
+    indent(out) << "return " << field->name() << ";" << endl;
     indent_down();
     indent(out) << "}" << endl;
     indent(out) << "break;" << endl;
@@ -926,10 +923,10 @@ void t_java_deprecated_generator::generate_write_value(
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_field* field = (*m_iter);
 
-    indent(out) << "case " << upcase_string(field->get_name()) << ":" << endl;
+    indent(out) << "case " << upcase_string(field->name()) << ":" << endl;
     indent_up();
     indent(out) << type_name(field->get_type(), true, false) << " "
-                << field->get_name() << " = ("
+                << field->name() << " = ("
                 << type_name(field->get_type(), true, false)
                 << ")getFieldValue();" << endl;
     generate_serialize_field(out, field, "");
@@ -964,9 +961,9 @@ void t_java_deprecated_generator::generate_get_field_desc(
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_field* field = (*m_iter);
-    indent(out) << "case " << upcase_string(field->get_name()) << ":" << endl;
-    indent(out) << "  return " << constant_name(field->get_name())
-                << "_FIELD_DESC;" << endl;
+    indent(out) << "case " << upcase_string(field->name()) << ":" << endl;
+    indent(out) << "  return " << constant_name(field->name()) << "_FIELD_DESC;"
+                << endl;
   }
 
   indent(out) << "default:" << endl;
@@ -993,10 +990,8 @@ void t_java_deprecated_generator::generate_union_comparisons(
     ofstream& out, const t_structured* tstruct) {
   // equality
   indent(out) << "public boolean equals(Object other) {" << endl;
-  indent(out) << "  if (other instanceof " << tstruct->get_name() << ") {"
-              << endl;
-  indent(out) << "    return equals((" << tstruct->get_name() << ")other);"
-              << endl;
+  indent(out) << "  if (other instanceof " << tstruct->name() << ") {" << endl;
+  indent(out) << "    return equals((" << tstruct->name() << ")other);" << endl;
   indent(out) << "  } else {" << endl;
   indent(out) << "    return false;" << endl;
   indent(out) << "  }" << endl;
@@ -1004,7 +999,7 @@ void t_java_deprecated_generator::generate_union_comparisons(
 
   out << endl;
 
-  indent(out) << "public boolean equals(" << tstruct->get_name() << " other) {"
+  indent(out) << "public boolean equals(" << tstruct->name() << " other) {"
               << endl;
   if (struct_has_naked_binary_fields(tstruct)) {
     indent(out) << "  return equalsSlowImpl(other);" << endl;
@@ -1042,14 +1037,14 @@ void t_java_deprecated_generator::generate_java_constructor(
     const t_structured* tstruct,
     const vector<t_field*>& fields) {
   vector<t_field*>::const_iterator m_iter;
-  indent(out) << "public " << tstruct->get_name() << "(";
+  indent(out) << "public " << tstruct->name() << "(";
   if (!fields.empty()) {
     out << endl;
     indent_up();
     indent_up();
     for (m_iter = fields.begin(); m_iter != fields.end();) {
       indent(out) << type_name((*m_iter)->get_type()) << " "
-                  << (*m_iter)->get_name();
+                  << (*m_iter)->name();
       ++m_iter;
       if (m_iter != fields.end()) {
         out << "," << endl;
@@ -1068,8 +1063,8 @@ void t_java_deprecated_generator::generate_java_constructor(
     indent(out) << "this();" << endl;
   }
   for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
-    indent(out) << "this." << (*m_iter)->get_name() << " = "
-                << (*m_iter)->get_name() << ";" << endl;
+    indent(out) << "this." << (*m_iter)->name() << " = " << (*m_iter)->name()
+                << ";" << endl;
     if (!generate_immutable_structs_) {
       generate_isset_set(out, (*m_iter));
     }
@@ -1095,7 +1090,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
   // - List builder fields
   for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
     indent(out) << "private " << type_name((*m_iter)->get_type()) << " "
-                << (*m_iter)->get_name() << ";" << endl;
+                << (*m_iter)->name() << ";" << endl;
   }
   out << endl;
 
@@ -1113,7 +1108,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
       if ((*m_iter)->get_value() != nullptr) {
         print_const_value(
             indent(out),
-            "this." + (*m_iter)->get_name(),
+            "this." + (*m_iter)->name(),
             t,
             (*m_iter)->get_value(),
             true,
@@ -1126,14 +1121,14 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
 
   // - Define field builder methods
   for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
-    auto methodName = (*m_iter)->get_name();
+    auto methodName = (*m_iter)->name();
     methodName[0] = toupper(methodName[0]);
     indent(out) << "public Builder set" << methodName << "(final "
-                << type_name((*m_iter)->get_type()) << " "
-                << (*m_iter)->get_name() << ") {" << endl;
+                << type_name((*m_iter)->get_type()) << " " << (*m_iter)->name()
+                << ") {" << endl;
     indent_up();
-    indent(out) << "this." << (*m_iter)->get_name() << " = "
-                << (*m_iter)->get_name() << ";" << endl;
+    indent(out) << "this." << (*m_iter)->name() << " = " << (*m_iter)->name()
+                << ";" << endl;
     if (!type_can_be_null((*m_iter)->get_type())) {
       indent(out) << "__optional_isset.set(" << isset_field_id(*m_iter)
                   << ", true);" << endl;
@@ -1143,14 +1138,14 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
     indent(out) << "}" << endl << endl;
   }
   // - Define build() method
-  indent(out) << "public " << tstruct->get_name() << " build() {" << endl;
+  indent(out) << "public " << tstruct->name() << " build() {" << endl;
   indent_up();
   if (useDefaultConstructor) {
-    indent(out) << tstruct->get_name() << " result = new "
-                << tstruct->get_name() << "();" << endl;
+    indent(out) << tstruct->name() << " result = new " << tstruct->name()
+                << "();" << endl;
 
     for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
-      auto methodName = (*m_iter)->get_name();
+      auto methodName = (*m_iter)->name();
       methodName[0] = toupper(methodName[0]);
       if (!type_can_be_null((*m_iter)->get_type())) {
         // if field is set (check the bitset), set the field value
@@ -1158,8 +1153,8 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
                     << ")) {" << endl;
         indent_up();
       }
-      indent(out) << "result.set" << methodName << "(this."
-                  << (*m_iter)->get_name() << ");" << endl;
+      indent(out) << "result.set" << methodName << "(this." << (*m_iter)->name()
+                  << ");" << endl;
       if (!type_can_be_null((*m_iter)->get_type())) {
         indent_down();
         indent(out) << "}" << endl;
@@ -1169,11 +1164,11 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
   } else {
     // android
 
-    indent(out) << "return new " << tstruct->get_name() << "(" << endl;
+    indent(out) << "return new " << tstruct->name() << "(" << endl;
     indent_up();
     for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
       auto isLast = m_iter + 1 == fields.end();
-      indent(out) << "this." << (*m_iter)->get_name() << (isLast ? "" : ",")
+      indent(out) << "this." << (*m_iter)->name() << (isLast ? "" : ",")
                   << endl;
     }
     indent_down();
@@ -1212,7 +1207,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
   indent(out) << (params.in_class ? string() : java_suppress_warnings_struct())
               << "public " << (is_final ? "final " : "")
               << (params.in_class ? "static " : "") << "class "
-              << tstruct->get_name() << " ";
+              << tstruct->name() << " ";
 
   std::optional<string> parent = java_struct_parent_class(tstruct, params);
   if (parent) {
@@ -1304,14 +1299,14 @@ void t_java_deprecated_generator::generate_java_struct_definition(
     generate_java_constructor(out, tstruct, members);
   } else {
     // Default constructor
-    indent(out) << "public " << tstruct->get_name() << "() {" << endl;
+    indent(out) << "public " << tstruct->name() << "() {" << endl;
     indent_up();
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
       if ((*m_iter)->get_value() != nullptr) {
         print_const_value(
             out,
-            "this." + (*m_iter)->get_name(),
+            "this." + (*m_iter)->name(),
             t,
             (*m_iter)->get_value(),
             true,
@@ -1353,7 +1348,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
   indent(out) << "/**" << endl;
   indent(out) << " * Performs a deep copy on <i>other</i>." << endl;
   indent(out) << " */" << endl;
-  indent(out) << "public " << tstruct->get_name() << "(" << tstruct->get_name()
+  indent(out) << "public " << tstruct->name() << "(" << tstruct->name()
               << " other) {" << endl;
   indent_up();
 
@@ -1364,7 +1359,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_field* field = (*m_iter);
-    std::string field_name = field->get_name();
+    std::string field_name = field->name();
     const t_type* type = field->get_type();
 
     bool can_be_null = type_can_be_null(type);
@@ -1393,8 +1388,8 @@ void t_java_deprecated_generator::generate_java_struct_definition(
 
   // clone method, so that you can deep copy an object when you don't know its
   // class.
-  indent(out) << "public " << tstruct->get_name() << " deepCopy() {" << endl;
-  indent(out) << "  return new " << tstruct->get_name() << "(this);" << endl;
+  indent(out) << "public " << tstruct->name() << " deepCopy() {" << endl;
+  indent(out) << "  return new " << tstruct->name() << "(this);" << endl;
   indent(out) << "}" << endl << endl;
 
   generate_java_bean_boilerplate(out, tstruct, params.gen_immutable);
@@ -1426,7 +1421,7 @@ void t_java_deprecated_generator::construct_constant_fields(
     if ((*m_iter)->get_value() != nullptr) {
       print_const_value(
           out,
-          "this." + (*m_iter)->get_name(),
+          "this." + (*m_iter)->name(),
           t,
           (*m_iter)->get_value(),
           true,
@@ -1452,11 +1447,11 @@ void t_java_deprecated_generator::generate_java_struct_equality(
       << // to make up for an otherwise
       indent() << "  return true;" << endl; // slow equals and a bad hashCode
 
-  out << indent() << "if (!(_that instanceof " << tstruct->get_name() << "))"
+  out << indent() << "if (!(_that instanceof " << tstruct->name() << "))"
       << endl
       << indent() << "  return false;" << endl;
 
-  out << indent() << tstruct->get_name() << " that = (" << tstruct->get_name()
+  out << indent() << tstruct->name() << " that = (" << tstruct->name()
       << ")_that;" << endl;
   const vector<t_field*>& members = tstruct->get_members();
   for (auto m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
@@ -1467,7 +1462,7 @@ void t_java_deprecated_generator::generate_java_struct_equality(
     // so we treat "default" fields as required.
     bool is_optional = (*m_iter)->get_req() == t_field::e_req::optional;
     bool can_be_null = type_can_be_null(t);
-    string name = (*m_iter)->get_name();
+    string name = (*m_iter)->name();
     string equalMethodName = "equalsNobinary";
     if (type_has_naked_binary(t)) {
       equalMethodName = "equalsSlow";
@@ -1497,7 +1492,7 @@ void t_java_deprecated_generator::generate_java_struct_equality(
     if (!first) {
       out << ", ";
     }
-    out << (*m_iter)->get_name();
+    out << (*m_iter)->name();
     first = false;
   }
   out << "});" << endl;
@@ -1537,9 +1532,8 @@ void t_java_deprecated_generator::generate_java_struct_compare_to(
     indent(out) << "  return lastComparison;" << endl;
     indent(out) << "}" << endl;
 
-    indent(out) << "lastComparison = TBaseHelper.compareTo("
-                << field->get_name() << ", other." << field->get_name() << ");"
-                << endl;
+    indent(out) << "lastComparison = TBaseHelper.compareTo(" << field->name()
+                << ", other." << field->name() << ");" << endl;
     indent(out) << "if (lastComparison != 0) { " << endl;
     indent(out) << "  return lastComparison;" << endl;
     indent(out) << "}" << endl;
@@ -1571,7 +1565,7 @@ void t_java_deprecated_generator::generate_java_struct_reader(
         << endl;
     out << indent() << "}" << endl << endl;
 
-    out << indent() << "public static " << tstruct->get_name()
+    out << indent() << "public static " << tstruct->name()
         << " deserialize(TProtocol iprot) throws TException {" << endl;
     indent_up();
   } else {
@@ -1585,7 +1579,7 @@ void t_java_deprecated_generator::generate_java_struct_reader(
 
   if (generate_immutable_structs_) {
     for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-      string tmp_name = "tmp_" + (*f_iter)->get_name();
+      string tmp_name = "tmp_" + (*f_iter)->name();
       const t_type* field_type = (*f_iter)->get_type();
       indent(out) << type_name(field_type) << " " << tmp_name;
       if (type_can_be_null(field_type)) {
@@ -1627,8 +1621,7 @@ void t_java_deprecated_generator::generate_java_struct_reader(
 
   // Generate deserialization code for known cases
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-    indent(out) << "case " << upcase_string((*f_iter)->get_name()) << ":"
-                << endl;
+    indent(out) << "case " << upcase_string((*f_iter)->name()) << ":" << endl;
     indent_up();
     indent(out) << "if (__field.type == " << type_to_enum((*f_iter)->get_type())
                 << ") {" << endl;
@@ -1663,11 +1656,11 @@ void t_java_deprecated_generator::generate_java_struct_reader(
   out << indent() << "iprot.readStructEnd();" << endl << endl;
 
   if (generate_immutable_structs_) {
-    indent(out) << tstruct->get_name() << " _that;" << endl;
-    indent(out) << "_that = new " << tstruct->get_name() << "(" << endl;
+    indent(out) << tstruct->name() << " _that;" << endl;
+    indent(out) << "_that = new " << tstruct->name() << "(" << endl;
     bool first = true;
     for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-      string tmp_name = "tmp_" + (*f_iter)->get_name();
+      string tmp_name = "tmp_" + (*f_iter)->name();
       if (first) {
         indent(out) << "  " << tmp_name << endl;
       } else {
@@ -1692,7 +1685,7 @@ void t_java_deprecated_generator::generate_java_struct_reader(
         out << indent() << "if (!" << generate_isset_check(*f_iter) << ") {"
             << endl
             << indent() << "  throw new TProtocolException(\"Required field '"
-            << (*f_iter)->get_name()
+            << (*f_iter)->name()
             << "' was not found in serialized data! Struct: \" + toString());"
             << endl
             << indent() << "}" << endl;
@@ -1721,14 +1714,14 @@ void t_java_deprecated_generator::generate_java_validator(
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     if ((*f_iter)->get_req() == t_field::e_req::required) {
       if (type_can_be_null((*f_iter)->get_type())) {
-        indent(out) << "if (" << (*f_iter)->get_name() << " == null) {" << endl;
+        indent(out) << "if (" << (*f_iter)->name() << " == null) {" << endl;
         indent(out) << "  throw new TProtocolException("
                     << "TProtocolException.MISSING_REQUIRED_FIELD, "
-                    << "\"Required field '" << (*f_iter)->get_name()
+                    << "\"Required field '" << (*f_iter)->name()
                     << "' was not present! Struct: \" + toString());" << endl;
         indent(out) << "}" << endl;
       } else {
-        indent(out) << "// alas, we cannot check '" << (*f_iter)->get_name()
+        indent(out) << "// alas, we cannot check '" << (*f_iter)->name()
                     << "' because it's a primitive and you chose the non-beans "
                     << "generator." << endl;
       }
@@ -1761,7 +1754,7 @@ void t_java_deprecated_generator::generate_java_struct_writer(
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     bool null_allowed = type_can_be_null((*f_iter)->get_type());
     if (null_allowed) {
-      out << indent() << "if (this." << (*f_iter)->get_name() << " != null) {"
+      out << indent() << "if (this." << (*f_iter)->name() << " != null) {"
           << endl;
       indent_up();
     }
@@ -1771,9 +1764,8 @@ void t_java_deprecated_generator::generate_java_struct_writer(
       indent_up();
     }
 
-    indent(out) << "oprot.writeFieldBegin("
-                << constant_name((*f_iter)->get_name()) << "_FIELD_DESC);"
-                << endl;
+    indent(out) << "oprot.writeFieldBegin(" << constant_name((*f_iter)->name())
+                << "_FIELD_DESC);" << endl;
 
     // Write field contents
     generate_serialize_field(out, *f_iter, "this.");
@@ -1829,9 +1821,8 @@ void t_java_deprecated_generator::generate_java_struct_result_writer(
 
     indent_up();
 
-    indent(out) << "oprot.writeFieldBegin("
-                << constant_name((*f_iter)->get_name()) << "_FIELD_DESC);"
-                << endl;
+    indent(out) << "oprot.writeFieldBegin(" << constant_name((*f_iter)->name())
+                << "_FIELD_DESC);" << endl;
 
     // Write field contents
     generate_serialize_field(out, *f_iter, "this.");
@@ -1903,7 +1894,7 @@ void t_java_deprecated_generator::generate_generic_field_getters_setters(
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     const t_field* field = *f_iter;
     const t_type* type = field->get_type()->get_true_type();
-    const std::string& field_name = field->get_name();
+    const std::string& field_name = field->name();
     std::string cap_name = get_cap_name(field_name);
 
     if (type->is<t_list>() || type->is<t_map>() || type->is<t_set>())
@@ -1961,7 +1952,7 @@ void t_java_deprecated_generator::generate_generic_field_getters_setters(
 
 std::string t_java_deprecated_generator::get_simple_getter_name(
     const t_field* field) {
-  const std::string& field_name = field->get_name();
+  const std::string& field_name = field->name();
   std::string cap_name = get_cap_name(field_name);
   const t_type* type = field->get_type()->get_true_type();
 
@@ -1987,7 +1978,7 @@ void t_java_deprecated_generator::generate_java_bean_boilerplate(
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     const t_field* field = *f_iter;
     const t_type* type = field->get_type()->get_true_type();
-    std::string field_name = field->get_name();
+    std::string field_name = field->name();
     std::string cap_name = get_cap_name(field_name);
 
     // Simple getter
@@ -2104,7 +2095,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
     out << indent() << R"(String newLine = prettyPrint ? "\n" : "";)" << endl;
     out << indent() << R"(String space = prettyPrint ? " " : "";)" << endl;
     out << indent() << "StringBuilder sb = new StringBuilder(\""
-        << tstruct->get_name() << "\");" << endl;
+        << tstruct->name() << "\");" << endl;
     out << indent() << "sb.append(space);" << endl;
     out << indent() << "sb.append(\"(\");" << endl;
     out << indent() << "sb.append(newLine);" << endl;
@@ -2115,7 +2106,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
     bool first = true;
     for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
       const t_field* field = (*f_iter);
-      string fname = field->get_name();
+      string fname = field->name();
       const t_type* ftype = field->get_type()->get_true_type();
 
       if (tstruct->is<t_union>()) {
@@ -2235,7 +2226,7 @@ void t_java_deprecated_generator::generate_java_meta_data_map(
               << endl;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     const t_field* field = *f_iter;
-    const std::string& field_name = field->get_name();
+    const std::string& field_name = field->name();
     indent(out) << "tmpMetaDataMap.put(" << upcase_string(field_name)
                 << ", new FieldMetaData(\"" << field_name << "\", ";
 
@@ -2299,12 +2290,12 @@ std::string t_java_deprecated_generator::get_java_type_string(
         return "TType.FLOAT";
       default:
         throw std::runtime_error(
-            "Unknown thrift type \"" + type->get_name() +
+            "Unknown thrift type \"" + type->name() +
             "\" passed to t_java_deprecated_generator::get_java_type_string!");
     }
   } else {
     throw std::runtime_error(
-        "Unknown thrift type \"" + type->get_name() +
+        "Unknown thrift type \"" + type->name() +
         "\" passed to t_java_deprecated_generator::get_java_type_string!");
   }
 }
@@ -2531,9 +2522,9 @@ void t_java_deprecated_generator::generate_service_client(
     if (!can_generate_method(*f_iter)) {
       continue;
     }
-    string funname = (*f_iter)->get_name();
+    string funname = (*f_iter)->name();
     string service_func_name =
-        "\"" + tservice->get_name() + "." + (*f_iter)->get_name() + "\"";
+        "\"" + tservice->name() + "." + (*f_iter)->name() + "\"";
     // Open function
     indent(f_service_) << "public " << function_signature(*f_iter) << endl;
     scope_up(f_service_);
@@ -2556,7 +2547,7 @@ void t_java_deprecated_generator::generate_service_client(
       } else {
         f_service_ << ", ";
       }
-      f_service_ << (*fld_iter)->get_name();
+      f_service_ << (*fld_iter)->name();
     }
     f_service_ << ");" << endl;
 
@@ -2574,10 +2565,10 @@ void t_java_deprecated_generator::generate_service_client(
     t_function send_function(
         nullptr,
         t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
-        string("send_") + (*f_iter)->get_name(),
+        string("send_") + (*f_iter)->name(),
         (*f_iter)->params().clone_DO_NOT_USE());
 
-    string argsname = (*f_iter)->get_name() + "_args";
+    string argsname = (*f_iter)->name() + "_args";
 
     // Open function
     indent(f_service_) << "public " << function_signature(&send_function)
@@ -2596,8 +2587,8 @@ void t_java_deprecated_generator::generate_service_client(
                << endl;
 
     for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
-      f_service_ << indent() << "args." << (*fld_iter)->get_name() << " = "
-                 << (*fld_iter)->get_name() << ";" << endl;
+      f_service_ << indent() << "args." << (*fld_iter)->name() << " = "
+                 << (*fld_iter)->name() << ";" << endl;
     }
 
     string bytes = tmp("_bytes");
@@ -2617,12 +2608,12 @@ void t_java_deprecated_generator::generate_service_client(
 
     // Generate recv function only if not a oneway function
     if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
-      string resultname = (*f_iter)->get_name() + "_result";
+      string resultname = (*f_iter)->name() + "_result";
 
       t_function recv_function(
           nullptr,
           (*f_iter)->return_type(),
-          "recv_" + (*f_iter)->get_name(),
+          "recv_" + (*f_iter)->name(),
           std::make_unique<t_paramlist>(program_));
       if (const t_throws* exceptions = (*f_iter)->exceptions()) {
         recv_function.set_exceptions(exceptions->clone_DO_NOT_USE());
@@ -2675,10 +2666,9 @@ void t_java_deprecated_generator::generate_service_client(
       }
 
       for (const auto& x : get_elems((*f_iter)->exceptions())) {
-        f_service_ << indent() << "if (result." << x.get_name() << " != null) {"
+        f_service_ << indent() << "if (result." << x.name() << " != null) {"
                    << endl
-                   << indent() << "  throw result." << x.get_name() << ";"
-                   << endl
+                   << indent() << "  throw result." << x.name() << ";" << endl
                    << indent() << "}" << endl;
       }
 
@@ -2690,7 +2680,7 @@ void t_java_deprecated_generator::generate_service_client(
             << indent()
             << "throw new "
                "TApplicationException(TApplicationException.MISSING_RESULT, \""
-            << (*f_iter)->get_name() << " failed: unknown result\");" << endl;
+            << (*f_iter)->name() << " failed: unknown result\");" << endl;
       }
 
       // Close function
@@ -2751,14 +2741,14 @@ void t_java_deprecated_generator::generate_service_async_client(
     if (!can_generate_method(*f_iter)) {
       continue;
     }
-    string funname = (*f_iter)->get_name();
+    string funname = (*f_iter)->name();
     const t_type& ret_type = *(*f_iter)->return_type();
     const t_paramlist& arg_struct = (*f_iter)->params();
     string funclassname = funname + "_call";
     const vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator fld_iter;
-    string args_name = (*f_iter)->get_name() + "_args";
-    string result_name = (*f_iter)->get_name() + "_result";
+    string args_name = (*f_iter)->name() + "_args";
+    string result_name = (*f_iter)->name() + "_result";
     string result_handler_symbol;
     string client_sybmol = tmp("client");
     string protocol_factory_symbol = tmp("protocolFactory");
@@ -2790,7 +2780,7 @@ void t_java_deprecated_generator::generate_service_async_client(
     // Member variables
     for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
       indent(f_service_) << "private " + type_name((*fld_iter)->get_type()) +
-              " " + (*fld_iter)->get_name() +
+              " " + (*fld_iter)->name() +
               ";" << endl;
     }
 
@@ -2817,8 +2807,8 @@ void t_java_deprecated_generator::generate_service_async_client(
 
     // Assign member variables
     for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
-      indent(f_service_) << "  this." + (*fld_iter)->get_name() + " = " +
-              (*fld_iter)->get_name() +
+      indent(f_service_) << "  this." + (*fld_iter)->name() + " = " +
+              (*fld_iter)->name() +
               ";" << endl;
     }
 
@@ -2830,17 +2820,15 @@ void t_java_deprecated_generator::generate_service_async_client(
 
     // Serialize request
     // NOTE we are leaving seqid as 0, for now (see above)
-    string pservice_func_name =
-        "\"" + tservice->get_name() + "." + funname + "\"";
+    string pservice_func_name = "\"" + tservice->name() + "." + funname + "\"";
     f_service_ << indent() << "prot.writeMessageBegin(new TMessage(\""
                << funname << "\", TMessageType.CALL, 0));" << endl
                << indent() << args_name << " args = new " << args_name << "();"
                << endl;
 
     for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
-      f_service_ << indent() << "args.set"
-                 << get_cap_name((*fld_iter)->get_name()) << "("
-                 << (*fld_iter)->get_name() << ");" << endl;
+      f_service_ << indent() << "args.set" << get_cap_name((*fld_iter)->name())
+                 << "(" << (*fld_iter)->name() << ");" << endl;
     }
 
     f_service_ << indent() << "args.write(prot);" << endl
@@ -2940,8 +2928,8 @@ void t_java_deprecated_generator::generate_service_server(
     if (!can_generate_method(*f_iter)) {
       continue;
     }
-    f_service_ << indent() << "processMap_.put(\"" << (*f_iter)->get_name()
-               << "\", new " << (*f_iter)->get_name() << "());" << endl;
+    f_service_ << indent() << "processMap_.put(\"" << (*f_iter)->name()
+               << "\", new " << (*f_iter)->name() << "());" << endl;
   }
 
   scope_down(f_service_);
@@ -3043,7 +3031,7 @@ void t_java_deprecated_generator::generate_function_helpers(
     return;
   }
 
-  t_struct result(program_, tfunction->get_name() + "_result");
+  t_struct result(program_, tfunction->name() + "_result");
   auto success =
       std::make_unique<t_field>(tfunction->return_type(), "success", 0);
   if (!tfunction->return_type()->is_void()) {
@@ -3068,7 +3056,7 @@ void t_java_deprecated_generator::generate_function_helpers(
 void t_java_deprecated_generator::generate_process_function(
     const t_service* tservice, const t_function* tfunction) {
   // Open class
-  indent(f_service_) << "private class " << tfunction->get_name()
+  indent(f_service_) << "private class " << tfunction->name()
                      << " implements ProcessFunction {" << endl;
   indent_up();
 
@@ -3079,10 +3067,10 @@ void t_java_deprecated_generator::generate_process_function(
       << endl;
   scope_up(f_service_);
 
-  string argsname = tfunction->get_name() + "_args";
-  string resultname = tfunction->get_name() + "_result";
+  string argsname = tfunction->name() + "_args";
+  string resultname = tfunction->name() + "_result";
   string pservice_fn_name =
-      "\"" + tservice->get_name() + "." + tfunction->get_name() + "\"";
+      "\"" + tservice->name() + "." + tfunction->name() + "\"";
   f_service_ << indent() << "Object handler_ctx = event_handler_.getContext("
              << pservice_fn_name << ", server_ctx);" << endl
              << indent() << argsname << " args = new " << argsname << "();"
@@ -3117,7 +3105,7 @@ void t_java_deprecated_generator::generate_process_function(
       !tfunction->return_type()->is_void()) {
     f_service_ << "result.success = ";
   }
-  f_service_ << "iface_." << tfunction->get_name() << "(";
+  f_service_ << "iface_." << tfunction->name() << "(";
   bool first = true;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     if (first) {
@@ -3125,7 +3113,7 @@ void t_java_deprecated_generator::generate_process_function(
     } else {
       f_service_ << ", ";
     }
-    f_service_ << "args." << (*f_iter)->get_name();
+    f_service_ << "args." << (*f_iter)->name();
   }
   f_service_ << ");" << endl;
 
@@ -3140,22 +3128,21 @@ void t_java_deprecated_generator::generate_process_function(
   if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !exceptions.empty()) {
     string pservice_func_name =
-        "\"" + tservice->get_name() + "." + tfunction->get_name() + "\"";
+        "\"" + tservice->name() + "." + tfunction->name() + "\"";
     string pservice_func_name_error =
-        tservice->get_name() + "." + tfunction->get_name();
+        tservice->name() + "." + tfunction->name();
     indent_down();
     f_service_ << indent() << "}";
     for (const t_field& x : exceptions) {
       f_service_ << " catch (" << type_name(x.get_type(), false, false) << " "
-                 << x.get_name() << ") {" << endl;
+                 << x.name() << ") {" << endl;
       if (tfunction->qualifier() != t_function_qualifier::oneway) {
         indent_up();
-        f_service_ << indent() << "result." << x.get_name() << " = "
-                   << x.get_name() << ";" << endl
+        f_service_ << indent() << "result." << x.name() << " = " << x.name()
+                   << ";" << endl
                    << indent()
                    << "event_handler_.declaredUserException(handler_ctx, "
-                   << pservice_func_name << ", " << x.get_name() << ");"
-                   << endl;
+                   << pservice_func_name << ", " << x.name() << ");" << endl;
         indent_down();
         f_service_ << indent() << "}";
       } else {
@@ -3204,8 +3191,7 @@ void t_java_deprecated_generator::generate_process_function(
   f_service_ << indent() << "event_handler_.preWrite(handler_ctx, "
              << pservice_fn_name << ", result);" << endl
              << indent() << "oprot.writeMessageBegin(new TMessage(\""
-             << tfunction->get_name() << "\", TMessageType.REPLY, seqid));"
-             << endl
+             << tfunction->name() << "\", TMessageType.REPLY, seqid));" << endl
              << indent() << "result.write(oprot);" << endl
              << indent() << "oprot.writeMessageEnd();" << endl
              << indent() << "oprot.getTransport().flush();" << endl
@@ -3234,10 +3220,10 @@ void t_java_deprecated_generator::generate_deserialize_field(
   if (type->is_void()) {
     throw std::runtime_error(
         "CANNOT GENERATE DESERIALIZE CODE FOR void TYPE: " + prefix +
-        tfield->get_name());
+        tfield->name());
   }
 
-  string name = prefix + tfield->get_name();
+  string name = prefix + tfield->name();
 
   if (type->is<t_structured>()) {
     generate_deserialize_struct(out, (t_structured*)type, name);
@@ -3290,7 +3276,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
   } else {
     printf(
         "DO NOT KNOW HOW TO DESERIALIZE FIELD '%s' TYPE '%s'\n",
-        tfield->get_name().c_str(),
+        tfield->name().c_str(),
         type_name(type).c_str());
     throw std::runtime_error("compiler error");
   }
@@ -3453,20 +3439,20 @@ void t_java_deprecated_generator::generate_serialize_field(
   if (type->is_void()) {
     throw std::runtime_error(
         "CANNOT GENERATE SERIALIZE CODE FOR void TYPE: " + prefix +
-        tfield->get_name());
+        tfield->name());
   }
 
   if (type->is<t_structured>()) {
     generate_serialize_struct(
-        out, (t_structured*)type, prefix + tfield->get_name());
+        out, (t_structured*)type, prefix + tfield->name());
   } else if (type->is<t_container>()) {
-    generate_serialize_container(out, type, prefix + tfield->get_name());
+    generate_serialize_container(out, type, prefix + tfield->name());
   } else if (type->is<t_enum>()) {
-    auto enumName = prefix + tfield->get_name();
+    auto enumName = prefix + tfield->name();
     indent(out) << "oprot.writeI32(" << enumName
                 << " == null ? 0 : " << enumName << ".getValue());" << endl;
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    string name = prefix + tfield->get_name();
+    string name = prefix + tfield->name();
     indent(out) << "oprot.";
 
     t_primitive_type::type tbase = primitive->primitive_type();
@@ -3511,7 +3497,7 @@ void t_java_deprecated_generator::generate_serialize_field(
     printf(
         "DO NOT KNOW HOW TO SERIALIZE FIELD '%s%s' TYPE '%s'\n",
         prefix.c_str(),
-        tfield->get_name().c_str(),
+        tfield->name().c_str(),
         type_name(type).c_str());
     throw std::runtime_error("compiler error");
   }
@@ -3674,11 +3660,11 @@ string t_java_deprecated_generator::type_name(
   if (program != nullptr && program != program_) {
     const string& package = program->get_namespace(namespace_key_);
     if (!package.empty()) {
-      return package + "." + ttype->get_name();
+      return package + "." + ttype->name();
     }
   }
 
-  return ttype->get_name();
+  return ttype->name();
 }
 
 /**
@@ -3728,14 +3714,13 @@ string t_java_deprecated_generator::base_type_name(
 string t_java_deprecated_generator::declare_field(
     const t_field* tfield, bool init) {
   // TODO(mcslee): do we ever need to initialize the field?
-  string result = type_name(tfield->get_type()) + " " + tfield->get_name();
+  string result = type_name(tfield->get_type()) + " " + tfield->name();
   if (init) {
     const t_type* ttype = tfield->get_type()->get_true_type();
     if (ttype->is<t_primitive_type>() && tfield->get_value() != nullptr) {
       ofstream dummy;
       result += " = " +
-          render_const_value(
-                    dummy, tfield->get_name(), ttype, tfield->get_value());
+          render_const_value(dummy, tfield->name(), ttype, tfield->get_value());
     } else if (const auto* primitive = ttype->try_as<t_primitive_type>()) {
       t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {
@@ -3782,7 +3767,7 @@ string t_java_deprecated_generator::declare_field(
 string t_java_deprecated_generator::function_signature(
     const t_function* tfunction, string prefix) {
   const t_type* type = tfunction->return_type().get_type();
-  std::string result = type_name(type) + " " + prefix + tfunction->get_name() +
+  std::string result = type_name(type) + " " + prefix + tfunction->name() +
       "(" + argument_list(tfunction->params()) + ") throws ";
   for (const t_field& x : get_elems(tfunction->exceptions())) {
     result += type_name(x.get_type(), false, false) + ", ";
@@ -3805,7 +3790,7 @@ string t_java_deprecated_generator::function_signature_async(
   std::string arglist = async_function_call_arglist(
       tfunction, result_handler_symbol, use_base_method, true);
   std::string result =
-      prefix + "void " + tfunction->get_name() + "(" + arglist + ")";
+      prefix + "void " + tfunction->name() + "(" + arglist + ")";
   return result;
 }
 
@@ -3846,7 +3831,7 @@ string t_java_deprecated_generator::argument_list(
     if (include_types) {
       result += type_name((*f_iter)->get_type()) + " ";
     }
-    result += (*f_iter)->get_name();
+    result += (*f_iter)->name();
   }
   return result;
 }
@@ -3869,7 +3854,7 @@ string t_java_deprecated_generator::async_argument_list(
     if (include_types) {
       result += type_name((*f_iter)->get_type()) + " ";
     }
-    result += (*f_iter)->get_name();
+    result += (*f_iter)->name();
   }
   if (!first) {
     result += ", ";
@@ -3922,7 +3907,7 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
     return "TType.LIST";
   }
 
-  throw std::runtime_error("INVALID TYPE IN type_to_enum: " + type->get_name());
+  throw std::runtime_error("INVALID TYPE IN type_to_enum: " + type->name());
 }
 
 /**
@@ -3993,7 +3978,7 @@ void t_java_deprecated_generator::generate_java_doc(
     vector<t_field*>::const_iterator p_iter;
     for (p_iter = fields.begin(); p_iter != fields.end(); ++p_iter) {
       const t_field* p = *p_iter;
-      ss << "\n@param " << p->get_name();
+      ss << "\n@param " << p->name();
       if (p->has_doc()) {
         ss << " " << p->doc();
       }
@@ -4003,12 +3988,12 @@ void t_java_deprecated_generator::generate_java_doc(
 }
 
 std::string t_java_deprecated_generator::isset_field_id(const t_field* field) {
-  return "__" + upcase_string(field->get_name() + "_isset_id");
+  return "__" + upcase_string(field->name() + "_isset_id");
 }
 
 std::string t_java_deprecated_generator::generate_isset_check(
     const t_field* field) {
-  return generate_isset_check(field->get_name());
+  return generate_isset_check(field->name());
 }
 
 std::string t_java_deprecated_generator::generate_isset_check(
@@ -4018,7 +4003,7 @@ std::string t_java_deprecated_generator::generate_isset_check(
 
 std::string t_java_deprecated_generator::generate_setfield_check(
     const t_field* field) {
-  return generate_setfield_check(field->get_name());
+  return generate_setfield_check(field->name());
 }
 
 std::string t_java_deprecated_generator::generate_setfield_check(
@@ -4029,8 +4014,8 @@ std::string t_java_deprecated_generator::generate_setfield_check(
 void t_java_deprecated_generator::generate_isset_set(
     ofstream& out, const t_field* field) {
   if (!type_can_be_null(field->get_type())) {
-    indent(out) << "set" << get_cap_name(field->get_name())
-                << get_cap_name("isSet") << "(true);" << endl;
+    indent(out) << "set" << get_cap_name(field->name()) << get_cap_name("isSet")
+                << "(true);" << endl;
   }
 }
 
@@ -4044,13 +4029,13 @@ std::string t_java_deprecated_generator::get_enum_class_name(
       package += ".";
     }
   }
-  return package + type->get_name();
+  return package + type->name();
 }
 
 void t_java_deprecated_generator::generate_struct_desc(
     ofstream& out, const t_structured* tstruct) {
   indent(out) << "private static final TStruct STRUCT_DESC = new TStruct(\""
-              << tstruct->get_name() << "\");" << endl;
+              << tstruct->name() << "\");" << endl;
 }
 
 void t_java_deprecated_generator::generate_field_descs(
@@ -4060,10 +4045,10 @@ void t_java_deprecated_generator::generate_field_descs(
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     indent(out) << "private static final TField "
-                << constant_name((*m_iter)->get_name())
-                << "_FIELD_DESC = new TField(\"" << (*m_iter)->get_name()
-                << "\", " << type_to_enum((*m_iter)->get_type()) << ", "
-                << "(short)" << (*m_iter)->get_key();
+                << constant_name((*m_iter)->name())
+                << "_FIELD_DESC = new TField(\"" << (*m_iter)->name() << "\", "
+                << type_to_enum((*m_iter)->get_type()) << ", " << "(short)"
+                << (*m_iter)->get_key();
     if (is_field_sensitive(*m_iter)) {
       out << ", new HashMap<String, Object>() {{ put(\"sensitive\", true); }}";
     }
@@ -4079,7 +4064,7 @@ void t_java_deprecated_generator::generate_field_name_constants(
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     indent(out) << "public static final int "
-                << upcase_string((*m_iter)->get_name()) << " = "
+                << upcase_string((*m_iter)->name()) << " = "
                 << (*m_iter)->get_key() << ";" << endl;
   }
 }

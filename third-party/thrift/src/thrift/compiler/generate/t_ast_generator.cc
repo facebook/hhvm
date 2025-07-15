@@ -399,7 +399,7 @@ type::Schema t_ast_generator::gen_schema(
               ident.uri()->scopedName_ref() =
                   enum_owner->program()->scoped_name(*enum_owner);
             }
-            ident.enumValue() = val->get_owner()->get_name();
+            ident.enumValue() = val->get_owner()->name();
             ast.identifierSourceRanges()->push_back(std::move(ident));
           } else if (auto owner = val->get_owner()) {
             if (const auto& uri = owner->uri(); !uri.empty()) {

@@ -220,7 +220,7 @@ class compatibility_checker {
             "const `{}` is defined as enum `{}` with a value of another enum `{}`",
             name_,
             type->name(),
-            val_type->get_name());
+            val_type->name());
       }
     }
     return true;

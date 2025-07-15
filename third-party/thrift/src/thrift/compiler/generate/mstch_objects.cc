@@ -37,7 +37,7 @@ std::shared_ptr<mstch_base> make_mstch_service_cached(
     const t_service* service,
     mstch_context& ctx,
     mstch_element_position pos) {
-  std::string service_id = program->path() + service->get_name();
+  std::string service_id = program->path() + service->name();
   auto itr = ctx.service_cache.find(service_id);
   if (itr == ctx.service_cache.end()) {
     itr = ctx.service_cache.emplace_hint(
@@ -229,7 +229,7 @@ mstch::node mstch_const_value::is_non_zero() {
 
 mstch::node mstch_const_value::enum_name() {
   if (type_ == cv::CV_INTEGER && const_value_->is_enum()) {
-    return const_value_->get_enum()->get_name();
+    return const_value_->get_enum()->name();
   }
   return mstch::node();
 }
@@ -316,10 +316,7 @@ mstch::node mstch_const_value::const_struct() {
       const auto* field = strct->get_field_by_name(member.first->get_string());
       assert(field != nullptr);
       constants.push_back(new t_const(
-          nullptr,
-          field->get_type(),
-          field->get_name(),
-          member.second->clone()));
+          nullptr, field->get_type(), field->name(), member.second->clone()));
       fields.push_back(field);
     }
   }

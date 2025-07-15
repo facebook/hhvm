@@ -92,7 +92,7 @@ mstch::node get_structed_annotation_attribute(
 template <typename Node>
 std::string get_java_swift_name(const Node* node) {
   return node->get_unstructured_annotation(
-      "java.swift.name", java::mangle_java_name(node->get_name(), false));
+      "java.swift.name", java::mangle_java_name(node->name(), false));
 }
 
 struct MdCtxDeleter {
@@ -197,9 +197,8 @@ class t_mstch_java_generator : public t_mstch_generator {
 
     for (const t_service* service : program->services()) {
       auto& cache = mstch_context_.service_cache;
-      auto filename =
-          java::mangle_java_name(service->get_name(), true) + ".java";
-      const auto& item_id = id + service->get_name();
+      auto filename = java::mangle_java_name(service->name(), true) + ".java";
+      const auto& item_id = id + service->name();
       if (!cache.count(item_id)) {
         cache[item_id] = mstch_context_.service_factory->make_mstch_object(
             service, mstch_context_);
@@ -231,9 +230,9 @@ class t_mstch_java_generator : public t_mstch_generator {
     std::string package_name = get_namespace_or_default(*program_);
 
     for (const T* item : items) {
-      auto classname = java::mangle_java_name(item->get_name(), true);
+      auto classname = java::mangle_java_name(item->name(), true);
       auto filename = classname + ".java";
-      const auto& item_id = id + item->get_name();
+      const auto& item_id = id + item->name();
       if (!c.count(item_id)) {
         c[item_id] = factory.make_mstch_object(item, mstch_context_);
       }
@@ -272,14 +271,14 @@ class t_mstch_java_generator : public t_mstch_generator {
 
     // Iterate through services
     for (const t_service* service : program->services()) {
-      auto service_name = java::mangle_java_name(service->get_name(), true);
+      auto service_name = java::mangle_java_name(service->name(), true);
       // NOTE: generation of ClientImpl and AsyncClientImpl is deprecated and
       // only customers who are still using netty3 for some reason should use it
       // for backward compatibility reasons.
       if (has_option("deprecated_allow_leagcy_reflection_client")) {
         // Generate deprecated sync client
         auto sync_filename = service_name + "ClientImpl.java";
-        const auto& sync_service_id = id + service->get_name() + "Client";
+        const auto& sync_service_id = id + service->name() + "Client";
         if (!cache.count(sync_service_id)) {
           cache[sync_service_id] =
               service_factory.make_mstch_object(service, mstch_context_);
@@ -292,7 +291,7 @@ class t_mstch_java_generator : public t_mstch_generator {
 
         // Generate deprecated async client
         auto async_filename = service_name + "AsyncClientImpl.java";
-        const auto& async_service_id = id + service->get_name() + "AsyncClient";
+        const auto& async_service_id = id + service->name() + "AsyncClient";
         if (!cache.count(async_service_id)) {
           cache[async_service_id] =
               service_factory.make_mstch_object(service, mstch_context_);
@@ -308,7 +307,7 @@ class t_mstch_java_generator : public t_mstch_generator {
       auto async_reactive_wrapper_filename =
           service_name + "AsyncReactiveWrapper.java";
       const auto& async_reactive_wrapper_id =
-          id + service->get_name() + "AsyncReactiveWrapper";
+          id + service->name() + "AsyncReactiveWrapper";
       if (!cache.count(async_reactive_wrapper_id)) {
         cache[async_reactive_wrapper_id] =
             service_factory.make_mstch_object(service, mstch_context_);
@@ -323,7 +322,7 @@ class t_mstch_java_generator : public t_mstch_generator {
       auto blocking_reactive_wrapper_filename =
           service_name + "BlockingReactiveWrapper.java";
       const auto& blocking_reactive_wrapper_id =
-          id + service->get_name() + "BlockingReactiveWrapper";
+          id + service->name() + "BlockingReactiveWrapper";
       if (!cache.count(blocking_reactive_wrapper_id)) {
         cache[blocking_reactive_wrapper_id] =
             service_factory.make_mstch_object(service, mstch_context_);
@@ -338,7 +337,7 @@ class t_mstch_java_generator : public t_mstch_generator {
       auto reactive_async_wrapper_filename =
           service_name + "ReactiveAsyncWrapper.java";
       const auto& reactive_async_wrapper_id =
-          id + service->get_name() + "ReactiveAsyncWrapper";
+          id + service->name() + "ReactiveAsyncWrapper";
       if (!cache.count(reactive_async_wrapper_id)) {
         cache[reactive_async_wrapper_id] =
             service_factory.make_mstch_object(service, mstch_context_);
@@ -353,7 +352,7 @@ class t_mstch_java_generator : public t_mstch_generator {
       auto reactive_blocking_wrapper_filename =
           service_name + "ReactiveBlockingWrapper.java";
       const auto& reactive_blocking_wrapper_id =
-          id + service->get_name() + "ReactiveBlockingWrapper";
+          id + service->name() + "ReactiveBlockingWrapper";
       if (!cache.count(reactive_blocking_wrapper_id)) {
         cache[reactive_blocking_wrapper_id] =
             service_factory.make_mstch_object(service, mstch_context_);
@@ -367,7 +366,7 @@ class t_mstch_java_generator : public t_mstch_generator {
       // Generate Reactive Client
       auto reactive_client_filename = service_name + "ReactiveClient.java";
       const auto& reactive_client_wrapper_id =
-          id + service->get_name() + "ReactiveClient";
+          id + service->name() + "ReactiveClient";
       if (!cache.count(reactive_client_wrapper_id)) {
         cache[reactive_client_wrapper_id] =
             service_factory.make_mstch_object(service, mstch_context_);
@@ -381,7 +380,7 @@ class t_mstch_java_generator : public t_mstch_generator {
       // Generate RpcServerHandler
       auto rpc_server_handler_filename = service_name + "RpcServerHandler.java";
       const auto& rpc_server_handler_id =
-          id + service->get_name() + "RpcServerHandler";
+          id + service->name() + "RpcServerHandler";
       if (!cache.count(rpc_server_handler_id)) {
         cache[rpc_server_handler_id] =
             service_factory.make_mstch_object(service, mstch_context_);
@@ -577,7 +576,7 @@ class mstch_java_struct : public mstch_struct {
   }
 
   mstch::node java_capital_name() {
-    return java::mangle_java_name(struct_->get_name(), true);
+    return java::mangle_java_name(struct_->name(), true);
   }
   mstch::node has_java_annotations() {
     return struct_->has_unstructured_annotation("java.swift.annotations") ||
@@ -637,7 +636,7 @@ class mstch_java_service : public mstch_service {
     return get_namespace_or_default(*(service_->program()));
   }
   mstch::node java_capital_name() {
-    return java::mangle_java_name(service_->get_name(), true);
+    return java::mangle_java_name(service_->name(), true);
   }
   mstch::node get_oneway_functions() {
     std::vector<t_function*> funcs;
@@ -706,7 +705,7 @@ class mstch_java_interaction : public mstch_java_service {
   }
 
   mstch::node java_parent_capital_name() {
-    return java::mangle_java_name(containing_service_->get_name(), true);
+    return java::mangle_java_name(containing_service_->name(), true);
   }
 };
 
@@ -770,7 +769,7 @@ class mstch_java_function : public mstch_function {
   }
 
   mstch::node java_name() {
-    return java::mangle_java_name(function_->get_name(), false);
+    return java::mangle_java_name(function_->name(), false);
   }
 
   mstch::node is_void_type() {
@@ -1007,7 +1006,7 @@ class mstch_java_field : public mstch_field {
     return constant_name(get_java_swift_name(field_));
   }
   mstch::node java_all_caps_name() {
-    auto field_name = field_->get_name();
+    auto field_name = field_->name();
     boost::to_upper(field_name);
     return field_name;
   }
@@ -1043,7 +1042,7 @@ class mstch_java_field : public mstch_field {
         // we use fromInteger(0) as default value as it may be null or the enum
         // entry for 0.
         auto javaNamespace = get_namespace_or_default(*(type->program()));
-        auto enumType = java::mangle_java_name(type->get_name(), true);
+        auto enumType = java::mangle_java_name(type->name(), true);
         return javaNamespace + "." + enumType + ".fromInteger(0)";
       }
       return "null";
@@ -1110,7 +1109,7 @@ class mstch_java_enum : public mstch_enum {
     return get_namespace_or_default(*enum_->program());
   }
   mstch::node java_capital_name() {
-    return java::mangle_java_name(enum_->get_name(), true);
+    return java::mangle_java_name(enum_->name(), true);
   }
   mstch::node java_skip_enum_name_map() {
     return enum_->has_unstructured_annotation("java.swift.skip_enum_name_map");
@@ -1120,7 +1119,7 @@ class mstch_java_enum : public mstch_enum {
     if (enum_->has_structured_annotation(kJavaUseIntrinsicDefaultUri)) {
       if (enum_->find_value(0) == nullptr) {
         throw std::runtime_error(
-            "Enum " + enum_->get_name() +
+            "Enum " + enum_->name() +
             " does not have a value for 0! You have to have value for 0 to use intrinsic default annotation.");
       }
       return true;
@@ -1129,7 +1128,7 @@ class mstch_java_enum : public mstch_enum {
   }
   mstch::node find_value_zero() {
     if (enum_->has_structured_annotation(kJavaUseIntrinsicDefaultUri)) {
-      return java::mangle_java_constant_name(enum_->find_value(0)->get_name());
+      return java::mangle_java_constant_name(enum_->find_value(0)->name());
     }
     return mstch::node();
   }
@@ -1149,7 +1148,7 @@ class mstch_java_enum_value : public mstch_enum_value {
         });
   }
   mstch::node java_constant_name() {
-    return java::mangle_java_constant_name(enum_value_->get_name());
+    return java::mangle_java_constant_name(enum_value_->name());
   }
   mstch::node ordinal() { return pos_.index; }
 };
@@ -1174,10 +1173,10 @@ class mstch_java_const : public mstch_const {
         });
   }
   mstch::node java_capital_name() {
-    return java::mangle_java_constant_name(const_->get_name());
+    return java::mangle_java_constant_name(const_->name());
   }
   mstch::node java_field_name() {
-    return java::mangle_java_name(field_->get_name(), true);
+    return java::mangle_java_name(field_->name(), true);
   }
   mstch::node java_ignore_constant() {
     // we have to ignore constants if they are enums that we handled as ints, as
@@ -1235,7 +1234,7 @@ class mstch_java_const_value : public mstch_const_value {
     if (type_ == cv::CV_INTEGER && const_value_->is_enum()) {
       const t_enum_value* enum_value = const_value_->get_enum_value();
       if (enum_value != nullptr) {
-        return java::mangle_java_constant_name(enum_value->get_name());
+        return java::mangle_java_constant_name(enum_value->name());
       }
       return "fromInteger(" + std::to_string(const_value_->get_integer()) + ")";
     }
@@ -1373,12 +1372,12 @@ class mstch_java_type : public mstch_type {
   mstch::node is_adapter_set() { return hasTypeAdapter; }
 
   mstch::node add_type_adapter() {
-    adapterDefinitionSet.insert(type_->get_name());
+    adapterDefinitionSet.insert(type_->name());
     return mstch::node();
   }
 
   mstch::node is_type_adapter_defined() {
-    return adapterDefinitionSet.find(type_->get_name()) !=
+    return adapterDefinitionSet.find(type_->name()) !=
         adapterDefinitionSet.end();
   }
 
@@ -1406,7 +1405,7 @@ class mstch_java_type : public mstch_type {
 
   mstch::node set_type_name() {
     if (nested_adapter_count() > 0) {
-      prevTypeName = type_->get_name();
+      prevTypeName = type_->name();
     }
 
     return mstch::node();

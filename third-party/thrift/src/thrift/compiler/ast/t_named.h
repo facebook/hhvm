@@ -121,11 +121,6 @@ class t_named : public t_node {
   std::optional<node_doc> doc_;
 
   std::optional<source_range> name_range_;
-
-  // TODO(afuller): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  const std::string& get_name() const { return name_; }
 };
 
 // Returns true iff the node is a definition of a transitive annotation,

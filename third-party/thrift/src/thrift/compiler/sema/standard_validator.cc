@@ -659,7 +659,7 @@ void validate_mixin_field_attributes(sema_context& ctx, const t_field& node) {
       typeid(*ttype) == typeid(t_struct) || typeid(*ttype) == typeid(t_union),
       "Mixin field `{}` type must be a struct or union. Found `{}`.",
       node.name(),
-      ttype->get_name());
+      ttype->name());
 
   if (const auto* parent = dynamic_cast<const t_union*>(ctx.parent())) {
     ctx.error(
@@ -806,7 +806,7 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
 
 void validate_field_name(sema_context& ctx, const t_field& field) {
   const auto* strct = dynamic_cast<const t_structured*>(ctx.parent());
-  if (field.get_name() == strct->get_name()) {
+  if (field.name() == strct->name()) {
     std::string parent_structure;
     if (strct->is<t_union>()) {
       parent_structure = "union";
@@ -817,7 +817,7 @@ void validate_field_name(sema_context& ctx, const t_field& field) {
     }
     ctx.warning(
         "Field '{}' has the same name as the containing {}.",
-        field.get_name(),
+        field.name(),
         parent_structure);
   }
 }
@@ -892,7 +892,7 @@ void validate_compatibility_with_lazy_field(
   if (has_lazy_field(node) && node.has_unstructured_annotation("cpp.methods")) {
     ctx.error(
         "cpp.methods is incompatible with lazy deserialization in struct `{}`",
-        node.get_name());
+        node.name());
   }
 }
 

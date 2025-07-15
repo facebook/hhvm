@@ -1115,7 +1115,7 @@ class py3_mstch_field : public mstch_field {
   mstch::node pyName() { return pyName_; }
   mstch::node cppName() { return cppName_; }
   mstch::node hasModifiedName() { return pyName_ != cppName_; }
-  mstch::node hasPyName() { return pyName_ != field_->get_name(); }
+  mstch::node hasPyName() { return pyName_ != field_->name(); }
 
   bool has_default_value() {
     return !is_ref() && (field_->get_value() != nullptr || !is_optional_());
@@ -1242,7 +1242,7 @@ class py3_mstch_enum_value : public mstch_enum_value {
   mstch::node cppName() { return cpp2::get_name(enum_value_); }
 
   mstch::node hasPyName() {
-    return python::get_py3_name(*enum_value_) != enum_value_->get_name();
+    return python::get_py3_name(*enum_value_) != enum_value_->name();
   }
 };
 
@@ -1310,7 +1310,7 @@ class py3_mstch_const_value : public mstch_const_value {
     if (!const_value_->is_enum() || const_value_->get_enum_value() == nullptr) {
       return mstch::node();
     }
-    const auto& enum_name = const_value_->get_enum()->get_name();
+    const auto& enum_name = const_value_->get_enum()->name();
     return python::get_py3_name_class_scope(
         *const_value_->get_enum_value(), enum_name);
   }
@@ -1394,7 +1394,7 @@ std::string py3_mstch_program::visit_type_impl(
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {
-      extra = trueType->get_name();
+      extra = trueType->name();
     }
     type->set_flat_name(std::move(extra));
   }
@@ -1481,7 +1481,7 @@ void validate(const t_named& node, const std::string& name, sema_context& ctx) {
 }
 bool validate_enum(sema_context& ctx, const t_enum& enm) {
   for (const t_enum_value& ev : enm.values()) {
-    validate(ev, ev.get_name(), ctx);
+    validate(ev, ev.name(), ctx);
   }
   return true;
 }

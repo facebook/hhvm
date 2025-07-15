@@ -60,7 +60,7 @@ void t_structured::append_field(std::unique_ptr<t_field> field) {
   if (!try_append_field(field)) {
     throw std::runtime_error(
         "Field identifier " + std::to_string(field->get_key()) + " for \"" +
-        field->get_name() + "\" has already been used");
+        field->name() + "\" has already been used");
   }
 }
 
@@ -77,12 +77,12 @@ void t_structured::append(std::unique_ptr<t_field> field) {
   if (field->get_key() != 0) {
     throw std::runtime_error(
         "Field identifier " + std::to_string(field->get_key()) + " for \"" +
-        field->get_name() + "\" has already been used");
+        field->name() + "\" has already been used");
   }
 
   // TODO(afuller): Figure out why some code relies on adding multiple id:0
   // fields, fix the code, and remove this hack.
-  if (!field->get_name().empty()) {
+  if (!field->name().empty()) {
     fields_by_name_[field->name()] = field.get();
   }
   fields_raw_.push_back(field.get());

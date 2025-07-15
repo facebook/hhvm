@@ -78,7 +78,7 @@ class t_enum : public t_type {
     update_unused(enum_value->get_value());
     values_raw_.push_back(enum_value.get());
     value_map_.emplace(enum_value->get_value(), enum_value.get());
-    consts_by_name_.emplace(enum_value->get_name(), constant.get());
+    consts_by_name_.emplace(enum_value->name(), constant.get());
     values_.push_back(std::move(enum_value));
     constants_.push_back(std::move(constant));
   }

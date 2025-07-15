@@ -398,7 +398,7 @@ class mstch_base : public mstch::object {
       const std::string& id,
       size_t element_index,
       size_t element_count) {
-    std::string elem_id = id + item->get_name();
+    std::string elem_id = id + item->name();
     auto itr = cache.find(elem_id);
     if (itr == cache.end()) {
       auto pos = mstch_element_position(element_index, element_count);
@@ -571,7 +571,7 @@ class mstch_service : public mstch_base {
   virtual std::string get_service_namespace(const t_program*) { return {}; }
 
   whisker::object self() { return make_self(*service_); }
-  mstch::node name() { return service_->get_name(); }
+  mstch::node name() { return service_->name(); }
   mstch::node has_functions() { return !get_functions().empty(); }
   mstch::node has_extends() { return service_->get_extends() != nullptr; }
   mstch::node functions();
@@ -579,7 +579,7 @@ class mstch_service : public mstch_base {
   mstch::node annotations() { return mstch_base::annotations(service_); }
   mstch::node thrift_uri() { return service_->uri(); }
 
-  mstch::node parent_service_name() { return parent_service()->get_name(); }
+  mstch::node parent_service_name() { return parent_service()->name(); }
 
   mstch::node has_streams() {
     auto& funcs = get_functions();
@@ -704,7 +704,7 @@ class mstch_function : public mstch_base {
   }
 
   whisker::object self() { return make_self(*function_); }
-  mstch::node name() { return function_->get_name(); }
+  mstch::node name() { return function_->name(); }
   mstch::node oneway() {
     return function_->qualifier() == t_function_qualifier::oneway;
   }
@@ -863,7 +863,7 @@ class mstch_type : public mstch_base {
   }
 
   whisker::object self() { return make_self(*type_); }
-  mstch::node name() { return type_->get_name(); }
+  mstch::node name() { return type_->name(); }
   mstch::node is_void() { return resolved_type_->is_void(); }
   mstch::node is_string() { return resolved_type_->is_string(); }
   mstch::node is_binary() { return resolved_type_->is_binary(); }
@@ -993,7 +993,7 @@ class mstch_struct : public mstch_base {
   }
 
   whisker::object self() { return make_self(*struct_); }
-  mstch::node name() { return struct_->get_name(); }
+  mstch::node name() { return struct_->name(); }
   mstch::node has_fields() { return struct_->has_fields(); }
   mstch::node fields();
   mstch::node is_exception() { return struct_->is<t_exception>(); }
@@ -1093,7 +1093,7 @@ class mstch_field : public mstch_base {
   }
 
   whisker::object self() { return make_self(*field_); }
-  mstch::node name() { return field_->get_name(); }
+  mstch::node name() { return field_->name(); }
   mstch::node key() { return field_->get_key(); }
   mstch::node value();
   mstch::node type();
@@ -1235,7 +1235,7 @@ class mstch_enum : public mstch_base {
   }
 
   whisker::object self() { return make_self(*enum_); }
-  mstch::node name() { return enum_->get_name(); }
+  mstch::node name() { return enum_->name(); }
   mstch::node values();
   mstch::node unused_value() { return enum_->unused(); }
   mstch::node has_structured_annotations() {
@@ -1308,7 +1308,7 @@ class mstch_enum_value : public mstch_base {
         });
   }
   whisker::object self() { return make_self(*enum_value_); }
-  mstch::node name() { return enum_value_->get_name(); }
+  mstch::node name() { return enum_value_->name(); }
   mstch::node value() { return enum_value_->get_value(); }
 
  protected:
@@ -1346,7 +1346,7 @@ class mstch_const : public mstch_base {
   }
 
   whisker::object self() { return make_self(*const_); }
-  mstch::node name() { return const_->get_name(); }
+  mstch::node name() { return const_->name(); }
   mstch::node index() { return pos_.index; }
   mstch::node type();
   mstch::node value();

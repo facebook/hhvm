@@ -662,7 +662,7 @@ class python_mstch_function : public mstch_function {
 
   mstch::node created_interaction() {
     const auto& interaction = function_->interaction();
-    return interaction ? interaction->get_name() : "";
+    return interaction ? interaction->name() : "";
   }
 
   mstch::node returns_tuple() {
@@ -1109,7 +1109,7 @@ bool validate_enum(sema_context& ctx, const t_enum& enm) {
     return pyname == "name" || pyname == "value";
   };
   for (const t_enum_value* ev : enm.get_enum_values()) {
-    validate(ev, ev->get_name(), ctx, predicate);
+    validate(ev, ev->name(), ctx, predicate);
   }
   return true;
 }
@@ -1369,7 +1369,7 @@ class python_mstch_const_value : public mstch_const_value {
     if (!const_value_->is_enum() || const_value_->get_enum_value() == nullptr) {
       return mstch::node();
     }
-    const auto& enum_name = const_value_->get_enum()->get_name();
+    const auto& enum_name = const_value_->get_enum()->name();
     return python::get_py3_name_class_scope(
         *const_value_->get_enum_value(), enum_name);
   }

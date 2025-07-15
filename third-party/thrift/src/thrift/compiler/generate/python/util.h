@@ -132,7 +132,7 @@ std::string get_py3_name(const T& node) {
     return std::string(name_override);
   }
 
-  const auto& name = node.get_name();
+  const auto& name = node.name();
   const auto& python_keywords = get_python_reserved_names();
   if (cython_keywords.find(name) != cython_keywords.end() ||
       python_keywords.find(name) != python_keywords.end()) {

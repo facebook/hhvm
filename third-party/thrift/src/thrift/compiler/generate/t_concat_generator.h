@@ -86,7 +86,7 @@ class t_concat_generator : public t_generator {
    * Method to get the service name, may be overridden
    */
   virtual std::string get_service_name(const t_service* tservice) {
-    return tservice->get_name();
+    return tservice->name();
   }
 
   /*
@@ -112,7 +112,7 @@ class t_concat_generator : public t_generator {
     }
 
     // A complex type like struct, typedef, exception.
-    std::string full_name = ttype->get_name();
+    std::string full_name = ttype->name();
 
     // Qualify the name with the program name, if the type isn't from this
     // program.

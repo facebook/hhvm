@@ -35,8 +35,7 @@ void t_enum::append_value(std::unique_ptr<t_enum_value> enum_value) {
   if (!enum_value->has_value()) {
     auto last_value = values_.empty() ? -1 : values_.back()->get_value();
     if (last_value == INT32_MAX) {
-      throw std::runtime_error(
-          "enum value overflow: " + enum_value->get_name());
+      throw std::runtime_error("enum value overflow: " + enum_value->name());
     }
     enum_value->set_implicit_value(last_value + 1);
   }
@@ -47,7 +46,7 @@ void t_enum::append_value(std::unique_ptr<t_enum_value> enum_value) {
   auto tconst = std::make_unique<t_const>(
       program_,
       &t_primitive_type::t_i32(),
-      enum_value->get_name(),
+      enum_value->name(),
       std::move(const_val));
   append(std::move(enum_value), std::move(tconst));
 }

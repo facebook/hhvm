@@ -401,7 +401,7 @@ class ast_builder : public parser_actions {
     // the same name. Note that this is not a safe assumption as it breaks all
     // dynamic casts and t_type::is_* calls.
     auto unnamed = t_typedef::make_unnamed(
-        const_cast<t_program*>(type.program()), type.get_name(), {type, range});
+        const_cast<t_program*>(type.program()), type.name(), {type, range});
     const t_type* result = unnamed.get();
     unnamed->set_src_range(range);
     set_annotations(unnamed.get(), std::move(annotations));

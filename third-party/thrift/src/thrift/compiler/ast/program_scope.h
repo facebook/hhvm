@@ -94,7 +94,7 @@ class program_scope {
       const auto* constant = dynamic_cast<const t_const*>(named);
       assert(constant->value()->is_enum());
       const std::string& enum_value_name =
-          constant->value()->get_enum_value()->get_name();
+          constant->value()->get_enum_value()->name();
 
       // DEVNOTE: UNKNOWN is excluded from this check because it is widely used
       // & would lead to a lot of false positives. This (likely) relied on the

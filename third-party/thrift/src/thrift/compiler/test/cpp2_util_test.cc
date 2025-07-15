@@ -138,14 +138,14 @@ TEST(UtilTest, for_each_transitive_field) {
 
   auto fields = std::vector<std::string>();
   cpp2::for_each_transitive_field(&a, [&](const t_field* f) {
-    fields.push_back(f->get_name());
+    fields.push_back(f->name());
     return true;
   });
   EXPECT_THAT(fields, testing::ElementsAreArray({"b", "d", "e", "f", "c"}));
 
   fields = std::vector<std::string>();
   cpp2::for_each_transitive_field(&a, [&](const t_field* f) {
-    const auto& name = f->get_name();
+    const auto& name = f->name();
     fields.push_back(name);
     return name != "e"; // Stop at e.
   });

@@ -1016,7 +1016,7 @@ class rust_mstch_service : public mstch_service {
       : mstch_service(service, ctx, pos, containing_service),
         options_(*options) {
     for (auto function : service->get_functions()) {
-      function_upcamel_names_.insert(camelcase(function->get_name()));
+      function_upcamel_names_.insert(camelcase(function->name()));
     }
     register_methods(
         this,
@@ -1058,7 +1058,7 @@ class rust_mstch_service : public mstch_service {
             service_->find_structured_annotation_or_null(kRustNameUri)) {
       return snakecase(get_annotation_property_string(annot_name, "name"));
     } else {
-      return mangle_type(snakecase(service_->get_name()));
+      return mangle_type(snakecase(service_->name()));
     }
   }
   mstch::node rust_request_context() {
@@ -1143,13 +1143,13 @@ class rust_mstch_function : public mstch_function {
   }
   mstch::node rust_name() { return named_rust_name(function_); }
   mstch::node rust_upcamel() {
-    auto upcamel_name = camelcase(function_->get_name());
+    auto upcamel_name = camelcase(function_->name());
     if (function_upcamel_names_.count(upcamel_name) > 1) {
       // If a service contains a pair of methods that collide converted to
       // CamelCase, like a service containing both create_shard and createShard,
       // then we name the exception types without any case conversion; instead
       // of a CreateShardExn they'll get create_shardExn and createShardExn.
-      return function_->get_name();
+      return function_->name();
     }
     return upcamel_name;
   }
@@ -1196,7 +1196,7 @@ class rust_mstch_function : public mstch_function {
   mstch::node rust_args_by_name() {
     auto params = function_->params().fields().copy();
     std::sort(params.begin(), params.end(), [](auto a, auto b) {
-      return a->get_name() < b->get_name();
+      return a->name() < b->name();
     });
     return make_mstch_fields(params);
   }
@@ -1271,8 +1271,7 @@ class rust_mstch_function : public mstch_function {
   mstch::node rust_doc() { return quoted_rust_doc(function_); }
   mstch::node rust_interaction_name() {
     const auto& interaction = function_->interaction();
-    return interaction ? interaction->get_name()
-                       : function_->return_type()->get_name();
+    return interaction ? interaction->name() : function_->return_type()->name();
   }
   mstch::node rust_void_or_void_stream() {
     if (function_->sink_or_stream()) {
@@ -1390,7 +1389,7 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node rust_fields_by_name() {
     auto fields = struct_->fields().copy();
     std::sort(fields.begin(), fields.end(), [](auto a, auto b) {
-      return a->get_name() < b->get_name();
+      return a->name() < b->name();
     });
     return make_mstch_fields(fields);
   }
@@ -1549,7 +1548,7 @@ class rust_mstch_enum : public mstch_enum {
   mstch::node variants_by_name() {
     std::vector<t_enum_value*> variants = enum_->get_enum_values();
     std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
-      return a->get_name() < b->get_name();
+      return a->name() < b->name();
     });
     return make_mstch_enum_values(variants);
   }
@@ -1590,7 +1589,7 @@ class rust_mstch_type : public mstch_type {
   }
   mstch::node rust_name() { return type_rust_name(type_); }
   mstch::node rust_name_snake() {
-    return snakecase(mangle_type(type_->get_name()));
+    return snakecase(mangle_type(type_->name()));
   }
   mstch::node rust_package() {
     return get_types_import_name(type_->program(), options_);
@@ -1833,7 +1832,7 @@ class mstch_rust_value : public mstch_base {
     if (const_value_->is_enum()) {
       auto enum_value = const_value_->get_enum_value();
       if (enum_value) {
-        return mangle(enum_value->get_name());
+        return mangle(enum_value->name());
       }
     }
     return mstch::node();
@@ -2144,9 +2143,7 @@ class rust_mstch_field : public mstch_field {
     auto type = field_->get_type();
     return type->is_bool() || type->is_any_int() || type->is_floating_point();
   }
-  mstch::node rust_rename() {
-    return field_->get_name() != mangle(field_->get_name());
-  }
+  mstch::node rust_rename() { return field_->name() != mangle(field_->name()); }
   mstch::node rust_default() {
     auto value = field_->get_value();
     if (value) {

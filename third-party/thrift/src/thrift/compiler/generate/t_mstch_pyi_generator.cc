@@ -131,7 +131,7 @@ std::string to_flat_type_name(const t_type* type) {
     return "binary";
   }
 
-  return true_type->get_name();
+  return true_type->name();
 }
 
 const std::string* get_py_adapter(const t_type* type) {
@@ -390,7 +390,7 @@ class pyi_mstch_field : public mstch_field {
     this->pep484_optional_ =
         (is_optional || (!has_default_value && !is_required));
 
-    auto filteredName = mstch_field::field_->get_name();
+    auto filteredName = mstch_field::field_->name();
     if (kKeywords.find(filteredName) != kKeywords.end()) {
       filteredName += "_PY_RESERVED_KEYWORD";
     }
@@ -403,7 +403,7 @@ class pyi_mstch_field : public mstch_field {
 
   mstch::node get_filtered_name() { return this->filtered_name_; }
 
-  mstch::node get_original_name() { return mstch_field::field_->get_name(); }
+  mstch::node get_original_name() { return mstch_field::field_->name(); }
 
   mstch::node get_capitalized_name() {
     std::string name(this->filtered_name_);
@@ -634,7 +634,7 @@ void t_mstch_pyi_generator::generate_ttypes() {
 void t_mstch_pyi_generator::generate_services() {
   const std::string template_name = "service.pyi";
   for (const auto* service : this->get_program()->services()) {
-    const std::string module = service->get_name() + ".pyi";
+    const std::string module = service->name() + ".pyi";
 
     this->render_file(template_name, this->root_path_ / module, service);
   }

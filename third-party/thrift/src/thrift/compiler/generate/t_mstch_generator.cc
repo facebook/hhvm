@@ -58,7 +58,7 @@ mstch::map t_mstch_generator::dump(const t_program& program) {
 
 mstch::map t_mstch_generator::dump(const t_structured& strct, bool shallow) {
   mstch::map result{
-      {"name", strct.get_name()},
+      {"name", strct.name()},
       {"fields?", strct.has_fields()},
       {"fields",
        shallow ? static_cast<mstch::node>(false) : dump_elems(strct.fields())},
@@ -76,7 +76,7 @@ mstch::map t_mstch_generator::dump(const t_structured& strct, bool shallow) {
 mstch::map t_mstch_generator::dump(const t_field& field, int32_t index) {
   auto req = field.get_req();
   mstch::map result{
-      {"name", field.get_name()},
+      {"name", field.name()},
       {"key", std::to_string(field.get_key())},
       {"type", dump(*field.get_type())},
       {"index", std::to_string(index)},
@@ -102,7 +102,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       should_resolve_typedefs() ? *orig_type.get_true_type() : orig_type;
 
   mstch::map result{
-      {"name", type.get_name()},
+      {"name", type.name()},
       {"annotations", dump_elems(type.unstructured_annotations())},
 
       {"void?", type.is_void()},
@@ -160,7 +160,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
 
 mstch::map t_mstch_generator::dump(const t_enum& enm) {
   mstch::map result{
-      {"name", enm.get_name()},
+      {"name", enm.name()},
       {"values", dump_elems(enm.get_enum_values())},
       {"annotations", dump_elems(enm.unstructured_annotations())},
   };
@@ -172,7 +172,7 @@ mstch::map t_mstch_generator::dump(const t_enum& enm) {
 
 mstch::map t_mstch_generator::dump(const t_enum_value& val) {
   mstch::map result{
-      {"name", val.get_name()},
+      {"name", val.name()},
       {"value", std::to_string(val.get_value())},
   };
 
@@ -184,7 +184,7 @@ mstch::map t_mstch_generator::dump(const t_enum_value& val) {
 mstch::map t_mstch_generator::dump(const t_service& service) {
   const t_service* extends = service.get_extends();
   mstch::map result{
-      {"name", service.get_name()},
+      {"name", service.name()},
       {"annotations", dump_elems(service.unstructured_annotations())},
       {"functions", dump_elems(service.get_functions())},
       {"functions?", !service.get_functions().empty()},
@@ -200,7 +200,7 @@ mstch::map t_mstch_generator::dump(const t_service& service) {
 mstch::map t_mstch_generator::dump(const t_function& function) {
   auto exceptions = get_elems(function.exceptions());
   mstch::map result{
-      {"name", function.get_name()},
+      {"name", function.name()},
       {"oneway?", function.qualifier() == t_function_qualifier::oneway},
       {"return_type", dump(*function.return_type())},
       {"exceptions", dump_elems(exceptions)},
@@ -217,7 +217,7 @@ mstch::map t_mstch_generator::dump(const t_function& function) {
 mstch::map t_mstch_generator::dump(const t_const& cnst) {
   mstch::map result{
       {"type", dump(*cnst.type())},
-      {"name", cnst.get_name()},
+      {"name", cnst.name()},
       {"value", dump(*cnst.value())},
   };
 
@@ -256,8 +256,8 @@ mstch::map t_mstch_generator::dump(const t_const_value& value) {
       break;
     case cv::CV_INTEGER:
       if (value.get_enum_value()) {
-        result.emplace("enum_name", value.get_enum()->get_name());
-        result.emplace("enum_value_name", value.get_enum_value()->get_name());
+        result.emplace("enum_name", value.get_enum()->name());
+        result.emplace("enum_value_name", value.get_enum_value()->name());
       }
       result.emplace("value", std::to_string(value.get_integer()));
       result.emplace("integer_value", std::to_string(value.get_integer()));

@@ -100,7 +100,7 @@ class json_experimental_program : public mstch_program {
     auto last = program_->includes().size();
     for (auto program : program_->get_included_programs()) {
       includes.push_back(mstch::map{
-          {"name", program->get_name()},
+          {"name", program->name()},
           {"path", program->include_prefix() + program->name() + ".thrift"},
           {"last?", (--last) == 0}});
     }

@@ -272,7 +272,7 @@ string t_json_generator::to_string(const t_type* type) {
     return "TYPEDEF";
   }
 
-  throw std::runtime_error("INVALID TYPE IN to_string: " + type->get_name());
+  throw std::runtime_error("INVALID TYPE IN to_string: " + type->name());
 }
 
 string t_json_generator::to_string(const t_service*) {
@@ -315,7 +315,7 @@ string t_json_generator::to_spec_args(const t_type* type) {
         to_spec_args(((t_list*)type)->get_elem_type()) + "} ";
   }
 
-  throw std::runtime_error("INVALID TYPE IN to_spec_args: " + type->get_name());
+  throw std::runtime_error("INVALID TYPE IN to_spec_args: " + type->name());
 }
 
 string t_json_generator::to_spec_args(const t_service* service) {
@@ -327,7 +327,7 @@ string t_json_generator::to_spec_args_named(const t_named* named) {
   if (named->program() != program_) {
     module = named->program()->name() + ".";
   }
-  return "\"" + module + named->get_name() + "\"";
+  return "\"" + module + named->name() + "\"";
 }
 
 /**
@@ -339,9 +339,9 @@ string t_json_generator::type_name(const t_type* ttype) {
   if (program != nullptr && program != program_) {
     const string& json_namespace = program->get_namespace("json");
     return (!json_namespace.empty() ? json_namespace : program->name()) + "." +
-        ttype->get_name();
+        ttype->name();
   }
-  return ttype->get_name();
+  return ttype->name();
 }
 
 /**
@@ -524,7 +524,7 @@ void t_json_generator::print_node_annotations(
  * @param tinclude The include statement
  */
 void t_json_generator::generate_include(const t_program* included_program) {
-  indent(f_out_) << "\"" << included_program->get_name() << "\" : {" << endl;
+  indent(f_out_) << "\"" << included_program->name() << "\" : {" << endl;
   indent_up();
   indent(f_out_) << R"("path" : ")"
                  << included_program->include_prefix() +
@@ -540,7 +540,7 @@ void t_json_generator::generate_include(const t_program* included_program) {
  * @param ttypedef The type definition
  */
 void t_json_generator::generate_typedef(const t_typedef* ttypedef) {
-  indent(f_out_) << "\"" << ttypedef->get_name() << "\" : {" << endl;
+  indent(f_out_) << "\"" << ttypedef->name() << "\" : {" << endl;
   indent_up();
   print_lineno(*ttypedef);
   print_spec(ttypedef->get_type());
@@ -560,7 +560,7 @@ void t_json_generator::generate_typedef(const t_typedef* ttypedef) {
  * @param tenum The enumeration
  */
 void t_json_generator::generate_enum(const t_enum* tenum) {
-  indent(f_out_) << "\"" << tenum->get_name() << "\" : {" << endl;
+  indent(f_out_) << "\"" << tenum->name() << "\" : {" << endl;
   indent_up();
   print_lineno(*tenum);
   print_node_annotations(
@@ -580,7 +580,7 @@ void t_json_generator::generate_enum(const t_enum* tenum) {
     // approach of compartmentalization, but may be backwards-incompatible.
     // Adding annotations as a separate top-level enum list/map would go
     // against this general approach.
-    indent(f_out_) << "\"" << (*val_iter)->get_name() << "\"" << " : "
+    indent(f_out_) << "\"" << (*val_iter)->name() << "\"" << " : "
                    << (*val_iter)->get_value();
   }
   f_out_ << endl;
@@ -607,7 +607,7 @@ void t_json_generator::generate_consts(vector<t_const*> consts) {
  * Generates a constant value
  */
 void t_json_generator::generate_const(const t_const* tconst) {
-  string name = tconst->get_name();
+  string name = tconst->name();
   indent(f_out_) << "\"" << name << "\" : {" << endl;
   indent_up();
   print_lineno(*tconst);
@@ -631,7 +631,7 @@ void t_json_generator::generate_const(const t_const* tconst) {
  * @param tstruct The struct definition
  */
 void t_json_generator::generate_struct(const t_structured* tstruct) {
-  const string& name = tstruct->get_name();
+  const string& name = tstruct->name();
   indent(f_out_) << "\"" << name << "\" : {" << endl;
   indent_up();
   print_lineno(*tstruct);
@@ -652,7 +652,7 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
     if (mem_iter != members.begin()) {
       f_out_ << "," << endl;
     }
-    indent(f_out_) << "\"" << (*mem_iter)->get_name() << "\" : {" << endl;
+    indent(f_out_) << "\"" << (*mem_iter)->name() << "\" : {" << endl;
     indent_up();
     print_spec((*mem_iter)->get_type());
     f_out_ << "," << endl
@@ -726,7 +726,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
     if (fn_iter != functions.begin()) {
       f_out_ << "," << endl;
     }
-    string fn_name = (*fn_iter)->get_name();
+    string fn_name = (*fn_iter)->name();
     indent(f_out_) << "\"" << service_name_ << "." << fn_name << "\" : {"
                    << endl;
     indent_up();
@@ -754,7 +754,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         }
         indent(f_out_) << "{" << endl;
         indent_up();
-        print_name((*arg_iter)->get_name());
+        print_name((*arg_iter)->name());
         print_spec((*arg_iter)->get_type());
         if ((*arg_iter)->get_value() != nullptr) {
           f_out_ << "," << endl << indent() << "\"value\" : ";

@@ -516,10 +516,11 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
             folly::IOBuf::copyBuffer(folly::to<std::string>(0)), {}},
         nullptr /* evb */,
         serverCallback.get());
-    folly::coro::co_invoke(
-        &apache::thrift::detail::ServerSinkBridge::start,
-        std::move(serverCallback))
-        .scheduleOn(threadManagerThread_.getEventBase())
+    co_withExecutor(
+        threadManagerThread_.getEventBase(),
+        folly::coro::co_invoke(
+            &apache::thrift::detail::ServerSinkBridge::start,
+            std::move(serverCallback)))
         .start();
   }
 

@@ -212,7 +212,7 @@ const std::string& cpp_name_resolver::get_underlying_type_name(
 const std::string& cpp_name_resolver::get_underlying_namespaced_name(
     const t_type& node) {
   return detail::get_or_gen(underlying_namespaced_name_cache_, &node, [&] {
-    if (auto program = node.get_program()) {
+    if (auto program = node.program()) {
       auto extra = get_extra_namespace(node);
       return fmt::format(
           "{}::{}{}",

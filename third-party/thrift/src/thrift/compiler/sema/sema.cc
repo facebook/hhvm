@@ -558,7 +558,7 @@ void add_annotations_to_node_type(
   } else {
     // Wrap in an unnamed typedef :(
     auto unnamed = t_typedef::make_unnamed(
-        const_cast<t_program*>(node_type->get_program()),
+        const_cast<t_program*>(node_type->program()),
         node_type->name(),
         t_type_ref::from_ptr(node_type));
     for (auto& pair : annotations) {

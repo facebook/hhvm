@@ -1303,7 +1303,7 @@ class cpp_mstch_type : public mstch_type {
   mstch::node cpp_name() { return cpp2::get_name(type_); }
   mstch::node cpp_fullname() {
     return cpp_context_->resolver().get_namespaced_name(
-        *type_->get_program(), *type_);
+        *type_->program(), *type_);
   }
   mstch::node cpp_type() {
     return cpp_context_->resolver().get_native_type(*type_);

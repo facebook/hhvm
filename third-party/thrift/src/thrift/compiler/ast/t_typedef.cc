@@ -66,7 +66,7 @@ bool t_placeholder_typedef::resolve() {
       // type_ref instead.
       name_ = type_->name();
       // TODO(afuller): Make program_ const or remove it completely.
-      program_ = type_->get_program();
+      program_ = type_->program();
     }
   }
   return !type_.empty();

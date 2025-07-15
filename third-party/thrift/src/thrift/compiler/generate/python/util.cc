@@ -55,9 +55,9 @@ static void get_needed_includes_by_patch_impl(
     // We don't need to import module to get the primitive types.
     return;
   }
-  if (type.get_program() && type.get_program() != root) {
+  if (type.program() && type.program() != root) {
     // If type is not in root, root needs type's program in runtime.
-    result.insert(type.get_program());
+    result.insert(type.program());
     return;
   }
   if (const t_list* asList = type.try_as<t_list>()) {

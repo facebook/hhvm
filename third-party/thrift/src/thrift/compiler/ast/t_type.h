@@ -185,13 +185,6 @@ class t_type : public t_named {
    * Create a unique hash number based on t_type's properties.
    */
   virtual uint64_t get_type_id() const;
-
-  t_type* get_true_type() {
-    return const_cast<t_type*>(
-        const_cast<const t_type*>(this)->get_true_type());
-  }
-
-  const t_program* get_program() const { return program(); }
 };
 
 /**

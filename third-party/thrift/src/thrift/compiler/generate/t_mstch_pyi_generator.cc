@@ -648,7 +648,7 @@ void t_mstch_pyi_generator::render_file(
       ? make_mstch_program_cached(
             this->get_program(), t_mstch_generator::mstch_context_)
       : make_mstch_service_cached(
-            service->get_program(), service, t_mstch_generator::mstch_context_);
+            service->program(), service, t_mstch_generator::mstch_context_);
 
   t_mstch_generator::render_to_file(mstchObject, template_name, path);
 }

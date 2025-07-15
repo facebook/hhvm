@@ -695,8 +695,8 @@ class mstch_go_type : public mstch_type {
   mstch::node metadata_thrift_type_getter() {
     // Program will be null for primitive (base) types.
     // They should be treated as being from the current program.
-    auto is_from_current_program = type_->get_program() == nullptr ||
-        data_.is_current_program(type_->get_program());
+    auto is_from_current_program = type_->program() == nullptr ||
+        data_.is_current_program(type_->program());
 
     if (is_from_current_program) {
       // If the type is from the current program, we can simply use its
@@ -714,8 +714,8 @@ class mstch_go_type : public mstch_type {
   mstch::node codec_type_spec_getter() {
     // Program will be null for primitive (base) types.
     // They should be treated as being from the current program.
-    auto is_from_current_program = type_->get_program() == nullptr ||
-        data_.is_current_program(type_->get_program());
+    auto is_from_current_program = type_->program() == nullptr ||
+        data_.is_current_program(type_->program());
 
     if (is_from_current_program) {
       // If the type is from the current program, we can simply use its

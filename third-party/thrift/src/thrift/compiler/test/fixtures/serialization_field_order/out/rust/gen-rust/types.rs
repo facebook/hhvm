@@ -134,11 +134,7 @@ where
             }
             (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
 
-            if fty != ::fbthrift::TType::Stop {
-                true
-            } else {
-                false
-            }
+            fty != ::fbthrift::TType::Stop
         };
 
         if fallback {
@@ -296,11 +292,7 @@ where
             }
             (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
 
-            if fty != ::fbthrift::TType::Stop {
-                true
-            } else {
-                false
-            }
+            fty != ::fbthrift::TType::Stop
         };
 
         if fallback {

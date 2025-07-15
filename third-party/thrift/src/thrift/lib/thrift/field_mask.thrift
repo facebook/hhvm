@@ -124,5 +124,5 @@ union Mask {
   8: MapTypeToMask includes_type; // types to be included for thrift.Any
 }
 
-const Mask allMask = {"excludes": {}}; // Masks all fields.
-const Mask noneMask = {"includes": {}}; // Masks no fields.
+const Mask allMask = Mask{excludes = {}}; // Masks all fields.
+const Mask noneMask = Mask{includes = {}}; // Masks no fields.

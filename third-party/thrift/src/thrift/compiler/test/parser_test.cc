@@ -105,7 +105,7 @@ TEST(ParserTest, include_paths) {
   EXPECT_FALSE(diags.has_errors());
   EXPECT_TRUE(programs != nullptr);
 
-  EXPECT_EQ(programs->get_programs().size(), 3);
+  EXPECT_EQ(programs->programs().size(), 3);
 }
 
 TEST(ParserTest, struct_doc) {

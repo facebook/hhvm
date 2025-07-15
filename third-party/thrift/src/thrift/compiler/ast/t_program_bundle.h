@@ -46,14 +46,13 @@ class t_program_bundle {
   node_list_view<t_program> programs() { return programs_; }
   node_list_view<const t_program> programs() const { return programs_; }
   void add_program(std::unique_ptr<t_program> program) {
-    programs_raw_.push_back(program.get());
     programs_by_full_path_[program->full_path()] = program.get();
     programs_.emplace_back(std::move(program));
   }
 
   void add_implicit_includes(std::unique_ptr<t_program_bundle> inc) {
-    for (auto* prog : inc->programs_raw_) {
-      programs_by_full_path_[prog->full_path()] = prog;
+    for (const auto& [path, prog] : inc->programs_by_full_path_) {
+      programs_by_full_path_[path] = prog;
     }
     std::move(
         inc->programs_.begin(),
@@ -76,12 +75,8 @@ class t_program_bundle {
 
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.
-
-  std::vector<t_program*> programs_raw_;
-
  public:
-  const std::vector<t_program*>& get_programs() const { return programs_raw_; }
-  t_program* get_root_program() const { return programs_raw_[0]; }
+  t_program* get_root_program() const { return programs_[0].get(); }
 };
 
 } // namespace apache::thrift::compiler

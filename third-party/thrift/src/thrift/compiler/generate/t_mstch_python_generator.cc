@@ -945,7 +945,8 @@ class python_mstch_struct : public mstch_struct {
   }
 
   mstch::node disable_field_caching() {
-    return struct_->has_structured_annotation(kPythonDisableFieldCacheUri);
+    return has_option("disable_field_cache") ||
+        struct_->has_structured_annotation(kPythonDisableFieldCacheUri);
   }
 
  private:

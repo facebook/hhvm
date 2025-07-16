@@ -203,6 +203,7 @@ struct QueryLoggingData : CommonLoggingData {
   AttributeMap response_attributes;
   bool was_slow;
   unsigned int warnings_count;
+  std::optional<int> thrift_rpc_priority;
 };
 
 // Base class for logging events of db client apis. This should be used as an

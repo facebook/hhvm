@@ -21,7 +21,10 @@
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
 #include <unordered_set>
+
+#include <folly/synchronization/DelayedInit.h>
 #include <folly/synchronization/RelaxedAtomic.h>
+
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
@@ -113,6 +116,14 @@ class SchemaRegistry : public type_system::TypeSystem {
    */
   std::optional<type_system::DefinitionRef> getTypeSystemDefinitionRefByUri(
       const std::string_view uri) const;
+  /**
+   * Gets the exact set of URIs for which getTypeSystemDefinitionRefByUri will
+   * succeed.
+   *
+   * This includes only types defined in a file with the `any` cpp2 compiler
+   * option enabled.
+   */
+  const folly::F14FastSet<type_system::Uri>& getTypeSystemUris() const;
 
   /**
    * Gets TypeSystem node for given definition, or throws `std::out_of_range` if
@@ -171,6 +182,7 @@ class SchemaRegistry : public type_system::TypeSystem {
   std::unordered_set<type::ProgramId> includedPrograms_;
 
   std::unique_ptr<syntax_graph::SyntaxGraph> syntaxGraph_;
+  mutable folly::DelayedInit<folly::F14FastSet<type_system::Uri>> knownUris_;
   syntax_graph::detail::IncrementalResolver* resolver_;
 
   friend struct test::SchemaTest;

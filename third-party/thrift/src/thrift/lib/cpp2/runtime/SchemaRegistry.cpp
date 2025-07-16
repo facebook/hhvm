@@ -130,6 +130,18 @@ SchemaRegistry::getTypeSystemDefinitionRefByUri(
   return std::nullopt;
 }
 
+const folly::F14FastSet<type_system::Uri>& SchemaRegistry::getTypeSystemUris()
+    const {
+  return knownUris_.try_emplace_with([&] {
+    folly::F14FastSet<type_system::Uri> ret;
+    ret.reserve(base_.rawSchemasByUri_.size());
+    for (const auto& [uri, _] : base_.rawSchemasByUri_) {
+      ret.insert(type_system::Uri(uri));
+    }
+    return ret;
+  });
+}
+
 } // namespace apache::thrift
 
 #endif

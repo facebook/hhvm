@@ -1,8 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures('expression_trees', 'expression_tree_nullsafe_obj_get')>>
 
-<<file: __EnableUnstableFeatures('expression_trees', 'expression_tree_nullsafe_obj_get')>>
-
-function test(): void {
+function f(): void {
   ExampleDsl`(?MyState $x): ?ExampleInt ==> {
     return $x?->my_prop;
   }`;

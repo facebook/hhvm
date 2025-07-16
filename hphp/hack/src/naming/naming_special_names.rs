@@ -1199,6 +1199,8 @@ pub mod expression_trees {
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
     pub const VISIT_INSTANCE_METHOD: &str = "visitInstanceMethod";
+    pub const VISIT_PROPERTY_ACCESS_NULL_SAFE: &str = "visitPropertyAccessNullSafe";
+    pub const VISIT_INSTANCE_METHOD_NULL_SAFE: &str = "visitInstanceMethodNullSafe";
     pub const VISIT_XHP: &str = "visitXhp";
     pub const VISIT_SHAPE: &str = "visitShape";
     pub const VISIT_KEYED_COLLECTION: &str = "visitKeyedCollection";

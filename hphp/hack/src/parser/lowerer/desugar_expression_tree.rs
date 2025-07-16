@@ -1529,22 +1529,21 @@ impl RewriteState {
             }
             // Source:
             //  MyDsl`(...)->foo` or
-            //  MyDsl`(...)->foo(...)`
+            //  MyDsl`(...)->foo(...)` or
+            //  MyDsl`(...)?->foo` or
+            //  MyDsl`(...)?->foo(...)`
             // Virtualized to:
             //   `(...)->foo` or
-            //   `(...)->foo(...)`
+            //   `(...)->foo(...)` or
+            //   `(...)?->foo` or
+            //   `(...)?->foo(...)`
             // Desugared to:
             //   `$0v->visitPropertyAccess(new ExprPos(...), ..., 'foo')` or
-            //   `$0v->visitInstanceMethod(new ExprPos(...), ..., 'foo')`
+            //   `$0v->visitInstanceMethod(new ExprPos(...), ..., 'foo')` or
+            //   `$0v->visitPropertyAccessNullSafe(new ExprPos(...), ..., 'foo')` or
+            //   `$0v->visitInstanceMethodNullSafe(new ExprPos(...), ..., 'foo')`
             ObjGet(og) => {
                 let (e1, e2, null_flavor, is_prop_call) = *og;
-
-                if null_flavor == OgNullFlavor::OGNullsafe {
-                    self.errors.push((
-                        pos.clone(),
-                        "Expression Trees do not support nullsafe property or instance method access".into(),
-                    ));
-                }
                 let rewritten_e1 = self.rewrite_expr(e1, visitor_name);
 
                 let id = if let Id(id) = &e2.2 {
@@ -1558,9 +1557,19 @@ impl RewriteState {
                     e2.clone()
                 };
                 let desugar_expr = v_meth_call(
-                    match is_prop_call {
-                        PropOrMethod::IsProp => et::VISIT_PROPERTY_ACCESS,
-                        PropOrMethod::IsMethod => et::VISIT_INSTANCE_METHOD,
+                    match (is_prop_call, null_flavor) {
+                        (PropOrMethod::IsProp, OgNullFlavor::OGNullthrows) => {
+                            et::VISIT_PROPERTY_ACCESS
+                        }
+                        (PropOrMethod::IsMethod, OgNullFlavor::OGNullthrows) => {
+                            et::VISIT_INSTANCE_METHOD
+                        }
+                        (PropOrMethod::IsProp, OgNullFlavor::OGNullsafe) => {
+                            et::VISIT_PROPERTY_ACCESS_NULL_SAFE
+                        }
+                        (PropOrMethod::IsMethod, OgNullFlavor::OGNullsafe) => {
+                            et::VISIT_INSTANCE_METHOD_NULL_SAFE
+                        }
                     },
                     vec![pos_expr, rewritten_e1.desugar_expr, id],
                     &pos,

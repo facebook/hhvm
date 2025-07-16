@@ -291,12 +291,28 @@ class ExampleDsl {
     return "$expr->$prop_name";
   }
 
+  public function visitPropertyAccessNullSafe(
+    ?ExprPos $_,
+    ExampleDsl::TAst $expr,
+    string $prop_name,
+  )[]: ExampleDsl::TAst {
+    return "$expr?->$prop_name";
+  }
+
   public function visitInstanceMethod(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,
     string $method,
   ): ExampleDsl::TAst {
     return "$expr->$method";
+  }
+
+  public function visitInstanceMethodNullSafe(
+    ?ExprPos $_,
+    ExampleDsl::TAst $expr,
+    string $method,
+  ): ExampleDsl::TAst {
+    return "$expr?->$method";
   }
 
   public function visitXhp(

@@ -1,0 +1,72 @@
+<?hh
+<<file:
+  __EnableUnstableFeatures(
+    'expression_trees',
+    'expression_tree_nullsafe_obj_get',
+  )>>
+
+function f(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 5,
+      "end_line" => 7,
+      "start_column" => 13,
+      "end_column" => 3,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 5,
+            "end_line" => 7,
+            "start_column" => 13,
+            "end_column" => 3,
+          ],
+          vec["$x"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 6,
+                "end_line" => 6,
+                "start_column" => 4,
+                "end_column" => 24,
+              ],
+              $v->visitPropertyAccessNullSafe(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 6,
+                  "end_line" => 6,
+                  "start_column" => 11,
+                  "end_column" => 23,
+                ],
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 6,
+                    "end_line" => 6,
+                    "start_column" => 11,
+                    "end_column" => 13,
+                  ],
+                  "$x",
+                ),
+                "my_prop",
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+abstract class MyState {
+  public ExampleInt $my_prop;
+}

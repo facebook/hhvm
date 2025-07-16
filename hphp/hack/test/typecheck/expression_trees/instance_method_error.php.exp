@@ -1,2 +1,0 @@
-ERROR: File "instance_method_error.php", line 7, characters 12-19:
-Expression Trees do not support nullsafe property or instance method access (Parsing[1002])

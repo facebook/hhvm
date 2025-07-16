@@ -1,0 +1,2 @@
+ERROR: File "nullsafe_property_access_feature.php", line 7, characters 12-23:
+Cannot use unstable feature: `expression_tree_nullsafe_obj_get` (Parsing[1002])

@@ -57,6 +57,7 @@ impl FeatureName {
             ProtectedInternal => Preview,
             PolymorphicLambda => OngoingRelease,
             ExpressionTreeCoalesceOperator => Preview,
+            ExpressionTreeNullsafeObjGet => Preview,
         }
     }
 

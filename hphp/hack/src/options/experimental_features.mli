@@ -66,6 +66,7 @@ type feature_name =
   | ProtectedInternal
   | PolymorphicLambda
   | ExpressionTreeCoalesceOperator
+  | ExpressionTreeNullsafeObjGet
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

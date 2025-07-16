@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('expression_trees', 'expression_tree_nullsafe_obj_get')>>
+<<file: __EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
   ExampleDsl`(?MyState $x): ?ExampleInt ==> {

@@ -3587,6 +3587,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.errors
                     .push(make_error_from_node(node, errors::varray_darray_banned))
             }
+            SafeMemberSelectionExpression(_) if self.context.active_expression_tree => {
+                self.check_can_use_feature(node, &FeatureName::ExpressionTreeNullsafeObjGet);
+            }
 
             // Other kinds of expressions currently produce no expr errors.
             _ => {}

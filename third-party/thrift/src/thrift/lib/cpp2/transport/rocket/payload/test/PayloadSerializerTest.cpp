@@ -36,7 +36,7 @@ void testPackAndUnpackWithCompactProtocol(PayloadSerializer& serializer) {
   EXPECT_EQ(other.protocol(), ProtocolId::COMPACT);
 }
 
-TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy) {
+TEST(PayloadSerializerTest, TestPackWithDefaultStrategy) {
   PayloadSerializer::reset();
   PayloadSerializer::initialize(DefaultPayloadSerializerStrategy());
   auto& serializer = *PayloadSerializer::getInstance().get();

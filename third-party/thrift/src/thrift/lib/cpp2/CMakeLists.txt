@@ -312,7 +312,6 @@ add_library(
   transport/core/ThriftClientCallback.cpp
   transport/core/ThriftRequest.cpp
   transport/rocket/FdSocket.cpp
-  transport/rocket/PayloadUtils.cpp
   transport/rocket/ChecksumGenerator.cpp
   transport/rocket/Types.cpp
   transport/rocket/compression/CompressionManager.cpp

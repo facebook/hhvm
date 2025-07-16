@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp2/transport/rocket/payload/ChecksumPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/CustomCompressionPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/DefaultPayloadSerializerStrategy.h>
-#include <thrift/lib/cpp2/transport/rocket/payload/LegacyPayloadSerializerStrategy.h>
 
 namespace apache::thrift::rocket {
 
@@ -101,9 +100,7 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
  private:
   std::variant<
       DefaultPayloadSerializerStrategy,
-      LegacyPayloadSerializerStrategy,
       ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>,
-      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>,
       CustomCompressionPayloadSerializerStrategy<
           DefaultPayloadSerializerStrategy>>
       strategy_;
@@ -117,20 +114,10 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
     if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
       auto& strategy = std::get<DefaultPayloadSerializerStrategy>(strategy_);
       return delegate(strategy);
-    } else if (std::holds_alternative<LegacyPayloadSerializerStrategy>(
-                   strategy_)) {
-      auto& strategy = std::get<LegacyPayloadSerializerStrategy>(strategy_);
-      return delegate(strategy);
     } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
                    DefaultPayloadSerializerStrategy>>(strategy_)) {
       auto& strategy = std::get<
           ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>>(
-          strategy_);
-      return delegate(strategy);
-    } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
-                   LegacyPayloadSerializerStrategy>>(strategy_)) {
-      auto& strategy = std::get<
-          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>>(
           strategy_);
       return delegate(strategy);
     } else {
@@ -176,21 +163,10 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       return PayloadSerializer{DefaultPayloadSerializerStrategy(args...)};
     } else if constexpr (std::is_same_v<
                              Strategy,
-                             LegacyPayloadSerializerStrategy>) {
-      return PayloadSerializer{LegacyPayloadSerializerStrategy(args...)};
-    } else if constexpr (std::is_same_v<
-                             Strategy,
                              ChecksumPayloadSerializerStrategy<
                                  DefaultPayloadSerializerStrategy>>) {
       return PayloadSerializer{
           ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>(
-              args...)};
-    } else if constexpr (std::is_same_v<
-                             Strategy,
-                             ChecksumPayloadSerializerStrategy<
-                                 LegacyPayloadSerializerStrategy>>) {
-      return PayloadSerializer{
-          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
               args...)};
     } else if constexpr (std::is_same_v<
                              Strategy,

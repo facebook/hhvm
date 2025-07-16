@@ -47,7 +47,7 @@ impl FeatureName {
             AwaitInSplice => OngoingRelease,
             OpenTuples => OngoingRelease,
             TypeSplat => OngoingRelease,
-            ExpressionTreeNestedBindings => Preview,
+            ExpressionTreeNestedBindings => OngoingRelease,
             LikeTypeHints => Unstable,
             ShapeDestructure => Unstable,
             ExpressionTreeShapeCreation => OngoingRelease,

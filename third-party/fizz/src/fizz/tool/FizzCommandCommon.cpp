@@ -8,7 +8,6 @@
 
 #include <fizz/backend/libsodium/crypto/exchange/X25519.h>
 #include <fizz/backend/openssl/OpenSSL.h>
-#include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/ech/Types.h>
 #include <fizz/tool/FizzCommandCommon.h>
 #include <folly/FileUtil.h>

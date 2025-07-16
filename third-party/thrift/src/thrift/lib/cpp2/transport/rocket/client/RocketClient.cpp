@@ -1539,7 +1539,7 @@ void RocketClient::maybeScheduleFirstResponseTimeout(
 }
 
 bool RocketClient::isFirstResponse(StreamId streamId) const {
-  return firstResponseTimeouts_.count(streamId) > 0;
+  return firstResponseTimeouts_.contains(streamId);
 }
 
 void RocketClient::acknowledgeFirstResponse(StreamId streamId) {

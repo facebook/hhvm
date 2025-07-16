@@ -19,6 +19,7 @@
 #include <folly/Utility.h>
 #include <folly/container/F14Map-fwd.h>
 #include <folly/container/F14Set-fwd.h>
+#include <folly/json/dynamic.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
@@ -36,7 +37,14 @@ class ValueWrapper;
 
 using Object = ObjectWrapper<detail::Object>;
 using Value = ValueWrapper<detail::Value>;
+} // namespace apache::thrift::protocol::detail
 
+namespace apache::thrift::protocol {
+folly::dynamic toDynamic(const detail::Object& obj);
+folly::dynamic toDynamic(const detail::Value& val);
+} // namespace apache::thrift::protocol
+
+namespace apache::thrift::protocol::detail {
 template <class Base>
 class ObjectWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
  private:
@@ -105,6 +113,10 @@ class ObjectWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   [[nodiscard]] bool empty() const { return members()->empty(); }
 
  private:
+  folly::dynamic toDynamicImpl() const;
+  friend folly::dynamic apache::thrift::protocol::toDynamic(
+      const ObjectWrapper&);
+
   friend bool operator==(
       const ObjectWrapper& lhs, const ObjectWrapper& rhs) noexcept {
     return lhs.data_ == rhs.data_;
@@ -271,6 +283,13 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   }
 
  private:
+  folly::dynamic toDynamicImpl() const;
+
+  template <typename T>
+  friend class ObjectWrapper;
+  friend folly::dynamic apache::thrift::protocol::toDynamic(
+      const ValueWrapper&);
+
   using Wrap::Wrap;
 };
 

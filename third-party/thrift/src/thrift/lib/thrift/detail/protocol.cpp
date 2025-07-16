@@ -23,6 +23,36 @@
 
 #include <xxhash.h>
 
+namespace {
+std::string str(const apache::thrift::protocol::detail::Value& value) {
+  using apache::thrift::protocol::detail::Value;
+  switch (value.getType()) {
+    case Value::Type::boolValue:
+      return std::to_string(value.as_bool());
+    case Value::Type::byteValue:
+      return std::to_string(value.as_byte());
+    case Value::Type::i16Value:
+      return std::to_string(value.as_i16());
+    case Value::Type::i32Value:
+      return std::to_string(value.as_i32());
+    case Value::Type::i64Value:
+      return std::to_string(value.as_i64());
+    case Value::Type::floatValue:
+      return std::to_string(value.as_float());
+    case Value::Type::doubleValue:
+      return std::to_string(value.as_double());
+    case Value::Type::stringValue:
+      return value.as_string();
+    case Value::Type::binaryValue:
+      return value.as_binary().to<std::string>();
+    default:
+      folly::throw_exception<std::runtime_error>(
+          "str(" + apache::thrift::util::enumNameSafe(value.getType()) +
+          ") is not implemented.");
+  }
+}
+} // namespace
+
 namespace apache::thrift::protocol::detail {
 
 template <class Base>
@@ -53,6 +83,71 @@ using ValueSet = Value::ValueSet;
 using BoxedValueSet = Value::BoxedValueSet;
 using ValueMap = Value::ValueMap;
 using BoxedValueMap = Value::BoxedValueMap;
+
+template <>
+folly::dynamic Value::toDynamicImpl() const {
+  folly::dynamic ret;
+  switch (getType()) {
+    case Value::Type::boolValue:
+      return as_bool();
+    case Value::Type::byteValue:
+      return as_byte();
+    case Value::Type::i16Value:
+      return as_i16();
+    case Value::Type::i32Value:
+      return as_i32();
+    case Value::Type::i64Value:
+      return as_i64();
+    case Value::Type::floatValue:
+      return as_float();
+    case Value::Type::doubleValue:
+      return as_double();
+    case Value::Type::stringValue:
+      return as_string();
+    case Value::Type::binaryValue:
+      return as_binary().to<std::string>();
+    case Value::Type::listValue:
+      ret = folly::dynamic::array();
+      ret.reserve(as_list().size());
+      for (auto&& v : as_list()) {
+        ret.push_back(v.toDynamicImpl());
+      }
+      return ret;
+    case Value::Type::setValue:
+      ret = folly::dynamic::array();
+      ret.reserve(as_set().size());
+      for (auto&& v : as_set()) {
+        ret.push_back(v.toDynamicImpl());
+      }
+      return ret;
+    case Value::Type::mapValue:
+      ret = folly::dynamic::object();
+      for (auto&& [k, v] : as_map()) {
+        ret[str(k)] = v.toDynamicImpl();
+      }
+      return ret;
+    case Value::Type::objectValue: {
+      ret = folly::dynamic::object();
+      for (auto&& [k, v] : as_object()) {
+        ret[std::to_string(k)] = v.toDynamicImpl();
+      }
+      return ret;
+    }
+    case Value::Type::__EMPTY__:
+      return nullptr;
+    default:
+      folly::throw_exception<std::runtime_error>("Not Implemented.");
+  }
+}
+
+template <>
+folly::dynamic Object::toDynamicImpl() const {
+  folly::dynamic ret = folly::dynamic::object();
+  for (auto&& [k, v] : *this) {
+    ret[std::to_string(k)] = v.toDynamicImpl();
+  }
+  return ret;
+}
 
 template <>
 ValueList& Value::emplace_list(BoxedValueList t) {

@@ -202,8 +202,18 @@ auto fromObjectStruct(const protocol::Object& o) {
 // Returns whether the protocol::Value/ Object is its intrinsic default.
 bool isIntrinsicDefault(const Value& value);
 bool isIntrinsicDefault(const Object& obj);
-folly::dynamic toDynamic(const Value& value);
-folly::dynamic toDynamic(const Object& obj);
+
+// Convert protocol::Value to folly::dynamic. The conversion is not supported
+// for container or structured keys.
+inline folly::dynamic toDynamic(const Value& value) {
+  return value.toDynamicImpl();
+}
+// Convert protocol::Object to folly::dynamic. Fields are stored in
+// folly::dynamic::object keyed by stringified field id. Check
+// protocol::Value::toDynamic for more details.
+inline folly::dynamic toDynamic(const Object& obj) {
+  return obj.toDynamicImpl();
+}
 
 // Convert protocol::Value to Thrift Any with the given protocol.
 using detail::toAny;

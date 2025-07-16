@@ -269,9 +269,11 @@ where
             ::fbthrift::Field::new("useless_field", ::fbthrift::TType::I32, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = A::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a A")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.useless_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "useless_field", strct: "A"})?;
@@ -511,9 +513,11 @@ where
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Bang::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Bang")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "Bang"})?;

@@ -505,9 +505,11 @@ where
             ::fbthrift::Field::new("readonly", ::fbthrift::TType::Bool, 6),
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?;
@@ -740,9 +742,11 @@ where
             ::fbthrift::Field::new("StringToI64Map", ::fbthrift::TType::Map, 3),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Containers::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Containers")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::List, 1) {
                 output.I32List = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "I32List", strct: "Containers"})?;
@@ -877,9 +881,11 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyDataItem::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataItem")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
 
             fty != ::fbthrift::TType::Stop
@@ -1177,9 +1183,11 @@ where
             ::fbthrift::Field::new("myUnion", ::fbthrift::TType::Struct, 4),
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyException::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyException")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyException"})?;
@@ -1348,9 +1356,11 @@ where
             ::fbthrift::Field::new("myUnion", ::fbthrift::TType::Struct, 4),
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyExceptionWithMessage::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyExceptionWithMessage")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyExceptionWithMessage"})?;
@@ -1510,9 +1520,11 @@ where
             ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = ReservedKeyword::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ReservedKeyword")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.reserved_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reserved_field", strct: "ReservedKeyword"})?;

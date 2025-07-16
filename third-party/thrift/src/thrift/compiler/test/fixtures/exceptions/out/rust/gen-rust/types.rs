@@ -271,9 +271,11 @@ where
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Fiery::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Fiery")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "Fiery"})?;
@@ -399,9 +401,11 @@ where
             ::fbthrift::Field::new("sonnet", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Serious::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Serious")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.sonnet = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sonnet", strct: "Serious"})?);
@@ -545,9 +549,11 @@ where
             ::fbthrift::Field::new("internal_error_message", ::fbthrift::TType::String, 2),
         ];
 
+        #[allow(unused_mut)]
         let mut output = ComplexFieldNames::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ComplexFieldNames")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.error_message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "error_message", strct: "ComplexFieldNames"})?;
@@ -687,9 +693,11 @@ where
             ::fbthrift::Field::new("internal_error_message", ::fbthrift::TType::String, 2),
         ];
 
+        #[allow(unused_mut)]
         let mut output = CustomFieldNames::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomFieldNames")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.error_message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "error_message", strct: "CustomFieldNames"})?;
@@ -829,9 +837,11 @@ where
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = ExceptionWithPrimitiveField::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ExceptionWithPrimitiveField")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "ExceptionWithPrimitiveField"})?;
@@ -971,9 +981,11 @@ where
             ::fbthrift::Field::new("message_field", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = ExceptionWithStructuredAnnotation::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ExceptionWithStructuredAnnotation")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.message_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message_field", strct: "ExceptionWithStructuredAnnotation"})?;
@@ -1101,9 +1113,11 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
         ];
 
+        #[allow(unused_mut)]
         let mut output = Banal::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Banal")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
 
             fty != ::fbthrift::TType::Stop

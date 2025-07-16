@@ -263,9 +263,11 @@ where
             ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 4),
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.MyIntField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?;
@@ -404,9 +406,11 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyDataItem::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataItem")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
 
             fty != ::fbthrift::TType::Stop
@@ -644,9 +648,11 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyException::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyException")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
 
             fty != ::fbthrift::TType::Stop

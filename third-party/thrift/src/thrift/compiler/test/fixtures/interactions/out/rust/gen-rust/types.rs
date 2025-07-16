@@ -111,9 +111,11 @@ where
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = CustomException::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomException")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "CustomException"})?;
@@ -228,9 +230,11 @@ where
             ::fbthrift::Field::new("sessionId", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = ShouldBeBoxed::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ShouldBeBoxed")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.sessionId = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sessionId", strct: "ShouldBeBoxed"})?;

@@ -338,9 +338,11 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
 
             fty != ::fbthrift::TType::Stop
@@ -750,9 +752,11 @@ where
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I64, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyStructWithCustomDefault::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStructWithCustomDefault")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "MyStructWithCustomDefault"})?;
@@ -957,9 +961,11 @@ where
             ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 15),
         ];
 
+        #[allow(unused_mut)]
         let mut output = StructLevelTerseStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructLevelTerseStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::Bool, 1) {
                 output.bool_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "StructLevelTerseStruct"})?;
@@ -1403,9 +1409,11 @@ where
             ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 30),
         ];
 
+        #[allow(unused_mut)]
         let mut output = FieldLevelTerseStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldLevelTerseStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::Bool, 1) {
                 output.terse_bool_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_bool_field", strct: "FieldLevelTerseStruct"})?;
@@ -1963,9 +1971,11 @@ where
             ::fbthrift::Field::new("field3", ::fbthrift::TType::I32, 3),
         ];
 
+        #[allow(unused_mut)]
         let mut output = AdaptedFields::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedFields")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedFields"})?;
@@ -2161,9 +2171,11 @@ where
             ::fbthrift::Field::new("msg", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = TerseException::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TerseException")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.msg = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "msg", strct: "TerseException"})?;

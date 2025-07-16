@@ -259,9 +259,11 @@ where
             ::fbthrift::Field::new("red", ::fbthrift::TType::Double, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Color::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Color")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::Double, 1) {
                 output.red = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "red", strct: "Color"})?;
@@ -438,9 +440,11 @@ where
             ::fbthrift::Field::new("name", ::fbthrift::TType::String, 4),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Vehicle::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Vehicle")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::Struct, 1) {
                 output.color = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "color", strct: "Vehicle"})?;
@@ -665,9 +669,11 @@ where
             ::fbthrift::Field::new("vehicles", ::fbthrift::TType::List, 10),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Person::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Person")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.id = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "id", strct: "Person"})?;

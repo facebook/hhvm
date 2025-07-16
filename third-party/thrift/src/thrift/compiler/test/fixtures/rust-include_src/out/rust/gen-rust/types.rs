@@ -88,9 +88,11 @@ where
             ::fbthrift::Field::new("foo", ::fbthrift::TType::I32, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = MyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.foo = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "MyStruct"})?;

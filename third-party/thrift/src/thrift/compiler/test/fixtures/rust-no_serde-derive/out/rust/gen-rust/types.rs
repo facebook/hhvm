@@ -96,9 +96,11 @@ where
             ::fbthrift::Field::new("a", ::fbthrift::TType::Bool, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = NoSerde::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a NoSerde")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::Bool, 1) {
                 output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "NoSerde"})?;
@@ -223,9 +225,11 @@ where
             ::fbthrift::Field::new("a", ::fbthrift::TType::Bool, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Serde::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Serde")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::Bool, 1) {
                 output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "Serde"})?;

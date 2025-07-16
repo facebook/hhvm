@@ -118,9 +118,11 @@ where
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, 100),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Fields::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Fields")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 100) {
                 output.injected_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "Fields"})?;
@@ -235,9 +237,11 @@ where
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
         ];
 
+        #[allow(unused_mut)]
         let mut output = FieldsInjectedToEmptyStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedToEmptyStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, -1100) {
                 output.injected_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedToEmptyStruct"})?;
@@ -368,9 +372,11 @@ where
             ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = FieldsInjectedToStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedToStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedToStruct"})?;
@@ -527,9 +533,11 @@ where
             ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = FieldsInjectedWithIncludedStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedWithIncludedStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedWithIncludedStruct"})?;

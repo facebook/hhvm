@@ -200,9 +200,11 @@ where
             ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = InitialResponse::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a InitialResponse")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.content = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "InitialResponse"})?;
@@ -317,9 +319,11 @@ where
             ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = FinalResponse::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FinalResponse")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.content = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "FinalResponse"})?;
@@ -434,9 +438,11 @@ where
             ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = SinkPayload::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SinkPayload")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.content = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "SinkPayload"})?;
@@ -551,9 +557,11 @@ where
             ::fbthrift::Field::new("sink", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = CompatibleWithKeywordSink::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompatibleWithKeywordSink")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.sink = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sink", strct: "CompatibleWithKeywordSink"})?;
@@ -668,9 +676,11 @@ where
             ::fbthrift::Field::new("reason", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = InitialException::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a InitialException")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.reason = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "InitialException"})?;
@@ -785,9 +795,11 @@ where
             ::fbthrift::Field::new("reason", ::fbthrift::TType::String, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = SinkException1::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SinkException1")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.reason = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "SinkException1"})?;
@@ -902,9 +914,11 @@ where
             ::fbthrift::Field::new("reason", ::fbthrift::TType::I64, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = SinkException2::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SinkException2")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.reason = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "SinkException2"})?;

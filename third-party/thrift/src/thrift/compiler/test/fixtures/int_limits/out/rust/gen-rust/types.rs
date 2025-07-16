@@ -133,9 +133,11 @@ where
             ::fbthrift::Field::new("min_i64_field", ::fbthrift::TType::I64, 2),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Limits::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Limits")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?;

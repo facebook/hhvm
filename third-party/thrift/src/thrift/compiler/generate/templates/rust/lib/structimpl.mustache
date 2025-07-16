@@ -152,9 +152,11 @@ where
         ];
 
         {{^program:deprecated_optional_with_default_is_some?}}
+        #[allow(unused_mut)]
         let mut output = {{struct:rust_name}}::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             {{#struct:fields}}
             if (fty, fid) == ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}) {

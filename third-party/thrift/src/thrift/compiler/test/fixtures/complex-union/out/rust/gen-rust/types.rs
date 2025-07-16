@@ -594,9 +594,11 @@ where
             ::fbthrift::Field::new("typedefValue", ::fbthrift::TType::Map, 9),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Val::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Val")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.strVal = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "strVal", strct: "Val"})?;
@@ -981,9 +983,11 @@ where
             ::fbthrift::Field::new("num", ::fbthrift::TType::I64, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = NonCopyableStruct::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a NonCopyableStruct")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I64, 1) {
                 output.num = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "num", strct: "NonCopyableStruct"})?;

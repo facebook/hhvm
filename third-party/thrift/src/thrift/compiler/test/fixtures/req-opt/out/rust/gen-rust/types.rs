@@ -104,9 +104,11 @@ where
             ::fbthrift::Field::new("myString", ::fbthrift::TType::String, 2),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Foo::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Foo")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.myInteger = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "myInteger", strct: "Foo"})?;

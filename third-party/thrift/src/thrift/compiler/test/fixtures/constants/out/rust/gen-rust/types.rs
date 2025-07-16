@@ -568,9 +568,11 @@ where
             ::fbthrift::Field::new("weeks", ::fbthrift::TType::I32, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Internship::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Internship")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.weeks = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "weeks", strct: "Internship"})?;
@@ -731,9 +733,11 @@ where
             ::fbthrift::Field::new("min", ::fbthrift::TType::I32, 1),
         ];
 
+        #[allow(unused_mut)]
         let mut output = Range::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Range")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.min = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min", strct: "Range"})?;
@@ -864,9 +868,11 @@ where
             ::fbthrift::Field::new("b", ::fbthrift::TType::String, 2),
         ];
 
+        #[allow(unused_mut)]
         let mut output = struct1::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a struct1")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "struct1"})?;
@@ -1009,9 +1015,11 @@ where
             ::fbthrift::Field::new("d", ::fbthrift::TType::List, 4),
         ];
 
+        #[allow(unused_mut)]
         let mut output = struct2::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a struct2")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "struct2"})?;
@@ -1168,9 +1176,11 @@ where
             ::fbthrift::Field::new("c", ::fbthrift::TType::Struct, 3),
         ];
 
+        #[allow(unused_mut)]
         let mut output = struct3::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a struct3")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::String, 1) {
                 output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "struct3"})?;
@@ -1321,9 +1331,11 @@ where
             ::fbthrift::Field::new("c", ::fbthrift::TType::Byte, 3),
         ];
 
+        #[allow(unused_mut)]
         let mut output = struct4::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a struct4")?;
         let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
         let fallback  = 'fastpath: {
             if (fty, fid) == (::fbthrift::TType::I32, 1) {
                 output.a = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "struct4"})?;

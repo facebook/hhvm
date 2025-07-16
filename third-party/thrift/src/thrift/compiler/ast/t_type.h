@@ -221,6 +221,9 @@ class t_type_ref final {
   bool resolved() const noexcept;
   bool resolve();
 
+  // TODO(T231221715) Consistently remove get_ prefix from accessors
+  t_placeholder_typedef* get_unresolved_type() { return unresolved_type_; }
+
   source_range src_range() const { return range_; }
 
   // Helpers for constructing from pointers.
@@ -241,6 +244,8 @@ class t_type_ref final {
   const t_type& operator*() const { return deref(); }
 
   static const t_type_ref& none();
+
+  static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
 
  private:
   const t_type* type_ = nullptr;
@@ -265,8 +270,6 @@ class t_type_ref final {
   // for backwards compatibility.
  public:
   const t_type* get_type() const { return type_; }
-  static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
-  t_placeholder_typedef* get_unresolved_type() { return unresolved_type_; }
 };
 
 bool is_scalar(const t_type& type);

@@ -31,10 +31,18 @@ namespace apache::thrift::compiler {
  */
 class t_typedef : public t_type {
  public:
+  enum class kind {
+    defined,
+    unnamed,
+    placeholder,
+  };
+
   t_typedef(const t_program* program, std::string name, t_type_ref type)
       : t_type(program, std::move(name)), type_(std::move(type)) {}
 
   const t_type_ref& type() const { return type_; }
+
+  kind typedef_kind() const;
 
   // Returns the first type, in the typedef type hierarchy, matching the
   // given predicate or nullptr.
@@ -79,8 +87,14 @@ class t_typedef : public t_type {
 
   std::string get_full_name() const override { return get_scoped_name(); }
 
+  static std::unique_ptr<t_typedef> make_unnamed(
+      const t_program* program, std::string name, t_type_ref type);
+
  protected:
   t_type_ref type_;
+
+ private:
+  bool unnamed_{false};
 
   // TODO(afuller): Remove everything below here, as it is just provided for
   // backwards compatibility.
@@ -98,18 +112,6 @@ class t_typedef : public t_type {
 
   uint64_t get_type_id() const override { return get_type()->get_type_id(); }
   const std::string& get_symbolic() const { return name(); }
-
-  enum class kind {
-    defined,
-    unnamed,
-    placeholder,
-  };
-  kind typedef_kind() const;
-  static std::unique_ptr<t_typedef> make_unnamed(
-      const t_program* program, std::string name, t_type_ref type);
-
- private:
-  bool unnamed_{false};
 };
 
 // A placeholder for a type that can't be resolved at parse time.

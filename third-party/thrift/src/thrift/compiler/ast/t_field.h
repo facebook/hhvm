@@ -87,6 +87,8 @@ class t_field final : public t_named {
   t_field_qualifier qualifier() const { return qual_; }
   void set_qualifier(t_field_qualifier qual) { qual_ = qual; }
 
+  void set_implicit_id(t_field_id id) { id_ = id; }
+
   /**
    * Thrift AST nodes are meant to be non-copyable and non-movable, and should
    * never be cloned. This method exists to grand-father specific uses in the
@@ -178,7 +180,6 @@ class t_field final : public t_named {
   const t_type* get_type() const { return type().get_type(); }
   void set_type(t_type_ref type) { type_ = type; }
   int32_t get_key() const { return id(); }
-  void set_implicit_id(t_field_id id) { id_ = id; }
 };
 
 using t_field_list = node_list<t_field>;

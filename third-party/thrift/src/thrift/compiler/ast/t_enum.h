@@ -65,11 +65,17 @@ class t_enum : public t_type {
   std::map<std::string_view, const t_const*> consts_by_name_;
   int32_t unused_ = default_unused;
 
+  /**
+   * Update unused integer value in the enum, in O(NlnN) worst case total time.
+   *
+   * @param val - The enum value being added. If this does not match the current
+   * unused value, this call will be a no-op.
+   */
+  void update_unused(int32_t val);
+
   // TODO(afuller): These methods are only provided for backwards
   // compatibility. Update all references and remove everything below.
   std::vector<t_enum_value*> values_raw_;
-
-  void update_unused(int32_t val);
 
  public:
   void append(

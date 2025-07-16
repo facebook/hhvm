@@ -324,6 +324,18 @@ class t_program : public t_named {
     return dynamic_cast<const Node*>(local_node);
   }
 
+  // Looks for an annotation on the given node, then if not found, and the node
+  // is not generated, looks for the same annotation on the program.
+  const t_const* inherit_annotation_or_null(
+      const t_named& node, const char* uri) const {
+    if (const t_const* annot = node.find_structured_annotation_or_null(uri)) {
+      return annot;
+    } else if (node.generated()) { // Generated nodes do not inherit.
+      return nullptr;
+    }
+    return find_structured_annotation_or_null(uri);
+  }
+
  private:
   t_package package_;
 
@@ -392,23 +404,6 @@ class t_program : public t_named {
 
   resolved_node find_by_id(scope::identifier id) const;
   const t_named* find_global_by_id(scope::identifier id) const;
-
-  // TODO (satishvk): There was a TODO from afuller here to remove other
-  // deprecated functions like add_service, etc. Did inherit_annotation_or_null
-  // accidentally end up at the bottom of the function below that TODO OR
-  // is it also meant to be removed?
- public:
-  // Looks for an annotation on the given node, then if not found, and the node
-  // is not generated, looks for the same annotation on the program.
-  const t_const* inherit_annotation_or_null(
-      const t_named& node, const char* uri) const {
-    if (const t_const* annot = node.find_structured_annotation_or_null(uri)) {
-      return annot;
-    } else if (node.generated()) { // Generated nodes do not inherit.
-      return nullptr;
-    }
-    return find_structured_annotation_or_null(uri);
-  }
 };
 
 } // namespace apache::thrift::compiler

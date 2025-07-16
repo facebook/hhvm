@@ -18,7 +18,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <fmt/format.h>
 
-#include <folly/Format.h>
 #include <folly/Singleton.h>
 #include <folly/Synchronized.h>
 

@@ -67,6 +67,8 @@ DEFINE_string(
     compression_level,
     "",
     "Compression level value to use. (DEFAULT, LESS, MORE)");
+DEFINE_string(
+    thrift_protocol, "COMPACT", "Thrift serialization protocol. Default is COMPACT. (COMPACT, BINARY)");
 
 namespace apache::thrift::stress {
 
@@ -120,6 +122,16 @@ std::optional<CompressionConfig> createCompressionConfigFromFlags() {
   return compressionConfig;
 }
 
+protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
+  if (FLAGS_thrift_protocol == "COMPACT") {
+    return protocol::T_COMPACT_PROTOCOL;
+  } else if (FLAGS_thrift_protocol == "BINARY") {
+    return protocol::T_BINARY_PROTOCOL;
+  } else {
+    LOG(FATAL) << fmt::format("Unrecognized option for thrift_protocol '{}'", FLAGS_thrift_protocol);
+  }
+}
+
 } // namespace detail
 
 /* static */ ClientConfig ClientConfig::createFromFlags() {
@@ -149,6 +161,7 @@ std::optional<CompressionConfig> createCompressionConfigFromFlags() {
   connCfg.useQuic = FLAGS_quic;
   connCfg.stopTLSv1 = FLAGS_stopTLSv1 && (security == ClientSecurity::FIZZ);
   connCfg.stopTLSv2 = FLAGS_stopTLSv2 && (security == ClientSecurity::FIZZ);
+  connCfg.thriftProtocol = detail::createThriftProtocolFromFlags();
 
   ClientConfig config{};
 

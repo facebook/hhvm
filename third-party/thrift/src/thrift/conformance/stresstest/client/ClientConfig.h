@@ -42,6 +42,7 @@ DECLARE_bool(gen_load);
 DECLARE_uint64(gen_load_interval);
 DECLARE_string(compression_config);
 DECLARE_string(compression_level);
+DECLARE_string(thrift_protocol);
 
 namespace apache::thrift::stress {
 
@@ -62,6 +63,7 @@ struct ClientConnectionConfig {
   bool useQuic{false};
   bool stopTLSv1{false};
   bool stopTLSv2{false};
+  protocol::PROTOCOL_TYPES thriftProtocol{protocol::T_COMPACT_PROTOCOL};
 };
 
 struct ClientConfig {

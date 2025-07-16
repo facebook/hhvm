@@ -288,6 +288,8 @@ ClientFactory::createRocketClient(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto chan = RocketClientChannel::newChannel(createSocket(evb, cfg));
 
+  chan->setProtocolId(cfg.thriftProtocol);
+
   if (cfg.compressionConfigOpt) {
     chan->setDesiredCompressionConfig(*cfg.compressionConfigOpt);
   }

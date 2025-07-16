@@ -1011,7 +1011,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
   auto root_prog = std::make_unique<t_program>(
       path,
       full_root_path,
-      already_parsed ? already_parsed->get_root_program() : nullptr);
+      already_parsed ? already_parsed->root_program() : nullptr);
   root_prog->set_use_global_resolution(params.use_global_resolution);
   auto programs =
       std::make_unique<t_program_bundle>(std::move(root_prog), already_parsed);
@@ -1082,7 +1082,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
 
         // Skip already parsed files.
         if (program) {
-          if (program == programs->get_root_program()) {
+          if (program == programs->root_program()) {
             // If we're including the root program we must have a dependency
             // cycle.
             assert(circular_deps.count(*full_path));

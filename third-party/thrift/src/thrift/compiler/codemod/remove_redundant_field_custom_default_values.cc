@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
       argc, argv, [](source_manager& sm, t_program_bundle& pb) {
         apache::thrift::compiler::RemoveRedundantFieldCustomDefaultValues(
-            sm, *pb.get_root_program())
+            sm, *pb.root_program())
             .run();
       });
 }

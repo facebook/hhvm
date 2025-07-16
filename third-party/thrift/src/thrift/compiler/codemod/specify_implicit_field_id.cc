@@ -45,7 +45,7 @@ void specify_implicit_field_id(codemod::file_manager& fm, const t_field& f) {
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
       argc, argv, [](source_manager& sm, t_program_bundle& pb) {
-        t_program& program = *pb.get_root_program();
+        t_program& program = *pb.root_program();
         basic_ast_visitor<true, codemod::file_manager&> visitor;
         visitor.add_field_visitor(specify_implicit_field_id);
         codemod::file_manager fm(sm, program);

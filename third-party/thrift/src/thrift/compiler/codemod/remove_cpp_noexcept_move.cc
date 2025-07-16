@@ -36,7 +36,7 @@ static void remove_cpp_noexcept_move(
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
       argc, argv, [](source_manager& sm, t_program_bundle& pb) {
-        t_program& program = *pb.get_root_program();
+        t_program& program = *pb.root_program();
         codemod::file_manager fm(sm, program);
 
         const_ast_visitor visitor;

@@ -364,6 +364,6 @@ class hoist_annotated_types {
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
       argc, argv, [](source_manager& sm, t_program_bundle& pb) {
-        hoist_annotated_types(sm, *pb.get_root_program()).run();
+        hoist_annotated_types(sm, *pb.root_program()).run();
       });
 }

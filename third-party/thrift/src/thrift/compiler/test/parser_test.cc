@@ -130,7 +130,7 @@ TEST(ParserTest, struct_doc) {
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
   EXPECT_FALSE(diags.has_errors());
 
-  auto s = programs->get_root_program()->structs_and_unions()[0];
+  auto s = programs->root_program()->structs_and_unions()[0];
   EXPECT_EQ(s->doc(), "struct doc\n");
   EXPECT_EQ(s->fields()[0].doc(), "field doc\n");
   EXPECT_EQ(s->fields()[1].doc(), "multiline doc\n");
@@ -159,7 +159,7 @@ TEST(ParserTest, enum_doc) {
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
   EXPECT_FALSE(diags.has_errors());
 
-  auto e = programs->get_root_program()->enums()[0];
+  auto e = programs->root_program()->enums()[0];
   EXPECT_EQ(e->doc(), "enum doc\n");
   EXPECT_EQ(e->values()[0].doc(), "value doc\n");
   EXPECT_EQ(e->values()[1].doc(), "multiline doc\n");
@@ -189,7 +189,7 @@ TEST(ParserTest, struct_annotation) {
   auto programs = parse_ast(source_mgr, diags, "test.thrift", params);
   EXPECT_FALSE(diags.has_errors());
 
-  auto& s = programs->get_root_program()->structs_and_unions()[0];
+  auto& s = programs->root_program()->structs_and_unions()[0];
   EXPECT_EQ(s->fields()[0].structured_annotations().size(), 1);
   EXPECT_EQ(
       s->fields()[0].structured_annotations()[0].type()->uri(),

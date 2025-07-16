@@ -72,11 +72,6 @@ class t_program_bundle {
   node_list<t_program> programs_;
   node_list<t_program> implicit_includes_;
   std::map<std::string, t_program*, std::less<>> programs_by_full_path_;
-
-  // TODO(afuller): Delete everything below here. It is only provided for
-  // backwards compatibility.
- public:
-  t_program* get_root_program() const { return programs_[0].get(); }
 };
 
 } // namespace apache::thrift::compiler

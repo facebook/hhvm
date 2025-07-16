@@ -508,7 +508,7 @@ compile_retcode generate_code_for_program_bundle(
       std::set<std::string> already_generated;
       if (generate_code_recursively(
               gparams,
-              *program_bundle.get_root_program(),
+              *program_bundle.root_program(),
               already_generated,
               program_bundle,
               ctx)) {
@@ -516,10 +516,7 @@ compile_retcode generate_code_for_program_bundle(
       }
     } else {
       if (generate_code_for_single_program(
-              gparams,
-              *program_bundle.get_root_program(),
-              program_bundle,
-              ctx)) {
+              gparams, *program_bundle.root_program(), program_bundle, ctx)) {
         retcode = compile_retcode::success;
       }
     }

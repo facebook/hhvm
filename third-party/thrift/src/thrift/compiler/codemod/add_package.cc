@@ -144,6 +144,6 @@ class add_package {
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
       argc, argv, [](source_manager& sm, t_program_bundle& pb) {
-        add_package(sm, *pb.get_root_program()).run();
+        add_package(sm, *pb.root_program()).run();
       });
 }

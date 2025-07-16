@@ -28,7 +28,7 @@ namespace {
 using apache::thrift::compiler::cpp2::OrderableTypeUtils;
 
 void codemod_main(source_manager& sm, t_program_bundle& bundle) {
-  const t_program& program = *bundle.get_root_program();
+  const t_program& program = *bundle.root_program();
   codemod::file_manager fm(sm, program);
   const_ast_visitor visitor;
   visitor.add_structured_definition_visitor([&](const t_structured&

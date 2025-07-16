@@ -24,6 +24,13 @@ let make_tmp_dir () =
   let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "files") in
   Relative_path.set_path_prefix Relative_path.Tmp tmpdir
 
+let log_monitor_exit (finale_data : Exit_status.finale_data) =
+  if finale_data.exit_status != Exit_status.No_error then
+    let { Exit_status.exit_status; msg; stack; telemetry } = finale_data in
+    let stack = Utils.show_callstack stack in
+
+    HackEventLogger.monitor_exit ~msg ~stack telemetry exit_status
+
 (** Main method of the server monitor daemon. The daemon is responsible for
     listening to socket requests from hh_client, checking Build ID, and relaying
     requests to the typechecker process. *)
@@ -81,6 +88,7 @@ let monitor_daemon_main
     (ServerArgs.root options)
     init_id
     (Unix.gettimeofday ());
+  Exit.add_hook_upon_clean_exit log_monitor_exit;
   Sys_utils.set_signal
     Sys.sigpipe
     (Sys.Signal_handle (fun i -> Hh_logger.log "SIGPIPE(%d)" i));
@@ -158,8 +166,6 @@ let daemon_entry =
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),
     or just runs the typechecker if detachment not enabled. *)
 let start () =
-  (* TODO: Catch all exceptions that make it this high, log them, and exit with
-   * the proper code *)
   try
     (* This avoids dying if SIGUSR{1,2} is received by accident: *)
     Sys_utils.set_signal Sys.sigusr1 Sys.Signal_ignore;
@@ -185,3 +191,5 @@ let start () =
       monitor_daemon_main options ~proc_stack
   with
   | SharedMem.Out_of_shared_memory -> Exit.exit Exit_status.Out_of_shared_memory
+  | Exit_status.Exit_with status -> Exit.exit status
+  | exn -> Exit.exit (Exit_status.Uncaught_exception (Exception.wrap exn))

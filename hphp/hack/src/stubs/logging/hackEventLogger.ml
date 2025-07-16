@@ -34,6 +34,8 @@ let set_rollout_flags _ = ()
 let typechecker_exit _ _ _ ~exit_type:_ ~exit_code:_ ~exit_status:_ ~is_oom:_ =
   ()
 
+let monitor_exit ~msg:_ ~stack:_ _telemetry _exit_status = ()
+
 let init
     ~root:_
     ~hhconfig_version:_

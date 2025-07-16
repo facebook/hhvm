@@ -62,6 +62,13 @@ typedef set<id.ValueId> AnnotationIds
  */
 @python.Py3Hidden
 struct Annotation {
+  /**
+   * NOTE: We use protocol.Value (somewhat weirdly) here as a tagged union (similar to folly::dynamic).
+   * Its usage must not be confused with its typical usage as the wire-representation of arbitrary
+   * thrift values.
+   * The fields of the annotation are stored as a map with field name as key. Nested structs are stored
+   * as maps themselves.
+   */
   1: map<string, protocol.Value> fields;
 }
 

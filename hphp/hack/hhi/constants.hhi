@@ -55,13 +55,33 @@ const int E_ALL;
 const int E_STRICT;
 
 // Built in pseudoconstants
-const int __LINE__;
-const string __CLASS__;
-const string __TRAIT__;
-const string __FILE__;
-const string __DIR__;
-const string __FUNCTION__;
-const string __METHOD__;
-const string __NAMESPACE__;
-const string __COMPILER_FRONTEND__;
+newtype BuiltinPseudoConstantLineNumber as int = int;
+const BuiltinPseudoConstantLineNumber __LINE__;
+
+newtype BuiltinPseudoConstantName as string = string;
+
+newtype BuiltinPseudoConstantClass as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantClass __CLASS__;
+
+newtype BuiltinPseudoConstantTrait as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantTrait __TRAIT__;
+
+newtype BuiltinPseudoConstantFile as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantFile __FILE__;
+
+newtype BuiltinPseudoConstantDir as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantDir __DIR__;
+
+newtype BuiltinPseudoConstantFunction as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantFunction __FUNCTION__;
+
+newtype BuiltinPseudoConstantMethod as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantMethod __METHOD__;
+
+newtype BuiltinPseudoConstantNamespace as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantNamespace __NAMESPACE__;
+
+newtype BuiltinPseudoConstantCompilerFrontend as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+const BuiltinPseudoConstantCompilerFrontend __COMPILER_FRONTEND__;
+
 const FunctionCredential __FUNCTION_CREDENTIAL__;

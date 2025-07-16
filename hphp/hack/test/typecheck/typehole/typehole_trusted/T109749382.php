@@ -1,6 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+<<__UNSAFE_AllowMultipleInstantiations>>
 interface I<T> {
   public function foo():T;
 }

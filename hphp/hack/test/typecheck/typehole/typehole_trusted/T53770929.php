@@ -1,7 +1,9 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+<<__UNSAFE_AllowMultipleInstantiations>>
 interface A<T> {}
+
 interface B<T> extends A<T> {
   public function f(): T;
 }

@@ -6,13 +6,13 @@ abstract class C {
 
 function id1<T as C with { type T = mixed }, Tacc>(mixed $x): Tacc
 where
-  Tacc = T::T {
+  T as C with { type T = Tacc } {
   return $x;
 }
 
 function id2<T as C with { type T = nothing }, Tacc>(Tacc $x): nothing
 where
-  Tacc = T::T {
+  T as C with { type T = Tacc } {
   return $x;
 }
 

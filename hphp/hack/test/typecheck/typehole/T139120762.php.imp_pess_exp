@@ -8,11 +8,11 @@ ERROR: File "T139120762.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "T139120762.php", line 13, characters 64-70:
   Expected `nothing`
-  File "T139120762.php", line 13, characters 54-57:
-  But got `Tacc`
+  File "T139120762.php", line 13, characters 48-51:
+  But got `mixed`
 ERROR: File "T139120762.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "T139120762.php", line 13, characters 64-70:
   Expected `nothing`
   File "T139120762.php", line 13, characters 54-57:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `Tacc`

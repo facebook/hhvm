@@ -49,7 +49,6 @@ class t_service : public t_interface {
   // for backwards compatibility.
  public:
   const t_service* get_extends() const { return extends_; }
-  void set_extends(const t_service* extends) { extends_ = extends; }
   type get_type_value() const override { return type::t_service; }
 };
 

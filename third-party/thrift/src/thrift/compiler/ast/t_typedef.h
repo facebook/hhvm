@@ -111,7 +111,6 @@ class t_typedef : public t_type {
   }
 
   uint64_t get_type_id() const override { return get_type()->get_type_id(); }
-  const std::string& get_symbolic() const { return name(); }
 };
 
 // A placeholder for a type that can't be resolved at parse time.

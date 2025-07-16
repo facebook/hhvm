@@ -761,11 +761,7 @@ std::vector<Annotation> SchemaIndex::createAnnotations(
       // bundled due to circular dependency issues.
       continue;
     }
-    Annotation::Fields fields;
-    for (const auto& [fieldName, value] : *annotation.fields()) {
-      fields.emplace(fieldName, value);
-    }
-    result.emplace_back(Annotation(typeOf(*rawType), std::move(fields)));
+    result.emplace_back(typeOf(*rawType), *annotation.fields());
   }
   return result;
 }

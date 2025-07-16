@@ -44,6 +44,10 @@ folly::dynamic toDynamic(const detail::Object& obj);
 folly::dynamic toDynamic(const detail::Value& val);
 } // namespace apache::thrift::protocol
 
+namespace apache::thrift::syntax_graph {
+class Annotation;
+}
+
 namespace apache::thrift::protocol::detail {
 template <class Base>
 class ObjectWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
@@ -289,6 +293,7 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   friend class ObjectWrapper;
   friend folly::dynamic apache::thrift::protocol::toDynamic(
       const ValueWrapper&);
+  friend class apache::thrift::syntax_graph::Annotation;
 
   using Wrap::Wrap;
 };

@@ -567,12 +567,11 @@ TEST_F(ServiceSchemaTest, StructuredAnnotation) {
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
       &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
-  EXPECT_EQ(annotations[0].fields().size(), 2);
-  EXPECT_EQ(annotations[0].fields().at("field1").as_i64(), 3);
-  EXPECT_TRUE(annotations[0].fields().at("field2").is_map());
-  const auto& field = *annotations[0].fields().at("field2").as_map().begin();
-  EXPECT_EQ(field.first.as_string(), "field1");
-  EXPECT_EQ(field.second.as_i64(), 4);
+  EXPECT_EQ(annotations[0].value().size(), 2);
+  EXPECT_EQ(annotations[0].value()["field1"].asInt(), 3);
+  EXPECT_TRUE(annotations[0].value()["field2"].isObject());
+  const auto& innerField = annotations[0].value()["field2"];
+  EXPECT_EQ(innerField["field1"].asInt(), 4);
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
@@ -589,8 +588,8 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
       &program->definitionsByName()
            .at("TestStructuredAnnotationWithoutUri")
            ->asStruct());
-  EXPECT_EQ(annotations[0].fields().size(), 1);
-  EXPECT_EQ(annotations[0].fields().at("field1").as_i64(), 3);
+  EXPECT_EQ(annotations[0].value().size(), 1);
+  EXPECT_EQ(annotations[0].value()["field1"].asInt(), 3);
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {

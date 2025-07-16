@@ -27,6 +27,7 @@
 #include <folly/Utility.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/span.h>
+#include <folly/json/dynamic.h>
 #include <folly/lang/Exception.h>
 #include <folly/memory/not_null.h>
 
@@ -1502,18 +1503,34 @@ class Annotation final : folly::MoveOnly {
  public:
   const TypeRef& type() const { return *type_; }
 
-  using Fields =
-      folly::F14FastMap<std::string_view, apache::thrift::protocol::Value>;
-  const Fields& fields() const { return fields_; }
+  /**
+   * Returns the value of the annotation as a folly::dynamic.
+   *
+   * For Thrift struct, values are stored field-name based where keys are the
+   * field names and values are the corresponding field values.
+   *
+   * Example:
+   *
+   *     struct MyAnnot {
+   *       1: i32 field1;
+   *     }
+   *
+   *     Annotation a = ...;
+   *     const folly::dynamic& value = a.value();
+   *     value["field1"].asInt();
+   */
+  const folly::dynamic& value() const { return value_; }
 
-  Annotation(TypeRef&& type, Fields&& fields);
+  Annotation(
+      TypeRef&& type,
+      const std::map<std::string, apache::thrift::protocol::Value>& fields);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   folly::not_null_unique_ptr<TypeRef> type_;
-  Fields fields_;
+  folly::dynamic value_;
 };
 
 class ProgramNode final : folly::MoveOnly,

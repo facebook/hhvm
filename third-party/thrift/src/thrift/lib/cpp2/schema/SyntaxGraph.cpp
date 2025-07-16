@@ -16,12 +16,11 @@
 
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
+#include <folly/lang/SafeAssert.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
-
-#include <folly/lang/SafeAssert.h>
 
 #include <fmt/core.h>
 
@@ -321,9 +320,15 @@ bool operator==(const TypeRef& lhs, const DefinitionNode& rhs) {
       });
 }
 
-Annotation::Annotation(TypeRef&& type, Fields&& fields)
-    : type_(folly::copy_to_unique_ptr(std::move(type))),
-      fields_(std::move(fields)) {}
+Annotation::Annotation(
+    TypeRef&& type,
+    const std::map<std::string, apache::thrift::protocol::Value>& fields)
+    : type_(folly::copy_to_unique_ptr(std::move(type))) {
+  value_ = folly::dynamic::object();
+  for (const auto& [n, v] : fields) {
+    value_[n] = v.toDynamicImpl();
+  }
+}
 
 ProgramNode::IncludesList ProgramNode::includes() const {
   IncludesList includes;

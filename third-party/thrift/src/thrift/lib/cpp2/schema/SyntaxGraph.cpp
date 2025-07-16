@@ -761,14 +761,14 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     while (!initialAllocationQueue.empty()) {
       const DefinitionNode* sgDef = initialAllocationQueue.front();
       initialAllocationQueue.pop();
-      if (cache_.count(sgDef)) {
+      if (cache_.contains(sgDef)) {
         continue;
       }
 
       auto processStructuredType = [&](const StructuredNode& s) {
         std::function<void(const TypeRef&)> visitType = [&](const TypeRef& t) {
           auto enqueue = [&](const DefinitionNode& def) {
-            if (!cache_.count(&def)) {
+            if (!cache_.contains(&def)) {
               initialAllocationQueue.push(&def);
             }
           };

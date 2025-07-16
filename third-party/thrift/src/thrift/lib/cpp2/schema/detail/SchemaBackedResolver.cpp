@@ -881,7 +881,7 @@ void IncrementalResolver::readSchema(
       std::make_move_iterator(src.programs()->end()),
       std::back_inserter(*dst.programs()),
       [this](const auto& program) {
-        return index_->programsById_.count(*program.id()) == 0;
+        return !index_->programsById_.contains(*program.id());
       });
   dst.valuesMap()->insert(
       std::make_move_iterator(src.valuesMap()->begin()),
@@ -921,7 +921,7 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode(
     return *def;
   }
 
-  if (index_->programsById_.count(programId)) {
+  if (index_->programsById_.contains(programId)) {
     folly::throw_exception<InvalidSyntaxGraphError>(fmt::format(
         "Definition `{}` not found in its program's schema.", name));
   }
@@ -966,7 +966,7 @@ const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
     return def;
   }
 
-  if (index_->programsById_.count(programId)) {
+  if (index_->programsById_.contains(programId)) {
     folly::throw_exception<InvalidSyntaxGraphError>(
         fmt::format("Definition `{}` not found in its program's schema.", uri));
   }

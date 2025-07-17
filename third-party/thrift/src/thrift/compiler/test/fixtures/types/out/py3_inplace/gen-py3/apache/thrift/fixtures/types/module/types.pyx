@@ -409,7 +409,7 @@ cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap
         if not isinstance(item, IncompleteMapDep):
             raise TypeError(f"{item!r} is not of type IncompleteMapDep")
 
-        c_inst[c_key] = _apache_thrift_fixtures_types_module_thrift_converter.IncompleteMapDep_convert_to_cpp(item._to_python())
+        c_inst[c_key] = __deref_const[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep](_apache_thrift_fixtures_types_module_thrift_converter.IncompleteMapDep_convert_to_cpp(item._to_python()))
     return cmove(c_inst)
 
 cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]& c_map) except *:
@@ -434,7 +434,7 @@ cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_
         if not isinstance(item, CompleteMapDep):
             raise TypeError(f"{item!r} is not of type CompleteMapDep")
 
-        c_inst[c_key] = _apache_thrift_fixtures_types_module_thrift_converter.CompleteMapDep_convert_to_cpp(item._to_python())
+        c_inst[c_key] = __deref_const[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep](_apache_thrift_fixtures_types_module_thrift_converter.CompleteMapDep_convert_to_cpp(item._to_python()))
     return cmove(c_inst)
 
 cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]& c_map) except *:
@@ -454,7 +454,7 @@ cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fix
     for item in items:
         if not isinstance(item, IncompleteListDep):
             raise TypeError(f"{item!r} is not of type IncompleteListDep")
-        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteListDep_convert_to_cpp(item._to_python()))
+        c_inst.push_back(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep](_apache_thrift_fixtures_types_module_thrift_converter.IncompleteListDep_convert_to_cpp(item._to_python())))
     return cmove(c_inst)
 
 cdef object _std_list__List__IncompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep]& c_vec) except *:
@@ -471,7 +471,7 @@ cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_t
     for item in items:
         if not isinstance(item, CompleteListDep):
             raise TypeError(f"{item!r} is not of type CompleteListDep")
-        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.CompleteListDep_convert_to_cpp(item._to_python()))
+        c_inst.push_back(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep](_apache_thrift_fixtures_types_module_thrift_converter.CompleteListDep_convert_to_cpp(item._to_python())))
     return cmove(c_inst)
 
 cdef object folly_small_vector__List__CompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep]& c_vec) except *:
@@ -488,7 +488,7 @@ cdef vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep] List
     for item in items:
         if not isinstance(item, AdaptedListDep):
             raise TypeError(f"{item!r} is not of type AdaptedListDep")
-        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.AdaptedListDep_convert_to_cpp(item._to_python()))
+        c_inst.push_back(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep](_apache_thrift_fixtures_types_module_thrift_converter.AdaptedListDep_convert_to_cpp(item._to_python())))
     return cmove(c_inst)
 
 cdef object List__AdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep]& c_vec) except *:
@@ -505,7 +505,7 @@ cdef vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList
     for item in items:
         if not isinstance(item, DependentAdaptedListDep):
             raise TypeError(f"{item!r} is not of type DependentAdaptedListDep")
-        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.DependentAdaptedListDep_convert_to_cpp(item._to_python()))
+        c_inst.push_back(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep](_apache_thrift_fixtures_types_module_thrift_converter.DependentAdaptedListDep_convert_to_cpp(item._to_python())))
     return cmove(c_inst)
 
 cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep]& c_vec) except *:

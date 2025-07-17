@@ -219,7 +219,7 @@ cdef vector[_module_cbindings.cSimpleStruct] List__SimpleStruct__make_instance(o
     for item in items:
         if not isinstance(item, SimpleStruct):
             raise TypeError(f"{item!r} is not of type SimpleStruct")
-        c_inst.push_back(_module_thrift_converter.SimpleStruct_convert_to_cpp(item._to_python()))
+        c_inst.push_back(__deref_const[_module_cbindings.cSimpleStruct](_module_thrift_converter.SimpleStruct_convert_to_cpp(item._to_python())))
     return cmove(c_inst)
 
 cdef object List__SimpleStruct__from_cpp(const vector[_module_cbindings.cSimpleStruct]& c_vec) except *:
@@ -310,7 +310,7 @@ cdef cmap[string,_module_cbindings.cSimpleStruct] Map__string_SimpleStruct__make
         if not isinstance(item, SimpleStruct):
             raise TypeError(f"{item!r} is not of type SimpleStruct")
 
-        c_inst[c_key] = _module_thrift_converter.SimpleStruct_convert_to_cpp(item._to_python())
+        c_inst[c_key] = __deref_const[_module_cbindings.cSimpleStruct](_module_thrift_converter.SimpleStruct_convert_to_cpp(item._to_python()))
     return cmove(c_inst)
 
 cdef object Map__string_SimpleStruct__from_cpp(const cmap[string,_module_cbindings.cSimpleStruct]& c_map) except *:

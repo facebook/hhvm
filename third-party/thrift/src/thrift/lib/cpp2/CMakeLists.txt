@@ -322,6 +322,8 @@ add_library(
   transport/rocket/client/RocketClient.cpp
   transport/rocket/client/KeepAliveWatcher.cpp
   transport/rocket/client/RocketStreamServerCallback.cpp
+  transport/rocket/client/RocketStreamServerCallbackWithChunkTimeout.cpp
+  transport/rocket/client/RocketSinkServerCallback.cpp
   transport/rocket/flush/FlushManager.cpp
   transport/rocket/framing/parser/AllocatingParserStrategy.cpp
   transport/rocket/framing/ErrorCode.cpp

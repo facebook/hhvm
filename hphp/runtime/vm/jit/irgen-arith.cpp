@@ -679,56 +679,70 @@ void emitShr(IRGS& env) {
 }
 
 void emitPow(IRGS& env) {
-  // Special-case exponent of 2 or 3, i.e.
+  // Special-case exponent of 0, 1, 2 or 3, i.e.
+  // $x ** 0 == 1
+  // $x ** 1 == $x
   // $x**2 becomes $x*$x,
   // $x**3 becomes ($x*$x)*$x
   auto exponent = topC(env);
   auto base = topC(env, BCSPRelOffset{1});
-  if ((exponent->hasConstVal(2) || exponent->hasConstVal(3)) &&
-      (base->isA(TDbl) || base->isA(TInt))) {
+  if ((base->isA(TInt) || base->isA(TDbl)) &&
+    exponent->hasConstVal(TInt)) {
     auto const intVal = exponent->intVal();
-    auto const isCube = intVal == 3;
+    if (intVal == 0) {
+        discard(env, 2);
+        push(env, base->isA(TInt) ? cns(env, 1) : cns(env, 1.0));
+        return;
+    }
+    if (intVal == 1) {
+        // discard exponent, leave base on stack
+        discard(env);
+        return;
+    }
+    if (intVal == 2 || intVal == 3) {
+      auto const isCube = intVal == 3;
 
-    auto makeExitPow = [&] (SSATmp* src, bool computeSquare) {
-      auto const exit = defBlock(env, Block::Hint::Unlikely);
-      BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-      assertx(src->isA(TInt));
-      src = gen(env, ConvIntToDbl, src);
-      SSATmp* genPowResult;
-      if (computeSquare) {
-        genPowResult = gen(env, MulDbl, src, src);
-        if (isCube) {
-          genPowResult = gen(env, MulDbl, genPowResult, src);
+      auto makeExitPow = [&] (SSATmp* src, bool computeSquare) {
+        auto const exit = defBlock(env, Block::Hint::Unlikely);
+        BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
+        assertx(src->isA(TInt));
+        src = gen(env, ConvIntToDbl, src);
+        SSATmp* genPowResult;
+        if (computeSquare) {
+          genPowResult = gen(env, MulDbl, src, src);
+          if (isCube) {
+            genPowResult = gen(env, MulDbl, genPowResult, src);
+          }
+        } else {
+          assertx(base->isA(TInt));
+          auto const src1 = gen(env, ConvIntToDbl, base);
+          genPowResult = gen(env, MulDbl, src, src1);
         }
+        discard(env, 2);
+        push(env, genPowResult);
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+        return exit;
+      };
+
+      SSATmp* genPowResult;
+      if (base->isA(TInt)) {
+        auto const exitPow = makeExitPow(base, true);
+        genPowResult = gen(env, MulIntO, exitPow, base, base);
       } else {
-        assertx(base->isA(TInt));
-        auto const src1 = gen(env, ConvIntToDbl, base);
-        genPowResult = gen(env, MulDbl, src, src1);
+        genPowResult = gen(env, MulDbl, base, base);
+      }
+      if (isCube) {
+        if (genPowResult->isA(TInt)) {
+          auto const exitPow = makeExitPow(genPowResult, false);
+          genPowResult = gen(env, MulIntO, exitPow, genPowResult, base);
+        } else {
+          genPowResult = gen(env, MulDbl, genPowResult, base);
+        }
       }
       discard(env, 2);
       push(env, genPowResult);
-      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-      return exit;
-    };
-
-    SSATmp* genPowResult;
-    if (base->isA(TInt)) {
-      auto const exitPow = makeExitPow(base, true);
-      genPowResult = gen(env, MulIntO, exitPow, base, base);
-    } else {
-      genPowResult = gen(env, MulDbl, base, base);
+      return;
     }
-    if (isCube) {
-      if (genPowResult->isA(TInt)) {
-        auto const exitPow = makeExitPow(genPowResult, false);
-        genPowResult = gen(env, MulIntO, exitPow, genPowResult, base);
-      } else {
-        genPowResult = gen(env, MulDbl, genPowResult, base);
-      }
-    }
-    discard(env, 2);
-    push(env, genPowResult);
-    return;
   }
   interpOne(env, TUncountedInit, 2);
 }

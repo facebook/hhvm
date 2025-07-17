@@ -192,10 +192,9 @@ class field_ref {
     return static_cast<reference_type>(value_);
   }
 
-  /// Forward operator[] to the value.
   template <typename Index>
-  FOLLY_ERASE auto operator[](const Index& index) const -> decltype(auto) {
-    return value_[index];
+  FOLLY_ERASE auto operator[](Index&& index) const -> decltype(auto) {
+    return value_[std::forward<Index>(index)];
   }
 
   /// Constructs the value in-place.
@@ -1709,8 +1708,8 @@ class required_field_ref {
   }
 
   template <typename Index>
-  FOLLY_ERASE auto operator[](const Index& index) const -> decltype(auto) {
-    return value_[index];
+  FOLLY_ERASE auto operator[](Index&& index) const -> decltype(auto) {
+    return value_[std::forward<Index>(index)];
   }
 
   template <typename... Args>
@@ -2212,8 +2211,8 @@ class terse_field_ref {
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   template <typename Index>
-  FOLLY_ERASE auto operator[](const Index& index) const -> decltype(auto) {
-    return value_[index];
+  FOLLY_ERASE auto operator[](Index&& index) const -> decltype(auto) {
+    return value_[std::forward<Index>(index)];
   }
 
   template <typename... Args>

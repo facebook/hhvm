@@ -65,6 +65,22 @@ struct Nested {
   int value = 0;
 };
 
+// just enough to test move semantics with field_ref
+struct NullableString : private std::unique_ptr<std::string> {
+  using std::unique_ptr<std::string>::unique_ptr;
+  using std::unique_ptr<std::string>::operator=;
+
+  bool operator<(const NullableString& other) const {
+    if (this->get() == nullptr) {
+      return other.get() != nullptr;
+    }
+    if (other.get() == nullptr) {
+      return false;
+    }
+    return *this->get() < *other.get();
+  }
+};
+
 class TestStruct {
  public:
   field_ref<std::string&> name() {
@@ -143,10 +159,34 @@ class TestStruct {
     return {vec_, __isset.at(folly::index_constant<5>())};
   }
 
+  field_ref<std::vector<bool>&&> vec() && {
+    return {std::move(vec_), __isset.at(folly::index_constant<5>())};
+  }
+
+  field_ref<const std::vector<bool>&> vec() const& {
+    return {vec_, __isset.at(folly::index_constant<5>())};
+  }
+
+  field_ref<const std::vector<bool>&&> vec() const&& {
+    return {std::move(vec_), __isset.at(folly::index_constant<5>())};
+  }
+
   terse_field_ref<std::vector<bool>&> terse_vec() & { return {vec_}; }
 
+  terse_field_ref<std::vector<bool>&&> terse_vec() && {
+    return {std::move(vec_)};
+  }
+
+  terse_field_ref<const std::vector<bool>&> terse_vec() const& {
+    return {vec_};
+  }
+
+  terse_field_ref<const std::vector<bool>&&> terse_vec() const&& {
+    return {std::move(vec_)};
+  }
+
   optional_field_ref<Nested&> opt_nested() & {
-    return {nested_, __isset.at(folly::index_constant<5>())};
+    return {nested_, __isset.at(folly::index_constant<6>())};
   }
 
   terse_field_ref<int&> terse_int_val() & { return {int_val_}; }
@@ -159,6 +199,22 @@ class TestStruct {
     return {static_cast<const int&&>(int_val_)};
   }
 
+  field_ref<std::map<NullableString, int>&> map() & {
+    return {map_, __isset.at(folly::index_constant<7>())};
+  }
+
+  field_ref<std::map<NullableString, int>&&> map() && {
+    return {std::move(map_), __isset.at(folly::index_constant<7>())};
+  }
+
+  field_ref<const std::map<NullableString, int>&> map() const& {
+    return {map_, __isset.at(folly::index_constant<7>())};
+  }
+
+  field_ref<const std::map<NullableString, int>&&> map() const&& {
+    return {std::move(map_), __isset.at(folly::index_constant<7>())};
+  }
+
  private:
   std::string name_ = "default";
   IntAssignable int_assign_;
@@ -167,8 +223,9 @@ class TestStruct {
   std::unique_ptr<int> uptr_;
   std::vector<bool> vec_;
   Nested nested_;
+  std::map<NullableString, int> map_;
 
-  apache::thrift::detail::isset_bitset<7> __isset{};
+  apache::thrift::detail::isset_bitset<8> __isset{};
 };
 
 class TestStructBoxedValuePtr {
@@ -560,9 +617,27 @@ TEST(field_ref_test, move) {
 
 TEST(field_ref_test, subscript) {
   TestStruct s;
+  const auto& cs = s;
   s.vec() = {false};
   EXPECT_FALSE(s.vec()[0]);
   s.vec()[0] = true;
+  EXPECT_TRUE(cs.vec()[0]);
+  s.terse_vec()[0] = false;
+  EXPECT_FALSE(cs.terse_vec()[0]);
+}
+
+TEST(field_ref_test, subscript_map) {
+  TestStruct s;
+  auto key = [] { return NullableString{new std::string{"foo"}}; };
+  field_ref map = s.map();
+  terse_field_ref<decltype(map.value())> tmap{*s.map()};
+  apache::thrift::required_field_ref<decltype(map.value())> rmap{*s.map()};
+  map[key()] = 42;
+  EXPECT_EQ(map[key()], 42);
+  tmap[key()] = 43;
+  EXPECT_EQ(tmap[key()], 43);
+  rmap[key()] = 44;
+  EXPECT_EQ(rmap[key()], 44);
 }
 
 template <typename T>

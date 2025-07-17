@@ -56,11 +56,7 @@ union ProtocolUnion {
   @python.Py3Hidden
   3: id.ProtocolId id;
 
-  // DO_BEFORE(aristidis,20250515): Remove EXPERIMENTAL warning - by either
-  // promoting to "production" status, or deleting.
   /**
-   * EXPERIMENTAL - DO NOT USE - MAY BREAK UNEXPECTEDLY !!!
-   *
    * Composition of a protocol + compression.
    */
   @python.Py3Hidden

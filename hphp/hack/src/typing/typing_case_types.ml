@@ -691,63 +691,60 @@ end = struct
                      Set.singleton ~reason
                      @@ InstanceOf { name; kind = Interface }
                  in
-                 if safe_for_are_disjoint then
-                   default ~reason
-                 else
-                   match Cls.sealed_whitelist cls with
-                   | None ->
-                     let reqs = Cls.all_ancestor_reqs cls in
-                     if List.is_empty reqs then
-                       default ~reason
-                     else
-                       List.fold
-                         ~init:(default ~reason)
-                         ~f:(fun acc (_, required_ty) ->
-                           match
-                             Typing_utils.try_unwrap_class_type required_ty
-                           with
-                           | None -> acc
-                           | Some (r, (_p, req_cls), _paraml) ->
-                             let trail =
-                               DataTypeReason.requirement
-                                 ~trail
-                                 (Reason.localize r)
-                                 name
-                             in
-                             cycle_handler ~trail ~default @@ fun env trail ->
-                             Set.inter acc
-                             @@ to_datatypes
-                                  ~safe_for_are_disjoint
-                                  ~trail
-                                  env
-                                  req_cls
-                                  (* TODO(T221435654)
-                                     you can require a specific generic class,
-                                     but for now, [] (all Erased) is sound but
-                                     incomplete *)
-                                  [])
-                         reqs
-                   | Some whitelist ->
-                     let trail =
-                       DataTypeReason.sealed_interface
-                         ~trail
-                         (Reason.witness_from_decl (Cls.pos cls))
-                         name
-                     in
-                     SSet.fold
-                       (fun whitelist_cls acc ->
-                         cycle_handler ~trail ~default @@ fun env trail ->
-                         Set.union acc
-                         @@ to_datatypes
-                              ~safe_for_are_disjoint
-                              ~trail
-                              env
-                              whitelist_cls
-                              (* You cannot provide generics when sealing *)
-                              [])
-                       whitelist
-                       Set.empty
-                     |> Set.inter (default ~reason)
+                 match Cls.sealed_whitelist cls with
+                 | None ->
+                   let reqs = Cls.all_ancestor_reqs cls in
+                   if safe_for_are_disjoint || List.is_empty reqs then
+                     default ~reason
+                   else
+                     List.fold
+                       ~init:(default ~reason)
+                       ~f:(fun acc (_, required_ty) ->
+                         match
+                           Typing_utils.try_unwrap_class_type required_ty
+                         with
+                         | None -> acc
+                         | Some (r, (_p, req_cls), _paraml) ->
+                           let trail =
+                             DataTypeReason.requirement
+                               ~trail
+                               (Reason.localize r)
+                               name
+                           in
+                           cycle_handler ~trail ~default @@ fun env trail ->
+                           Set.inter acc
+                           @@ to_datatypes
+                                ~safe_for_are_disjoint
+                                ~trail
+                                env
+                                req_cls
+                                (* TODO(T221435654)
+                                   you can require a specific generic class,
+                                   but for now, [] (all Erased) is sound but
+                                   incomplete *)
+                                [])
+                       reqs
+                 | Some whitelist ->
+                   let trail =
+                     DataTypeReason.sealed_interface
+                       ~trail
+                       (Reason.witness_from_decl (Cls.pos cls))
+                       name
+                   in
+                   SSet.fold
+                     (fun whitelist_cls acc ->
+                       cycle_handler ~trail ~default @@ fun env trail ->
+                       Set.union acc
+                       @@ to_datatypes
+                            ~safe_for_are_disjoint
+                            ~trail
+                            env
+                            whitelist_cls
+                            (* You cannot provide generics when sealing *)
+                            [])
+                     whitelist
+                     Set.empty
+                   |> Set.inter (default ~reason)
                end
                | Cenum
                | Cenum_class _ ->

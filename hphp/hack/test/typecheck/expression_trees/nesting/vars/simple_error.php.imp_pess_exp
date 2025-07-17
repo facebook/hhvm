@@ -1,16 +1,16 @@
 ERROR: File "simple_error.php", line 6, characters 31-51:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 383, characters 26-35:
+  File "expr_tree.php", line 385, characters 26-35:
   Expected `ExampleInt`
-  File "expr_tree.php", line 92, characters 40-52:
+  File "expr_tree.php", line 94, characters 40-52:
   But got `ExampleString`
 ERROR: File "simple_error.php", line 7, characters 30-50:
 Typing error (Typing[4110])
   File "simple_error.php", line 7, characters 43-48:
   Expected `nothing` because type parameter `T` of `operationType` could not be determined. Please add explicit type parameters to the invocation of `operationType`
-  File "expr_tree.php", line 111, characters 50-50:
+  File "expr_tree.php", line 113, characters 50-50:
     via this generic `T`
-  File "expr_tree.php", line 111, characters 43-43:
+  File "expr_tree.php", line 113, characters 43-43:
     via this generic `T`
-  File "expr_tree.php", line 83, characters 39-48:
+  File "expr_tree.php", line 85, characters 39-48:
   But got `ExampleInt`

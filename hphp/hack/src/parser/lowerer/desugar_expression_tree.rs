@@ -196,6 +196,7 @@ pub fn desugar(
         &state.global_function_pointers,
         &state.static_method_pointers,
         env.is_typechecker(),
+        &free_vars,
         virtualized_expr,
     );
 
@@ -2131,6 +2132,7 @@ fn maketree_metadata(
     functions: &[Expr],
     static_methods: &[Expr],
     is_typecheck: bool,
+    freevars: &BTreeMap<(isize, String), Pos>,
     virtual_expr: Expr,
 ) -> Expr {
     let key_value_pairs = splices
@@ -2161,10 +2163,22 @@ fn maketree_metadata(
         .map(|(i, expr)| temp_static_method_lvar(&expr.1, i))
         .collect();
     let static_method_vec = vec_literal_with_pos(pos, static_method_vars);
+    let freevars_exprs = freevars
+        .iter()
+        .map(|((_, str), pos)| {
+            Expr::new(
+                (),
+                pos.clone(),
+                Expr_::mk_string(BString::from(str.clone())),
+            )
+        })
+        .collect();
+    let freevars_vec = vec_literal_with_pos(pos, freevars_exprs);
     let mut fields = vec![
         ("splices", splices_dict),
         ("functions", functions_vec),
         ("static_methods", static_method_vec),
+        ("variables", freevars_vec),
     ];
     if is_typecheck {
         fields.push(("type", virtual_expr))

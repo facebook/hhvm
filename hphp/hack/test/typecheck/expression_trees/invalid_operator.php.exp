@@ -18,17 +18,17 @@ Variable `$x` is undefined, or not always defined. (Naming[2050])
   Did you mean `$z` instead?
 ERROR: File "invalid_operator.php", line 13, characters 19-27:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 60, characters 21-26:
+  File "expr_tree.php", line 61, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 71, characters 28-43:
+  File "expr_tree.php", line 73, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 13, characters 23-25:
   But got `Foo`
 ERROR: File "invalid_operator.php", line 16, characters 19-26:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 60, characters 21-26:
+  File "expr_tree.php", line 61, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 141, characters 5-20:
+  File "expr_tree.php", line 143, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 9, characters 7-9:
   But got `int`
@@ -38,21 +38,21 @@ You are trying to access the method `__plus` but this is an int (Typing[4062])
   Definition is here
 ERROR: File "invalid_operator.php", line 19, characters 19-42:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 60, characters 21-26:
+  File "expr_tree.php", line 61, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 71, characters 28-43:
+  File "expr_tree.php", line 73, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 19, characters 19-42:
   But got `(function(): int)`
 ERROR: File "invalid_operator.php", line 29, characters 38-46:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 83, characters 39-48:
+  File "expr_tree.php", line 85, characters 39-48:
   Expected `dynamic`
-  File "expr_tree.php", line 83, characters 39-48:
+  File "expr_tree.php", line 85, characters 39-48:
   Type `ExampleInt` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "invalid_operator.php", line 32, characters 40-40:
 Typing error (Typing[4429])
   File "invalid_operator.php", line 32, characters 34-40:
   Expected `num` because this is used in an arithmetic operation
-  File "expr_tree.php", line 83, characters 39-48:
+  File "expr_tree.php", line 85, characters 39-48:
   But got `ExampleInt`

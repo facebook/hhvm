@@ -11,7 +11,9 @@ class DictError {
       // Based on a user report of an error that didn't make much sense
       'splices' => dict<string, Spliceable<DictError, DictError::TAst, TInfer>>,
       'functions' => vec<mixed>,
-      'static_methods' => vec<mixed>, ?'type' => TInfer,
+      'static_methods' => vec<mixed>,
+      ?'type' => TInfer,
+      'variables' => vec<string>,
     ) $metadata,
     (function(DictError): DictError::TAst) $ast,
   ): ExprTree<DictError, DictError::TAst, TInfer> {

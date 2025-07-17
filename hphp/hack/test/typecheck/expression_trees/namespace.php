@@ -12,7 +12,9 @@ class MyExampleDsl {
     shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
-      'static_methods' => vec<mixed>, ?'type' => TInfer,
+      'static_methods' => vec<mixed>,
+      ?'type' => TInfer,
+      'variables' => vec<string>,
     ) $metadata,
     (function(MyExampleDsl): MyExampleDsl::TAst) $ast,
   ): \ExprTree<MyExampleDsl, MyExampleDsl::TAst, TInfer> {

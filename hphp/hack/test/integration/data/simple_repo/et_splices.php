@@ -26,6 +26,7 @@ type ExprTreeInfo<TInfer> = shape(
   // The virtualised expression is placed here, to cause the type checker to instantiate
   // TInfer to the virtualised type.
   ?'type' => (function(): TInfer),
+  'variables' => vec<string>,
 );
 
 final class ExprTree<TVisitor, TResult, +TInfer>
@@ -62,6 +63,7 @@ class ExampleDsl {
       'functions' => vec<mixed>,
       'static_methods' => vec<mixed>,
       ?'type' => (function(): TInfer),
+      'variables' => vec<string>,
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {

@@ -14,6 +14,7 @@ function g(): ExprTree<(function(optional ExampleInt): ExampleInt)> {
       "splices" => dict[],
       "functions" => vec[],
       "static_methods" => vec[],
+      "variables" => vec[],
     ],
     (
       (ExampleDsl $v) ==> {

@@ -14,6 +14,7 @@ function f(): void {
       "splices" => dict[],
       "functions" => vec[],
       "static_methods" => vec[],
+      "variables" => vec[],
     ],
     (
       (ExampleDsl $v) ==> {
@@ -45,6 +46,7 @@ function f(): void {
           "splices" => dict["$0splice0" => $splice0],
           "functions" => vec[],
           "static_methods" => vec[],
+          "variables" => vec[],
         ],
         (
           (ExampleDsl $v) ==> {

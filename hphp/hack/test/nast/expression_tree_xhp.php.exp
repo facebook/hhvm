@@ -37,6 +37,7 @@
                                         [((SFlit_str ([4:8-18], "splices")), ((), [4:8-18], (KeyValCollection (([4:8-18], Dict), None, []))));
                                           ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
                                           ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
+                                          ((SFlit_str ([4:8-18], "variables")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
                                           ((SFlit_str ([4:8-18], "type")),
                                            ((), [4:19-58],
                                             (Efun

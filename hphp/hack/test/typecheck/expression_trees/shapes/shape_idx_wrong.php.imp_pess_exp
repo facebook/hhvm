@@ -2,7 +2,7 @@ ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 8, characters 15-46:
   Expected `dynamic`
-  File "expr_tree.php", line 72, characters 8-53:
+  File "expr_tree.php", line 74, characters 8-53:
   But got `ExprTree<ExampleDsl, string, _>`
 ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
@@ -14,7 +14,7 @@ ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 8, characters 36-45:
   Expected `ExampleInt`
-  File "expr_tree.php", line 452, characters 73-73:
+  File "expr_tree.php", line 454, characters 73-73:
     via this generic `T`
   File "shape_idx_wrong.php", line 11, characters 12-40:
   But got `?_`
@@ -30,7 +30,7 @@ ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 25, characters 15-46:
   Expected `dynamic`
-  File "expr_tree.php", line 72, characters 8-53:
+  File "expr_tree.php", line 74, characters 8-53:
   But got `ExprTree<ExampleDsl, string, _>`
 ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
 Invalid return type (Typing[4110])
@@ -42,7 +42,7 @@ ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 25, characters 36-45:
   Expected `ExampleInt`
-  File "expr_tree.php", line 452, characters 73-73:
+  File "expr_tree.php", line 454, characters 73-73:
     via this generic `T`
   File "shape_idx_wrong.php", line 28, characters 12-40:
   But got `?(_ | ExampleString)`
@@ -50,7 +50,7 @@ ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 33, characters 16-47:
   Expected `dynamic`
-  File "expr_tree.php", line 72, characters 8-53:
+  File "expr_tree.php", line 74, characters 8-53:
   But got `ExprTree<ExampleDsl, string, _>`
 ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
@@ -62,9 +62,9 @@ ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 33, characters 37-46:
   Expected `ExampleInt`
-  File "expr_tree.php", line 452, characters 73-73:
+  File "expr_tree.php", line 454, characters 73-73:
     via this generic `T`
-  File "expr_tree.php", line 92, characters 40-52:
+  File "expr_tree.php", line 94, characters 40-52:
   But got `ExampleString`
 ERROR: File "shape_idx_wrong.php", line 36, characters 37-39:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
@@ -82,7 +82,7 @@ Too few arguments (required 2 but got 1) (Typing[4104])
   Definition is here
 ERROR: File "shape_idx_wrong.php", line 52, characters 34-36:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "expr_tree.php", line 427, characters 31-31:
+  File "expr_tree.php", line 429, characters 31-31:
   The field `x` is not defined in this shape
 ERROR: File "shape_idx_wrong.php", line 55, characters 5-34:
 `ExampleString` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])
@@ -90,13 +90,13 @@ ERROR: File "shape_idx_wrong.php", line 62, characters 10-140:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 59, characters 15-49:
   Expected `Spliceable<ExampleDsl, string, ExampleString>`
-  File "expr_tree.php", line 72, characters 8-53:
+  File "expr_tree.php", line 74, characters 8-53:
   But got `dynamic` because the type of this return is implicitly a like-type due to unenforced generic type arguments
 ERROR: File "shape_idx_wrong.php", line 62, characters 10-140:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 59, characters 36-48:
   Expected `ExampleString`
-  File "expr_tree.php", line 452, characters 73-73:
+  File "expr_tree.php", line 454, characters 73-73:
     via this generic `T`
   File "shape_idx_wrong.php", line 63, characters 24-33:
   But got `mixed`

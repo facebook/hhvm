@@ -2,9 +2,9 @@ ERROR: File "php_lambda.php", line 6, characters 14-44:
 Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. (Parsing[1002])
 ERROR: File "php_lambda.php", line 6, characters 14-44:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 60, characters 21-26:
+  File "expr_tree.php", line 61, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 71, characters 28-43:
+  File "expr_tree.php", line 73, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "php_lambda.php", line 6, characters 14-44:
   But got `(function(): int)`

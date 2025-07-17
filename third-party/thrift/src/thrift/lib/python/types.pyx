@@ -77,18 +77,23 @@ cdef _is_py3_structured(obj):
 
 
 
-cdef _make_non_primitive_property(struct_class, int field_index, str field_name, pbool disabled_caching):
+cdef _make_non_primitive_property(struct_class, int field_index, str field_name):
+    # there are two cases where cinder.cached_property is not used:
+    # 1. On MacOs/Windows, cinder is not available.
+    # 2. On Linux, in python_binary where use_cinder = False (the default)
+    #    cinder is available but cinder.cached_property is very slow.
     if _fbthrift_is_cinder_runtime:
         getter_fn = lambda self: (<Struct>self)._fbthrift_py_value_from_internal_data(field_index)
         return cinder.cached_property(
             getter_fn,
             getattr(struct_class, field_name),
         )
-    # there are two cases where cinder.cached_property is not used:
-    # 1. On MacOs/Windows, cinder is not available.
-    # 2. On Linux, in python_binary where use_cinder = False (the default)
-    #    cinder is available but cinder.cached_property is very slow.
-    elif disabled_caching:
+    cdef pbool disable_cache = getattr(
+        struct_class,
+        '_fbthrift_disable_field_cache_DO_NOT_USE',
+        False
+    )
+    if disable_cache:
         return _StructUncachedField(field_index, field_name)
     else:
         return _StructCachedField(field_index, field_name)
@@ -1132,7 +1137,7 @@ cdef class Struct(StructOrUnion):
                 arguments during initialization.
         """
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        if _fbthrift_is_cinder_runtime or hasattr(self, '_fbthrift_diable_field_cache_DO_NOT_USE') :
+        if _fbthrift_is_cinder_runtime or getattr(self, '_fbthrift_disable_field_cache_DO_NOT_USE', False):
             # in cinder, caching happens in property layer
             self._fbthrift_field_cache = None
         else:
@@ -1797,6 +1802,10 @@ cdef class _StructPrimitiveField(_FieldDescriptorBase):
 
         return obj._fbthrift_data[self._tuple_index]
 
+cdef inline _is_primitive_field(FieldInfo field_info) noexcept:
+    return field_info.is_primitive and field_info.adapter_info is None \
+        and not isinstance(field_info.type_info, AdaptedTypeInfo)
+
 
 class StructMeta(type):
     """Metaclass for all generated (immutable) thrift-python Struct types."""
@@ -1822,10 +1831,6 @@ class StructMeta(type):
             attributes, meant for internal (Thrift) processing:
 
             _fbthrift_struct_info: StructInfo
-
-            _fbthrift_primitive_types:
-                List[Tuple[int (index in fields), str (field name), type_info]]
-                for all primitive (and non-adapted) fields.
         """
         for base in bases:
             if getattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE', False):
@@ -1836,42 +1841,27 @@ class StructMeta(type):
         # Set[Tuple (field spec)]. See `StructInfo` class docstring for the
         # contents of the field spec tuples.
         fields = dct.pop('_fbthrift_SPEC', ())
-        # boolean
-        disabled_caching = dct.get('_fbthrift_diable_field_cache_DO_NOT_USE', False)
 
-        num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
-
-        # List[Tuple[int (index in fields), str (field name), type_info]]
-        cdef list primitive_types = []
-
-        # List[Tuple[int (index in fields), str (field name)]]
-        cdef list non_primitive_types = []
 
         cdef list slots = []
         for i, field_info in enumerate(fields):
             slots.append(field_info.py_name)
 
-            # if field has an adapter or is not primitive type, consider as "non-primitive"
-            if not field_info.is_primitive or field_info.adapter_info is not None \
-                    or isinstance(field_info.type_info, AdaptedTypeInfo):
-                non_primitive_types.append((i, field_info.py_name))
-            else:
-                primitive_types.append((i, field_info.py_name, field_info.type_info))
-
-        dct["_fbthrift_primitive_types"] = primitive_types
         dct["__slots__"] = slots
         all_bases = bases if bases else (Struct,)
         klass = super().__new__(cls, cls_name, all_bases, dct)
 
-        for field_index, field_name in non_primitive_types:
-            type.__setattr__(
-                klass,
-                field_name,
-                _make_non_primitive_property(klass, field_index, field_name, disabled_caching),
-            )
-        for field_index, field_name, field_type_info in primitive_types:
-            descriptor = _StructPrimitiveField(field_index, field_name)
+        for field_index, field_info in enumerate(fields):
+            field_name = field_info.py_name
+            if _is_primitive_field(field_info):
+                descriptor = _StructPrimitiveField(field_index, field_name)
+            else:
+                descriptor = _make_non_primitive_property(
+                    klass,
+                    field_index,
+                    field_name,
+                )
             type.__setattr__(klass, field_name, descriptor)
 
         klass.__setattr__, klass.__delattr__ = _make_readonly_mutate_attr()
@@ -1968,7 +1958,6 @@ class UnionMeta(type):
             )
 
         field_infos = union_class_namespace.pop('_fbthrift_SPEC')
-        num_fields = len(field_infos)
         union_class_namespace["_fbthrift_struct_info"] = UnionInfo(
             union_name, field_infos
         )

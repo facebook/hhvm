@@ -444,7 +444,9 @@ class StructTestsParameterized(unittest.TestCase):
     def test_getattr_disable_cached(self) -> None:
         # check the argument is set
         self.assertTrue(
-            hasattr(StructDisabledFieldCache, "_fbthrift_diable_field_cache_DO_NOT_USE")
+            hasattr(
+                StructDisabledFieldCache, "_fbthrift_disable_field_cache_DO_NOT_USE"
+            )
         )
 
         s = StructDisabledFieldCache(

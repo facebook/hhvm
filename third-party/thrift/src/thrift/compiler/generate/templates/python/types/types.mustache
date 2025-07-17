@@ -69,7 +69,7 @@ class {{> structs/unadapted_name}}{{!
     {{/struct:allow_inheritance?}}
     {{/program:py3_auto_migrate?}}
     {{#struct:disable_field_caching?}}
-    _fbthrift_diable_field_cache_DO_NOT_USE = True
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{/struct:disable_field_caching?}}
     _fbthrift_SPEC = (
         {{#struct:fields_ordered_by_id}}

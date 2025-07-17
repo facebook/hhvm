@@ -309,7 +309,7 @@ TEST(SchematizerTest, wrap_with_protocol_map) {
   // have a string-based key type.
   auto program = std::make_unique<t_program>("./", "./");
   auto map_ty = std::make_unique<t_map>(
-      &t_primitive_type::t_i16(), &t_primitive_type::t_i32());
+      t_primitive_type::t_i16(), t_primitive_type::t_i32());
   auto foo_map_ty = make_foo_map(program.get(), map_ty.get());
 
   // Make the following structure:

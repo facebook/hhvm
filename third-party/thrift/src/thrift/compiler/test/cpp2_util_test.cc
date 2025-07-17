@@ -61,7 +61,7 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   auto set = t_set(&i32);
   EXPECT_FALSE(is_eligible_for_constexpr(&set));
 
-  auto map = t_map(&i32, &t_primitive_type::t_double());
+  auto map = t_map(i32, t_primitive_type::t_double());
   EXPECT_FALSE(is_eligible_for_constexpr(&map));
 
   for (auto a : {"cpp.template", "cpp2.template", "cpp.type", "cpp2.type"}) {
@@ -173,7 +173,7 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   auto li = t_list(&i);
   auto lli = t_list(t_list(&i));
   auto si = t_set(&i);
-  auto mii = t_map(&i, &i);
+  auto mii = t_map(i, i);
 
   const t_type* no_uniques[] = {&i, &li, &lli, &si, &mii};
   for (const auto* no_unique : no_uniques) {
@@ -189,7 +189,7 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   auto lp = t_list(&p);
   auto llp = t_list(t_list(&p));
   auto sp = t_set(&p);
-  auto mip = t_map(&i, &p);
+  auto mip = t_map(i, p);
 
   const t_type* uniques[] = {&p, &lp, &llp, &sp, &mip};
   for (const auto* unique : uniques) {

@@ -2788,7 +2788,7 @@ const t_type* t_hack_generator::tmeta_ThriftService_type() {
 const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
   static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftEnum");
-  static t_map tmap(&t_primitive_type::t_i32(), &t_primitive_type::t_string());
+  static t_map tmap(t_primitive_type::t_i32(), t_primitive_type::t_string());
   if (type.has_fields()) {
     return &type;
   }

@@ -432,7 +432,7 @@ TYPED_TEST(AstVisitorTest, list) {
 
 TYPED_TEST(AstVisitorTest, map) {
   auto map = std::make_unique<t_map>(
-      &t_primitive_type::t_i32(), &t_primitive_type::t_i32());
+      t_primitive_type::t_i32(), t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_map(map.get()));
   EXPECT_CALL(this->mock_, visit_container(map.get()));
   EXPECT_CALL(this->overload_mock_, visit_map(map.get()));

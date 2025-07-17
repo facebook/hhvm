@@ -49,10 +49,6 @@ class t_map final : public t_container {
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.
  public:
-  t_map(const t_type* key_type, const t_type* val_type)
-      : t_map(
-            t_type_ref::from_req_ptr(key_type),
-            t_type_ref::from_req_ptr(val_type)) {}
   const t_type* get_key_type() const { return key_type().get_type(); }
   const t_type* get_val_type() const { return val_type().get_type(); }
 };

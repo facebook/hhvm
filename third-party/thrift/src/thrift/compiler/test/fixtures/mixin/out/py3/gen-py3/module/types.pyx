@@ -36,6 +36,7 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
+    mixin_deprecation_log_error,
 )
 from thrift.py3.types cimport _ensure_py3_or_raise, _ensure_py3_container_or_raise
 cimport thrift.py3.serializer as serializer
@@ -232,6 +233,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
     @property
     def field1(self):
+        mixin_deprecation_log_error(b"Mixin2", b"field1")
         return self.field1_impl()
 
 
@@ -487,6 +489,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @property
     def m1(self):
+        mixin_deprecation_log_error(b"Foo", b"m1")
         return self.m1_impl()
 
     cdef inline field2_impl(self):
@@ -496,6 +499,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @property
     def field2(self):
+        mixin_deprecation_log_error(b"Foo", b"field2")
         return self.field2_impl()
 
     cdef inline field1_impl(self):
@@ -503,6 +507,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @property
     def field1(self):
+        mixin_deprecation_log_error(b"Foo", b"field1")
         return self.field1_impl()
 
     cdef inline field3_impl(self):
@@ -510,6 +515,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @property
     def field3(self):
+        mixin_deprecation_log_error(b"Foo", b"field3")
         return self.field3_impl()
 
 

@@ -1082,7 +1082,13 @@ class py3_mstch_field : public mstch_field {
             {"field:hasPyName?", &py3_mstch_field::hasPyName},
             {"field:boxed_ref?", &py3_mstch_field::boxed_ref},
             {"field:has_ref_api?", &py3_mstch_field::hasRefApi},
+            {"field:is_mixin?", &py3_mstch_field::is_mixin},
         });
+  }
+
+  mstch::node is_mixin() {
+    return mstch_field::field_context_ == nullptr ||
+        mstch_field::field_context_->strct == nullptr;
   }
 
   mstch::node isRef() { return is_ref(); }

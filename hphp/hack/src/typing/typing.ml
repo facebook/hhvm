@@ -7650,6 +7650,8 @@ end = struct
           (mk_constraint_type
              (reason, Ttype_switch { predicate; ty_true; ty_false }))
       in
+      let (env, _ty_err) = SubType.sub_type env ty_true ty None in
+      let (env, _ty_err) = SubType.sub_type env ty_false ty None in
       let env = Env.set_tyvar_variance_i env type_switch_constraint in
       let (env, ty_err) =
         Type.sub_type_i

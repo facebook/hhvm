@@ -4639,6 +4639,9 @@ template <> struct TEnumTraits<::py3::simple::detail::AdaptedUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::best; }
+  static constexpr type max() { return type::best; }
 };
 
 template <> struct TEnumDataStorage<::py3::simple::BinaryUnion::Type>;
@@ -4658,6 +4661,9 @@ template <> struct TEnumTraits<::py3::simple::BinaryUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::iobuf_val; }
+  static constexpr type max() { return type::iobuf_val; }
 };
 } // namespace apache::thrift
 

@@ -2694,6 +2694,9 @@ template <> struct TEnumTraits<::cpp2::ComplexUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::intValue; }
+  static constexpr type max() { return type::stringRef; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::ListUnion::Type>;
@@ -2713,6 +2716,9 @@ template <> struct TEnumTraits<::cpp2::ListUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::intListValue; }
+  static constexpr type max() { return type::stringListValue; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::DataUnion::Type>;
@@ -2732,6 +2738,9 @@ template <> struct TEnumTraits<::cpp2::DataUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::binaryData; }
+  static constexpr type max() { return type::stringData; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::ValUnion::Type>;
@@ -2751,6 +2760,9 @@ template <> struct TEnumTraits<::cpp2::ValUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::v1; }
+  static constexpr type max() { return type::v2; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>;
@@ -2770,6 +2782,9 @@ template <> struct TEnumTraits<::cpp2::VirtualComplexUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::thingOne; }
+  static constexpr type max() { return type::thingTwo; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::NonCopyableUnion::Type>;
@@ -2789,6 +2804,9 @@ template <> struct TEnumTraits<::cpp2::NonCopyableUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::s; }
+  static constexpr type max() { return type::s; }
 };
 } // namespace apache::thrift
 

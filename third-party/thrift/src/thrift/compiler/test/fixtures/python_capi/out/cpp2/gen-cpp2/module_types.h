@@ -6436,6 +6436,9 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::Shallot::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::myEnum; }
+  static constexpr type max() { return type::adapted_int; }
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::SomeBinary::Type>;
@@ -6455,6 +6458,9 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type> 
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::iobuf; }
+  static constexpr type max() { return type::iobufRef; }
 };
 } // namespace apache::thrift
 

@@ -716,6 +716,9 @@ template <> struct TEnumTraits<::cpp2::U::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::i; }
+  static constexpr type max() { return type::s; }
 };
 } // namespace apache::thrift
 

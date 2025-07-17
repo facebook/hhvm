@@ -1072,6 +1072,9 @@ template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::myEnum; }
+  static constexpr type max() { return type::myDataItem; }
 };
 } // namespace apache::thrift
 

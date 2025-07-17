@@ -10697,6 +10697,9 @@ template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::myEnum; }
+  static constexpr type max() { return type::intValue; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>;
@@ -10716,6 +10719,9 @@ template <> struct TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::myEnum; }
+  static constexpr type max() { return type::complexNestedStruct; }
 };
 } // namespace apache::thrift
 

@@ -10450,6 +10450,9 @@ template <> struct TEnumTraits<::some::valid::ns::SimpleUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::stringValue; }
+  static constexpr type max() { return type::intValue; }
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::ComplexUnion::Type>;
@@ -10469,6 +10472,9 @@ template <> struct TEnumTraits<::some::valid::ns::ComplexUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::intValue; }
+  static constexpr type max() { return type::opt_a_union; }
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::FloatUnion::Type>;
@@ -10488,6 +10494,9 @@ template <> struct TEnumTraits<::some::valid::ns::FloatUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::floatSide; }
+  static constexpr type max() { return type::doubleSide; }
 };
 } // namespace apache::thrift
 

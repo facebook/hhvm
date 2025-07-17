@@ -5165,6 +5165,9 @@ template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::anInteger; }
+  static constexpr type max() { return type::aString; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::NonTriviallyDestructibleUnion::Type>;
@@ -5184,6 +5187,9 @@ template <> struct TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::int_field; }
+  static constexpr type max() { return type::int_field; }
 };
 } // namespace apache::thrift
 

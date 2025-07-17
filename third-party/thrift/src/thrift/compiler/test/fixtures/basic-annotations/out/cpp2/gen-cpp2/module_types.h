@@ -1329,6 +1329,7 @@ template <> struct TEnumTraits<::cpp2::detail::YourUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
 };
 } // namespace apache::thrift
 

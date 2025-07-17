@@ -292,6 +292,9 @@ template <> struct TEnumTraits<::cpp2::RefUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::field1; }
+  static constexpr type max() { return type::field1; }
 };
 } // namespace apache::thrift
 

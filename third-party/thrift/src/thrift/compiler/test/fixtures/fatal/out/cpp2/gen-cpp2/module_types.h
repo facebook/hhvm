@@ -12464,6 +12464,9 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union1::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::ui; }
+  static constexpr type max() { return type::ue; }
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>;
@@ -12483,6 +12486,9 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union2::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::ui_2; }
+  static constexpr type max() { return type::ue_2; }
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>;
@@ -12502,6 +12508,9 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union3::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::ui_3; }
+  static constexpr type max() { return type::ue_3; }
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>;
@@ -12521,6 +12530,9 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::i; }
+  static constexpr type max() { return type::a; }
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>;
@@ -12540,6 +12552,9 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_n
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::get; }
+  static constexpr type max() { return type::fields; }
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter::Type>;
@@ -12559,6 +12574,9 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::UnionWithTypedefFiel
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::field; }
+  static constexpr type max() { return type::field; }
 };
 } // namespace apache::thrift
 

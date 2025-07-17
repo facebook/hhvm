@@ -106,3 +106,16 @@ enum U16 {
 @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum U32 {
 }
+
+// For testing union tag enum
+union MyUnion {
+  1: i32 first_field;
+  2: i32 i32_field;
+  // Notice the gap in `id` is intentional for testing the case
+  5: i32 last_field;
+}
+
+union EmptyUnion {}
+
+enum EmptyEnum {
+}

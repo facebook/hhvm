@@ -4583,6 +4583,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
     (void)findName(value, &ret);
     return ret.data();
   }
+
 };
 } // namespace apache::thrift
 

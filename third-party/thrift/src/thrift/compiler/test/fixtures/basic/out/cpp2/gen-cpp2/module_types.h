@@ -2646,6 +2646,9 @@ template <> struct TEnumTraits<::test::fixtures::basic::MyUnion::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::myEnum; }
+  static constexpr type max() { return type::floatSet; }
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>;
@@ -2665,6 +2668,9 @@ template <> struct TEnumTraits<::test::fixtures::basic::UnionToBeRenamed::Type> 
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::reserved_field; }
+  static constexpr type max() { return type::reserved_field; }
 };
 } // namespace apache::thrift
 

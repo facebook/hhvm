@@ -36,6 +36,11 @@ template <> struct TEnumTraits<{{struct:cpp_fullname}}::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  {{#if (int.gt? struct:num_union_members 0)}}
+  static constexpr type min() { return type::{{struct:min_union_member}}; }
+  static constexpr type max() { return type::{{struct:max_union_member}}; }
+  {{/if (int.gt? struct:num_union_members 0)}}
 };
 {{/struct:union?}}{{/program:structs}}
 } // namespace apache::thrift

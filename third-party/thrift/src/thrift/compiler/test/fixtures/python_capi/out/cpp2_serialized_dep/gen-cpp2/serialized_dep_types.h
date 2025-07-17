@@ -1930,6 +1930,9 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::SerializedUnion::T
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::s; }
+  static constexpr type max() { return type::i; }
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::MarshalUnion::Type>;
@@ -1949,6 +1952,9 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MarshalUnion::Type
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::s; }
+  static constexpr type max() { return type::i; }
 };
 } // namespace apache::thrift
 

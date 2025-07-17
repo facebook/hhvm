@@ -180,8 +180,14 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE enum_find<U>& enum_find_instance() {
 template <typename E, typename = void>
 inline constexpr bool eligible_for_dense_enum_optimization_v = false;
 
-// Union tag enum doesn't have max/min/size so we only consider dense enum
-// optimization for user-defined enums
+// Empty Thrift enums as well as empty Thrift union tag enums do NOT
+// have TEnumtraits<E>::min()/max() static methods. Instead of failing
+// the build, we will just exclude them from the dense enum optimization.
+// It is reasonable to expect few would call `enum_find_name` on an
+// empty enum. So it should not miss any major optimizations.
+// Since C++ allows `static_cast<E>()` with any value representable
+// by the underlying type, it's better to just fallback to the unoptimized
+// path instead of failing to build.
 template <typename E>
 inline constexpr bool eligible_for_dense_enum_optimization_v<
     E,

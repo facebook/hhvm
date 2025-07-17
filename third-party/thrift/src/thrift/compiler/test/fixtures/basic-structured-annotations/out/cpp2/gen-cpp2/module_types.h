@@ -1988,6 +1988,9 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::first; }
+  static constexpr type max() { return type::second; }
 };
 } // namespace apache::thrift
 

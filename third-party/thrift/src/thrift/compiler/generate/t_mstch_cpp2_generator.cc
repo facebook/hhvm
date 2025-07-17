@@ -1420,6 +1420,10 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:mixin_fields", &cpp_mstch_struct::mixin_fields},
             {"struct:num_union_members",
              &cpp_mstch_struct::get_num_union_members},
+            {"struct:min_union_member",
+             &cpp_mstch_struct::get_min_union_member},
+            {"struct:max_union_member",
+             &cpp_mstch_struct::get_max_union_member},
             {"struct:cpp_allocator", &cpp_mstch_struct::cpp_allocator},
             {"struct:cpp_allocator_via", &cpp_mstch_struct::cpp_allocator_via},
             {"struct:cpp_frozen2_exclude?",
@@ -1718,6 +1722,33 @@ class cpp_mstch_struct : public mstch_struct {
     }
     return struct_->fields().size();
   }
+
+  template <class Comp>
+  mstch::node get_extremal_union_member(Comp comp) {
+    if (!struct_->is<t_union>()) {
+      throw std::runtime_error("not a union struct");
+    }
+    auto iter = std::min_element(
+        struct_->fields().cbegin(),
+        struct_->fields().cend(),
+        [&comp](const t_field& a, const t_field& b) {
+          return comp(a.id(), b.id());
+        });
+    if (iter == struct_->fields().cend()) {
+      throw std::runtime_error("empty union struct");
+    }
+
+    return cpp2::get_name(&*iter);
+  }
+
+  mstch::node get_min_union_member() {
+    return get_extremal_union_member(std::less<>{});
+  }
+
+  mstch::node get_max_union_member() {
+    return get_extremal_union_member(std::greater<>{});
+  }
+
   mstch::node has_non_optional_and_non_terse_field() {
     const auto& fields = struct_->fields();
     return std::any_of(

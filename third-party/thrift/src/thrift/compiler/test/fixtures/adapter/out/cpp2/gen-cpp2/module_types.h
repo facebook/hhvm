@@ -8307,6 +8307,9 @@ template <> struct TEnumTraits<::facebook::thrift::test::Baz::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::intField; }
+  static constexpr type max() { return type::longField; }
 };
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>;
@@ -8326,6 +8329,9 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::T
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::delay; }
+  static constexpr type max() { return type::custom; }
 };
 } // namespace apache::thrift
 

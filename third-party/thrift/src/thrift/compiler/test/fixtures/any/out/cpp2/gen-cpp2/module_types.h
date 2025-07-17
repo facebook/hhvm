@@ -609,6 +609,9 @@ template <> struct TEnumTraits<::facebook::thrift::compiler::test::fixtures::any
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::myString; }
+  static constexpr type max() { return type::myString; }
 };
 } // namespace apache::thrift
 

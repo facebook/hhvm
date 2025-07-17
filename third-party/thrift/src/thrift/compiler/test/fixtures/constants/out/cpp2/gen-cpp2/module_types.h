@@ -2597,6 +2597,9 @@ template <> struct TEnumTraits<::cpp2::union1::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::i; }
+  static constexpr type max() { return type::d; }
 };
 
 template <> struct TEnumDataStorage<::cpp2::union2::Type>;
@@ -2616,6 +2619,9 @@ template <> struct TEnumTraits<::cpp2::union2::Type> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::i; }
+  static constexpr type max() { return type::u; }
 };
 } // namespace apache::thrift
 

@@ -4470,6 +4470,9 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::T
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::bool_field; }
+  static constexpr type max() { return type::struct_field; }
 };
 } // namespace apache::thrift
 

@@ -26,6 +26,20 @@ using apache::thrift::TEnumTraits;
 using namespace apache::thrift::util;
 using namespace cpp2;
 
+template <typename E, typename = void>
+constexpr bool t_enum_trait_has_min_v = false;
+template <typename E>
+constexpr bool
+    t_enum_trait_has_min_v<E, folly::void_t<decltype(TEnumTraits<E>::min())>> =
+        true;
+
+template <typename E, typename = void>
+constexpr bool t_enum_trait_has_max_v = false;
+template <typename E>
+constexpr bool
+    t_enum_trait_has_max_v<E, folly::void_t<decltype(TEnumTraits<E>::max())>> =
+        true;
+
 TEST(EnumTestCpp2, test_enum) {
   // Check that all the enum values match what we expect
   EXPECT_TRUE(TEnumTraits<MyEnum1>::min() == MyEnum1::ME1_0);
@@ -57,6 +71,17 @@ TEST(EnumTestCpp2, test_enum) {
   EXPECT_EQ(int(MyEnum4::ME4_B), 0x7ffffffe);
   EXPECT_EQ(int(MyEnum4::ME4_C), 0x7fffffff);
   EXPECT_TRUE(TEnumTraits<MyEnum4>::max() == MyEnum4::ME4_C);
+
+  EXPECT_TRUE(TEnumTraits<MyUnion::Type>::min() == MyUnion::Type::first_field);
+  EXPECT_EQ(int(MyUnion::Type::first_field), 1);
+  EXPECT_EQ(int(MyUnion::Type::i32_field), 2);
+  EXPECT_EQ(int(MyUnion::Type::last_field), 5);
+  EXPECT_TRUE(TEnumTraits<MyUnion::Type>::max() == MyUnion::Type::last_field);
+
+  EXPECT_FALSE(t_enum_trait_has_max_v<EmptyUnion::Type>);
+  EXPECT_FALSE(t_enum_trait_has_min_v<EmptyUnion::Type>);
+  EXPECT_FALSE(t_enum_trait_has_max_v<EmptyEnum>);
+  EXPECT_FALSE(t_enum_trait_has_min_v<EmptyEnum>);
 }
 
 TEST(EnumTestCpp2, test_enum_constant) {

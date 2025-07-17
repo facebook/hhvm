@@ -1398,6 +1398,9 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleUnion::Type>
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static constexpr type min() { return type::fieldA; }
+  static constexpr type max() { return type::fieldB; }
 };
 } // namespace apache::thrift
 

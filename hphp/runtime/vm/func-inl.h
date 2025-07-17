@@ -146,7 +146,7 @@ inline Unit* Func::unit() const {
 }
 
 inline Class* Func::cls() const {
-  return !isMethCaller() ? m_u.cls() : nullptr;
+  return !isMethCaller() ? clsData().m_impl : nullptr;
 }
 
 inline PreClass* Func::preClass() const {
@@ -154,8 +154,7 @@ inline PreClass* Func::preClass() const {
 }
 
 inline Class* Func::baseCls() const {
-  return !(m_baseCls & kMethCallerBit) ?
-    reinterpret_cast<Class*>(m_baseCls) : nullptr;
+  return !isMethCaller() ? clsData().m_base : nullptr;
 }
 
 inline Class* Func::implCls() const {
@@ -216,27 +215,26 @@ inline void invalidFuncConversion(const char* type) {
 
 inline NamedFunc* Func::getNamedFunc() {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<LowPtr<NamedFunc>*>(&m_namedFunc);
+  return const_cast<NamedFunc*>(m_namedFunc.get());
 }
 
 inline const NamedFunc* Func::getNamedFunc() const {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<const LowPtr<const NamedFunc>*>(&m_namedFunc);
+  return m_namedFunc;
 }
 
 inline void Func::setNamedFunc(const NamedFunc* e) {
-  *reinterpret_cast<LowPtr<const NamedFunc>*>(&m_namedFunc) = e;
+  m_namedFunc = e;
 }
 
 inline const StringData* Func::methCallerClsName() const {
   assertx(isMethCaller() && isBuiltin());
-  return m_u.name();
+  return methCallerData().m_clsName;
 }
 
 inline const StringData* Func::methCallerMethName() const {
-  assertx(isMethCaller() && isBuiltin() &&
-          (m_methCallerMethName & kMethCallerBit));
-  return reinterpret_cast<StringData*>(m_methCallerMethName - kMethCallerBit);
+  assertx(isMethCaller() && isBuiltin());
+  return methCallerData().m_methName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -855,7 +853,7 @@ inline void Func::setAttrs(Attr attrs) {
 }
 
 inline void Func::setBaseCls(Class* baseCls) {
-  m_baseCls = to_low(baseCls);
+  clsData().m_base = baseCls;
 }
 
 inline void Func::setHasPrivateAncestor(bool b) {

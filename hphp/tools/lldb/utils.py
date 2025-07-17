@@ -710,8 +710,7 @@ def _full_func_name(func: lldb.SBValue) -> str:
     if attrs.unsigned & Enum("HPHP::Attr", "AttrIsMethCaller", func.target).unsigned:
         cls = ""
     else:
-        m_u = atomic_get(get(func, "m_u", "m_u"))
-        cls = get(m_u, "m_cls")
+        cls = atomic_get(get(func, "m_u", "m_cls", "m_impl", "m_s"))
         if cls.unsigned == 0:
             cls = ""
         else:

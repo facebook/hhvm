@@ -1275,16 +1275,19 @@ public:
   OFF(inoutBits)
   OFF(shared)
   OFF(unit)
-  OFF(methCallerMethName)
   OFF(funcEntry)
 #undef OFF
 
   static constexpr ptrdiff_t clsOff() {
-    return offsetof(Func, m_u);
+    return offsetof(Func, m_u.m_cls.m_impl);
+  }
+
+  static constexpr ptrdiff_t methCallerMethNameOff() {
+    return offsetof(Func, m_u.m_methCaller.m_methName);
   }
 
   static constexpr ptrdiff_t methCallerClsNameOff() {
-    return offsetof(Func, m_u);
+    return offsetof(Func, m_u.m_methCaller.m_clsName);
   }
 
   static constexpr ptrdiff_t sharedAllFlags() {
@@ -1595,79 +1598,10 @@ private:
   };
 
 public:
-#ifdef USE_LOWPTR
-  using low_storage_t = uint32_t;
-#else
-  using low_storage_t = uintptr_t;
-#endif
-
-private:
-  /*
-   * Lowptr wrapper around std::atomic<Union> for Class* or StringData*
-   */
-  struct UnionWrapper {
-    union U {
-     low_storage_t m_cls;
-     low_storage_t m_methCallerClsName;
-    };
-    std::atomic<U> m_u;
-
-    // constructors
-    explicit UnionWrapper(Class *cls)
-      : m_u([](Class *cls){
-        U u;
-        u.m_cls = to_low(cls);
-        return u; }(cls)) {}
-    explicit UnionWrapper(const StringData *name)
-      : m_u([](const StringData *n){
-        U u;
-        u.m_methCallerClsName = to_low(n, kMethCallerBit);
-        return u; }(name)) {}
-    /* implicit */ UnionWrapper(std::nullptr_t /*px*/)
-      : m_u([](){
-        U u;
-        u.m_cls = 0;
-        return u; }()) {}
-    UnionWrapper(const UnionWrapper& r) :
-      m_u(r.m_u.load()) {
-    }
-
-    // Assignments
-    UnionWrapper& operator=(UnionWrapper r) {
-      m_u.store(r.m_u, std::memory_order_release);
-      return *this;
-    }
-
-    // setter & getter
-    void setCls(Class *cls) {
-      U u;
-      u.m_cls = to_low(cls);
-      m_u.store(u, std::memory_order_release);
-    }
-    Class* cls() const {
-      auto cls = m_u.load(std::memory_order_acquire).m_cls;
-      assertx(!(cls & kMethCallerBit));
-      return reinterpret_cast<Class*>(cls);
-    }
-    StringData* name() const {
-     auto n = m_u.load(std::memory_order_acquire).m_methCallerClsName;
-     assertx(n & kMethCallerBit);
-     return reinterpret_cast<StringData*>(n - kMethCallerBit);
-    }
-  };
-
-  template <class T>
-  static Func::low_storage_t to_low(T* px, Func::low_storage_t bit = 0) {
-    Func::low_storage_t ones = ~0;
-    auto ptr = reinterpret_cast<uintptr_t>(px) | bit;
-    always_assert((ptr & ones) == ptr);
-    return (Func::low_storage_t)(ptr);
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Atomic Flags.
 
-public:
   enum Flags : uint8_t {
     None             = 0,
     Optimized        = 1 << 0,
@@ -1792,8 +1726,6 @@ public:
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
 
-  // To conserve space, we use unions for pairs of mutually exclusive fields
-  static auto constexpr kMethCallerBit = 0x1;  // set for m_methCaller
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1812,23 +1744,78 @@ private:
   mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
 
-  union {
-    // The first Class in the inheritance hierarchy that declared this method.
-    // Note that this may be an abstract class that did not provide an
-    // implementation.
-    low_storage_t m_baseCls{0};
-    // m_methCallerMethName can be accessed by meth_caller() only
-    low_storage_t m_methCallerMethName;
+  struct ClsOrMethCaller {
+    struct Cls {
+      // The first Class in the inheritance hierarchy that declared this method.
+      // Note that this may be an abstract class that did not provide an
+      // implementation.
+      LowPtr<Class> m_base{nullptr};
+      // Class that provided this method implementation
+      AtomicLowPtr<Class> m_impl{nullptr};
+
+      Cls() {}
+
+      Cls(const Cls& o) {
+        m_base = o.m_base;
+        m_impl = o.m_impl;
+      }
+
+      Cls& operator=(const Cls& o) {
+        m_base = o.m_base;
+        m_impl = o.m_impl;
+        return *this;
+      }
+    };
+    struct MethCaller {
+      LowStringPtr m_methName;
+      // Class name provided by meth_caller()
+      LowStringPtr m_clsName;
+    };
+
+    // The first part of the union is valid if !isMethCaller
+    // and the second part is valid if isMethCaller
+    union {
+      Cls m_cls;
+      MethCaller m_methCaller;
+    };
+
+    ClsOrMethCaller() {
+      m_cls.m_base = nullptr;
+      m_cls.m_impl = nullptr;
+    }
+
+    ClsOrMethCaller(const ClsOrMethCaller& o) {
+      m_cls = o.m_cls;
+    }
   };
 
-  // m_u is used to represent
-  // the Class that provided this method implementation, or
-  // the class name provided by meth_caller()
-  UnionWrapper m_u{nullptr};
+  ClsOrMethCaller::Cls& clsData() {
+    assertx(!isMethCaller());
+    return m_u.m_cls;
+  }
+
+  const ClsOrMethCaller::Cls& clsData() const {
+    assertx(!isMethCaller());
+    return m_u.m_cls;
+  }
+
+  ClsOrMethCaller::MethCaller& methCallerData() {
+    assertx(isMethCaller());
+    return m_u.m_methCaller;
+  }
+
+  const ClsOrMethCaller::MethCaller& methCallerData() const {
+    assertx(isMethCaller());
+    return m_u.m_methCaller;
+  }
+
+  ClsOrMethCaller m_u;
+
   union {
     Slot m_methodSlot{0};
-    LowPtr<const NamedFunc>::storage_type m_namedFunc;
+    LowPtr<const NamedFunc> m_namedFunc;
   };
+
   mutable ClonedFlag m_cloned;
   mutable AtomicFlags m_atomicFlags;
   bool m_isPreFunc : 1;

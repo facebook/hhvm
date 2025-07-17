@@ -225,24 +225,20 @@ void cgLdFuncName(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
-  static_assert(Func::kMethCallerBit == 1,
-                "Fix the decq if you change kMethCallerBit");
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
   auto const isCls = inst->extra<MethCallerData>()->isCls;
   auto& v = vmain(env);
   auto const off = isCls ?
     Func::methCallerClsNameOff() : Func::methCallerMethNameOff();
-  auto const tmp = v.makeReg();
-  emitLdLowPtr(v, func[off], tmp, sizeof(Func::low_storage_t));
-  v << decq{tmp, dst, v.makeReg()};
+  emitLdLowPtr(v, func[off], dst, sizeof(LowStringPtr));
 }
 
 void cgLdFuncCls(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  emitLdLowPtr(v, func[Func::clsOff()], dst, sizeof(Func::low_storage_t));
+  emitLdLowPtr(v, func[Func::clsOff()], dst, sizeof(LowPtr<Class>));
 }
 
 void cgFuncHasAttr(IRLS& env, const IRInstruction* inst) {

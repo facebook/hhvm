@@ -122,8 +122,6 @@ Func::Func(
   Unit& unit, const StringData* name, Attr attrs,
   const StringData *methCallerCls, const StringData *methCallerMeth)
   : m_name(name)
-  , m_methCallerMethName(to_low(methCallerMeth, kMethCallerBit))
-  , m_u(methCallerCls)
   , m_isPreFunc(false)
   , m_hasPrivateAncestor(false)
   , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
@@ -135,6 +133,8 @@ Func::Func(
 {
   assertx(methCallerCls != nullptr);
   assertx(methCallerMeth != nullptr);
+  methCallerData().m_methName = methCallerMeth;
+  methCallerData().m_clsName = methCallerCls;
 }
 
 Func::~Func() {
@@ -229,7 +229,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_cloned.flag.test_and_set();
   f->initProloguesAndFuncEntry(numParams);
   if (name) f->m_name = name;
-  f->m_u.setCls(cls);
+  f->clsData().m_impl = cls;
   f->setFullName(numParams);
 
   if (f != this) {
@@ -246,7 +246,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
 }
 
 void Func::rescope(Class* ctx) {
-  m_u.setCls(ctx);
+  clsData().m_impl = ctx;
   setFullName(numParams());
 }
 

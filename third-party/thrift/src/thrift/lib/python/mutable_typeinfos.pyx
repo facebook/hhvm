@@ -276,7 +276,14 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
             val_info,
             (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo),
         )
-        self.cpp_obj = make_unique[cMutableSetTypeInfo](getCTypeInfo(val_info))
+        cdef unique_ptr[cMutableSetTypeInfo] cpp_obj = make_unique[cMutableSetTypeInfo](
+            getCTypeInfo(val_info)
+        )
+        self.cpp_obj = unique_ptr[cSetTypeInfoBase](cpp_obj.release())
+
+    def enableKeySorted(self):
+        self.cpp_obj = self.cpp_obj.get().asKeySorted()
+        return self
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
@@ -407,6 +414,9 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
             getCTypeInfo(key_info),
             getCTypeInfo(val_info),
         )
+
+    def enableKeySorted(self):
+        return self
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()

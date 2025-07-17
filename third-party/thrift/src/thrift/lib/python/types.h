@@ -424,8 +424,15 @@ class MutableListTypeInfo {
   const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
-template <typename T>
-class SetTypeInfoTemplate {
+class SetTypeInfoBase {
+ public:
+  virtual const ::apache::thrift::detail::TypeInfo* get() const = 0;
+  virtual ::std::unique_ptr<SetTypeInfoBase> asKeySorted() const = 0;
+  virtual ~SetTypeInfoBase() = default;
+};
+
+template <typename T, bool KeySorted>
+class SetTypeInfoTemplate final : public SetTypeInfoBase {
  public:
   static std::uint32_t size(const void* object) {
     return folly::to<std::uint32_t>(PySet_GET_SIZE(toPyObject(object)));
@@ -467,15 +474,21 @@ class SetTypeInfoTemplate {
                 T::clear),
             &ext_,
         } {}
-  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
+  const ::apache::thrift::detail::TypeInfo* get() const override {
+    return &typeinfo_;
+  }
+
+  std::unique_ptr<SetTypeInfoBase> asKeySorted() const override {
+    return std::make_unique<SetTypeInfoTemplate<T, true>>(ext_.valInfo);
+  }
 
  private:
   const ::apache::thrift::detail::SetFieldExt ext_;
   const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
-template <typename T>
-void SetTypeInfoTemplate<T>::read(
+template <typename T, bool KeySorted>
+void SetTypeInfoTemplate<T, KeySorted>::read(
     const void* context,
     void* objectPtr,
     std::uint32_t setSize,
@@ -495,8 +508,8 @@ void SetTypeInfoTemplate<T>::read(
   setPyObject(objectPtr, std::move(set));
 }
 
-template <typename T>
-size_t SetTypeInfoTemplate<T>::write(
+template <typename T, bool KeySorted>
+size_t SetTypeInfoTemplate<T, KeySorted>::write(
     const void* context,
     const void* object,
     bool protocolSortKeys,
@@ -504,7 +517,7 @@ size_t SetTypeInfoTemplate<T>::write(
   size_t written = 0;
   PyObject* set = const_cast<PyObject*>(toPyObject(object));
   UniquePyObjectPtr iter;
-  if (protocolSortKeys) {
+  if (UNLIKELY(protocolSortKeys) || KeySorted) {
     UniquePyObjectPtr seq{PySequence_List(set)};
     if (!seq) {
       THRIFT_PY3_CHECK_ERROR();
@@ -527,8 +540,8 @@ size_t SetTypeInfoTemplate<T>::write(
   return written;
 }
 
-template <typename T>
-void SetTypeInfoTemplate<T>::consumeElem(
+template <typename T, bool KeySorted>
+void SetTypeInfoTemplate<T, KeySorted>::consumeElem(
     const void* context,
     void* objectPtr,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
@@ -564,7 +577,7 @@ struct ImmutableSetHandler {
   static void* clear(void* object) { return setFrozenSet(object); }
 };
 
-using SetTypeInfo = SetTypeInfoTemplate<ImmutableSetHandler>;
+using SetTypeInfo = SetTypeInfoTemplate<ImmutableSetHandler, false>;
 
 /**
  * This class is intended to be used as a template parameter for the
@@ -579,7 +592,7 @@ struct MutableSetHandler {
   static void* clear(void* object) { return setMutableSet(object); }
 };
 
-using MutableSetTypeInfo = SetTypeInfoTemplate<MutableSetHandler>;
+using MutableSetTypeInfo = SetTypeInfoTemplate<MutableSetHandler, false>;
 
 class MapTypeInfo {
  public:
@@ -618,8 +631,8 @@ class MapTypeInfo {
             /* .size */ size,
             /* .clear */ clear,
             /* .consumeElem */ consumeElem,
-            /* .readSet */ read,
-            /* .writeSet */ write,
+            /* .readMap */ read,
+            /* .writeMap */ write,
         },
         typeinfo_{
             protocol::TType::T_MAP,
@@ -745,7 +758,9 @@ class DynamicStructInfo {
 
   // DynamicStructInfo is non-copyable
   DynamicStructInfo(const DynamicStructInfo&) = delete;
-  void operator=(const DynamicStructInfo&) = delete;
+  DynamicStructInfo& operator=(const DynamicStructInfo&) = delete;
+  DynamicStructInfo(DynamicStructInfo&&) = delete;
+  DynamicStructInfo& operator=(DynamicStructInfo&&) = delete;
 
   ~DynamicStructInfo();
 

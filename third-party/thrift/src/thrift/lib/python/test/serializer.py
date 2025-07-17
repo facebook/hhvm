@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import pickle
 import types
 import unittest
@@ -53,6 +54,7 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import Foo, Lists, Maps, Sets
+from testing.thrift_mutable_types import SortedSets as MutableSortedSets
 from testing.thrift_types import (
     Color,
     ColorGroups,
@@ -69,6 +71,7 @@ from testing.thrift_types import (
     Reserved,
     SetI32,
     SetI32Lists,
+    SortedSets,
     StrEasyMap,
     StrI32ListMap,
     StringBucket,
@@ -161,6 +164,7 @@ class SerializerTests(unittest.TestCase):
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
+        self.SortedSets: Type[SortedSets] = self.test_types.SortedSets
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -509,6 +513,37 @@ class SerializerTests(unittest.TestCase):
             ),
             r,
         )
+
+    def test_serialize_sorted_set(self) -> None:
+        if self.is_mutable_run:
+            # mutable sets aren't hashable but empty set works
+            easies = set()
+        else:
+            easies = {self.easy(val=i) for i in range(3, 0, -1)}
+        ints = set(range(5, 6, -2))
+        strings = {"foo", "bar", "baz"}
+        colors = {self.Color.red, self.Color.green}
+        if self.is_mutable_run:
+            s = MutableSortedSets(
+                easies=to_thrift_set(easies),
+                ints=to_thrift_set(ints),
+                strings=to_thrift_set(strings),
+                colors=to_thrift_set(colors),
+            )
+        else:
+            s = self.SortedSets(
+                easies=easies, ints=ints, strings=strings, colors=colors
+            )
+        # assert basic serialization works across all protocols
+        thrift_serialization_round_trip(self, s, self.serializer)
+
+        # assert the set is sorted in json
+        json_s = json.loads(self.serializer.serialize(s, Protocol.JSON).decode("utf-8"))
+        self.assertEqual(json_s["ints"], sorted(ints))
+        self.assertEqual(json_s["strings"], sorted(strings))
+        self.assertEqual(json_s["colors"], sorted(colors))
+        json_easy_vals = [e["val"] for e in json_s["easies"]]
+        self.assertEqual(json_easy_vals, sorted(e.val for e in easies))
 
 
 @parameterized_class(

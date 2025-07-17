@@ -717,7 +717,14 @@ cdef class ListTypeInfo(TypeInfoBase):
 cdef class SetTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
-        self.cpp_obj = make_unique[cSetTypeInfo](getCTypeInfo(val_info))
+        cdef unique_ptr[cSetTypeInfo] cpp_obj = make_unique[cSetTypeInfo](
+            getCTypeInfo(val_info)
+        )
+        self.cpp_obj = unique_ptr[cSetTypeInfoBase](cpp_obj.release())
+
+    def enableKeySorted(self):
+        self.cpp_obj = self.cpp_obj.get().asKeySorted()
+        return self
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
@@ -779,6 +786,9 @@ cdef class MapTypeInfo(TypeInfoBase):
             getCTypeInfo(key_info),
             getCTypeInfo(val_info),
         )
+
+    def enableKeySorted(self):
+        return self
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()

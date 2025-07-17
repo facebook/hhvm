@@ -14,6 +14,7 @@
 
 from libc.stdint cimport int16_t
 from libcpp.memory cimport unique_ptr
+from thrift.python.types cimport cSetTypeInfoBase 
 
 cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
     cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
@@ -44,9 +45,8 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         cMutableListTypeInfo(cTypeInfo& valInfo)
         const cTypeInfo* get()
 
-    cdef cppclass cMutableSetTypeInfo "::apache::thrift::python::MutableSetTypeInfo":
+    cdef cppclass cMutableSetTypeInfo "::apache::thrift::python::MutableSetTypeInfo"(cSetTypeInfoBase):
         cMutableSetTypeInfo(cTypeInfo& valInfo)
-        const cTypeInfo* get()
 
     cdef cppclass cMutableMapTypeInfo "::apache::thrift::python::MutableMapTypeInfo":
         cMutableMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
@@ -78,7 +78,7 @@ cdef class MutableListTypeInfo(TypeInfoBase):
 cdef class MutableSetTypeInfo(TypeInfoBase):
     cdef object val_info
     cdef bint value_type_is_container
-    cdef unique_ptr[cMutableSetTypeInfo] cpp_obj
+    cdef unique_ptr[cSetTypeInfoBase] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
     cdef to_internal_data(self, object)
     cdef to_python_value(self, object)

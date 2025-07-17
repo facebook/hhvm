@@ -157,6 +157,10 @@ inline constexpr auto kPythonMigrationBlockingAllowInheritanceUri =
     "facebook.com/thrift/annotation/python/MigrationBlockingAllowInheritance";
 inline constexpr auto kPythonDisableFieldCacheUri =
     "facebook.com/thrift/annotation/python/DisableFieldCache";
+inline constexpr auto kPythonSortSetOnSerializeUri =
+    "facebook.com/thrift/annotation/python/DeprecatedSortSetOnSerialize";
+inline constexpr auto kPythonKeySortMapOnSerializeUri =
+    "facebook.com/thrift/annotation/python/DeprecatedKeySortMapOnSerialize";
 
 // Hack:
 inline constexpr auto kHackAdapterUri =

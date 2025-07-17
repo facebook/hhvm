@@ -446,6 +446,17 @@ struct Messy {
   };
 }
 
+struct SortedSets {
+  @python.DeprecatedSortSetOnSerialize
+  1: set<i32> ints;
+  @python.DeprecatedSortSetOnSerialize
+  2: set<string> strings;
+  // @lint-ignore THRIFTCHECKS
+  @python.DeprecatedSortSetOnSerialize
+  3: set<easy> easies;
+  4: set<Color> colors;
+}
+
 struct ComplexRef {
   1: string name;
   @cpp.Ref{type = cpp.RefType.Unique}

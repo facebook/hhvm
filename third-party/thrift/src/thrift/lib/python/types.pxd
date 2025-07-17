@@ -63,9 +63,12 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         cListTypeInfo(cTypeInfo& valInfo)
         const cTypeInfo* get()
 
-    cdef cppclass cSetTypeInfo "::apache::thrift::python::SetTypeInfo":
-        cSetTypeInfo(cTypeInfo& valInfo)
+    cdef cppclass cSetTypeInfoBase "::apache::thrift::python::SetTypeInfoBase":
         const cTypeInfo* get()
+        unique_ptr[cSetTypeInfoBase] asKeySorted()
+
+    cdef cppclass cSetTypeInfo "::apache::thrift::python::SetTypeInfo"(cSetTypeInfoBase):
+        cSetTypeInfo(cTypeInfo& valInfo)
 
     cdef cppclass cMapTypeInfo "::apache::thrift::python::MapTypeInfo":
         cMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
@@ -194,7 +197,7 @@ cdef class ListTypeInfo(TypeInfoBase):
 
 cdef class SetTypeInfo(TypeInfoBase):
     cdef object val_info
-    cdef unique_ptr[cSetTypeInfo] cpp_obj
+    cdef unique_ptr[cSetTypeInfoBase] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)

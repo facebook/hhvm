@@ -977,7 +977,14 @@ class python_mstch_field : public mstch_field {
             {"field:is_container_type", &python_mstch_field::is_container_type},
             {"field:is_invariant_type?",
              &python_mstch_field::is_invariant_type},
+            {"field:sorted_key_serialize?",
+             &python_mstch_field::key_sorted_serialize},
         });
+  }
+
+  mstch::node key_sorted_serialize() {
+    return field_->has_structured_annotation(kPythonSortSetOnSerializeUri) ||
+        field_->has_structured_annotation(kPythonKeySortMapOnSerializeUri);
   }
 
   mstch::node py_name() {

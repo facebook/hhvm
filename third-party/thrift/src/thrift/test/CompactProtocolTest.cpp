@@ -25,8 +25,7 @@ using apache::thrift::protocol::TMessageType;
 using apache::thrift::transport::TFramedTransport;
 using apache::thrift::transport::TMemoryBuffer;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class TCompactProtocolTest : public testing::Test {};
 
@@ -63,5 +62,4 @@ TEST_F(TCompactProtocolTest, test_readMessageBegin) {
   testTMessageWriteAndRead("methodName", TMessageType::T_ONEWAY, 1);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

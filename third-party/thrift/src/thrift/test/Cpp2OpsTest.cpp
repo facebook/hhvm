@@ -23,9 +23,7 @@
 #include <thrift/test/gen-cpp2/Cpp2OpsNative_constants.h>
 #include <thrift/test/gen-cpp2/Cpp2OpsNative_types.h>
 
-namespace thrift {
-namespace test {
-namespace cpp2ops {
+namespace thrift::test::cpp2ops {
 
 template <class T>
 class Cpp2OpsTest : public testing::Test {};
@@ -74,9 +72,7 @@ REGISTER_TYPED_TEST_CASE_P(Cpp2OpsTest, Simple);
 typedef testing::Types<cpp2::Native> Types;
 INSTANTIATE_TYPED_TEST_CASE_P(Cpp2OpsTest, Cpp2OpsTest, Types);
 
-} // namespace cpp2ops
-} // namespace test
-} // namespace thrift
+} // namespace thrift::test::cpp2ops
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);

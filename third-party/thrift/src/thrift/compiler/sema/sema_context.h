@@ -92,22 +92,22 @@ struct sema_params {
   /**
    * Action to take on extra validation failure (see `sema_params`).
    */
-  enum class ValidationLevel {
+  enum class validation_level {
     /** Do not take any action. */
-    None,
+    none,
 
     /** Issue a diagnostic warning. */
-    Warn,
+    warn,
 
     /** Issue a diagnostic error (i.e., will fail to compile). */
-    Error,
+    error,
   };
 
   /**
    * Returns the validation level with the given human readable name, or
    * throws if none exists.
    */
-  static ValidationLevel parseValidationLevel(const std::string& name);
+  static validation_level parse_validation_level(const std::string& name);
 
   bool skip_lowering_annotations = false;
 
@@ -121,8 +121,8 @@ struct sema_params {
 
   // Action to take when @cpp.EnableCustomTypeOrdering is present on a
   // (structured) type that does not need it.
-  ValidationLevel unnecessary_enable_custom_type_ordering =
-      ValidationLevel::None;
+  validation_level unnecessary_enable_custom_type_ordering =
+      validation_level::none;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

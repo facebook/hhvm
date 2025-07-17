@@ -502,11 +502,11 @@ void validate_orderable_structured_types(
       const diagnostic_level lvl = [&]() {
         const sema_params& sparams = ctx.sema_parameters();
         switch (sparams.unnecessary_enable_custom_type_ordering) {
-          case sema_params::ValidationLevel::Error:
+          case sema_params::validation_level::error:
             return diagnostic_level::error;
-          case sema_params::ValidationLevel::Warn:
+          case sema_params::validation_level::warn:
             return diagnostic_level::warning;
-          case sema_params::ValidationLevel::None:
+          case sema_params::validation_level::none:
             return diagnostic_level::debug;
         }
       }();

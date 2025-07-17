@@ -22,18 +22,18 @@ namespace apache::thrift::compiler {
 
 using testing::ThrowsMessage;
 
-TEST(sema_params_test, parseValidationLevel) {
+TEST(sema_params_test, parse_validation_level) {
   EXPECT_EQ(
-      sema_params::parseValidationLevel("none"),
-      sema_params::ValidationLevel::None);
+      sema_params::parse_validation_level("none"),
+      sema_params::validation_level::none);
   EXPECT_EQ(
-      sema_params::parseValidationLevel("warn"),
-      sema_params::ValidationLevel::Warn);
+      sema_params::parse_validation_level("warn"),
+      sema_params::validation_level::warn);
   EXPECT_EQ(
-      sema_params::parseValidationLevel("error"),
-      sema_params::ValidationLevel::Error);
+      sema_params::parse_validation_level("error"),
+      sema_params::validation_level::error);
   EXPECT_THAT(
-      [&]() { sema_params::parseValidationLevel("invalid"); },
+      []() { sema_params::parse_validation_level("invalid"); },
       ThrowsMessage<std::runtime_error>("Unknown validation level: 'invalid'"));
 }
 

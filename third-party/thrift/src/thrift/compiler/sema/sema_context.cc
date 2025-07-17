@@ -20,12 +20,12 @@
 
 namespace apache::thrift::compiler {
 
-sema_params::ValidationLevel sema_params::parseValidationLevel(
+sema_params::validation_level sema_params::parse_validation_level(
     const std::string& name) {
-  static const std::map<std::string, ValidationLevel> kValidationLevelNames{
-      {"none", ValidationLevel::None},
-      {"warn", ValidationLevel::Warn},
-      {"error", ValidationLevel::Error}};
+  static const std::map<std::string, validation_level> kValidationLevelNames{
+      {"none", validation_level::none},
+      {"warn", validation_level::warn},
+      {"error", validation_level::error}};
 
   if (auto it = kValidationLevelNames.find(name);
       it != kValidationLevelNames.end()) {

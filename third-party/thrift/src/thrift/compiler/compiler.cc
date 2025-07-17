@@ -772,7 +772,7 @@ std::string parse_args(
               throw std::runtime_error("Missing '=' after validator name.");
             }
             sparams.unnecessary_enable_custom_type_ordering =
-                sema_params::parseValidationLevel(suffix.substr(1));
+                sema_params::parse_validation_level(suffix.substr(1));
           } catch (const std::exception& e) {
             fmt::print(
                 stderr,

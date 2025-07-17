@@ -404,7 +404,7 @@ TYPED_TEST(AstVisitorTest, constant) {
 
 TYPED_TEST(AstVisitorTest, typedef) {
   auto ttypedef = std::make_unique<t_typedef>(
-      &this->program_, &t_primitive_type::t_i32(), "Typedef", nullptr);
+      &this->program_, "Typedef", t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_typedef(ttypedef.get()));
   // Matches: root definition, definition, named.
   EXPECT_CALL(this->mock_, visit_root_definition(ttypedef.get()));

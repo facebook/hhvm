@@ -99,10 +99,6 @@ class t_typedef : public t_type {
   // TODO(afuller): Remove everything below here, as it is just provided for
   // backwards compatibility.
  public:
-  t_typedef(
-      const t_program* program, const t_type* type, std::string name, void*)
-      : t_typedef(program, std::move(name), t_type_ref::from_req_ptr(type)) {}
-
   const t_type* get_type() const { return type_.get_type(); }
   void set_type(t_type_ref type) { type_ = type; }
 

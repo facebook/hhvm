@@ -43,7 +43,7 @@ TEST(
       R"(
 
     include "thrift/annotation/thrift.thrift"
-    
+
     @thrift.AllowReservedFilename
     package "test.dev/test"
   )";
@@ -60,7 +60,7 @@ TEST(
   name_contents_map["path/to/should_error_due_to_incorrect_annotation.thrift"] =
       R"(
     include "thrift/annotation/thrift.thrift"
-    
+
     @thrift.AllowReservedIdentifier
     package "test.dev/test"
     # expected-error@4: `AllowReservedIdentifier` cannot annotate `should_error_due_to_incorrect_annotation`
@@ -113,11 +113,11 @@ TEST(ReservedIdentifierValidatorTest, StructNameIsReserved) {
 
     struct MyStruct {
       1: i32 myField;
-      
+
       2: i32 __fbthriftFieldShouldError;
         # expected-error@-1: `__fbthriftFieldShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
-      
-      @thrift.AllowReservedIdentifier    
+
+      @thrift.AllowReservedIdentifier
       3: i32 __fbthriftFieldShouldNotErrorDueToBypass;
     }
 
@@ -175,7 +175,7 @@ TEST(ReservedIdentifierValidatorTest, EnumNameIsReserved) {
 
     enum MyEnum {
       NORMAL                                    = 1,
-      FBTHRIFT_SHOULD_ERROR                     = 2, 
+      FBTHRIFT_SHOULD_ERROR                     = 2,
         # expected-error@-1: `FBTHRIFT_SHOULD_ERROR` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
       @thrift.AllowReservedIdentifier
       FBTHRIFT_SHOULD_NOT_ERROR_DUE_TO_BYPASS   = 3
@@ -225,7 +225,7 @@ TEST(ReservedIdentifierValidatorTest, TypedefNameIsReserved) {
 
     @thrift.AllowReservedIdentifier
     typedef i16 __fbthriftTypedefShouldNotErrorDueToBypass;
- 
+
     @thrift.AllowReservedFilename
     typedef i32 aTypedef;
       # expected-error@-2: `AllowReservedFilename` cannot annotate `aTypedef`

@@ -54,11 +54,11 @@ std::optional<w_string> find_fstype_in_linux_proc_mounts(
   std::vector<std::string_view> lines;
   std::string_view bestMountPoint, bestVfsType;
 
-  folly::split("\n", procMountsData, lines);
+  folly::split('\n', procMountsData, lines);
   for (auto& line : lines) {
     std::string_view device, mountPoint, vfstype, opts, freq, passno;
     if (folly::split(
-            " ", line, device, mountPoint, vfstype, opts, freq, passno)) {
+            ' ', line, device, mountPoint, vfstype, opts, freq, passno)) {
       // Look for the mountPoint that matches the longest prefix of path
       // we intentially bias towards the last matching path
       if (mountPoint.size() >= bestMountPoint.size() &&

@@ -49,6 +49,7 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/user-info.h"
@@ -59,6 +60,9 @@ namespace HPHP {
 // Linux: /tmp
 // MacOS: /var/tmp
 const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
+const StaticString s_used_bytes("used_bytes");
+const StaticString s_used_local_bytes("used_local_bytes");
+const StaticString s_used_persistent_bytes("used_persistent_bytes");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1061,6 +1065,14 @@ Variant HHVM_FUNCTION(version_compare,
   return init_null();
 }
 
+Array HHVM_FUNCTION(rds_bytes) {
+  DictInit info(3);
+
+  info.set(s_used_bytes, static_cast<int64_t>(rds::usedBytes()));
+  info.set(s_used_local_bytes, static_cast<int64_t>(rds::usedLocalBytes()));
+  info.set(s_used_persistent_bytes, static_cast<int64_t>(rds::usedPersistentBytes()));
+  return info.toArray();
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::registerNativeOptions() {
@@ -1113,6 +1125,7 @@ void StandardExtension::registerNativeOptions() {
   HHVM_FE(set_pre_timeout_handler);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(version_compare);
+  HHVM_NAMED_FE_STR("rds_bytes", HHVM_FN(rds_bytes), nativeFuncs());
 
 #ifdef CLOCK_REALTIME
   HHVM_RC_INT_SAME(CLOCK_REALTIME);

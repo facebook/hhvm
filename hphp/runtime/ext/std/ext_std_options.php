@@ -407,6 +407,18 @@ function version_compare(string $version1,
                          string $version2,
                          string $sop = "")[]: mixed;
 
+/* rds_bytes() returns a shape of all RDS memory utilization in bytes.
+ * You should assume this is an implementation detail of HHVM and is subject
+ * to change.
+ */
+<<__Native>>
+function rds_bytes(): shape(
+  "used_bytes" => int,
+  "used_local_bytes" => int, 
+  "used_persistent_bytes" => int,
+);
+
+
 } // root namespace
 
 namespace __SystemLib {

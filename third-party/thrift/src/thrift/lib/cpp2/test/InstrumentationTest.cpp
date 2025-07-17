@@ -304,7 +304,7 @@ THRIFT_PLUGGABLE_FUNC_SET(uint64_t, getCurrentServerTick) {
 
 THRIFT_PLUGGABLE_FUNC_SET(
     bool, includeInRecentRequestsCount, const std::string_view methodName) {
-  return !excludeFromRecentRequestsCount.count(std::string{methodName});
+  return !excludeFromRecentRequestsCount.contains(std::string{methodName});
 }
 
 THRIFT_PLUGGABLE_FUNC_SET(

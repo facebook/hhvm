@@ -40,8 +40,8 @@ using Value = ValueWrapper<detail::Value>;
 } // namespace apache::thrift::protocol::detail
 
 namespace apache::thrift::protocol {
-folly::dynamic toDynamic(const detail::Object& obj);
-folly::dynamic toDynamic(const detail::Value& val);
+folly::dynamic toDynamic(const ::apache::thrift::protocol::detail::Object& obj);
+folly::dynamic toDynamic(const ::apache::thrift::protocol::detail::Value& val);
 } // namespace apache::thrift::protocol
 
 namespace apache::thrift::syntax_graph {
@@ -119,7 +119,7 @@ class ObjectWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
  private:
   folly::dynamic toDynamicImpl() const;
   friend folly::dynamic apache::thrift::protocol::toDynamic(
-      const ObjectWrapper&);
+      const apache::thrift::protocol::detail::Object&);
 
   friend bool operator==(
       const ObjectWrapper& lhs, const ObjectWrapper& rhs) noexcept {
@@ -292,7 +292,7 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   template <typename T>
   friend class ObjectWrapper;
   friend folly::dynamic apache::thrift::protocol::toDynamic(
-      const ValueWrapper&);
+      const apache::thrift::protocol::detail::Value&);
   friend class apache::thrift::syntax_graph::Annotation;
 
   using Wrap::Wrap;

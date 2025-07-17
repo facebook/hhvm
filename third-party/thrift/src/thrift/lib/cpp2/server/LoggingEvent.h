@@ -118,6 +118,16 @@ class ConnectionEventHandler : public LoggingEventHandler {
 class ApplicationEventHandler : public LoggingEventHandler {
  public:
   virtual void log(DynamicFieldsCallback = {}) {}
+
+  virtual void logSampled(
+      SamplingRate /* presampledRate */, DynamicFieldsCallback = {}) {}
+  void logSampled(
+      const LoggingSampler& loggingSampler,
+      DynamicFieldsCallback callback = {}) {
+    DCHECK(loggingSampler.isSampled())
+        << "logSampled should not be called if sampling did not pass";
+    logSampled(loggingSampler.getSamplingRate(), std::move(callback));
+  }
   ~ApplicationEventHandler() override {}
 };
 

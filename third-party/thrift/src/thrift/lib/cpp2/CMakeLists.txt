@@ -118,6 +118,7 @@ add_dependencies(thrifttype any_rep-cpp2-target type-cpp2-target
 target_link_libraries(
   thrifttype
   PUBLIC
+    common
     Folly::folly
     thriftannotation
     thrifttyperep

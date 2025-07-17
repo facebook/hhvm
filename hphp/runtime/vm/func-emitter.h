@@ -326,7 +326,7 @@ public:
   ParamInfoVec params;
   int16_t maxStackCells{0};
 
-  LowStringPtrOrId retUserType;
+  LazyStringData retUserType;
   TypeIntersectionConstraint retTypeConstraints;
   std::vector<LowStringPtr> typeParamNames;
   StaticCoeffectsVec staticCoeffects;

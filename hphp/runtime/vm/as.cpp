@@ -2240,7 +2240,7 @@ void parse_parameter_list(AsmState& as) {
     }
 
     auto [userType, typeConstraints] = parse_type_info(as);
-    param.userType = userType;
+    param.userType = as.ue->mergeLitstr(userType);
     param.typeConstraints = TypeIntersectionConstraint(
         std::move(typeConstraints)
     );
@@ -2273,7 +2273,9 @@ void parse_parameter_list(AsmState& as) {
       ch = as.in.getc();
       if (ch == '(') {
         String str = parse_long_string(as);
-        parse_default_value(param, makeStaticString(str));
+        auto v = makeStaticString(str);
+        auto id = as.ue->mergeLitstr(v);
+        parse_default_value(param, id, v);
         as.in.expectWs(')');
         as.in.skipWhitespace();
         ch = as.in.getc();
@@ -2389,7 +2391,7 @@ void parse_function(AsmState& as) {
   as.fe = as.ue->newFuncEmitter(sname);
   as.fe->init(line0, line1, attrs, nullptr, as.ue->isSystemLib());
 
-  as.fe->retUserType = userType;
+  as.fe->retUserType = as.ue->mergeLitstr(userType);
   as.fe->retTypeConstraints = TypeIntersectionConstraint(
     std::move(typeConstraints)
   );
@@ -2444,7 +2446,7 @@ void parse_method(AsmState& as) {
   as.pce->addMethod(as.fe);
   as.fe->init(line0, line1, attrs, nullptr, as.ue->isSystemLib());
 
-  as.fe->retUserType = userType;
+  as.fe->retUserType = as.ue->mergeLitstr(userType);
   as.fe->retTypeConstraints = TypeIntersectionConstraint(
     std::move(typeConstraints)
   );
@@ -3312,8 +3314,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
   return ue;
 }
 
-void parse_default_value(Func::ParamInfo& param, const StringData* str) {
-  param.phpCode = str;
+void parse_default_value(Func::ParamInfo& param, Id id, const StringData* str) {
+  param.phpCode = id;
   TypedValue tv;
   tvWriteUninit(tv);
   if (str->size() == 4) {

@@ -16,40 +16,36 @@
 
 #pragma once
 
-#include "hphp/util/low-ptr.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 
+struct StringData;
 struct Unit;
 struct UnitEmitter;
 
-struct LowStringPtrOrId {
+struct LazyStringData {
 
-  using storage_type = LowPtr<const StringData>::storage_type;
+  LazyStringData(): m_id(kInvalidId) {}
+  LazyStringData(Id id): m_id(id) {}
 
-  LowStringPtrOrId(): m_s(0) {}
-  explicit LowStringPtrOrId(const LowStringPtr str) : HPHP::LowStringPtrOrId(str.get()) {}
-  explicit LowStringPtrOrId(const StringData* str);
-  explicit LowStringPtrOrId(Id id);
-  LowStringPtrOrId(const LowStringPtrOrId& other);
+  LazyStringData& operator=(Id id) {
+    m_id = id;
+    return *this;
+  }
 
-  LowStringPtrOrId& operator=(const StringData* str);
-  LowStringPtrOrId& operator=(const LowStringPtrOrId& other);
+  const Id id() const { return m_id; }
 
-  Id id() const;
-  const StringData* rawPtr() const;
-  const StringData* ptr(const Unit* unit) const;
-  const StringData* ptr(const UnitEmitter& ue) const;
+  const StringData* get(const Unit* unit) const;
+  const StringData* get(const UnitEmitter& ue) const;
 
-private:
-  mutable std::atomic<storage_type> m_s;
+  template <typename SerDe>
+  void serde(SerDe& sd) {
+    sd(m_id);
+  }
+
+ private:
+  Id m_id;
 };
 
-template<>
-struct BlobEncoderHelper<LowStringPtrOrId> {
-  static void serde(BlobEncoder&, const LowStringPtrOrId&);
-  static void serde(BlobDecoder&, LowStringPtrOrId&);
-};
-
-} // namespace HPHP
+}

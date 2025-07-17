@@ -57,12 +57,12 @@ void pretty_print(const FuncEmitter* fe, const UnitEmitter* ue, std::ostream& ou
         out << " " << tc.displayName();
       }
     }
-    if (auto userType = param.userType.ptr(*ue)) {
+    if (auto userType = param.userType.get(*ue)) {
       out << " (" << userType->data() << ")";
     }
     if (param.funcletOff != kInvalidOffset) {
       out << " DV" << " at " << param.funcletOff;
-      if (auto phpCode = param.phpCode.ptr(*ue)) {
+      if (auto phpCode = param.phpCode.get(*ue)) {
         out << " = " << phpCode->data();
       }
     }
@@ -71,7 +71,7 @@ void pretty_print(const FuncEmitter* fe, const UnitEmitter* ue, std::ostream& ou
 
   auto tcs = fe->retTypeConstraints;
   out << " Ret: " << tcs.show();
-  auto retUserType = fe->retUserType.ptr(*ue);
+  auto retUserType = fe->retUserType.get(*ue);
   if (retUserType && !retUserType->empty()) {
     out << " (" << retUserType->data() << ")";
   }

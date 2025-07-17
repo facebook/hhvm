@@ -619,10 +619,10 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe, const UnitEmitt
       php::Param {
         param.defaultValue,
         NoBlockId,
-        param.userType.ptr(ue),
+        param.userType.get(ue),
         param.typeConstraints,
         param.userAttributes,
-        param.phpCode.ptr(ue),
+        param.phpCode.get(ue),
         param.isInOut(),
         param.isOutOnly(),
         param.isReadonly(),
@@ -679,7 +679,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                        AttrPersistent);
 
   ret->userAttributes     = fe.userAttributes;
-  ret->returnUserType     = fe.retUserType.ptr(ue);
+  ret->returnUserType     = fe.retUserType.get(ue);
   ret->retTypeConstraints = fe.retTypeConstraints;
   for (auto const& typeParam : fe.typeParamNames) {
     ret->typeParamNames.emplace_back(typeParam);

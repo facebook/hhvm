@@ -1029,7 +1029,8 @@ void translateDefaultParameterValue(TranslationState& ts,
                                     Func::ParamInfo& param) {
   auto const str = toStaticString(dv.expr);
   ts.labelMap[dv.label].dvInits.push_back(ts.fe->params.size());
-  parse_default_value(param, str);
+  auto id = ts.ue->mergeLitstr(str);
+  parse_default_value(param, id, str);
 }
 
 void translateParameter(TranslationState& ts,
@@ -1057,9 +1058,12 @@ void translateParameter(TranslationState& ts,
   if (p.is_splat) param.setFlag(Func::ParamInfo::Flags::Splat);
 
   TypeConstraint tc;
-  std::tie(param.userType, tc) =  maybeOrElse(p.type_info,
-      [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
-      [&]() {return std::make_pair(nullptr, TypeConstraint{});});
+  std::tie(param.userType, tc) = maybeOrElse(p.type_info,
+    [&](hhbc::TypeInfo& ti) {
+      auto [userType, tc] = translateTypeInfo(ti);
+      return std::make_pair(ts.ue->mergeLitstr(userType), tc);
+    },
+    [&]() {return std::make_pair(kInvalidId, TypeConstraint{});});
 
   param.typeConstraints = upperBoundsHelper(
     ubs, classUbs, shadowedTParams, tc, hasReifiedGenerics);
@@ -1259,7 +1263,7 @@ void translateFunction(TranslationState& ts,
     upperBoundsHelper(ts, ubs, {}, {}, retTypeInfo.second, userAttrs);
   assertx(!tic.isTop());
 
-  ts.fe->retUserType = retTypeInfo.first;
+  ts.fe->retUserType = ts.ue->mergeLitstr(retTypeInfo.first);
   ts.fe->retTypeConstraints = std::move(tic);
   ts.srcLoc = locationFromSpan(f.body.span);
   checkNative(ts);
@@ -1312,7 +1316,7 @@ void translateMethod(TranslationState& ts,
 
   assertx(!tic.isTop());
   ts.srcLoc = locationFromSpan(m.body.span);
-  ts.fe->retUserType = retTypeInfo.first;
+  ts.fe->retUserType = ts.ue->mergeLitstr(retTypeInfo.first);
   ts.fe->retTypeConstraints = std::move(tic);
   checkNative(ts);
   translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);

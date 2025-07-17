@@ -171,12 +171,12 @@ void fixup_default_values(T& state, FuncEmitter* fe) {
       VariableSerializer vs(VariableSerializer::Type::PHPOutput);
       auto str = vs.serialize(tvAsCVarRef(&dv), true);
       pi.defaultValue = dv;
-      pi.phpCode = makeStaticString(str.get());
+      pi.phpCode = state.ue->mergeLitstr(makeStaticString(str.get()));
     }
   }
 }
 
-void parse_default_value(Func::ParamInfo& param, const StringData* str);
+void parse_default_value(Func::ParamInfo& param, Id id, const StringData* str);
 
 // Sets output on success; throws on failure.
 void ParseRepoAuthType(folly::StringPiece input, RepoAuthType& output);

@@ -678,7 +678,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
   return ret;
 }
 
-void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
+void emit_locals_and_params(UnitEmitter& ue, FuncEmitter& fe, const php::Func& func,
                             const EmitBcInfo& info) {
   Id id = 0;
   for (auto const& loc : func.locals) {
@@ -690,8 +690,8 @@ void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
       Func::ParamInfo pinfo;
       pinfo.defaultValue = param.defaultValue;
       pinfo.typeConstraints = param.typeConstraints;
-      pinfo.userType = param.userTypeConstraint;
-      pinfo.phpCode = param.phpCode;
+      pinfo.userType = ue.mergeLitstr(param.userTypeConstraint);
+      pinfo.phpCode = ue.mergeLitstr(param.phpCode);
       pinfo.userAttributes = param.userAttributes;
       if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
       if (param.outOnly) pinfo.setFlag(Func::ParamInfo::Flags::OutOnly);
@@ -957,17 +957,17 @@ void emit_ehent_tree(FuncEmitter& fe, const php::WideFunc& func,
   fe.setEHTabIsSorted();
 }
 
-void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
+void emit_finish_func(EmitUnitState& state, UnitEmitter& ue, FuncEmitter& fe,
                       php::WideFunc& wf, const EmitBcInfo& info) {
   auto const& func = *wf;
   if (info.containsCalls) fe.containsCalls = true;
 
-  emit_locals_and_params(fe, func, info);
+  emit_locals_and_params(ue, fe, func, info);
   emit_ehent_tree(fe, wf, info);
   wf.blocks().clear();
 
   fe.userAttributes = func.userAttributes;
-  fe.retUserType = func.returnUserType;
+  fe.retUserType = ue.mergeLitstr(func.returnUserType);
   fe.retTypeConstraints = func.retTypeConstraints;
   fe.typeParamNames = std::vector<LowStringPtr>(
     func.typeParamNames.begin(),
@@ -1056,7 +1056,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   emit_init_func(ue, fe, f);
   auto func = php::WideFunc::mut(&f);
   auto const info = emit_bytecode(state, ue, fe, func);
-  emit_finish_func(state, fe, func, info);
+  emit_finish_func(state, ue, fe, func, info);
 }
 
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,

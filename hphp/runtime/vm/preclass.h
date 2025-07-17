@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/lazy-string-data.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"

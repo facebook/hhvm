@@ -375,7 +375,7 @@ inline const TypeIntersectionConstraint& Func::returnTypeConstraints() const {
 }
 
 inline const StringData* Func::returnUserType() const {
-  return shared()->m_retUserType.ptr(m_unit);
+  return shared()->m_retUserType.get(m_unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

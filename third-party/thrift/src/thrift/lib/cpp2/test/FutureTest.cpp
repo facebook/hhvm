@@ -81,7 +81,7 @@ class TestInterface : public apache::thrift::ServiceHandler<FutureService> {
 
     auto header = getConnectionContext()->getHeader();
 
-    if (header->getHeaders().count("foo")) {
+    if (header->getHeaders().contains("foo")) {
       header->setHeader("header_from_server", "1");
     }
 

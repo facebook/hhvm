@@ -47,11 +47,11 @@ class t_package : public t_node {
 
   // If the package has been set.
   bool is_explicit() const { return explicit_; }
-  bool empty() const { return uriPrefix_.empty(); }
+  bool empty() const { return uri_prefix_.empty(); }
 
   // The raw package name.
   std::string_view name() const {
-    std::string_view ret = uriPrefix_;
+    std::string_view ret = uri_prefix_;
     if (!empty()) {
       ret.remove_suffix(1);
     }
@@ -59,13 +59,13 @@ class t_package : public t_node {
   }
 
  private:
-  std::string uriPrefix_;
+  std::string uri_prefix_;
   std::vector<std::string> domain_;
   std::vector<std::string> path_;
   bool explicit_ = false;
 
   friend bool operator==(const t_package& lhs, const t_package& rhs) {
-    return lhs.uriPrefix_ == rhs.uriPrefix_;
+    return lhs.uri_prefix_ == rhs.uri_prefix_;
   }
 };
 

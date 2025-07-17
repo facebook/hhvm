@@ -19,6 +19,7 @@ add_library(
 
   detail/string.cc
   tree_printer.cc
+  universal_name.cc
 )
 
 target_link_libraries(

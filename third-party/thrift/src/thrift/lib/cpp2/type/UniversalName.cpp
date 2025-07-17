@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
-#include <algorithm>
 #include <limits>
 #include <string>
 
@@ -24,10 +23,8 @@
 
 #include <fmt/core.h>
 #include <folly/Range.h>
-#include <folly/String.h>
 #include <folly/lang/Exception.h>
 #include <folly/portability/OpenSSL.h>
-#include <folly/small_vector.h>
 
 namespace apache::thrift::type {
 
@@ -51,56 +48,6 @@ ctx_ptr newMdContext() {
 void checkResult(int evp_result) {
   if (evp_result == 0) {
     folly::throw_exception<std::runtime_error>("EVP failure");
-  }
-}
-
-void check(bool cond, const char* err) {
-  if (!cond) {
-    folly::throw_exception<std::invalid_argument>(err);
-  }
-}
-
-bool isDomainChar(char c) {
-  return std::isdigit(c) || std::islower(c) || c == '-';
-}
-
-bool isPathChar(char c) {
-  return isDomainChar(c) || c == '_';
-}
-
-bool isTypeChar(char c) {
-  return isPathChar(c) || std::isupper(c);
-}
-
-void checkDomainSegment(folly::StringPiece seg) {
-  check(!seg.empty(), "empty domain segment");
-  for (const auto& c : seg) {
-    check(isDomainChar(c), "invalid domain char");
-  }
-}
-
-void checkPathSegment(folly::StringPiece seg) {
-  check(!seg.empty(), "empty path segment");
-  for (const auto& c : seg) {
-    check(isPathChar(c), "invalid path char");
-  }
-}
-
-void checkTypeSegment(folly::StringPiece seg) {
-  check(!seg.empty(), "empty type segment");
-  for (const auto& c : seg) {
-    check(isTypeChar(c), "invalid type char");
-  }
-}
-
-void checkDomain(folly::StringPiece domain) {
-  // We require a minimum of 2 domain segments, but up to 4 is likely to be
-  // common.
-  folly::small_vector<folly::StringPiece, 4> segs;
-  folly::splitTo<folly::StringPiece>('.', domain, std::back_inserter(segs));
-  check(segs.size() >= 2, "not enough domain segments");
-  for (const auto& seg : segs) {
-    checkDomainSegment(seg);
   }
 }
 
@@ -135,22 +82,6 @@ hash_size_t UniversalHashSizeSha2_256() {
 }
 
 } // namespace
-
-// TODO(afuller): Consider 'normalizing' a folly::Uri instead of
-// requiring the uri be expressed in a restricted cononical form.
-void validateUniversalName(std::string_view uri) {
-  // We require a minimum 1 domain and 2 path segements, though up to 4 path
-  // segments is likely to be common.
-  folly::small_vector<folly::StringPiece, 4> segs;
-  folly::splitTo<folly::StringPiece>('/', uri, std::back_inserter(segs));
-  check(segs.size() >= 3, "not enough path segments");
-  checkDomain(segs[0]);
-  size_t i = 1;
-  for (; i < segs.size() - 1; ++i) {
-    checkPathSegment(segs[i]);
-  }
-  checkTypeSegment(segs[i]);
-}
 
 folly::fbstring getUniversalHash(
     UniversalHashAlgorithm alg, std::string_view uri) {

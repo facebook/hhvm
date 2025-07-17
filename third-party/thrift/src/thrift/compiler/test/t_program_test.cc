@@ -24,7 +24,6 @@
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/conformance/data/Constants.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -51,18 +50,12 @@ TEST(PackageTest, Simple) {
 }
 
 TEST(PackageTest, Validation) {
-  for (const auto& good : conformance::data::kGoodPackageNames) {
-    SCOPED_TRACE(good);
-    t_package actual(good);
-    EXPECT_EQ(actual, t_package(actual.domain(), actual.path()));
-    EXPECT_THROW(t_package({"bad!"}, actual.path()), std::invalid_argument);
-    EXPECT_THROW(t_package(actual.domain(), {"bad!"}), std::invalid_argument);
-  }
+  t_package actual("foo.com/my");
+  EXPECT_EQ(actual, t_package(actual.domain(), actual.path()));
+  EXPECT_THROW(t_package({"bad!"}, actual.path()), std::invalid_argument);
+  EXPECT_THROW(t_package(actual.domain(), {"bad!"}), std::invalid_argument);
 
-  for (const auto& bad : conformance::data::kBadPackageNames) {
-    SCOPED_TRACE(bad);
-    EXPECT_THROW(t_package{bad}, std::invalid_argument);
-  }
+  EXPECT_THROW(t_package("my"), std::invalid_argument);
 }
 
 TEST(TProgram, GetNamespace) {

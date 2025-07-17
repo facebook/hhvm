@@ -21,6 +21,7 @@
 #include <folly/FBString.h>
 #include <folly/Range.h>
 #include <folly/lang/Exception.h>
+#include <thrift/common/universal_name.h>
 #include <thrift/lib/cpp2/type/UniversalHashAlgorithm.h>
 
 namespace apache::thrift::type {
@@ -30,13 +31,15 @@ using hash_size_t = int8_t;
 inline constexpr hash_size_t kDisableUniversalHash = 0;
 inline constexpr hash_size_t kDefaultTypeHashBytes = 16;
 
-// Validates that uri is a valid universal name uri of the form:
+// Validates that uri is a valid universal name of the form:
 // {domain}/{path}. For example: facebook.com/thrift/Value.
 //
 // The scheme "fbthrift://"" is implied and not included in the uri.
 //
 // Throws std::invalid_argument on failure.
-void validateUniversalName(std::string_view uri);
+inline void validateUniversalName(std::string_view uri) {
+  return validate_universal_name(uri);
+}
 
 // Validates that the given type hash meets the size requirements.
 //

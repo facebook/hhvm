@@ -16,17 +16,16 @@
 
 #include <thrift/compiler/ast/t_package.h>
 
-#include <cctype>
-#include <stdexcept>
-
 #include <boost/algorithm/string/split.hpp>
+#include <thrift/common/universal_name.h>
 
+namespace apache::thrift::compiler {
 namespace {
 
-const char kDomainDelim[] = ".";
-const char kPathDelim[] = "/";
+const char DOMAIN_DELIM[] = ".";
+const char PATH_DELIM[] = "/";
 
-std::string genPrefix(
+std::string gen_prefix(
     const std::vector<std::string>& domain,
     const std::vector<std::string>& path) {
   std::string result;
@@ -34,9 +33,9 @@ std::string genPrefix(
   for (const auto& label : domain) {
     result += delim;
     result += label;
-    delim = kDomainDelim;
+    delim = DOMAIN_DELIM;
   }
-  delim = kPathDelim;
+  delim = PATH_DELIM;
   for (const auto& segment : path) {
     result += delim;
     result += segment;
@@ -45,84 +44,42 @@ std::string genPrefix(
   return result;
 }
 
-void check(bool cond, const char* err) {
-  if (!cond) {
-    throw std::invalid_argument(err);
-  }
-}
-
-bool isDomainChar(char c) {
-  return std::isdigit(c) || std::islower(c) || c == '-';
-}
-
-bool isPathChar(char c) {
-  return isDomainChar(c) || c == '_';
-}
-
-void checkDomainLabel(const std::string& label) {
-  check(!label.empty(), "empty domain label");
-  for (const auto& c : label) {
-    check(isDomainChar(c), "invalid domain char");
-  }
-}
-
-void checkDomain(const std::vector<std::string>& domain) {
-  check(domain.size() >= 2, "not enough domain labels");
-  for (const auto& label : domain) {
-    checkDomainLabel(label);
-  }
-}
-
-void checkPathSegment(const std::string& seg) {
-  check(!seg.empty(), "empty path segment");
-  for (const auto& c : seg) {
-    check(isPathChar(c), "invalid path char");
-  }
-}
-
-void checkPath(const std::vector<std::string>& path) {
-  check(!path.empty(), "not enough path segments");
-  for (const auto& seg : path) {
-    checkPathSegment(seg);
-  }
-}
-
-std::vector<std::string> parseDomain(const std::string& domain) {
+std::vector<std::string> parse_domain(const std::string& domain) {
   std::vector<std::string> labels;
   boost::algorithm::split(
-      labels, domain, [](auto ch) { return ch == kDomainDelim[0]; });
-  checkDomain(labels);
+      labels, domain, [](auto ch) { return ch == DOMAIN_DELIM[0]; });
+  detail::check_univeral_name_domain(labels);
   return labels;
 }
 
 } // namespace
 
-namespace apache::thrift::compiler {
-
 t_package::t_package(std::string name)
-    : uriPrefix_(std::move(name)), explicit_(true) {
+    : uri_prefix_(std::move(name)), explicit_(true) {
   boost::algorithm::split(
-      path_, uriPrefix_, [](auto ch) { return ch == kPathDelim[0]; });
-  check(path_.size() >= 2, "invalid package name");
-  domain_ = parseDomain(path_.front());
+      path_, uri_prefix_, [](auto ch) { return ch == PATH_DELIM[0]; });
+  if (path_.size() < 2) {
+    throw std::invalid_argument("invalid package name");
+  }
+  domain_ = parse_domain(path_.front());
   path_.erase(path_.begin());
-  checkPath(path_);
-  uriPrefix_ += "/";
+  detail::check_universal_name_path(path_);
+  uri_prefix_ += "/";
 }
 
 std::string t_package::get_uri(const std::string& name) const {
   if (empty()) {
     return {}; // Package is empty, so no URI.
   }
-  return uriPrefix_ + name;
+  return uri_prefix_ + name;
 }
 
 t_package::t_package(
     std::vector<std::string> domain, std::vector<std::string> path)
     : domain_(std::move(domain)), path_(std::move(path)), explicit_(true) {
-  checkDomain(domain_);
-  checkPath(path_);
-  uriPrefix_ = genPrefix(domain_, path_);
+  detail::check_univeral_name_domain(domain_);
+  detail::check_universal_name_path(path_);
+  uri_prefix_ = gen_prefix(domain_, path_);
 }
 
 } // namespace apache::thrift::compiler

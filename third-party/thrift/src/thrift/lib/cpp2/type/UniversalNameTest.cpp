@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
-#include <regex>
 #include <string>
 
 #include <openssl/evp.h>
@@ -26,7 +25,6 @@
 #include <folly/Demangle.h>
 #include <folly/FBString.h>
 #include <folly/String.h>
-#include <thrift/conformance/data/Constants.h>
 #include <thrift/lib/cpp2/type/UniversalHashAlgorithm.h>
 
 namespace apache::thrift::type {
@@ -55,26 +53,6 @@ TEST(UniversalNameTest, Constants) {
       getUniversalHashSize(UniversalHashAlgorithm::Sha2_256),
       EVP_MD_CTX_size(ctx));
   EVP_MD_CTX_free(ctx);
-}
-
-TEST(UniversalNameTest, ValidateUniversalName) {
-  // @lint-ignore-every CLANGTIDY facebook-hte-StdRegexIsAwful
-  std::regex pattern(fmt::format(
-      "{0}(\\.{0})+\\/{1}(\\/{1})*(\\/{2})",
-      "[a-z0-9-]+",
-      "[a-z0-9_-]+",
-      "[a-zA-Z0-9_-]+"));
-  for (const auto& good : conformance::data::genGoodDefUris()) {
-    SCOPED_TRACE(good);
-    EXPECT_TRUE(std::regex_match(good, pattern));
-    validateUniversalName(good);
-  }
-
-  for (const auto& bad : conformance::data::genBadDefUris()) {
-    SCOPED_TRACE(bad);
-    EXPECT_FALSE(std::regex_match(bad, pattern));
-    EXPECT_THROW(validateUniversalName(bad), std::invalid_argument);
-  }
 }
 
 TEST(UniversalNameTest, ValidateUniversalHash) {

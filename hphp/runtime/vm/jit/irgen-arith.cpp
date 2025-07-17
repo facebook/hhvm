@@ -684,67 +684,94 @@ void emitPow(IRGS& env) {
   // $x ** 1 == $x
   // $x**2 becomes $x*$x,
   // $x**3 becomes ($x*$x)*$x
+  // For other constant integer exponents, use binary exponentiation
   auto exponent = topC(env);
   auto base = topC(env, BCSPRelOffset{1});
   if ((base->isA(TInt) || base->isA(TDbl)) &&
     exponent->hasConstVal(TInt)) {
     auto const intVal = exponent->intVal();
     if (intVal == 0) {
-        discard(env, 2);
-        push(env, base->isA(TInt) ? cns(env, 1) : cns(env, 1.0));
-        return;
+      discard(env, 2);
+      push(env, base->isA(TInt) ? cns(env, 1) : cns(env, 1.0));
+      return;
     }
     if (intVal == 1) {
-        // discard exponent, leave base on stack
-        discard(env);
-        return;
+      // discard exponent, leave base on stack
+      discard(env);
+      return;
     }
-    if (intVal == 2 || intVal == 3) {
-      auto const isCube = intVal == 3;
-
-      auto makeExitPow = [&] (SSATmp* src, bool computeSquare) {
+    
+    auto const isNegExp = intVal < 0;
+    if (isNegExp) return interpOne(env, TUncountedInit, 2); // TODO
+    if (base->isA(TInt)) {
+      // Create exit block for potential integer overflow
+      auto makeExitPow = [&] () {
         auto const exit = defBlock(env, Block::Hint::Unlikely);
         BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-        assertx(src->isA(TInt));
-        src = gen(env, ConvIntToDbl, src);
-        SSATmp* genPowResult;
-        if (computeSquare) {
-          genPowResult = gen(env, MulDbl, src, src);
-          if (isCube) {
-            genPowResult = gen(env, MulDbl, genPowResult, src);
+
+        // Convert base to double and compute power
+        auto baseVal = base->isA(TInt) ? gen(env, ConvIntToDbl, base) : base;
+        auto result = cns(env, 1.0);
+
+        auto exp = intVal;
+        while (exp > 0) {
+          if (exp & 1) {
+            result = gen(env, MulDbl, result, baseVal);
           }
-        } else {
-          assertx(base->isA(TInt));
-          auto const src1 = gen(env, ConvIntToDbl, base);
-          genPowResult = gen(env, MulDbl, src, src1);
+          if (exp > 1) {
+            baseVal = gen(env, MulDbl, baseVal, baseVal);
+          }
+          exp >>= 1;
         }
+
         discard(env, 2);
-        push(env, genPowResult);
+        push(env, result);
         gen(env, Jmp, makeExit(env, nextSrcKey(env)));
         return exit;
       };
 
-      SSATmp* genPowResult;
-      if (base->isA(TInt)) {
-        auto const exitPow = makeExitPow(base, true);
-        genPowResult = gen(env, MulIntO, exitPow, base, base);
-      } else {
-        genPowResult = gen(env, MulDbl, base, base);
-      }
-      if (isCube) {
-        if (genPowResult->isA(TInt)) {
-          auto const exitPow = makeExitPow(genPowResult, false);
-          genPowResult = gen(env, MulIntO, exitPow, genPowResult, base);
-        } else {
-          genPowResult = gen(env, MulDbl, genPowResult, base);
+      auto exitPow = makeExitPow();
+      auto result = cns(env, 1);
+      auto baseVal = base;
+
+      auto exp = intVal;
+      while (exp > 0) {
+        if (exp & 1) {
+          result = gen(env, MulIntO, exitPow, result, baseVal);
         }
+        if (exp > 1) {
+          baseVal = gen(env, MulIntO, exitPow, baseVal, baseVal);
+        }
+        exp >>= 1;
       }
+
       discard(env, 2);
-      push(env, genPowResult);
+      push(env, result);
       return;
+    } else {
+      assert(base->isA(TDbl));
+      auto result = cns(env, 1.0);
+      auto exp = intVal;
+      auto baseVal = base;
+
+      while (exp > 0) {
+        if (exp & 1) {
+          result = gen(env, MulDbl, result, baseVal);
+        }
+        if (exp > 1) {
+          baseVal = gen(env, MulDbl, baseVal, baseVal);
+        }
+        exp >>= 1;
+      }
+
+      discard(env, 2);
+      push(env, result);
+      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+      return;
+
     }
   }
-  interpOne(env, TUncountedInit, 2);
+  return interpOne(env, TUncountedInit, 2);
 }
 
 void emitBitNot(IRGS& env) {

@@ -44,8 +44,6 @@ class t_list final : public t_container {
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.
  public:
-  explicit t_list(const t_type* elem_type)
-      : t_list(t_type_ref::from_req_ptr(elem_type)) {}
   const t_type* get_elem_type() const { return elem_type().get_type(); }
 };
 

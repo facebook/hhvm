@@ -423,7 +423,7 @@ TYPED_TEST(AstVisitorTest, set) {
 }
 
 TYPED_TEST(AstVisitorTest, list) {
-  auto list = std::make_unique<t_list>(&t_primitive_type::t_i32());
+  auto list = std::make_unique<t_list>(t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_list(list.get()));
   EXPECT_CALL(this->mock_, visit_container(list.get()));
   EXPECT_CALL(this->overload_mock_, visit_list(list.get()));

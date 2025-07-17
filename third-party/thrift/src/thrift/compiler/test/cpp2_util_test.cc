@@ -55,7 +55,7 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   EXPECT_FALSE(is_eligible_for_constexpr(&t_primitive_type::t_string()));
   EXPECT_FALSE(is_eligible_for_constexpr(&t_primitive_type::t_binary()));
 
-  auto list = t_list(&i32);
+  auto list = t_list(i32);
   EXPECT_FALSE(is_eligible_for_constexpr(&list));
 
   auto set = t_set(&i32);
@@ -170,8 +170,8 @@ TEST(UtilTest, for_each_transitive_field) {
 
 TEST(UtilTest, field_transitively_refers_to_unique) {
   auto i = t_primitive_type::t_i32();
-  auto li = t_list(&i);
-  auto lli = t_list(t_list(&i));
+  auto li = t_list(i);
+  auto lli = t_list(t_list(i));
   auto si = t_set(&i);
   auto mii = t_map(i, i);
 
@@ -186,8 +186,8 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   auto p = t_primitive_type::t_binary();
   p.set_unstructured_annotation("cpp.type", "std::unique_ptr<folly::IOBuf>");
 
-  auto lp = t_list(&p);
-  auto llp = t_list(t_list(&p));
+  auto lp = t_list(p);
+  auto llp = t_list(t_list(p));
   auto sp = t_set(&p);
   auto mip = t_map(i, p);
 
@@ -249,7 +249,7 @@ TEST(UtilTest, is_custom_type) {
 
   const auto i32 = t_primitive_type::t_i32();
   {
-    auto cppTemplate = t_list(&i32);
+    auto cppTemplate = t_list(i32);
     auto typeDef = t_typedef(&p, "Type", cppTemplate);
     EXPECT_FALSE(cpp2::is_custom_type(cppTemplate));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
@@ -259,7 +259,7 @@ TEST(UtilTest, is_custom_type) {
   }
 
   {
-    auto cpp2Template = t_list(&i32);
+    auto cpp2Template = t_list(i32);
     auto typeDef = t_typedef(&p, "Type", cpp2Template);
     EXPECT_FALSE(cpp2::is_custom_type(cpp2Template));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
@@ -293,7 +293,7 @@ TEST(UtilTest, is_custom_type) {
   }
 
   {
-    const auto& list_i32 = t_list(&i32);
+    const auto& list_i32 = t_list(i32);
     auto typeDef = t_typedef(&p, "Type", list_i32);
     auto typeDef2 = t_typedef(&p, "TypeDef", typeDef);
     EXPECT_FALSE(cpp2::is_custom_type(list_i32));

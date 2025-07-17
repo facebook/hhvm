@@ -2755,7 +2755,7 @@ const t_type* t_hack_generator::tmeta_ThriftField_type() {
 const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
   static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftFunction");
-  static t_list tlist(tmeta_ThriftField_type());
+  static t_list tlist(*tmeta_ThriftField_type());
   if (type.has_fields()) {
     return &type;
   }
@@ -2773,7 +2773,7 @@ const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
 const t_type* t_hack_generator::tmeta_ThriftService_type() {
   static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftService");
-  static t_list tlist(tmeta_ThriftFunction_type());
+  static t_list tlist(*tmeta_ThriftFunction_type());
   if (type.has_fields()) {
     return &type;
   }
@@ -2801,7 +2801,7 @@ const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
 const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
   static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftStruct");
-  static t_list tlist(tmeta_ThriftField_type());
+  static t_list tlist(*tmeta_ThriftField_type());
   if (type.has_fields()) {
     return &type;
   }
@@ -2816,7 +2816,7 @@ const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
 const t_type* t_hack_generator::tmeta_ThriftException_type() {
   static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftException");
-  static t_list tlist(tmeta_ThriftField_type());
+  static t_list tlist(*tmeta_ThriftField_type());
   if (type.has_fields()) {
     return &type;
   }

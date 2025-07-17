@@ -179,7 +179,7 @@ TEST(SchematizerTest, wrap_with_protocol_with_enum_ty) {
 }
 
 std::unique_ptr<t_list> make_foo_bar_list(const t_struct* element) {
-  return std::make_unique<t_list>(element);
+  return std::make_unique<t_list>(*element);
 }
 
 TEST(SchematizerTest, wrap_with_protocol_list) {

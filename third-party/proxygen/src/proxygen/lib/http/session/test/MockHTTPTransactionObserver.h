@@ -34,4 +34,22 @@ class MockHTTPTransactionObserver
               (noexcept));
 };
 
+class MockHTTPTransactionObserverAccessor
+    : public HTTPTransactionObserverAccessor {
+ public:
+  ~MockHTTPTransactionObserverAccessor() override = default;
+
+  MOCK_METHOD(bool,
+              addObserver,
+              (HTTPTransactionObserverContainer::Observer * observer),
+              (override));
+  MOCK_METHOD(
+      bool,
+      addObserver,
+      (std::shared_ptr<HTTPTransactionObserverContainer::Observer> observer),
+      (override));
+
+  MOCK_METHOD(uint64_t, getTxnId, (), (const, override));
+};
+
 } // namespace proxygen

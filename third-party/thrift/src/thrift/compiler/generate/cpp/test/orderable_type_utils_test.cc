@@ -161,7 +161,7 @@ struct StructWithCustomSetCppTypeWithEnableCustomTypeOrdering {
 } // namespace
 
 TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
-  t_set set_t(&t_primitive_type::t_double());
+  t_set set_t(t_primitive_type::t_double());
   set_t.set_unstructured_annotation("cpp2.template", "blah");
   t_program program_p("path/to/program.thrift", "path/to/program.thrift");
   t_struct struct_s(&program_p, "struct_name");
@@ -194,7 +194,7 @@ TEST(OrderableTypeUtilsTest, is_orderable_struct) {
 TEST(OrderableTypeUtilsTest, is_orderable_struct_self_reference) {
   t_program program_p("path/to/program.thrift", "path/to/program.thrift");
 
-  t_set set_t(&t_primitive_type::t_double());
+  t_set set_t(t_primitive_type::t_double());
   set_t.set_unstructured_annotation("cpp2.template", "blah");
 
   t_struct struct_c(&program_p, "C");

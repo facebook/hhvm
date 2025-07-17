@@ -229,7 +229,7 @@ TEST(SchematizerTest, wrap_with_protocol_list) {
 TEST(SchematizerTest, wrap_with_protocol_set) {
   auto program = std::make_unique<t_program>("./", "./");
   auto foo_bar_strct_ty = make_foo_bar(program.get());
-  auto foo_bar_set_ty = std::make_unique<t_set>(foo_bar_strct_ty.get());
+  auto foo_bar_set_ty = std::make_unique<t_set>(*foo_bar_strct_ty);
   auto struct_with_set_ty =
       std::make_unique<t_struct>(program.get(), "FooBarSet");
   struct_with_set_ty->append_field(

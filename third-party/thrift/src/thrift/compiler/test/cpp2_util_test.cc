@@ -58,7 +58,7 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   auto list = t_list(i32);
   EXPECT_FALSE(is_eligible_for_constexpr(&list));
 
-  auto set = t_set(&i32);
+  auto set = t_set(i32);
   EXPECT_FALSE(is_eligible_for_constexpr(&set));
 
   auto map = t_map(i32, t_primitive_type::t_double());
@@ -172,7 +172,7 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   auto i = t_primitive_type::t_i32();
   auto li = t_list(i);
   auto lli = t_list(t_list(i));
-  auto si = t_set(&i);
+  auto si = t_set(i);
   auto mii = t_map(i, i);
 
   const t_type* no_uniques[] = {&i, &li, &lli, &si, &mii};
@@ -188,7 +188,7 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
 
   auto lp = t_list(p);
   auto llp = t_list(t_list(p));
-  auto sp = t_set(&p);
+  auto sp = t_set(p);
   auto mip = t_map(i, p);
 
   const t_type* uniques[] = {&p, &lp, &llp, &sp, &mip};

@@ -415,7 +415,7 @@ TYPED_TEST(AstVisitorTest, typedef) {
 }
 
 TYPED_TEST(AstVisitorTest, set) {
-  auto set = std::make_unique<t_set>(&t_primitive_type::t_i32());
+  auto set = std::make_unique<t_set>(t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_set(set.get()));
   EXPECT_CALL(this->mock_, visit_container(set.get()));
   EXPECT_CALL(this->overload_mock_, visit_set(set.get()));

@@ -55,6 +55,7 @@
 #include <thrift/lib/cpp2/async/processor/AsyncProcessorFunc.h>
 #include <thrift/lib/cpp2/async/processor/EventTask.h>
 #include <thrift/lib/cpp2/async/processor/RequestParams.h>
+#include <thrift/lib/cpp2/async/processor/RequestTask.h>
 #include <thrift/lib/cpp2/async/processor/ServerInterface.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequest.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
@@ -193,33 +194,6 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor,
       int64_t id, Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
   void destroyAllInteractions(
       Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
-};
-
-template <typename ChildType>
-class RequestTask final : public EventTask {
- public:
-  RequestTask(
-      ResponseChannelRequest::UniquePtr req,
-      SerializedCompressedRequest&& serializedRequest,
-      folly::Executor::KeepAlive<> executor,
-      Cpp2RequestContext* ctx,
-      bool oneway,
-      ChildType* childClass,
-      GeneratedAsyncProcessorBase::ExecuteFunc<ChildType> executeFunc)
-      : EventTask(
-            std::move(req),
-            std::move(serializedRequest),
-            std::move(executor),
-            ctx,
-            oneway),
-        childClass_(childClass),
-        executeFunc_(executeFunc) {}
-
-  void run() override;
-
- private:
-  ChildType* childClass_;
-  GeneratedAsyncProcessorBase::ExecuteFunc<ChildType> executeFunc_;
 };
 
 template <class T>

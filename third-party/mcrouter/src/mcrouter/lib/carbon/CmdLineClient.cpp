@@ -10,8 +10,6 @@
 #include <boost/program_options.hpp>
 #include <fmt/format.h>
 
-#include <folly/Format.h>
-
 namespace carbon {
 namespace tools {
 

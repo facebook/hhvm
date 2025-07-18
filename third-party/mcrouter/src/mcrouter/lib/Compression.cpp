@@ -12,7 +12,6 @@
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
 
-#include "mcrouter/lib/IovecCursor.h"
 #include "mcrouter/lib/Lz4CompressionCodec.h"
 #include "mcrouter/lib/Lz4ImmutableCompressionCodec.h"
 #include "mcrouter/lib/ZstdCompressionCodec.h"

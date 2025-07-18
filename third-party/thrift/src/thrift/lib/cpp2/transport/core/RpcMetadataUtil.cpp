@@ -24,19 +24,47 @@
 
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 #include <thrift/lib/cpp/transport/THeader.h>
-#include <thrift/lib/cpp2/async/RequestCallback.h>
+#include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+THRIFT_FLAG_DEFINE_int64(log_thrift_framework_metadata_sample_rate, 1'000'000);
+
 namespace apache::thrift::detail {
+
+// Log framework metadata information with sampling
+void logFrameworkMetadata(
+    const std::string& serviceName,
+    const std::string& methodName,
+    const folly::IOBuf* frameworkMetadata,
+    bool isFromInterceptor) {
+  // Log framework metadata with sampling
+  LoggingSampler frameworkMetadataSampler{
+      THRIFT_FLAG(log_thrift_framework_metadata_sample_rate)};
+  if (frameworkMetadataSampler.isSampled()) {
+    THRIFT_APPLICATION_EVENT(rpc_metadata_framework_metadata)
+        .logSampled(frameworkMetadataSampler, [&] {
+          folly::dynamic log = folly::dynamic::object;
+
+          log["service_name"] = serviceName;
+          log["method_name"] = methodName;
+          log["is_from_interceptor"] = isFromInterceptor ? 1 : 0;
+          log["framework_metadata_size"] =
+              frameworkMetadata->computeChainDataLength();
+
+          return log;
+        });
+  }
+}
 
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,
     RpcKind kind,
-    ManagedStringView&& methodName,
+    MethodMetadata&& methodMetadata,
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     bool serverZstdSupported,
@@ -44,6 +72,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
     transport::THeader& header,
     std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata,
     bool customCompressionEnabled) {
+  auto methodName = methodMetadata.name_managed();
+
   RequestRpcMetadata metadata;
   metadata.protocol() = static_cast<ProtocolId>(header.getProtocolId());
   metadata.kind() = kind;
@@ -138,7 +168,9 @@ RequestRpcMetadata makeRequestRpcMetadata(
     metadata.otherMetadata() = std::move(writeHeaders);
   }
 
-  if (interceptorFrameworkMetadata != nullptr) {
+  bool isFromInterceptor = interceptorFrameworkMetadata != nullptr;
+
+  if (isFromInterceptor) {
     metadata.frameworkMetadata() = std::move(interceptorFrameworkMetadata);
   } else if (rpcOptions.getContextPropMask()) {
     folly::dynamic logMessages = folly::dynamic::object();
@@ -151,6 +183,15 @@ RequestRpcMetadata makeRequestRpcMetadata(
         return logMessages;
       });
     }
+  }
+
+  // Log framework metadata
+  if (const auto& fmd = metadata.frameworkMetadata()) {
+    logFrameworkMetadata(
+        methodMetadata.thriftServiceUriOrName_managed().str(),
+        metadata.name().value().str(),
+        fmd.value().get(),
+        isFromInterceptor);
   }
 
   if (const auto& loggingContext = header.loggingContext()) {

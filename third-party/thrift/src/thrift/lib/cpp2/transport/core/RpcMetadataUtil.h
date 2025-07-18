@@ -21,6 +21,7 @@
 #include <folly/dynamic.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/util/ManagedStringView.h>
+#include <thrift/lib/cpp2/util/MethodMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
@@ -51,7 +52,7 @@ inline constexpr std::string_view kHeaderProxiedAnyexType = "panyext";
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,
     RpcKind kind,
-    ManagedStringView&& methodName,
+    MethodMetadata&& methodMetadata,
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     bool serverZstdSupported,

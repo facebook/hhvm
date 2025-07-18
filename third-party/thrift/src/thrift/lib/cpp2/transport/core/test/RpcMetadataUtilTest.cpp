@@ -40,6 +40,7 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
   RpcOptions rpcOptions;
   auto kind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   std::string methodName = "foo";
+  std::string serviceName = "bar";
   std::chrono::milliseconds timeout(100);
   std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
       std::monostate{};
@@ -47,10 +48,12 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
   header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
 
   rpcOptions.setShardId("123");
+  MethodMetadata methodMetadata(MethodMetadata::Data(
+      methodName, FunctionQualifier::Unspecified, serviceName));
   auto requestRpcMetadata = makeRequestRpcMetadata(
       rpcOptions,
       kind,
-      methodName,
+      std::move(methodMetadata),
       timeout,
       interactionHandle,
       false,
@@ -67,6 +70,7 @@ TEST(RpcMetadataUtil, interceptorFrameworkMetadata) {
   RpcOptions rpcOptions;
   auto kind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   std::string methodName = "foo";
+  std::string serviceName = "bar";
   std::chrono::milliseconds timeout(100);
   std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
       std::monostate{};
@@ -74,10 +78,12 @@ TEST(RpcMetadataUtil, interceptorFrameworkMetadata) {
   header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
 
   rpcOptions.setShardId("123");
+  MethodMetadata methodMetadata(MethodMetadata::Data(
+      methodName, FunctionQualifier::Unspecified, serviceName));
   auto requestRpcMetadata = makeRequestRpcMetadata(
       rpcOptions,
       kind,
-      methodName,
+      std::move(methodMetadata),
       timeout,
       interactionHandle,
       false,
@@ -94,6 +100,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
   RpcOptions rpcOptions;
   auto kind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   std::string methodName = "foo";
+  std::string serviceName = "bar";
   std::chrono::milliseconds timeout(100);
   std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
       std::monostate{};
@@ -106,10 +113,12 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
+    MethodMetadata methodMetadata(MethodMetadata::Data(
+        methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
-        methodName,
+        std::move(methodMetadata),
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/false,
@@ -134,10 +143,12 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
+    MethodMetadata methodMetadata(MethodMetadata::Data(
+        methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
-        methodName,
+        std::move(methodMetadata),
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/true,
@@ -161,10 +172,12 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
+    MethodMetadata methodMetadata(MethodMetadata::Data(
+        methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
-        methodName,
+        std::move(methodMetadata),
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/false,
@@ -188,10 +201,12 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().zstdConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
+    MethodMetadata methodMetadata(MethodMetadata::Data(
+        methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
-        methodName,
+        std::move(methodMetadata),
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/false,

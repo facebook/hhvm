@@ -167,7 +167,7 @@ class RocketClientChannel final : public ClientChannel,
   void sendThriftRequest(
       const RpcOptions& rpcOptions,
       RpcKind kind,
-      apache::thrift::ManagedStringView&& methodName,
+      apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
       RequestClientCallback::Ptr cb,

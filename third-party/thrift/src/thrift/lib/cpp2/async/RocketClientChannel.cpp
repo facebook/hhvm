@@ -812,7 +812,7 @@ void RocketClientChannel::sendRequestResponse(
   sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      std::move(methodMetadata).name_managed(),
+      std::move(methodMetadata),
       std::move(request),
       std::move(header),
       std::move(cb),
@@ -829,7 +829,7 @@ void RocketClientChannel::sendRequestNoResponse(
   sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-      std::move(methodMetadata).name_managed(),
+      std::move(methodMetadata),
       std::move(request),
       std::move(header),
       std::move(cb),
@@ -854,7 +854,7 @@ void RocketClientChannel::sendRequestStream(
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
-      methodMetadata.name_managed(),
+      std::move(methodMetadata),
       firstResponseTimeout,
       getInteractionHandle(rpcOptions),
       getServerZstdSupported(),
@@ -900,7 +900,7 @@ void RocketClientChannel::sendRequestSink(
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINK,
-      methodMetadata.name_managed(),
+      std::move(methodMetadata),
       firstResponseTimeout,
       getInteractionHandle(rpcOptions),
       getServerZstdSupported(),
@@ -930,7 +930,7 @@ void RocketClientChannel::sendRequestSink(
 void RocketClientChannel::sendThriftRequest(
     const RpcOptions& rpcOptions,
     RpcKind kind,
-    apache::thrift::ManagedStringView&& methodName,
+    apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     RequestClientCallback::Ptr clientCallback,
@@ -940,13 +940,12 @@ void RocketClientChannel::sendThriftRequest(
     return;
   }
   preprocessHeader(header.get());
-
   auto timeout = getClientTimeout(rpcOptions);
   auto buf = std::move(request.buffer);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       kind,
-      std::move(methodName),
+      std::move(methodMetadata),
       timeout,
       getInteractionHandle(rpcOptions),
       getServerZstdSupported(),

@@ -564,13 +564,75 @@ struct MutableSetHandler {
 
 using MutableSetTypeInfo = SetTypeInfoImpl<MutableSetHandler, false>;
 
-class MapTypeInfo {
+template <typename Handler>
+class MapTypeInfoImpl {
  public:
   static std::uint32_t size(const void* object) {
-    return folly::to<std::uint32_t>(PyTuple_GET_SIZE(toPyObject(object)));
+    return folly::to<std::uint32_t>(Handler::size(toPyObject(object)));
   }
 
-  static void clear(void* object) { setContainer(object); }
+  static void clear(void* object) { Handler::clear(object); }
+
+  static void read(
+      const void* context,
+      void* objectPtr,
+      std::uint32_t mapSize,
+      void (*keyReader)(const void* context, void* key),
+      void (*valueReader)(const void* context, void* val)) {
+    Handler::read(context, objectPtr, mapSize, keyReader, valueReader);
+  }
+
+  static size_t write(
+      const void* context,
+      const void* object,
+      bool protocolSortKeys,
+      size_t (*writer)(
+          const void* context, const void* keyElem, const void* valueElem)) {
+    return Handler::write(context, object, protocolSortKeys, writer);
+  }
+
+  static void consumeElem(
+      const void* context,
+      void* object,
+      void (*keyReader)(const void* /*context*/, void* /*val*/),
+      void (*valueReader)(const void* /*context*/, void* /*val*/)) {
+    Handler::consumeElem(context, object, keyReader, valueReader);
+  }
+
+  explicit MapTypeInfoImpl(
+      const ::apache::thrift::detail::TypeInfo* keyInfo,
+      const ::apache::thrift::detail::TypeInfo* valInfo)
+      : ext_{
+            /* .keyInfo */ keyInfo,
+            /* .valInfo */ valInfo,
+            /* .size */ size,
+            /* .clear */ clear,
+            /* .consumeElem */ consumeElem,
+            /* .readMap */ read,
+            /* .writeMap */ write,
+        },
+        typeinfo_{
+            protocol::TType::T_MAP,
+            getStruct,
+            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
+                Handler::clear),
+            &ext_,
+        } {}
+
+  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
+
+ private:
+  const ::apache::thrift::detail::MapFieldExt ext_;
+  const ::apache::thrift::detail::TypeInfo typeinfo_;
+};
+
+class ImmutableMapHandler {
+ public:
+  static int64_t size(const PyObject* object) {
+    return PyTuple_GET_SIZE(object);
+  }
+
+  static void* clear(void* object) { return setContainer(object); }
 
   static void read(
       const void* context,
@@ -591,41 +653,17 @@ class MapTypeInfo {
       void* object,
       void (*keyReader)(const void* /*context*/, void* /*val*/),
       void (*valueReader)(const void* /*context*/, void* /*val*/));
-
-  explicit MapTypeInfo(
-      const ::apache::thrift::detail::TypeInfo* keyInfo,
-      const ::apache::thrift::detail::TypeInfo* valInfo)
-      : ext_{
-            /* .keyInfo */ keyInfo,
-            /* .valInfo */ valInfo,
-            /* .size */ size,
-            /* .clear */ clear,
-            /* .consumeElem */ consumeElem,
-            /* .readMap */ read,
-            /* .writeMap */ write,
-        },
-        typeinfo_{
-            protocol::TType::T_MAP,
-            getStruct,
-            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
-                setContainer),
-            &ext_,
-        } {}
-  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
-
- private:
-  const ::apache::thrift::detail::MapFieldExt ext_;
-  const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
-class MutableMapTypeInfo {
+using MapTypeInfo = MapTypeInfoImpl<ImmutableMapHandler>;
+
+class MutableMapHandler {
  public:
-  static std::uint32_t size(const void* object) {
-    return folly::to<std::uint32_t>(
-        PyDict_Size(const_cast<PyObject*>(toPyObject(object))));
+  static int64_t size(const PyObject* object) {
+    return PyDict_Size(const_cast<PyObject*>(object));
   }
 
-  static void clear(void* objectPtr) { setMutableMap(objectPtr); }
+  static void* clear(void* objectPtr) { return setMutableMap(objectPtr); }
 
   /**
    * Deserializes a dict (with `mapSize` key/value pairs) into `objectPtr`.
@@ -686,34 +724,9 @@ class MutableMapTypeInfo {
       void* object,
       void (*keyReader)(const void* /*context*/, void* /*val*/),
       void (*valueReader)(const void* /*context*/, void* /*val*/));
-
-  explicit MutableMapTypeInfo(
-      const ::apache::thrift::detail::TypeInfo* keyInfo,
-      const ::apache::thrift::detail::TypeInfo* valInfo)
-      : tableBasedSerializerMapFieldExt_{
-            /* .keyInfo */ keyInfo,
-            /* .valInfo */ valInfo,
-            /* .size */ size,
-            /* .clear */ clear,
-            /* .consumeElem */ consumeElem,
-            /* .readSet */ read,
-            /* .writeSet */ write,
-        },
-        tableBasedSerializerTypeinfo_{
-            protocol::TType::T_MAP,
-            getStruct,
-            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
-                setMutableMap),
-            &tableBasedSerializerMapFieldExt_,
-        } {}
-  const ::apache::thrift::detail::TypeInfo* get() const {
-    return &tableBasedSerializerTypeinfo_;
-  }
-
- private:
-  const ::apache::thrift::detail::MapFieldExt tableBasedSerializerMapFieldExt_;
-  const ::apache::thrift::detail::TypeInfo tableBasedSerializerTypeinfo_;
 };
+
+using MutableMapTypeInfo = MapTypeInfoImpl<MutableMapHandler>;
 
 using FieldValueMap = folly::F14FastMap<int16_t, PyObject*>;
 

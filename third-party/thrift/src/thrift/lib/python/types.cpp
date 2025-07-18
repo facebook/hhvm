@@ -1617,7 +1617,7 @@ void SetTypeInfo_consumeElem(
   Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
 }
 
-void MapTypeInfo::read(
+void ImmutableMapHandler::read(
     const void* context,
     void* objectPtr,
     std::uint32_t mapSize,
@@ -1647,7 +1647,7 @@ void MapTypeInfo::read(
   setPyObject(objectPtr, std::move(map));
 }
 
-size_t MapTypeInfo::write(
+size_t ImmutableMapHandler::write(
     const void* context,
     const void* object,
     bool protocolSortKeys,
@@ -1676,7 +1676,7 @@ size_t MapTypeInfo::write(
   return written;
 }
 
-void MapTypeInfo::consumeElem(
+void ImmutableMapHandler::consumeElem(
     const void* context,
     void* objectPtr,
     void (*keyReader)(const void* context, void* key),
@@ -1700,7 +1700,7 @@ void MapTypeInfo::consumeElem(
   PyTuple_SET_ITEM(*pyObjPtr, currentSize, elem.release());
 }
 
-void MutableMapTypeInfo::read(
+void MutableMapHandler::read(
     const void* context,
     void* objectPtr,
     std::uint32_t mapSize,
@@ -1723,7 +1723,7 @@ void MutableMapTypeInfo::read(
   setPyObject(objectPtr, std::move(dict));
 }
 
-size_t MutableMapTypeInfo::write(
+size_t MutableMapHandler::write(
     const void* context,
     const void* object,
     bool protocolSortKeys,
@@ -1744,7 +1744,7 @@ size_t MutableMapTypeInfo::write(
   return written;
 }
 
-void MutableMapTypeInfo::consumeElem(
+void MutableMapHandler::consumeElem(
     const void* context,
     void* objectPtr,
     void (*keyReader)(const void* context, void* key),

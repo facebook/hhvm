@@ -431,34 +431,79 @@ class SetTypeInfoBase {
   virtual ~SetTypeInfoBase() = default;
 };
 
-template <typename T, bool KeySorted>
-class SetTypeInfoTemplate final : public SetTypeInfoBase {
+/**
+ * Given owned reference UniquePyObjectPtr set, an empty `set`, read the
+ * elements using context and reader, adding the read elements to `set`, and set
+ * objectPtr to the read `set`.
+ */
+void SetTypeInfoTemplate_read(
+    UniquePyObjectPtr set,
+    const void* context,
+    void* objectPtr,
+    std::uint32_t setSize,
+    void (*reader)(const void* /*context*/, void* /*val*/));
+
+/**
+ * Given PyObject* `set` (may be a frozenset), sort the elements and return
+ * UniquePyObjectPtr (owned reference) to iterator over the sorted elements
+ */
+UniquePyObjectPtr SetTypeInfo_sortElem(PyObject* set);
+
+/**
+ * Given UniquePyObjectPtr `iter`, an owned reference over set's elements, write
+ * the elements using `context` and `writer`. Returns the written size.
+ */
+size_t SetTypeInfo_write(
+    UniquePyObjectPtr iter,
+    const void* context,
+    size_t (*writer)(const void* /*context*/, const void* /*val*/));
+
+void SetTypeInfo_consumeElem(
+    const void* context,
+    void* objectPtr,
+    void (*reader)(const void* /*context*/, void* /*val*/));
+
+template <typename Handler, bool KeySorted>
+class SetTypeInfoImpl final : public SetTypeInfoBase {
  public:
   static std::uint32_t size(const void* object) {
     return folly::to<std::uint32_t>(PySet_GET_SIZE(toPyObject(object)));
   }
 
-  static void clear(void* object) { T::clear(object); }
+  static void clear(void* object) { Handler::clear(object); }
 
   static void read(
       const void* context,
       void* objectPtr,
       std::uint32_t setSize,
-      void (*reader)(const void* /*context*/, void* /*val*/));
+      void (*reader)(const void* /*context*/, void* /*val*/)) {
+    UniquePyObjectPtr set{Handler::create(nullptr)};
+    SetTypeInfoTemplate_read(
+        std::move(set), context, objectPtr, setSize, reader);
+  }
 
   static size_t write(
       const void* context,
       const void* object,
       bool protocolSortKeys,
-      size_t (*writer)(const void* /*context*/, const void* /*val*/));
+      size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
+    PyObject* set = const_cast<PyObject*>(toPyObject(object));
+    const bool sortKeys = protocolSortKeys || KeySorted;
+    UniquePyObjectPtr iter = UNLIKELY(sortKeys)
+        ? SetTypeInfo_sortElem(set)
+        : UniquePyObjectPtr{PyObject_GetIter(set)};
+
+    return SetTypeInfo_write(std::move(iter), context, writer);
+  }
 
   static void consumeElem(
       const void* context,
-      void* object,
-      void (*reader)(const void* /*context*/, void* /*val*/));
+      void* objectPtr,
+      void (*reader)(const void* /*context*/, void* /*val*/)) {
+    return SetTypeInfo_consumeElem(context, objectPtr, reader);
+  }
 
-  explicit SetTypeInfoTemplate(
-      const ::apache::thrift::detail::TypeInfo* valInfo)
+  explicit SetTypeInfoImpl(const ::apache::thrift::detail::TypeInfo* valInfo)
       : ext_{
             /* .valInfo */ valInfo,
             /* .size */ size,
@@ -471,7 +516,7 @@ class SetTypeInfoTemplate final : public SetTypeInfoBase {
             protocol::TType::T_SET,
             getStruct,
             reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
-                T::clear),
+                Handler::clear),
             &ext_,
         } {}
   const ::apache::thrift::detail::TypeInfo* get() const override {
@@ -479,7 +524,7 @@ class SetTypeInfoTemplate final : public SetTypeInfoBase {
   }
 
   std::unique_ptr<SetTypeInfoBase> asKeySorted() const override {
-    return std::make_unique<SetTypeInfoTemplate<T, true>>(ext_.valInfo);
+    return std::make_unique<SetTypeInfoImpl<Handler, true>>(ext_.valInfo);
   }
 
  private:
@@ -487,86 +532,11 @@ class SetTypeInfoTemplate final : public SetTypeInfoBase {
   const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
-template <typename T, bool KeySorted>
-void SetTypeInfoTemplate<T, KeySorted>::read(
-    const void* context,
-    void* objectPtr,
-    std::uint32_t setSize,
-    void (*reader)(const void* /*context*/, void* /*val*/)) {
-  UniquePyObjectPtr set{T::create(nullptr)};
-  if (!set) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  for (std::uint32_t i = 0; i < setSize; ++i) {
-    PyObject* elem{};
-    reader(context, &elem);
-    if (PySet_Add(set.get(), elem) == -1) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    Py_DECREF(elem);
-  }
-  setPyObject(objectPtr, std::move(set));
-}
-
-template <typename T, bool KeySorted>
-size_t SetTypeInfoTemplate<T, KeySorted>::write(
-    const void* context,
-    const void* object,
-    bool protocolSortKeys,
-    size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
-  size_t written = 0;
-  PyObject* set = const_cast<PyObject*>(toPyObject(object));
-  UniquePyObjectPtr iter;
-  if (UNLIKELY(protocolSortKeys) || KeySorted) {
-    UniquePyObjectPtr seq{PySequence_List(set)};
-    if (!seq) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    if (PyList_Sort(seq.get()) == -1) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    iter = UniquePyObjectPtr{PyObject_GetIter(seq.get())};
-  } else {
-    iter = UniquePyObjectPtr{PyObject_GetIter(set)};
-  }
-  if (!iter) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  PyObject* elem;
-  while ((elem = PyIter_Next(iter.get())) != nullptr) {
-    written += writer(context, &elem);
-    Py_DECREF(elem);
-  }
-  return written;
-}
-
-template <typename T, bool KeySorted>
-void SetTypeInfoTemplate<T, KeySorted>::consumeElem(
-    const void* context,
-    void* objectPtr,
-    void (*reader)(const void* /*context*/, void* /*val*/)) {
-  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
-  DCHECK(*pyObjPtr);
-  PyObject* elem = nullptr;
-  reader(context, &elem);
-  DCHECK(elem);
-  // This is nasty hack since Cython generated code will incr the refcnt
-  // so PySet_Add will fail. Need to temporarily decrref.
-  const Py_ssize_t currentRefCnt = Py_REFCNT(*pyObjPtr);
-  Py_SET_REFCNT(*pyObjPtr, 1);
-  if (PySet_Add(*pyObjPtr, elem) == -1) {
-    Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  Py_DECREF(elem);
-  Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
-}
-
 /**
- * This class is intended to be used as a template parameter for the
- * `SetTypeInfoTemplate` class.
+ * This class implements `frozenset` handler methods for immutable
+ * thrift-python, for the `SetTypeInfoImpl` class.
  *
- * Immutable Thrift structs utilize Python's `Frozenset` for internal data
+ * Immutable Thrift structs use Python's `frozenset` for internal data
  * representation. The `ImmutableSetHandler` class provides methods to create
  * and clear the set.
  */
@@ -577,13 +547,13 @@ struct ImmutableSetHandler {
   static void* clear(void* object) { return setFrozenSet(object); }
 };
 
-using SetTypeInfo = SetTypeInfoTemplate<ImmutableSetHandler, false>;
+using SetTypeInfo = SetTypeInfoImpl<ImmutableSetHandler, false>;
 
 /**
- * This class is intended to be used as a template parameter for the
- * `SetTypeInfoTemplate` class.
+ * This class implements `set` handler methods for mutable thrift-python,
+ * for the `SetTypeInfoImpl` class.
  *
- * Mutable Thrift structs utilize Python's `set` for internal data
+ * Mutable Thrift structs use Python's `set` for internal data
  * representation. The `MutableSetHandler` class provides methods to create
  * and clear the set.
  */
@@ -592,7 +562,7 @@ struct MutableSetHandler {
   static void* clear(void* object) { return setMutableSet(object); }
 };
 
-using MutableSetTypeInfo = SetTypeInfoTemplate<MutableSetHandler, false>;
+using MutableSetTypeInfo = SetTypeInfoImpl<MutableSetHandler, false>;
 
 class MapTypeInfo {
  public:

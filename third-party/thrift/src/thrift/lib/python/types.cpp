@@ -1536,6 +1536,87 @@ void MutableListTypeInfo::consumeElem(
   }
 }
 
+/**
+ * Given owned reference UniquePyObjectPtr set, an empty `set`, read the
+ * elements using context and reader, adding the read elements to `set`, and set
+ * objectPtr to the read `set`.
+ */
+void SetTypeInfoTemplate_read(
+    UniquePyObjectPtr set,
+    const void* context,
+    void* objectPtr,
+    std::uint32_t setSize,
+    void (*reader)(const void* /*context*/, void* /*val*/)) {
+  if (!set) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  for (std::uint32_t i = 0; i < setSize; ++i) {
+    PyObject* elem{};
+    reader(context, &elem);
+    if (PySet_Add(set.get(), elem) == -1) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    Py_DECREF(elem);
+  }
+  setPyObject(objectPtr, std::move(set));
+}
+
+/**
+ * Given PyObject* `set` (may be a frozenset), sort the elements and return
+ * UniquePyObjectPtr (owned reference) to iterator over the sorted elements
+ */
+UniquePyObjectPtr SetTypeInfo_sortElem(PyObject* set) {
+  UniquePyObjectPtr seq{PySequence_List(set)};
+  if (!seq) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  if (PyList_Sort(seq.get()) == -1) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return UniquePyObjectPtr{PyObject_GetIter(seq.get())};
+}
+
+/**
+ * Given UniquePyObjectPtr `iter`, an owned reference over set's elements, write
+ * the elements using `context` and `writer`. Returns the written size.
+ */
+size_t SetTypeInfo_write(
+    UniquePyObjectPtr iter,
+    const void* context,
+    size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
+  size_t written = 0;
+  if (!iter) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  PyObject* elem;
+  while ((elem = PyIter_Next(iter.get())) != nullptr) {
+    written += writer(context, &elem);
+    Py_DECREF(elem);
+  }
+  return written;
+}
+
+void SetTypeInfo_consumeElem(
+    const void* context,
+    void* objectPtr,
+    void (*reader)(const void* /*context*/, void* /*val*/)) {
+  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
+  DCHECK(*pyObjPtr);
+  PyObject* elem = nullptr;
+  reader(context, &elem);
+  DCHECK(elem);
+  // This is nasty hack since Cython generated code will incr the refcnt
+  // so PySet_Add will fail. Need to temporarily decrref.
+  const Py_ssize_t currentRefCnt = Py_REFCNT(*pyObjPtr);
+  Py_SET_REFCNT(*pyObjPtr, 1);
+  if (PySet_Add(*pyObjPtr, elem) == -1) {
+    Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  Py_DECREF(elem);
+  Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
+}
+
 void MapTypeInfo::read(
     const void* context,
     void* objectPtr,

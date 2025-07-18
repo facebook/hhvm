@@ -160,6 +160,8 @@ TEST_F(ServiceSchemaTest, Enum) {
   const EnumNode& e = testEnum->asEnum();
   EXPECT_EQ(&e.definition(), testEnum.unwrap());
   EXPECT_EQ(e.uri(), "meta.com/thrift_test/TestEnum");
+  EXPECT_EQ(e.definition().annotations().size(), 1);
+  EXPECT_EQ(e.definition().annotations()[0].value()["field1"], 3);
 
   const std::vector<EnumNode::Value> expected = {
       {"UNSET", 0},

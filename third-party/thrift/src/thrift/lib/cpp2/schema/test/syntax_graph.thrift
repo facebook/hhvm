@@ -19,18 +19,6 @@ include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.syntax_graph.test
 
-@thrift.Uri{value = "meta.com/thrift_test/TestEnum"}
-enum TestEnum {
-  UNSET = 0,
-  VALUE_1 = 1,
-  VALUE_2 = 2,
-}
-
-struct TestStruct {
-  1: i32 field1 = 10;
-  2: optional TestEnum field2;
-}
-
 @thrift.Uri{value = "meta.com/thrift_test/TestRecursiveStruct"}
 struct TestRecursiveStruct {
   @thrift.Box
@@ -40,9 +28,23 @@ struct TestRecursiveStruct {
 @thrift.Uri{value = "meta.com/thrift_test/TestStructuredAnnotation"}
 @scope.Definition
 @scope.Field
+@scope.Enum
 struct TestStructuredAnnotation {
   1: i64 field1;
   2: TestInnerStructuredAnnotation field2;
+}
+
+@thrift.Uri{value = "meta.com/thrift_test/TestEnum"}
+@TestStructuredAnnotation{field1 = 3}
+enum TestEnum {
+  UNSET = 0,
+  VALUE_1 = 1,
+  VALUE_2 = 2,
+}
+
+struct TestStruct {
+  1: i32 field1 = 10;
+  2: optional TestEnum field2;
 }
 
 struct TestInnerStructuredAnnotation {

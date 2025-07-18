@@ -42,6 +42,7 @@ class ReflectionClass implements Reflector {
   public function getTypeConstants()[]: varray<ReflectionTypeConstant>;
   public function getConstructor()[]: ?ReflectionMethod;
   public function getDefaultProperties()[]: darray<string, mixed>;
+  public function getTypeVarNames()[]: vec<string>;
   /**
    * Returns string or false
    */
@@ -144,6 +145,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getNamespaceName()[]: string;
   public function getShortName()[]: string;
   public function getParamTypeVarNames()[]: keyset<string>;
+  public function getTypeVarNames()[]: vec<string>;
   public function isHack()[]: bool;
   public function isInternal()[]: bool;
   public function isClosure()[]: bool;

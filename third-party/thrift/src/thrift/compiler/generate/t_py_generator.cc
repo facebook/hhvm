@@ -602,7 +602,7 @@ void t_py_generator::generate_json_collection_element(
     to_act_on = tmp("_struct");
   }
 
-  t_field felem(type, to_act_on);
+  t_field felem(*type, to_act_on);
   generate_json_field(out, &felem, "", "", to_parse, false);
   indent(out) << collection << action_prefix << to_act_on << action_suffix
               << endl;
@@ -3321,10 +3321,10 @@ void t_py_generator::generate_deserialize_container(
   string vtype = tmp("_vtype");
   string etype = tmp("_etype");
 
-  t_field fsize(&t_primitive_type::t_i32(), size);
-  t_field fktype(&t_primitive_type::t_byte(), ktype);
-  t_field fvtype(&t_primitive_type::t_byte(), vtype);
-  t_field fetype(&t_primitive_type::t_byte(), etype);
+  t_field fsize(t_primitive_type::t_i32(), size);
+  t_field fktype(t_primitive_type::t_byte(), ktype);
+  t_field fvtype(t_primitive_type::t_byte(), vtype);
+  t_field fetype(t_primitive_type::t_byte(), etype);
 
   // Declare variables, read header
   if (ttype->is<t_map>()) {
@@ -3405,8 +3405,8 @@ void t_py_generator::generate_deserialize_map_element(
     string value_actual_type) {
   string key = tmp("_key");
   string val = tmp("_val");
-  t_field fkey(tmap->get_key_type(), key);
-  t_field fval(tmap->get_val_type(), val);
+  t_field fkey(*tmap->get_key_type(), key);
+  t_field fval(*tmap->get_val_type(), val);
 
   generate_deserialize_field(out, &fkey, "", false, key_actual_type);
   generate_deserialize_field(out, &fval, "", false, value_actual_type);
@@ -3420,7 +3420,7 @@ void t_py_generator::generate_deserialize_map_element(
 void t_py_generator::generate_deserialize_set_element(
     ofstream& out, const t_set* tset, string prefix) {
   string elem = tmp("_elem");
-  t_field felem(tset->get_elem_type(), elem);
+  t_field felem(*tset->get_elem_type(), elem);
 
   generate_deserialize_field(out, &felem);
 
@@ -3433,7 +3433,7 @@ void t_py_generator::generate_deserialize_set_element(
 void t_py_generator::generate_deserialize_list_element(
     ofstream& out, const t_list* tlist, string prefix) {
   string elem = tmp("_elem");
-  t_field felem(tlist->get_elem_type(), elem);
+  t_field felem(*tlist->get_elem_type(), elem);
 
   generate_deserialize_field(out, &felem);
 
@@ -3603,10 +3603,10 @@ void t_py_generator::generate_serialize_container(
  */
 void t_py_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string kiter, string viter) {
-  t_field kfield(tmap->get_key_type(), kiter);
+  t_field kfield(*tmap->get_key_type(), kiter);
   generate_serialize_field(out, &kfield, "");
 
-  t_field vfield(tmap->get_val_type(), viter);
+  t_field vfield(*tmap->get_val_type(), viter);
   generate_serialize_field(out, &vfield, "");
 }
 
@@ -3615,7 +3615,7 @@ void t_py_generator::generate_serialize_map_element(
  */
 void t_py_generator::generate_serialize_set_element(
     ofstream& out, const t_set* tset, string iter) {
-  t_field efield(tset->get_elem_type(), iter);
+  t_field efield(*tset->get_elem_type(), iter);
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3624,7 +3624,7 @@ void t_py_generator::generate_serialize_set_element(
  */
 void t_py_generator::generate_serialize_list_element(
     ofstream& out, const t_list* tlist, string iter) {
-  t_field efield(tlist->get_elem_type(), iter);
+  t_field efield(*tlist->get_elem_type(), iter);
   generate_serialize_field(out, &efield, "");
 }
 

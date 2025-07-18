@@ -1306,10 +1306,10 @@ void t_js_generator::generate_deserialize_container(
   string etype = tmp("_etype");
   string rtmp3 = tmp("_rtmp3");
 
-  t_field fsize(&t_primitive_type::t_i32(), size);
-  t_field fktype(&t_primitive_type::t_byte(), ktype);
-  t_field fvtype(&t_primitive_type::t_byte(), vtype);
-  t_field fetype(&t_primitive_type::t_byte(), etype);
+  t_field fsize(t_primitive_type::t_i32(), size);
+  t_field fktype(t_primitive_type::t_byte(), ktype);
+  t_field fvtype(t_primitive_type::t_byte(), vtype);
+  t_field fetype(t_primitive_type::t_byte(), etype);
 
   out << indent() << "var " << size << " = 0;" << endl;
   out << indent() << "var " << rtmp3 << ";" << endl;
@@ -1385,8 +1385,8 @@ void t_js_generator::generate_deserialize_map_element(
     ofstream& out, const t_map* tmap, string prefix) {
   string key = tmp("key");
   string val = tmp("val");
-  t_field fkey(tmap->get_key_type(), key);
-  t_field fval(tmap->get_val_type(), val);
+  t_field fkey(*tmap->get_key_type(), key);
+  t_field fval(*tmap->get_val_type(), val);
 
   indent(out) << declare_field(&fkey, false, false) << ";" << endl;
   indent(out) << declare_field(&fval, false, false) << ";" << endl;
@@ -1400,7 +1400,7 @@ void t_js_generator::generate_deserialize_map_element(
 void t_js_generator::generate_deserialize_set_element(
     ofstream& out, const t_set* tset, string prefix) {
   string elem = tmp("elem");
-  t_field felem(tset->get_elem_type(), elem);
+  t_field felem(*tset->get_elem_type(), elem);
 
   indent(out) << "var " << elem << " = null;" << endl;
 
@@ -1412,7 +1412,7 @@ void t_js_generator::generate_deserialize_set_element(
 void t_js_generator::generate_deserialize_list_element(
     ofstream& out, const t_list* tlist, string prefix) {
   string elem = tmp("elem");
-  t_field felem(tlist->get_elem_type(), elem);
+  t_field felem(*tlist->get_elem_type(), elem);
 
   indent(out) << "var " << elem << " = null;" << endl;
 
@@ -1586,10 +1586,10 @@ void t_js_generator::generate_serialize_container(
  */
 void t_js_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string kiter, string viter) {
-  t_field kfield(tmap->get_key_type(), kiter);
+  t_field kfield(*tmap->get_key_type(), kiter);
   generate_serialize_field(out, &kfield);
 
-  t_field vfield(tmap->get_val_type(), viter);
+  t_field vfield(*tmap->get_val_type(), viter);
   generate_serialize_field(out, &vfield);
 }
 
@@ -1598,7 +1598,7 @@ void t_js_generator::generate_serialize_map_element(
  */
 void t_js_generator::generate_serialize_set_element(
     ofstream& out, const t_set* tset, string iter) {
-  t_field efield(tset->get_elem_type(), iter);
+  t_field efield(*tset->get_elem_type(), iter);
   generate_serialize_field(out, &efield);
 }
 
@@ -1607,7 +1607,7 @@ void t_js_generator::generate_serialize_set_element(
  */
 void t_js_generator::generate_serialize_list_element(
     ofstream& out, const t_list* tlist, string iter) {
-  t_field efield(tlist->get_elem_type(), iter);
+  t_field efield(*tlist->get_elem_type(), iter);
   generate_serialize_field(out, &efield);
 }
 

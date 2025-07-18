@@ -2358,8 +2358,8 @@ void t_cocoa_generator::generate_deserialize_map_element(
   std::string val = tmp("_val");
   const t_type* key_type = tmap->get_key_type();
   const t_type* valType = tmap->get_val_type();
-  t_field fkey(key_type, key);
-  t_field fval(valType, val);
+  t_field fkey(*key_type, key);
+  t_field fval(*valType, val);
 
   generate_deserialize_field(out, &fkey, key);
   generate_deserialize_field(out, &fval, val);
@@ -2391,7 +2391,7 @@ void t_cocoa_generator::generate_deserialize_set_element(
     std::ofstream& out, const t_set* tset, const std::string& fieldName) {
   std::string elem = tmp("_elem");
   const t_type* type = tset->get_elem_type();
-  t_field felem(type, elem);
+  t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
 
@@ -2414,7 +2414,7 @@ void t_cocoa_generator::generate_deserialize_list_element(
     std::ofstream& out, const t_list* tlist, const std::string& fieldName) {
   std::string elem = tmp("_elem");
   const t_type* type = tlist->get_elem_type();
-  t_field felem(type, elem);
+  t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
 
@@ -2627,10 +2627,10 @@ void t_cocoa_generator::generate_serialize_map_element(
     const t_map* tmap,
     const std::string& key,
     const std::string& mapName) {
-  t_field kfield(tmap->get_key_type(), key);
+  t_field kfield(*tmap->get_key_type(), key);
   generate_serialize_field(out, &kfield, decontainerize(&kfield, key));
   t_field vfield(
-      tmap->get_val_type(), "[" + mapName + " objectForKey: " + key + "]");
+      *tmap->get_val_type(), "[" + mapName + " objectForKey: " + key + "]");
   generate_serialize_field(
       out, &vfield, decontainerize(&vfield, vfield.name()));
 }
@@ -2640,7 +2640,7 @@ void t_cocoa_generator::generate_serialize_map_element(
  */
 void t_cocoa_generator::generate_serialize_set_element(
     std::ofstream& out, const t_set* tset, const std::string& elementName) {
-  t_field efield(tset->get_elem_type(), elementName);
+  t_field efield(*tset->get_elem_type(), elementName);
   generate_serialize_field(out, &efield, decontainerize(&efield, elementName));
 }
 
@@ -2653,7 +2653,7 @@ void t_cocoa_generator::generate_serialize_list_element(
     const std::string& index,
     const std::string& listName) {
   t_field efield(
-      tlist->get_elem_type(),
+      *tlist->get_elem_type(),
       "[" + listName + " objectAtIndex: " + index + "]");
   generate_serialize_field(
       out, &efield, decontainerize(&efield, efield.name()));

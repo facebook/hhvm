@@ -135,9 +135,6 @@ class t_field final : public t_named {
     terse = 3,
   };
 
-  t_field(const t_type* type, std::string name, t_field_id key = 0)
-      : t_field(t_type_ref::from_req_ptr(type), std::move(name), key) {}
-
   void set_value(std::unique_ptr<t_const_value> value) {
     set_default_value(std::move(value));
   }

@@ -3383,8 +3383,8 @@ void t_java_deprecated_generator::generate_deserialize_map_element(
     ofstream& out, const t_map* tmap, string prefix) {
   string key = tmp("_key");
   string val = tmp("_val");
-  t_field fkey(tmap->get_key_type(), key);
-  t_field fval(tmap->get_val_type(), val);
+  t_field fkey(*tmap->get_key_type(), key);
+  t_field fval(*tmap->get_val_type(), val);
 
   indent(out) << declare_field(&fkey) << endl;
   indent(out) << declare_field(&fval) << endl;
@@ -3401,7 +3401,7 @@ void t_java_deprecated_generator::generate_deserialize_map_element(
 void t_java_deprecated_generator::generate_deserialize_set_element(
     ofstream& out, const t_set* tset, string prefix) {
   string elem = tmp("_elem");
-  t_field felem(tset->get_elem_type(), elem);
+  t_field felem(*tset->get_elem_type(), elem);
 
   indent(out) << declare_field(&felem) << endl;
 
@@ -3416,7 +3416,7 @@ void t_java_deprecated_generator::generate_deserialize_set_element(
 void t_java_deprecated_generator::generate_deserialize_list_element(
     ofstream& out, const t_list* tlist, string prefix) {
   string elem = tmp("_elem");
-  t_field felem(tlist->get_elem_type(), elem);
+  t_field felem(*tlist->get_elem_type(), elem);
 
   indent(out) << declare_field(&felem) << endl;
 
@@ -3582,9 +3582,9 @@ void t_java_deprecated_generator::generate_serialize_container(
  */
 void t_java_deprecated_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string iter, string /*map*/) {
-  t_field kfield(tmap->get_key_type(), iter + ".getKey()");
+  t_field kfield(*tmap->get_key_type(), iter + ".getKey()");
   generate_serialize_field(out, &kfield, "");
-  t_field vfield(tmap->get_val_type(), iter + ".getValue()");
+  t_field vfield(*tmap->get_val_type(), iter + ".getValue()");
   generate_serialize_field(out, &vfield, "");
 }
 
@@ -3593,7 +3593,7 @@ void t_java_deprecated_generator::generate_serialize_map_element(
  */
 void t_java_deprecated_generator::generate_serialize_set_element(
     ofstream& out, const t_set* tset, string iter) {
-  t_field efield(tset->get_elem_type(), iter);
+  t_field efield(*tset->get_elem_type(), iter);
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3602,7 +3602,7 @@ void t_java_deprecated_generator::generate_serialize_set_element(
  */
 void t_java_deprecated_generator::generate_serialize_list_element(
     ofstream& out, const t_list* tlist, string iter) {
-  t_field efield(tlist->get_elem_type(), iter);
+  t_field efield(*tlist->get_elem_type(), iter);
   generate_serialize_field(out, &efield, "");
 }
 

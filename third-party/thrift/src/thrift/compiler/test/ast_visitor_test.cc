@@ -223,7 +223,7 @@ TYPED_TEST(AstVisitorTest, interaction) {
   auto func1 =
       std::make_unique<t_function>(&this->program_, void_ref, "function1");
   auto exn = std::make_unique<t_exception>(nullptr, "Exception");
-  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto thrown = std::make_unique<t_field>(*exn, "ex", 1);
   auto throws = std::make_unique<t_throws>();
   auto thrownptr = thrown.get();
   throws->append(std::move(thrown));
@@ -264,13 +264,12 @@ TYPED_TEST(AstVisitorTest, service) {
   auto func1 =
       std::make_unique<t_function>(&this->program_, void_ref, "function1");
   auto exn = std::make_unique<t_exception>(nullptr, "Exception");
-  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto thrown = std::make_unique<t_field>(*exn, "ex", 1);
   auto throws = std::make_unique<t_throws>();
   auto thrownptr = thrown.get();
   throws->append(std::move(thrown));
   func1->set_exceptions(std::move(throws));
-  auto field =
-      std::make_unique<t_field>(&t_primitive_type::t_i32(), "field", 1);
+  auto field = std::make_unique<t_field>(t_primitive_type::t_i32(), "field", 1);
   auto fieldptr = field.get();
   auto params = std::make_unique<t_paramlist>(nullptr);
   params->append(std::move(field));
@@ -310,7 +309,7 @@ TYPED_TEST(AstVisitorTest, service) {
 TYPED_TEST(AstVisitorTest, struct) {
   auto tstruct = std::make_unique<t_struct>(&this->program_, "Struct");
   auto field =
-      std::make_unique<t_field>(&t_primitive_type::t_i32(), "struct_field", 1);
+      std::make_unique<t_field>(t_primitive_type::t_i32(), "struct_field", 1);
   EXPECT_CALL(this->mock_, visit_field(field.get()));
   // Matches: definition, named
   EXPECT_CALL(this->mock_, visit_definition(field.get()));
@@ -331,7 +330,7 @@ TYPED_TEST(AstVisitorTest, struct) {
 TYPED_TEST(AstVisitorTest, union) {
   auto tunion = std::make_unique<t_union>(&this->program_, "Union");
   auto field =
-      std::make_unique<t_field>(&t_primitive_type::t_i32(), "union_field", 1);
+      std::make_unique<t_field>(t_primitive_type::t_i32(), "union_field", 1);
   EXPECT_CALL(this->mock_, visit_field(field.get()));
   // Matches: definition, named.
   EXPECT_CALL(this->mock_, visit_definition(field.get()));
@@ -352,7 +351,7 @@ TYPED_TEST(AstVisitorTest, union) {
 TYPED_TEST(AstVisitorTest, exception) {
   auto except = std::make_unique<t_exception>(&this->program_, "Exception");
   auto field = std::make_unique<t_field>(
-      &t_primitive_type::t_i32(), "exception_field", 1);
+      t_primitive_type::t_i32(), "exception_field", 1);
   EXPECT_CALL(this->mock_, visit_field(field.get()));
   // Matches: definition, named.
   EXPECT_CALL(this->mock_, visit_definition(field.get()));
@@ -443,7 +442,7 @@ TEST(AstVisitorTest, sink) {
   auto sink1 = std::make_unique<t_sink>(
       t_primitive_type::t_i32(), t_primitive_type::t_i32());
   auto exn = std::make_unique<t_exception>(nullptr, "Exception");
-  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto thrown = std::make_unique<t_field>(*exn, "ex", 1);
   auto throws = std::make_unique<t_throws>();
   auto thrownptr = thrown.get();
   auto thrown1 = thrown->clone_DO_NOT_USE();
@@ -486,7 +485,7 @@ TEST(AstVisitorTest, stream) {
   auto stream1ptr = stream1.get();
 
   auto exn = std::make_unique<t_exception>(nullptr, "Exception");
-  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto thrown = std::make_unique<t_field>(*exn, "ex", 1);
   auto throws = std::make_unique<t_throws>();
   auto thrownptr = thrown.get();
   throws->append(std::move(thrown));
@@ -556,7 +555,7 @@ TEST_F(ContextTest, order_of_calls) {
 
   auto& tunion = create_def<t_union>("Union");
   auto& field =
-      tunion.create_field(&t_primitive_type::t_i32(), "union_field", 1);
+      tunion.create_field(t_primitive_type::t_i32(), "union_field", 1);
   mock_visitor m1, m2;
   {
     testing::InSequence ins;
@@ -585,7 +584,7 @@ TEST_F(ContextTest, visit_context) {
 
   auto& tunion = create_def<t_union>("Union");
   auto& field =
-      tunion.create_field(&t_primitive_type::t_i32(), "union_field", 1);
+      tunion.create_field(t_primitive_type::t_i32(), "union_field", 1);
 
   int calls = 0;
   ctx_ast_visitor visitor;

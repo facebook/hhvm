@@ -1270,7 +1270,7 @@ void t_hack_generator::generate_json_struct(
   std::string enc = namer("$_tmp");
   indent(out) << enc << " = " << "\\json_encode(" << prefix_json << ");\n";
   std::string tmp = namer("$_tmp");
-  t_field felem(tstruct, tmp);
+  t_field felem(*tstruct, tmp);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   indent(out) << tmp << "->readFromJson(" << enc << ");\n";
   indent(out) << prefix_thrift << " = " << tmp << ";\n";
@@ -1411,7 +1411,7 @@ void t_hack_generator::generate_json_list_element(
     const std::string& value,
     const std::string& prefix_thrift) {
   std::string elem = namer("$_elem");
-  t_field felem(tlist->get_elem_type(), elem);
+  t_field felem(*tlist->get_elem_type(), elem);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &felem, "", "", value);
   indent(out) << prefix_thrift << " []= " << elem << ";\n";
@@ -1424,7 +1424,7 @@ void t_hack_generator::generate_json_set_element(
     const std::string& value,
     const std::string& prefix_thrift) {
   std::string elem = namer("$_elem");
-  t_field felem(tset->get_elem_type(), elem);
+  t_field felem(*tset->get_elem_type(), elem);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &felem, "", "", value);
   if (arraysets_) {
@@ -1462,7 +1462,7 @@ void t_hack_generator::generate_json_map_element(
     }
   }
   std::string _value = namer("$_value");
-  t_field vfelem(tmap->get_val_type(), _value);
+  t_field vfelem(*tmap->get_val_type(), _value);
   indent(out) << declare_field(&vfelem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &vfelem, "", "", value);
   indent(out) << prefix_thrift << "[" << key << "] = " << _value << ";\n";
@@ -2705,35 +2705,35 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
   append_to_t_enum(
       &primitive_type, &empty_program, ThriftPrimitiveType::THRIFT_VOID_TYPE);
 
-  list_type.append(std::make_unique<t_field>(&type, "valueType"));
-  set_type.append(std::make_unique<t_field>(&type, "valueType"));
-  map_type.append(std::make_unique<t_field>(&type, "keyType"));
-  map_type.append(std::make_unique<t_field>(&type, "valueType"));
+  list_type.append(std::make_unique<t_field>(type, "valueType"));
+  set_type.append(std::make_unique<t_field>(type, "valueType"));
+  map_type.append(std::make_unique<t_field>(type, "keyType"));
+  map_type.append(std::make_unique<t_field>(type, "valueType"));
   enum_type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
+      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
   struct_type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
+      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
   union_type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
+      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
   typedef_type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
-  typedef_type.append(std::make_unique<t_field>(&type, "underlyingType"));
-  stream_type.append(std::make_unique<t_field>(&type, "elemType"));
-  stream_type.append(std::make_unique<t_field>(&type, "initialResponseType"));
-  sink_type.append(std::make_unique<t_field>(&type, "elemType"));
-  sink_type.append(std::make_unique<t_field>(&type, "finalResponseType"));
-  sink_type.append(std::make_unique<t_field>(&type, "initialResponseType"));
+      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
+  typedef_type.append(std::make_unique<t_field>(type, "underlyingType"));
+  stream_type.append(std::make_unique<t_field>(type, "elemType"));
+  stream_type.append(std::make_unique<t_field>(type, "initialResponseType"));
+  sink_type.append(std::make_unique<t_field>(type, "elemType"));
+  sink_type.append(std::make_unique<t_field>(type, "finalResponseType"));
+  sink_type.append(std::make_unique<t_field>(type, "initialResponseType"));
 
-  type.append(std::make_unique<t_field>(&primitive_type, "t_primitive"));
-  type.append(std::make_unique<t_field>(&list_type, "t_list"));
-  type.append(std::make_unique<t_field>(&set_type, "t_set"));
-  type.append(std::make_unique<t_field>(&map_type, "t_map"));
-  type.append(std::make_unique<t_field>(&enum_type, "t_enum"));
-  type.append(std::make_unique<t_field>(&struct_type, "t_struct"));
-  type.append(std::make_unique<t_field>(&union_type, "t_union"));
-  type.append(std::make_unique<t_field>(&typedef_type, "t_typedef"));
-  type.append(std::make_unique<t_field>(&stream_type, "t_stream"));
-  type.append(std::make_unique<t_field>(&sink_type, "t_sink"));
+  type.append(std::make_unique<t_field>(primitive_type, "t_primitive"));
+  type.append(std::make_unique<t_field>(list_type, "t_list"));
+  type.append(std::make_unique<t_field>(set_type, "t_set"));
+  type.append(std::make_unique<t_field>(map_type, "t_map"));
+  type.append(std::make_unique<t_field>(enum_type, "t_enum"));
+  type.append(std::make_unique<t_field>(struct_type, "t_struct"));
+  type.append(std::make_unique<t_field>(union_type, "t_union"));
+  type.append(std::make_unique<t_field>(typedef_type, "t_typedef"));
+  type.append(std::make_unique<t_field>(stream_type, "t_stream"));
+  type.append(std::make_unique<t_field>(sink_type, "t_sink"));
   return &type;
 }
 
@@ -2744,11 +2744,11 @@ const t_type* t_hack_generator::tmeta_ThriftField_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_i64(), "id"));
-  type.append(std::make_unique<t_field>(tmeta_ThriftType_type(), "type"));
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_i64(), "id"));
+  type.append(std::make_unique<t_field>(*tmeta_ThriftType_type(), "type"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
   type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_bool(), "is_optional"));
+      std::make_unique<t_field>(t_primitive_type::t_bool(), "is_optional"));
   return &type;
 }
 
@@ -2760,13 +2760,13 @@ const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
   type.append(
-      std::make_unique<t_field>(tmeta_ThriftType_type(), "return_type"));
-  type.append(std::make_unique<t_field>(&tlist, "arguments"));
-  type.append(std::make_unique<t_field>(&tlist, "exceptions"));
+      std::make_unique<t_field>(*tmeta_ThriftType_type(), "return_type"));
+  type.append(std::make_unique<t_field>(tlist, "arguments"));
+  type.append(std::make_unique<t_field>(tlist, "exceptions"));
   type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_bool(), "is_oneway"));
+      std::make_unique<t_field>(t_primitive_type::t_bool(), "is_oneway"));
   return &type;
 }
 
@@ -2778,10 +2778,10 @@ const t_type* t_hack_generator::tmeta_ThriftService_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(&tlist, "functions"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(tlist, "functions"));
   type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_string(), "parent"));
+      std::make_unique<t_field>(t_primitive_type::t_string(), "parent"));
   return &type;
 }
 
@@ -2793,8 +2793,8 @@ const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(&tmap, "elements"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(tmap, "elements"));
   return &type;
 }
 
@@ -2806,10 +2806,10 @@ const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(&tlist, "fields"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(tlist, "fields"));
   type.append(
-      std::make_unique<t_field>(&t_primitive_type::t_bool(), "is_union"));
+      std::make_unique<t_field>(t_primitive_type::t_bool(), "is_union"));
   return &type;
 }
 
@@ -2821,8 +2821,8 @@ const t_type* t_hack_generator::tmeta_ThriftException_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(&tlist, "fields"));
+  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(tlist, "fields"));
   return &type;
 }
 
@@ -6134,7 +6134,7 @@ void t_hack_generator::generate_php_struct_definition_result_helpers(
     const t_throws* ex,
     bool is_void) {
   if (ttype) {
-    auto success = std::make_unique<t_field>(ttype, "success", 0);
+    auto success = std::make_unique<t_field>(*ttype, "success", 0);
     if (!is_void) {
       result->append(std::move(success));
     }

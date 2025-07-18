@@ -113,13 +113,13 @@ TEST(SchematizerTest, wrap_with_protocol_passthrough) {
 std::unique_ptr<t_struct> make_foo_bar(const t_program* program) {
   auto struct_ty = std::make_unique<t_struct>(program, "FooBar");
   struct_ty->append_field(
-      std::make_unique<t_field>(&t_primitive_type::t_i32(), "foo", 1));
+      std::make_unique<t_field>(t_primitive_type::t_i32(), "foo", 1));
   struct_ty->append_field(
-      std::make_unique<t_field>(&t_primitive_type::t_i16(), "bar", 2));
+      std::make_unique<t_field>(t_primitive_type::t_i16(), "bar", 2));
   struct_ty->append_field(
-      std::make_unique<t_field>(&t_primitive_type::t_float(), "baz", 3));
+      std::make_unique<t_field>(t_primitive_type::t_float(), "baz", 3));
   struct_ty->append_field(
-      std::make_unique<t_field>(&t_primitive_type::t_double(), "qux", 4));
+      std::make_unique<t_field>(t_primitive_type::t_double(), "qux", 4));
   return struct_ty;
 }
 
@@ -156,7 +156,7 @@ TEST(SchematizerTest, wrap_with_protocol_with_struct_ty) {
 std::unique_ptr<t_struct> make_foo_enum(
     const t_program* program, const t_enum* my_enum) {
   auto struct_ty = std::make_unique<t_struct>(program, "FooBar");
-  struct_ty->append_field(std::make_unique<t_field>(my_enum, "foo", 1));
+  struct_ty->append_field(std::make_unique<t_field>(*my_enum, "foo", 1));
   return struct_ty;
 }
 
@@ -189,7 +189,7 @@ TEST(SchematizerTest, wrap_with_protocol_list) {
   auto struct_with_list_ty =
       std::make_unique<t_struct>(program.get(), "FooBarList");
   struct_with_list_ty->append_field(
-      std::make_unique<t_field>(foo_bar_list_ty.get(), "foos", 1));
+      std::make_unique<t_field>(*foo_bar_list_ty, "foos", 1));
 
   auto my_list = t_const_value::make_list();
   auto foo_bar_elem = t_const_value::make_map();
@@ -233,7 +233,7 @@ TEST(SchematizerTest, wrap_with_protocol_set) {
   auto struct_with_set_ty =
       std::make_unique<t_struct>(program.get(), "FooBarSet");
   struct_with_set_ty->append_field(
-      std::make_unique<t_field>(foo_bar_set_ty.get(), "foos", 1));
+      std::make_unique<t_field>(*foo_bar_set_ty, "foos", 1));
 
   auto my_set = t_const_value::make_list();
   auto foo_bar_elem_1 = t_const_value::make_map();
@@ -298,7 +298,7 @@ std::unique_ptr<t_struct> make_foo_map(
     const t_program* program, const t_map* map_ty) {
   auto strct = std::make_unique<t_struct>(program, "FooMap");
   strct->append_field(
-      std::make_unique<t_field>(&t_primitive_type::t_i32(), "foo", 1));
+      std::make_unique<t_field>(t_primitive_type::t_i32(), "foo", 1));
   strct->append_field(
       std::make_unique<t_field>(t_type_ref{*map_ty}, "foo_map", 2));
   return strct;

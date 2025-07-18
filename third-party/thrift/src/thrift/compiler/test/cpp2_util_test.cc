@@ -77,7 +77,7 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   }
   {
     auto s = t_struct(&program, "struct_name");
-    s.append(std::make_unique<t_field>(&i32, "field1", 1));
+    s.append(std::make_unique<t_field>(i32, "field1", 1));
     EXPECT_TRUE(is_eligible_for_constexpr(&s));
   }
   for (auto a : {"cpp.virtual", "cpp2.virtual", "cpp.allocator"}) {
@@ -87,20 +87,20 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   }
   {
     auto s = t_struct(&program, "struct_name");
-    s.append(std::make_unique<t_field>(&i32, "field1", 1));
-    s.append(std::make_unique<t_field>(&set, "field2", 2));
+    s.append(std::make_unique<t_field>(i32, "field1", 1));
+    s.append(std::make_unique<t_field>(set, "field2", 2));
     EXPECT_FALSE(is_eligible_for_constexpr(&s));
   }
   for (auto a : {"cpp.ref", "cpp2.ref"}) {
     auto s = t_struct(&program, "struct_name");
-    auto field = std::make_unique<t_field>(&i32, "field1", 1);
+    auto field = std::make_unique<t_field>(i32, "field1", 1);
     field->set_unstructured_annotation(a, "true");
     s.append(std::move(field));
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
   }
   for (auto a : {"cpp.ref_type", "cpp2.ref_type"}) {
     auto s = t_struct(&program, "struct_name");
-    auto field = std::make_unique<t_field>(&i32, "field1", 1);
+    auto field = std::make_unique<t_field>(i32, "field1", 1);
     field->set_unstructured_annotation(a, "unique");
     s.append(std::move(field));
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
@@ -130,11 +130,11 @@ TEST(UtilTest, for_each_transitive_field) {
   auto a = t_struct(&program, "a");
   auto b = t_struct(&program, "b");
   auto e = t_struct(&program, "e");
-  a.append(std::make_unique<t_field>(&b, "b", 1));
-  a.append(std::make_unique<t_field>(&i32, "c", 2));
-  b.append(std::make_unique<t_field>(&i32, "d", 1));
-  b.append(std::make_unique<t_field>(&e, "e", 2));
-  e.append(std::make_unique<t_field>(&i32, "f", 1));
+  a.append(std::make_unique<t_field>(b, "b", 1));
+  a.append(std::make_unique<t_field>(i32, "c", 2));
+  b.append(std::make_unique<t_field>(i32, "d", 1));
+  b.append(std::make_unique<t_field>(e, "e", 2));
+  e.append(std::make_unique<t_field>(i32, "f", 1));
 
   auto fields = std::vector<std::string>();
   cpp2::for_each_transitive_field(&a, [&](const t_field* f) {
@@ -157,8 +157,7 @@ TEST(UtilTest, for_each_transitive_field) {
   structs.push_back(std::make_unique<t_paramlist>(&program));
   for (int i = 1; i < depth; ++i) {
     structs.push_back(std::make_unique<t_paramlist>(&program));
-    structs[i - 1]->append(
-        std::make_unique<t_field>(structs[i].get(), "field", 1));
+    structs[i - 1]->append(std::make_unique<t_field>(*structs[i], "field", 1));
   }
   auto count = 0;
   cpp2::for_each_transitive_field(structs.front().get(), [&](const t_field*) {
@@ -178,7 +177,7 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   const t_type* no_uniques[] = {&i, &li, &lli, &si, &mii};
   for (const auto* no_unique : no_uniques) {
     // no_unique f;
-    auto f = t_field(no_unique, "f", 1);
+    auto f = t_field(*no_unique, "f", 1);
     EXPECT_FALSE(cpp2::field_transitively_refers_to_unique(&f));
   }
 
@@ -194,24 +193,24 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   const t_type* uniques[] = {&p, &lp, &llp, &sp, &mip};
   for (const auto* unique : uniques) {
     // unique f;
-    auto f = t_field(unique, "f", 1);
+    auto f = t_field(*unique, "f", 1);
     EXPECT_TRUE(cpp2::field_transitively_refers_to_unique(&f));
   }
 
   const t_type* types[] = {&i, &li, &si, &mii, &p, &lp, &sp, &mip};
   for (const auto* type : types) {
     // type r (cpp.ref = "true");
-    auto r = t_field(type, "r", 1);
+    auto r = t_field(*type, "r", 1);
     r.set_unstructured_annotation("cpp.ref", "true");
     EXPECT_TRUE(cpp2::field_transitively_refers_to_unique(&r));
 
     // type u (cpp.ref_type = "unique");
-    auto u = t_field(type, "u", 1);
+    auto u = t_field(*type, "u", 1);
     u.set_unstructured_annotation("cpp.ref_type", "unique");
     EXPECT_TRUE(cpp2::field_transitively_refers_to_unique(&u));
 
     // type s (cpp.ref_type = "shared");
-    auto s = t_field(type, "s", 1);
+    auto s = t_field(*type, "s", 1);
     s.set_unstructured_annotation("cpp.ref_type", "shared");
     EXPECT_FALSE(cpp2::field_transitively_refers_to_unique(&s));
   }

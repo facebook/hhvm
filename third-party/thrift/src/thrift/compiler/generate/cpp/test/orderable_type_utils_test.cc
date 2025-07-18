@@ -165,7 +165,7 @@ TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
   set_t.set_unstructured_annotation("cpp2.template", "blah");
   t_program program_p("path/to/program.thrift", "path/to/program.thrift");
   t_struct struct_s(&program_p, "struct_name");
-  struct_s.append(std::make_unique<t_field>(&set_t, "set_field", 1));
+  struct_s.append(std::make_unique<t_field>(set_t, "set_field", 1));
   EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, true));
 
   struct_s.set_uri("facebook.com/path/to/struct_name");
@@ -186,8 +186,8 @@ TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
 TEST(OrderableTypeUtilsTest, is_orderable_struct) {
   t_program program_p("path/to/program.thrift", "path/to/program.thrift");
   t_struct struct_s(&program_p, "struct_name");
-  struct_s.append(std::make_unique<t_field>(
-      &t_primitive_type::t_string(), "field_name", 1));
+  struct_s.append(
+      std::make_unique<t_field>(t_primitive_type::t_string(), "field_name", 1));
   EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
 }
 
@@ -198,15 +198,15 @@ TEST(OrderableTypeUtilsTest, is_orderable_struct_self_reference) {
   set_t.set_unstructured_annotation("cpp2.template", "blah");
 
   t_struct struct_c(&program_p, "C");
-  struct_c.append(std::make_unique<t_field>(&set_t, "set_field", 1));
+  struct_c.append(std::make_unique<t_field>(set_t, "set_field", 1));
   EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_c, true));
 
   t_struct struct_b(&program_p, "B");
   t_struct struct_a(&program_p, "A");
 
-  struct_b.append(std::make_unique<t_field>(&struct_a, "struct_a", 1));
-  struct_a.append(std::make_unique<t_field>(&struct_b, "struct_b", 1));
-  struct_a.append(std::make_unique<t_field>(&struct_c, "struct_c", 2));
+  struct_b.append(std::make_unique<t_field>(struct_a, "struct_a", 1));
+  struct_a.append(std::make_unique<t_field>(struct_b, "struct_b", 1));
+  struct_a.append(std::make_unique<t_field>(struct_c, "struct_c", 2));
 
   EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_a, true));
   EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_b, true));

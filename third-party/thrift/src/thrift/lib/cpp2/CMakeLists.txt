@@ -253,6 +253,7 @@ add_library(
   async/processor/AsyncProcessor.cpp
   async/processor/AsyncProcessorFunc.cpp
   async/processor/EventTask.cpp
+  async/processor/GeneratedAsyncProcessorBase.cpp
   async/processor/RequestParams.cpp
   async/processor/RequestTask.cpp
   async/processor/ServerInterface.cpp

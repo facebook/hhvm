@@ -185,6 +185,7 @@ constexpr T align(T value, std::align_val_t alignment) {
 struct LocatorBase {
   std::ptrdiff_t offset;
   explicit LocatorBase(std::ptrdiff_t offsetValue) : offset(offsetValue) {}
+  ~LocatorBase() noexcept = default;
 
   LocatorBase(const LocatorBase&) = delete;
   LocatorBase& operator=(const LocatorBase&) = delete;
@@ -205,6 +206,7 @@ class UnsafeCursorBase {
 
  public:
   explicit UnsafeCursorBase(MaybeConstByte* buffer) : buffer_(buffer) {}
+  ~UnsafeCursorBase() noexcept = default;
   UnsafeCursorBase(const UnsafeCursorBase&) = default;
   UnsafeCursorBase& operator=(const UnsafeCursorBase&) = default;
   UnsafeCursorBase(UnsafeCursorBase&&) = default;

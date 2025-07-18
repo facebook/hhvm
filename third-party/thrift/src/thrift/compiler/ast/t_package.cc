@@ -22,8 +22,8 @@
 namespace apache::thrift::compiler {
 namespace {
 
-const char DOMAIN_DELIM[] = ".";
-const char PATH_DELIM[] = "/";
+constexpr std::string_view DOMAIN_DELIM = ".";
+constexpr std::string_view PATH_DELIM = "/";
 
 std::string gen_prefix(
     const std::vector<std::string>& domain,
@@ -33,9 +33,9 @@ std::string gen_prefix(
   for (const auto& label : domain) {
     result += delim;
     result += label;
-    delim = DOMAIN_DELIM;
+    delim = DOMAIN_DELIM.data();
   }
-  delim = PATH_DELIM;
+  delim = PATH_DELIM.data();
   for (const auto& segment : path) {
     result += delim;
     result += segment;

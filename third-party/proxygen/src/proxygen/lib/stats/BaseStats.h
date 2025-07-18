@@ -51,6 +51,12 @@ class BaseStats {
     template <typename... Args>
     explicit TLTimeseriesMinuteAndAllTime(std::string name,
                                           const Args&... args) {
+      // Static assertion that will fail at compile time if Args is empty
+      static_assert(
+          sizeof...(Args) > 0,
+          "TLTimeseriesMinuteAndAllTime requires at least one argument "
+          "after the name, typically the export type (e.g., "
+          "facebook::fb303::SUM)");
       if (FLAGS_basestats_all_time_timeseries) {
         impl_ = std::make_unique<facebook::fb303::MinuteTimeseriesWrapper>(
             std::move(name), args...);

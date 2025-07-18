@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6cd57093890985a369531e2600ca71c5>>
+// @generated SignedSource<<da2147b82df6370e3378ed5517816a6f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -379,6 +379,8 @@ arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);
 #[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum FlowKind {
+    #[rust_to_ocaml(name = "Flow_array_get")]
+    FlowArrayGet,
     #[rust_to_ocaml(name = "Flow_assign")]
     FlowAssign,
     #[rust_to_ocaml(name = "Flow_call")]

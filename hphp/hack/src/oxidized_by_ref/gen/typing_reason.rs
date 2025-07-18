@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4a12719b12aafd1be5f0b1c4564411e5>>
+// @generated SignedSource<<fd0abde49e528c5e28e30d8056e30c6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -207,6 +207,8 @@ pub use oxidized::typing_reason::PrjAsymm;
 #[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum FlowKind<'a> {
+    #[rust_to_ocaml(name = "Flow_array_get")]
+    FlowArrayGet,
     #[rust_to_ocaml(name = "Flow_assign")]
     FlowAssign,
     #[rust_to_ocaml(name = "Flow_call")]

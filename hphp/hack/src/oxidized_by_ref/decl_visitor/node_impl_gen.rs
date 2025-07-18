@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2302670618a906f9853bd31b42b23656>>
+// @generated SignedSource<<b2a86e2d88d2ca03252f6a38ef98e836>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1195,6 +1195,7 @@ impl<'a> Node<'a> for FlowKind<'a> {
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
+            FlowKind::FlowArrayGet => {}
             FlowKind::FlowAssign => {}
             FlowKind::FlowCall => {}
             FlowKind::FlowPropAccess => {}

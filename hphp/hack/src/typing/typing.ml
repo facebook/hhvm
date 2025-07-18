@@ -4015,6 +4015,13 @@ end = struct
             e2
             ty2
         in
+        let ty =
+          Typing_env.(
+            update_reason env ty ~f:(fun def ->
+                Typing_reason.flow_array_get
+                  ~def
+                  ~access:(Typing_reason.witness p)))
+        in
         make_result
           env
           p

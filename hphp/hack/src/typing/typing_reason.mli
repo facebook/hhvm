@@ -399,6 +399,8 @@ val join_point : Pos.t -> t
 val axiom_extends :
   child:locl_phase t_ -> ancestor:locl_phase t_ -> locl_phase t_
 
+val flow_array_get : def:locl_phase t_ -> access:locl_phase t_ -> locl_phase t_
+
 val flow_assign : rhs:locl_phase t_ -> lval:locl_phase t_ -> locl_phase t_
 
 val flow_local : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_

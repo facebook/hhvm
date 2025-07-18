@@ -51,6 +51,19 @@ File array_get.php, line 3, character 22 - line 3, character 27:
 
 and flows into this expression
 
+File array_get.php, line 4, character 8 - line 4, character 12:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = »$d[1]«;
+ 5 |   return $x;
+ 6 | }
+
+by the result of this array access
+
+which itself flows into this expression
+
 File array_get.php, line 4, character 3 - line 4, character 4:
 
  1 | <?hh

@@ -29,6 +29,7 @@ struct TestRecursiveStruct {
 @scope.Definition
 @scope.Field
 @scope.Enum
+@scope.EnumValue
 struct TestStructuredAnnotation {
   1: i64 field1;
   2: TestInnerStructuredAnnotation field2;
@@ -37,6 +38,7 @@ struct TestStructuredAnnotation {
 @thrift.Uri{value = "meta.com/thrift_test/TestEnum"}
 @TestStructuredAnnotation{field1 = 3}
 enum TestEnum {
+  @TestStructuredAnnotation{field1 = 4}
   UNSET = 0,
   VALUE_1 = 1,
   VALUE_2 = 2,

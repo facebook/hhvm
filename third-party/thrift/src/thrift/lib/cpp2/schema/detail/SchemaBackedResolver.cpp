@@ -151,7 +151,8 @@ class SchemaIndex {
       const type::Field&,
       const type::Schema&);
 
-  EnumNode createEnum(const type::DefinitionKey&, const type::Enum&);
+  EnumNode createEnum(
+      const type::DefinitionKey&, const type::Enum&, const type::Schema&);
   TypedefNode createTypedef(const type::DefinitionKey&, const type::Typedef&);
   ConstantNode createConstant(const type::DefinitionKey&, const type::Const&);
 
@@ -508,7 +509,7 @@ void SchemaIndex::updateDefinitionsByKey(
           return createException(definitionKey, exceptionDef, schema);
         },
         [&](const type::Enum& enumDef) -> DefinitionNode::Alternative {
-          return createEnum(definitionKey, enumDef);
+          return createEnum(definitionKey, enumDef, schema);
         },
         [&](const type::Typedef& typedefDef) -> DefinitionNode::Alternative {
           return createTypedef(definitionKey, typedefDef);
@@ -625,10 +626,15 @@ FieldNode SchemaIndex::createField(
 }
 
 EnumNode SchemaIndex::createEnum(
-    const type::DefinitionKey& definitionKey, const type::Enum& enumDef) {
+    const type::DefinitionKey& definitionKey,
+    const type::Enum& enumDef,
+    const type::Schema& schema) {
   std::vector<EnumNode::Value> values;
   for (const type::EnumValue& enumValue : *enumDef.values()) {
-    values.emplace_back(EnumNode::Value(*enumValue.name(), *enumValue.value()));
+    values.emplace_back(
+        *enumValue.name(),
+        *enumValue.value(),
+        createAnnotations(*enumValue.annotationsByKey(), schema));
   }
   return EnumNode(resolver_, definitionKey, *enumDef.uri(), std::move(values));
 }

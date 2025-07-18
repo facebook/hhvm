@@ -698,11 +698,17 @@ class EnumNode final : folly::MoveOnly,
    * A mapping of enum name to its i32 value.
    */
   // TODO: these can also have annotations
-  class Value : detail::WithName {
+  class Value : detail::WithName, detail::WithAnnotations {
    public:
-    Value(std::string_view name, std::int32_t i32)
-        : WithName(name), i32_(i32) {}
+    Value(
+        std::string_view name,
+        std::int32_t i32,
+        std::vector<Annotation>&& annotations)
+        : detail::WithName(name),
+          detail::WithAnnotations(std::move(annotations)),
+          i32_(i32) {}
 
+    using detail::WithAnnotations::annotations;
     using detail::WithName::name;
     /**
      * All enums values in Thrift have underlying type of i32

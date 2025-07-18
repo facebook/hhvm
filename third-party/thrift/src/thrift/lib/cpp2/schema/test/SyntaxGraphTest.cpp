@@ -163,12 +163,18 @@ TEST_F(ServiceSchemaTest, Enum) {
   EXPECT_EQ(e.definition().annotations().size(), 1);
   EXPECT_EQ(e.definition().annotations()[0].value()["field1"], 3);
 
-  const std::vector<EnumNode::Value> expected = {
-      {"UNSET", 0},
-      {"VALUE_1", 1},
-      {"VALUE_2", 2},
-  };
-  EXPECT_THAT(e.values(), testing::ElementsAreArray(expected));
+  const auto& unset = e.values()[0];
+  const auto& value1 = e.values()[1];
+  const auto& value2 = e.values()[2];
+
+  EXPECT_EQ(unset.name(), "UNSET");
+  EXPECT_EQ(unset.i32(), 0);
+  EXPECT_EQ(unset.annotations().size(), 1);
+  EXPECT_EQ(unset.annotations()[0].value()["field1"], 4);
+  EXPECT_EQ(value1.name(), "VALUE_1");
+  EXPECT_EQ(value1.i32(), 1);
+  EXPECT_EQ(value2.name(), "VALUE_2");
+  EXPECT_EQ(value2.i32(), 2);
 
   EXPECT_EQ(
       e.toDebugString(),

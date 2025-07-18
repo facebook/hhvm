@@ -2,5 +2,7 @@ ERROR: File "fully_opaque_newtype.php--file2.php", line 4, characters 10-11:
 Invalid return type (Typing[4110])
   File "fully_opaque_newtype.php--file2.php", line 3, characters 19-25:
   Expected `nonnull`
+  File "fully_opaque_newtype.php--file2.php", line 3, characters 12-12:
+  But got `mixed`
   File "fully_opaque_newtype.php--file1.php", line 3, characters 9-9:
-  But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
+    by the definition of `t` arising from an implicit `as ?nonnull` constraint on this type

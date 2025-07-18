@@ -12,8 +12,8 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
-  File "variadic_args1.php--strict.php", line 29, characters 27-28:
-  But got `mixed`
+  File "variadic_args1.php--strict.php", line 29, characters 41-42:
+  But got `Tk`
 ERROR: File "variadic_args1.php--strict.php", line 29, characters 34-46:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -23,4 +23,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "variadic_args1.php--strict.php", line 29, characters 41-42:
-  But got `Tk`
+  But got `mixed`
+  File "variadic_args1.php--strict.php", line 29, characters 27-28:
+    by the definition of `Tk`

@@ -10,8 +10,10 @@ ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 18-48:
   Expected `dynamic`
-  File "meth_caller4.php", line 13, characters 19-21:
+  File "meth_caller4.php", line 21, characters 13-40:
   But got `(readonly function(X<_>, $x): ~_)`
+  File "meth_caller4.php", line 13, characters 19-21:
+    by the definition of `HH\FunctionRef` because method or function was called on dynamic or like-type
 ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 18-48:

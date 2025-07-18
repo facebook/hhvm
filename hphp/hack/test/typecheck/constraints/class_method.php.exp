@@ -17,4 +17,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "class_method.php", line 3, characters 27-29:
   Expected `num`
   File "class_method.php", line 6, characters 37-37:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "class_method.php", line 6, characters 37-37:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

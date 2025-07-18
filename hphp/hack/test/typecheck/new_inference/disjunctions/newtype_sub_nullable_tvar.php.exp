@@ -2,32 +2,40 @@ ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 24, characters 14-2
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
   Expected `int`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+  File "newtype_sub_nullable_tvar.php--file2.php", line 21, characters 16-16:
   But got `?N`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
-  Expected `M`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-  But got `?<expr#2> as B`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+    by the definition of `M`
 ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
   Expected `M`
   File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 15-15:
   But got `B`
+ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
+  Expected `M`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
+  But got `?<expr#2> as B`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
+    by the definition of `N`
 ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 33, characters 12-20:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
   Expected `B`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
   But got `?<expr#2> as B`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
+    by the definition of `N`
 ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 43, characters 12-20:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
   Expected `B`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+  File "newtype_sub_nullable_tvar.php--file2.php", line 37, characters 16-16:
   But got `?N`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+    by the definition of `M`
 ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 9, characters 23-24:
@@ -44,17 +52,21 @@ ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-1
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
   Expected `int`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-  But got `?<expr#2> as B`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
-  Expected `int`
   File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 15-15:
   But got `B`
 ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
   Expected `int`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
+  But got `?<expr#2> as B`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
+    by the definition of `N`
+ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
+  Expected `int`
+  File "newtype_sub_nullable_tvar.php--file2.php", line 46, characters 16-16:
   But got `?N`
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+    by the definition of `M`

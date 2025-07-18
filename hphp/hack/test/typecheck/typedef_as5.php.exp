@@ -8,5 +8,7 @@ ERROR: File "typedef_as5.php--file2.php", line 4, characters 10-11:
 Invalid return type (Typing[4110])
   File "typedef_as5.php--file2.php", line 3, characters 32-35:
   Expected `Duck`
-  File "typedef_as5.php--file1.php", line 15, characters 24-24:
+  File "typedef_as5.php--file2.php", line 3, characters 15-25:
   But got `Y`
+  File "typedef_as5.php--file1.php", line 15, characters 24-24:
+    by the definition of `opaque_duck`

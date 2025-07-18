@@ -16,25 +16,23 @@ ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
-  File "covariant-dep-1.php", line 9, characters 32-32:
-  But got `TBox::T where TBox::T super <expr#23>::T, TBox::T super T0, TBox::T as Box::T`
-  by accessing the type constant `T`
   File "covariant-dep-1.php", line 9, characters 26-32:
-  on the expression dependent type <expr#23>
+  But got `Box::T super TBox::T`
   File "covariant-dep-1.php", line 52, characters 12-29:
     where `<expr#23>` is a reference to this expression
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
-  File "covariant-dep-1.php", line 51, characters 11-11:
-  But got `Box::T super TBox::T`
-  by accessing the type constant `T`
-  File "covariant-dep-1.php", line 51, characters 5-11:
-  on a value of generic type TBox
+  File "covariant-dep-1.php", line 9, characters 26-32:
+  But got `TBox::T where TBox::T super <expr#23>::T, TBox::T super T0, TBox::T as Box::T`
+  File "covariant-dep-1.php", line 52, characters 12-29:
+    where `<expr#23>` is a reference to this expression
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
-  File "covariant-dep-1.php", line 51, characters 11-11:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  File "covariant-dep-1.php", line 9, characters 26-32:
+  But got `mixed`
+  File "covariant-dep-1.php", line 52, characters 12-29:
+    where `<expr#23>` is a reference to this expression

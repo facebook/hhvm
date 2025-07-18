@@ -38,16 +38,6 @@ Invalid argument (Typing[4326])
     resulting from accessing the type constant 'T'
   File "tconst_on_generics6.php", line 30, characters 47-52:
     on an object of type IntBox
-  File "tconst_on_generics6.php", line 4, characters 28-35:
-  But got `arraykey`
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
   File "tconst_on_generics6.php", line 30, characters 86-86:
   But got `<expr#3>::T`
   by accessing the type constant `T`
@@ -65,6 +55,21 @@ Invalid argument (Typing[4326])
     on an object of type IntBox
   File "tconst_on_generics6.php", line 30, characters 86-86:
   But got `Box::T`
+  by accessing the type constant `T`
+  File "tconst_on_generics6.php", line 38, characters 26-28:
+  on the expression dependent type <expr#3>
+  File "tconst_on_generics6.php", line 44, characters 20-21:
+    where `<expr#3>` is a reference to this expression
+ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
+Invalid argument (Typing[4326])
+  File "tconst_on_generics6.php", line 10, characters 18-20:
+  Expected `int`
+  File "tconst_on_generics6.php", line 30, characters 86-86:
+    resulting from accessing the type constant 'T'
+  File "tconst_on_generics6.php", line 30, characters 47-52:
+    on an object of type IntBox
+  File "tconst_on_generics6.php", line 30, characters 86-86:
+  But got `arraykey`
   by accessing the type constant `T`
   File "tconst_on_generics6.php", line 38, characters 26-28:
   on the expression dependent type <expr#3>

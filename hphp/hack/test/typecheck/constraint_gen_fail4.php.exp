@@ -2,7 +2,7 @@ ERROR: File "constraint_gen_fail4.php", line 14, characters 12-16:
 Invalid return type (Typing[4110])
   File "constraint_gen_fail4.php", line 13, characters 26-26:
   Expected `T`
-  File "constraint_gen_fail4.php", line 12, characters 7-7:
+  File "constraint_gen_fail4.php", line 14, characters 12-16:
   But got `B<T> where T as B<A>`
 ERROR: File "constraint_gen_fail4.php", line 14, characters 12-16:
 Invalid return type (Typing[4110])

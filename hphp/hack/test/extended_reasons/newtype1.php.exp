@@ -20,6 +20,16 @@ File newtype1.php--file2.php, line 3, character 22 - line 3, character 25:
 
 But got int
 
+File newtype1.php--file2.php, line 7, character 22 - line 7, character 26:
+
+ 5 | }
+ 6 | 
+ 7 | function pass_my_int(»myint« $y) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+  by the definition of myint
+
 File newtype1.php--file1.php, line 3, character 18 - line 3, character 20:
 
  1 | <?hh

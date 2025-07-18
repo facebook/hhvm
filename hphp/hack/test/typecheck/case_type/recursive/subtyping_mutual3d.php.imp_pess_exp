@@ -2,26 +2,38 @@ ERROR: File "subtyping_mutual3d.php", line 26, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3d.php", line 10, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
+  File "subtyping_mutual3d.php", line 14, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3d.php", line 4, characters 16-16:
+    by the definition of `A`
+  File "subtyping_mutual3d.php", line 6, characters 11-11:
+    by the definition of `B`
 ERROR: File "subtyping_mutual3d.php", line 27, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3d.php", line 11, characters 22-27:
   Expected `vec<B>`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
+  File "subtyping_mutual3d.php", line 14, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3d.php", line 4, characters 16-16:
+    by the definition of `A`
+  File "subtyping_mutual3d.php", line 6, characters 11-11:
+    by the definition of `B`
 ERROR: File "subtyping_mutual3d.php", line 30, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3d.php", line 10, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
+  File "subtyping_mutual3d.php", line 15, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3d.php", line 6, characters 11-11:
+    by the definition of `B`
 ERROR: File "subtyping_mutual3d.php", line 31, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3d.php", line 11, characters 22-27:
   Expected `vec<B>`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
+  File "subtyping_mutual3d.php", line 15, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3d.php", line 6, characters 11-11:
+    by the definition of `B`
 ERROR: File "subtyping_mutual3d.php", line 60, characters 12-15:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3d.php", line 8, characters 19-19:

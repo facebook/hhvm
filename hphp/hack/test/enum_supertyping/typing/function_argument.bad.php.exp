@@ -2,11 +2,15 @@ ERROR: File "function_argument.bad.php", line 17, characters 7-10:
 Invalid argument (Typing[4110])
   File "function_argument.bad.php", line 13, characters 14-14:
   Expected `F`
+  File "function_argument.bad.php", line 8, characters 9-11:
+  But got `arraykey`
   File "function_argument.bad.php", line 8, characters 6-6:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+    by the definition of `G` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "function_argument.bad.php", line 18, characters 7-10:
 Invalid argument (Typing[4110])
   File "function_argument.bad.php", line 13, characters 14-14:
   Expected `F`
+  File "function_argument.bad.php", line 8, characters 9-11:
+  But got `arraykey`
   File "function_argument.bad.php", line 8, characters 6-6:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+    by the definition of `G` arising from an implicit `as arraykey` constraint on this type

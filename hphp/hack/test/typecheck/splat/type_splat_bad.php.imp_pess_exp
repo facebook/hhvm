@@ -42,14 +42,16 @@ ERROR: File "type_splat_bad.php", line 26, characters 51-55:
 Some type arguments violate their constraints (Typing[4323])
   File "type_splat_bad.php", line 26, characters 57-63:
   Expected `(mixed...)`
-  File "type_splat_bad.php", line 26, characters 15-19:
-  But got `mixed`
+  File "type_splat_bad.php", line 26, characters 51-55:
+  But got `Targs super (int, int, mixed...)`
 ERROR: File "type_splat_bad.php", line 26, characters 51-55:
 Some type arguments violate their constraints (Typing[4323])
   File "type_splat_bad.php", line 26, characters 57-63:
   Expected `(mixed...)`
   File "type_splat_bad.php", line 26, characters 51-55:
-  But got `Targs super (int, int, mixed...)`
+  But got `mixed`
+  File "type_splat_bad.php", line 26, characters 15-19:
+    by the definition of `Targs`
 ERROR: File "type_splat_bad.php", line 37, characters 60-64:
 Some type arguments violate their constraints (Typing[4323])
   File "type_splat_bad.php", line 37, characters 36-71:

@@ -17,4 +17,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "shapes_toarray.php", line 19, characters 11-12:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "shapes_toarray.php", line 19, characters 11-12:
+    by the definition of `Tk` arising from an implicit `as mixed` constraint on this type

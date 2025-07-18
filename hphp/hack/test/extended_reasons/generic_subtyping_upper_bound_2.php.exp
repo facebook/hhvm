@@ -48,6 +48,18 @@ File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, charact
 
 But got A
 
+File generic_subtyping_upper_bound_2.php, line 11, character 52 - line 11, character 52:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+  by the definition of T
+
 File generic_subtyping_upper_bound_2.php, line 11, character 49 - line 11, character 49:
 
   7 | class D extends B {}

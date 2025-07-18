@@ -11,21 +11,22 @@ Invalid argument (Typing[4110])
   File "bad_env_merge_T221690280.php", line 14, characters 27-29:
   Expected `int`
   File "bad_env_merge_T221690280.php", line 8, characters 45-56:
-  But got `this::TInner as Foo::TInner`
+  But got `Foo::TInner super this::TInner`
   File "bad_env_merge_T221690280.php", line 8, characters 51-56:
   This type argument to `MyReifiedGenericClass` must match exactly (it is invariant)
 ERROR: File "bad_env_merge_T221690280.php", line 19, characters 25-26:
 Invalid argument (Typing[4110])
   File "bad_env_merge_T221690280.php", line 14, characters 27-29:
   Expected `int`
-  File "bad_env_merge_T221690280.php", line 8, characters 51-56:
-  But got `Foo::TInner super this::TInner`
-  by accessing the type constant `TInner`
   File "bad_env_merge_T221690280.php", line 8, characters 45-56:
-  on the expression dependent type this
+  But got `mixed`
+  File "bad_env_merge_T221690280.php", line 8, characters 51-56:
+  This type argument to `MyReifiedGenericClass` must match exactly (it is invariant)
 ERROR: File "bad_env_merge_T221690280.php", line 19, characters 25-26:
 Invalid argument (Typing[4110])
   File "bad_env_merge_T221690280.php", line 14, characters 27-29:
   Expected `int`
+  File "bad_env_merge_T221690280.php", line 8, characters 45-56:
+  But got `this::TInner as Foo::TInner`
   File "bad_env_merge_T221690280.php", line 8, characters 51-56:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  This type argument to `MyReifiedGenericClass` must match exactly (it is invariant)

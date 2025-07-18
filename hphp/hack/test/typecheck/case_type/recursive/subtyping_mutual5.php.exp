@@ -7,13 +7,15 @@ Invalid argument (Typing[4110])
   File "subtyping_mutual5.php", line 9, characters 19-19:
   Expected `B`
   File "subtyping_mutual5.php", line 4, characters 11-11:
-  But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
+  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
 ERROR: File "subtyping_mutual5.php", line 24, characters 12-13:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5.php", line 9, characters 19-19:
   Expected `B`
+  File "subtyping_mutual5.php", line 12, characters 3-3:
+  But got `mixed`
   File "subtyping_mutual5.php", line 4, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
+    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
 ERROR: File "subtyping_mutual5.php", line 28, characters 12-13:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5.php", line 9, characters 19-19:

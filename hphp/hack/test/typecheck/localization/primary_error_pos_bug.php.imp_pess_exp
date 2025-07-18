@@ -24,8 +24,8 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "primary_error_pos_bug.php", line 5, characters 14-16:
   Expected `num`
-  File "primary_error_pos_bug.php", line 24, characters 22-22:
-  But got `mixed`
+  File "primary_error_pos_bug.php", line 24, characters 30-30:
+  But got `T`
 ERROR: File "primary_error_pos_bug.php", line 24, characters 28-31:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
@@ -35,7 +35,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 14-16:
   Expected `num`
   File "primary_error_pos_bug.php", line 24, characters 30-30:
-  But got `T`
+  But got `mixed`
+  File "primary_error_pos_bug.php", line 24, characters 22-22:
+    by the definition of `T`
 ERROR: File "primary_error_pos_bug.php", line 32, characters 18-31:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:

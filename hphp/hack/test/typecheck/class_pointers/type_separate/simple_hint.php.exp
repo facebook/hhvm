@@ -8,5 +8,9 @@ ERROR: File "simple_hint.php", line 12, characters 10-11:
 Invalid return type (Typing[4110])
   File "simple_hint.php", line 11, characters 34-45:
   Expected `class<mixed>`
-  File "classname.hhi", line 14, characters 27-32:
+  File "simple_hint.php", line 11, characters 12-27:
   But got `string`
+  File "classname.hhi", line 21, characters 28-38:
+    by the definition of `classname`
+  File "classname.hhi", line 14, characters 27-32:
+    by the definition of `typename`

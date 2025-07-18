@@ -9,4 +9,6 @@ Invalid return type (Typing[4110])
   File "newtype11.php--file2.php", line 7, characters 32-33:
   Expected `T2`
   File "newtype11.php--file2.php", line 7, characters 25-26:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "newtype11.php--file2.php", line 7, characters 25-26:
+    by the definition of `T1` arising from an implicit `as mixed` constraint on this type

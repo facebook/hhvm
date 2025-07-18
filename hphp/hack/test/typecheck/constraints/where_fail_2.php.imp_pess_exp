@@ -6,18 +6,10 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "where_fail_2.php", line 5, characters 14-14:
   Expected `I`
-  File "where_fail_2.php", line 8, characters 28-28:
-  But got `mixed`
-ERROR: File "where_fail_2.php", line 8, characters 33-36:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 8, characters 33-36:
+  File "where_fail_2.php", line 8, characters 35-35:
   But got `C<T> where T as C<T>`
+  File "where_fail_2.php", line 8, characters 33-36:
+    by the definition of `T`
 ERROR: File "where_fail_2.php", line 8, characters 33-36:
 Some type arguments violate their constraints (Typing[4323])
   File "where_fail_2.php", line 5, characters 9-9:
@@ -28,7 +20,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `I`
   File "where_fail_2.php", line 8, characters 35-35:
   But got `T as C<T>`
-ERROR: File "where_fail_2.php", line 17, characters 51-54:
+ERROR: File "where_fail_2.php", line 8, characters 33-36:
 Some type arguments violate their constraints (Typing[4323])
   File "where_fail_2.php", line 5, characters 9-9:
   `T` is a constrained type parameter
@@ -36,8 +28,10 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "where_fail_2.php", line 5, characters 14-14:
   Expected `I`
-  File "where_fail_2.php", line 17, characters 26-26:
+  File "where_fail_2.php", line 8, characters 35-35:
   But got `mixed`
+  File "where_fail_2.php", line 8, characters 28-28:
+    by the definition of `T`
 ERROR: File "where_fail_2.php", line 17, characters 51-54:
 Some type arguments violate their constraints (Typing[4323])
   File "where_fail_2.php", line 5, characters 9-9:
@@ -46,8 +40,10 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "where_fail_2.php", line 5, characters 14-14:
   Expected `I`
-  File "where_fail_2.php", line 17, characters 51-54:
+  File "where_fail_2.php", line 17, characters 53-53:
   But got `C<T> where T as C<T>`
+  File "where_fail_2.php", line 17, characters 51-54:
+    by the definition of `T`
 ERROR: File "where_fail_2.php", line 17, characters 51-54:
 Some type arguments violate their constraints (Typing[4323])
   File "where_fail_2.php", line 5, characters 9-9:
@@ -58,3 +54,15 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `I`
   File "where_fail_2.php", line 17, characters 53-53:
   But got `T as C<T>`
+ERROR: File "where_fail_2.php", line 17, characters 51-54:
+Some type arguments violate their constraints (Typing[4323])
+  File "where_fail_2.php", line 5, characters 9-9:
+  `T` is a constrained type parameter
+  File "where_fail_2.php", line 5, characters 14-14:
+  This type constraint is violated
+  File "where_fail_2.php", line 5, characters 14-14:
+  Expected `I`
+  File "where_fail_2.php", line 17, characters 53-53:
+  But got `mixed`
+  File "where_fail_2.php", line 17, characters 26-26:
+    by the definition of `T`

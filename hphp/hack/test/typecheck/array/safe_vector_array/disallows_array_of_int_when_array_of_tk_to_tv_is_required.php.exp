@@ -17,7 +17,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
+    by the definition of `Tk` arising from an implicit `as mixed` constraint on this type
 ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 6, characters 24-34:
 Invalid argument (Typing[4110])
   File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:

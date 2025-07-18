@@ -6,8 +6,8 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
-  File "subtyping_interfaces.php", line 17, characters 21-22:
-  But got `mixed`
+  File "subtyping_interfaces.php", line 17, characters 36-37:
+  But got `Tk`
 ERROR: File "subtyping_interfaces.php", line 17, characters 29-42:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -17,4 +17,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "subtyping_interfaces.php", line 17, characters 36-37:
-  But got `Tk`
+  But got `mixed`
+  File "subtyping_interfaces.php", line 17, characters 21-22:
+    by the definition of `Tk`

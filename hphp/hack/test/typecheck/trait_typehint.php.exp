@@ -2,7 +2,7 @@ ERROR: File "trait_typehint.php", line 25, characters 14-18:
 Invalid argument (Typing[4110])
   File "trait_typehint.php", line 34, characters 19-34:
   Expected `Vector<KidTrait>`
-  File "trait_typehint.php", line 17, characters 7-14:
+  File "trait_typehint.php", line 25, characters 14-18:
   But got `Kid`
 ERROR: File "trait_typehint.php", line 25, characters 14-18:
 Invalid argument (Typing[4110])

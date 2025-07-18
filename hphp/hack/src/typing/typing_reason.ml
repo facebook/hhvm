@@ -1567,13 +1567,13 @@ let witness_decl_to_string prefix witness =
     constraint simplification  *)
 type axiom =
   | Extends
-  | Upper_bound
+  | Upper_bound of string
   | Lower_bound
 [@@deriving hash]
 
 let axiom_to_json = function
   | Extends -> Hh_json.string_ "Extends"
-  | Upper_bound -> Hh_json.string_ "Upper_bound"
+  | Upper_bound _ -> Hh_json.string_ "Upper_bound"
   | Lower_bound -> Hh_json.string_ "Lower_bound"
 
 (* ~~ Reasons ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -2318,10 +2318,12 @@ let rec to_string_help :
     to_string_help prefix solutions r
   | From_witness_locl witness -> [witness_locl_to_string prefix witness]
   | From_witness_decl witness -> [witness_decl_to_string prefix witness]
-  | Axiom { next = r; _ }
-  | Def (_, r)
-  | Prj_one { part = r; _ } ->
-    to_string_help prefix solutions r
+  | Axiom { next; prev; axiom = Upper_bound name } ->
+    to_string_help_upper_bound prefix solutions ~next ~prev name
+  | Axiom { next = r1; _ }
+  | Def (_, r1)
+  | Prj_one { part = r1; _ } ->
+    to_string_help prefix solutions r1
   (* If we don't have a solution for a type variable use the origin of the flow *)
   | Flow { from; _ }
     when Tvid.Map.is_empty solutions || not (flow_contains_tyvar r) ->
@@ -2557,6 +2559,30 @@ let rec to_string_help :
       ^ module_
       ^ ", which is opaque outside of the module." )
     :: to_string_help "The type originated from here" solutions r_orig
+
+and to_string_help_upper_bound prefix solutions ~next ~prev name =
+  let bound =
+    (* Don't report definitions on internal generated types *)
+    let internal = function
+      | '#'
+      | '$'
+      | ':' ->
+        true
+      | _ -> false
+    in
+    if
+      String.exists ~f:internal name
+      || String.equal name SN.Typehints.this
+      || String.equal name SN.Classes.cSupportDyn
+    then
+      []
+    else
+      to_string_help
+        ("  by the definition of " ^ (strip_ns name |> Markdown_lite.md_codify))
+        solutions
+        next
+  in
+  to_string_help prefix solutions prev @ bound
 
 let to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
  (fun prefix r -> to_string_help prefix Tvid.Map.empty r)
@@ -2821,8 +2847,8 @@ module Constructors = struct
   let axiom_extends ~child ~ancestor =
     Axiom { axiom = Extends; prev = child; next = ancestor }
 
-  let axiom_upper_bound ~bound ~of_ =
-    Axiom { axiom = Upper_bound; prev = of_; next = bound }
+  let axiom_upper_bound ~bound ~of_ ~name =
+    Axiom { axiom = Upper_bound name; prev = of_; next = bound }
 
   let axiom_lower_bound ~bound ~of_ =
     Axiom { axiom = Lower_bound; prev = of_; next = bound }
@@ -3336,7 +3362,7 @@ module Derivation = struct
           "The %s extends or implements the %s class or interface so next I checked that subtype constraint."
           subject
           other
-      | Upper_bound ->
+      | Upper_bound _ ->
         Format.sprintf
           "The %s declares an upper bound so next I checked that was a %s of the %s."
           subject

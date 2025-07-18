@@ -6,8 +6,8 @@ Invalid argument (Typing[4323])
   This type constraint is violated
   File "lambda_bad_contra.php", line 25, characters 30-32:
   Expected `int`
-  File "lambda_bad_contra.php", line 16, characters 10-13:
-  But got `mixed`
+  File "lambda_bad_contra.php", line 16, characters 15-19:
+  But got `mixed` where `Tblah#2` corresponds to the rank-2 type parameter `Tblah` in the polymorphic function
 ERROR: File "lambda_bad_contra.php", line 25, characters 29-46:
 Invalid argument (Typing[4110])
   File "lambda_bad_contra.php", line 25, characters 30-32:

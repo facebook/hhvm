@@ -5,12 +5,17 @@
 
 use std::cmp::Ordering;
 
+use arena_deserializer::DeserializeInArena;
+use ocamlrep::FromOcamlRepIn;
+use serde::Deserializer;
+
 use crate::errors::*;
 use crate::explanation::Explanation;
 use crate::message::Message;
 use crate::pos::Pos;
 use crate::quickfix::Edits;
 use crate::quickfix::Quickfix;
+use crate::typing_reason::Axiom;
 use crate::user_error::Severity;
 use crate::user_error::UserError;
 
@@ -323,5 +328,26 @@ impl std::fmt::Display for ParseFormatError {
 impl Default for Format {
     fn default() -> Self {
         Format::Plain
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for Axiom {
+    fn from_ocamlrep_in(
+        _value: ocamlrep::Value<'_>,
+        _arena: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        panic!("Axioms are internal to inference and should not appear in decls")
+    }
+}
+
+impl<'a> DeserializeInArena<'a> for &Axiom {
+    fn deserialize_in_arena<D>(
+        _arena: &'a bumpalo::Bump,
+        _deserializer: D,
+    ) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'a>,
+    {
+        panic!("Axioms are internal to inference and should not appear in decls")
     }
 }

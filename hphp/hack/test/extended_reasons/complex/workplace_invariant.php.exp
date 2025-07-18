@@ -17,7 +17,161 @@ File workplace_invariant.php, line 8, character 32 - line 8, character 34:
 10 |     return 1;
 11 |   }
 
+But got Tu as num
+
+File workplace_invariant.php, line 15, character 47 - line 15, character 48:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
+ 16 |     return foo::class;
+ 17 | }
+
+This type argument to bar must match exactly (it is invariant)
+
+File workplace_invariant.php, line 15, character 47 - line 15, character 48:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
+ 16 |     return foo::class;
+ 17 | }
+
+Here's why:
+
+
+  Step 1 of 3                                                                   
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 14:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo«::class;
+ 17 | }
+
+and flows into this implicitly defined constant ::class of class \foo
+
+File workplace_invariant.php, line 8, character 13 - line 8, character 15:
+
+ 7 | 
+ 8 | final class »foo« implements bar<int> {
+ 9 |   public function get(): int {
+10 |     return 1;
+11 |   }
+
+as the instantiation of the generic this
+
+The supertype comes from this hint
+
+File workplace_invariant.php, line 15, character 43 - line 15, character 49:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
+ 16 |     return foo::class;
+ 17 | }
+
+which is defined here
+
+File workplace_invariant.php, line 3, character 11 - line 3, character 13:
+
+ 1 | <?hh
+ 2 | 
+ 3 | interface »bar«<T as num> {
+ 4 |   public function get(): T;
+ 5 | }
+
+
+  Step 2 of 3                                                                   
+
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
+
+The subtype comes from this hint
+
+File workplace_invariant.php, line 8, character 28 - line 8, character 35:
+
+ 7 | 
+ 8 | final class foo implements »bar<int>« {
+ 9 |   public function get(): int {
+10 |     return 1;
+11 |   }
+
+(its definition was given in [Step 1])
+
+The supertype is the same as before.
+
+File workplace_invariant.php, line 15, character 43 - line 15, character 49:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
+ 16 |     return foo::class;
+ 17 | }
+
+
+  Step 3 of 3                                 (here is where the error occurred) 
+
+bar is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the contravariant case so the direction of the subtype relationship is reversed.
+
+The subtype comes from this hint
+
+File workplace_invariant.php, line 15, character 47 - line 15, character 48:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
+ 16 |     return foo::class;
+ 17 | }
+
+The supertype comes from this hint
+
+File workplace_invariant.php, line 8, character 32 - line 8, character 34:
+
+ 7 | 
+ 8 | final class foo implements bar<»int«> {
+ 9 |   public function get(): int {
+10 |     return 1;
+11 |   }
+
+error: Typing[4110] Invalid return type
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 21:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo::class«;
+ 17 | }
+
+Expected int
+
+File workplace_invariant.php, line 8, character 32 - line 8, character 34:
+
+ 7 | 
+ 8 | final class foo implements bar<»int«> {
+ 9 |   public function get(): int {
+10 |     return 1;
+11 |   }
+
 But got num
+
+File workplace_invariant.php, line 15, character 47 - line 15, character 48:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
+ 16 |     return foo::class;
+ 17 | }
+
+This type argument to bar must match exactly (it is invariant)
+
+File workplace_invariant.php, line 15, character 47 - line 15, character 48:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
+ 16 |     return foo::class;
+ 17 | }
+
+  by the definition of Tu
 
 File workplace_invariant.php, line 15, character 25 - line 15, character 27:
 
@@ -140,142 +294,6 @@ File workplace_invariant.php, line 15, character 25 - line 15, character 27:
  17 | }
 
 The supertype is the same as before.
-
-File workplace_invariant.php, line 8, character 32 - line 8, character 34:
-
- 7 | 
- 8 | final class foo implements bar<»int«> {
- 9 |   public function get(): int {
-10 |     return 1;
-11 |   }
-
-error: Typing[4110] Invalid return type
-
-File workplace_invariant.php, line 16, character 12 - line 16, character 21:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
- 16 |     return »foo::class«;
- 17 | }
-
-Expected int
-
-File workplace_invariant.php, line 8, character 32 - line 8, character 34:
-
- 7 | 
- 8 | final class foo implements bar<»int«> {
- 9 |   public function get(): int {
-10 |     return 1;
-11 |   }
-
-But got Tu as num
-
-File workplace_invariant.php, line 15, character 47 - line 15, character 48:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
- 16 |     return foo::class;
- 17 | }
-
-This type argument to bar must match exactly (it is invariant)
-
-File workplace_invariant.php, line 15, character 47 - line 15, character 48:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
- 16 |     return foo::class;
- 17 | }
-
-Here's why:
-
-
-  Step 1 of 3                                                                   
-
-I started by checking this subtype relationship.
-
-The subtype comes from this expression
-
-File workplace_invariant.php, line 16, character 12 - line 16, character 14:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
- 16 |     return »foo«::class;
- 17 | }
-
-and flows into this implicitly defined constant ::class of class \foo
-
-File workplace_invariant.php, line 8, character 13 - line 8, character 15:
-
- 7 | 
- 8 | final class »foo« implements bar<int> {
- 9 |   public function get(): int {
-10 |     return 1;
-11 |   }
-
-as the instantiation of the generic this
-
-The supertype comes from this hint
-
-File workplace_invariant.php, line 15, character 43 - line 15, character 49:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
- 16 |     return foo::class;
- 17 | }
-
-which is defined here
-
-File workplace_invariant.php, line 3, character 11 - line 3, character 13:
-
- 1 | <?hh
- 2 | 
- 3 | interface »bar«<T as num> {
- 4 |   public function get(): T;
- 5 | }
-
-
-  Step 2 of 3                                                                   
-
-The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
-
-The subtype comes from this hint
-
-File workplace_invariant.php, line 8, character 28 - line 8, character 35:
-
- 7 | 
- 8 | final class foo implements »bar<int>« {
- 9 |   public function get(): int {
-10 |     return 1;
-11 |   }
-
-(its definition was given in [Step 1])
-
-The supertype is the same as before.
-
-File workplace_invariant.php, line 15, character 43 - line 15, character 49:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
- 16 |     return foo::class;
- 17 | }
-
-
-  Step 3 of 3                                 (here is where the error occurred) 
-
-bar is a class or interface so next I checked the 1st type arguments are subtypes.
-The type parameter is invariant so the subtype relationship must hold in both directions.
-Here I check the contravariant case so the direction of the subtype relationship is reversed.
-
-The subtype comes from this hint
-
-File workplace_invariant.php, line 15, character 47 - line 15, character 48:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
- 16 |     return foo::class;
- 17 | }
-
-The supertype comes from this hint
 
 File workplace_invariant.php, line 8, character 32 - line 8, character 34:
 

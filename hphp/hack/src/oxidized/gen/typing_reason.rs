@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<76543548f204346bbc57ca9f1fea695a>>
+// @generated SignedSource<<6cd57093890985a369531e2600ca71c5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -609,13 +609,11 @@ pub enum WitnessDecl {
 /// constraint simplification
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -625,16 +623,14 @@ pub enum WitnessDecl {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving hash")]
-#[repr(u8)]
+#[repr(C, u8)]
 pub enum Axiom {
     Extends,
     #[rust_to_ocaml(name = "Upper_bound")]
-    UpperBound,
+    UpperBound(String),
     #[rust_to_ocaml(name = "Lower_bound")]
     LowerBound,
 }
-impl TrivialDrop for Axiom {}
-arena_deserializer::impl_deserialize_in_arena!(Axiom);
 
 /// The reason why something is expected to have a certain type
 #[derive(

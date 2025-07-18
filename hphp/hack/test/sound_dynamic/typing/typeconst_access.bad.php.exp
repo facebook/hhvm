@@ -11,4 +11,6 @@ Invalid return type (Typing[4110])
   File "typeconst_access.bad.php", line 14, characters 6-8:
   Expected `int`
   File "", line 0, characters 0-0:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "typeconst_access.bad.php", line 21, characters 11-16:
+    via this generic `TIndex`

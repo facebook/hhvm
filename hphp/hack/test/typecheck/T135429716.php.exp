@@ -21,7 +21,9 @@ Invalid argument (Typing[4110])
   File "T135429716.php", line 7, characters 27-27:
     via this generic `T`
   File "T135429716.php", line 21, characters 27-27:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "T135429716.php", line 21, characters 27-27:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "T135429716.php", line 26, characters 12-25:
 Invalid return type (Typing[4110])
   File "T135429716.php", line 25, characters 36-36:
@@ -45,4 +47,6 @@ Invalid argument (Typing[4110])
   File "T135429716.php", line 7, characters 27-27:
     via this generic `T`
   File "T135429716.php", line 25, characters 28-28:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "T135429716.php", line 25, characters 28-28:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

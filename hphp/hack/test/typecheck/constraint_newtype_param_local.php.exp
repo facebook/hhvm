@@ -17,4 +17,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_local.php--a.php", line 3, characters 16-23:
   Expected `arraykey`
   File "constraint_newtype_param_local.php--a.php", line 5, characters 27-27:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "constraint_newtype_param_local.php--a.php", line 5, characters 27-27:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

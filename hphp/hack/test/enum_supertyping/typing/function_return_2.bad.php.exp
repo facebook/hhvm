@@ -2,5 +2,7 @@ ERROR: File "function_return_2.bad.php", line 18, characters 10-13:
 Invalid return type (Typing[4110])
   File "function_return_2.bad.php", line 17, characters 19-19:
   Expected `G`
-  File "function_return_2.bad.php", line 4, characters 16-18:
+  File "function_return_2.bad.php", line 4, characters 9-11:
   But got `int`
+  File "function_return_2.bad.php", line 4, characters 16-18:
+    by the definition of `F`

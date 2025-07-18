@@ -3,37 +3,51 @@ Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 9, characters 19-19:
   Expected `B`
   File "subtyping_mutual5b.php", line 4, characters 11-11:
-  But got `mixed`
+  But got `nonnull`
 ERROR: File "subtyping_mutual5b.php", line 26, characters 12-13:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 9, characters 19-19:
   Expected `B`
+  File "subtyping_mutual5b.php", line 14, characters 3-3:
+  But got `mixed`
   File "subtyping_mutual5b.php", line 4, characters 11-11:
-  But got `nonnull`
+    by the definition of `A`
 ERROR: File "subtyping_mutual5b.php", line 27, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 10, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_mutual5b.php", line 4, characters 11-11:
+  File "subtyping_mutual5b.php", line 14, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual5b.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual5b.php", line 28, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 11, characters 22-27:
   Expected `vec<B>`
-  File "subtyping_mutual5b.php", line 4, characters 11-11:
+  File "subtyping_mutual5b.php", line 14, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual5b.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual5b.php", line 32, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 10, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_mutual5b.php", line 4, characters 11-11:
+  File "subtyping_mutual5b.php", line 15, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual5b.php", line 6, characters 16-16:
+    by the definition of `B`
+  File "subtyping_mutual5b.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual5b.php", line 35, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 11, characters 22-27:
   Expected `vec<B>`
-  File "subtyping_mutual5b.php", line 4, characters 11-11:
+  File "subtyping_mutual5b.php", line 15, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual5b.php", line 6, characters 16-16:
+    by the definition of `B`
+  File "subtyping_mutual5b.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual5b.php", line 38, characters 12-13:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5b.php", line 9, characters 19-19:

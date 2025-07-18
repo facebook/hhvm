@@ -11,7 +11,9 @@ Invalid argument (Typing[4110])
   File "instanceof_generic_bad4.php", line 6, characters 29-32:
   Expected `Base`
   File "instanceof_generic_bad4.php", line 8, characters 7-18:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed` from this `is` expression test
+  File "instanceof_generic_bad4.php", line 8, characters 7-18:
+  This type argument to `Inv` must match exactly (it is invariant)
 ERROR: File "instanceof_generic_bad4.php", line 9, characters 20-21:
 Invalid argument (Typing[4110])
   File "instanceof_generic_bad4.php", line 8, characters 7-18:

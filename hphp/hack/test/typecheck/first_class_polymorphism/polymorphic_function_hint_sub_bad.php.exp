@@ -16,8 +16,8 @@ Invalid argument (Typing[4323])
   This type constraint is violated
   File "polymorphic_function_hint_sub_bad.php", line 23, characters 32-36:
   Expected `Three`
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 18-20:
-  But got `Two`
+  File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
+  But got `Two` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
 ERROR: File "polymorphic_function_hint_sub_bad.php", line 34, characters 15-16:
 Invalid argument (Typing[4323])
   File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:

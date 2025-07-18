@@ -6,8 +6,8 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
-  File "array_sub.php", line 12, characters 19-20:
-  But got `mixed`
+  File "array_sub.php", line 12, characters 34-35:
+  But got `T1`
 ERROR: File "array_sub.php", line 12, characters 27-40:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -17,7 +17,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "array_sub.php", line 12, characters 34-35:
-  But got `T1`
+  But got `mixed`
+  File "array_sub.php", line 12, characters 19-20:
+    by the definition of `T1`
 ERROR: File "array_sub.php", line 21, characters 12-13:
 Invalid argument (Typing[4110])
   File "array_sub.php", line 12, characters 27-40:

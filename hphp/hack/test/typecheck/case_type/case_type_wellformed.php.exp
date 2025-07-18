@@ -17,7 +17,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 43, characters 55-62:
   Expected `arraykey`
   File "case_type_wellformed.php", line 4, characters 47-47:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "case_type_wellformed.php", line 4, characters 47-47:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -37,7 +39,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "case_type_wellformed.php", line 4, characters 57-57:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "case_type_wellformed.php", line 4, characters 57-57:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "case_type_wellformed.php", line 7, characters 20-23:
 Illegal usage of a covariant type parameter (Typing[4120])
   File "case_type_wellformed.php", line 6, characters 48-51:

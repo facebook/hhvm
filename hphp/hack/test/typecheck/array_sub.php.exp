@@ -17,7 +17,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "array_sub.php", line 12, characters 34-35:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "array_sub.php", line 12, characters 34-35:
+    by the definition of `T1` arising from an implicit `as mixed` constraint on this type
 ERROR: File "array_sub.php", line 21, characters 12-13:
 Invalid argument (Typing[4110])
   File "array_sub.php", line 12, characters 27-40:

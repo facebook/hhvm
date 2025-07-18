@@ -12,6 +12,10 @@ Invalid return type (Typing[4110])
   Expected `nonnull`
   File "option_is_not_subtype_of_nonnull3.php", line 3, characters 9-9:
   But got `mixed`
+  File "option_is_not_subtype_of_nonnull3.php", line 4, characters 12-12:
+    via this generic `T`
+  File "option_is_not_subtype_of_nonnull3.php", line 3, characters 9-9:
+    by the definition of `T`
 ERROR: File "option_is_not_subtype_of_nonnull3.php", line 8, characters 12-23:
 Invalid return type (Typing[4110])
   File "option_is_not_subtype_of_nonnull3.php", line 7, characters 26-32:

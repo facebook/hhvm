@@ -2,5 +2,7 @@ ERROR: File "subtyping_simple3.php", line 20, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_simple3.php", line 7, characters 22-27:
   Expected `vec<A>`
+  File "subtyping_simple3.php", line 10, characters 3-3:
+  But got `mixed`
   File "subtyping_simple3.php", line 4, characters 11-11:
-  But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
+    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type

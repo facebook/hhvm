@@ -34,3 +34,7 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "new_static2.php", line 13, characters 18-18:
   But got `mixed`
+  File "new_static2.php", line 13, characters 18-18:
+  This type argument to `A` must match exactly (it is invariant)
+  File "new_static2.php", line 13, characters 18-18:
+    by the definition of `T`

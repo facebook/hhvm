@@ -419,7 +419,7 @@ val solved :
   Tvid.t -> solution:locl_phase t_ -> in_:locl_phase t_ -> locl_phase t_
 
 val axiom_upper_bound :
-  bound:locl_phase t_ -> of_:locl_phase t_ -> locl_phase t_
+  bound:locl_phase t_ -> of_:locl_phase t_ -> name:string -> locl_phase t_
 
 val axiom_lower_bound :
   bound:locl_phase t_ -> of_:locl_phase t_ -> locl_phase t_

@@ -6,8 +6,10 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
   Expected `arraykey`
+  File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
+  But got `T`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+    via this generic `T`
 ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 26-35:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
@@ -17,19 +19,11 @@ Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
   Expected `arraykey`
   File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
-  But got `T`
+  But got `mixed`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
     via this generic `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
@@ -42,7 +36,7 @@ Some type arguments violate their constraints (Typing[4323])
   But got `T`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
     via this generic `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
+ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
   `T` is a constrained type parameter
@@ -50,8 +44,12 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
   Expected `arraykey`
+  File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
+  But got `mixed`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+    via this generic `T`
+  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
@@ -64,3 +62,17 @@ Some type arguments violate their constraints (Typing[4323])
   But got `T`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
     via this generic `T`
+ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
+Some type arguments violate their constraints (Typing[4323])
+  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
+  `T` is a constrained type parameter
+  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
+  This type constraint is violated
+  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
+  Expected `arraykey`
+  File "constraint_newtype_param_type_advanced.php", line 7, characters 32-32:
+  But got `mixed`
+  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
+    via this generic `T`
+  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

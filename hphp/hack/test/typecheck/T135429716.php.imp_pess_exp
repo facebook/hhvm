@@ -12,8 +12,8 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "T135429716.php", line 7, characters 27-27:
     via this generic `T`
-  File "T135429716.php", line 4, characters 9-9:
-  But got `mixed`
+  File "T135429716.php", line 21, characters 27-27:
+  But got `T`
 ERROR: File "T135429716.php", line 22, characters 23-24:
 Invalid argument (Typing[4110])
   File "T135429716.php", line 32, characters 19-21:
@@ -21,7 +21,9 @@ Invalid argument (Typing[4110])
   File "T135429716.php", line 7, characters 27-27:
     via this generic `T`
   File "T135429716.php", line 21, characters 27-27:
-  But got `T`
+  But got `mixed`
+  File "T135429716.php", line 4, characters 9-9:
+    by the definition of `T`
 ERROR: File "T135429716.php", line 26, characters 12-25:
 Invalid return type (Typing[4110])
   File "T135429716.php", line 25, characters 36-36:
@@ -36,8 +38,8 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "T135429716.php", line 7, characters 27-27:
     via this generic `T`
-  File "T135429716.php", line 4, characters 9-9:
-  But got `mixed`
+  File "T135429716.php", line 25, characters 28-28:
+  But got `T`
 ERROR: File "T135429716.php", line 26, characters 23-24:
 Invalid argument (Typing[4110])
   File "T135429716.php", line 35, characters 21-23:
@@ -45,4 +47,6 @@ Invalid argument (Typing[4110])
   File "T135429716.php", line 7, characters 27-27:
     via this generic `T`
   File "T135429716.php", line 25, characters 28-28:
-  But got `T`
+  But got `mixed`
+  File "T135429716.php", line 4, characters 9-9:
+    by the definition of `T`

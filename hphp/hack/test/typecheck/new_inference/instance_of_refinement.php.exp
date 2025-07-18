@@ -36,22 +36,18 @@ ERROR: File "instance_of_refinement.php", line 44, characters 16-24:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
   Expected `int`
+  File "instance_of_refinement.php", line 42, characters 7-16:
+  But got `T#2` from this `is` expression test
   File "instance_of_refinement.php", line 7, characters 26-26:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+    via this generic `T`
 ERROR: File "instance_of_refinement.php", line 44, characters 16-24:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
   Expected `int`
   File "instance_of_refinement.php", line 42, characters 7-16:
-  But got `T#2` from this `is` expression test
+  But got `mixed` from this `is` expression test
   File "instance_of_refinement.php", line 7, characters 26-26:
     via this generic `T`
-ERROR: File "instance_of_refinement.php", line 52, characters 16-24:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `int`
-  File "instance_of_refinement.php", line 7, characters 26-26:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "instance_of_refinement.php", line 52, characters 16-24:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
@@ -70,5 +66,13 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "instance_of_refinement.php", line 50, characters 7-16:
   But got `T#2` from this `is` expression test
+  File "instance_of_refinement.php", line 7, characters 26-26:
+    via this generic `T`
+ERROR: File "instance_of_refinement.php", line 52, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 17, characters 21-23:
+  Expected `int`
+  File "instance_of_refinement.php", line 50, characters 7-16:
+  But got `mixed` from this `is` expression test
   File "instance_of_refinement.php", line 7, characters 26-26:
     via this generic `T`

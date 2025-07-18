@@ -2,5 +2,7 @@ ERROR: File "enum_subtyping.php", line 11, characters 14-14:
 Unable to satisfy constraint on this type constant (Typing[4110])
   File "enum_subtyping.php", line 7, characters 43-48:
   Expected `string`
-  File "enum_subtyping.php", line 3, characters 16-18:
+  File "enum_subtyping.php", line 11, characters 18-18:
   But got `int`
+  File "enum_subtyping.php", line 3, characters 16-18:
+    by the definition of `E`

@@ -22,5 +22,9 @@ A `where` type constraint is violated here (Typing[4323])
     via this generic `TBox`
   File "runner-pattern.php", line 27, characters 13-35:
   Expected a class with `{type T = _}`
-  File "runner-pattern.php", line 18, characters 28-30:
+  File "runner-pattern.php", line 18, characters 20-23:
   But got `Box`
+  File "runner-pattern.php", line 27, characters 5-8:
+    via this generic `TBox`
+  File "runner-pattern.php", line 18, characters 28-30:
+    by the definition of `TBox`

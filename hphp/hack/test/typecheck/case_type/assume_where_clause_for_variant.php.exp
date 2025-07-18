@@ -17,13 +17,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 43, characters 55-62:
   Expected `arraykey`
   File "assume_where_clause_for_variant.php", line 7, characters 12-12:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
-ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
-Invalid constraint on `newtype` (Typing[4332])
-  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
-  Expected `string`
-  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "assume_where_clause_for_variant.php", line 7, characters 12-12:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
 Invalid constraint on `newtype` (Typing[4332])
   File "assume_where_clause_for_variant.php", line 16, characters 36-41:
@@ -34,6 +30,18 @@ Invalid constraint on `newtype` (Typing[4332])
     via this generic `T`
   File "assume_where_clause_for_variant.php", line 12, characters 36-36:
   This type argument to `IFoo` must match exactly (it is invariant)
+ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
+Invalid constraint on `newtype` (Typing[4332])
+  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
+  Expected `string`
+  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
+  But got `mixed`
+  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+    via this generic `T`
+  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+  This type argument to `IFoo` must match exactly (it is invariant)
+  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
 Invalid constraint on `newtype` (Typing[4332])
   File "assume_where_clause_for_variant.php", line 18, characters 9-9:

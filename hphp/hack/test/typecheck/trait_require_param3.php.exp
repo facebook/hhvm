@@ -19,7 +19,11 @@ This class does not satisfy all the requirements of its traits or interfaces. (T
   File "trait_require_param3.php", line 6, characters 25-27:
   Expected `int`
   File "trait_require_param3.php", line 13, characters 26-26:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "trait_require_param3.php", line 13, characters 26-26:
+  This type argument to `Super` must match exactly (it is invariant)
+  File "trait_require_param3.php", line 13, characters 26-26:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "trait_require_param3.php", line 13, characters 7-7:
 This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
   File "trait_require_param3.php", line 14, characters 7-8:
@@ -53,7 +57,11 @@ This class does not satisfy all the requirements of its traits or interfaces. (T
   File "trait_require_param3.php", line 10, characters 25-29:
   Expected `float`
   File "trait_require_param3.php", line 13, characters 26-26:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "trait_require_param3.php", line 13, characters 26-26:
+  This type argument to `Super` must match exactly (it is invariant)
+  File "trait_require_param3.php", line 13, characters 26-26:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "trait_require_param3.php", line 13, characters 7-7:
 This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
   File "trait_require_param3.php", line 15, characters 7-8:

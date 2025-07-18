@@ -4117,7 +4117,7 @@ end = struct
       (* TODO(mjt) update to be an asymm projection *)
       let ty_sub =
         Typing_env.update_reason env upper_bound ~f:(fun bound ->
-            Typing_reason.axiom_upper_bound ~bound ~of_:r)
+            Typing_reason.axiom_upper_bound ~bound ~of_:r ~name)
       in
       env
       |> simplify
@@ -7776,7 +7776,10 @@ end = struct
           | upper_bound :: upper_bounds ->
             let ty_sub =
               Typing_env.update_reason env upper_bound ~f:(fun bound ->
-                  Typing_reason.axiom_upper_bound ~bound ~of_:reason_generic)
+                  Typing_reason.axiom_upper_bound
+                    ~bound
+                    ~of_:reason_generic
+                    ~name:generic_nm)
             in
             let (env, prop) =
               mk_prop
@@ -7808,7 +7811,10 @@ end = struct
           let tmixed = MakeType.mixed r in
           let ty_sub =
             Typing_env.update_reason env tmixed ~f:(fun bound ->
-                Typing_reason.axiom_upper_bound ~bound ~of_:reason_generic)
+                Typing_reason.axiom_upper_bound
+                  ~bound
+                  ~of_:reason_generic
+                  ~name:generic_nm)
           in
           let (env, prop) =
             mk_prop
@@ -7852,7 +7858,10 @@ end = struct
     in
     let ty_sub =
       Typing_env.update_reason env newtype_ty ~f:(fun bound ->
-          Typing_reason.axiom_upper_bound ~bound ~of_:reason_newtype)
+          Typing_reason.axiom_upper_bound
+            ~bound
+            ~of_:reason_newtype
+            ~name:newtype_nm)
     in
 
     mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env

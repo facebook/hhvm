@@ -81,49 +81,41 @@ Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 17, characters 22-29:
     resulting from expanding the type constant `AppendOnly::TC`
   File "caller-callee_bad.php", line 18, characters 46-53:
-  But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC`
+  But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite`
 ERROR: File "caller-callee_bad.php", line 39, characters 66-83:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 49, characters 19-27:
   Expected `CanAppend`
   File "caller-callee_bad.php", line 17, characters 22-29:
     resulting from expanding the type constant `AppendOnly::TC`
-  File "caller-callee_bad.php", line 43, characters 28-29:
-  But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite`
-  by accessing the type constant `TC`
-  File "caller-callee_bad.php", line 35, characters 5-9:
-  on the expression dependent type this
-  File "caller-callee_bad.php", line 43, characters 22-29:
-    via this generic `this`
+  File "caller-callee_bad.php", line 18, characters 46-53:
+  But got `mixed`
 ERROR: File "caller-callee_bad.php", line 39, characters 66-83:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 49, characters 19-27:
   Expected `CanAppend`
   File "caller-callee_bad.php", line 17, characters 22-29:
     resulting from expanding the type constant `AppendOnly::TC`
-  File "caller-callee_bad.php", line 43, characters 28-29:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  File "caller-callee_bad.php", line 18, characters 46-53:
+  But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC`
+ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
+Invalid argument (Typing[4110])
+  File "caller-callee_bad.php", line 34, characters 49-57:
+  Expected `CanAppend`
+  File "caller-callee_bad.php", line 43, characters 22-29:
+  But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite`
+ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
+Invalid argument (Typing[4110])
+  File "caller-callee_bad.php", line 34, characters 49-57:
+  Expected `CanAppend`
+  File "caller-callee_bad.php", line 43, characters 22-29:
+  But got `mixed`
 ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 34, characters 49-57:
   Expected `CanAppend`
   File "caller-callee_bad.php", line 43, characters 22-29:
   But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC`
-ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 43, characters 28-29:
-  But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite`
-  by accessing the type constant `TC`
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  on the expression dependent type this
-ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 43, characters 28-29:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "caller-callee_bad.php", line 55, characters 47-60:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 33, characters 32-39:

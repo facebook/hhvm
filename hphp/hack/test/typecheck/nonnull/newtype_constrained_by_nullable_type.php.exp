@@ -2,5 +2,7 @@ ERROR: File "newtype_constrained_by_nullable_type.php--file2.php", line 4, chara
 Invalid return type (Typing[4110])
   File "newtype_constrained_by_nullable_type.php--file2.php", line 3, characters 19-25:
   Expected `nonnull`
-  File "newtype_constrained_by_nullable_type.php--file1.php", line 3, characters 14-20:
+  File "newtype_constrained_by_nullable_type.php--file2.php", line 3, characters 12-12:
   But got `?string`
+  File "newtype_constrained_by_nullable_type.php--file1.php", line 3, characters 14-20:
+    by the definition of `t`

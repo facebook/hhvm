@@ -3,21 +3,16 @@ Invalid return type (Typing[4110])
   File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
   Expected `nonnull`
   File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
-  But got `this::T as C::T`
-ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
-Invalid return type (Typing[4110])
-  File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
-  Expected `nonnull`
-  File "object_is_subtype_of_nonnull.php", line 6, characters 34-34:
   But got `C::T super this::T`
-  by accessing the type constant `T`
-  File "object_is_subtype_of_nonnull.php", line 9, characters 10-15:
-  on the expression dependent type this
-  File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
-    via this generic `this`
 ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
 Invalid return type (Typing[4110])
   File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
   Expected `nonnull`
-  File "object_is_subtype_of_nonnull.php", line 6, characters 34-34:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
+  But got `mixed`
+ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
+Invalid return type (Typing[4110])
+  File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
+  Expected `nonnull`
+  File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
+  But got `this::T as C::T`

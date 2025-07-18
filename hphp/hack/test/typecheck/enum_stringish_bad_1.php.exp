@@ -3,4 +3,6 @@ Invalid return type (Typing[4110])
   File "enum_stringish_bad_1.php", line 9, characters 22-30:
   Expected `Stringish`
   File "enum_stringish_bad_1.php", line 9, characters 15-15:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+  But got `arraykey`
+  File "enum_stringish_bad_1.php", line 9, characters 15-15:
+    by the definition of `E` arising from an implicit `as arraykey` constraint on this type

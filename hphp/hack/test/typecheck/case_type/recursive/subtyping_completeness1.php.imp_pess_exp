@@ -3,11 +3,21 @@ hh_expect type mismatch (Typing[4453])
   File "subtyping_completeness1.php", line 8, characters 13-13:
   Expected `A`
   File "subtyping_completeness1.php", line 4, characters 11-11:
-  But got `mixed`
+  But got `nonnull`
 ERROR: File "subtyping_completeness1.php", line 8, characters 3-18:
 hh_expect type mismatch (Typing[4453])
   File "subtyping_completeness1.php", line 8, characters 13-13:
   Expected `A`
+  File "subtyping_completeness1.php", line 7, characters 21-21:
+  But got `mixed`
+  File "subtyping_completeness1.php", line 4, characters 11-11:
+    by the definition of `B`
+ERROR: File "subtyping_completeness1.php", line 8, characters 16-17:
+Invalid argument (Typing[4110])
+  File "subtyping_completeness1.php", line 8, characters 13-13:
+  Expected `A`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
   File "subtyping_completeness1.php", line 4, characters 11-11:
   But got `nonnull`
 ERROR: File "subtyping_completeness1.php", line 8, characters 16-17:
@@ -16,36 +26,24 @@ Invalid argument (Typing[4110])
   Expected `A`
   File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
     via this generic `T`
-  File "subtyping_completeness1.php", line 4, characters 11-11:
+  File "subtyping_completeness1.php", line 7, characters 21-21:
   But got `mixed`
-ERROR: File "subtyping_completeness1.php", line 8, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 8, characters 13-13:
-  Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
   File "subtyping_completeness1.php", line 4, characters 11-11:
-  But got `nonnull`
-ERROR: File "subtyping_completeness1.php", line 9, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 9, characters 13-13:
-  Expected `A`
-  File "subtyping_completeness1.php", line 5, characters 11-11:
-  But got `mixed`
+    by the definition of `B`
 ERROR: File "subtyping_completeness1.php", line 9, characters 3-18:
 hh_expect type mismatch (Typing[4453])
   File "subtyping_completeness1.php", line 9, characters 13-13:
   Expected `A`
   File "subtyping_completeness1.php", line 5, characters 11-11:
   But got `nonnull`
-ERROR: File "subtyping_completeness1.php", line 9, characters 16-17:
-Invalid argument (Typing[4110])
+ERROR: File "subtyping_completeness1.php", line 9, characters 3-18:
+hh_expect type mismatch (Typing[4453])
   File "subtyping_completeness1.php", line 9, characters 13-13:
   Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 5, characters 11-11:
+  File "subtyping_completeness1.php", line 7, characters 27-27:
   But got `mixed`
+  File "subtyping_completeness1.php", line 5, characters 11-11:
+    by the definition of `C`
 ERROR: File "subtyping_completeness1.php", line 9, characters 16-17:
 Invalid argument (Typing[4110])
   File "subtyping_completeness1.php", line 9, characters 13-13:
@@ -54,16 +52,36 @@ Invalid argument (Typing[4110])
     via this generic `T`
   File "subtyping_completeness1.php", line 5, characters 11-11:
   But got `nonnull`
+ERROR: File "subtyping_completeness1.php", line 9, characters 16-17:
+Invalid argument (Typing[4110])
+  File "subtyping_completeness1.php", line 9, characters 13-13:
+  Expected `A`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "subtyping_completeness1.php", line 7, characters 27-27:
+  But got `mixed`
+  File "subtyping_completeness1.php", line 5, characters 11-11:
+    by the definition of `C`
 ERROR: File "subtyping_completeness1.php", line 10, characters 3-18:
 hh_expect type mismatch (Typing[4453])
   File "subtyping_completeness1.php", line 10, characters 13-13:
   Expected `C`
   File "subtyping_completeness1.php", line 3, characters 11-11:
-  But got `mixed`
+  But got `nonnull`
 ERROR: File "subtyping_completeness1.php", line 10, characters 3-18:
 hh_expect type mismatch (Typing[4453])
   File "subtyping_completeness1.php", line 10, characters 13-13:
   Expected `C`
+  File "subtyping_completeness1.php", line 7, characters 15-15:
+  But got `mixed`
+  File "subtyping_completeness1.php", line 3, characters 11-11:
+    by the definition of `A`
+ERROR: File "subtyping_completeness1.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "subtyping_completeness1.php", line 10, characters 13-13:
+  Expected `C`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
   File "subtyping_completeness1.php", line 3, characters 11-11:
   But got `nonnull`
 ERROR: File "subtyping_completeness1.php", line 10, characters 16-17:
@@ -72,13 +90,7 @@ Invalid argument (Typing[4110])
   Expected `C`
   File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
     via this generic `T`
-  File "subtyping_completeness1.php", line 3, characters 11-11:
+  File "subtyping_completeness1.php", line 7, characters 15-15:
   But got `mixed`
-ERROR: File "subtyping_completeness1.php", line 10, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 10, characters 13-13:
-  Expected `C`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
   File "subtyping_completeness1.php", line 3, characters 11-11:
-  But got `nonnull`
+    by the definition of `A`

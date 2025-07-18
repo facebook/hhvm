@@ -2,12 +2,6 @@ ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`
-  File "tc_in_enum_class.php", line 45, characters 23-29:
-  But got `mixed`
-ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
-Invalid argument (Typing[4110])
-  File "tc_in_enum_class.php", line 47, characters 23-25:
-  Expected `int`
   File "tc_in_enum_class.php", line 91, characters 29-44:
   But got `<expr#8>::T::TSource as IAntParent::T::TSource`
   File "tc_in_enum_class.php", line 91, characters 38-44:
@@ -16,24 +10,26 @@ ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`
-  File "tc_in_enum_class.php", line 91, characters 38-44:
-  But got `IAntParent::T::TSource where \IAntParent::T::TSource super <expr#8>::T::TSource, \IAntParent::T::TSource as ParentAccessors::TSource`
-  by accessing the type constant `TSource`
   File "tc_in_enum_class.php", line 91, characters 29-44:
-  on the expression dependent type <expr#8>::T
-  File "tc_in_enum_class.php", line 103, characters 10-13:
-    where `<expr#8>` is a reference to this expression
+  But got `IAntParent::T::TSource where \IAntParent::T::TSource super <expr#8>::T::TSource, \IAntParent::T::TSource as ParentAccessors::TSource`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
 ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`
-  File "tc_in_enum_class.php", line 91, characters 38-44:
-  But got `ParentAccessors::TSource super IAntParent::T::TSource`
-  by accessing the type constant `TSource`
   File "tc_in_enum_class.php", line 91, characters 29-44:
-  on the expression dependent type <expr#8>::T
-  File "tc_in_enum_class.php", line 103, characters 10-13:
-    where `<expr#8>` is a reference to this expression
+  But got `ParentAccessors::TSource super IAntParent::T::TSource`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
+ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
+Invalid argument (Typing[4110])
+  File "tc_in_enum_class.php", line 47, characters 23-25:
+  Expected `int`
+  File "tc_in_enum_class.php", line 91, characters 29-44:
+  But got `mixed`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
 ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4323])
   File "tc_in_enum_class.php", line 89, characters 40-46:

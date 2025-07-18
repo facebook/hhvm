@@ -3,4 +3,8 @@ Invalid return type (Typing[4110])
   File "fc_enum_9.php", line 12, characters 42-44:
   Expected `int`
   File "fc_enum_9.php", line 3, characters 6-8:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+  But got `arraykey`
+  File "BuiltinEnum.hhi", line 34, characters 64-64:
+    via this generic `T`
+  File "fc_enum_9.php", line 3, characters 6-8:
+    by the definition of `Foo` arising from an implicit `as arraykey` constraint on this type

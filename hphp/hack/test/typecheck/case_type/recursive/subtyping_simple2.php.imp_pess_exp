@@ -10,5 +10,7 @@ ERROR: File "subtyping_simple2.php", line 11, characters 14-15:
 Invalid argument (Typing[4110])
   File "subtyping_simple2.php", line 7, characters 21-23:
   Expected `int`
-  File "subtyping_simple2.php", line 4, characters 11-11:
+  File "subtyping_simple2.php", line 9, characters 14-14:
   But got `mixed`
+  File "subtyping_simple2.php", line 4, characters 11-11:
+    by the definition of `A`

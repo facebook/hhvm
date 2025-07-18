@@ -18,7 +18,7 @@ Invalid assignment (Typing[4110])
   Expected exactly the type `BadClass`
   File "this_tparam_static.php", line 19, characters 7-10:
     where the class `BadClass` was referenced here via the keyword `self`
-  File "this_tparam_static.php", line 12, characters 7-14:
+  File "this_tparam_static.php", line 18, characters 23-28:
   But got the nonexact type `BadClass`
 ERROR: File "this_tparam_static.php", line 21, characters 12-20:
 Invalid return type (Typing[4110])

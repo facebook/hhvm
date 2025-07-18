@@ -15,4 +15,6 @@ Invalid return type (Typing[4110])
   File "T139120762.php", line 13, characters 64-70:
   Expected `nothing`
   File "T139120762.php", line 13, characters 54-57:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "T139120762.php", line 13, characters 54-57:
+    by the definition of `Tacc` arising from an implicit `as mixed` constraint on this type

@@ -12,16 +12,22 @@ ERROR: File "typedef_cycles_via_constraints4c.php--uses.php", line 6, characters
 Invalid argument (Typing[4110])
   File "typedef_cycles_via_constraints4c.php--uses.php", line 3, characters 24-29:
   Expected `string`
-  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 17-19:
+  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 15-20:
   But got `int`
+  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 17-19:
+    by the definition of `A`
   File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 25-25:
     via this generic `T`
 ERROR: File "typedef_cycles_via_constraints4c.php--uses.php", line 7, characters 17-18:
 Invalid argument (Typing[4110])
   File "typedef_cycles_via_constraints4c.php--uses.php", line 3, characters 24-29:
   Expected `string`
-  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 28-30:
+  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 26-31:
   But got `int`
+  File "typedef_cycles_via_constraints4c.php--defs.php", line 4, characters 17-20:
+    by the definition of `B`
+  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 28-30:
+    by the definition of `A`
   File "typedef_cycles_via_constraints4c.php--defs.php", line 4, characters 19-19:
     via this generic `T`
   File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 25-25:

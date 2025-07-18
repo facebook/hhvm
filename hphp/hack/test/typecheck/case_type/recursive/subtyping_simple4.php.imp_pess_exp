@@ -2,17 +2,23 @@ ERROR: File "subtyping_simple4.php", line 22, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_simple4.php", line 7, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_simple4.php", line 4, characters 11-11:
+  File "subtyping_simple4.php", line 11, characters 3-3:
   But got `mixed`
+  File "subtyping_simple4.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_simple4.php", line 27, characters 18-19:
 Invalid argument (Typing[4110])
   File "subtyping_simple4.php", line 8, characters 25-35:
   Expected `vec<vec<A>>`
-  File "subtyping_simple4.php", line 4, characters 11-11:
+  File "subtyping_simple4.php", line 11, characters 3-3:
   But got `mixed`
+  File "subtyping_simple4.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_simple4.php", line 32, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtyping_simple4.php", line 8, characters 29-34:
   Expected `vec<A>`
-  File "subtyping_simple4.php", line 4, characters 11-11:
+  File "subtyping_simple4.php", line 13, characters 7-7:
   But got `mixed`
+  File "subtyping_simple4.php", line 4, characters 11-11:
+    by the definition of `A`

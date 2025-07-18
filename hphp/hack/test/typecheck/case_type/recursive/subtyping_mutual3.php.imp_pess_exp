@@ -3,49 +3,61 @@ Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 9, characters 19-19:
   Expected `B`
   File "subtyping_mutual3.php", line 4, characters 11-11:
-  But got `mixed`
+  But got `nonnull`
 ERROR: File "subtyping_mutual3.php", line 25, characters 12-13:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 9, characters 19-19:
   Expected `B`
+  File "subtyping_mutual3.php", line 14, characters 3-3:
+  But got `mixed`
   File "subtyping_mutual3.php", line 4, characters 11-11:
-  But got `nonnull`
+    by the definition of `A`
 ERROR: File "subtyping_mutual3.php", line 26, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 10, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
+  File "subtyping_mutual3.php", line 14, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual3.php", line 27, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 11, characters 22-27:
   Expected `vec<B>`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
+  File "subtyping_mutual3.php", line 14, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual3.php", line 30, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 10, characters 22-27:
   Expected `vec<A>`
-  File "subtyping_mutual3.php", line 6, characters 11-11:
+  File "subtyping_mutual3.php", line 15, characters 3-3:
   But got `mixed`
+  File "subtyping_mutual3.php", line 6, characters 11-11:
+    by the definition of `B`
 ERROR: File "subtyping_mutual3.php", line 31, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 11, characters 22-27:
   Expected `vec<B>`
+  File "subtyping_mutual3.php", line 15, characters 3-3:
+  But got `mixed`
   File "subtyping_mutual3.php", line 6, characters 11-11:
-  But got `mixed`
-ERROR: File "subtyping_mutual3.php", line 40, characters 5-7:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-  But got `mixed`
+    by the definition of `B`
 ERROR: File "subtyping_mutual3.php", line 40, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 11, characters 26-26:
   Expected `B`
   File "subtyping_mutual3.php", line 4, characters 11-11:
   But got `nonnull`
+ERROR: File "subtyping_mutual3.php", line 40, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtyping_mutual3.php", line 11, characters 26-26:
+  Expected `B`
+  File "subtyping_mutual3.php", line 17, characters 7-7:
+  But got `mixed`
+  File "subtyping_mutual3.php", line 4, characters 11-11:
+    by the definition of `A`
 ERROR: File "subtyping_mutual3.php", line 62, characters 12-15:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3.php", line 8, characters 19-19:

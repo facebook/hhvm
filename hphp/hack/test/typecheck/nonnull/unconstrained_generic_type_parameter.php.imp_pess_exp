@@ -2,11 +2,13 @@ ERROR: File "unconstrained_generic_type_parameter.php", line 4, characters 10-11
 Invalid return type (Typing[4110])
   File "unconstrained_generic_type_parameter.php", line 3, characters 25-31:
   Expected `nonnull`
-  File "unconstrained_generic_type_parameter.php", line 3, characters 15-15:
-  But got `mixed`
+  File "unconstrained_generic_type_parameter.php", line 3, characters 18-18:
+  But got `T`
 ERROR: File "unconstrained_generic_type_parameter.php", line 4, characters 10-11:
 Invalid return type (Typing[4110])
   File "unconstrained_generic_type_parameter.php", line 3, characters 25-31:
   Expected `nonnull`
   File "unconstrained_generic_type_parameter.php", line 3, characters 18-18:
-  But got `T`
+  But got `mixed`
+  File "unconstrained_generic_type_parameter.php", line 3, characters 15-15:
+    by the definition of `T`

@@ -2,13 +2,7 @@ ERROR: File "recursive_constraint_bad_4.php", line 6, characters 12-13:
 Invalid return type (Typing[4110])
   File "recursive_constraint_bad_4.php", line 5, characters 39-41:
   Expected `int`
-  File "recursive_constraint_bad_4.php", line 4, characters 19-20:
-  But got `Ty = Tx`
-ERROR: File "recursive_constraint_bad_4.php", line 6, characters 12-13:
-Invalid return type (Typing[4110])
-  File "recursive_constraint_bad_4.php", line 5, characters 39-41:
-  Expected `int`
-  File "recursive_constraint_bad_4.php", line 4, characters 29-30:
+  File "recursive_constraint_bad_4.php", line 5, characters 31-32:
   But got `Tx = Ty`
 ERROR: File "recursive_constraint_bad_4.php", line 6, characters 12-13:
 Invalid return type (Typing[4110])
@@ -16,3 +10,15 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "recursive_constraint_bad_4.php", line 5, characters 31-32:
   But got `Tx = Ty`
+  File "recursive_constraint_bad_4.php", line 4, characters 19-20:
+    by the definition of `Tx`
+  File "recursive_constraint_bad_4.php", line 4, characters 29-30:
+    by the definition of `Ty`
+ERROR: File "recursive_constraint_bad_4.php", line 6, characters 12-13:
+Invalid return type (Typing[4110])
+  File "recursive_constraint_bad_4.php", line 5, characters 39-41:
+  Expected `int`
+  File "recursive_constraint_bad_4.php", line 5, characters 31-32:
+  But got `Ty = Tx`
+  File "recursive_constraint_bad_4.php", line 4, characters 19-20:
+    by the definition of `Tx`

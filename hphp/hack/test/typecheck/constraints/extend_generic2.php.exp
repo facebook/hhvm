@@ -6,8 +6,10 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "extend_generic2.php", line 15, characters 14-14:
   Expected `B`
-  File "extend_generic2.php", line 18, characters 14-14:
+  File "extend_generic2.php", line 18, characters 27-27:
   But got `A`
+  File "extend_generic2.php", line 18, characters 14-14:
+    by the definition of `T`
 ERROR: File "extend_generic2.php", line 18, characters 25-28:
 Some type arguments violate their constraints (Typing[4323])
   File "extend_generic2.php", line 15, characters 9-9:

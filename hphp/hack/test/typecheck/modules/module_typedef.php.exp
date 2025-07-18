@@ -30,5 +30,7 @@ ERROR: File "module_typedef.php--still-A.php", line 6, characters 8-9:
 Typing error (Typing[4429])
   File "module_typedef.php--still-A.php", line 6, characters 8-13:
   Expected `num` because this is used in an arithmetic operation
+  File "module_typedef.php--still-A.php", line 4, characters 29-33:
+  But got `mixed`
   File "module_typedef.php--A.php", line 9, characters 18-22:
-  But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
+    by the definition of `TyNew` arising from an implicit `as ?nonnull` constraint on this type

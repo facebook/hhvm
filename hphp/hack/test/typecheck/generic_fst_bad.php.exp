@@ -9,4 +9,6 @@ Invalid return type (Typing[4110])
   File "generic_fst_bad.php", line 4, characters 35-36:
   Expected `T2`
   File "generic_fst_bad.php", line 4, characters 21-22:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "generic_fst_bad.php", line 4, characters 21-22:
+    by the definition of `T1` arising from an implicit `as mixed` constraint on this type

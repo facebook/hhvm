@@ -30,5 +30,7 @@ ERROR: File "nonnull.php--file2.php", line 51, characters 18-19:
 Invalid argument (Typing[4110])
   File "nonnull.php--file2.php", line 60, characters 25-31:
   Expected `nonnull`
-  File "nonnull.php--file1.php", line 5, characters 14-17:
+  File "nonnull.php--file2.php", line 13, characters 3-3:
   But got `?int`
+  File "nonnull.php--file1.php", line 5, characters 14-17:
+    by the definition of `C`

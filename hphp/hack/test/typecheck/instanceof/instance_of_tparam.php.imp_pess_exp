@@ -20,12 +20,6 @@ ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
 Invalid return type (Typing[4110])
   File "instance_of_tparam.php", line 23, characters 33-34:
   Expected `Ty`
-  File "instance_of_tparam.php", line 23, characters 12-13:
-  But got `mixed`
-ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  Expected `Ty`
   File "instance_of_tparam.php", line 24, characters 7-16:
   But got `Tx` from this `is` expression test
   File "instance_of_tparam.php", line 21, characters 22-22:
@@ -34,12 +28,16 @@ Invalid return type (Typing[4110])
   This type argument to `D` must match exactly (it is invariant)
 ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
 Invalid return type (Typing[4110])
+  File "instance_of_tparam.php", line 23, characters 33-34:
+  Expected `Ty`
   File "instance_of_tparam.php", line 24, characters 7-16:
-  Expected `Tx` from this `is` expression test
+  But got `mixed` from this `is` expression test
   File "instance_of_tparam.php", line 21, characters 22-22:
     via this generic `T`
-  File "instance_of_tparam.php", line 23, characters 16-17:
-  But got `mixed`
+  File "instance_of_tparam.php", line 21, characters 22-22:
+  This type argument to `D` must match exactly (it is invariant)
+  File "instance_of_tparam.php", line 23, characters 12-13:
+    by the definition of `Tx`
 ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
 Invalid return type (Typing[4110])
   File "instance_of_tparam.php", line 24, characters 7-16:
@@ -50,3 +48,15 @@ Invalid return type (Typing[4110])
   But got `Ty`
   File "instance_of_tparam.php", line 23, characters 33-34:
   This type argument to `D` must match exactly (it is invariant)
+ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
+Invalid return type (Typing[4110])
+  File "instance_of_tparam.php", line 24, characters 7-16:
+  Expected `Tx` from this `is` expression test
+  File "instance_of_tparam.php", line 21, characters 22-22:
+    via this generic `T`
+  File "instance_of_tparam.php", line 23, characters 33-34:
+  But got `mixed`
+  File "instance_of_tparam.php", line 23, characters 33-34:
+  This type argument to `D` must match exactly (it is invariant)
+  File "instance_of_tparam.php", line 23, characters 16-17:
+    by the definition of `Ty`

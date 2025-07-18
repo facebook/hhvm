@@ -6,8 +6,8 @@ Invalid argument (Typing[4323])
   This type constraint is violated
   File "generics_sub_nullable_tvar.php", line 4, characters 18-23:
   Expected `string`
-  File "generics_sub_nullable_tvar.php", line 10, characters 22-25:
-  But got `?int`
+  File "generics_sub_nullable_tvar.php", line 10, characters 23-25:
+  But got `int`
 ERROR: File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
 Invalid argument (Typing[4323])
   File "generics_sub_nullable_tvar.php", line 4, characters 12-13:
@@ -16,8 +16,10 @@ Invalid argument (Typing[4323])
   This type constraint is violated
   File "generics_sub_nullable_tvar.php", line 4, characters 18-23:
   Expected `string`
-  File "generics_sub_nullable_tvar.php", line 10, characters 23-25:
-  But got `int`
+  File "generics_sub_nullable_tvar.php", line 10, characters 28-29:
+  But got `?int`
+  File "generics_sub_nullable_tvar.php", line 10, characters 22-25:
+    by the definition of `T2`
 ERROR: File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
 Invalid argument (Typing[4323])
   File "generics_sub_nullable_tvar.php", line 4, characters 12-13:

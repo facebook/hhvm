@@ -2,20 +2,12 @@ ERROR: File "super_constraint_4.php", line 12, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_4.php", line 8, characters 38-40:
   Expected `Foo`
-  File "super_constraint_4.php", line 8, characters 43-44:
-  But got `mixed`
-ERROR: File "super_constraint_4.php", line 12, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_4.php", line 8, characters 38-40:
-  Expected `Foo`
-  File "super_constraint_4.php", line 8, characters 49-51:
-  But got `Ty1 where Ty1 super Ty, Ty1 as Blah`
-ERROR: File "super_constraint_4.php", line 12, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_4.php", line 8, characters 38-40:
-  Expected `Foo`
-  File "super_constraint_4.php", line 8, characters 61-64:
+  File "super_constraint_4.php", line 9, characters 3-4:
   But got `Blah`
+  File "super_constraint_4.php", line 8, characters 49-51:
+    by the definition of `Ty`
+  File "super_constraint_4.php", line 8, characters 61-64:
+    by the definition of `Ty1`
 ERROR: File "super_constraint_4.php", line 12, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_4.php", line 8, characters 38-40:
@@ -24,28 +16,52 @@ Invalid return type (Typing[4110])
   But got `Ty as Ty1`
 ERROR: File "super_constraint_4.php", line 12, characters 10-13:
 Invalid return type (Typing[4110])
-  File "super_constraint_4.php", line 11, characters 4-5:
-  Expected `Tx`
-  File "super_constraint_4.php", line 8, characters 43-44:
-  But got `mixed`
-ERROR: File "super_constraint_4.php", line 12, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_4.php", line 11, characters 4-5:
-  Expected `Tx`
-  File "super_constraint_4.php", line 8, characters 49-51:
+  File "super_constraint_4.php", line 8, characters 38-40:
+  Expected `Foo`
+  File "super_constraint_4.php", line 9, characters 3-4:
   But got `Ty1 where Ty1 super Ty, Ty1 as Blah`
+  File "super_constraint_4.php", line 8, characters 49-51:
+    by the definition of `Ty`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 8, characters 38-40:
+  Expected `Foo`
+  File "super_constraint_4.php", line 9, characters 3-4:
+  But got `mixed`
+  File "super_constraint_4.php", line 8, characters 43-44:
+    by the definition of `Ty`
 ERROR: File "super_constraint_4.php", line 12, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_4.php", line 11, characters 4-5:
   Expected `Tx`
-  File "super_constraint_4.php", line 8, characters 61-64:
+  File "super_constraint_4.php", line 9, characters 3-4:
   But got `Blah`
+  File "super_constraint_4.php", line 8, characters 49-51:
+    by the definition of `Ty`
+  File "super_constraint_4.php", line 8, characters 61-64:
+    by the definition of `Ty1`
 ERROR: File "super_constraint_4.php", line 12, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_4.php", line 11, characters 4-5:
   Expected `Tx`
   File "super_constraint_4.php", line 9, characters 3-4:
   But got `Ty as Ty1`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 11, characters 4-5:
+  Expected `Tx`
+  File "super_constraint_4.php", line 9, characters 3-4:
+  But got `Ty1 where Ty1 super Ty, Ty1 as Blah`
+  File "super_constraint_4.php", line 8, characters 49-51:
+    by the definition of `Ty`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 11, characters 4-5:
+  Expected `Tx`
+  File "super_constraint_4.php", line 9, characters 3-4:
+  But got `mixed`
+  File "super_constraint_4.php", line 8, characters 43-44:
+    by the definition of `Ty`
 ERROR: File "super_constraint_4.php", line 15, characters 7-18:
 Invalid argument (Typing[4323])
   File "super_constraint_4.php", line 8, characters 54-56:

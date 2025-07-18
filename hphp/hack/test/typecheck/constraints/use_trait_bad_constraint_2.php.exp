@@ -17,4 +17,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "use_trait_bad_constraint_2.php", line 4, characters 20-21:
   Expected `Ta`
   File "use_trait_bad_constraint_2.php", line 10, characters 14-15:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "use_trait_bad_constraint_2.php", line 10, characters 14-15:
+    by the definition of `Tb` arising from an implicit `as mixed` constraint on this type

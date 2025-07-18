@@ -16,14 +16,6 @@ Invalid argument (Typing[4110])
   Expected `<expr#13>::T`
   File "lvar_expr_dependent.php", line 27, characters 5-6:
     where `<expr#13>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 10, characters 28-30:
-  But got `num`
-ERROR: File "lvar_expr_dependent.php", line 27, characters 13-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#13>::T`
-  File "lvar_expr_dependent.php", line 27, characters 5-6:
-    where `<expr#13>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
   But got `<expr#16>::T as C::T`
   File "lvar_expr_dependent.php", line 27, characters 13-20:
@@ -34,21 +26,20 @@ Invalid argument (Typing[4110])
   Expected `<expr#13>::T`
   File "lvar_expr_dependent.php", line 27, characters 5-6:
     where `<expr#13>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 41-41:
-  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#16>::T, \C::T as num`
-  by accessing the type constant `T`
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  on the expression dependent type <expr#16>
+  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#16>::T, \C::T as num`
   File "lvar_expr_dependent.php", line 27, characters 13-20:
     where `<expr#16>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
+ERROR: File "lvar_expr_dependent.php", line 27, characters 13-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#16>::T`
-  File "lvar_expr_dependent.php", line 28, characters 5-12:
-    where `<expr#16>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 10, characters 28-30:
+  Expected `<expr#13>::T`
+  File "lvar_expr_dependent.php", line 27, characters 5-6:
+    where `<expr#13>` is a reference to this expression
+  File "lvar_expr_dependent.php", line 12, characters 35-41:
   But got `num`
+  File "lvar_expr_dependent.php", line 27, characters 13-20:
+    where `<expr#16>` is a reference to this expression
 ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
@@ -65,21 +56,20 @@ Invalid argument (Typing[4110])
   Expected `<expr#16>::T`
   File "lvar_expr_dependent.php", line 28, characters 5-12:
     where `<expr#16>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 41-41:
-  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#16>::T, \C::T as num`
-  by accessing the type constant `T`
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  on the expression dependent type <expr#13>
-  File "lvar_expr_dependent.php", line 20, characters 13-14:
+  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#16>::T, \C::T as num`
+  File "lvar_expr_dependent.php", line 28, characters 19-20:
     where `<expr#13>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
+ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#20>::T`
-  File "lvar_expr_dependent.php", line 42, characters 5-6:
-    where `<expr#20>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 10, characters 28-30:
+  Expected `<expr#16>::T`
+  File "lvar_expr_dependent.php", line 28, characters 5-12:
+    where `<expr#16>` is a reference to this expression
+  File "lvar_expr_dependent.php", line 12, characters 35-41:
   But got `num`
+  File "lvar_expr_dependent.php", line 28, characters 19-20:
+    where `<expr#13>` is a reference to this expression
 ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
@@ -96,10 +86,17 @@ Invalid argument (Typing[4110])
   Expected `<expr#20>::T`
   File "lvar_expr_dependent.php", line 42, characters 5-6:
     where `<expr#20>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 41-41:
-  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#16>::T, \C::T super <expr#20>::T, \C::T as num`
-  by accessing the type constant `T`
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  on the expression dependent type <expr#13>
-  File "lvar_expr_dependent.php", line 20, characters 13-14:
+  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#16>::T, \C::T super <expr#20>::T, \C::T as num`
+  File "lvar_expr_dependent.php", line 38, characters 14-15:
+    where `<expr#13>` is a reference to this expression
+ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
+Invalid argument (Typing[4110])
+  File "lvar_expr_dependent.php", line 13, characters 26-32:
+  Expected `<expr#20>::T`
+  File "lvar_expr_dependent.php", line 42, characters 5-6:
+    where `<expr#20>` is a reference to this expression
+  File "lvar_expr_dependent.php", line 12, characters 35-41:
+  But got `num`
+  File "lvar_expr_dependent.php", line 38, characters 14-15:
     where `<expr#13>` is a reference to this expression

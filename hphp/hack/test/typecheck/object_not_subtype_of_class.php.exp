@@ -9,4 +9,6 @@ Invalid return type (Typing[4110])
   File "object_not_subtype_of_class.php", line 6, characters 36-36:
   Expected `C`
   File "object_not_subtype_of_class.php", line 6, characters 28-28:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "object_not_subtype_of_class.php", line 6, characters 28-28:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

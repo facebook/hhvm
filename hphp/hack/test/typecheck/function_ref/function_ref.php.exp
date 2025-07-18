@@ -63,7 +63,7 @@ Invalid argument (Typing[4110])
   File "function_ref.php", line 31, characters 37-44:
   Expected `arraykey`
   File "function_ref.php", line 22, characters 22-22:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
 ERROR: File "function_ref.php", line 95, characters 16-19:
 Invalid argument (Typing[4110])
   File "function_ref.php", line 31, characters 3-57:
@@ -75,7 +75,7 @@ Invalid argument (Typing[4110])
   File "function_ref.php", line 35, characters 3-60:
   Expected `HH\FunctionRef<(readonly function(C, arraykey): arraykey)>`
   File "function_ref.php", line 14, characters 19-30:
-  But got `(readonly function<T>(C, $x): _)`
+  But got `(readonly function<T>(C, $x): _)` because method or function was called on dynamic or like-type
 ERROR: File "function_ref.php", line 104, characters 19-38:
 Invalid argument (Typing[4411])
   File "function_ref.php", line 104, characters 19-38:

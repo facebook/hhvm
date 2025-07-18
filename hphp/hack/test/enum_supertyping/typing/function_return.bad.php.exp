@@ -2,5 +2,7 @@ ERROR: File "function_return.bad.php", line 14, characters 10-13:
 Invalid return type (Typing[4110])
   File "function_return.bad.php", line 13, characters 19-19:
   Expected `F`
+  File "function_return.bad.php", line 8, characters 9-11:
+  But got `arraykey`
   File "function_return.bad.php", line 8, characters 6-6:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+    by the definition of `G` arising from an implicit `as arraykey` constraint on this type

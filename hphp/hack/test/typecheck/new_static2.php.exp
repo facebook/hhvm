@@ -33,4 +33,8 @@ Invalid return type (Typing[4110])
   File "new_static2.php", line 22, characters 35-37:
   Expected `int`
   File "new_static2.php", line 13, characters 18-18:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "new_static2.php", line 13, characters 18-18:
+  This type argument to `A` must match exactly (it is invariant)
+  File "new_static2.php", line 13, characters 18-18:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

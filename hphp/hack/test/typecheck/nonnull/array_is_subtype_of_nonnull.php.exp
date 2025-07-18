@@ -17,7 +17,9 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "array_is_subtype_of_nonnull.php", line 7, characters 37-38:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "array_is_subtype_of_nonnull.php", line 7, characters 37-38:
+    by the definition of `Tk` arising from an implicit `as mixed` constraint on this type
 ERROR: File "array_is_subtype_of_nonnull.php", line 15, characters 30-43:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -37,4 +39,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "array_is_subtype_of_nonnull.php", line 15, characters 37-38:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "array_is_subtype_of_nonnull.php", line 15, characters 37-38:
+    by the definition of `Tk` arising from an implicit `as mixed` constraint on this type

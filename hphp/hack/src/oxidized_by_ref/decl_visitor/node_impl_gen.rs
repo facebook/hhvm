@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<369880de458004bb136d3a2444b614db>>
+// @generated SignedSource<<2302670618a906f9853bd31b42b23656>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1681,7 +1681,7 @@ impl<'a> Node<'a> for Axiom {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             Axiom::Extends => {}
-            Axiom::UpperBound => {}
+            Axiom::UpperBound(ref __binding_0) => __binding_0.accept(v),
             Axiom::LowerBound => {}
         }
     }

@@ -49,4 +49,6 @@ Some type arguments violate their constraints (Typing[4323])
   File "type_splat_bad.php", line 26, characters 57-63:
   Expected `(mixed...)`
   File "type_splat_bad.php", line 26, characters 51-55:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  But got `mixed`
+  File "type_splat_bad.php", line 26, characters 51-55:
+    by the definition of `Targs` arising from an implicit `as mixed` constraint on this type

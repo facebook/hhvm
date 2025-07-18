@@ -1652,6 +1652,23 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
       const UnionNode& node) const;
   const type_system::EnumNode& asTypeSystemEnumNode(const EnumNode& node) const;
 
+  /**
+   * Allows converting a TypeSystem node into its corresponding SyntaxGraph. A
+   * TypeSystem node can only be converted if it was initially converted from
+   * SyntaxGraph node.
+   *
+   * Throws `std::runtime_error` if the provided node was not originally
+   * converted from a SyntaxGraph node.
+   */
+  const DefinitionNode& asSyntaxGraphDefinition(
+      const type_system::DefinitionNode& node) const;
+  const StructNode& asSyntaxGraphStructNode(
+      const type_system::StructNode& node) const;
+  const UnionNode& asSyntaxGraphUnionNode(
+      const type_system::UnionNode& node) const;
+  const EnumNode& asSyntaxGraphEnumNode(
+      const type_system::EnumNode& node) const;
+
   explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 
   void printTo(

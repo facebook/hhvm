@@ -555,23 +555,28 @@ TEST_F(ServiceSchemaTest, Interaction) {
       "                  ╰─ type = BINARY\n");
 }
 
-TEST_F(ServiceSchemaTest, StructuredAnnotation) {
-  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
-
-  folly::not_null<const DefinitionNode*> testUnion =
-      program->definitionsByName().at("TestUnion");
-
-  const auto& annotations = testUnion->annotations();
+void checkAnnotationsOnTestUnion(const UnionNode& node) {
+  const auto& annotations = node.definition().annotations();
   EXPECT_EQ(annotations.size(), 1);
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
-      &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
+      &node.definition()
+           .program()
+           .definitionsByName()
+           .at("TestStructuredAnnotation")
+           ->asStruct());
   EXPECT_EQ(annotations[0].value().size(), 2);
   EXPECT_EQ(annotations[0].value()["field1"].asInt(), 3);
   EXPECT_TRUE(annotations[0].value()["field2"].isObject());
   const auto& innerField = annotations[0].value()["field2"];
   EXPECT_EQ(innerField["field1"].asInt(), 4);
+}
+
+TEST_F(ServiceSchemaTest, StructuredAnnotation) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  checkAnnotationsOnTestUnion(
+      program->definitionsByName().at("TestUnion")->asUnion());
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
@@ -750,6 +755,8 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
   EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
   EXPECT_EQ(&syntaxGraph.asTypeSystemStructNode(def->asStruct()), &structNode);
+  const auto& sgStructNode = syntaxGraph.asSyntaxGraphStructNode(structNode);
+  EXPECT_EQ(&sgStructNode, &def->asStruct());
 
   uri = "meta.com/thrift_test/TestUnion";
   const type_system::UnionNode& unionNode =
@@ -761,6 +768,11 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(
       unionNode.fields()[0].presence(),
       type_system::PresenceQualifier::OPTIONAL_);
+  const auto& sgUnionNode = syntaxGraph.asSyntaxGraphUnionNode(unionNode);
+  EXPECT_EQ(
+      &mainProgram->definitionsByName().at("TestUnion")->asUnion(),
+      &sgUnionNode);
+  checkAnnotationsOnTestUnion(sgUnionNode);
 
   uri = "meta.com/thrift_test/TestEnum";
   const type_system::EnumNode& enumNode =
@@ -773,6 +785,9 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(enumNode.values()[1].i32, 1);
   EXPECT_EQ(enumNode.values()[2].name, "VALUE_2");
   EXPECT_EQ(enumNode.values()[2].i32, 2);
+  const auto& sgEnumNode = syntaxGraph.asSyntaxGraphEnumNode(enumNode);
+  EXPECT_EQ(
+      &mainProgram->definitionsByName().at("TestEnum")->asEnum(), &sgEnumNode);
 }
 
 TEST(SyntaxGraphTest, getSchemaMerge) {

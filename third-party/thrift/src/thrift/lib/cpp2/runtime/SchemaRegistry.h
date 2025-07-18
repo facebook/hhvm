@@ -146,6 +146,16 @@ class SchemaRegistry : public type_system::TypeSystem {
         .template asType<detail::TypeSystemNodeTypeFor<T>>();
   }
 
+  /**
+   * Gets SyntaxGraph node for given TypeSystem node, or throws
+   * `std::runtime_error` if the TypeSystem node was originated from the same
+   * SchemaRegistry.
+   */
+  const syntax_graph::DefinitionNode& getSyntaxGraphNode(
+      const type_system::DefinitionNode& node) const {
+    return syntaxGraph_->asSyntaxGraphDefinition(node);
+  }
+
   explicit SchemaRegistry(BaseSchemaRegistry& base);
   ~SchemaRegistry() override;
 

@@ -250,4 +250,16 @@ TEST_F(SchemaTest, getTypeSystemDefinitionRef) {
   EXPECT_EQ(uri, dynamicDefinitionRef->asStruct().uri());
 }
 
+TEST_F(SchemaTest, getSyntaxGraphNode) {
+  auto& registry = SchemaRegistry::get();
+
+  auto uri = "facebook.com/thrift/test/schema/Empty";
+
+  auto tsNodeRef = registry.getTypeSystemDefinitionRefByUri(uri);
+  EXPECT_TRUE(tsNodeRef);
+  const auto& sgNode = registry.getSyntaxGraphNode(tsNodeRef->asStruct());
+
+  EXPECT_EQ(getSyntaxGraphDefinitionNodeByUri(uri), &sgNode);
+}
+
 } // namespace apache::thrift::test

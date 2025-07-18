@@ -736,6 +736,16 @@ class TypeSystemFacade final : public type_system::TypeSystem {
         rootSgDef);
   }
 
+  const DefinitionNode& reverseUserDefinedType(
+      const type_system::DefinitionNode& node) const {
+    std::shared_lock rlock(cacheMutex_);
+    if (auto it = reverseCache_.find(&node); it != reverseCache_.end()) {
+      return *it->second;
+    }
+    folly::throw_exception<std::runtime_error>(
+        "Could not find the original SyntaxGraph Definition node for the given type.");
+  }
+
  private:
   // Convert the definition to TypeSystem's representation.
   // Caller must hold the write lock.
@@ -797,11 +807,17 @@ class TypeSystemFacade final : public type_system::TypeSystem {
       // into the map that we will later overwrite with the correct data.
       sgDef->visit(
           [&](const StructNode& s) {
-            cache_.emplace(sgDef, type_system::StructNode{{}, {}, {}, {}});
+            auto [entry, _] =
+                cache_.emplace(sgDef, type_system::StructNode{{}, {}, {}, {}});
+            reverseCache_.emplace(
+                &std::get<type_system::StructNode>(entry->second), sgDef);
             processStructuredType(s);
           },
           [&](const UnionNode& s) {
-            cache_.emplace(sgDef, type_system::UnionNode{{}, {}, {}, {}});
+            auto [entry, _] =
+                cache_.emplace(sgDef, type_system::UnionNode{{}, {}, {}, {}});
+            reverseCache_.emplace(
+                &std::get<type_system::UnionNode>(entry->second), sgDef);
             processStructuredType(s);
           },
           [](const ExceptionNode&) {
@@ -820,10 +836,12 @@ class TypeSystemFacade final : public type_system::TypeSystem {
                   type_system::AnnotationsMap{}});
             }
             // TODO: annotations
-            cache_.emplace(
+            auto [entry, _] = cache_.emplace(
                 sgDef,
                 type_system::EnumNode{
                     type_system::Uri(e.uri()), std::move(values), {}});
+            reverseCache_.emplace(
+                &std::get<type_system::EnumNode>(entry->second), sgDef);
           },
           [](const TypedefNode&) {
             folly::throw_exception<std::logic_error>(
@@ -952,6 +970,8 @@ class TypeSystemFacade final : public type_system::TypeSystem {
 
   const detail::SchemaBackedResolver& resolver_;
   folly::F14NodeMap<const DefinitionNode*, TSDefinition> cache_;
+  folly::F14NodeMap<const type_system::DefinitionNode*, const DefinitionNode*>
+      reverseCache_;
   mutable folly::SharedMutex cacheMutex_;
 };
 } // namespace
@@ -988,6 +1008,24 @@ const type_system::UnionNode& SyntaxGraph::asTypeSystemUnionNode(
 const type_system::EnumNode& SyntaxGraph::asTypeSystemEnumNode(
     const EnumNode& node) const {
   return asTypeSystemDefinitionRef(node.definition()).asEnum();
+}
+
+const DefinitionNode& SyntaxGraph::asSyntaxGraphDefinition(
+    const type_system::DefinitionNode& node) const {
+  auto& facade = static_cast<const TypeSystemFacade&>(asTypeSystem());
+  return facade.reverseUserDefinedType(node);
+}
+const StructNode& SyntaxGraph::asSyntaxGraphStructNode(
+    const type_system::StructNode& node) const {
+  return asSyntaxGraphDefinition(node).asStruct();
+}
+const UnionNode& SyntaxGraph::asSyntaxGraphUnionNode(
+    const type_system::UnionNode& node) const {
+  return asSyntaxGraphDefinition(node).asUnion();
+}
+const EnumNode& SyntaxGraph::asSyntaxGraphEnumNode(
+    const type_system::EnumNode& node) const {
+  return asSyntaxGraphDefinition(node).asEnum();
 }
 
 } // namespace apache::thrift::syntax_graph

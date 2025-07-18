@@ -1068,7 +1068,7 @@ class rust_mstch_service : public mstch_service {
     mstch::array extended_services;
     const t_service* service = service_;
     std::string as_ref_impl = "&self.parent";
-    while (const t_service* parent_service = service->get_extends()) {
+    while (const t_service* parent_service = service->extends()) {
       mstch::map node;
       node["extendedService:packagePrefix"] =
           get_client_import_name(parent_service->program(), options_);

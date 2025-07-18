@@ -73,7 +73,7 @@ class t_enum : public t_type {
    */
   void update_unused(int32_t val);
 
-  // TODO(afuller): These methods are only provided for backwards
+  // TODO(T227540797): These methods are only provided for backwards
   // compatibility. Update all references and remove everything below.
   std::vector<t_enum_value*> values_raw_;
 

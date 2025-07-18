@@ -69,7 +69,7 @@ class t_sink : public t_node {
   std::unique_ptr<t_throws> final_response_exceptions_;
 
  public:
-  // TODO(afuller): Delete everything below here. It is only provided for
+  // TODO(T227540797): Delete everything below here. It is only provided for
   // backwards compatibility.
   const t_type* get_elem_type() const { return elem_type().get_type(); }
   const t_type* get_final_response_type() const {

@@ -30,7 +30,7 @@ class t_paramlist final : public t_structured {
   // 'unnamed' t_type (or more accurately, not a type at all).
   explicit t_paramlist(const t_program* program) : t_structured(program, "") {}
 
-  // TODO(hchok): Remove everything below this comment. It is only provided
+  // TODO(T227540797): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
   /**

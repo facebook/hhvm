@@ -79,7 +79,7 @@ class t_primitive_type : public t_type {
   t_primitive_type(std::string name, type primitive_type)
       : t_type(std::move(name)), primitive_type_(primitive_type) {}
 
-  // TODO(afuller): Remove everything below here. It is provided only for
+  // TODO(T227540797): Remove everything below here. It is provided only for
   // backwards compatibility.
  public:
   /**

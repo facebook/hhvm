@@ -125,7 +125,7 @@ class t_field final : public t_named {
 
   bool injected_ = false;
 
-  // TODO(afuller): Delete everything below here. It is only provided for
+  // TODO(T227540797): Delete everything below here. It is only provided for
   // backwards compatibility.
  public:
   enum class e_req {

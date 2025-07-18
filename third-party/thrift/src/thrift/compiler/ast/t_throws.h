@@ -35,7 +35,7 @@ class t_throws : public t_structured {
     return value == nullptr || !value->has_fields();
   }
 
-  // TODO(hchok): Remove everything below this comment. It is only provided
+  // TODO(T227540797): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
   /**

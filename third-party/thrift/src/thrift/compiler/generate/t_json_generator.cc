@@ -701,10 +701,10 @@ void t_json_generator::generate_service(const t_service* tservice) {
 
   bool first = true;
 
-  if (tservice->get_extends()) {
+  if (tservice->extends()) {
     indent(f_out_) << "\"extends\" : {" << endl;
     indent_up();
-    print_spec(tservice->get_extends());
+    print_spec(tservice->extends());
     f_out_ << endl;
     indent_down();
     indent(f_out_) << "}";

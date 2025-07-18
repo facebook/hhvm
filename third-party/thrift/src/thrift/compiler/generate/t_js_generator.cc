@@ -733,15 +733,15 @@ void t_js_generator::generate_service(const t_service* tservice) {
              << render_includes() << endl;
 
   if (gen_node_) {
-    if (tservice->get_extends() != nullptr) {
-      f_service_ << "var " << tservice->get_extends()->name() << " = require('"
-                 << js_node_module(tservice->get_extends()->program()) << "/"
-                 << tservice->get_extends()->name() << "')" << endl
-                 << "var " << tservice->get_extends()->name()
-                 << "Client = " << tservice->get_extends()->name() << ".Client"
+    if (tservice->extends() != nullptr) {
+      f_service_ << "var " << tservice->extends()->name() << " = require('"
+                 << js_node_module(tservice->extends()->program()) << "/"
+                 << tservice->extends()->name() << "')" << endl
+                 << "var " << tservice->extends()->name()
+                 << "Client = " << tservice->extends()->name() << ".Client"
                  << endl
-                 << "var " << tservice->get_extends()->name()
-                 << "Processor = " << tservice->get_extends()->name()
+                 << "var " << tservice->extends()->name()
+                 << "Processor = " << tservice->extends()->name()
                  << ".Processor" << endl;
     }
 
@@ -778,10 +778,10 @@ void t_js_generator::generate_service_processor(const t_service* tservice) {
 
   scope_down(f_service_);
 
-  if (tservice->get_extends() != nullptr) {
+  if (tservice->extends() != nullptr) {
     indent(f_service_) << "Thrift.inherits("
                        << js_namespace(tservice->program()) << service_name_
-                       << "Processor, " << tservice->get_extends()->name()
+                       << "Processor, " << tservice->extends()->name()
                        << "Processor)" << endl;
   }
 
@@ -982,11 +982,11 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
 
   f_service_ << indent() << "};" << endl;
 
-  if (tservice->get_extends() != nullptr) {
+  if (tservice->extends() != nullptr) {
     indent(f_service_) << "Thrift.inherits("
                        << js_namespace(tservice->program()) << service_name_
-                       << "Client, " << tservice->get_extends()->name()
-                       << "Client)" << endl;
+                       << "Client, " << tservice->extends()->name() << "Client)"
+                       << endl;
   } else {
     // init prototype
     indent(f_service_) << js_namespace(tservice->program()) << service_name_

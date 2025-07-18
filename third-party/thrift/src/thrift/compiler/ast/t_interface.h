@@ -49,7 +49,7 @@ class t_interface : public t_type {
  private:
   node_list<t_function> functions_;
 
-  // TODO(afuller): Remove everything below this comment. It is only provided
+  // TODO(T227540797): Remove everything below this comment. It is only provided
   // for backwards compatibility.
   std::vector<t_function*> old_functions_raw_;
 

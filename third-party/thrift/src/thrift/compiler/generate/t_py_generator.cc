@@ -2161,11 +2161,10 @@ void t_py_generator::generate_service(const t_service* tservice) {
 
   f_service_ << py_autogen_comment() << endl << py_imports() << endl;
 
-  if (tservice->get_extends() != nullptr) {
+  if (tservice->extends() != nullptr) {
     f_service_ << "import "
-               << get_real_py_module(tservice->get_extends()->program()) << "."
-               << rename_reserved_keywords(tservice->get_extends()->name())
-               << endl;
+               << get_real_py_module(tservice->extends()->program()) << "."
+               << rename_reserved_keywords(tservice->extends()->name()) << endl;
   }
 
   f_service_ << "from .ttypes import " << render_ttype_declarations("") << endl
@@ -2319,8 +2318,8 @@ void t_py_generator::generate_service_interface(
   string iface_prefix = with_context ? "Context" : "";
   string extends;
   string extends_if;
-  if (tservice->get_extends() != nullptr) {
-    extends = service_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = service_name(tservice->extends());
     extends_if = "(" + extends + "." + iface_prefix + "Iface)";
   }
 
@@ -2386,8 +2385,8 @@ void t_py_generator::generate_service_interface(
 void t_py_generator::generate_service_client(const t_service* tservice) {
   string extends;
   string extends_client;
-  if (tservice->get_extends() != nullptr) {
-    extends = service_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = service_name(tservice->extends());
     extends_client = extends + ".Client, ";
   }
 
@@ -2814,7 +2813,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
 
   set<string> processed_fns;
   for (const t_service* cur_service = tservice; cur_service != nullptr;
-       cur_service = cur_service->get_extends()) {
+       cur_service = cur_service->extends()) {
     const string& svc_name = cur_service->name();
     const auto& functions = get_functions(cur_service);
     for (vector<t_function*>::const_iterator it = functions.begin();
@@ -2862,7 +2861,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
   // Similar, but for service names
   f_remote << "SERVICE_NAMES = [";
   for (const t_service* cur_service = tservice; cur_service != nullptr;
-       cur_service = cur_service->get_extends()) {
+       cur_service = cur_service->extends()) {
     f_remote << "'" << cur_service->name() << "', ";
   }
   f_remote << "]\n\n";
@@ -2931,8 +2930,8 @@ void t_py_generator::generate_service_server(
 
   string extends;
   string extends_processor;
-  if (tservice->get_extends() != nullptr) {
-    extends = service_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = service_name(tservice->extends());
     extends_processor = extends + "." + class_prefix + "Processor, ";
   }
 

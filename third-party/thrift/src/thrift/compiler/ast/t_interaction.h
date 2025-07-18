@@ -30,7 +30,7 @@ class t_program;
  *
  * An interaction is an interface with context.
  */
-// TODO(afuller): Inherit from t_interface directly.
+// TODO(T227540797): Inherit from t_interface directly.
 class t_interaction : public t_service {
  public:
   using t_service::t_service;

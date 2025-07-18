@@ -123,7 +123,7 @@ class t_type : public t_named {
   t_type(const t_program* program, std::string name)
       : t_named(program, std::move(name)) {}
 
-  // TODO(afuller): Delete everything below this point. It's only here for
+  // TODO(T227540797): Delete everything below this point. It's only here for
   // backwards compatibility.
  public:
   /*
@@ -266,7 +266,7 @@ class t_type_ref final {
 
   const t_type& deref_or_throw() const;
 
-  // TODO(afuller): Remove everything below this comment. It is only provided
+  // TODO(T227540797): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
   const t_type* get_type() const { return type_; }

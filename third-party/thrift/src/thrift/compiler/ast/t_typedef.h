@@ -96,7 +96,7 @@ class t_typedef : public t_type {
  private:
   bool unnamed_{false};
 
-  // TODO(afuller): Remove everything below here, as it is just provided for
+  // TODO(T227540797): Remove everything below here, as it is just provided for
   // backwards compatibility.
  public:
   const t_type* get_type() const { return type_.get_type(); }

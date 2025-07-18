@@ -592,7 +592,7 @@ mstch::node mstch_service::functions() {
 }
 
 mstch::node mstch_service::extends() {
-  const auto* extends = service_->get_extends();
+  const auto* extends = service_->extends();
   if (extends) {
     return make_mstch_extended_service_cached(extends);
   }

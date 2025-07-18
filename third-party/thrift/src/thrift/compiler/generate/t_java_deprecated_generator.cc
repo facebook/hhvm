@@ -2378,8 +2378,8 @@ void t_java_deprecated_generator::generate_service_interface(
     const t_service* tservice) {
   string extends;
   string extends_iface;
-  if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = type_name(tservice->extends());
     extends_iface = " extends " + extends + ".Iface";
   }
 
@@ -2408,8 +2408,8 @@ void t_java_deprecated_generator::generate_service_async_interface(
     const t_service* tservice) {
   string extends;
   string extends_iface;
-  if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = type_name(tservice->extends());
     extends_iface = " extends " + extends + ".AsyncIface";
   }
 
@@ -2463,8 +2463,8 @@ void t_java_deprecated_generator::generate_service_client(
     const t_service* tservice) {
   string extends;
   string extends_client;
-  if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = type_name(tservice->extends());
     extends_client = " extends " + extends + ".Client";
   } else {
     // Client base class
@@ -2697,8 +2697,8 @@ void t_java_deprecated_generator::generate_service_async_client(
     const t_service* tservice) {
   string extends = "TAsyncClient";
   string extends_client;
-  if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends()) + ".AsyncClient";
+  if (tservice->extends() != nullptr) {
+    extends = type_name(tservice->extends()) + ".AsyncClient";
   }
 
   indent(f_service_) << "public static class AsyncClient extends " << extends
@@ -2896,8 +2896,8 @@ void t_java_deprecated_generator::generate_service_server(
   // Extends stuff
   string extends;
   string extends_processor;
-  if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+  if (tservice->extends() != nullptr) {
+    extends = type_name(tservice->extends());
     extends_processor = " extends " + extends + ".Processor";
   }
 

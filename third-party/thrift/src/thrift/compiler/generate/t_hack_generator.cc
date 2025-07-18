@@ -2558,7 +2558,7 @@ std::unique_ptr<t_const_value> t_hack_generator::service_to_tmeta(
         std::move(tmeta_functions));
   }
 
-  const t_service* parent = service->get_extends();
+  const t_service* parent = service->extends();
   if (parent) {
     tmeta_ThriftService->add_map(
         std::make_unique<t_const_value>("parent"),
@@ -4947,7 +4947,7 @@ std::string t_hack_generator::render_service_metadata_response(
       if (tservice != service) {
         services.push_back(tservice);
       }
-      queue.push(tservice->get_extends());
+      queue.push(tservice->extends());
 
       for (const auto& function : tservice->functions()) {
         if (skip_codegen(&function)) {
@@ -5701,8 +5701,8 @@ void t_hack_generator::generate_service_processor(
   // Generate the dispatch methods
   std::string extends;
   std::string extends_processor = std::string("\\ThriftAsyncProcessor");
-  if (tservice->get_extends() != nullptr) {
-    extends = php_servicename_mangle(mangle, tservice->get_extends(), true);
+  if (tservice->extends() != nullptr) {
+    extends = php_servicename_mangle(mangle, tservice->extends(), true);
     extends_processor = extends + "AsyncProcessorBase";
   }
 
@@ -6785,14 +6785,14 @@ void t_hack_generator::generate_service_interface(
   std::string long_name = php_servicename_mangle(mangle, tservice);
   if (async && client) {
     extends_if = long_name + "Async" + "If";
-    if (tservice->get_extends() != nullptr) {
+    if (tservice->extends() != nullptr) {
       std::string ext_prefix =
-          php_servicename_mangle(mangle, tservice->get_extends(), true);
+          php_servicename_mangle(mangle, tservice->extends(), true);
       extends_if = extends_if + ", " + ext_prefix + suffix + "If";
     }
-  } else if (tservice->get_extends() != nullptr) {
+  } else if (tservice->extends() != nullptr) {
     std::string ext_prefix =
-        php_servicename_mangle(mangle, tservice->get_extends(), true);
+        php_servicename_mangle(mangle, tservice->extends(), true);
     extends_if = ext_prefix + suffix + "If";
   }
 
@@ -7141,9 +7141,9 @@ void t_hack_generator::_generate_service_client_children(
   std::string class_suffix = std::string(async ? "Async" : "");
   std::string interface_suffix = std::string(async ? "AsyncClient" : "Client");
   std::string extends = "\\ThriftClientBase";
-  bool root = tservice->get_extends() == nullptr;
+  bool root = tservice->extends() == nullptr;
   if (!root) {
-    extends = php_servicename_mangle(mangle, tservice->get_extends(), true) +
+    extends = php_servicename_mangle(mangle, tservice->extends(), true) +
         class_suffix + "Client";
   }
 

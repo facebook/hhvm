@@ -45,10 +45,9 @@ class t_service : public t_interface {
   const t_service* extends_ = nullptr;
   source_range extends_range_;
 
-  // TODO(afuller): Remove everything below this comment. It is only provided
+  // TODO(T227540797): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
-  const t_service* get_extends() const { return extends_; }
   type get_type_value() const override { return type::t_service; }
 };
 

@@ -46,7 +46,7 @@ class t_map final : public t_container {
   t_type_ref key_type_;
   t_type_ref val_type_;
 
-  // TODO(afuller): Delete everything below here. It is only provided for
+  // TODO(T227540797): Delete everything below here. It is only provided for
   // backwards compatibility.
  public:
   const t_type* get_key_type() const { return key_type().get_type(); }

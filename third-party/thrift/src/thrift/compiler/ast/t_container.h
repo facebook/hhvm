@@ -43,7 +43,7 @@ class t_container : public t_type {
  protected:
   t_container() = default;
 
-  // TODO(afuller): Remove everything below here. It is provided only for
+  // TODO(T227540797): Remove everything below here. It is provided only for
   // backwards compatibility.
  public:
   t_type::type get_type_value() const override {

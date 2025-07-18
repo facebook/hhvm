@@ -573,7 +573,7 @@ class mstch_service : public mstch_base {
   whisker::object self() { return make_self(*service_); }
   mstch::node name() { return service_->name(); }
   mstch::node has_functions() { return !get_functions().empty(); }
-  mstch::node has_extends() { return service_->get_extends() != nullptr; }
+  mstch::node has_extends() { return service_->extends() != nullptr; }
   mstch::node functions();
   mstch::node extends();
   mstch::node annotations() { return mstch_base::annotations(service_); }

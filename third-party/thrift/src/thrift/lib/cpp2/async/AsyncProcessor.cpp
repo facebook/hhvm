@@ -49,8 +49,6 @@ bool isStreamTrackingEnabled() {
 
 namespace apache::thrift {
 
-thread_local RequestParams ServerInterface::requestParams_;
-
 void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
   if (!setUpRequestProcessing(req)) {
     return;
@@ -539,62 +537,6 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(
   }
 
   return true;
-}
-
-concurrency::PRIORITY ServerInterface::getRequestPriority(
-    Cpp2RequestContext* ctx, concurrency::PRIORITY prio) {
-  concurrency::PRIORITY callPriority = ctx->getCallPriority();
-  return callPriority == concurrency::N_PRIORITIES ? prio : callPriority;
-}
-
-void ServerInterface::setEventBase(folly::EventBase* eb) {
-  folly::RequestEventBase::set(eb);
-  requestParams_.eventBase_ = eb;
-}
-
-void ServerInterface::BlockingThreadManager::add(folly::Func f) {
-  try {
-    if (threadManagerKa_) {
-      std::shared_ptr<concurrency::Runnable> task =
-          concurrency::FunctionRunner::create(std::move(f));
-      threadManagerKa_->add(
-          std::move(task),
-          std::chrono::milliseconds(kTimeout).count() /* deprecated */,
-          0,
-          false);
-    } else {
-      executorKa_->add(std::move(f));
-    }
-    return;
-  } catch (...) {
-    LOG(FATAL) << "Failed to schedule a task within timeout: "
-               << folly::exceptionStr(folly::current_exception());
-  }
-}
-
-bool ServerInterface::BlockingThreadManager::keepAliveAcquire() noexcept {
-  auto keepAliveCount = keepAliveCount_.fetch_add(1, std::memory_order_relaxed);
-  // We should never increment from 0
-  DCHECK(keepAliveCount > 0);
-  return true;
-}
-
-void ServerInterface::BlockingThreadManager::keepAliveRelease() noexcept {
-  auto keepAliveCount = keepAliveCount_.fetch_sub(1, std::memory_order_acq_rel);
-  DCHECK(keepAliveCount >= 1);
-  if (keepAliveCount == 1) {
-    delete this;
-  }
-}
-
-folly::Executor::KeepAlive<> ServerInterface::getInternalKeepAlive() {
-  if (getThreadManager_deprecated()) {
-    return getThreadManager_deprecated()->getKeepAlive(
-        getRequestContext()->getRequestExecutionScope(),
-        apache::thrift::concurrency::ThreadManager::Source::INTERNAL);
-  } else {
-    return folly::Executor::getKeepAliveToken(getHandlerExecutor());
-  }
 }
 
 const folly::Executor::KeepAlive<>&

@@ -254,6 +254,7 @@ add_library(
   async/processor/AsyncProcessorFunc.cpp
   async/processor/EventTask.cpp
   async/processor/RequestParams.cpp
+  async/processor/ServerInterface.cpp
   async/processor/ServerRequest.cpp
   async/processor/ServerRequestHelper.cpp
   async/processor/ServerRequestTask.cpp

@@ -1021,37 +1021,6 @@ void* setIOBuf(void* objectPtr, const folly::IOBuf& value) {
   return nullptr;
 }
 
-// This helper method for `MutableMapTypeInfo::write()` sorts the map keys and
-// writes them to the wire. It is called when the `protocolSortKeys` parameter
-// of `write()` is set to `true`.
-size_t writeMapSorted(
-    const void* context,
-    const void* object,
-    size_t (*writer)(
-        const void* context, const void* keyElem, const void* valueElem)) {
-  PyObject* dict = const_cast<PyObject*>(toPyObject(object));
-  DCHECK(PyDict_Check(dict));
-  UniquePyObjectPtr listPtr =
-      UniquePyObjectPtr{PySequence_List(PyDict_Items(dict))};
-  if (!listPtr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  if (PyList_Sort(listPtr.get()) == -1) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-
-  size_t written = 0;
-  const Py_ssize_t size = PyList_Size(listPtr.get());
-  for (std::uint32_t i = 0; i < size; ++i) {
-    PyObject* pair = PyList_GET_ITEM(listPtr.get(), i);
-    PyObject* key = PyTuple_GET_ITEM(pair, 0);
-    PyObject* value = PyTuple_GET_ITEM(pair, 1);
-    written += writer(context, &key, &value);
-  }
-
-  return written;
-}
-
 inline UniquePyObjectPtr primitiveCppToPython(bool value) {
   PyObject* ret = value ? Py_True : Py_False;
   Py_INCREF(ret);
@@ -1647,26 +1616,43 @@ void ImmutableMapHandler::read(
   setPyObject(objectPtr, std::move(map));
 }
 
-size_t ImmutableMapHandler::write(
+size_t writeMapSorted(
     const void* context,
     const void* object,
-    bool protocolSortKeys,
+    PyObject* (*toItems)(PyObject* dict_),
+    size_t (*writer)(
+        const void* context, const void* keyElem, const void* valueElem)) {
+  PyObject* dict = const_cast<PyObject*>(toPyObject(object));
+  PyObject* keys = toItems(dict);
+  UniquePyObjectPtr listPtr = UniquePyObjectPtr{PySequence_List(keys)};
+  if (!listPtr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  if (PyList_Sort(listPtr.get()) == -1) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+
+  size_t written = 0;
+  const Py_ssize_t size = PyList_Size(listPtr.get());
+  for (std::uint32_t i = 0; i < size; ++i) {
+    PyObject* pair = PyList_GET_ITEM(listPtr.get(), i);
+    PyObject* key = PyTuple_GET_ITEM(pair, 0);
+    PyObject* value = PyTuple_GET_ITEM(pair, 1);
+    written += writer(context, &key, &value);
+  }
+
+  return written;
+}
+
+size_t ImmutableMapHandler::writeUnsorted(
+    const void* context,
+    const void* object,
     size_t (*writer)(
         const void* context, const void* keyElem, const void* valueElem)) {
   size_t written = 0;
   PyObject* map = const_cast<PyObject*>(toPyObject(object));
   const Py_ssize_t size = PyTuple_GET_SIZE(map);
   UniquePyObjectPtr seq;
-  if (protocolSortKeys) {
-    seq = UniquePyObjectPtr{PySequence_List(map)};
-    if (!seq) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    if (PyList_Sort(seq.get()) == -1) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    map = PySequence_Tuple(seq.get());
-  }
   for (std::uint32_t i = 0; i < size; ++i) {
     PyObject* pair = PyTuple_GET_ITEM(map, i);
     PyObject* key = PyTuple_GET_ITEM(pair, 0);
@@ -1723,24 +1709,21 @@ void MutableMapHandler::read(
   setPyObject(objectPtr, std::move(dict));
 }
 
-size_t MutableMapHandler::write(
+size_t MutableMapHandler::writeUnsorted(
     const void* context,
     const void* object,
-    bool protocolSortKeys,
     size_t (*writer)(
         const void* context, const void* keyElem, const void* valueElem)) {
-  if (protocolSortKeys) {
-    return writeMapSorted(context, object, writer);
-  }
-
   PyObject* dict = const_cast<PyObject*>(toPyObject(object));
   size_t written = 0;
   PyObject* key = nullptr;
   PyObject* value = nullptr;
   Py_ssize_t pos = 0;
+
   while (PyDict_Next(dict, &pos, &key, &value)) {
     written += writer(context, &key, &value);
   }
+
   return written;
 }
 

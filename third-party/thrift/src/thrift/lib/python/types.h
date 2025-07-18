@@ -564,6 +564,17 @@ struct MutableSetHandler {
 
 using MutableSetTypeInfo = SetTypeInfoImpl<MutableSetHandler, false>;
 
+/**
+ * This helper method sorts map keys and write them to the wire. It may  be
+ * called for both mutable and immutable maps.
+ */
+size_t writeMapSorted(
+    const void* context,
+    const void* object,
+    PyObject* (*toItems)(PyObject* dict),
+    size_t (*writer)(
+        const void* context, const void* keyElem, const void* valueElem));
+
 template <typename Handler>
 class MapTypeInfoImpl {
  public:
@@ -588,7 +599,10 @@ class MapTypeInfoImpl {
       bool protocolSortKeys,
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem)) {
-    return Handler::write(context, object, protocolSortKeys, writer);
+    if (UNLIKELY(protocolSortKeys)) {
+      return writeMapSorted(context, object, Handler::toItems, writer);
+    }
+    return Handler::writeUnsorted(context, object, writer);
   }
 
   static void consumeElem(
@@ -632,6 +646,12 @@ class ImmutableMapHandler {
     return PyTuple_GET_SIZE(object);
   }
 
+  // Result is used by writeMapSorted as input to PySequence_list
+  // Since immutable map representation is tuple, this is a no-op.
+  // Since maps can't have duplicate keys, the value (second value in tuple)
+  // will never be used for comparison, only the first value of each.
+  static PyObject* toItems(PyObject* dictTuple) { return dictTuple; }
+
   static void* clear(void* object) { return setContainer(object); }
 
   static void read(
@@ -641,10 +661,9 @@ class ImmutableMapHandler {
       void (*keyReader)(const void* context, void* key),
       void (*valueReader)(const void* context, void* val));
 
-  static size_t write(
+  static size_t writeUnsorted(
       const void* context,
       const void* object,
-      bool protocolSortKeys,
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem));
 
@@ -661,6 +680,15 @@ class MutableMapHandler {
  public:
   static int64_t size(const PyObject* object) {
     return PyDict_Size(const_cast<PyObject*>(object));
+  }
+
+  // Result is used by writeMapSorted as input to PySequence_List
+  static PyObject* toItems(PyObject* dict) {
+    PyObject* keys = PyDict_Items(dict);
+    if (keys == nullptr) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    return keys;
   }
 
   static void* clear(void* objectPtr) { return setMutableMap(objectPtr); }
@@ -702,10 +730,9 @@ class MutableMapHandler {
    *
    * @return Total number of bytes written.
    */
-  static size_t write(
+  static size_t writeUnsorted(
       const void* context,
       const void* object,
-      bool protocolSortKeys,
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem));
 

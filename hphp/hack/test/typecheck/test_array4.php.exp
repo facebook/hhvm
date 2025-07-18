@@ -12,8 +12,10 @@ ERROR: File "test_array4.php", line 13, characters 10-17:
 Invalid return type (Typing[4110])
   File "test_array4.php", line 12, characters 38-41:
   Expected `bool`
-  File "test_array4.php", line 12, characters 28-30:
+  File "test_array4.php", line 13, characters 10-17:
   But got `int`
+  File "test_array4.php", line 12, characters 28-30:
+    from this definition
 ERROR: File "test_array4.php", line 13, characters 10-17:
 This value is not a valid key type for this container (Typing[4324])
   File "test_array4.php", line 12, characters 15-31:

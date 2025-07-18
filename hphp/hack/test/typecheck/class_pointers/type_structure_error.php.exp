@@ -1,0 +1,12 @@
+ERROR: File "type_structure_error.php", line 10, characters 5-6:
+Invalid argument (Typing[4110])
+  File "type_structure_error.php", line 7, characters 12-19:
+  Expected `class<D>`
+  File "type_structure_error.php", line 8, characters 8-49:
+  But got `string`
+  File "typestructure.hhi", line 63, characters 21-32:
+    from this definition
+  File "classname.hhi", line 21, characters 28-38:
+    by the definition of `classname`
+  File "classname.hhi", line 14, characters 27-32:
+    by the definition of `typename`

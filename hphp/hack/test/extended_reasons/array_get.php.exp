@@ -22,6 +22,17 @@ File array_get.php, line 3, character 35 - line 3, character 38:
 
 But got string
 
+File array_get.php, line 4, character 8 - line 4, character 12:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = »$d[1]«;
+ 5 |   return $x;
+ 6 | }
+
+  from this definition
+
 File array_get.php, line 3, character 22 - line 3, character 27:
 
  1 | <?hh

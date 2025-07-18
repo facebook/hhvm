@@ -18,5 +18,7 @@ ERROR: File "recursive_type_bad.php", line 27, characters 10-20:
 Invalid return type (Typing[4110])
   File "recursive_type_bad.php", line 24, characters 33-44:
   Expected `shape('inner' => mixed, 'value1' => int, 'value2' => string)`
-  File "recursive_type_bad.php", line 6, characters 14-29:
+  File "recursive_type_bad.php", line 27, characters 10-20:
   But got `mixed`
+  File "recursive_type_bad.php", line 6, characters 14-29:
+    from this definition

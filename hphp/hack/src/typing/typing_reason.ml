@@ -2327,9 +2327,13 @@ let rec to_string_help :
   | Prj_one { part = r1; _ } ->
     to_string_help prefix solutions r1
   (* If we don't have a solution for a type variable use the origin of the flow *)
-  | Flow { from; _ }
+  | Flow { from; into; kind }
     when Tvid.Map.is_empty solutions || not (flow_contains_tyvar r) ->
-    to_string_help prefix solutions from
+    (match kind with
+    | Flow_array_get ->
+      to_string_help prefix solutions into
+      @ to_string_help "  from this definition" solutions from
+    | _ -> to_string_help prefix solutions from)
   (* otherwise, follow the flow until we reach the type variable *)
   | Flow { from; into; _ } ->
     (match from with

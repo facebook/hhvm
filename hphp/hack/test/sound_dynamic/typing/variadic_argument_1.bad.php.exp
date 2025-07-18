@@ -4,5 +4,7 @@ Method  `foo` in class `C` is not dynamically callable. (Typing[4110])
   Invalid argument
   File "variadic_argument_1.bad.php", line 4, characters 18-27:
   Expected `(int, int)`
+  File "variadic_argument_1.bad.php", line 9, characters 13-17:
+  But got `dynamic`
   File "variadic_argument_1.bad.php", line 8, characters 37-38:
-  But got `dynamic` (variadic argument)
+    from this definition (variadic argument)

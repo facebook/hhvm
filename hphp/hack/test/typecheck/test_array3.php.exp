@@ -2,5 +2,7 @@ ERROR: File "test_array3.php", line 13, characters 10-14:
 Invalid return type (Typing[4110])
   File "test_array3.php", line 12, characters 33-35:
   Expected `int`
-  File "test_array3.php", line 12, characters 22-25:
+  File "test_array3.php", line 13, characters 10-14:
   But got `bool`
+  File "test_array3.php", line 12, characters 22-25:
+    from this definition

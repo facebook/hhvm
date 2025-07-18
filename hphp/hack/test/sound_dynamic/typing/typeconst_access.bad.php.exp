@@ -2,15 +2,19 @@ ERROR: File "typeconst_access.bad.php", line 16, characters 12-16:
 Invalid return type (Typing[4110])
   File "typeconst_access.bad.php", line 14, characters 6-8:
   Expected `int`
-  File "", line 0, characters 0-0:
+  File "typeconst_access.bad.php", line 16, characters 12-16:
   But got `<expr#2>::TIndex`
+  File "", line 0, characters 0-0:
+    from this definition
   File "typeconst_access.bad.php", line 21, characters 11-16:
     via this generic `TIndex`
 ERROR: File "typeconst_access.bad.php", line 16, characters 12-16:
 Invalid return type (Typing[4110])
   File "typeconst_access.bad.php", line 14, characters 6-8:
   Expected `int`
-  File "", line 0, characters 0-0:
+  File "typeconst_access.bad.php", line 16, characters 12-16:
   But got `mixed`
+  File "", line 0, characters 0-0:
+    from this definition
   File "typeconst_access.bad.php", line 21, characters 11-16:
     via this generic `TIndex`

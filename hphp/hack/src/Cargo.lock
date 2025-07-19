@@ -630,7 +630,7 @@ name = "cbindgen"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "clap 4.5.38",
+ "clap 4.5.41",
  "heck 0.4.1",
  "indexmap 2.10.0",
  "log",
@@ -723,19 +723,19 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.38"
+version = "4.5.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed93b9805f8ba930df42c2590f05453d5ec36cbb85d018868a5b24d31f6ac000"
+checksum = "be92d32e80243a54711e5d7ce823c35c41c9d929dc4ab58e1276f625841aadf9"
 dependencies = [
  "clap_builder",
- "clap_derive 4.5.32",
+ "clap_derive 4.5.41",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.38"
+version = "4.5.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "379026ff283facf611b0ea629334361c4211d1b12ee01024eec1591133b04120"
+checksum = "707eab41e9622f9139419d573eca0900137718000c517d47da73045f54331c3d"
 dependencies = [
  "anstream",
  "anstyle",
@@ -761,9 +761,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.32"
+version = "4.5.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09176aae279615badda0765c0c0b3f6ed53f4709118af73cf4655d85d1530cd7"
+checksum = "ef4f52386a59ca4c860f7393bcf8abd8dfd91ecccc0f774635ff68e92eeef491"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -853,7 +853,7 @@ dependencies = [
  "bc_to_ir",
  "bstr",
  "bytecode_printer",
- "clap 4.5.38",
+ "clap 4.5.41",
  "decl_provider",
  "elab",
  "emit_unit",
@@ -1138,7 +1138,7 @@ name = "cxxbridge-cmd"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "clap 4.5.38",
+ "clap 4.5.41",
  "codespan-reporting",
  "indexmap 2.10.0",
  "proc-macro2",
@@ -1485,7 +1485,7 @@ name = "dump-opcodes"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.38",
+ "clap 4.5.41",
  "emit_opcodes",
  "hhbc-gen",
  "quote",
@@ -1495,7 +1495,7 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
- "clap 4.5.38",
+ "clap 4.5.41",
  "depgraph_reader",
  "indicatif",
 ]
@@ -2163,7 +2163,7 @@ dependencies = [
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
- "clap 4.5.38",
+ "clap 4.5.41",
  "cmp",
  "compile",
  "decl_parser",
@@ -2407,7 +2407,7 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.38",
+ "clap 4.5.41",
  "hash",
  "proc-macro2",
  "quote",
@@ -2578,7 +2578,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.38",
+ "clap 4.5.41",
  "hdf",
  "hhvm_runtime_options",
 ]

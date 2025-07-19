@@ -71,7 +71,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
     folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> generator) {
   const auto& clientCancelToken =
       co_await folly::coro::co_current_cancellation_token;
-  auto mergedToken = folly::CancellationToken::merge(
+  auto mergedToken = folly::cancellation_token_merge(
       serverCancelSource_.getToken(), clientCancelToken);
   auto makeCancellationCallback = [&] {
     return folly::CancellationCallback{

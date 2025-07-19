@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
+
 namespace apache::thrift::detail {
 
 #if FOLLY_HAS_COROUTINES
@@ -23,7 +25,7 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
     StreamElementEncoder<T>* encode,
     folly::coro::AsyncGenerator<
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
-    TileStreamGuard,
+    TileStreamGuard interaction,
     ContextStack::UniquePtr contextStack) {
   using ReadyCallback = ServerStreamConsumerBaton<folly::coro::Baton>;
   bool pauseStream = false;
@@ -33,7 +35,12 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
   };
 
   if (contextStack) {
-    contextStack->onStreamSubscribe();
+    StreamEventHandler::StreamContext streamCtx;
+    if (interaction.hasTile()) {
+      streamCtx.interactionCreationTime =
+          interaction.getInteractionCreationTime();
+    }
+    contextStack->onStreamSubscribe(std::move(streamCtx));
   }
 
   // ensure the generator is destroyed before the interaction TimeStreamGuard

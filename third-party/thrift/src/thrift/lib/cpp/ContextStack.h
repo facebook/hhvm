@@ -110,7 +110,7 @@ class ContextStack {
   void handlerErrorWrapped(const folly::exception_wrapper& ew);
   void userExceptionWrapped(bool declared, const folly::exception_wrapper& ew);
 
-  void onStreamSubscribe();
+  void onStreamSubscribe(const StreamEventHandler::StreamContext&);
   void onStreamNext();
   void onStreamCredit(uint32_t credits);
   void onStreamPauseReceive();

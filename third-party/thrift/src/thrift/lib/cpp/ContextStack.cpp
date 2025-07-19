@@ -358,7 +358,8 @@ void ContextStack::userExceptionWrapped(
   }
 }
 
-void ContextStack::onStreamSubscribe() {
+void ContextStack::onStreamSubscribe(
+    const StreamEventHandler::StreamContext& streamCtx) {
   FOLLY_SDT(
       thrift,
       thrift_context_stack_on_stream_subscribe,
@@ -368,7 +369,7 @@ void ContextStack::onStreamSubscribe() {
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
       if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
-        streamEventHandler->onStreamSubscribe(contextAt(i));
+        streamEventHandler->onStreamSubscribe(contextAt(i), streamCtx);
       }
     }
   }

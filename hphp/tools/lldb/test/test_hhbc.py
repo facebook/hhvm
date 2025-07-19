@@ -33,14 +33,14 @@ class HHBCTestCase(base.TestHHVMBinary):
         # TODO replace Ids in 'String <Id>' with actual string value when lookup_litstr works
         expected_bcs = [
             "+0: NewDictArray 3",
-            "+2: String 0",  # 0=>"hello"
-            "+7: String 1",  # 1=>"world"
+            "+2: String 1",  # 1=>"hello"
+            "+7: String 2",  # 2=>"world"
             "+12: AddElemC",
-            "+13: String 2",  # 2=>"this"
-            "+18: String 3",  # 3=>"is"
+            "+13: String 3",  # 3=>"this"
+            "+18: String 4",  # 4=>"is"
             "+23: AddElemC",
-            "+24: String 4",  # 4=>"a"
-            "+29: String 5",  # 5=>"test"
+            "+24: String 5",  # 5=>"a"
+            "+29: String 6",  # 6=>"test"
             "+34: AddElemC",
             "+35: SetL L:0",
             "+37: PopC",
@@ -49,12 +49,12 @@ class HHBCTestCase(base.TestHHVMBinary):
             "+50: PopL L:1",
             "+52: IterGetKey WithKeys 0 L:0",
             "+56: PopL L:2",
-            "+58: String 6",  # 6=>"\n"
+            "+58: String 7",  # 7=>"\n"
             "+63: CGetL2 L:1:1",
             "+66: Concat",
             "+67: Print",
             "+68: PopC",
-            "+69: String 6",  # 6=>"\n"'
+            "+69: String 7",  # 7=>"\n"'
             "+74: CGetL2 L:2:2",
             "+77: Concat",
             "+78: Print",
@@ -64,12 +64,12 @@ class HHBCTestCase(base.TestHHVMBinary):
             "+92: PopL L:3",
             "+94: IterGetKey WithKeys 1 L:0",
             "+98: PopL L:4",
-            "+100: String 6",  # 6=>"\n"
+            "+100: String 7",  # 7=>"\n"
             "+105: CGetL2 L:3:3",
             "+108: Concat",
             "+109: Print",
             "+110: PopC",
-            "+111: String 6",  # 6=>"\n"
+            "+111: String 7",  # 7=>"\n"
             "+116: CGetL2 L:4:4",
             "+119: Concat",
             "+120: Print",
@@ -172,24 +172,24 @@ class HHBCTestCase2(base.TestHHVMBinary):
         expected_bcs = [
             "+0: NullUninit",
             "+1: NullUninit",
-            "+2: String 0",  # 0=>"arr"
-            "+7: String 1",  # 1=>"ClassWithArray"
+            "+2: String 1",  # 1=>"arr"
+            "+7: String 2",  # 2=>"ClassWithArray"
             "+12: ClassGetC 0",  # 0=>"Normal"
             "+14: CGetS 0",  # 0=>Any (a subop)
-            '+16: FCallFuncD <> 1 1 "" "" - "" 2',  # 2=>"var_dump"
+            '+16: FCallFuncD <> 1 1 "" "" - "" 3',  # 3=>"var_dump"
             "+23: PopC",
-            "+24: String 1",  # 1=>"ClassWithArray"
+            "+24: String 2",  # 2=>"ClassWithArray"
             "+29: SetL L:0",
             "+31: PopC",
             "+32: NullUninit",
             "+33: NullUninit",
-            "+34: String 0",  # 0=>"arr"
+            "+34: String 1",  # 1=>"arr"
             "+39: Int 2",
             "+48: CGetL L:0:0",
             "+51: ClassGetC 0",  # 0=>"Normal"
             "+53: BaseSC 2 0 1 0",  # 1=>Warn 0=>Any
             "+58: QueryM 3 0 EC:1 Any",  # 0=>CGet
-            '+64: FCallFuncD <> 1 1 "" "" - "" 2',  # 2=>"var_dump"
+            '+64: FCallFuncD <> 1 1 "" "" - "" 3',  # 3=>"var_dump"
             "+71: PopC",
             "+72: True",
             "+73: RetC",
@@ -219,15 +219,15 @@ class HHBCTestCase3(base.TestHHVMBinary):
             "+20: PopL L:1",
             "+22: CGetL L:1:1",
             "+25: Switch 0 0 <31 41 51 61 71>",  # 0=>Unbounded
-            "+56: String 0",  # 0=>\"label_0\n\"
+            "+56: String 1",  # 1=>\"label_0\n\"
             "+61: Jmp 40",
-            "+66: String 1",  # 1=>\"label_1\n\"
+            "+66: String 2",  # 2=>\"label_1\n\"
             "+71: Jmp 30",
-            "+76: String 2",  # 2=>\"label_2\n\"
+            "+76: String 3",  # 3=>\"label_2\n\"
             "+81: Jmp 20",
-            "+86: String 3",  # 3=>\"label_3\n\"
+            "+86: String 4",  # 4=>\"label_3\n\"
             "+91: Jmp 10",
-            "+96: String 4",  # 4=>\"label_4\n\"
+            "+96: String 5",  # 5=>\"label_4\n\"
             "+101: Print",
             "+102: PopC",
             "+103: IterNext 0 L:0 -87",

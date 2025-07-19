@@ -394,8 +394,8 @@ class TaggedPatchRef<type::cpp_type<T, Tag>> : public TaggedPatchRef<Tag> {
   using TaggedPatchRef<Tag>::TaggedPatchRef;
   using TaggedPatchRef<Tag>::operator=;
 
-  void apply(T& v) { this->template apply_impl(v); }
-  void assign(const T& v) { this->template assign_impl(v); }
+  void apply(T& v) { this->apply_impl(v); }
+  void assign(const T& v) { this->assign_impl(v); }
 };
 
 // A wrapper to make unowned types own the underlying data

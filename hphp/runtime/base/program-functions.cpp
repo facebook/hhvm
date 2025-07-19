@@ -2404,7 +2404,6 @@ namespace {
 // Retrieve a embed section of the HHVM binary
 std::string get_embedded_section(const std::string& path) {
   auto section_name = get_section_name(path);
-  FTRACE_MOD(Trace::tmp0, 1, "get_embedded_section {} {}\n", path.c_str(), section_name.c_str());
 
   embedded_data desc;
   if (!get_embedded_data(section_name.c_str(), &desc)) return "";

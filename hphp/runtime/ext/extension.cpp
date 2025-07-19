@@ -135,7 +135,6 @@ void Extension::loadDecls() {
 
 void Extension::loadDeclsFrom(const std::string& name) {
   auto serialized_decls = get_embedded_section("/:ext_" + name + ".decls");
-  FTRACE_MOD(Trace::tmp0, 1, "Loading decls from {}\n", name.c_str());
   always_assert(serialized_decls.size() > 0);
   Native::registerBuiltinSymbols(serialized_decls);
 }

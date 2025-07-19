@@ -94,6 +94,7 @@ class TilePtr;
 
 class Tile {
  public:
+  Tile() : interactionCreationTime_(std::chrono::steady_clock::now()) {}
   virtual ~Tile();
 
 #if FOLLY_HAS_COROUTINES
@@ -104,6 +105,10 @@ class Tile {
 #endif
 
   void onDestroy(folly::Function<void()> cb) { onDestroy_ = std::move(cb); }
+
+  std::chrono::steady_clock::time_point getInteractionCreationTime() {
+    return interactionCreationTime_;
+  }
 
  private:
   // Only moves in arg when it returns true
@@ -128,11 +133,16 @@ class Tile {
     overloadPolicy_ = std::move(policy);
   }
 
+  std::chrono::steady_clock::time_point getInteractionCreationTime() const {
+    return interactionCreationTime_;
+  }
+
   size_t refCount_{0};
   folly::Executor::KeepAlive<concurrency::ThreadManager> tm_;
   folly::Executor::KeepAlive<> executor_{}; // Used only for ResourcePools
   folly::Function<void()> onDestroy_;
   std::unique_ptr<InteractionOverloadPolicy> overloadPolicy_{nullptr};
+  std::chrono::steady_clock::time_point interactionCreationTime_;
   friend class TilePromise;
   friend class TilePtr;
   friend class TileStreamGuard;
@@ -260,6 +270,12 @@ class TileStreamGuard {
   // must call in eb thread
   static TileStreamGuard transferFrom(TilePtr&& ptr) {
     return TileStreamGuard(std::move(ptr));
+  }
+
+  bool hasTile() const { return (bool)tile_; }
+
+  std::chrono::steady_clock::time_point getInteractionCreationTime() const {
+    return tile_->getInteractionCreationTime();
   }
 
  private:

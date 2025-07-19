@@ -110,8 +110,13 @@ folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
 ServerSinkBridge::makeGenerator() {
   if (const auto& contextStack = consumer_.contextStack) {
     StreamEventHandler::StreamContext streamCtx;
-    contextStack->onSinkSubscribe(streamCtx);
+    if (interaction_.hasTile()) {
+      streamCtx.interactionCreationTime =
+          interaction_.getInteractionCreationTime();
+    }
+    contextStack->onSinkSubscribe(std::move(streamCtx));
   }
+
   uint64_t counter = 0;
   while (true) {
     CoroConsumer consumer;

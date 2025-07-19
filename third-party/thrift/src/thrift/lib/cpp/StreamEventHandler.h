@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <chrono>
+#include <optional>
 #include <folly/ExceptionWrapper.h>
 
 namespace apache::thrift {
@@ -36,7 +38,10 @@ enum class SINK_ENDING_TYPES {
 // EXPERIMENTAL: DO NOT USE WITHOUT TALKING TO THRIFT TEAM
 class StreamEventHandler {
  public:
-  struct StreamContext {};
+  struct StreamContext {
+    std::optional<std::chrono::steady_clock::time_point>
+        interactionCreationTime;
+  };
 
   virtual ~StreamEventHandler() {}
   virtual void onStreamSubscribe(void*) {}

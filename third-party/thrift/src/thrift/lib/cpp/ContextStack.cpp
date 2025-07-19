@@ -469,7 +469,8 @@ void ContextStack::onStreamFinally(details::STREAM_ENDING_TYPES endReason) {
   }
 }
 
-void ContextStack::onSinkSubscribe() {
+void ContextStack::onSinkSubscribe(
+    const StreamEventHandler::StreamContext& streamCtx) {
   FOLLY_SDT(
       thrift,
       thrift_context_stack_on_sink_established,
@@ -478,7 +479,7 @@ void ContextStack::onSinkSubscribe() {
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
       if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
-        streamEventHandler->onSinkSubscribe(contextAt(i));
+        streamEventHandler->onSinkSubscribe(contextAt(i), streamCtx);
       }
     }
   }

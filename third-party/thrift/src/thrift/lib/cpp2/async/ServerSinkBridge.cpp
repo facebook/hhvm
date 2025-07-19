@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/ServerSinkBridge.h>
 
 #include <folly/Overload.h>
@@ -108,7 +109,8 @@ void ServerSinkBridge::consume() {
 folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
 ServerSinkBridge::makeGenerator() {
   if (const auto& contextStack = consumer_.contextStack) {
-    contextStack->onSinkSubscribe();
+    StreamEventHandler::StreamContext streamCtx;
+    contextStack->onSinkSubscribe(streamCtx);
   }
   uint64_t counter = 0;
   while (true) {

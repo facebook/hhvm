@@ -27,6 +27,8 @@
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
+
 namespace apache::thrift {
 
 class ContextStack;
@@ -116,7 +118,7 @@ class ContextStack {
   void handleStreamErrorWrapped(const folly::exception_wrapper& ew);
   void onStreamFinally(details::STREAM_ENDING_TYPES endReason);
 
-  void onSinkSubscribe();
+  void onSinkSubscribe(const StreamEventHandler::StreamContext&);
   void onSinkNext();
   void onSinkConsumed();
   void onSinkCancel();

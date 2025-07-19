@@ -36,6 +36,8 @@ enum class SINK_ENDING_TYPES {
 // EXPERIMENTAL: DO NOT USE WITHOUT TALKING TO THRIFT TEAM
 class StreamEventHandler {
  public:
+  struct StreamContext {};
+
   virtual ~StreamEventHandler() {}
   virtual void onStreamSubscribe(void*) {}
   virtual void onStreamNext(void*) {}
@@ -46,7 +48,7 @@ class StreamEventHandler {
       void*, const folly::exception_wrapper&) {}
   virtual void onStreamFinally(void*, details::STREAM_ENDING_TYPES) {}
 
-  virtual void onSinkSubscribe(void*) {}
+  virtual void onSinkSubscribe(void*, const StreamContext&) {}
   virtual void onSinkNext(void*) {}
   virtual void onSinkConsumed(void*) {}
   virtual void onSinkCancel(void*) {}

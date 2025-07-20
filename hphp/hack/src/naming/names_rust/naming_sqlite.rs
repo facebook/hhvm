@@ -55,7 +55,7 @@ impl Names {
     }
 
     pub fn backup(&self, path: &Path) -> anyhow::Result<()> {
-        self.conn.backup(rusqlite::DatabaseName::Main, path, None)?;
+        self.conn.backup(rusqlite::MAIN_DB, path, None)?;
         Ok(())
     }
 

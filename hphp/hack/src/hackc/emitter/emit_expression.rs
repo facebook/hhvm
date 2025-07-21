@@ -3549,7 +3549,10 @@ fn emit_call_expr(
             ]))
         }
         (Expr_::Id(id), args, None)
-            if id.1 == pseudo_functions::UNSAFE_CAST && !args.is_empty() && targs.len() == 2 =>
+            if id.1 == pseudo_functions::UNSAFE_CAST
+                && e.options().hhbc.emit_checked_unsafe_cast
+                && !args.is_empty()
+                && targs.len() == 2 =>
         {
             let target_type = &targs[1].1;
             emit_checked_unsafe_cast(

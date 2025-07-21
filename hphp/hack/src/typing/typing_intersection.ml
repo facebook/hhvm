@@ -90,7 +90,9 @@ let negate_type env r ty ~approx =
     end
     | Tneg (r, IsTag (ClassTag (c, []))) when Utils.class_has_no_params env c ->
       MkType.class_type r c []
-    | Tneg predicate -> Typing_refinement.TyPredicate.to_ty predicate
+    | Tneg predicate ->
+      Typing_refinement.TyPredicate.to_ty_without_instantiation_opt predicate
+      |> Option.value ~default:approximated
     | Tnonnull -> MkType.null r
     | Tclass ((_, c), Nonexact _, args) ->
       let tparams =

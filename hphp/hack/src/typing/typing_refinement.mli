@@ -82,5 +82,11 @@ module TyPredicate : sig
     Typing_env_types.env
     * ((Typing_defs.decl_tparam * string) option * Typing_defs.locl_ty) SMap.t
 
-  val to_ty : Typing_defs.type_predicate -> Typing_defs.locl_ty
+  val to_ty :
+    Typing_defs.locl_ty SMap.t ->
+    Typing_defs.type_predicate ->
+    Typing_defs.locl_ty
+
+  val to_ty_without_instantiation_opt :
+    Typing_defs.type_predicate -> Typing_defs.locl_ty option
 end

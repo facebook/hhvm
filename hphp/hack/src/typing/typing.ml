@@ -7689,7 +7689,9 @@ end = struct
       ( env,
         refine_local
           ty_true
-          (Typing_refinement.TyPredicate.to_ty predicate)
+          (Typing_refinement.TyPredicate.to_ty
+             SMap.empty (* TODO pass generics map *)
+             predicate)
           ~ty_refine_is_class:
             (match predicate with
             | (_, IsTag (ClassTag _)) -> true
@@ -7816,7 +7818,10 @@ end = struct
                 env
                 left
                 span
-                ~refine:(Typing_refinement.TyPredicate.to_ty predicate)
+                ~refine:
+                  (Typing_refinement.TyPredicate.to_ty
+                     SMap.empty (* TODO pass generics map *)
+                     predicate)
             in
             let ty_falses env =
               union_inter_list
@@ -7872,7 +7877,9 @@ end = struct
               env
               ~r:reason
               ty_true
-              (Typing_refinement.TyPredicate.to_ty predicate)
+              (Typing_refinement.TyPredicate.to_ty
+                 SMap.empty (* TODO pass generics map *)
+                 predicate)
           in
           refine_local ty_true env),
         fun env ->

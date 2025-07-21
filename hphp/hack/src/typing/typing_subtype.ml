@@ -612,8 +612,8 @@ module Subtype_negation = struct
       | Tneg (r, IsTag NullTag) -> Some (MakeType.null r)
       | Tnonnull -> Some (MakeType.null r)
       | Tneg (_, IsTag (ClassTag _)) -> None
-      | Tneg (r, predicate) ->
-        Some (Typing_refinement.TyPredicate.to_ty (r, predicate))
+      | Tneg predicate ->
+        Typing_refinement.TyPredicate.to_ty_without_instantiation_opt predicate
       | _ -> None
     in
     (env, neg_ty)

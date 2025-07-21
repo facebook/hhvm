@@ -248,7 +248,7 @@ module TyPredicate = struct
       in
       (env, new_tparams)
 
-  let rec to_ty predicate =
+  let rec to_ty instantiation_map predicate =
     let tag_to_ty reason tag =
       match tag with
       | BoolTag -> Typing_make_type.bool reason
@@ -264,8 +264,7 @@ module TyPredicate = struct
           List.map generics ~f:(fun g ->
               match g with
               | Filled ty -> ty
-              (* TODO freshen the type in later diff *)
-              | Wildcard _ -> Typing_make_type.nothing Reason.none)
+              | Wildcard key -> SMap.find key instantiation_map)
         in
         Typing_make_type.class_type reason id tyargs
     in
@@ -276,7 +275,7 @@ module TyPredicate = struct
         ( reason,
           Ttuple
             {
-              t_required = List.map tp_required ~f:to_ty;
+              t_required = List.map tp_required ~f:(to_ty instantiation_map);
               t_extra =
                 Textra
                   {
@@ -288,10 +287,17 @@ module TyPredicate = struct
       let map =
         TShapeMap.map
           (fun { sfp_predicate } ->
-            { sft_optional = false; sft_ty = to_ty sfp_predicate })
+            {
+              sft_optional = false;
+              sft_ty = to_ty instantiation_map sfp_predicate;
+            })
           sp_fields
       in
       Typing_make_type.shape reason (Typing_make_type.nothing reason) map
+
+  let to_ty_without_instantiation_opt predicate =
+    try Some (to_ty SMap.empty predicate) with
+    | Stdlib.Not_found -> None
 end
 
 let cartesian = Partition.cartesian
@@ -319,7 +325,9 @@ module TyPartition = struct
      relations must hold *)
   let assume env base_ty predicate : assumptions =
     let sub ty =
-      let pred_ty = TyPredicate.to_ty predicate in
+      let pred_ty =
+        TyPredicate.to_ty SMap.empty (* TODO pass generics map *) predicate
+      in
       Typing_logic.IsSubtype (None, LoclType pred_ty, LoclType ty)
     in
     Option.value ~default:valid

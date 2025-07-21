@@ -75,5 +75,12 @@ module TyPredicate : sig
     Typing_defs.locl_ty ->
     (Typing_defs.type_predicate, string) Result.t
 
+  val instantiate_wildcards_for_predicate :
+    Typing_env_types.env ->
+    Typing_defs.type_predicate ->
+    Pos.t ->
+    Typing_env_types.env
+    * ((Typing_defs.decl_tparam * string) option * Typing_defs.locl_ty) SMap.t
+
   val to_ty : Typing_defs.type_predicate -> Typing_defs.locl_ty
 end

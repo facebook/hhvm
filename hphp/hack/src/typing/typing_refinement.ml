@@ -9,6 +9,7 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
+open Common
 module Cls = Folded_class
 module Env = Typing_env
 module DataType = Typing_case_types.AtomicDataTypes
@@ -124,6 +125,128 @@ module TyPredicate = struct
     | Tlabel _ -> Result.Error "label"
     | Ttuple _ -> Result.Error "tuple"
     | Tclass_ptr _ -> Result.Error "class_ptr"
+
+  let instantiate_wildcards_for_tag env reason tag p =
+    match tag with
+    | BoolTag
+    | IntTag
+    | StringTag
+    | ArraykeyTag
+    | FloatTag
+    | NumTag
+    | ResourceTag
+    | NullTag ->
+      (env, SMap.empty)
+    | ClassTag (id, generics) ->
+      let (env, new_tparams) =
+        match Env.get_class env id with
+        | Decl_entry.Found class_info ->
+          let tparams = Folded_class.tparams class_info in
+          (* if we're only getting ClassTag predicates by calling of_ty on
+             Tclass localized from is/as hints, then the count should match
+             since localization will trim excess arguments and of_ty should
+             fill in when there are too few arguments;
+             we shouldn't be creating ClassTag just anywhere, so we should
+             fail when something is unexpected *)
+          let tparam_generic_pairs = List.zip_exn tparams generics in
+          let (env, tyl, new_tparams) =
+            List.fold_left
+              tparam_generic_pairs
+              ~init:(env, [], SMap.empty)
+              ~f:(fun (env, tyl, new_tparams) (tparam, generic) ->
+                match generic with
+                | Filled ty -> (env, ty :: tyl, new_tparams)
+                | Wildcard wildcard_key ->
+                  let {
+                    tp_name = (_, tparam_name);
+                    tp_reified = reified;
+                    tp_user_attributes;
+                    _;
+                  } =
+                    tparam
+                  in
+                  let enforceable =
+                    Attributes.mem
+                      Naming_special_names.UserAttributes.uaEnforceable
+                      tp_user_attributes
+                  in
+                  let newable =
+                    Attributes.mem
+                      Naming_special_names.UserAttributes.uaNewable
+                      tp_user_attributes
+                  in
+                  let (env, new_name) =
+                    Env.add_fresh_generic_parameter
+                      env
+                      (Reason.to_pos reason)
+                      tparam_name
+                      ~reified
+                      ~enforceable
+                      ~newable
+                  in
+                  let ty = Typing_make_type.generic reason new_name in
+                  let new_tparam = (Some (tparam, new_name), ty) in
+                  (env, ty :: tyl, SMap.add wildcard_key new_tparam new_tparams))
+          in
+          let tyl = List.rev tyl in
+          let ety_env =
+            {
+              empty_expand_env with
+              substs = Decl_subst.make_locl tparams tyl;
+              this_ty = Typing_make_type.class_type reason id tyl;
+            }
+          in
+          let add_bounds env (t, ty_fresh) =
+            List.fold_left t.tp_constraints ~init:env ~f:(fun env (ck, ty) ->
+                (* Substitute fresh type parameters for
+                    * original formals in constraint *)
+                let ((env, ty_err_opt), ty) =
+                  Typing_utils.localize ~ety_env env ty
+                in
+                Option.iter
+                  ~f:(Typing_error_utils.add_typing_error ~env)
+                  ty_err_opt;
+                Typing_utils.add_constraint env ck ty_fresh ty
+                @@ Some (Typing_error.Reasons_callback.unify_error_at p))
+          in
+          let env =
+            List.fold_left (List.zip_exn tparams tyl) ~f:add_bounds ~init:env
+          in
+          (env, new_tparams)
+        | Decl_entry.NotYetAvailable
+        | Decl_entry.DoesNotExist ->
+          (env, SMap.empty)
+      in
+      (env, new_tparams)
+
+  let rec instantiate_wildcards_for_predicate env predicate p :
+      Typing_env_types.env * ((decl_tparam * string) option * locl_ty) SMap.t =
+    match predicate with
+    | (reason, IsTag tag) ->
+      let (env, new_tparams) = instantiate_wildcards_for_tag env reason tag p in
+      (env, new_tparams)
+    | (_reason, IsTupleOf { tp_required }) ->
+      let (env, new_tparams) =
+        List.map_env env tp_required ~f:(fun env predicate ->
+            let (env, new_tparams) =
+              instantiate_wildcards_for_predicate env predicate p
+            in
+            (env, new_tparams))
+      in
+      (env, List.fold new_tparams ~init:SMap.empty ~f:SMap.union)
+    | (_reason, IsShapeOf { sp_fields }) ->
+      let (env, new_tparams) =
+        TShapeMap.fold_env
+          env
+          (fun env _key { sfp_predicate } new_tparams_acc ->
+            let (env, new_tparams) =
+              instantiate_wildcards_for_predicate env sfp_predicate p
+            in
+            (env, SMap.union new_tparams_acc new_tparams))
+          sp_fields
+          SMap.empty
+      in
+      (env, new_tparams)
 
   let rec to_ty predicate =
     let tag_to_ty reason tag =

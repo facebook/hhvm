@@ -14,7 +14,7 @@
 
 from libc.stdint cimport int16_t
 from libcpp.memory cimport unique_ptr
-from thrift.python.types cimport cSetTypeInfoBase 
+from thrift.python.types cimport cMapTypeInfoBase, cSetTypeInfoBase 
 
 cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
     cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
@@ -48,9 +48,8 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef cppclass cMutableSetTypeInfo "::apache::thrift::python::MutableSetTypeInfo"(cSetTypeInfoBase):
         cMutableSetTypeInfo(cTypeInfo& valInfo)
 
-    cdef cppclass cMutableMapTypeInfo "::apache::thrift::python::MutableMapTypeInfo":
+    cdef cppclass cMutableMapTypeInfo "::apache::thrift::python::MutableMapTypeInfo"(cMapTypeInfoBase):
         cMutableMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
-        const cTypeInfo* get()
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef cTypeInfo createMutableStructTypeInfo(
@@ -89,7 +88,7 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
     cdef object val_info
     cdef bint key_type_is_container
     cdef bint value_type_is_container
-    cdef unique_ptr[cMutableMapTypeInfo] cpp_obj
+    cdef unique_ptr[cMapTypeInfoBase] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
     cdef to_internal_data(self, object)
     cdef to_python_value(self, object)

@@ -70,9 +70,12 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef cppclass cSetTypeInfo "::apache::thrift::python::SetTypeInfo"(cSetTypeInfoBase):
         cSetTypeInfo(cTypeInfo& valInfo)
 
-    cdef cppclass cMapTypeInfo "::apache::thrift::python::MapTypeInfo":
-        cMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
+    cdef cppclass cMapTypeInfoBase "::apache::thrift::python::MapTypeInfoBase":
         const cTypeInfo* get()
+        unique_ptr[cMapTypeInfoBase] asKeySorted()
+
+    cdef cppclass cMapTypeInfo "::apache::thrift::python::MapTypeInfo"(cMapTypeInfoBase):
+        cMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
 
     cdef object createImmutableStructTupleWithDefaultValues(
         const cStructInfo& structInfo
@@ -102,6 +105,9 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef const cTypeInfo  stringTypeInfo
     cdef const cTypeInfo  binaryTypeInfo
     cdef const cTypeInfo  iobufTypeInfo
+
+    # invokes make_unique[Child] using args in C++ but returns unique_ptr[Base]
+    unique_ptr[Base] make_unique_base[Base, Child](...) except+
 
 
 cdef extern from "<Python.h>":
@@ -207,7 +213,7 @@ cdef class SetTypeInfo(TypeInfoBase):
 cdef class MapTypeInfo(TypeInfoBase):
     cdef object key_info
     cdef object val_info
-    cdef unique_ptr[cMapTypeInfo] cpp_obj
+    cdef unique_ptr[cMapTypeInfoBase] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)

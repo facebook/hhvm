@@ -43,6 +43,7 @@ from thrift.python.types cimport (
     List,
     Set,
     Map,
+    make_unique_base,
 )
 
 
@@ -276,10 +277,9 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
             val_info,
             (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo),
         )
-        cdef unique_ptr[cMutableSetTypeInfo] cpp_obj = make_unique[cMutableSetTypeInfo](
+        self.cpp_obj = make_unique_base[cSetTypeInfoBase, cMutableSetTypeInfo](
             getCTypeInfo(val_info)
         )
-        self.cpp_obj = unique_ptr[cSetTypeInfoBase](cpp_obj.release())
 
     def enableKeySorted(self):
         self.cpp_obj = self.cpp_obj.get().asKeySorted()
@@ -410,12 +410,13 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
             val_info,
             (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo)
         )
-        self.cpp_obj = make_unique[cMutableMapTypeInfo](
+        self.cpp_obj = make_unique_base[cMapTypeInfoBase, cMutableMapTypeInfo](
             getCTypeInfo(key_info),
             getCTypeInfo(val_info),
         )
 
     def enableKeySorted(self):
+        self.cpp_obj = self.cpp_obj.get().asKeySorted()
         return self
 
     cdef const cTypeInfo* get_cTypeInfo(self):

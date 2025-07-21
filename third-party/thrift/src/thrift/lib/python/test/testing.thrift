@@ -454,7 +454,20 @@ struct SortedSets {
   // @lint-ignore THRIFTCHECKS
   @python.DeprecatedSortSetOnSerialize
   3: set<easy> easies;
+  @python.DeprecatedSortSetOnSerialize
   4: set<Color> colors;
+}
+
+struct SortedMaps {
+  @python.DeprecatedKeySortMapOnSerialize
+  1: map<i32, i32> ints;
+  @python.DeprecatedKeySortMapOnSerialize
+  2: map<string, string> strings;
+  // @lint-ignore THRIFTCHECKS
+  @python.DeprecatedKeySortMapOnSerialize
+  3: map<easy, easy> easies;
+  @python.DeprecatedSortSetOnSerialize
+  4: map<Color, Color> colors;
 }
 
 struct ComplexRef {

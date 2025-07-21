@@ -24,7 +24,7 @@ import pickle
 import types
 import unittest
 from collections.abc import Sequence, Set
-from typing import Any, Mapping, Type, TypeVar, Union
+from typing import Any, Iterable, Mapping, Type, TypeVar, Union
 
 import apache.thrift.test.terse_write.terse_write.thrift_mutable_types as mutable_terse_types
 import apache.thrift.test.terse_write.terse_write.thrift_types as immutable_terse_types
@@ -54,7 +54,10 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import Foo, Lists, Maps, Sets
-from testing.thrift_mutable_types import SortedSets as MutableSortedSets
+from testing.thrift_mutable_types import (
+    SortedMaps as MutableSortedMaps,
+    SortedSets as MutableSortedSets,
+)
 from testing.thrift_types import (
     Color,
     ColorGroups,
@@ -71,6 +74,7 @@ from testing.thrift_types import (
     Reserved,
     SetI32,
     SetI32Lists,
+    SortedMaps,
     SortedSets,
     StrEasyMap,
     StrI32ListMap,
@@ -165,6 +169,7 @@ class SerializerTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
         self.SortedSets: Type[SortedSets] = self.test_types.SortedSets
+        self.SortedMaps: Type[SortedMaps] = self.test_types.SortedMaps
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -516,13 +521,13 @@ class SerializerTests(unittest.TestCase):
 
     def test_serialize_sorted_set(self) -> None:
         if self.is_mutable_run:
-            # mutable sets aren't hashable but empty set works
+            # mutable structs aren't hashable but empty set works
             easies = set()
         else:
             easies = {self.easy(val=i) for i in range(3, 0, -1)}
-        ints = set(range(5, 6, -2))
+        ints = set(range(5, -6, -2))
         strings = {"foo", "bar", "baz"}
-        colors = {self.Color.red, self.Color.green}
+        colors = {self.Color.green, self.Color.red, self.Color.blue}
         if self.is_mutable_run:
             s = MutableSortedSets(
                 easies=to_thrift_set(easies),
@@ -544,6 +549,65 @@ class SerializerTests(unittest.TestCase):
         self.assertEqual(json_s["colors"], sorted(colors))
         json_easy_vals = [e["val"] for e in json_s["easies"]]
         self.assertEqual(json_easy_vals, sorted(e.val for e in easies))
+
+    def test_serialize_sorted_map(self) -> None:
+        if self.is_mutable_run:
+            # mutable structs aren't hashable but empty set works
+            easies = {}
+        else:
+            easies = {self.easy(val=i): self.easy(val=-i) for i in range(3, 0, -1)}
+        ints = {i: -i for i in range(5, -6, -2)}
+        strings = {s: s + "_val" for s in ("foo", "bar", "baz")}
+        colors = {
+            c: self.Color((int(c) - 1) % 3) for c in (self.Color.green, self.Color.red)
+        }
+        if self.is_mutable_run:
+            s = MutableSortedMaps(
+                easies=to_thrift_map(easies),
+                ints=to_thrift_map(ints),
+                strings=to_thrift_map(strings),
+                colors=to_thrift_map(colors),
+            )
+        else:
+            s = self.SortedMaps(
+                easies=easies, ints=ints, strings=strings, colors=colors
+            )
+        # assert basic serialization works across all protocols
+        thrift_serialization_round_trip(self, s, self.serializer)
+
+        # struct keys aren't supported by normal json parse, so drop them
+        if self.is_mutable_run:
+            assert isinstance(s, MutableSortedMaps)
+            s.easies = to_thrift_map({})
+        else:
+            assert isinstance(s, self.SortedMaps)
+            s = s(easies={})
+
+        serialized_json = self.serializer.serialize(s, Protocol.JSON).decode("utf-8")
+        json_s = json.loads(serialized_json)
+
+        # assert the map is sorted in json
+        def to_int_list(it: Iterable[str]) -> list[int]:
+            return list(map(int, it))
+
+        self.assertListEqual(to_int_list(json_s["ints"].keys()), sorted(ints.keys()))
+        self.assertListEqual(list(json_s["strings"].keys()), sorted(strings.keys()))
+        self.assertListEqual(
+            to_int_list(json_s["colors"].keys()), sorted(map(int, colors.keys()))
+        )
+        # assert the values match the keys
+        self.assertListEqual(
+            to_int_list(json_s["ints"].values()),
+            [-int(i) for i in json_s["ints"].keys()],
+        )
+        self.assertListEqual(
+            list(json_s["strings"].values()),
+            [s + "_val" for s in json_s["strings"].keys()],
+        )
+        self.assertListEqual(
+            to_int_list(json_s["colors"].values()),
+            [(int(c) - 1) % 3 for c in json_s["colors"].keys()],
+        )
 
 
 @parameterized_class(

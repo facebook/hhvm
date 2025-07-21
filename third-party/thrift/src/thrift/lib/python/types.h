@@ -424,6 +424,11 @@ class MutableListTypeInfo {
   const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
+/**
+ * An abstract base class for set types so that the cython SetTypeInfo class
+ * can be used for both unsorted and sorted sets. Also used for
+ * MutableSetTypeInfo.
+ */
 class SetTypeInfoBase {
  public:
   virtual const ::apache::thrift::detail::TypeInfo* get() const = 0;
@@ -463,6 +468,20 @@ void SetTypeInfo_consumeElem(
     void* objectPtr,
     void (*reader)(const void* /*context*/, void* /*val*/));
 
+/**
+ * An implementation of SetTypeInfoBase. Implements functions required by the
+ * `SetFieldExt` interface of the table-based serializer. All implementations
+ * are static methods to avoid lifetime issues and comply with function
+ * signatures expected by `SetFieldExt` interface.
+ *
+ * The `Handler` parameter represents cpython operations for either mutable or
+ * immutable sets, based on their respective internal data types.
+ *
+ * The `KeySorted` parameter determines whether the set elements are sorted
+ * during `write` (serialize). The default is `false`. Do not use this without
+ * contacting the Thrift team. It may be removed after migrating from
+ * thrift-py3.
+ */
 template <typename Handler, bool KeySorted>
 class SetTypeInfoImpl final : public SetTypeInfoBase {
  public:
@@ -565,7 +584,7 @@ struct MutableSetHandler {
 using MutableSetTypeInfo = SetTypeInfoImpl<MutableSetHandler, false>;
 
 /**
- * This helper method sorts map keys and write them to the wire. It may  be
+ * This helper method sorts map keys and writes them to wire format. It may be
  * called for both mutable and immutable maps.
  */
 size_t writeMapSorted(
@@ -575,8 +594,34 @@ size_t writeMapSorted(
     size_t (*writer)(
         const void* context, const void* keyElem, const void* valueElem));
 
-template <typename Handler>
-class MapTypeInfoImpl {
+/**
+ * An abstract base class for map types so that the cython MapTypeInfo class
+ * can be used for both unsorted and key-sorted maps. Also used for
+ * MutableMapTypeInfo.
+ */
+class MapTypeInfoBase {
+ public:
+  virtual const ::apache::thrift::detail::TypeInfo* get() const = 0;
+  virtual ::std::unique_ptr<MapTypeInfoBase> asKeySorted() const = 0;
+  virtual ~MapTypeInfoBase() = default;
+};
+
+/**
+ * An implementation of MapTypeInfoBase. Implements functions required by the
+ * `MapFieldExt` interface of the table-based serializer. All implementations
+ * are static methods to avoid lifetime issues and comply with function
+ * signatures expected by `MapFieldExt` interface.
+ *
+ * The `Handler` parameter represents cpython operations for either mutable or
+ * immutable maps, based on their respective internal data types.
+ *
+ * The `KeySorted` parameter determines whether the map is sorted by key
+ * during `write` (serialize). The default is `false`. Do not use this without
+ * contacting the Thrift team. It may be removed after migrating from
+ * thrift-py3.
+ */
+template <typename Handler, bool KeySorted>
+class MapTypeInfoImpl final : public MapTypeInfoBase {
  public:
   static std::uint32_t size(const void* object) {
     return folly::to<std::uint32_t>(Handler::size(toPyObject(object)));
@@ -599,7 +644,7 @@ class MapTypeInfoImpl {
       bool protocolSortKeys,
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem)) {
-    if (UNLIKELY(protocolSortKeys)) {
+    if (UNLIKELY(protocolSortKeys) || KeySorted) {
       return writeMapSorted(context, object, Handler::toItems, writer);
     }
     return Handler::writeUnsorted(context, object, writer);
@@ -633,7 +678,14 @@ class MapTypeInfoImpl {
             &ext_,
         } {}
 
-  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
+  const ::apache::thrift::detail::TypeInfo* get() const override {
+    return &typeinfo_;
+  }
+
+  std::unique_ptr<MapTypeInfoBase> asKeySorted() const override {
+    return std::make_unique<MapTypeInfoImpl<Handler, true>>(
+        ext_.keyInfo, ext_.valInfo);
+  }
 
  private:
   const ::apache::thrift::detail::MapFieldExt ext_;
@@ -674,7 +726,7 @@ class ImmutableMapHandler {
       void (*valueReader)(const void* /*context*/, void* /*val*/));
 };
 
-using MapTypeInfo = MapTypeInfoImpl<ImmutableMapHandler>;
+using MapTypeInfo = MapTypeInfoImpl<ImmutableMapHandler, false>;
 
 class MutableMapHandler {
  public:
@@ -753,7 +805,7 @@ class MutableMapHandler {
       void (*valueReader)(const void* /*context*/, void* /*val*/));
 };
 
-using MutableMapTypeInfo = MapTypeInfoImpl<MutableMapHandler>;
+using MutableMapTypeInfo = MapTypeInfoImpl<MutableMapHandler, false>;
 
 using FieldValueMap = folly::F14FastMap<int16_t, PyObject*>;
 
@@ -929,6 +981,15 @@ PyObject* getStandardMutableDefaultValuePtrForType(
  */
 void tag_object_as_sequence(PyTypeObject* type_object);
 void tag_object_as_mapping(PyTypeObject* type_object);
+
+/**
+ * A helper function that teaches Cython how to up-cast a unique_ptr<Child> to
+ * unique_ptr<Base>. Will fail C++ compilation if Child does not extend Base.
+ */
+template <typename Base, typename Child, typename... Args>
+std::unique_ptr<Base> make_unique_base(Args&&... args) {
+  return std::make_unique<Child>(std::forward<Args>(args)...);
+}
 
 namespace capi {
 /**

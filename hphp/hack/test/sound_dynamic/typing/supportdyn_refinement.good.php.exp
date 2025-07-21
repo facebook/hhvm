@@ -1,4 +1,4 @@
-warning: Warn[12010] This is check is always false. The expression on the left has type supportdyn<not Traversable> which shares no values with KeyedContainer<nothing, nothing>. [1]
+warning: Warn[12010] This is check is always false. The expression on the left has type ?supportdyn<(nonnull & not Traversable<_>)> which shares no values with KeyedContainer<nothing, nothing>. [1]
 
 supportdyn_refinement.good.php:11:12
      9 |     expect_trav_sd($m);
@@ -7,7 +7,7 @@ supportdyn_refinement.good.php:11:12
     12 |     expect_kc_sd($m);
     13 |   }
 
-warning: Warn[12010] This is check is always false. The expression on the left has type supportdyn<not Traversable> which shares no values with vec<nothing>. [1]
+warning: Warn[12010] This is check is always false. The expression on the left has type ?supportdyn<(not KeyedContainer<_, _> & nonnull & not Traversable<_>)> which shares no values with vec<nothing>. [1]
 
 supportdyn_refinement.good.php:14:12
     12 |     expect_kc_sd($m);
@@ -16,7 +16,7 @@ supportdyn_refinement.good.php:14:12
     15 |     expect_vec_sd($m);
     16 |   }
 
-warning: Warn[12010] This is check is always false. The expression on the left has type (T & not Traversable) which shares no values with KeyedContainer<nothing, nothing>. [1]
+warning: Warn[12010] This is check is always false. The expression on the left has type (T & ?not Traversable<_>) which shares no values with KeyedContainer<nothing, nothing>. [1]
 
 supportdyn_refinement.good.php:20:12
     18 |     expect_trav_sd($t);
@@ -25,7 +25,7 @@ supportdyn_refinement.good.php:20:12
     21 |     expect_kc_sd($t);
     22 |   }
 
-warning: Warn[12010] This is check is always false. The expression on the left has type (T & not Traversable) which shares no values with vec<nothing>. [1]
+warning: Warn[12010] This is check is always false. The expression on the left has type (T & ?(not KeyedContainer<_, _> & not Traversable<_>)) which shares no values with vec<nothing>. [1]
 
 supportdyn_refinement.good.php:23:12
     21 |     expect_kc_sd($t);

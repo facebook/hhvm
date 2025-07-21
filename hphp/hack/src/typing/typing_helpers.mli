@@ -51,10 +51,13 @@ val hint_fun_decl :
   Typing_env_types.env ->
   Typing_defs.decl_ty option * Typing_defs.decl_ty option list
 
+val is_enforced : Typing_defs.locl_ty -> bool
+
 val refine_and_simplify_intersection :
   hint_first:bool ->
   Typing_env_types.env ->
   is_class:bool ->
+  ?ty_is_supportdyn:bool ->
   Typing_reason.t ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->

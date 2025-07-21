@@ -1,2 +1,2 @@
 WARN: File "talias5.php", line 11, characters 14-23:
-This `is` check is always `false`. The expression on the left has type `(B & not C)` which shares no values with `C<nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `(B & not C<_>)` which shares no values with `C<nothing>`. (Warn[12010])

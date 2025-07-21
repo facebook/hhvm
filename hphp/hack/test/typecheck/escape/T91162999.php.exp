@@ -1,6 +1,6 @@
 ERROR: File "T91162999.php", line 12, characters 8-103:
 Rigid type variable escapes its lambda (Typing[4442])
-  File "T91162999.php", line 13, characters 25-25:
+  File "T91162999.php", line 13, characters 21-26:
   Could not remove rigid type variable `T#3`
   File "T91162999.php", line 10, characters 3-15:
   in the type of local `$v`

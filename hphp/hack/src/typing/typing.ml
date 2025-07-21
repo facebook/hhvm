@@ -2563,11 +2563,18 @@ module Valkind = struct
       false
 end
 
+(** This represents a partially-processed result of type partitioning.
+   ty_trues and ty_falses take envs because they do intersections where you
+   want the updated environment. *)
 type type_split_info = {
   ty_trues: locl_ty -> env -> env * locl_ty list;
+      (** Given the instantiated predicate type and the current env, get the parts of the union for the true branch *)
   ty_falses: env -> env * locl_ty list;
+      (** Given the current env, get the parts of the union for the false branch *)
   true_assumptions: Typing_refinement.Uninstantiated_typing_logic.subtype_prop;
+      (** A proposition that is to be assumed in the true branch *)
   false_assumptions: Typing_refinement.Uninstantiated_typing_logic.subtype_prop;
+      (** A proposition that is to be assumed in the false branch *)
 }
 
 module rec Expr : sig
@@ -7731,6 +7738,12 @@ end = struct
             ~hint_first:false
             env
             ~is_class:ty_refine_is_class
+              (* The normal call to is_supportdyn tends not to work on a tyvars
+                 and so normally we wouldn't end up wrapping ty_refine in
+                 supportdyn.
+                 But we know tyvar is part of ty, so we should wrap ty_refine
+                 in supportdyn when intersecting if ty is *)
+            ~ty_is_supportdyn:(Typing_utils.is_supportdyn env ty)
             reason
             tyvar
             ty_refine
@@ -7802,7 +7815,14 @@ end = struct
                  See "intersection_order_to_preserve_type_const_generic" test
                  (T223013561)
               *)
-              Inter.intersect_list env reason (tyl @ [refine]))
+              let (env, inter) = Inter.intersect_list env reason tyl in
+              Typing_helpers.refine_and_simplify_intersection
+                ~hint_first:false
+                env
+                ~is_class:(Typing_utils.is_class refine)
+                reason
+                inter
+                refine)
         in
         (env, tyl @ tyl_span)
       in
@@ -7869,7 +7889,7 @@ end = struct
         | [prop] -> prop
         | props -> Typing_logic.Disj (None, props)
       in
-      let union_helper env extract_ty_f =
+      let union_helper env dyn extract_ty_f =
         let (env, tys) =
           List.fold_left_env
             env
@@ -7881,7 +7901,7 @@ end = struct
               (env, tys @ acc))
         in
         let tys =
-          match like_type_dynamic with
+          match dyn with
           | Some dyn -> dyn :: tys
           | None -> tys
         in
@@ -7905,10 +7925,24 @@ end = struct
                          true_assumptions))
           in
           let (env, ty_true) =
-            union_helper env (fun { ty_trues; _ } -> ty_trues predicate_ty)
-          in
-          let (env, ty_true) =
-            Inter.intersect env ~r:reason ty_true predicate_ty
+            match like_type_dynamic with
+            | Some _ when not (Typing_helpers.is_enforced predicate_ty) ->
+              (* When predicate_ty is unenforced, keep dynamic on the outside,
+                 and do not intersect it *)
+              let (env, ty_true) =
+                union_helper env None (fun { ty_trues; _ } ->
+                    ty_trues predicate_ty)
+              in
+              let (env, ty_true) =
+                Inter.intersect env ~r:reason ty_true predicate_ty
+              in
+              (env, MakeType.locl_like reason ty_true)
+            | _ ->
+              let (env, ty_true) =
+                union_helper env like_type_dynamic (fun { ty_trues; _ } ->
+                    ty_trues predicate_ty)
+              in
+              Inter.intersect env ~r:reason ty_true predicate_ty
           in
           refine_local ty_true env),
         fun env ->
@@ -7938,7 +7972,8 @@ end = struct
                          false_assumptions))
           in
           let (env, ty_false) =
-            union_helper env (fun { ty_falses; _ } -> ty_falses)
+            union_helper env like_type_dynamic (fun { ty_falses; _ } ->
+                ty_falses)
           in
           refine_local ty_false env )
 
@@ -8092,7 +8127,7 @@ end = struct
       | _ -> begin
         match Result.ok @@ Typing_refinement.TyPredicate.of_ty env hint_ty with
         | None -> default_branch env
-        | Some (_, predicate) ->
+        | Some (env, (_, predicate)) ->
           branch_for_type_switch
             env
             ~p

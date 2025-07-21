@@ -146,6 +146,17 @@ let hint_fun_decl ~params ~ret env =
   in
   (ret_decl_ty, params_decl_ty)
 
+(* T231531028 to improve coverage *)
+let rec is_enforced hint_ty =
+  match get_node hint_ty with
+  | Toption ty -> is_nonnull ty || is_enforced ty
+  | Tclass (_, _, [])
+  | Tprim _ ->
+    true
+  | Tshape { s_fields = expected_fdm; _ } ->
+    TShapeMap.for_all (fun _name ty -> is_enforced ty.sft_ty) expected_fdm
+  | _ -> false
+
 (** [refine_and_simplify_intersection ~hint_first env p reason ivar_pos ty hint_ty]
   intersects [ty] and [hint_ty], possibly making [hint_ty] support dynamic
   first if [ty] also supports dynamic.
@@ -159,15 +170,16 @@ let hint_fun_decl ~params ~ret env =
   Parameters:
   * [reason]          The reason for the result types and other intermediate types.
   * [is_class]        Whether [hint_ty] is a class
+  * [ty_is_supportdyn] Assume that ty is supportdyn when intersecting with the hint type
   *)
-let refine_and_simplify_intersection ~hint_first env ~is_class reason ty hint_ty
-    =
+let refine_and_simplify_intersection
+    ~hint_first env ~is_class ?(ty_is_supportdyn = false) reason ty hint_ty =
   let intersect ~hint_first ~is_class env r ty hint_ty =
     let (env, hint_ty) =
       if
         is_class
         && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-        && Utils.is_supportdyn env ty
+        && (ty_is_supportdyn || Utils.is_supportdyn env ty)
       then
         Utils.make_supportdyn reason env hint_ty
       else
@@ -199,16 +211,6 @@ let refine_and_simplify_intersection ~hint_first env ~is_class reason ty hint_ty
     *)
     let (env, intersection_ty) =
       intersect ~hint_first:false ~is_class env reason ty hint_ty
-    in
-    let rec is_enforced hint_ty =
-      match get_node hint_ty with
-      | Toption ty -> is_nonnull ty || is_enforced ty
-      | Tclass (_, _, [])
-      | Tprim _ ->
-        true
-      | Tshape { s_fields = expected_fdm; _ } ->
-        TShapeMap.for_all (fun _name ty -> is_enforced ty.sft_ty) expected_fdm
-      | _ -> false
     in
     if is_enforced hint_ty then
       let (env, dyn_ty) =

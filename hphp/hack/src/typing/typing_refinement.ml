@@ -27,35 +27,34 @@ let list_to_list_of_e_and_others xs =
   helper [] xs
 
 module TyPredicate = struct
-  let is_fresh_generic ty =
-    match get_node ty with
-    | Tgeneric name -> Env.is_fresh_generic_parameter name
-    | _ -> false
-
-  let rec of_ty env (ty : locl_ty) =
-    Result.map ~f:(fun pred -> (get_reason ty, pred))
+  let rec of_ty env (ty : locl_ty) : (env * type_predicate, string) Result.t =
+    Result.map ~f:(fun (env, pred_) -> (env, (get_reason ty, pred_)))
     @@
     match get_node ty with
-    | Tprim Aast.Tbool -> Result.Ok (IsTag BoolTag)
-    | Tprim Aast.Tint -> Result.Ok (IsTag IntTag)
-    | Tprim Aast.Tstring -> Result.Ok (IsTag StringTag)
-    | Tprim Aast.Tarraykey -> Result.Ok (IsTag ArraykeyTag)
-    | Tprim Aast.Tfloat -> Result.Ok (IsTag FloatTag)
-    | Tprim Aast.Tnum -> Result.Ok (IsTag NumTag)
-    | Tprim Aast.Tresource -> Result.Ok (IsTag ResourceTag)
-    | Tprim Aast.Tnull -> Result.Ok (IsTag NullTag)
+    | Tprim Aast.Tbool -> Result.Ok (env, IsTag BoolTag)
+    | Tprim Aast.Tint -> Result.Ok (env, IsTag IntTag)
+    | Tprim Aast.Tstring -> Result.Ok (env, IsTag StringTag)
+    | Tprim Aast.Tarraykey -> Result.Ok (env, IsTag ArraykeyTag)
+    | Tprim Aast.Tfloat -> Result.Ok (env, IsTag FloatTag)
+    | Tprim Aast.Tnum -> Result.Ok (env, IsTag NumTag)
+    | Tprim Aast.Tresource -> Result.Ok (env, IsTag ResourceTag)
+    | Tprim Aast.Tnull -> Result.Ok (env, IsTag NullTag)
     (* TODO: optional and variadic fields T201398626 T201398652 *)
     | Ttuple { t_required; t_extra = Textra { t_optional = []; t_variadic } }
       when is_nothing t_variadic -> begin
       match
-        List.fold_left t_required ~init:(Result.Ok []) ~f:(fun acc ty ->
+        List.fold_left
+          t_required
+          ~init:(Result.Ok (env, []))
+          ~f:(fun acc ty ->
             let open Result.Monad_infix in
-            acc >>= fun predicates ->
-            of_ty env ty >>| fun predicate -> predicate :: predicates)
+            acc >>= fun (env, predicates) ->
+            of_ty env ty >>| fun (env, predicate) ->
+            (env, predicate :: predicates))
       with
       | Result.Error err -> Result.Error ("tuple-" ^ err)
-      | Result.Ok predicates ->
-        Result.Ok (IsTupleOf { tp_required = List.rev predicates })
+      | Result.Ok (env, predicates) ->
+        Result.Ok (env, IsTupleOf { tp_required = List.rev predicates })
     end
     | Tshape { s_origin = _; s_unknown_value; s_fields } ->
       if
@@ -76,36 +75,64 @@ module TyPredicate = struct
                 Result.Error "optional_field"
               else
                 let open Result.Monad_infix in
-                acc >>= fun sf_predicates ->
-                of_ty env s_field.sft_ty >>| fun sfp_predicate ->
-                (key, { sfp_predicate }) :: sf_predicates)
+                acc >>= fun (env, sf_predicates) ->
+                of_ty env s_field.sft_ty >>| fun (env, sfp_predicate) ->
+                (env, (key, { sfp_predicate }) :: sf_predicates))
             s_fields
-            (Result.Ok [])
+            (Result.Ok (env, []))
         with
         | Result.Error err -> Result.Error ("shape-" ^ err)
-        | Result.Ok elts ->
-          Result.Ok (IsShapeOf { sp_fields = TShapeMap.of_list elts })
+        | Result.Ok (env, elts) ->
+          Result.Ok (env, IsShapeOf { sp_fields = TShapeMap.of_list elts })
       end else
         Result.Error "open_shape"
     | Tclass (_, Exact, _) -> Result.Error "exact class"
-    | Tclass ((_, name), Nonexact _, args) -> begin
-      match Env.get_class env name with
-      | Decl_entry.Found class_info ->
-        let tparams = Folded_class.tparams class_info in
-        if not @@ Int.equal (List.length tparams) (List.length args) then
-          Result.Error "malformed class with generics"
-        else if
-          List.exists tparams ~f:(fun p -> Aast.is_erased p.tp_reified)
-          || List.exists args ~f:is_fresh_generic
-        then
-          Result.Error "class with erased generics"
-        else
-          let args = List.map args ~f:(fun ty -> Filled ty) in
-          Result.Ok (IsTag (ClassTag (name, args)))
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        Result.Error "missing class"
-    end
+    | Tclass ((_, name), Nonexact _, args) ->
+      let generics =
+        List.map args ~f:(fun ty ->
+            match get_node ty with
+            | Tgeneric name when Env.is_fresh_generic_parameter name ->
+              Wildcard name
+            | _ -> Filled ty)
+      in
+      let (env, generics) =
+        match Env.get_class env name with
+        | Decl_entry.Found class_info ->
+          let tparams = Folded_class.tparams class_info in
+          let pad_len = List.length tparams - List.length generics in
+          if pad_len > 0 then
+            (* if the class's type arguments are underspecified, we need to
+               fill them in so that when we zip them with the tparams later,
+               the count matches up *)
+            let pads = List.init pad_len ~f:(fun _ -> ()) in
+            let (env, pad_generics) =
+              List.map_env env pads ~f:(fun env _pad ->
+                  (* just hijacking Env.add_fresh_generic_parameter to get a
+                     unique key for the Wildcard so it doesn't matter the
+                     specs of the generic in the env; just that we increment
+                     the name *)
+                  let (env, name) =
+                    Env.add_fresh_generic_parameter
+                      env
+                      Pos_or_decl.none
+                      "%Wildcard"
+                      ~reified:Aast.Erased
+                      ~enforceable:false
+                      ~newable:false
+                  in
+                  (env, Wildcard name))
+            in
+            (env, generics @ pad_generics)
+          else
+            (* ignore excess type arguments if the class is known;
+               if Tclass comes from a localized hint (as is the case for is/as)
+               then this pruning should already happen, but just in case *)
+            (env, List.take generics @@ List.length tparams)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          (env, generics)
+      in
+      Result.Ok (env, IsTag (ClassTag (name, generics)))
     | Tprim Aast.Tvoid -> Result.Error "void"
     | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
     | Tnonnull -> Result.Error "nonnull"

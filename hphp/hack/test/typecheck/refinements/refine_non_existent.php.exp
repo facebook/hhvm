@@ -1,2 +1,8 @@
 ERROR: File "refine_non_existent.php", line 6, characters 13-13:
 Unbound name: `C` (Naming[2049])
+ERROR: File "refine_non_existent.php", line 7, characters 15-16:
+Invalid argument (Typing[4110])
+  File "refine_non_existent.php", line 3, characters 20-22:
+  Expected `int`
+  File "refine_non_existent.php", line 6, characters 13-13:
+  But got `C` from this `is` expression test

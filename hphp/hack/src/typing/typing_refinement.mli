@@ -98,7 +98,7 @@ module TyPredicate : sig
   val of_ty :
     Typing_env_types.env ->
     Typing_defs.locl_ty ->
-    (Typing_defs.type_predicate, string) Result.t
+    (Typing_env_types.env * Typing_defs.type_predicate, string) Result.t
 
   val instantiate_wildcards_for_predicate :
     Typing_env_types.env ->

@@ -1,9 +1,9 @@
 File "neg_class_invariant.php", line 19, characters 3-17:
-  (int | (Vector<Tv#2> & (T | Vector<int>)) | (not Vector & T))
+  (int | T | (Vector<Tv#2> & Vector<int>))
 File "neg_class_invariant.php", line 20, characters 3-13:
   (int | (Vector<Tv#2> & (T | Vector<int>)))
 File "neg_class_invariant.php", line 21, characters 3-13:
-  (int | (Vector<Tv#2> & (T | Vector<int>)) | (not Vector & T))
+  (int | T | (Vector<Tv#2> & Vector<int>))
 File "neg_class_invariant.php", line 32, characters 3-13:
   T
 File "neg_class_invariant.php", line 33, characters 3-13:
@@ -11,9 +11,9 @@ File "neg_class_invariant.php", line 33, characters 3-13:
 File "neg_class_invariant.php", line 34, characters 3-13:
   T
 File "neg_class_invariant.php", line 45, characters 3-13:
-  (not Vector | Vector<Tv#2>)
+  ?(nonnull | Vector<Tv#2>)
 File "neg_class_invariant.php", line 46, characters 3-13:
   (int | Vector<Tv#2>)
 File "neg_class_invariant.php", line 47, characters 3-13:
-  (not Vector | Vector<Tv#2>)
+  ?(nonnull | Vector<Tv#2>)
 No errors

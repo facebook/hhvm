@@ -1,0 +1,16 @@
+File "array.php", line 5, characters 5-15:
+  vec<mixed>
+File "array.php", line 7, characters 5-15:
+  dict<arraykey, mixed>
+File "array.php", line 9, characters 5-15:
+  nothing
+File "array.php", line 11, characters 5-15:
+  nothing
+File "array.php", line 13, characters 5-15:
+  nothing
+WARN: File "array.php", line 8, characters 14-28:
+This `is` check is always `false`. The expression on the left has type `?(not dict<_, _> & nonnull & not vec<_>)` which shares no values with `vec<nothing>`. (Warn[12010])
+WARN: File "array.php", line 10, characters 14-31:
+This `is` check is always `false`. The expression on the left has type `?(not dict<_, _> & nonnull & not vec<_>)` which shares no values with `dict<nothing, nothing>`. (Warn[12010])
+WARN: File "array.php", line 12, characters 14-38:
+This `is` check is always `false`. The expression on the left has type `?(not dict<_, _> & nonnull & not vec<_>)` which shares no values with `vec_or_dict<arraykey, _>`. (Warn[12010])

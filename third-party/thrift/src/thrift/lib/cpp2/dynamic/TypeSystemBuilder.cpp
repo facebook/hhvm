@@ -526,11 +526,11 @@ TypeSystemBuilder::DefinitionHelper::Union(
 TypeSystemBuilder::DefinitionHelper::Enum(
     const std::vector<EnumValue>& values, const Annotations& annotations) {
   SerializableEnumDefinition enumDef;
-  for (auto& [name, value, annotations] : values) {
+  for (auto& [name, value, enumValueAnnotations] : values) {
     SerializableEnumValueDefinition v;
     v.name() = name;
     v.datum() = value;
-    v.annotations() = toRawAnnotations(annotations);
+    v.annotations() = toRawAnnotations(enumValueAnnotations);
     enumDef.values()->emplace_back(std::move(v));
   }
   enumDef.annotations() = toRawAnnotations(annotations);

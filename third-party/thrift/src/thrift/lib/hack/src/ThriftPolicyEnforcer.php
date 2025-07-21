@@ -20,6 +20,9 @@ final class ThriftPolicyEnforcer extends PolicyEnforcer {
   const PolicyEnforcerAssetClass ASSET_CLASS =
     PolicyEnforcerAssetClass::THRIFT_CLIENT;
 
+  // NOTE: This PolicyEnforcer is under deprecation, please do not add new
+  // modules. Please use corresponding PrivacyLib integration instead.
+
   const bool IS_THRIFT = true;
   const int ODS_ONE_IN = 100;
   const string CONFIG_READ_PATH = 'privacy/constraints/enforcer/thrift/';

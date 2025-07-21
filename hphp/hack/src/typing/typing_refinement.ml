@@ -300,6 +300,65 @@ module TyPredicate = struct
     | Stdlib.Not_found -> None
 end
 
+module Uninstantiated_typing_logic = struct
+  type ty =
+    | Predicate of Typing_defs.type_predicate
+    | LoclTy of Typing_defs.locl_ty
+
+  type subtype_prop =
+    | Valid
+    | Invalid
+    | IsSubtype of ty * ty
+    | Conj of subtype_prop * subtype_prop
+    | Disj of subtype_prop * subtype_prop
+    | Instantiated of Typing_logic.subtype_prop
+
+  let valid = Valid
+
+  let invalid = Invalid
+
+  let conj a b = Conj (a, b)
+
+  let disj a b = Disj (a, b)
+
+  let instantiate_ty map = function
+    | Predicate predicate -> TyPredicate.to_ty map predicate
+    | LoclTy ty -> ty
+
+  module TL = Typing_logic
+
+  let rec instantiate_prop map = function
+    | Valid -> TL.valid
+    | Invalid -> TL.invalid ~fail:None
+    | IsSubtype (ty1, ty2) ->
+      let ty1 = instantiate_ty map ty1 in
+      let ty2 = instantiate_ty map ty2 in
+      TL.IsSubtype
+        (None, Typing_defs_core.LoclType ty1, Typing_defs_core.LoclType ty2)
+    | Conj (p1, p2) ->
+      TL.conj (instantiate_prop map p1) (instantiate_prop map p2)
+    | Disj (p1, p2) ->
+      TL.disj ~fail:None (instantiate_prop map p1) (instantiate_prop map p2)
+    | Instantiated prop -> prop
+
+  let print_ty env = function
+    | Predicate (_r, predicate_) -> Typing_defs.show_type_predicate_ predicate_
+    | LoclTy ty -> Typing_print.debug env ty
+
+  let print_prop env prop =
+    let rec print_prop = function
+      | Valid -> "TRUE"
+      | Invalid -> "FALSE"
+      | Conj (p1, p2) -> "(" ^ print_prop p1 ^ " && " ^ print_prop p2 ^ ")"
+      | Disj (p1, p2) -> "(" ^ print_prop p1 ^ " || " ^ print_prop p2 ^ ")"
+      | IsSubtype (ty1, ty2) -> print_ty env ty1 ^ " <: " ^ print_ty env ty2
+      | Instantiated prop -> Typing_print.subtype_prop env prop
+    in
+    print_prop prop
+end
+
+module UTL = Uninstantiated_typing_logic
+
 let cartesian = Partition.cartesian
 
 module TyPartition = struct
@@ -309,7 +368,7 @@ module TyPartition = struct
     let compare = Typing_defs.compare_locl_ty ~normalize_lists:true
   end)
 
-  type assumptions = Typing_logic.subtype_prop
+  type assumptions = UTL.subtype_prop
 
   type t = Partition.t * assumptions * assumptions
 
@@ -317,19 +376,14 @@ module TyPartition = struct
     | ClassTy of pos_id * exact * locl_ty list
     | OtherTy
 
-  let valid = Typing_logic.valid
+  let valid = UTL.valid
 
-  let invalid = Typing_logic.invalid ~fail:None
+  let invalid = UTL.invalid
 
   (* Assuming a value `v` is a sub type of [base_ty] and satisifies [predicate], subtyping
      relations must hold *)
   let assume env base_ty predicate : assumptions =
-    let sub ty =
-      let pred_ty =
-        TyPredicate.to_ty SMap.empty (* TODO pass generics map *) predicate
-      in
-      Typing_logic.IsSubtype (None, LoclType pred_ty, LoclType ty)
-    in
+    let sub ty = UTL.IsSubtype (UTL.Predicate predicate, UTL.LoclTy ty) in
     Option.value ~default:valid
     @@
     match (base_ty, snd predicate) with
@@ -374,14 +428,10 @@ module TyPartition = struct
   let mk_bottom = (Partition.mk_bottom, invalid, invalid)
 
   let join (partition1, t1, f1) (partition2, t2, f2) =
-    ( Partition.join partition1 partition2,
-      Typing_logic.disj ~fail:None t1 t2,
-      Typing_logic.disj ~fail:None f1 f2 )
+    (Partition.join partition1 partition2, UTL.disj t1 t2, UTL.disj f1 f2)
 
   let meet (partition1, t1, f1) (partition2, t2, f2) =
-    ( Partition.meet partition1 partition2,
-      Typing_logic.conj t1 t2,
-      Typing_logic.conj f1 f2 )
+    (Partition.meet partition1 partition2, UTL.conj t1 t2, UTL.conj f1 f2)
 
   let product ~f sub_splits_and_assumptions =
     let sub_splits = List.map sub_splits_and_assumptions ~f:fst3 in
@@ -397,11 +447,11 @@ module TyPartition = struct
          is the first element of every input list *)
       | all_true_assumptions :: rest ->
         let true_assumptions =
-          List.fold ~init:valid ~f:Typing_logic.conj all_true_assumptions
+          List.fold ~init:valid ~f:UTL.conj all_true_assumptions
         in
         let false_assumptions =
-          List.fold ~init:invalid ~f:(Typing_logic.disj ~fail:None)
-          @@ List.map rest ~f:(List.fold ~init:valid ~f:Typing_logic.conj)
+          List.fold ~init:invalid ~f:UTL.disj
+          @@ List.map rest ~f:(List.fold ~init:valid ~f:UTL.conj)
         in
         (true_assumptions, false_assumptions)
     in
@@ -424,8 +474,8 @@ type ty_partition = {
   left: dnf_ty;
   span: dnf_ty;
   right: dnf_ty;
-  true_assumptions: Typing_logic.subtype_prop;
-  false_assumptions: Typing_logic.subtype_prop;
+  true_assumptions: UTL.subtype_prop;
+  false_assumptions: UTL.subtype_prop;
 }
 
 let rec split_ty_by_tuple
@@ -841,10 +891,11 @@ and split_ty
                     (* Here we conj the where clause with the true and false
                        assumptions from the split; we do this so that any
                        FALSE from the split will eliminate the clause *)
+                    let current_prop = UTL.Instantiated current_prop in
                     ( env,
                       ( partition_,
-                        Typing_logic.conj true_assumptions current_prop,
-                        Typing_logic.conj false_assumptions current_prop ) ))
+                        UTL.conj true_assumptions current_prop,
+                        UTL.conj false_assumptions current_prop ) ))
                   ty_prop_pairs
               in
               let partition =
@@ -901,12 +952,9 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
           @ from_list "right" right
           @ [
               Log_head
-                ( "true_assumptions = "
-                  ^ Typing_print.subtype_prop env true_assumptions,
-                  [] );
+                ("true_assumptions = " ^ UTL.print_prop env true_assumptions, []);
               Log_head
-                ( "false_assumptions = "
-                  ^ Typing_print.subtype_prop env false_assumptions,
+                ( "false_assumptions = " ^ UTL.print_prop env false_assumptions,
                   [] );
             ]
         in

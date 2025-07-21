@@ -2566,8 +2566,8 @@ end
 type type_split_info = {
   ty_trues: env -> env * locl_ty list;
   ty_falses: env -> env * locl_ty list;
-  true_assumptions: Typing_logic.subtype_prop;
-  false_assumptions: Typing_logic.subtype_prop;
+  true_assumptions: Typing_refinement.Uninstantiated_typing_logic.subtype_prop;
+  false_assumptions: Typing_refinement.Uninstantiated_typing_logic.subtype_prop;
 }
 
 module rec Expr : sig
@@ -7835,7 +7835,14 @@ end = struct
       let update_env_and_union env extract_ty_f extract_assumptions =
         let assumptions =
           match
-            List.map ty_true_ty_false_assumptions ~f:extract_assumptions
+            List.map
+              ty_true_ty_false_assumptions
+              ~f:
+                (Fn.compose
+                   (Typing_refinement.Uninstantiated_typing_logic
+                    .instantiate_prop
+                      SMap.empty (* TODO pass generics map *))
+                   extract_assumptions)
           with
           (* Avoid creating a unary Disj -- this avoids the is_unsat prop
              filtering that we do in update_env_with_assumptions.

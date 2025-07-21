@@ -10,6 +10,31 @@
    the type (A & B) | C is represented as [[A; B]; [C]] *)
 type dnf_ty = Typing_defs.locl_ty list list
 
+module Uninstantiated_typing_logic : sig
+  type ty =
+    | Predicate of Typing_defs.type_predicate
+    | LoclTy of Typing_defs.locl_ty
+
+  type subtype_prop =
+    | Valid
+    | Invalid
+    | IsSubtype of ty * ty
+    | Conj of subtype_prop * subtype_prop
+    | Disj of subtype_prop * subtype_prop
+    | Instantiated of Typing_logic.subtype_prop
+
+  val valid : subtype_prop
+
+  val invalid : subtype_prop
+
+  val conj : subtype_prop -> subtype_prop -> subtype_prop
+
+  val disj : subtype_prop -> subtype_prop -> subtype_prop
+
+  val instantiate_prop :
+    Typing_defs.locl_ty SMap.t -> subtype_prop -> Typing_logic.subtype_prop
+end
+
 (** The partition of type over [predicate].
 
   [left] describes a type that is a subset of the values that
@@ -29,8 +54,8 @@ type ty_partition = {
   left: dnf_ty;
   span: dnf_ty;
   right: dnf_ty;
-  true_assumptions: Typing_logic.subtype_prop;
-  false_assumptions: Typing_logic.subtype_prop;
+  true_assumptions: Uninstantiated_typing_logic.subtype_prop;
+  false_assumptions: Uninstantiated_typing_logic.subtype_prop;
 }
 
 (**

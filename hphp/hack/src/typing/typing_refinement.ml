@@ -185,7 +185,7 @@ module TyPredicate = struct
                       ~newable
                   in
                   let ty = Typing_make_type.generic reason new_name in
-                  let new_tparam = (Some (tparam, new_name), ty) in
+                  let new_tparam = ((tparam, new_name), ty) in
                   (env, ty :: tyl, SMap.add wildcard_key new_tparam new_tparams))
           in
           let tyl = List.rev tyl in
@@ -220,7 +220,7 @@ module TyPredicate = struct
       (env, new_tparams)
 
   let rec instantiate_wildcards_for_predicate env predicate p :
-      Typing_env_types.env * ((decl_tparam * string) option * locl_ty) SMap.t =
+      Typing_env_types.env * ((decl_tparam * string) * locl_ty) SMap.t =
     match predicate with
     | (reason, IsTag tag) ->
       let (env, new_tparams) = instantiate_wildcards_for_tag env reason tag p in

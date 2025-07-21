@@ -2564,7 +2564,7 @@ module Valkind = struct
 end
 
 type type_split_info = {
-  ty_trues: env -> env * locl_ty list;
+  ty_trues: locl_ty -> env -> env * locl_ty list;
   ty_falses: env -> env * locl_ty list;
   true_assumptions: Typing_refinement.Uninstantiated_typing_logic.subtype_prop;
   false_assumptions: Typing_refinement.Uninstantiated_typing_logic.subtype_prop;
@@ -7648,6 +7648,56 @@ end = struct
       in
       (set_local ~is_defined:true ~bound_ty env locl ty, { pkgs = SSet.empty })
     in
+    let rec update_env_with_assumptions env assumptions =
+      match assumptions with
+      | Typing_logic.Disj (_err, props) ->
+        (* If we have reached a disjunction then we cannot assume the assumption holds
+            since it is not required. Return environment unchanged *)
+        (match
+           List.filter props ~f:(fun prop -> not @@ Typing_logic.is_unsat prop)
+         with
+        (* make sure it's not a trivial disjunction *)
+        | [prop] -> update_env_with_assumptions env prop
+        | _ -> env)
+      | Typing_logic.Conj props ->
+        List.fold props ~init:env ~f:update_env_with_assumptions
+      | Typing_logic.IsSubtype (None, LoclType ty_sub, LoclType ty_super) ->
+        SubType.add_constraint env Ast_defs.Constraint_as ty_sub ty_super
+        @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+      | Typing_logic.IsSubtype _ ->
+        (* Assume nothing if coercion is required or if requirement comes from a constraint type *)
+        env
+    in
+    (* Helper do to a combo of operations wildcards for a predicate, *)
+    let instantiate_predicate_with_assumptions env predicate p assumptions_f =
+      let (env, instantiated_tparams) =
+        Typing_refinement.TyPredicate.instantiate_wildcards_for_predicate
+          env
+          predicate
+          p
+      in
+      let generics_map =
+        SMap.map (fun (_tparam, locl_ty) -> locl_ty) instantiated_tparams
+      in
+      let assumptions = assumptions_f generics_map in
+      let env = update_env_with_assumptions env assumptions in
+      let (env, tparam_substs) =
+        Type_parameter_env_ops.simplify_tpenv
+          env
+          (SMap.values
+          @@ SMap.map (fun (tp, ty) -> (Some tp, ty)) instantiated_tparams)
+          reason
+      in
+      let generics_map =
+        SMap.map
+          (fun ((_tp, name), _ty) -> SMap.find name tparam_substs)
+          instantiated_tparams
+      in
+      let predicate_ty =
+        Typing_refinement.TyPredicate.to_ty generics_map predicate
+      in
+      (env, predicate_ty)
+    in
     let type_switch_constraint env =
       let env = Env.open_tyvars env p in
       let (env, ty_true) = Env.fresh_type env p in
@@ -7674,7 +7724,8 @@ end = struct
       let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
       let errs = Option.merge errs ty_err ~f:Typing_error.both in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
-      let refine_local tyvar ty_refine ~ty_refine_is_class env =
+      let refine_local tyvar ty_refine_f ~ty_refine_is_class env =
+        let (env, ty_refine) = ty_refine_f env in
         let (env, ty) =
           Typing_helpers.refine_and_simplify_intersection
             ~hint_first:false
@@ -7689,16 +7740,19 @@ end = struct
       ( env,
         refine_local
           ty_true
-          (Typing_refinement.TyPredicate.to_ty
-             SMap.empty (* TODO pass generics map *)
-             predicate)
+          (fun env ->
+            let (env, predicate_ty) =
+              instantiate_predicate_with_assumptions env predicate p (fun _ ->
+                  Typing_logic.valid)
+            in
+            (env, predicate_ty))
           ~ty_refine_is_class:
             (match predicate with
             | (_, IsTag (ClassTag _)) -> true
             | _ -> false),
         refine_local
           ty_false
-          (MakeType.neg reason predicate)
+          (fun env -> (env, MakeType.neg reason predicate))
           ~ty_refine_is_class:false )
     in
     let rec get_partitions env ty :
@@ -7730,27 +7784,6 @@ end = struct
     match get_partitions env ty with
     | (_env, None) -> type_switch_constraint env
     | (env, Some partitions) ->
-      let rec update_env_with_assumptions env assumptions =
-        match assumptions with
-        | Typing_logic.Disj (_err, props) ->
-          (* If we have reached a disjunction then we cannot assume the assumption holds
-             since it is not required. Return environment unchanged *)
-          (match
-             List.filter props ~f:(fun prop ->
-                 not @@ Typing_logic.is_unsat prop)
-           with
-          (* make sure it's not a trivial disjunction *)
-          | [prop] -> update_env_with_assumptions env prop
-          | _ -> env)
-        | Typing_logic.Conj props ->
-          List.fold props ~init:env ~f:update_env_with_assumptions
-        | Typing_logic.IsSubtype (None, LoclType ty_sub, LoclType ty_super) ->
-          SubType.add_constraint env Ast_defs.Constraint_as ty_sub ty_super
-          @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-        | Typing_logic.IsSubtype _ ->
-          (* Assume nothing if coercion is required or if requirement comes from a constraint type *)
-          env
-      in
       (* return (env, locl_ty list) where we intend to union the list later;
          we don't do it here b/c we'll have more types to union with later *)
       let union_inter_list ~refine env tyll tyll_span =
@@ -7813,15 +7846,8 @@ end = struct
               | Some dyn -> [dyn] :: right
               | _ -> right
             in
-            let ty_trues env =
-              union_inter_list
-                env
-                left
-                span
-                ~refine:
-                  (Typing_refinement.TyPredicate.to_ty
-                     SMap.empty (* TODO pass generics map *)
-                     predicate)
+            let ty_trues predicate_ty env =
+              union_inter_list env left span ~refine:predicate_ty
             in
             let ty_falses env =
               union_inter_list
@@ -7832,28 +7858,18 @@ end = struct
             in
             (env, { ty_trues; ty_falses; true_assumptions; false_assumptions }))
       in
-      let update_env_and_union env extract_ty_f extract_assumptions =
-        let assumptions =
-          match
-            List.map
-              ty_true_ty_false_assumptions
-              ~f:
-                (Fn.compose
-                   (Typing_refinement.Uninstantiated_typing_logic
-                    .instantiate_prop
-                      SMap.empty (* TODO pass generics map *))
-                   extract_assumptions)
-          with
-          (* Avoid creating a unary Disj -- this avoids the is_unsat prop
+      let disj_assumptions assumptions =
+        match assumptions with
+        (* Avoid creating a unary Disj -- this avoids the is_unsat prop
              filtering that we do in update_env_with_assumptions.
              This is a sneaky way of handling cases such as where we have a
              like type whose non-dynamic part is disjoint and we get
              `prop &&& FALSE` and we'd like to not filter it out and apply
              `prop` to mimic current (unsound) behavior (T214130596) *)
-          | [prop] -> prop
-          | props -> Typing_logic.Disj (None, props)
-        in
-        let env = update_env_with_assumptions env assumptions in
+        | [prop] -> prop
+        | props -> Typing_logic.Disj (None, props)
+      in
+      let union_helper env extract_ty_f =
         let (env, tys) =
           List.fold_left_env
             env
@@ -7873,28 +7889,56 @@ end = struct
       in
       ( env,
         (fun env ->
-          let (env, ty_true) =
-            update_env_and_union
+          let (env, predicate_ty) =
+            instantiate_predicate_with_assumptions
               env
-              (fun { ty_trues; _ } -> ty_trues)
-              (fun { true_assumptions; _ } -> true_assumptions)
+              predicate
+              p
+              (fun generics_map ->
+                disj_assumptions
+                @@ List.map
+                     ty_true_ty_false_assumptions
+                     ~f:(fun { true_assumptions; _ } ->
+                       Typing_refinement.Uninstantiated_typing_logic
+                       .instantiate_prop
+                         generics_map
+                         true_assumptions))
           in
           let (env, ty_true) =
-            Inter.intersect
-              env
-              ~r:reason
-              ty_true
-              (Typing_refinement.TyPredicate.to_ty
-                 SMap.empty (* TODO pass generics map *)
-                 predicate)
+            union_helper env (fun { ty_trues; _ } -> ty_trues predicate_ty)
+          in
+          let (env, ty_true) =
+            Inter.intersect env ~r:reason ty_true predicate_ty
           in
           refine_local ty_true env),
         fun env ->
-          let (env, ty_false) =
-            update_env_and_union
+          (* We need to instantiate wildcards in order to instantiate the
+             proposition for the false branch due to the tuple case where the
+             false branch proposition is a disjunction of combinations of the
+             propositions of the sub-splits; usually this results in a
+             non-trivial disjunction and is discarded.
+             One case where you can get a false proposition that actually keeps
+             involves an always false and an always true subsplit like:
+             $x:(vec<T>, int); $x is (vec<_>, string)
+             Here, you'll get a new T#3 and T#3 <: T but that seems harmless.
+          *)
+          let (env, _predicate_ty) =
+            instantiate_predicate_with_assumptions
               env
-              (fun { ty_falses; _ } -> ty_falses)
-              (fun { false_assumptions; _ } -> false_assumptions)
+              predicate
+              p
+              (fun generics_map ->
+                disj_assumptions
+                @@ List.map
+                     ty_true_ty_false_assumptions
+                     ~f:(fun { false_assumptions; _ } ->
+                       Typing_refinement.Uninstantiated_typing_logic
+                       .instantiate_prop
+                         generics_map
+                         false_assumptions))
+          in
+          let (env, ty_false) =
+            union_helper env (fun { ty_falses; _ } -> ty_falses)
           in
           refine_local ty_false env )
 

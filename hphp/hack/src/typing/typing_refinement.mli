@@ -105,7 +105,7 @@ module TyPredicate : sig
     Typing_defs.type_predicate ->
     Pos.t ->
     Typing_env_types.env
-    * ((Typing_defs.decl_tparam * string) option * Typing_defs.locl_ty) SMap.t
+    * ((Typing_defs.decl_tparam * string) * Typing_defs.locl_ty) SMap.t
 
   val to_ty :
     Typing_defs.locl_ty SMap.t ->

@@ -110,7 +110,7 @@ void buildRandomStructB(cpp2::StructB& obj) {
     }
     obj.fieldG()->push_back(g1);
     obj.fieldH()->insert(h1);
-    obj.fieldI()[std::move(getRandomFollyMap())] = getRandomFollyMap();
+    obj.fieldI()[getRandomFollyMap()] = getRandomFollyMap();
     obj.fieldJ()[std::move(j1)] = j2;
   }
 }

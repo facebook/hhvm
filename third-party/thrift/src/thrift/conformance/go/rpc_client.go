@@ -24,8 +24,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	"thrift/conformance/rpc"
-	"thrift/lib/go/thrift"
 
 	"github.com/golang/glog"
 )

@@ -28,12 +28,12 @@ import (
 
 	"github.com/golang/glog"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	thrift_any "thrift/conformance/any"
 	"thrift/conformance/conformance"
 	"thrift/conformance/patch_data"
 	"thrift/conformance/protocol"
 	"thrift/conformance/serialization"
-	"thrift/lib/go/thrift"
 	"thrift/lib/thrift/protocol_detail"
 	"thrift/test/testset"
 	enum "thrift/test/testset/Enum"

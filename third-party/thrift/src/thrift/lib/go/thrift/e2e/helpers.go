@@ -25,7 +25,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"thrift/lib/go/thrift"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	"thrift/lib/go/thrift/e2e/handler"
 	"thrift/lib/go/thrift/e2e/service"
 

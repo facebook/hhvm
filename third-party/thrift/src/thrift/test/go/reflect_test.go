@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	"github.com/stretchr/testify/require"
-	"thrift/lib/go/thrift"
 	"thrift/test/go/if/thrifttest"
 )
 

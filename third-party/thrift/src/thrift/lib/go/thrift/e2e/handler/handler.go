@@ -19,7 +19,7 @@ package handler
 import (
 	"context"
 
-	"thrift/lib/go/thrift"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	"thrift/lib/go/thrift/e2e/service"
 )
 

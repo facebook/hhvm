@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"apache/thrift/test/load"
-	"thrift/lib/go/thrift"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"

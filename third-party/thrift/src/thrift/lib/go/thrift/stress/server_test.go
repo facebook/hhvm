@@ -28,9 +28,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
-	"thrift/lib/go/thrift"
 
 	"github.com/stretchr/testify/require"
 )

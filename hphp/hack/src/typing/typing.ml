@@ -7701,7 +7701,7 @@ end = struct
           instantiated_tparams
       in
       let predicate_ty =
-        Typing_refinement.TyPredicate.to_ty generics_map predicate
+        Typing_refinement.TyPredicate.to_ty generics_map p predicate
       in
       (env, predicate_ty)
     in
@@ -7922,6 +7922,7 @@ end = struct
                        Typing_refinement.Uninstantiated_typing_logic
                        .instantiate_prop
                          generics_map
+                         p
                          true_assumptions))
           in
           let (env, ty_true) =
@@ -7969,6 +7970,7 @@ end = struct
                        Typing_refinement.Uninstantiated_typing_logic
                        .instantiate_prop
                          generics_map
+                         p
                          false_assumptions))
           in
           let (env, ty_false) =

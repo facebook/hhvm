@@ -32,7 +32,10 @@ module Uninstantiated_typing_logic : sig
   val disj : subtype_prop -> subtype_prop -> subtype_prop
 
   val instantiate_prop :
-    Typing_defs.locl_ty SMap.t -> subtype_prop -> Typing_logic.subtype_prop
+    Typing_defs.locl_ty SMap.t ->
+    Pos.t ->
+    subtype_prop ->
+    Typing_logic.subtype_prop
 end
 
 (** The partition of type over [predicate].
@@ -109,6 +112,7 @@ module TyPredicate : sig
 
   val to_ty :
     Typing_defs.locl_ty SMap.t ->
+    Pos.t ->
     Typing_defs.type_predicate ->
     Typing_defs.locl_ty
 

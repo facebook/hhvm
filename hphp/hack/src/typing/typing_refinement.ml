@@ -275,7 +275,7 @@ module TyPredicate = struct
       in
       (env, new_tparams)
 
-  let rec to_ty instantiation_map predicate =
+  let rec to_ty lookup_wildcard predicate =
     let tag_to_ty reason tag =
       match tag with
       | BoolTag -> Typing_make_type.bool reason
@@ -291,7 +291,7 @@ module TyPredicate = struct
           List.map generics ~f:(fun g ->
               match g with
               | Filled ty -> ty
-              | Wildcard key -> SMap.find key instantiation_map)
+              | Wildcard key -> lookup_wildcard key)
         in
         Typing_make_type.class_type reason id tyargs
     in
@@ -302,7 +302,7 @@ module TyPredicate = struct
         ( reason,
           Ttuple
             {
-              t_required = List.map tp_required ~f:(to_ty instantiation_map);
+              t_required = List.map tp_required ~f:(to_ty lookup_wildcard);
               t_extra =
                 Textra
                   {
@@ -316,15 +316,31 @@ module TyPredicate = struct
           (fun { sfp_predicate } ->
             {
               sft_optional = false;
-              sft_ty = to_ty instantiation_map sfp_predicate;
+              sft_ty = to_ty lookup_wildcard sfp_predicate;
             })
           sp_fields
       in
       Typing_make_type.shape reason (Typing_make_type.nothing reason) map
 
+  exception FoundWildcard
+
   let to_ty_without_instantiation_opt predicate =
-    try Some (to_ty SMap.empty predicate) with
-    | Stdlib.Not_found -> None
+    try Some (to_ty (fun _key -> raise FoundWildcard) predicate) with
+    | FoundWildcard -> None
+
+  let to_ty instantiation_map p predicate =
+    to_ty
+      (fun key ->
+        match SMap.find_opt key instantiation_map with
+        | Some ty -> ty
+        | None ->
+          Errors.invariant_violation
+            p
+            (Telemetry.create ())
+            "Unexpected failure to instantiate type from predicate"
+            ~report_to_user:true;
+          Typing_make_type.nothing Reason.none)
+      predicate
 end
 
 module Uninstantiated_typing_logic = struct
@@ -348,24 +364,27 @@ module Uninstantiated_typing_logic = struct
 
   let disj a b = Disj (a, b)
 
-  let instantiate_ty map = function
-    | Predicate predicate -> TyPredicate.to_ty map predicate
+  let instantiate_ty map pos = function
+    | Predicate predicate -> TyPredicate.to_ty map pos predicate
     | LoclTy ty -> ty
 
   module TL = Typing_logic
 
-  let rec instantiate_prop map = function
+  let rec instantiate_prop map pos = function
     | Valid -> TL.valid
     | Invalid -> TL.invalid ~fail:None
     | IsSubtype (ty1, ty2) ->
-      let ty1 = instantiate_ty map ty1 in
-      let ty2 = instantiate_ty map ty2 in
+      let ty1 = instantiate_ty map pos ty1 in
+      let ty2 = instantiate_ty map pos ty2 in
       TL.IsSubtype
         (None, Typing_defs_core.LoclType ty1, Typing_defs_core.LoclType ty2)
     | Conj (p1, p2) ->
-      TL.conj (instantiate_prop map p1) (instantiate_prop map p2)
+      TL.conj (instantiate_prop map pos p1) (instantiate_prop map pos p2)
     | Disj (p1, p2) ->
-      TL.disj ~fail:None (instantiate_prop map p1) (instantiate_prop map p2)
+      TL.disj
+        ~fail:None
+        (instantiate_prop map pos p1)
+        (instantiate_prop map pos p2)
     | Instantiated prop -> prop
 
   let print_ty env = function

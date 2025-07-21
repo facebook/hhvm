@@ -279,5 +279,23 @@ uint32_t getReplySourceBitMask(const Message& message) {
   return 0;
 }
 
+template <typename Message, typename = std::enable_if_t<true>>
+class HasShardTrait : public std::false_type {};
+template <typename Message>
+class HasShardTrait<
+    Message,
+    std::void_t<decltype(std::declval<Message>().shard_ref())>>
+    : public std::true_type {};
+
+template <typename Message>
+std::optional<int64_t> getMessageShardId(const Message& message) {
+  if constexpr (HasShardTrait<Message>::value) {
+    if (message.shard().has_value()) {
+      return *message.shard()->id_ref();
+    }
+  }
+  return std::nullopt;
+}
+
 } // namespace memcache
 } // namespace facebook

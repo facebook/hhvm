@@ -42,8 +42,8 @@ class AsyncClientWorker2
     setupSSLContext();
   }
 
-  typedef test::LoadTestAsyncClient Client;
-  typedef Worker<Client, ClientLoadConfig> Parent;
+  using Client = test::LoadTestAsyncClient;
+  using Parent = Worker<Client, ClientLoadConfig>;
 
   std::shared_ptr<Client> createConnection() override;
   // this is now a no-op, AsyncClientWorker::run works differently

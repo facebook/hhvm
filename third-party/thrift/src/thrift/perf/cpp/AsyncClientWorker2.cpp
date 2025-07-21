@@ -33,7 +33,7 @@ using apache::thrift::loadgen::ScoreBoard;
 
 namespace apache::thrift {
 
-typedef std::shared_ptr<AsyncClientWorker2::Client> LoadTestClientPtr;
+using LoadTestClientPtr = std::shared_ptr<AsyncClientWorker2::Client>;
 
 const int kTimeout = 60000;
 const int MAX_LOOPS = 0;

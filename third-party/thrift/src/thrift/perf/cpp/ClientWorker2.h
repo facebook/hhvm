@@ -32,8 +32,8 @@ class ClientLoadConfig;
 class ClientWorker2
     : public loadgen::Worker<LoadTestAsyncClient, ClientLoadConfig> {
  public:
-  typedef LoadTestAsyncClient Client;
-  typedef loadgen::Worker<Client, ClientLoadConfig> Parent;
+  using Client = LoadTestAsyncClient;
+  using Parent = loadgen::Worker<Client, ClientLoadConfig>;
 
   std::shared_ptr<Client> createConnection() override;
   void performOperation(

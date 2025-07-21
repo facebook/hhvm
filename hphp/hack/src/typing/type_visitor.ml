@@ -346,7 +346,13 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
         match tag with
         | ClassTag (c, args) ->
           let acc = this#on_tclass acc r (Reason.to_pos r, c) nonexact [] in
-          this#on_tlist acc r args
+          let tyl =
+            List.filter_map args ~f:(fun g ->
+                match g with
+                | Filled ty -> Some ty
+                | Wildcard _ -> None)
+          in
+          this#on_tlist acc r tyl
         | ArraykeyTag
         | BoolTag
         | IntTag

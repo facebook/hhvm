@@ -1208,6 +1208,17 @@ module Full = struct
 
   and type_predicate ~fuel ~negate ~hide_internals to_doc st penv predicate =
     let k ~fuel lty = locl_ty ~fuel ~hide_internals to_doc st penv lty in
+    let g ~fuel g =
+      match g with
+      | Wildcard s ->
+        ( fuel,
+          text
+            (if hide_internals then
+              "_"
+            else
+              s) )
+      | Filled ty -> k ~fuel ty
+    in
     let tag_doc fuel tag =
       match tag with
       | BoolTag -> (fuel, text "bool")
@@ -1218,12 +1229,12 @@ module Full = struct
       | NumTag -> (fuel, text "num")
       | ResourceTag -> (fuel, text "resource")
       | NullTag -> (fuel, text "null")
-      | ClassTag (s, tyl) ->
+      | ClassTag (s, generics) ->
         let (fuel, targs_doc) =
-          if List.is_empty tyl then
+          if List.is_empty generics then
             (fuel, Nothing)
           else
-            list ~fuel "<" k tyl ">"
+            list ~fuel "<" g generics ">"
         in
         (fuel, to_doc s ^^ targs_doc)
     in

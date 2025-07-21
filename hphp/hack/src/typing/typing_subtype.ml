@@ -5319,7 +5319,7 @@ end = struct
           valid env
         else
           invalid ~fail env
-      | (_, Tclass ((_, c_sub), _, _)) when List.is_empty c_super_args ->
+      | (_, Tclass ((_, c_sub), _, _)) ->
         if Subtype_negation.is_class_disjoint env c_sub c_super then
           valid env
         else

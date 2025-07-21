@@ -188,9 +188,17 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
       | ResourceTag -> name "isresource"
       | NullTag -> name "isnull"
       | ClassTag (s, args) ->
-        let args_json =
-          List.map args ~f:(fun ty -> from_type env ~show_like_ty ty)
+        let generic_json g =
+          match g with
+          | Filled ty ->
+            obj
+              [
+                ("generic_kind", JSON_String "filled");
+                ("type", from_type env ~show_like_ty ty);
+              ]
+          | Wildcard _ -> obj [("generic_kind", JSON_String "wildcard")]
         in
+        let args_json = List.map args ~f:generic_json in
         name s @ [("args", JSON_Array args_json)]
     and predicate_json predicate =
       match snd predicate with

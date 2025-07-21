@@ -23,6 +23,40 @@ module Tag = struct
     | Reified of locl_ty
     | Erased
 
+  let is_fresh_generic ty =
+    match get_node ty with
+    | Tgeneric name -> Env.is_fresh_generic_parameter name
+    | _ -> false
+
+  let generics_for_class_and_ty_opt_l env cls ty_opt_l =
+    match Env.get_class env cls with
+    | Decl_entry.Found class_info ->
+      let tparams = Folded_class.tparams class_info in
+      let rec zip tparams ty_opt_l =
+        match (tparams, ty_opt_l) with
+        | ([], _) -> []
+        | ( { tp_reified = Aast.(SoftReified | Reified); _ } :: tparams,
+            Some ty :: ty_opt_l )
+          when not (is_fresh_generic ty) ->
+          Reified ty :: zip tparams ty_opt_l
+        | (_ :: tparams, _ :: (_ as ty_opt_l))
+        | (_ :: tparams, ([] as ty_opt_l)) ->
+          Erased :: zip tparams ty_opt_l
+      in
+      zip tparams ty_opt_l
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      List.map ty_opt_l ~f:(fun _ -> Erased)
+
+  let generics_for_class_and_tyl env cls args =
+    generics_for_class_and_ty_opt_l env cls @@ List.map args ~f:Option.some
+
+  let generics_for_class_and_tag_generic_l env cls generic_l =
+    generics_for_class_and_ty_opt_l env cls
+    @@ List.map generic_l ~f:(function
+           | Filled ty -> Some ty
+           | Wildcard _ -> None)
+
   (* Pad with Erased because for Foo<T>, Foo and Foo<_> should be the same;
      It's also convenient to not check for arity mismatch and failwith *)
   let rec zip_generics al bl =
@@ -460,7 +494,7 @@ module DataType : sig
       trail:DataTypeReason.trail ->
       env ->
       string ->
-      locl_ty list ->
+      Tag.generic list ->
       env * t
   end
 end = struct
@@ -549,7 +583,7 @@ end = struct
       trail:DataTypeReason.trail ->
       env ->
       string ->
-      locl_ty list ->
+      Tag.generic list ->
       env * t
   end = struct
     (* Set of interfaces that contain non-object members *)
@@ -633,28 +667,12 @@ end = struct
     let special_interface_cache : Tag.t list String.Table.t =
       String.Table.create ()
 
-    let is_fresh_generic ty =
-      match get_node ty with
-      | Tgeneric name -> Env.is_fresh_generic_parameter name
-      | _ -> false
-
-    let rec get_generics tparams locl_tys =
-      match (tparams, locl_tys) with
-      | ([], _) -> []
-      | ( { tp_reified = Aast.SoftReified | Aast.Reified; _ } :: tparams,
-          locl_ty :: locl_tys )
-        when not (is_fresh_generic locl_ty) ->
-        Tag.Reified locl_ty :: get_generics tparams locl_tys
-      | (_ :: tparams, _ :: locl_tys)
-      | (_ :: tparams, locl_tys) ->
-        Tag.Erased :: get_generics tparams locl_tys
-
     let rec to_datatypes
         ~(safe_for_are_disjoint : bool)
         ~(trail : DataTypeReason.trail)
         (env : env)
         (cls : string)
-        (args : locl_ty list) : t =
+        (generics : Tag.generic list) : t =
       let open Tag in
       let cycle_handler f = cycle_handler ~env ~f in
       let reason = DataTypeReason.(make NoSubreason trail) in
@@ -673,8 +691,6 @@ end = struct
              ~default:(Set.singleton ~reason ObjectData)
              ~f:(fun cls ->
                let open Ast_defs in
-               let tparams = Cls.tparams cls in
-               let generics = get_generics tparams args in
                match Cls.kind cls with
                | Cclass _ when Cls.final cls ->
                  Set.singleton ~reason
@@ -755,7 +771,7 @@ end = struct
         ~trail
         (env : env)
         (cls : string)
-        (args : locl_ty list) : env * t =
+        (args : Tag.generic list) : env * t =
       if SSet.mem cls special_interfaces then
         let (env, tags) =
           match Hashtbl.find special_interface_cache cls with
@@ -794,7 +810,8 @@ end = struct
       | ResourceTag -> (env, Set.singleton ~reason ResourceData)
       | NullTag -> (env, Set.singleton ~reason NullData)
       | ClassTag (id, args) ->
-        Class.to_datatypes ~safe_for_are_disjoint ~trail env id args
+        let generics = Tag.generics_for_class_and_tag_generic_l env id args in
+        Class.to_datatypes ~safe_for_are_disjoint ~trail env id generics
     in
     match snd predicate with
     | IsTag tag -> from_tag tag
@@ -950,12 +967,13 @@ end = struct
         cycle_handler ~env ~trail as_ty
     end
     | Tclass ((_, cls), _, args) ->
+      let generics = Tag.generics_for_class_and_tyl env cls args in
       Class.to_datatypes
         ~safe_for_are_disjoint:ctx.safe_for_are_disjoint
         ~trail
         env
         cls
-        args
+        generics
     | Tneg predicate ->
       let (env, right) =
         fromPredicate
@@ -1173,7 +1191,8 @@ module AtomicDataTypes = struct
     | Shape -> (env, shape)
     | Label -> (env, label)
     | Class (name, args) ->
-      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name args
+      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
+      @@ Tag.generics_for_class_and_tyl env name args
 
   let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
     let of_ty = of_ty ~safe_for_are_disjoint in
@@ -1186,7 +1205,9 @@ module AtomicDataTypes = struct
     | NumTag -> of_ty env (Primitive Aast.Tnum)
     | ResourceTag -> of_ty env (Primitive Aast.Tresource)
     | NullTag -> of_ty env (Primitive Aast.Tnull)
-    | ClassTag (id, args) -> of_ty env (Class (id, args))
+    | ClassTag (name, args) ->
+      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
+      @@ Tag.generics_for_class_and_tag_generic_l env name args
 
   let complement dt = DataType.Set.diff mixed dt
 

@@ -99,6 +99,7 @@ module TyPredicate = struct
         then
           Result.Error "class with erased generics"
         else
+          let args = List.map args ~f:(fun ty -> Filled ty) in
           Result.Ok (IsTag (ClassTag (name, args)))
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->
@@ -135,7 +136,15 @@ module TyPredicate = struct
       | NumTag -> Typing_make_type.num reason
       | ResourceTag -> Typing_make_type.resource reason
       | NullTag -> Typing_make_type.null reason
-      | ClassTag (id, tyargs) -> Typing_make_type.class_type reason id tyargs
+      | ClassTag (id, generics) ->
+        let tyargs =
+          List.map generics ~f:(fun g ->
+              match g with
+              | Filled ty -> ty
+              (* TODO freshen the type in later diff *)
+              | Wildcard _ -> Typing_make_type.nothing Reason.none)
+        in
+        Typing_make_type.class_type reason id tyargs
     in
     match predicate with
     | (reason, IsTag tag) -> tag_to_ty reason tag

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b3196c88bd44f1b6123a56cb76f6ba5>>
+// @generated SignedSource<<1f03ccd69df4c731e4656d9a362c0178>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -518,6 +518,28 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
 )]
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
+pub enum TypeTagGeneric {
+    Filled(Ty),
+    Wildcard(String),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
 pub enum TypeTag {
     BoolTag,
     IntTag,
@@ -527,7 +549,7 @@ pub enum TypeTag {
     NumTag,
     ResourceTag,
     NullTag,
-    ClassTag(ast_defs::Id_, Vec<Ty>),
+    ClassTag(ast_defs::Id_, Vec<TypeTagGeneric>),
 }
 
 #[derive(

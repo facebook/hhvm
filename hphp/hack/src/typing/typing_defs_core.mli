@@ -208,6 +208,10 @@ type 'ty fun_type = {
 (** = Reason.t * 'phase ty_ *)
 type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
+and type_tag_generic =
+  | Filled of locl_phase ty
+  | Wildcard of string
+
 and type_tag =
   | BoolTag
   | IntTag
@@ -217,7 +221,7 @@ and type_tag =
   | NumTag
   | ResourceTag
   | NullTag
-  | ClassTag of Ast_defs.id_ * locl_phase ty list
+  | ClassTag of Ast_defs.id_ * type_tag_generic list
 
 and shape_field_predicate = {
   (* T196048813 *)
@@ -809,3 +813,5 @@ val transform_top_down_decl_ty :
     'a * [< `Continue of decl_ty | `Stop of decl_ty | `Restart of decl_ty ]) ->
   ctx:'a ->
   decl_ty
+
+val is_type_tag_generic_wildcard : type_tag_generic -> bool

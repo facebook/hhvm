@@ -407,22 +407,26 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
          c2 has no type parameters.
       *)
       (env, Some (MakeType.mixed r))
-    | ( (_, Tneg (_, IsTag (ClassTag (c1, [])))),
+    | ( (_, Tneg (_, IsTag (ClassTag (c1, c1_args)))),
         (_, Tclass ((_, c2), Nonexact _, _ :: _)) )
     | ( (_, Tclass ((_, c2), Nonexact _, _ :: _)),
-        (_, Tneg (_, IsTag (ClassTag (c1, [])))) )
-      when approx_cancel_neg && Utils.is_sub_class_refl env c1 c2 ->
+        (_, Tneg (_, IsTag (ClassTag (c1, c1_args)))) )
+      when approx_cancel_neg
+           && Utils.is_sub_class_refl env c1 c2
+           && List.for_all c1_args ~f:is_type_tag_generic_wildcard ->
       (* Unlike the case where c2 has no parameters, here we can get a situation
          where c1 is a sub-class of c2, but they don't union to mixed. For example,
          Vector<int> | not Vector, which doesn't include Vector<string>, etc. However,
          we can still approximate up to mixed when it would be both sound and convenient,
          as controlled by the approx_cancel_neg flag. *)
       (env, Some (MakeType.mixed r))
-    | ( (_, Tneg (_, IsTag (ClassTag (c1, [])))),
+    | ( (_, Tneg (_, IsTag (ClassTag (c1, c1_args)))),
         (_, Tclass ((_, c2), Exact, _ :: _)) )
     | ( (_, Tclass ((_, c2), Exact, _ :: _)),
-        (_, Tneg (_, IsTag (ClassTag (c1, [])))) )
-      when approx_cancel_neg && String.equal c1 c2 ->
+        (_, Tneg (_, IsTag (ClassTag (c1, c1_args)))) )
+      when approx_cancel_neg
+           && String.equal c1 c2
+           && List.for_all c1_args ~f:is_type_tag_generic_wildcard ->
       (env, Some (MakeType.mixed r))
     | ((_, Tneg (_, IsTag NumTag)), (_, Tprim Aast.Tarraykey))
     | ((_, Tprim Aast.Tarraykey), (_, Tneg (_, IsTag NumTag))) ->

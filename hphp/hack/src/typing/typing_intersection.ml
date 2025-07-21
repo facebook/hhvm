@@ -120,7 +120,7 @@ let negate_type env r ty ~approx =
             (ClassTag
                ( c,
                  if is_all_filled_reified tparams args then
-                   args
+                   List.map args ~f:(fun ty -> Filled ty)
                  else
                    [] )) )
     | _ -> approximated

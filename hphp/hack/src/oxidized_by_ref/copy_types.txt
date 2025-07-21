@@ -217,6 +217,7 @@ typing_defs_core::TypeOrigin
 typing_defs_core::TypePredicate
 typing_defs_core::TypePredicate_
 typing_defs_core::TypeTag
+typing_defs_core::TypeTagGeneric
 typing_defs_core::UserAttributeParam
 typing_defs_core::ValKind
 typing_defs_core::XhpAttr

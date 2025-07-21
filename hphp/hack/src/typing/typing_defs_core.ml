@@ -240,6 +240,10 @@ let _hash_fold_phase hsv _ = hsv
 
 type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
+and type_tag_generic =
+  | Filled of locl_phase ty
+  | Wildcard of string
+
 and type_tag =
   | BoolTag
   | IntTag
@@ -249,7 +253,7 @@ and type_tag =
   | NumTag
   | ResourceTag
   | NullTag
-  | ClassTag of Ast_defs.id_ * locl_phase ty list
+  | ClassTag of Ast_defs.id_ * type_tag_generic list
 
 and shape_field_predicate = {
   (* T196048813 *)
@@ -853,6 +857,17 @@ module Pp = struct
     Format.fprintf fmt "@]";
     Format.fprintf fmt "@ }@]"
 
+  and pp_type_tag_generic fmt generic =
+    match generic with
+    | Filled ty ->
+      Format.fprintf fmt "(@[<2>Filled@ ";
+      pp_ty fmt ty;
+      Format.fprintf fmt "@])"
+    | Wildcard string ->
+      Format.fprintf fmt "(@[<2>Wildcard@ ";
+      Format.pp_print_string fmt string;
+      Format.fprintf fmt "@])"
+
   and pp_type_tag fmt tag =
     match tag with
     | BoolTag -> Format.pp_print_string fmt "BoolTag"
@@ -867,7 +882,7 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>ClassTag (@,";
       Format.pp_print_string fmt id;
       Format.fprintf fmt ",@ ";
-      pp_list pp_ty fmt args;
+      pp_list pp_type_tag_generic fmt args;
       Format.fprintf fmt "@,))@]"
 
   and pp_type_predicate fmt predicate = pp_type_predicate_ fmt (snd predicate)
@@ -1269,6 +1284,13 @@ and compare_type_predicate (_, p1) (_, p2) =
   | (IsShapeOf sp1, IsShapeOf sp2) -> compare_shape_predicate sp1 sp2
   | _ -> type_predicate__con_ordinal p1 - type_predicate__con_ordinal p2
 
+and compare_type_tag_generic g1 g2 =
+  match (g1, g2) with
+  | (Wildcard s1, Wildcard s2) -> String.compare s1 s2
+  | (Filled ty1, Filled ty2) -> ty_compare ty1 ty2
+  | (Wildcard _, Filled _) -> 1
+  | (Filled _, Wildcard _) -> -1
+
 and compare_type_tag tag1 tag2 =
   match (tag1, tag2) with
   | (BoolTag, BoolTag)
@@ -1282,7 +1304,7 @@ and compare_type_tag tag1 tag2 =
     0
   | (ClassTag (id1, args1), ClassTag (id2, args2)) -> begin
     match String.compare id1 id2 with
-    | 0 -> tyl_compare ~sort:false args1 args2
+    | 0 -> List.compare compare_type_tag_generic args1 args2
     | n -> n
   end
   | _ -> type_tag_con_ordinal tag1 - type_tag_con_ordinal tag2
@@ -2161,3 +2183,8 @@ end
 
 let transform_top_down_decl_ty decl_ty ~f ~ctx =
   Transform_top_down_decl.transform decl_ty ~f ~ctx
+
+let is_type_tag_generic_wildcard generic =
+  match generic with
+  | Wildcard _ -> true
+  | Filled _ -> false

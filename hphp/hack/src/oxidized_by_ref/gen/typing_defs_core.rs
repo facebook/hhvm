@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<692ea0fed8ba43f4d2b7d139109270c1>>
+// @generated SignedSource<<dd30293f05e036404e28e9d980a2b759>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -495,6 +495,33 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 )]
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
+pub enum TypeTagGeneric<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Filled(&'a Ty<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Wildcard(&'a str),
+}
+impl<'a> TrivialDrop for TypeTagGeneric<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypeTagGeneric<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
 pub enum TypeTag<'a> {
     BoolTag,
     IntTag,
@@ -506,7 +533,7 @@ pub enum TypeTag<'a> {
     NullTag,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
-    ClassTag(&'a (&'a ast_defs::Id_<'a>, &'a [&'a Ty<'a>])),
+    ClassTag(&'a (&'a ast_defs::Id_<'a>, &'a [TypeTagGeneric<'a>])),
 }
 impl<'a> TrivialDrop for TypeTag<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypeTag<'arena>);

@@ -19,6 +19,7 @@ use libc::c_char;
 
 use crate::DeclProvider;
 use crate::DeclsHolder;
+use crate::ParsedFileHolder;
 
 /// Keep this in sync with struct ExternalDeclProviderResult in decl_provider.h
 #[repr(C)]
@@ -133,7 +134,12 @@ impl<'a> ExternalDeclProvider<'a> {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(ptr) => {
                 let holder = unsafe { ptr.as_ref() }.unwrap();
-                find(&holder.parsed_file.decls)
+                match &holder.parsed_file {
+                    ParsedFileHolder::O(_file) => {
+                        panic!("Attempt to use ExternalDeclProvider with Oxidized decl parser")
+                    }
+                    ParsedFileHolder::Obr(file, _) => find(&file.decls),
+                }
             }
             ExternalDeclProviderResult::RustVec(p) => {
                 // turn raw pointer back into &Vec<u8>
@@ -157,7 +163,7 @@ impl<'a> ExternalDeclProvider<'a> {
         match self.decls.borrow_mut().entry(content_hash.into()) {
             Occupied(e) => Ok(*e.get()),
             Vacant(e) => {
-                let decls = decl_provider::deserialize_decls(self.arena, data)?;
+                let decls = decl_provider::deserialize_decls_obr(self.arena, data)?;
                 Ok(*e.insert(self.arena.alloc(decls)))
             }
         }

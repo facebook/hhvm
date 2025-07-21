@@ -30,6 +30,9 @@ impl MethodFlags {
     pub fn is_final(&self) -> bool {
         self.contains(Self::FINAL)
     }
+    pub fn is_php_std_lib(&self) -> bool {
+        self.contains(Self::PHP_STD_LIB)
+    }
     pub fn is_dynamicallycallable(&self) -> bool {
         self.contains(Self::DYNAMICALLYCALLABLE)
     }

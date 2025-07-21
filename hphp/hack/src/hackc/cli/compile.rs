@@ -453,7 +453,7 @@ impl<'a, R: Reason> SingleDeclProvider<'a, R> {
             arena,
             decls: match hackc_opts.use_serialized_decls {
                 false => DeclsHolder::ByRef(decls),
-                true => DeclsHolder::Ser(decl_provider::serialize_decls(&decls)?),
+                true => DeclsHolder::Ser(decl_provider::serialize_decls_obr(&decls)?),
             },
             shallow_decl_provider: if hackc_opts.naming_table.is_some()
                 && hackc_opts.naming_table_root.is_some()
@@ -477,7 +477,9 @@ impl<'a, R: Reason> SingleDeclProvider<'a, R> {
     ) -> Result<T, Error> {
         match &self.decls {
             DeclsHolder::ByRef(decls) => find(decls),
-            DeclsHolder::Ser(data) => find(&decl_provider::deserialize_decls(self.arena, data)?),
+            DeclsHolder::Ser(data) => {
+                find(&decl_provider::deserialize_decls_obr(self.arena, data)?)
+            }
         }
     }
 

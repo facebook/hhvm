@@ -1472,6 +1472,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Treat non annotated <<__Memoize>> as KeyedByIC.
 
+- bool Hack.Lang.UseObrDecls = true, sowens, repooptionsflag(Parser)
+
+  Use oxidized by ref for ext_decl decling instead of oxidized
+
 - bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)

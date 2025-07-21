@@ -303,6 +303,7 @@ void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
   config.php5_compat_mode = true;
   config.hhvm_compat_mode = true;
   config.enable_class_pointer_hint = EnableClassPointerHint;
+  config.use_obr_decls = UseObrDecls;
 }
 
 void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {

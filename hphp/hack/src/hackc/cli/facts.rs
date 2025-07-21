@@ -47,7 +47,7 @@ pub(crate) fn extract_facts(
             // Swallowing errors is bad.
             continue;
         }
-        let facts = Facts::from_decls(&parsed_file);
+        let facts = Facts::from_decls_obr(&parsed_file);
         let json = json!(facts);
         file_to_facts.insert(path.to_str().unwrap().to_owned(), json);
     }

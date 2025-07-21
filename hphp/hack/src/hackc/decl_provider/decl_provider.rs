@@ -15,6 +15,7 @@ use std::path::PathBuf;
 use arena_deserializer::ArenaDeserializer;
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
+use direct_decl_parser::Decls;
 use direct_decl_parser::DeclsObr;
 use direct_decl_parser::ParsedFileObr;
 use hash::IndexMap;
@@ -100,7 +101,19 @@ pub trait DeclProvider<'d>: std::fmt::Debug {
 }
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
-pub fn serialize_decls(decls: &DeclsObr<'_>) -> Result<Vec<u8>, bincode::Error> {
+pub fn serialize_decls(decls: &Decls) -> Result<Vec<u8>, bincode::Error> {
+    let mut blob = Vec::new();
+    bincode::options()
+        .with_native_endian()
+        .serialize_into(&mut blob, decls)?;
+    let mut digest = Sha1::new();
+    digest.update(&blob);
+    blob.write_all(&digest.finalize())?;
+    Ok(blob)
+}
+
+/// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
+pub fn serialize_decls_obr(decls: &DeclsObr<'_>) -> Result<Vec<u8>, bincode::Error> {
     let mut blob = Vec::new();
     bincode::options()
         .with_native_endian()
@@ -112,7 +125,20 @@ pub fn serialize_decls(decls: &DeclsObr<'_>) -> Result<Vec<u8>, bincode::Error> 
 }
 
 /// Deserialize decls. Panic in cfg(debug) if the content hash is wrong.
-pub fn deserialize_decls<'a>(
+pub fn deserialize_decls(data: &[u8]) -> Result<Decls, bincode::Error> {
+    let (data, hash) = split_serialized_decls(data);
+    debug_assert!({
+        let mut digest = Sha1::new();
+        digest.update(data);
+        digest.finalize().to_vec() == hash
+    });
+    let op = bincode::options().with_native_endian();
+    let mut de = bincode::de::Deserializer::from_slice(data, op);
+    Decls::deserialize(&mut de)
+}
+
+/// Deserialize decls. Panic in cfg(debug) if the content hash is wrong.
+pub fn deserialize_decls_obr<'a>(
     arena: &'a bumpalo::Bump,
     data: &[u8],
 ) -> Result<DeclsObr<'a>, bincode::Error> {

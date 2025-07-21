@@ -1808,6 +1808,7 @@ dependencies = [
  "hash",
  "hhbc_string_utils",
  "naming_special_names_rust",
+ "oxidized",
  "oxidized_by_ref",
  "serde",
  "serde_json",

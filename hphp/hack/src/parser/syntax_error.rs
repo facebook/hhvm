@@ -924,10 +924,9 @@ pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {
 pub fn duplicate_modifiers_for_declaration(decl: &str) -> Error {
     Cow::Owned(format!("{} cannot have duplicate modifiers", decl))
 }
-// TODO(T223852815): need to change errors message when protected internal is released
 pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
     Cow::Owned(format!(
-        "{} cannot have multiple visibility modifiers",
+        "{} cannot have multiple visibility modifiers except for `protected internal`.",
         decl,
     ))
 }

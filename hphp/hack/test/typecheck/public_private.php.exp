@@ -1,2 +1,2 @@
 ERROR: File "public_private.php", line 13, characters 17-23:
-Methods cannot have multiple visibility modifiers (Parsing[1002])
+Methods cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])

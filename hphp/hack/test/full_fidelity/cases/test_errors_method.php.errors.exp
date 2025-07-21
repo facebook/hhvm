@@ -1,5 +1,5 @@
 (3,7)-(3,8) Class `E` contains an abstract method and must therefore be declared `abstract`
-(4,10)-(4,17) Methods cannot have multiple visibility modifiers
+(4,10)-(4,17) Methods cannot have multiple visibility modifiers except for `protected internal`.
 (5,3)-(5,35) Redeclared method `E::f`
 (5,9)-(5,14) Methods cannot have duplicate modifiers
 (6,3)-(6,45) Redeclared method `E::f`

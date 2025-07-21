@@ -1,1 +1,1 @@
-Fatal error: Methods cannot have multiple visibility modifiers in %s/multiple_access_modifiers.php on line 3
+Fatal error: Methods cannot have multiple visibility modifiers except for `protected internal`. in %s/multiple_access_modifiers.php on line 3

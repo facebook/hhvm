@@ -132,6 +132,8 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     $sr_config_service_name =
       $context->get(#ThriftPolicyZones)?->getSmcServiceName() ?? '';
 
+    self::customLogging($asset_xid, $caller);
+
     $privacy_lib =
       self::getPrivacyLibObject($asset_xid, $sr_config_service_name);
     $privacylib_failure = await $privacy_lib->genClientRPCWithTAE(
@@ -151,6 +153,30 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
       ),
       $privacylib_failure,
     );
+  }
+
+  private static function customLogging(
+    ThriftServiceMethodNameAssetXID $xid,
+    PolicyEnforcerCallerIdentity $caller,
+  ): void {
+    $service_name = $xid->getServiceName();
+    if (
+      coinflip(1000000) &&
+      $service_name === 'InstagramGraphQLService' &&
+      !PrivacyLibKS::isKilled(PLKS::THRIFT_GRAPHQL_CUSTOM_AUDIT)
+    ) {
+      if ($caller->getRawCallerBitmask() !== 1) {
+        signal_log_in_psp_once(
+          SignalDynamicLoggerDataset::PRIVACY_INFRASTRUCTURE,
+          SignalDynamicLoggerProject::PRIVACYLIB_GRAPHQL_THRIFT_CUSTOM_AUDIT,
+          'privacylib_graphql_thrift_custom_audit: '.
+          (string)($caller->getRawCallerBitmask()),
+          StackTrace::getCurrent(
+            DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_METADATA,
+          )->__toString(),
+        );
+      }
+    }
   }
 
   public static async function genProcessResponse(

@@ -460,4 +460,99 @@ void TypeSystemBuilder::tryEmplace(Uri uri, DefinitionEntry&& def) {
   }
 }
 
+namespace {
+
+using RawAnnotations = folly::F14FastMap<Uri, SerializableRecordUnion>;
+
+static RawAnnotations toRawAnnotations(
+    const TypeSystemBuilder::DefinitionHelper::Annotations& annotations) {
+  RawAnnotations raw;
+  for (const auto& [uri, record] : annotations) {
+    raw.emplace(uri, SerializableRecord::toThrift(record));
+  }
+  return raw;
+}
+
+} // namespace
+
+/* static */ FieldIdentity TypeSystemBuilder::DefinitionHelper::Identity(
+    std::int16_t id, std::string_view name) {
+  return FieldIdentity{FieldId{id}, std::string(name)};
+}
+
+/* static */ SerializableFieldDefinition
+TypeSystemBuilder::DefinitionHelper::Field(
+    FieldIdentity identity,
+    PresenceQualifier presence,
+    TypeId type,
+    std::optional<SerializableRecord> customDefault,
+    const Annotations& annotations) {
+  SerializableFieldDefinition def;
+  def.identity() = std::move(identity);
+  def.presence() = presence;
+  def.type() = type;
+  if (customDefault.has_value()) {
+    def.customDefaultValue() = SerializableRecord::toThrift(*customDefault);
+  }
+  def.annotations() = toRawAnnotations(annotations);
+  return def;
+}
+
+/* static */ SerializableStructDefinition
+TypeSystemBuilder::DefinitionHelper::Struct(
+    std::vector<SerializableFieldDefinition> fields,
+    bool isSealed,
+    const Annotations& annotations) {
+  SerializableStructDefinition def;
+  def.fields() = fields;
+  def.isSealed() = isSealed;
+  def.annotations() = toRawAnnotations(annotations);
+  return def;
+}
+
+/* static */ SerializableUnionDefinition
+TypeSystemBuilder::DefinitionHelper::Union(
+    std::vector<SerializableFieldDefinition> fields,
+    bool isSealed,
+    const Annotations& annotations) {
+  SerializableUnionDefinition def;
+  def.fields() = fields;
+  def.isSealed() = isSealed;
+  def.annotations() = toRawAnnotations(annotations);
+  return def;
+}
+
+/* static */ SerializableEnumDefinition
+TypeSystemBuilder::DefinitionHelper::Enum(
+    const std::vector<EnumValue>& values, const Annotations& annotations) {
+  SerializableEnumDefinition enumDef;
+  for (auto& [name, value, annotations] : values) {
+    SerializableEnumValueDefinition v;
+    v.name() = name;
+    v.datum() = value;
+    v.annotations() = toRawAnnotations(annotations);
+    enumDef.values()->emplace_back(std::move(v));
+  }
+  enumDef.annotations() = toRawAnnotations(annotations);
+  return enumDef;
+}
+
+/* static */ SerializableOpaqueAliasDefinition
+TypeSystemBuilder::DefinitionHelper::OpaqueAlias(
+    TypeId targetType, const Annotations& annotations) {
+  SerializableOpaqueAliasDefinition def;
+  def.targetType() = targetType;
+  def.annotations() = toRawAnnotations(annotations);
+  return def;
+}
+
+/* static */ SerializableThriftSourceInfo
+TypeSystemBuilder::DefinitionHelper::SourceInfo(
+    std::string_view location, std::string_view name) {
+  SerializableThriftSourceInfo entry;
+  entry.locator() = std::string(location);
+  entry.name() = std::string(name);
+  return entry;
+}
+
 } // namespace apache::thrift::type_system

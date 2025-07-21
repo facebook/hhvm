@@ -22,9 +22,7 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
 
-#include <cstdint>
 #include <optional>
-#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -32,94 +30,9 @@
 namespace apache::thrift::type_system {
 
 // For conciseness
+using def = TypeSystemBuilder::DefinitionHelper;
+
 namespace {
-
-constexpr inline PresenceQualifier optional = PresenceQualifier::OPTIONAL_;
-constexpr inline PresenceQualifier unqualified = PresenceQualifier::UNQUALIFIED;
-using RawAnnotationsMap = folly::F14FastMap<Uri, SerializableRecordUnion>;
-
-FieldIdentity identity(std::int16_t id, std::string_view name) {
-  return FieldIdentity{FieldId{id}, std::string(name)};
-}
-
-SerializableFieldDefinition makeField(
-    FieldIdentity identity,
-    PresenceQualifier presence,
-    TypeId type,
-    std::optional<SerializableRecord> customDefault = std::nullopt,
-    RawAnnotationsMap annotations = {}) {
-  SerializableFieldDefinition def;
-  def.identity() = std::move(identity);
-  def.presence() = presence;
-  def.type() = type;
-  if (customDefault.has_value()) {
-    def.customDefaultValue() = SerializableRecord::toThrift(*customDefault);
-  }
-  def.annotations() = std::move(annotations);
-  return def;
-}
-
-SerializableStructDefinition makeStruct(
-    std::vector<SerializableFieldDefinition> fields,
-    bool isSealed = false,
-    RawAnnotationsMap annotations = {}) {
-  SerializableStructDefinition def;
-  def.fields() = fields;
-  def.isSealed() = isSealed;
-  def.annotations() = std::move(annotations);
-  return def;
-}
-
-SerializableUnionDefinition makeUnion(
-    std::vector<SerializableFieldDefinition> fields,
-    bool isSealed = false,
-    RawAnnotationsMap annotations = {}) {
-  SerializableUnionDefinition def;
-  def.fields() = fields;
-  def.isSealed() = isSealed;
-  def.annotations() = std::move(annotations);
-  return def;
-}
-
-struct EnumValue {
-  std::string name;
-  std::int32_t value;
-  RawAnnotationsMap annotations;
-
-  EnumValue(std::string n, std::int32_t v) : name{std::move(n)}, value{v} {}
-  EnumValue(std::string n, std::int32_t v, RawAnnotationsMap m)
-      : name{std::move(n)}, value{v}, annotations(std::move(m)) {}
-};
-
-SerializableEnumDefinition makeEnum(
-    std::vector<EnumValue> values, RawAnnotationsMap annotations = {}) {
-  SerializableEnumDefinition enumDef;
-  for (auto& [name, value, annotations] : values) {
-    SerializableEnumValueDefinition v;
-    v.name() = std::move(name);
-    v.datum() = value;
-    v.annotations() = std::move(annotations);
-    enumDef.values()->emplace_back(std::move(v));
-  }
-  enumDef.annotations() = std::move(annotations);
-  return enumDef;
-}
-
-SerializableOpaqueAliasDefinition makeOpaqueAlias(
-    TypeId targetType, RawAnnotationsMap annotations = {}) {
-  SerializableOpaqueAliasDefinition def;
-  def.targetType() = targetType;
-  def.annotations() = std::move(annotations);
-  return def;
-}
-
-SerializableThriftSourceInfo makeSourceInfo(
-    std::string_view location, std::string_view name) {
-  SerializableThriftSourceInfo entry;
-  entry.locator() = std::string(location);
-  entry.name() = std::string(name);
-  return entry;
-}
 
 void expectKnownUris(
     const TypeSystem& typeSystem, std::initializer_list<Uri> uris) {
@@ -134,9 +47,9 @@ constexpr auto kEmptyEnumUri = "meta.com/thrift/test/EmptyEnum";
 
 std::unique_ptr<TypeSystem> typeSystemWithEmpties() {
   TypeSystemBuilder builder;
-  builder.addType(kEmptyStructUri, makeStruct({}));
-  builder.addType(kEmptyUnionUri, makeUnion({}));
-  builder.addType(kEmptyEnumUri, makeEnum({}));
+  builder.addType(kEmptyStructUri, def::Struct({}));
+  builder.addType(kEmptyUnionUri, def::Union({}));
+  builder.addType(kEmptyEnumUri, def::Enum({}));
 
   return std::move(builder).build();
 }
@@ -150,7 +63,7 @@ TEST(TypeSystemTest, EmptyStruct) {
   TypeSystemBuilder builder;
 
   // Define an empty struct
-  builder.addType("meta.com/thrift/test/EmptyStruct", makeStruct({}));
+  builder.addType("meta.com/thrift/test/EmptyStruct", def::Struct({}));
 
   auto typeSystem = std::move(builder).build();
 
@@ -167,7 +80,7 @@ TEST(TypeSystemTest, EmptyUnion) {
   TypeSystemBuilder builder;
 
   // Define a union with no fields
-  builder.addType("meta.com/thrift/test/EmptyUnion", makeUnion({}));
+  builder.addType("meta.com/thrift/test/EmptyUnion", def::Union({}));
 
   auto typeSystem = std::move(builder).build();
 
@@ -189,17 +102,17 @@ TEST(TypeSystemTest, NestedStructs) {
 
   builder.addType(
       outerStructUri,
-      makeStruct({
-          makeField(
-              identity(1, "innerStruct"),
-              optional,
+      def::Struct({
+          def::Field(
+              def::Identity(1, "innerStruct"),
+              def::Optional,
               TypeIds::uri(innerStructUri)),
       }));
 
   builder.addType(
       innerStructUri,
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -210,12 +123,12 @@ TEST(TypeSystemTest, NestedStructs) {
   EXPECT_EQ(outerDef.uri(), outerStructUri);
   EXPECT_EQ(outerDef.asStruct().fields().size(), 1);
   const FieldNode& innerField = outerDef.asStruct().fields()[0];
-  EXPECT_EQ(innerField.identity(), identity(1, "innerStruct"));
-  EXPECT_EQ(innerField.presence(), optional);
+  EXPECT_EQ(innerField.identity(), def::Identity(1, "innerStruct"));
+  EXPECT_EQ(innerField.presence(), def::Optional);
   EXPECT_EQ(innerField.type().asStruct().fields().size(), 1);
   const FieldNode& field1 = innerField.type().asStruct().fields()[0];
-  EXPECT_EQ(field1.identity(), identity(1, "field1"));
-  EXPECT_EQ(field1.presence(), optional);
+  EXPECT_EQ(field1.identity(), def::Identity(1, "field1"));
+  EXPECT_EQ(field1.presence(), def::Optional);
   EXPECT_EQ(field1.type().id(), TypeIds::I32);
 
   expectKnownUris(*typeSystem, {innerStructUri, outerStructUri});
@@ -230,17 +143,21 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
   // Define a recursive struct
   builder.addType(
       recursiveStructUri,
-      makeStruct({
-          makeField(
-              identity(1, "self"), optional, TypeIds::uri(recursiveStructUri)),
+      def::Struct({
+          def::Field(
+              def::Identity(1, "self"),
+              def::Optional,
+              TypeIds::uri(recursiveStructUri)),
       }));
 
   // Define a recursive union
   builder.addType(
       recursiveUnionUri,
-      makeUnion({
-          makeField(
-              identity(1, "self"), optional, TypeIds::uri(recursiveUnionUri)),
+      def::Union({
+          def::Field(
+              def::Identity(1, "self"),
+              def::Optional,
+              TypeIds::uri(recursiveUnionUri)),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -251,8 +168,8 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
   EXPECT_EQ(structDef.uri(), recursiveStructUri);
   EXPECT_EQ(structDef.asStruct().fields().size(), 1);
   const FieldNode& structField = structDef.asStruct().fields()[0];
-  EXPECT_EQ(structField.identity(), identity(1, "self"));
-  EXPECT_EQ(structField.presence(), optional);
+  EXPECT_EQ(structField.identity(), def::Identity(1, "self"));
+  EXPECT_EQ(structField.presence(), def::Optional);
   EXPECT_EQ(
       std::addressof(structField.type().asStruct()),
       std::addressof(structDef.asStruct()));
@@ -263,8 +180,8 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
   EXPECT_EQ(unionDef.uri(), recursiveUnionUri);
   EXPECT_EQ(unionDef.asUnion().fields().size(), 1);
   const FieldNode& unionField = unionDef.asUnion().fields()[0];
-  EXPECT_EQ(unionField.identity(), identity(1, "self"));
-  EXPECT_EQ(unionField.presence(), optional);
+  EXPECT_EQ(unionField.identity(), def::Identity(1, "self"));
+  EXPECT_EQ(unionField.presence(), def::Optional);
   EXPECT_EQ(
       std::addressof(unionField.type().asUnion()),
       std::addressof(unionDef.asUnion()));
@@ -278,11 +195,11 @@ TEST(TypeSystemTest, IncompleteTypeSystem) {
 
   builder.addType(
       "meta.com/thrift/test/MyStruct",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
-          makeField(
-              identity(2, "field2"),
-              unqualified,
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
+          def::Field(
+              def::Identity(2, "field2"),
+              def::AlwaysPresent,
               TypeIds::uri("meta.com/thrift/test/MyUnion")),
       }));
   EXPECT_THROW(std::move(builder).build(), InvalidTypeError);
@@ -293,20 +210,20 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
 
   builder.addType(
       "meta.com/thrift/test/MyStruct",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
-          makeField(
-              identity(2, "field2"),
-              unqualified,
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
+          def::Field(
+              def::Identity(2, "field2"),
+              def::AlwaysPresent,
               TypeIds::uri("meta.com/thrift/test/MyUnion")),
       }));
   builder.addType(
       "meta.com/thrift/test/MyUnion",
-      makeUnion({
-          makeField(identity(1, "int64"), optional, TypeIds::I64),
-          makeField(
-              identity(2, "myStruct"),
-              optional,
+      def::Union({
+          def::Field(def::Identity(1, "int64"), def::Optional, TypeIds::I64),
+          def::Field(
+              def::Identity(2, "myStruct"),
+              def::Optional,
               TypeIds::uri("meta.com/thrift/test/MyStruct")),
       }));
 
@@ -319,14 +236,14 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
   EXPECT_EQ(def.asStruct().fields().size(), 2);
   {
     const FieldNode& field1 = def.asStruct().fields()[0];
-    EXPECT_EQ(field1.identity(), identity(1, "field1"));
-    EXPECT_EQ(field1.presence(), optional);
+    EXPECT_EQ(field1.identity(), def::Identity(1, "field1"));
+    EXPECT_EQ(field1.presence(), def::Optional);
     EXPECT_EQ(field1.type().id(), TypeIds::I32);
   }
   {
     const FieldNode& field2 = def.asStruct().fields()[1];
-    EXPECT_EQ(field2.identity(), identity(2, "field2"));
-    EXPECT_EQ(field2.presence(), unqualified);
+    EXPECT_EQ(field2.identity(), def::Identity(2, "field2"));
+    EXPECT_EQ(field2.presence(), def::AlwaysPresent);
     EXPECT_EQ(field2.type().id(), TypeIds::uri("meta.com/thrift/test/MyUnion"));
     {
       TypeRef typeRef = field2.type();
@@ -334,14 +251,14 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
       EXPECT_EQ(otherUnion.fields().size(), 2);
       {
         const FieldNode& int64 = otherUnion.fields()[0];
-        EXPECT_EQ(int64.identity(), identity(1, "int64"));
-        EXPECT_EQ(int64.presence(), optional);
+        EXPECT_EQ(int64.identity(), def::Identity(1, "int64"));
+        EXPECT_EQ(int64.presence(), def::Optional);
         EXPECT_EQ(int64.type().id(), TypeIds::I64);
       }
       {
         const FieldNode& myStruct = otherUnion.fields()[1];
-        EXPECT_EQ(myStruct.identity(), identity(2, "myStruct"));
-        EXPECT_EQ(myStruct.presence(), optional);
+        EXPECT_EQ(myStruct.identity(), def::Identity(2, "myStruct"));
+        EXPECT_EQ(myStruct.presence(), def::Optional);
         EXPECT_EQ(
             std::addressof(myStruct.type().asStruct()),
             std::addressof(def.asStruct()));
@@ -360,13 +277,16 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   // Define a struct with a custom default field value
   builder.addType(
       "meta.com/thrift/test/StructWithDefaults",
-      makeStruct({
-          makeField(
-              identity(1, "fieldWithDefault"),
-              optional,
+      def::Struct({
+          def::Field(
+              def::Identity(1, "fieldWithDefault"),
+              def::Optional,
               TypeIds::I32,
               SerializableRecord::Int32(42)),
-          makeField(identity(2, "fieldWithoutDefault"), optional, TypeIds::I64),
+          def::Field(
+              def::Identity(2, "fieldWithoutDefault"),
+              def::Optional,
+              TypeIds::I64),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -378,15 +298,16 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   EXPECT_EQ(def.asStruct().fields().size(), 2);
 
   const FieldNode& fieldWithDefault = def.asStruct().fields()[0];
-  EXPECT_EQ(fieldWithDefault.identity(), identity(1, "fieldWithDefault"));
-  EXPECT_EQ(fieldWithDefault.presence(), optional);
+  EXPECT_EQ(fieldWithDefault.identity(), def::Identity(1, "fieldWithDefault"));
+  EXPECT_EQ(fieldWithDefault.presence(), def::Optional);
   EXPECT_EQ(fieldWithDefault.type().id(), TypeIds::I32);
   EXPECT_NE(fieldWithDefault.customDefault(), nullptr);
   EXPECT_EQ(fieldWithDefault.customDefault()->asInt32(), 42);
 
   const FieldNode& fieldWithoutDefault = def.asStruct().fields()[1];
-  EXPECT_EQ(fieldWithoutDefault.identity(), identity(2, "fieldWithoutDefault"));
-  EXPECT_EQ(fieldWithoutDefault.presence(), optional);
+  EXPECT_EQ(
+      fieldWithoutDefault.identity(), def::Identity(2, "fieldWithoutDefault"));
+  EXPECT_EQ(fieldWithoutDefault.presence(), def::Optional);
   EXPECT_EQ(fieldWithoutDefault.type().id(), TypeIds::I64);
   EXPECT_EQ(fieldWithoutDefault.customDefault(), nullptr);
 }
@@ -395,12 +316,13 @@ TEST(TypeSystemTest, Annotations) {
   TypeSystemBuilder builder;
   builder.addType(
       "meta.com/thrift/test/MyAnnot",
-      makeStruct({makeField(identity(1, "field1"), optional, TypeIds::I32)}));
+      def::Struct({def::Field(
+          def::Identity(1, "field1"), def::Optional, TypeIds::I32)}));
 
-  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+  folly::F14FastMap<Uri, SerializableRecord> annots = {
       {"meta.com/thrift/test/MyAnnot",
-       SerializableRecord::toThrift({SerializableRecord::FieldSet(
-           {{FieldId(1), SerializableRecord::Int32(42)}})})}};
+       {SerializableRecord::FieldSet(
+           {{FieldId(1), SerializableRecord::Int32(42)}})}}};
 
   // @MyAnnot{field1=42}
   // struct MyStruct{
@@ -409,10 +331,10 @@ TEST(TypeSystemTest, Annotations) {
   // }
   builder.addType(
       "meta.com/thrift/test/MyStruct",
-      makeStruct(
-          {makeField(
-              identity(1, "field1"),
-              optional,
+      def::Struct(
+          {def::Field(
+              def::Identity(1, "field1"),
+              def::Optional,
               TypeIds::I32,
               std::nullopt,
               annots)},
@@ -426,10 +348,10 @@ TEST(TypeSystemTest, Annotations) {
   // }
   builder.addType(
       "meta.com/thrift/test/MyUnion",
-      makeUnion(
-          {makeField(
-              identity(1, "int64"),
-              optional,
+      def::Union(
+          {def::Field(
+              def::Identity(1, "int64"),
+              def::Optional,
               TypeIds::I64,
               std::nullopt,
               annots)},
@@ -439,7 +361,7 @@ TEST(TypeSystemTest, Annotations) {
   // @MyAnnot{field1=42}
   // typedef i32 MyI32
   builder.addType(
-      "meta.com/thrift/test/MyI32", makeOpaqueAlias(TypeIds::I32, annots));
+      "meta.com/thrift/test/MyI32", def::OpaqueAlias(TypeIds::I32, annots));
 
   // @MyAnnot{field1=42}
   // enum MyEnum {
@@ -447,7 +369,8 @@ TEST(TypeSystemTest, Annotations) {
   //   VALUE = 1,
   // }
   builder.addType(
-      "meta.com/thrift/test/MyEnum", makeEnum({{"VALUE1", 1, annots}}, annots));
+      "meta.com/thrift/test/MyEnum",
+      def::Enum({{"VALUE1", 1, annots}}, annots));
 
   auto typeSystem = std::move(builder).build();
 
@@ -489,10 +412,10 @@ TEST(TypeSystemTest, Annotations) {
 TEST(TypeSystemTest, WrongAnnotationTypeUri) {
   TypeSystemBuilder builder;
 
-  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+  folly::F14FastMap<Uri, SerializableRecord> annots = {
       {"meta.com/thrift/test/MyAnnot",
-       SerializableRecord::toThrift({SerializableRecord::FieldSet(
-           {{FieldId(1), SerializableRecord::Int32(42)}})})}};
+       {SerializableRecord::FieldSet(
+           {{FieldId(1), SerializableRecord::Int32(42)}})}}};
 
   // @MyAnnot{field1=42}
   // struct MyStruct{
@@ -501,13 +424,14 @@ TEST(TypeSystemTest, WrongAnnotationTypeUri) {
   // }
   builder.addType(
       "meta.com/thrift/test/MyAnnot",
-      makeUnion({makeField(identity(1, "field1"), optional, TypeIds::I32)}));
+      def::Union({def::Field(
+          def::Identity(1, "field1"), def::Optional, TypeIds::I32)}));
   builder.addType(
       "meta.com/thrift/test/MyStruct",
-      makeStruct(
-          {makeField(
-              identity(1, "field1"),
-              optional,
+      def::Struct(
+          {def::Field(
+              def::Identity(1, "field1"),
+              def::Optional,
               TypeIds::I32,
               std::nullopt,
               annots)},
@@ -520,9 +444,8 @@ TEST(TypeSystemTest, WrongAnnotationTypeValue) {
   TypeSystemBuilder builder;
 
   // Value is not a FieldSetDatum.
-  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
-      {"meta.com/thrift/test/MyAnnot",
-       SerializableRecord::toThrift({SerializableRecord::Int32(42)})}};
+  folly::F14FastMap<Uri, SerializableRecord> annots = {
+      {"meta.com/thrift/test/MyAnnot", {SerializableRecord::Int32(42)}}};
 
   // @MyAnnot{field1=42}
   // struct MyStruct{
@@ -531,13 +454,14 @@ TEST(TypeSystemTest, WrongAnnotationTypeValue) {
   // }
   builder.addType(
       "meta.com/thrift/test/MyAnnot",
-      makeStruct({makeField(identity(1, "field1"), optional, TypeIds::I32)}));
+      def::Struct({def::Field(
+          def::Identity(1, "field1"), def::Optional, TypeIds::I32)}));
   builder.addType(
       "meta.com/thrift/test/MyStruct",
-      makeStruct(
-          {makeField(
-              identity(1, "field1"),
-              optional,
+      def::Struct(
+          {def::Field(
+              def::Identity(1, "field1"),
+              def::Optional,
               TypeIds::I32,
               std::nullopt,
               annots)},
@@ -549,10 +473,10 @@ TEST(TypeSystemTest, WrongAnnotationTypeValue) {
 TEST(TypeSystemTest, MissingAnnotationType) {
   TypeSystemBuilder builder;
 
-  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+  folly::F14FastMap<Uri, SerializableRecord> annots = {
       {"meta.com/thrift/test/MyAnnot",
-       SerializableRecord::toThrift({SerializableRecord::FieldSet(
-           {{FieldId(1), SerializableRecord::Int32(42)}})})}};
+       {SerializableRecord::FieldSet(
+           {{FieldId(1), SerializableRecord::Int32(42)}})}}};
 
   // @MyAnnot{field1=42}
   // struct MyStruct{
@@ -561,10 +485,10 @@ TEST(TypeSystemTest, MissingAnnotationType) {
   // }
   builder.addType(
       "meta.com/thrift/test/MyStruct",
-      makeStruct(
-          {makeField(
-              identity(1, "field1"),
-              optional,
+      def::Struct(
+          {def::Field(
+              def::Identity(1, "field1"),
+              def::Optional,
               TypeIds::I32,
               std::nullopt,
               annots)},
@@ -580,9 +504,11 @@ TEST(TypeSystemTest, UnionFieldsMustBeOptional) {
   EXPECT_THROW(
       builder.addType(
           "meta.com/thrift/test/InvalidUnion",
-          makeUnion({
-              makeField(
-                  identity(1, "nonOptionalField"), unqualified, TypeIds::I32),
+          def::Union({
+              def::Field(
+                  def::Identity(1, "nonOptionalField"),
+                  def::AlwaysPresent,
+                  TypeIds::I32),
           })),
       InvalidTypeError);
 }
@@ -594,9 +520,11 @@ TEST(TypeSystemTest, FieldIdentitiesMustBeUnique) {
   EXPECT_THROW(
       builder.addType(
           "meta.com/thrift/test/DuplicateFieldIdStruct",
-          makeStruct({
-              makeField(identity(1, "field1"), optional, TypeIds::I32),
-              makeField(identity(1, "field2"), optional, TypeIds::I64),
+          def::Struct({
+              def::Field(
+                  def::Identity(1, "field1"), def::Optional, TypeIds::I32),
+              def::Field(
+                  def::Identity(1, "field2"), def::Optional, TypeIds::I64),
           })),
       InvalidTypeError);
 
@@ -604,9 +532,11 @@ TEST(TypeSystemTest, FieldIdentitiesMustBeUnique) {
   EXPECT_THROW(
       builder.addType(
           "meta.com/thrift/test/DuplicateFieldNameStruct",
-          makeStruct({
-              makeField(identity(1, "field1"), optional, TypeIds::I32),
-              makeField(identity(2, "field1"), optional, TypeIds::I64),
+          def::Struct({
+              def::Field(
+                  def::Identity(1, "field1"), def::Optional, TypeIds::I32),
+              def::Field(
+                  def::Identity(2, "field1"), def::Optional, TypeIds::I64),
           })),
       InvalidTypeError);
 }
@@ -618,7 +548,7 @@ TEST(TypeSystemTest, OpaqueAliasMustNotBeUserDefinedType) {
   EXPECT_THROW(
       builder.addType(
           "meta.com/thrift/test/InvalidOpaqueAlias",
-          makeOpaqueAlias(TypeIds::uri("meta.com/thrift/test/MyStruct"))),
+          def::OpaqueAlias(TypeIds::uri("meta.com/thrift/test/MyStruct"))),
       InvalidTypeError);
 }
 
@@ -629,14 +559,14 @@ TEST(TypeSystemTest, EnumMappingsMustBeUnique) {
   EXPECT_THROW(
       builder.addType(
           "meta.com/thrift/test/DuplicateEnumName",
-          makeEnum({{"name1", 1}, {"name1", 2}})),
+          def::Enum({{"name1", 1}, {"name1", 2}})),
       InvalidTypeError);
 
   // Attempt to add an enum with duplicate values
   EXPECT_THROW(
       builder.addType(
           "meta.com/thrift/test/DuplicateEnumValue",
-          makeEnum({{"name1", 1}, {"name2", 1}})),
+          def::Enum({{"name1", 1}, {"name2", 1}})),
       InvalidTypeError);
 }
 
@@ -646,9 +576,11 @@ TEST(TypeSystemTest, ListTypeRef) {
   // Define a struct with a list field
   builder.addType(
       "meta.com/thrift/test/ListStruct",
-      makeStruct({
-          makeField(
-              identity(1, "listField"), optional, TypeIds::list(TypeIds::I32)),
+      def::Struct({
+          def::Field(
+              def::Identity(1, "listField"),
+              def::Optional,
+              TypeIds::list(TypeIds::I32)),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -659,8 +591,8 @@ TEST(TypeSystemTest, ListTypeRef) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/ListStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
   const FieldNode& listField = def.asStruct().fields()[0];
-  EXPECT_EQ(listField.identity(), identity(1, "listField"));
-  EXPECT_EQ(listField.presence(), optional);
+  EXPECT_EQ(listField.identity(), def::Identity(1, "listField"));
+  EXPECT_EQ(listField.presence(), def::Optional);
   EXPECT_TRUE(listField.type().isList());
   EXPECT_EQ(listField.type().asList().id(), TypeIds::list(TypeIds::I32));
   EXPECT_EQ(listField.type().id(), TypeRef::List::of(TypeRef::I32()).id());
@@ -672,9 +604,11 @@ TEST(TypeSystemTest, SetTypeRef) {
   // Define a struct with a set field
   builder.addType(
       "meta.com/thrift/test/SetStruct",
-      makeStruct({
-          makeField(
-              identity(1, "setField"), optional, TypeIds::set(TypeIds::I32)),
+      def::Struct({
+          def::Field(
+              def::Identity(1, "setField"),
+              def::Optional,
+              TypeIds::set(TypeIds::I32)),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -685,8 +619,8 @@ TEST(TypeSystemTest, SetTypeRef) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/SetStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
   const FieldNode& setField = def.asStruct().fields()[0];
-  EXPECT_EQ(setField.identity(), identity(1, "setField"));
-  EXPECT_EQ(setField.presence(), optional);
+  EXPECT_EQ(setField.identity(), def::Identity(1, "setField"));
+  EXPECT_EQ(setField.presence(), def::Optional);
   EXPECT_TRUE(setField.type().isSet());
   EXPECT_EQ(setField.type().asSet().id(), TypeIds::set(TypeIds::I32));
   EXPECT_EQ(setField.type().id(), TypeRef::Set::of(TypeRef::I32()).id());
@@ -698,10 +632,10 @@ TEST(TypeSystemTest, MapTypeRef) {
   // Define a struct with a map field
   builder.addType(
       "meta.com/thrift/test/MapStruct",
-      makeStruct({
-          makeField(
-              identity(1, "mapField"),
-              optional,
+      def::Struct({
+          def::Field(
+              def::Identity(1, "mapField"),
+              def::Optional,
               TypeIds::map(TypeIds::I32, TypeIds::String)),
       }));
 
@@ -713,8 +647,8 @@ TEST(TypeSystemTest, MapTypeRef) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/MapStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
   const FieldNode& mapField = def.asStruct().fields()[0];
-  EXPECT_EQ(mapField.identity(), identity(1, "mapField"));
-  EXPECT_EQ(mapField.presence(), optional);
+  EXPECT_EQ(mapField.identity(), def::Identity(1, "mapField"));
+  EXPECT_EQ(mapField.presence(), def::Optional);
   EXPECT_TRUE(mapField.type().isMap());
   EXPECT_EQ(
       mapField.type().asMap().id(),
@@ -729,7 +663,7 @@ TEST(TypeSystemTest, OpaqueAliasTypeRef) {
 
   // Define an opaque alias
   builder.addType(
-      "meta.com/thrift/test/OpaqueAlias", makeOpaqueAlias(TypeIds::I32));
+      "meta.com/thrift/test/OpaqueAlias", def::OpaqueAlias(TypeIds::I32));
 
   auto typeSystem = std::move(builder).build();
 
@@ -747,7 +681,7 @@ TEST(TypeSystemTest, EnumTypeRef) {
   // Define an enum
   builder.addType(
       "meta.com/thrift/test/SimpleEnum",
-      makeEnum({{"VALUE1", 1}, {"VALUE2", 2}}));
+      def::Enum({{"VALUE1", 1}, {"VALUE2", 2}}));
 
   auto typeSystem = std::move(builder).build();
 
@@ -769,27 +703,27 @@ TEST(TypeSystemTest, ComplexTypeReferences) {
   // Define a struct with complex type references
   builder.addType(
       "meta.com/thrift/test/ComplexStruct",
-      makeStruct({
-          makeField(
-              identity(1, "listOfStructs"),
-              optional,
+      def::Struct({
+          def::Field(
+              def::Identity(1, "listOfStructs"),
+              def::Optional,
               TypeIds::list(TypeIds::uri("meta.com/thrift/test/SimpleStruct"))),
-          makeField(
-              identity(2, "mapOfUnions"),
-              optional,
+          def::Field(
+              def::Identity(2, "mapOfUnions"),
+              def::Optional,
               TypeIds::map(
                   TypeIds::String,
                   TypeIds::uri("meta.com/thrift/test/SimpleUnion"))),
       }));
   builder.addType(
       "meta.com/thrift/test/SimpleStruct",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }));
   builder.addType(
       "meta.com/thrift/test/SimpleUnion",
-      makeUnion({
-          makeField(identity(1, "field1"), optional, TypeIds::I64),
+      def::Union({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I64),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -801,15 +735,15 @@ TEST(TypeSystemTest, ComplexTypeReferences) {
   EXPECT_EQ(complexDef.asStruct().fields().size(), 2);
 
   const FieldNode& listField = complexDef.asStruct().fields()[0];
-  EXPECT_EQ(listField.identity(), identity(1, "listOfStructs"));
-  EXPECT_EQ(listField.presence(), optional);
+  EXPECT_EQ(listField.identity(), def::Identity(1, "listOfStructs"));
+  EXPECT_EQ(listField.presence(), def::Optional);
   EXPECT_TRUE(listField.type().isList());
   EXPECT_EQ(
       listField.type().asList().elementType().asStruct().fields().size(), 1);
 
   const FieldNode& mapField = complexDef.asStruct().fields()[1];
-  EXPECT_EQ(mapField.identity(), identity(2, "mapOfUnions"));
-  EXPECT_EQ(mapField.presence(), optional);
+  EXPECT_EQ(mapField.identity(), def::Identity(2, "mapOfUnions"));
+  EXPECT_EQ(mapField.presence(), def::Optional);
   EXPECT_TRUE(mapField.type().isMap());
   EXPECT_EQ(mapField.type().asMap().keyType().id(), TypeIds::String);
   EXPECT_EQ(mapField.type().asMap().valueType().asUnion().fields().size(), 1);
@@ -821,14 +755,14 @@ TEST(TypeSystemTest, NestedContainers) {
   // Define a struct with nested containers
   builder.addType(
       "meta.com/thrift/test/NestedContainerStruct",
-      makeStruct({
-          makeField(
-              identity(1, "listOfMaps"),
-              optional,
+      def::Struct({
+          def::Field(
+              def::Identity(1, "listOfMaps"),
+              def::Optional,
               TypeIds::list(TypeIds::map(TypeIds::String, TypeIds::I32))),
-          makeField(
-              identity(2, "setOfLists"),
-              optional,
+          def::Field(
+              def::Identity(2, "setOfLists"),
+              def::Optional,
               TypeIds::set(TypeIds::list(TypeIds::I64))),
       }));
 
@@ -841,8 +775,8 @@ TEST(TypeSystemTest, NestedContainers) {
   EXPECT_EQ(def.asStruct().fields().size(), 2);
 
   const FieldNode& listOfMapsField = def.asStruct().fields()[0];
-  EXPECT_EQ(listOfMapsField.identity(), identity(1, "listOfMaps"));
-  EXPECT_EQ(listOfMapsField.presence(), optional);
+  EXPECT_EQ(listOfMapsField.identity(), def::Identity(1, "listOfMaps"));
+  EXPECT_EQ(listOfMapsField.presence(), def::Optional);
   EXPECT_TRUE(listOfMapsField.type().isList());
   EXPECT_TRUE(listOfMapsField.type().asList().elementType().isMap());
   EXPECT_EQ(
@@ -853,8 +787,8 @@ TEST(TypeSystemTest, NestedContainers) {
       TypeIds::I32);
 
   const FieldNode& setOfListsField = def.asStruct().fields()[1];
-  EXPECT_EQ(setOfListsField.identity(), identity(2, "setOfLists"));
-  EXPECT_EQ(setOfListsField.presence(), optional);
+  EXPECT_EQ(setOfListsField.identity(), def::Identity(2, "setOfLists"));
+  EXPECT_EQ(setOfListsField.presence(), def::Optional);
   EXPECT_TRUE(setOfListsField.type().isSet());
   EXPECT_TRUE(setOfListsField.type().asSet().elementType().isList());
   EXPECT_EQ(
@@ -868,8 +802,11 @@ TEST(TypeSystemTest, StructWithNegativeFieldId) {
   // Define a struct with the maximum field id
   builder.addType(
       "meta.com/thrift/test/NegativeFieldId",
-      makeStruct({
-          makeField(identity(-1, "negativeFieldId"), unqualified, TypeIds::I32),
+      def::Struct({
+          def::Field(
+              def::Identity(-1, "negativeFieldId"),
+              def::AlwaysPresent,
+              TypeIds::I32),
       }));
 
   auto typeSystem = std::move(builder).build();
@@ -882,7 +819,7 @@ TEST(TypeSystemTest, StructWithNegativeFieldId) {
   const FieldNode& negativeFieldId = def.asStruct().fields()[0];
   EXPECT_EQ(negativeFieldId.identity().id(), FieldId(-1));
   EXPECT_EQ(negativeFieldId.identity().name(), "negativeFieldId");
-  EXPECT_EQ(negativeFieldId.presence(), unqualified);
+  EXPECT_EQ(negativeFieldId.presence(), def::AlwaysPresent);
   EXPECT_EQ(negativeFieldId.type().id(), TypeIds::I32);
 }
 
@@ -892,7 +829,7 @@ TEST(TypeSystemTest, EnumWithNegativeValues) {
   // Define an enum with negative values
   builder.addType(
       "meta.com/thrift/test/NegativeEnum",
-      makeEnum({{"NEGATIVE_ONE", -1}, {"NEGATIVE_TWO", -2}}));
+      def::Enum({{"NEGATIVE_ONE", -1}, {"NEGATIVE_TWO", -2}}));
 
   auto typeSystem = std::move(builder).build();
 
@@ -913,20 +850,20 @@ TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
 
     builder.addType(
         "meta.com/thrift/test/OuterStruct",
-        makeStruct({
-            makeField(
-                identity(1, "innerStruct"),
-                optional,
+        def::Struct({
+            def::Field(
+                def::Identity(1, "innerStruct"),
+                def::Optional,
                 TypeIds::uri("meta.com/thrift/test/InnerStruct")),
         }));
     builder.addType(
         "meta.com/thrift/test/InnerStruct",
-        makeStruct({
-            makeField(identity(1, "field1"), optional, TypeIds::I32),
+        def::Struct({
+            def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
         }));
     builder.addType(
         "meta.com/thrift/test/Alias",
-        makeOpaqueAlias(
+        def::OpaqueAlias(
             TypeIds::list(TypeIds::uri("meta.com/thrift/test/OuterStruct"))));
 
     return std::move(builder).build();
@@ -1071,27 +1008,27 @@ TEST(TypeSystemTest, SourceIndexedTypeSystem) {
 
   builder.addType(
       "meta.com/thrift/test/StructWithI32Field",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }),
-      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+      def::SourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
 
   builder.addType(
       "meta.com/thrift/test/Enum",
-      makeEnum({{"VALUE1", 1}, {"VALUE2", 2}}),
-      makeSourceInfo("file://foo/bar.thrift", "Enum"));
+      def::Enum({{"VALUE1", 1}, {"VALUE2", 2}}),
+      def::SourceInfo("file://foo/bar.thrift", "Enum"));
 
   builder.addType(
       "meta.com/thrift/test/UnionWithI32Field",
-      makeUnion({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Union({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }),
-      makeSourceInfo("file://foo/other.thrift", "UnionWithI32Field"));
+      def::SourceInfo("file://foo/other.thrift", "UnionWithI32Field"));
 
   builder.addType(
       "meta.com/thrift/test/OpaqueAlias",
-      makeOpaqueAlias(TypeIds::I32),
-      makeSourceInfo("file://foo/other.thrift", "OpaqueAlias"));
+      def::OpaqueAlias(TypeIds::I32),
+      def::SourceInfo("file://foo/other.thrift", "OpaqueAlias"));
 
   auto typeSystem = std::move(builder).build();
   const auto& sym = dynamic_cast<const SourceIndexedTypeSystem&>(*typeSystem);
@@ -1145,17 +1082,17 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemWithDuplicateEntries) {
 
   builder.addType(
       "meta.com/thrift/test/StructWithI32Field",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }),
-      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+      def::SourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
 
   builder.addType(
       "meta.com/thrift/test/StructWithI32Field2",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }),
-      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+      def::SourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
 
   EXPECT_THAT(
       [&] { std::move(builder).build(); },
@@ -1168,20 +1105,20 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemLookupByDefinition) {
 
   builder.addType(
       "meta.com/thrift/test/StructWithI32Field",
-      makeStruct({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }),
-      makeSourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
+      def::SourceInfo("file://foo/bar.thrift", "StructWithI32Field"));
 
   builder.addType(
       "meta.com/thrift/test/Enum",
-      makeEnum({{"VALUE1", 1}, {"VALUE2", 2}}),
-      makeSourceInfo("file://foo/bar.thrift", "Enum"));
+      def::Enum({{"VALUE1", 1}, {"VALUE2", 2}}),
+      def::SourceInfo("file://foo/bar.thrift", "Enum"));
 
   builder.addType(
       "meta.com/thrift/test/UnionWithI32Field",
-      makeUnion({
-          makeField(identity(1, "field1"), optional, TypeIds::I32),
+      def::Union({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
       }),
       std::nullopt /* sourceInfo */);
 

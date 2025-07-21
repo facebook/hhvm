@@ -28,7 +28,7 @@ class ByteEvent {
     TRACKED_BYTE,
     SECOND_TO_LAST_PACKET,
   };
-  typedef std::function<void(ByteEvent&)> Callback;
+  using Callback = std::function<void(ByteEvent&)>;
   FOLLY_PUSH_WARNING
   FOLLY_CLANG_DISABLE_WARNING("-Wsigned-enum-bitfield")
   ByteEvent(uint64_t byteOffset,

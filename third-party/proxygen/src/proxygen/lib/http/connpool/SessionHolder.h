@@ -168,10 +168,10 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
   Endpoint endpoint_;
   HTTPSessionBase::InfoCallback* originalSessionInfoCb_;
 };
-typedef folly::CountedIntrusiveList<SessionHolder, &SessionHolder::listHook>
-    SessionList;
+using SessionList =
+    folly::CountedIntrusiveList<SessionHolder, &SessionHolder::listHook>;
 
-typedef folly::CountedIntrusiveList<SessionHolder,
-                                    &SessionHolder::secondaryListHook>
-    SecondarySessionList;
+using SecondarySessionList =
+    folly::CountedIntrusiveList<SessionHolder,
+                                &SessionHolder::secondaryListHook>;
 } // namespace proxygen

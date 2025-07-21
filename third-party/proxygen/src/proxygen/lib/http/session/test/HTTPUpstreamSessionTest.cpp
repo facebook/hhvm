@@ -2234,11 +2234,11 @@ class TestAbortPost : public MockHTTPUpstreamTest {
   }
 };
 
-typedef TestAbortPost<1> TestAbortPost1;
-typedef TestAbortPost<2> TestAbortPost2;
-typedef TestAbortPost<3> TestAbortPost3;
-typedef TestAbortPost<4> TestAbortPost4;
-typedef TestAbortPost<5> TestAbortPost5;
+using TestAbortPost1 = TestAbortPost<1>;
+using TestAbortPost2 = TestAbortPost<2>;
+using TestAbortPost3 = TestAbortPost<3>;
+using TestAbortPost4 = TestAbortPost<4>;
+using TestAbortPost5 = TestAbortPost<5>;
 
 TEST_F(TestAbortPost1, Test) {
   doAbortTest();

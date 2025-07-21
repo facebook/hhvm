@@ -77,13 +77,12 @@ static const std::vector<const std::string*> testHeadersCodeStrings =
 static const std::vector<const std::string*> testHeadersOtherStrings =
     getTestHeaderOtherStrings();
 
-typedef PerfectIndexMap<HTTPHeaderCode,
-                        HTTP_HEADER_OTHER,
-                        HTTP_HEADER_NONE,
-                        HTTPCommonHeaders::hash,
-                        false,
-                        false>
-    DefaultPerfectIndexMap;
+using DefaultPerfectIndexMap = PerfectIndexMap<HTTPHeaderCode,
+                                               HTTP_HEADER_OTHER,
+                                               HTTP_HEADER_NONE,
+                                               HTTPCommonHeaders::hash,
+                                               false,
+                                               false>;
 
 } // namespace
 

@@ -13,11 +13,10 @@
 
 namespace proxygen {
 
-typedef GenericFilter<HTTPCodec,
-                      HTTPCodec::Callback,
-                      &HTTPCodec::setCallback,
-                      true>
-    HTTPCodecFilter;
+using HTTPCodecFilter = GenericFilter<HTTPCodec,
+                                      HTTPCodec::Callback,
+                                      &HTTPCodec::setCallback,
+                                      true>;
 
 /**
  * An implementation of HTTPCodecFilter that passes through all calls. This is
@@ -260,11 +259,10 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
   int8_t mapDependencyToPriority(StreamID parent) const override;
 };
 
-typedef FilterChain<HTTPCodec,
-                    HTTPCodec::Callback,
-                    PassThroughHTTPCodecFilter,
-                    &HTTPCodec::setCallback,
-                    true>
-    HTTPCodecFilterChain;
+using HTTPCodecFilterChain = FilterChain<HTTPCodec,
+                                         HTTPCodec::Callback,
+                                         PassThroughHTTPCodecFilter,
+                                         &HTTPCodec::setCallback,
+                                         true>;
 
 } // namespace proxygen

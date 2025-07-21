@@ -182,6 +182,7 @@ final class ThriftContextPropState {
     $fb_user_id = self::coerceId($fb_user_id);
 
     if ($fb_user_id is nonnull) {
+      $fb_user_id = UserIdValidation::validateFBUserId($fb_user_id);
       self::get()->setFBUserId($fb_user_id);
       $ods->bumpKey('contextprop.set_fb_user_id.'.$src);
       return true;

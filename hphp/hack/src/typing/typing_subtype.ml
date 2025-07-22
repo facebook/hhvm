@@ -6312,9 +6312,9 @@ end = struct
       let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
       is_mutable_container tk tv
     | (_, Tclass ((_, n), _, [tk; tv]))
-      when String.equal n SN.Collections.cMutableMap
-           || String.equal n SN.Collections.cImmMap
-           || String.equal n SN.Collections.cConstMap ->
+      when String.equal n SN.Collections.cImmMap
+           || String.equal n SN.Collections.cConstMap
+           || String.equal n SN.Collections.cAnyArray ->
       unify_default ~subtype_env can_index.ci_key tk env
       &&& simplify_default ~subtype_env tv can_index.ci_val
     | (_, Tclass ((_, n), _, [tk; tv]))

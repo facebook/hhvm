@@ -502,7 +502,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?recursive_case_types:(bool_opt "recursive_case_types" config)
     ?class_sub_classname:(bool_opt "class_sub_classname" config)
     ?class_class_type:(bool_opt "class_class_type" config)
-    ?safe_abstract:(bool_opt "safe_abstract" config)
     ?needs_concrete:(bool_opt "needs_concrete" config)
     ?allow_class_string_cast:(bool_opt "allow_class_string_cast" config)
     ?class_pointer_ban_classname_new:

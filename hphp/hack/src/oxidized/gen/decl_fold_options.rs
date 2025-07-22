@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fe8e9771cfcef366bb5b9d8b78471ca2>>
+// @generated SignedSource<<2aca3cac0b6e173c66e594e94215e053>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,5 +39,4 @@ pub struct DeclFoldOptions {
     pub implicit_inherit_sdt: bool,
     pub everything_sdt: bool,
     pub class_class_type: bool,
-    pub safe_abstract: bool,
 }

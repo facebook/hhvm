@@ -71,60 +71,6 @@ module Sketchy_equality = struct
   let quickfixes _ = []
 end
 
-module Safe_abstract : Warning with type t = Typing_warning.Safe_abstract.t =
-struct
-  open Typing_warning.Safe_abstract
-
-  type t = Typing_warning.Safe_abstract.t
-
-  let claim : t -> string = function
-    (* TODO(T213971384): better error messages and quickfixes *)
-    | { kind = Call_abstract { method_ }; class_; reason = _ } ->
-      Printf.sprintf
-        "Unsafe call: `%s::%s` might not exist because the receiver might be abstract."
-        (Utils.strip_ns class_)
-        method_
-    | { kind = Call_needs_concrete { method_ }; class_; reason = _ } ->
-      Printf.sprintf
-        "Unsafe call: %s::%s has `<<__NeedsConcrete>>`, but the receiver might be abstract."
-        (Utils.strip_ns class_)
-        method_
-    | { kind = Const_access_abstract { const }; class_; reason = _ } ->
-      Printf.sprintf
-        "Unsafe class constant access: %s::%s might not exist because the receiver might be abstract."
-        (Utils.strip_ns class_)
-        const
-    | { kind = New_abstract; class_; reason = _ } ->
-      Printf.sprintf
-        "Unsafe use of `new`: `%s` might be abstract"
-        (Utils.strip_ns class_)
-
-  let code { kind; _ } : Codes.t =
-    match kind with
-    | Call_abstract _ -> Codes.SafeAbstractCall
-    | New_abstract -> Codes.SafeAbstractNew
-    | Const_access_abstract _ -> Codes.SafeAbstractConstAccess
-    | Call_needs_concrete _ -> Codes.SafeAbstractCallNeedsConcrete
-
-  let codes : Codes.t list =
-    [
-      Codes.SafeAbstractCall;
-      Codes.SafeAbstractNew;
-      Codes.SafeAbstractCallNeedsConcrete;
-    ]
-
-  let reasons { class_; reason; _ } : Pos_or_decl.t Message.t list =
-    match reason with
-    | Some reason ->
-      [
-        ( Typing_reason.to_pos reason,
-          Printf.sprintf "%s is from " (Utils.strip_ns class_) );
-      ]
-    | None -> []
-
-  let quickfixes _ : Pos.t Quickfix.t list = []
-end
-
 module Is_as_always = struct
   type t = Typing_warning.Is_as_always.t
 
@@ -636,7 +582,6 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
   | Typing_warning.Sketchy_equality -> (module Sketchy_equality)
-  | Typing_warning.Safe_abstract -> (module Safe_abstract)
   | Typing_warning.Is_as_always -> (module Is_as_always)
   | Typing_warning.Sketchy_null_check -> (module Sketchy_null_check)
   | Typing_warning.Non_disjoint_check -> (module Non_disjoint_check)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8816312c95bd82d52ae6ae9910e368ad>>
+// @generated SignedSource<<259cc71522654530ee53f0d895272d27>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -258,7 +258,6 @@ pub struct GlobalOptions {
     pub recursive_case_types: bool,
     pub class_sub_classname: bool,
     pub class_class_type: bool,
-    pub safe_abstract: bool,
     pub needs_concrete: bool,
     pub allow_class_string_cast: bool,
     pub class_pointer_ban_classname_new: isize,

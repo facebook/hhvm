@@ -146,7 +146,6 @@ impl Default for GlobalOptions {
             recursive_case_types: false,
             class_sub_classname: true,
             class_class_type: true,
-            safe_abstract: false,
             needs_concrete: false,
             allow_class_string_cast: true,
             class_pointer_ban_classname_new: 0,

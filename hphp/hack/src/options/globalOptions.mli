@@ -288,8 +288,6 @@ type t = {
   recursive_case_types: bool;  (** Enable recursive case types *)
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
-  safe_abstract: bool;
-      (** Enable Safe Abstract features https://fburl.com/hack-safe-abstract *)
   needs_concrete: bool;
       (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
@@ -415,7 +413,6 @@ val set :
   ?recursive_case_types:bool ->
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
-  ?safe_abstract:bool ->
   ?needs_concrete:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_classname_new:int ->

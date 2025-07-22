@@ -195,7 +195,6 @@ type t = {
   recursive_case_types: bool;
   class_sub_classname: bool;
   class_class_type: bool;
-  safe_abstract: bool;
   needs_concrete: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_classname_new: int;
@@ -317,7 +316,6 @@ let default =
     recursive_case_types = false;
     class_sub_classname = true;
     class_class_type = true;
-    safe_abstract = false;
     needs_concrete = false;
     allow_class_string_cast = true;
     class_pointer_ban_classname_new = 0;
@@ -436,7 +434,6 @@ let set
     ?recursive_case_types
     ?class_sub_classname
     ?class_class_type
-    ?safe_abstract
     ?needs_concrete
     ?allow_class_string_cast
     ?class_pointer_ban_classname_new
@@ -746,7 +743,6 @@ let set
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;
-    safe_abstract = setting safe_abstract options.safe_abstract;
     needs_concrete = setting needs_concrete options.needs_concrete;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;

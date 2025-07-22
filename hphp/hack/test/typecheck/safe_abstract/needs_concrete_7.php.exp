@@ -1,4 +1,0 @@
-ERROR: File "needs_concrete_7.php", line 13, characters 26-27:
-Cannot declare this method as __NeedsConcrete, since it overrides a non-__NeedsConcrete method (Typing[4487])
-  File "needs_concrete_7.php", line 4, characters 26-27:
-  Previously defined here

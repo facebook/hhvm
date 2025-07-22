@@ -153,10 +153,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let pos = self.child.name.pos();
         let name = self.child.name.id();
         let reason = R::class_class(pos.clone(), name);
-        let is_abstract = match self.child.kind {
-            ClassishKind::Cenum | ClassishKind::Ctrait | ClassishKind::Cinterface => true,
-            ClassishKind::Cclass(c) | ClassishKind::CenumClass(c) => c.is_abstract(),
-        };
         // Examples: classname<this>, class<this>, concrete<classname<this>> ...
         let ty = {
             let classname_or_class_ptr_ty = if self.opts.class_class_type {
@@ -168,15 +164,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     [Ty::this(reason.clone())].into(),
                 )
             };
-            if is_abstract || !self.opts.safe_abstract {
-                classname_or_class_ptr_ty
-            } else {
-                Ty::apply(
-                    reason,
-                    Positioned::new(pos.clone(), *sn::classes::cConcrete),
-                    [classname_or_class_ptr_ty].into(),
-                )
-            }
+            classname_or_class_ptr_ty
         };
         let class_const = ClassConst {
             is_synthesized: true,

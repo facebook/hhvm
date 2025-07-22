@@ -1,2 +1,0 @@
-WARN: File "static_call_2.php", line 8, characters 5-28:
-Unsafe call: `AbstractClass::abstractMethod` might not exist because the receiver might be abstract. (Warn[12014])

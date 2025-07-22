@@ -12,7 +12,6 @@ impl DeclFoldOptions {
             implicit_inherit_sdt: opts.tco_implicit_inherit_sdt,
             everything_sdt: opts.po.everything_sdt,
             class_class_type: opts.class_class_type,
-            safe_abstract: opts.safe_abstract,
         }
     }
 }

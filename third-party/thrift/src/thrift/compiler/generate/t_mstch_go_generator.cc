@@ -851,18 +851,16 @@ void t_mstch_go_generator::generate_program() {
   }
 
   const auto& prog = cached_program(program);
-  auto package_dir = std::filesystem::path{
-      go::get_go_package_dir(program, data_.package_override)};
 
-  render_to_file(prog, "const.go", package_dir / "const.go");
-  render_to_file(prog, "types.go", package_dir / "types.go");
-  render_to_file(prog, "svcs.go", package_dir / "svcs.go");
-  render_to_file(prog, "codec.go", package_dir / "codec.go");
+  render_to_file(prog, "const.go", "const.go");
+  render_to_file(prog, "types.go", "types.go");
+  render_to_file(prog, "svcs.go", "svcs.go");
+  render_to_file(prog, "codec.go", "codec.go");
   if (data_.gen_metadata) {
-    render_to_file(prog, "metadata.go", package_dir / "metadata.go");
+    render_to_file(prog, "metadata.go", "metadata.go");
   }
   if (program->has_doc()) {
-    render_to_file(prog, "doc.go", package_dir / "doc.go");
+    render_to_file(prog, "doc.go", "doc.go");
   }
 }
 

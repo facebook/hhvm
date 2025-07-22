@@ -17,20 +17,17 @@
 package com.facebook.thrift.util.resources;
 
 import static com.facebook.thrift.util.resources.ResourceConfiguration.enableForkJoinPool;
-import static com.facebook.thrift.util.resources.ResourceConfiguration.enableVirtualThreadScheduler;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.eventLoopGroupThreadPrefix;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forceClientExecutionOffEventLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forceExecutionOffEventLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forkJoinPoolClientThreads;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forkJoinPoolThreads;
-import static com.facebook.thrift.util.resources.ResourceConfiguration.limitVirtualThreadConcurrency;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.maxPendingTasksForOffLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.minNumThreadsForOffLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.minPendingTasksBeforeNewThread;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.numThreadsForEventLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.numThreadsForOffLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.separateOffLoopScheduler;
-import static com.facebook.thrift.util.resources.ResourceConfiguration.virtualThreadMaxConcurrency;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
@@ -38,7 +35,6 @@ import io.netty.channel.SingleThreadEventLoop;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.internal.PlatformDependent;
 import io.rsocket.Closeable;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -132,17 +128,7 @@ class ResourcesHolder implements Closeable {
 
   private ThriftScheduler createOffLoopScheduler() {
     LOGGER.info("force execution off event loop enabled:  {}", forceExecutionOffEventLoop);
-    if (enableVirtualThreadScheduler) {
-      if (!runtimeSupportsVirtualThreads()) {
-        throw new IllegalStateException(
-            "Virtual threads not supported on runtime version: "
-                + System.getProperty("java.version"));
-      }
-      LOGGER.info("Enabling VirtualThreadScheduler");
-      LOGGER.info("Virtual thread concurrency limited: {}", limitVirtualThreadConcurrency);
-      LOGGER.info("Virtual thread max concurrency: {}", virtualThreadMaxConcurrency);
-      return new VirtualThreadScheduler(limitVirtualThreadConcurrency, virtualThreadMaxConcurrency);
-    } else if (enableForkJoinPool) {
+    if (enableForkJoinPool) {
       LOGGER.info("creating ForkJoinPoolScheduler scheduler");
       LOGGER.info("off event loop max threads: {}", forkJoinPoolThreads);
       return ForkJoinPoolScheduler.create("thrift-forkjoin-scheduler", forkJoinPoolThreads);
@@ -158,29 +144,10 @@ class ResourcesHolder implements Closeable {
     }
   }
 
-  /**
-   * Virtual threads introduced in version 19, runtime must be greater than or equal to 19 to enable
-   * features
-   *
-   * @return if runtime major version supports virtual threads
-   */
-  private boolean runtimeSupportsVirtualThreads() {
-    return PlatformDependent.javaVersion() >= 19;
-  }
-
   private ThriftScheduler createClientOffLoopScheduler() {
     LOGGER.info("force client execution off event loop enabled:  {}", forceExecutionOffEventLoop);
-    if (enableVirtualThreadScheduler) {
-      if (!runtimeSupportsVirtualThreads()) {
-        throw new IllegalStateException(
-            "Virtual threads not supported on runtime version: "
-                + System.getProperty("java.version"));
-      }
-      LOGGER.info("Enabling seprate VirtualThreadScheduler for client ");
-      LOGGER.info("Client virtual thread concurrency limited: {}", limitVirtualThreadConcurrency);
-      LOGGER.info("Client virtual thread max concurrency: {}", virtualThreadMaxConcurrency);
-      return new VirtualThreadScheduler(limitVirtualThreadConcurrency, virtualThreadMaxConcurrency);
-    } else if (enableForkJoinPool) {
+
+    if (enableForkJoinPool) {
       LOGGER.info("creating separate ForkJoinPoolScheduler scheduler for client");
       LOGGER.info("off event loop max threads: {}", forkJoinPoolClientThreads);
       return ForkJoinPoolScheduler.create(

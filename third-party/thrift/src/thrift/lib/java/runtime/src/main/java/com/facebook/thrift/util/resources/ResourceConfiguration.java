@@ -24,19 +24,6 @@ final class ResourceConfiguration {
   static final boolean enableForkJoinPool =
       System.getProperty("thrift.separate-forkjoin-scheduler", "false").equalsIgnoreCase("true");
 
-  static final boolean enableVirtualThreadScheduler =
-      System.getProperty("thrift.virtual-thread-scheduler", "false").equalsIgnoreCase("true");
-
-  static final boolean limitVirtualThreadConcurrency =
-      System.getProperty("thrift.virtual-thread-limit-concurrency", "false")
-          .equalsIgnoreCase("true");
-
-  static final int virtualThreadMaxConcurrency =
-      Math.max(
-          1,
-          Integer.getInteger(
-              "thrift.virtual-thread-max-concurrency", Runtime.getRuntime().availableProcessors()));
-
   static final boolean enableOperatorFusion =
       System.getProperty("thrift.operator-fusion", "true").equalsIgnoreCase("true");
 

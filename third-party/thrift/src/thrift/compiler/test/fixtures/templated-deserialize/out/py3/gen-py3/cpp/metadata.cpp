@@ -31,7 +31,6 @@ namespace cpp {
   ::apache::thrift::detail::md::StructMetadata<Frozen2Exclude>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Frozen2RequiresCompleteContainerParams>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ProcessInEbThreadUnsafe>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<RuntimeAnnotation>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<UseCursorSerialization>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GenerateDeprecatedHeaderClientMethods>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowLegacyNonOptionalRef>::gen(metadata);

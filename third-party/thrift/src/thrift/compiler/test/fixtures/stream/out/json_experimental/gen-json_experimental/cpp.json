@@ -549,23 +549,6 @@
         "is_union" : false,
         "lineno" : 336
       },
-      "RuntimeAnnotation" : {
-        "name" : "RuntimeAnnotation",
-        "structured_annotations": {
-          "scope.Struct" : {
-            "type" : {
-          "type" : "struct",
-          "name" : "Struct",
-          "path" : "thrift/annotation/scope.thrift"
-        },
-            "value" : {}
-          }
-        },
-        "docstring" : "Applies to structured annotation that need to be accessed in always-on reflection.\n",
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 343
-      },
       "UseCursorSerialization" : {
         "name" : "UseCursorSerialization",
         "structured_annotations": {
@@ -612,7 +595,7 @@
         "docstring" : "Causes uses of the given structured type to be replaced with `CursorSerializationWrapper` to allow use of cursor-based serialization.\nMust add `cpp_include \"thrift/lib/cpp2/protocol/CursorBasedSerializer.h\"` to files that use this annotation.\nSee documentation for this class in CursorBasedSerializer.h\nCan only be applied to top-level structs (used as return type or sole argument to an RPC or serialized directly), not to types used as struct fields or container elements.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 352
+        "lineno" : 346
       },
       "GenerateDeprecatedHeaderClientMethods" : {
         "name" : "GenerateDeprecatedHeaderClientMethods",
@@ -637,7 +620,7 @@
         "docstring" : "Given either of the following Thrift service definitions:\n\n    @cpp.GenerateDeprecatedHeaderClientMethods\n    service Foo {\n      void bar();\n    }\n\n    service Foo {\n      @cpp.GenerateDeprecatedHeaderClientMethods\n      void bar();\n    }\n\nThis annotation instructs the compiler to generate the following (now deprecated) client method variants:\n  - apache::thrift::Client<Foo>::header_future_bar\n  - apache::thrift::Client<Foo>::header_semifuture_bar\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 376
+        "lineno" : 370
       },
       "AllowLegacyNonOptionalRef" : {
         "name" : "AllowLegacyNonOptionalRef",
@@ -654,7 +637,7 @@
         "docstring" : "Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it\nis not optional (or in a union, which is effectively optional).\n\nThis annotation is provided for a limited time, to exempt pre-existing fields\nwhile rolling out a stricter enforcement of the condition above.\n\nReminder: reference fields should be optional because the corresponding smart\npointers (std::unique_ptr, std::shared_ptr) can always be reset or set to\nnullptr by the clients. If the field is not optional, this leads to a\nconfusing (or non-sensical) situation, wherein a field that should always\nhave a value has nullptr instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 393
+        "lineno" : 387
       },
       "DeprecatedTerseWrite" : {
         "name" : "DeprecatedTerseWrite",
@@ -671,7 +654,7 @@
         "docstring" : "Changes the serialization behavior of the field to skip serialization if its value is equal to standard default\nfor bool, integers, enums, and floating points, and intrinsic default for string, binary, and containers.\nIf an unqualified field with structured type has @cpp.Ref, the serilaization skips the field if the pointer is empty.\n\nThis annotation is only applicable to an unqualified field with bool, integers, enums, floating points, string, binary, and containers\nbut not for structs, unions, and exceptions.\n\nNote, this is a deprecated feature. Use @thrift.TerseWrite instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 406
+        "lineno" : 400
       },
       "AllowLegacyDeprecatedTerseWritesRef" : {
         "name" : "AllowLegacyDeprecatedTerseWritesRef",
@@ -688,7 +671,7 @@
         "docstring" : "Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it\nis deprecated_terse_writes field.\n\nThis annotation is provided for a limited time, to exempt pre-existing fields\nwhile rolling out a stricter enforcement of the condition above.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 416
+        "lineno" : 410
       },
       "EnableCustomTypeOrdering" : {
         "name" : "EnableCustomTypeOrdering",
@@ -713,7 +696,7 @@
         "docstring" : "If there are custom types in thrift structure (e.g., `std::unordered_map` field),\nWe won't define `operator<` automatically (unless URI exists, but that's about\nto change). Note that `operator<` is always declared.\nThis annotation ensures the `operator<` is always defined. For types that\ndon't have `operator<`, such as `std::unordered_map`, we will convert it to\na sorted `std::vector<pair<K*, V*>>` to do the comparison.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 427
+        "lineno" : 421
       },
       "GenerateServiceMethodDecorator" : {
         "name" : "GenerateServiceMethodDecorator",
@@ -730,7 +713,7 @@
         "docstring" : "When applied to a service, this annotation will cause the thrift compiler\nto generate the method decorator interface for the class.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 435
+        "lineno" : 429
       }
   },
   "source_path" : "thrift/annotation/cpp",

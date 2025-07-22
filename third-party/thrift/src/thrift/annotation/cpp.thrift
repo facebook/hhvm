@@ -338,12 +338,6 @@ struct Frozen2RequiresCompleteContainerParams {}
 struct ProcessInEbThreadUnsafe {}
 
 /**
- * Applies to structured annotation that need to be accessed in always-on reflection.
- */
-@scope.Struct
-struct RuntimeAnnotation {}
-
-/**
  * Causes uses of the given structured type to be replaced with `CursorSerializationWrapper` to allow use of cursor-based serialization.
  * Must add `cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"` to files that use this annotation.
  * See documentation for this class in CursorBasedSerializer.h

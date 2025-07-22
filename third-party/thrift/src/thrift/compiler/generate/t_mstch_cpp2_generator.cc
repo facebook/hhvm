@@ -202,8 +202,7 @@ bool resolves_to_container_or_struct(const t_type* type) {
 }
 
 bool is_runtime_annotation(const t_named& named) {
-  return named.has_structured_annotation(kCppRuntimeAnnotation) ||
-      named.has_structured_annotation(kRuntimeAnnotationUri);
+  return named.has_structured_annotation(kRuntimeAnnotationUri);
 }
 
 bool has_runtime_annotation(const t_named& named) {

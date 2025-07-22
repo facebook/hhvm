@@ -166,13 +166,6 @@ inline void reset_field<::facebook::thrift::annotation::cpp::ProcessInEbThreadUn
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::cpp::RuntimeAnnotation>(
-    ::facebook::thrift::annotation::cpp::RuntimeAnnotation& obj, uint16_t index) {
-  switch (index) {
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::annotation::cpp::UseCursorSerialization>(
     ::facebook::thrift::annotation::cpp::UseCursorSerialization& obj, uint16_t index) {
   switch (index) {
@@ -364,16 +357,6 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::ProcessInEbThreadUnsafe>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::cpp::RuntimeAnnotation>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

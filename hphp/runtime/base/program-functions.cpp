@@ -202,7 +202,8 @@ enum class ExecutionMode {
   VERIFY,
   VSDEBUG,
   GETOPTION,
-  DUMPCOVERAGE
+  DUMPCOVERAGE,
+  LIVE_TRANSLATE
 };
 
 void validate(boost::any& v, const std::vector<std::string>& values, ExecutionMode*, int) {
@@ -236,6 +237,8 @@ void validate(boost::any& v, const std::vector<std::string>& values, ExecutionMo
         v = boost::any(ExecutionMode::GETOPTION);
     } else if (s == "dumpcoverage") {
         v = boost::any(ExecutionMode::DUMPCOVERAGE);
+    } else if (s == "live") {
+        v = boost::any(ExecutionMode::LIVE_TRANSLATE);
     } else {
         throw validation_error(validation_error::invalid_option_value);
     }
@@ -1144,6 +1147,7 @@ static void set_execution_mode(ExecutionMode mode) {
         case ExecutionMode::GETOPTION:
         case ExecutionMode::EVAL:
         case ExecutionMode::DUMPCOVERAGE:
+        case ExecutionMode::LIVE_TRANSLATE:
         // We don't run PHP in "translate" mode, so just treat it like cli mode.
             Cfg::Server::Mode = false;
             Logger::Escape = false;
@@ -2176,6 +2180,58 @@ static int execute_program_impl(int argc, char** argv) {
       return HPHP_EXIT_FAILURE;
     }
     Logger::Info("No syntax errors detected in %s", po.lint.c_str());
+    return 0;
+  }
+
+  if (po.mode == ExecutionMode::LIVE_TRANSLATE) {
+    Cfg::Jit::Enabled = true;
+    Cfg::Jit::PGO = false;
+
+    init_repo_file();
+    hphp_process_init();
+    SCOPE_EXIT { hphp_process_exit(); };
+
+    hphp_session_init(Treadmill::SessionKind::CLISession);
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+    };
+
+    auto const fname = Cfg::Eval::LiveTranslateFunction;
+
+    auto const f = [&] () -> Func* {
+      std::vector<std::string> parts;
+      folly::split("::", fname, parts);
+      if (parts.size() != 2) return Func::load(makeStaticString(fname));
+
+      auto const c = Class::load(makeStaticString(parts[0]));
+      if (!c) return nullptr;
+      return c->lookupMethod(makeStaticString(parts[1]));
+    }();
+
+    if (!f) {
+      std::cerr << "Unable to load function: "
+                << Cfg::Eval::LiveTranslateFunction
+                << std::endl;
+      return -1;
+    }
+
+    auto const off = Cfg::Eval::LiveTranslateOffset;
+    if (off >= f->bclen()) {
+      std::cerr << "Bytecode offset past function end: " << off << std::endl;
+      return -1;
+    }
+
+
+    auto msg = jit::mcgen::debug_translate_live(
+      SrcKey{f, off, ResumeMode::None},
+      Cfg::Eval::LiveTranslateGuards
+    );
+    if (!msg.empty()) {
+      std::cerr << msg << std::endl;
+      return -1;
+    }
+
     return 0;
   }
 

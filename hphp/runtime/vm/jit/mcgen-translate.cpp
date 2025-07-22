@@ -627,6 +627,95 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
   return translator.publish();
 }
 
+Optional<SBInvOffset> offsetAtLocation(SrcKey sk) {
+  auto const f = sk.func();
+  auto const end = sk.pc();
+  auto const start = f->entry();
+
+  std::vector<std::pair<PC, SBInvOffset>> toProcess;
+  hphp_fast_set<PC> seen;
+
+  for (auto& pi : f->params()) {
+    if (pi.funcletOff != kInvalidOffset) {
+      toProcess.emplace_back(start + pi.funcletOff, SBInvOffset{0});
+    }
+  }
+
+  for (auto& eh : f->ehtab()) {
+    toProcess.emplace_back(start + eh.m_handler, SBInvOffset{0});
+  }
+
+  // Process start first
+  toProcess.emplace_back(start, SBInvOffset{0});
+
+  while (!toProcess.empty()) {
+    auto [pc, off] = toProcess.back();
+    toProcess.pop_back();
+    if (!seen.emplace(pc).second) continue;
+
+    while (true) {
+      if (pc == end) return off;
+
+      off += instrNumPushes(pc);
+      off -= instrNumPops(pc);
+
+      auto const targets = instrJumpTargets(start, pc - start);
+      for (auto t : targets) toProcess.emplace_back(start + t, off);
+      if (!instrAllowsFallThru(peek_op(pc))) break;
+      pc += instrLen(pc);
+    }
+  }
+
+  return {};
+}
+
+std::string debug_translate_live(SrcKey sk,
+                                 const std::vector<std::string>& types) {
+  auto off = offsetAtLocation(sk);
+  if (!off) return "Unable to compute stack offset for start location";
+  if (!tc::createSrcRec(sk, *off)) return "Unable to create SrcRec";
+  RegionContext ctx{sk, *off};
+
+  for (auto& tloc : types) {
+    std::string locStr, typeStr;
+    if (!folly::split('|', tloc, locStr, typeStr)) {
+      return folly::to<std::string>("Cannot parse guard: ", tloc);
+    }
+
+    int32_t id;
+    Optional<Location> loc;
+    if (sscanf(locStr.data(), "loc(%i)", &id) == 1) {
+      loc = Location::Local{static_cast<uint32_t>(id)};
+    } else if (sscanf(locStr.data(), "stk(%i)", &id) == 1) {
+      loc = Location::Stack{BCSPRelOffset{id}.to<SBInvOffset>(*off)};
+    } else {
+      return folly::to<std::string>("Cannot parse guard location: ", locStr);
+    }
+
+    DataType dt;
+#define DT(t, ...) else if (typeStr == tname(DataType::t)) dt = DataType::t;
+    if (false) {}
+    DATATYPES
+    else {
+      return folly::to<std::string>("Cannot parse guard type: ", typeStr);
+    }
+#undef DT
+
+    ctx.liveTypes.emplace_back(*loc, Type{dt});
+  }
+
+  auto const res = mcgen::retranslate(TransArgs{sk}, ctx);
+  switch (res.scope()) {
+  case TranslationResult::Scope::Success: return "";
+  case TranslationResult::Scope::Transient:
+    return "Encountered transient retranslate failure";
+  case TranslationResult::Scope::Request:
+    return "Encountered request persistent retranslate failure";
+  case TranslationResult::Scope::Process:
+    return "Encountered process persistent retranslate failure";
+  }
+}
+
 bool retranslateOpt(FuncId funcId) {
   VMProtect _;
 

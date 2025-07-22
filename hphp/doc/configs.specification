@@ -869,6 +869,22 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   DumpHhas =1 dumps user php, =2 dumps systemlib & user php
 
+- std::string Eval.LiveTranslateFunction = "", paulbiss
+
+  The function to translate when running in live translate mode
+
+- int32_t Eval.LiveTranslateOffset = 0, paulbiss
+
+  The bytecode offset within Eval.LiveTranslateFunction to translate when
+  running in live translate mode.
+
+- std::vector<std::string> Eval.LiveTranslateGuards = {}, paulbiss
+
+  Guards to apply to the translation when running in live translate mode. Each
+  guard should have the form {location}|{type}, where {location} can be L{n},
+  S{n}, or MBR for locals, BCSPOffsets or MBR respectively, and {type} is the
+  DataType to apply to the location.
+
 - std::string Eval.DumpHhasToFile = "", UNKNOWN
 
 - bool Eval.DumpTC = false, UNKNOWN

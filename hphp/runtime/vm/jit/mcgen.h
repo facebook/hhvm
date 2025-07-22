@@ -141,4 +141,7 @@ bool dumpTCAnnotation(TransKind transKind);
  */
 int getActiveWorker();
 
+std::string debug_translate_live(SrcKey sk,
+                                 const std::vector<std::string>& types);
+
 }}}

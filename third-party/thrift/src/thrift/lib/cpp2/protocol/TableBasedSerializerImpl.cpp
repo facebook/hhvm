@@ -172,8 +172,7 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
     case protocol::TType::T_UTF8:
     case protocol::TType::T_U64:
     case protocol::TType::T_UTF16:
-      DCHECK(false);
-      break;
+      CHECK(false);
   }
 }
 
@@ -299,8 +298,7 @@ bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& fieldInfo) {
     case protocol::TType::T_UTF8:
     case protocol::TType::T_U64:
     case protocol::TType::T_UTF16:
-      DCHECK(false);
-      break;
+      CHECK(false);
   }
   return false;
 }

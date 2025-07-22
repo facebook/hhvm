@@ -438,12 +438,26 @@ final class ThriftContextPropState {
     return $this->getBaggage()?->user_ids;
   }
 
-  public function getFBUserId()[]: ?int {
-    return $this->getUserIds()?->fb_user_id;
+  public readonly function getFBUserId()[leak_safe]: ?int {
+    if ($this->storage->baggage is null) {
+      return null;
+    }
+    $user_ids = $this->storage->baggage?->user_ids;
+    if ($user_ids is null) {
+      return null;
+    }
+    return ($user_ids->fb_user_id as int);
   }
 
-  public function getIGUserId()[]: ?int {
-    return $this->getUserIds()?->ig_user_id;
+  public readonly function getIGUserId()[leak_safe]: ?int {
+    if ($this->storage->baggage is null) {
+      return null;
+    }
+    $user_ids = $this->storage->baggage?->user_ids;
+    if ($user_ids is null) {
+      return null;
+    }
+    return ($user_ids->ig_user_id as int);
   }
 
   // user id setters

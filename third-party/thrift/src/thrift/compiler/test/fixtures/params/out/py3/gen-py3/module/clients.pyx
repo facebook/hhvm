@@ -157,7 +157,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         if not isinstance(foo, _module_types.Map__i32_List__i32):
             foo = _module_types.Map__i32_List__i32(foo)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -187,7 +187,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         if not isinstance(foo, _module_types.Map__i32_Set__i32):
             foo = _module_types.Map__i32_Set__i32(foo)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -217,7 +217,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         if not isinstance(foo, _module_types.List__Map__i32_i32):
             foo = _module_types.List__Map__i32_i32(foo)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -247,7 +247,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         if not isinstance(foo, _module_types.List__Set__i32):
             foo = _module_types.List__Set__i32(foo)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -277,7 +277,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         if not isinstance(foo, _module_types.List__List__Map__i32_Map__i32_Set__i32):
             foo = _module_types.List__List__Map__i32_Map__i32_Set__i32(foo)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](

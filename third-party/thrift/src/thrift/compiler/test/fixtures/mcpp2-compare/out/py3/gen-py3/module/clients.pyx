@@ -771,7 +771,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -797,7 +797,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cbool](
@@ -823,7 +823,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint16_t](
@@ -849,7 +849,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint32_t](
@@ -875,7 +875,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint64_t](
@@ -901,7 +901,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[float](
@@ -927,7 +927,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[double](
@@ -953,7 +953,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[string](
@@ -979,7 +979,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[string](
@@ -1005,7 +1005,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cmap[string,cint64_t]](
@@ -1031,7 +1031,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint32_t](
@@ -1057,7 +1057,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]](
@@ -1083,7 +1083,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]](
@@ -1109,7 +1109,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cMyEnumA](
@@ -1135,7 +1135,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[_module_cbindings.cMyEnumA]](
@@ -1161,7 +1161,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cMyStruct](
@@ -1187,7 +1187,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cset[_module_cbindings.cMyStruct]](
@@ -1213,7 +1213,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cComplexUnion](
@@ -1239,7 +1239,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[_module_cbindings.cComplexUnion]](
@@ -1270,7 +1270,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         else:
             size = <cint64_t> size
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_fbthrift_iobuf.cIOBuf](
@@ -1302,7 +1302,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         else:
             size = <cint64_t> size
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[unique_ptr[_fbthrift_iobuf.cIOBuf]](
@@ -1361,7 +1361,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param1 = <cint16_t> param1
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1398,7 +1398,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param2 = <cint16_t> param2
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1429,7 +1429,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.Map__string_i64):
             param1 = _module_types.Map__string_i64(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1462,7 +1462,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param2, _module_types.Set__List__string):
             param2 = _module_types.Set__List__string(param2)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1495,7 +1495,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param1 = <cint32_t> param1
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1523,7 +1523,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1551,7 +1551,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1581,7 +1581,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.List__ComplexUnion):
             param1 = _module_types.List__ComplexUnion(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -1618,7 +1618,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param2 = <cint64_t> param2
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cbool](
@@ -1649,7 +1649,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.Map__string_i64):
             param1 = _module_types.Map__string_i64(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cbool](
@@ -1677,7 +1677,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cbool](
@@ -1706,7 +1706,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint64_t](
@@ -1738,7 +1738,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param2, _module_types.Set__List__List__Map__Empty_MyStruct):
             param2 = _module_types.Set__List__List__Map__Empty_MyStruct(param2)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint64_t](
@@ -1791,7 +1791,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param5 = <cint32_t> param5
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint64_t](
@@ -1825,7 +1825,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.Set__MyStruct):
             param1 = _module_types.Set__MyStruct(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[double](
@@ -1853,7 +1853,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[string](
@@ -1881,7 +1881,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[string](
@@ -1909,7 +1909,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cmap[string,cint64_t]](
@@ -1942,7 +1942,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param2, _module_types.List__string):
             param2 = _module_types.List__string(param2)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[cbool]](
@@ -1973,7 +1973,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.List__List__List__List__i32):
             param1 = _module_types.List__List__List__List__i32(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](
@@ -2005,7 +2005,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param1 = <cint32_t> param1
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint32_t](
@@ -2035,7 +2035,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.List__Map__Empty_MyStruct):
             param1 = _module_types.List__Map__Empty_MyStruct(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[cint32_t]](
@@ -2063,7 +2063,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cMyEnumA](
@@ -2092,7 +2092,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cMyEnumA](
@@ -2123,7 +2123,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.Map__string_i64):
             param1 = _module_types.Map__string_i64(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[_module_cbindings.cMyEnumA]](
@@ -2155,7 +2155,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param1 = <cint16_t> param1
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cMyStruct](
@@ -2185,7 +2185,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if not isinstance(param1, _module_types.Set__string):
             param1 = _module_types.Set__string(param1)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cset[_module_cbindings.cMyStruct]](
@@ -2222,7 +2222,7 @@ cdef class ParamService(thrift.py3.client.Client):
         else:
             param2 = <cint32_t> param2
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cComplexUnion](
@@ -2251,7 +2251,7 @@ cdef class ParamService(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[vector[_module_cbindings.cComplexUnion]](

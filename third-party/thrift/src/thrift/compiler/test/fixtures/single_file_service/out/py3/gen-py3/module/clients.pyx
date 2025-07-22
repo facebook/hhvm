@@ -159,7 +159,7 @@ cdef class A(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_module_cbindings.cFoo](
@@ -211,7 +211,7 @@ cdef class A_I(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -254,7 +254,7 @@ cdef class B(A):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](
@@ -281,7 +281,7 @@ cdef class B(A):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](
@@ -360,7 +360,7 @@ cdef class C_I(thrift.py3.client.Client):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cFollyUnit](

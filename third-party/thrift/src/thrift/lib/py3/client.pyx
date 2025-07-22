@@ -53,7 +53,7 @@ cdef class Client:
     Base class for all thrift clients
     """
     def __cinit__(Client self):
-        loop = asyncio.get_event_loop()
+        self._loop = loop = asyncio.get_event_loop()
         self._executor = get_executor()
         # Keep a reference to the executor for the life of the client
         self._executor_wrapper = folly.executor.loop_to_q[loop]
@@ -113,7 +113,7 @@ cdef class Client:
         if aexit_callback:
             aexit_callback()
         # To break any future usage of this client
-        badfuture = asyncio.get_event_loop().create_future()
+        badfuture = self._loop.create_future()
         badfuture.set_exception(asyncio.InvalidStateError('Client Out of Context'))
         badfuture.exception()
         self._connect_future = badfuture

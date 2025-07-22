@@ -107,7 +107,7 @@ cdef class HsTestService(thrift.py3.client.Client):
         else:
             int1 = <cint64_t> int1
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cint64_t](

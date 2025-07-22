@@ -53,6 +53,7 @@ cdef class Client:
     cdef object _connect_future
     cdef object _deferred_headers
     cdef object _aexit_callback
+    cdef object _loop # the loop the client was created on
     cdef vector[shared_ptr[cTProcessorEventHandler]] _deferred_event_handlers
     cdef cFollyExecutor* _executor
     cdef AsyncioExecutor _executor_wrapper

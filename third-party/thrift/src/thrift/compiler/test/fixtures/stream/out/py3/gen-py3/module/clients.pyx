@@ -259,7 +259,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             i32_to = <cint32_t> i32_to
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](
@@ -292,7 +292,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](
@@ -324,7 +324,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](
@@ -356,7 +356,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](
@@ -388,7 +388,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](
@@ -420,7 +420,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cResponseAndClientBufferedStream[cint32_t,cint32_t]](
@@ -452,7 +452,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cResponseAndClientBufferedStream[cint32_t,cint32_t]](
@@ -484,7 +484,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             foo = <cint32_t> foo
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cResponseAndClientBufferedStream[cint32_t,cint32_t]](
@@ -521,7 +521,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         else:
             i32_to = <cint32_t> i32_to
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cClientBufferedStream[cint32_t]](

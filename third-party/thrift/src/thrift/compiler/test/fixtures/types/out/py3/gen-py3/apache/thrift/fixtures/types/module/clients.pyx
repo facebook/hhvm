@@ -121,7 +121,7 @@ cdef class SomeService(thrift.py3.client.Client):
         if not isinstance(m, _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string):
             m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string(m)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](
@@ -151,7 +151,7 @@ cdef class SomeService(thrift.py3.client.Client):
         if not isinstance(r, _apache_thrift_fixtures_types_module_types.List__i64):
             r = _apache_thrift_fixtures_types_module_types.List__i64(r)
         self._check_connect_future()
-        __loop = asyncio_get_event_loop()
+        __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[cmap[string,cint64_t]](

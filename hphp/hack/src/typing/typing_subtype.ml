@@ -6400,8 +6400,7 @@ end = struct
       (match Subtype_negation.find_type_with_exact_negation env ty_subs with
       | (env, Some non_ty, tyl) ->
         let ty_sub = MakeType.intersection r_sub tyl in
-        let mk_prop = simplify
-        and lift_rhs { reason_super; can_index } =
+        let lift_rhs { reason_super; can_index } =
           mk_constraint_type (reason_super, Tcan_index can_index)
         and lhs = (sub_supportdyn, ty_sub)
         and rhs_subtype =
@@ -6434,11 +6433,14 @@ end = struct
       do_tuple tup
     | (_, Ttuple tup) -> do_tuple tup.t_required
     | (r, Tshape ts) -> do_shape r ts
-    | (_, Tnewtype (name_sub, [tyarg_sub], _))
+    | (r, Tnewtype (name_sub, [ty_sub], _))
       when String.equal name_sub SN.Classes.cSupportDyn ->
-      (match deref tyarg_sub with
-      | (r, Tshape ts) -> do_shape r ts
-      | _ -> invalid ~fail env)
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn = Some r; ty_sub }
+        ~rhs
+        env
     | _ -> invalid ~fail env
 end
 

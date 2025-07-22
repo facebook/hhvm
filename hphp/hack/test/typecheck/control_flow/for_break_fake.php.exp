@@ -1,9 +1,0 @@
-ERROR: File "for_break_fake.php", line 12, characters 14-22:
-Invalid argument (Typing[4110])
-  File "for_break_fake.php", line 6, characters 21-23:
-  Expected `int`
-  File "for_break_fake.php", line 4, characters 17-20:
-  But got `null`
-  File "for_break_fake.php", line 10, characters 10-18:
-  All the local information about `C::$thing` has been invalidated because of scope change.
-This is a limitation of the type-checker; use a local if that's the problem.

@@ -57,6 +57,7 @@ const int64_t kRocketServerMinVersion = 8;
 
 THRIFT_FLAG_DEFINE_bool(rocket_server_legacy_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_server_max_version, kRocketServerMaxVersion);
+THRIFT_FLAG_DEFINE_bool(rocket_server_reset_connctx_userdata_on_close, false);
 
 namespace apache::thrift::rocket {
 
@@ -105,7 +106,9 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
       maxResponseWriteTime_(worker_->getServer()
                                 ->getThriftServerConfig()
                                 .getMaxResponseWriteTime()
-                                .get()) {
+                                .get()),
+      resetConnCtxUserDataOnClose_(
+          THRIFT_FLAG(rocket_server_reset_connctx_userdata_on_close)) {
   connContext_.setTransportType(Cpp2ConnContext::TransportType::ROCKET);
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&connContext_);
@@ -482,6 +485,11 @@ void ThriftRocketServerHandler::handleRequestChannelFrame(
 
 void ThriftRocketServerHandler::connectionClosing() {
   connContext_.connectionClosed();
+  if (resetConnCtxUserDataOnClose_) {
+    // Despite the method name, this only resets TransportInfo and userdata, not
+    // the entire Cpp2ConnContext!
+    connContext_.reset();
+  }
   if (processor_) {
     processor_->destroyAllInteractions(connContext_, *eventBase_);
   }

@@ -1652,7 +1652,6 @@ size_t ImmutableMapHandler::writeUnsorted(
   size_t written = 0;
   PyObject* map = const_cast<PyObject*>(toPyObject(object));
   const Py_ssize_t size = PyTuple_GET_SIZE(map);
-  UniquePyObjectPtr seq;
   for (std::uint32_t i = 0; i < size; ++i) {
     PyObject* pair = PyTuple_GET_ITEM(map, i);
     PyObject* key = PyTuple_GET_ITEM(pair, 0);

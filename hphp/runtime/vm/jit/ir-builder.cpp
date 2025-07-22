@@ -197,7 +197,7 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
     return fwdGuardSource(inst);
   }
 
-  auto const newType = oldType & inst->typeParam();
+  auto const newType = oldType.refine(inst->typeParam());
   if (oldType <= newType) {
     // The type of the src is the same or more refined than type, so the guard
     // is unnecessary.
@@ -228,7 +228,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          oldVal ? oldVal->toString() : "nullptr",
          srcInst ? srcInst->toString() : "nullptr");
 
-  auto const newType = oldType & inst->typeParam();
+  auto const newType = oldType.refine(inst->typeParam());
 
   // Eliminate this AssertTypeOp if:
   // 1) oldType is at least as good as newType and:
@@ -269,7 +269,7 @@ SSATmp* IRBuilder::preOptimizeAssertLocation(IRInstruction* inst,
   auto const prevType = typeOf(l, DataTypeGeneric);
   if (auto const prevValue = valueOf(l, DataTypeGeneric)) {
     auto toAssert = inst->typeParam();
-    if (!shouldConstrainGuards()) toAssert &= prevType;
+    if (!shouldConstrainGuards()) toAssert = prevType.refine(toAssert);
     gen(AssertType, toAssert, prevValue);
     inst->convertToNop();
     return nullptr;
@@ -500,7 +500,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeMem(IRInstruction* inst) {
     return nullptr;
   }
 
-  auto const newType = oldType & inst->typeParam();
+  auto const newType = oldType.refine(inst->typeParam());
   if (oldType <= newType) {
     inst->convertToNop();
     return nullptr;
@@ -988,7 +988,7 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
   // If the dest of the Assert/Check doesn't fit `gc', there's no point in
   // continuing.
   auto prevType = get_required(m_constraints.prevTypes, guard);
-  if (!typeFitsConstraint(prevType & guard->typeParam(), gc)) {
+  if (!typeFitsConstraint(prevType.refine(guard->typeParam()), gc)) {
     return false;
   }
 

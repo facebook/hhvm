@@ -2686,7 +2686,7 @@ SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
 SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
 
-  auto const newType = src->type() & inst->typeParam();
+  auto const newType = src->type().refine(inst->typeParam());
   if (newType == TBottom) {
     return cns(env, TBottom);
   }

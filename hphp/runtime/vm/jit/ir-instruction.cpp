@@ -720,7 +720,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
 #define D(type)         return checkLayoutFlags(type);
 #define DofS(n)         return inst->src(n)->type();
-#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
+#define DRefineS(n)     return inst->src(n)->type().refine(inst->typeParam());
 #define DParam(t)       return inst->typeParam();
 #define DEscalateToVanilla return inst->src(0)->type().modified().\
                                narrowToVanilla();

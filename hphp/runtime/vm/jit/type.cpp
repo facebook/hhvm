@@ -637,6 +637,25 @@ Type Type::modified() const {
   return arrSpec().vanilla() ? Type(t, spec) : t;
 }
 
+Type Type::refine(Type refinement) const {
+  auto original = *this;
+
+  // While ideally we would intersect the source and parameter types in all
+  // cases but when we have a RAT we fallback to a selection heuristic that may
+  // widen the type. If we have two RAT types we need to assume that the type
+  // being asserted is the one we want to keep. Generally when we assert a RAT
+  // it is because HHBBC statically determined that that information would be
+  // valuable when doing its analysis.
+  if (Cfg::Jit::PreferRefinedRATArraySpecializations &&
+      original.arrSpec().type() && refinement.arrSpec().type()) {
+    original = original
+      .unspecialize()
+      .narrowToLayout(original.arrSpec().layout());
+  }
+  return refinement & original;
+}
+
+
 /*
  * Return true if the array satisfies requirement on the ArraySpec.
  * If the kind and RepoAuthType are both set, the array must match both.

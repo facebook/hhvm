@@ -677,6 +677,14 @@ public:
    */
   Type modified() const;
 
+  /*
+   * Intersect with refinement.
+   *
+   * For intersections that cannot be performed monotonically (e.g. RATArrays),
+   * select the refinement version of the specialization.
+   */
+  Type refine(Type refinement) const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Specialization introspection.                                      [const]
 

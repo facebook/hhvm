@@ -1877,6 +1877,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Functions to upload traces from to the blob store.
 
+- bool Jit.PreferRefinedRATArraySpecializations = true, paulbiss
+
+  When refining a type and selecting between two possible RATArray
+  specializaitons, always select the version from the refinement.
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

@@ -1934,7 +1934,7 @@ void FrameStateMgr::widenType(Location l, Type type) {
 template<LTag tag>
 static void refineTypeImpl(Location l, LocationState<tag>& state,
                            Type type, Optional<TypeSource> typeSrc) {
-  auto const refined = state.type & type;
+  auto const refined = state.type.refine(type);
   ITRACE(2, "{} :: {} -> {} (via {})\n",
          jit::show(l), state.type, refined, type);
 
@@ -1999,18 +1999,18 @@ void FrameStateMgr::refineTypeAndSyncMBase(Location l,
       refineMTempBase(type);
     }
 
-    cur().mbaseStackType &= type;
-    cur().mbaseLocalType &= type;
-    cur().mbaseTempType &= type;
+    cur().mbaseStackType = cur().mbaseStackType.refine(type);
+    cur().mbaseLocalType = cur().mbaseLocalType.refine(type);
+    cur().mbaseTempType  = cur().mbaseTempType.refine(type);
   } else {
     // Only refine the MBase if it's definitely this location
     auto const acls = locationToAliasClass(l);
     if (isMBase(nullptr, acls) == TriBool::Yes) {
       refineType(Location::MBase{}, type, typeSrc);
       if (l.tag() == LTag::Stack) {
-        cur().mbaseStackType &= type;
+        cur().mbaseStackType = cur().mbaseStackType.refine(type);
       } else if (l.tag() == LTag::Local) {
-        cur().mbaseLocalType &= type;
+        cur().mbaseLocalType = cur().mbaseLocalType.refine(type);
       }
     }
   }

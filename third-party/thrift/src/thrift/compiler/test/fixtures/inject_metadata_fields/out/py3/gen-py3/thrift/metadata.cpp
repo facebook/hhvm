@@ -31,6 +31,8 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<AllowReservedIdentifier>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowReservedFilename>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RuntimeAnnotation>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AllowLegacyTypedefUri>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AllowUnsafeOptionalCustomDefaultValue>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

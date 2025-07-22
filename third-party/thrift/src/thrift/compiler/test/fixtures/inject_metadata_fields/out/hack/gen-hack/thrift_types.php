@@ -1480,3 +1480,170 @@ class RuntimeAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 }
 
+/**
+ * Allows the Thrift compiler to add a URI to the target typedef.
+ * 
+ * Use of this annotation is strongly DISCOURAGED, and is provided for
+ * backwards-compatibility purposes only.
+ * 
+ * Indeed, Thrift IDL [typedefs](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#typedefs)
+ * do not correspond to the set of user-defined types that can have unique URIs
+ * per the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri)
+ * While it may seem like typedefs correspond to
+ * [Opaque Alias Types](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#opaque-alias-types),
+ * that is actually incorrect, as the "aliased" type that a typedef introduces
+ * is considered identical - at the Object Model level - to the original type.
+ * 
+ * This annotation is introduced to allow "grandfathering in" existing typedef
+ * URIs in preparation for the thrift compiler to reject such cases in the
+ * future (unless this annotation is specified).
+ * 
+ * This annoation MUST NOT be applied to a typedef for which no URI is
+ * specified (either explicitly via @thrift.Uri, or implicitly through a
+ * non-empty
+ * [package declaration](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration)).
+ *
+ * Original thrift struct:-
+ * AllowLegacyTypedefUri
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/AllowLegacyTypedefUri'))>>
+class AllowLegacyTypedefUri implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowLegacyTypedefUri';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.AllowLegacyTypedefUri",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Allows the target field of a structured user-defined type (i.e., struct,
+ * union or exception), whose qualifier is `optional`, to have a custom default
+ * value specified in IDL.
+ * 
+ * Use of this annotation is strongly DISCOURAGED, as custom default values for
+ * optional fields are both non-sensical and dangerous:
+ *   - non-sensical because, by definition, the "default" state of an optional
+ *     field is to have no value (i.e., be "absent") - as explicitly specified
+ *     in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#structured-types).
+ *   - dangerous because in practice, the runtime behavior of the generated code
+ *     for optional fields with custom default values is inconsistent (sometimes
+ *     even for the same programming language!).
+ * 
+ * This annotation is merely introduced to allow existing use cases to be
+ * grandfathered into the new compiler validation logic, which will reject
+ * optional fields with custom default values unless this annotation is
+ * specified.
+ * 
+ * This annotation MUST NOT be applied to a field whose qualifier is not
+ * optional, or that doesn't have a custom default value.
+ *
+ * Original thrift struct:-
+ * AllowUnsafeOptionalCustomDefaultValue
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/AllowUnsafeOptionalCustomDefaultValue'))>>
+class AllowUnsafeOptionalCustomDefaultValue implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowUnsafeOptionalCustomDefaultValue';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.AllowUnsafeOptionalCustomDefaultValue",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

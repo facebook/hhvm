@@ -479,6 +479,48 @@
           "column" : 28
         }
       }
+    },
+    "AllowLegacyTypedefUri" : {
+      "lineno" : 284,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Typedef" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 284,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 285,
+          "column" : 32
+        }
+      }
+    },
+    "AllowUnsafeOptionalCustomDefaultValue" : {
+      "lineno" : 309,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 309,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 310,
+          "column" : 48
+        }
+      }
     }
   }
 }

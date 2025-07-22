@@ -473,6 +473,40 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 258
+      },
+      "AllowLegacyTypedefUri" : {
+        "name" : "AllowLegacyTypedefUri",
+        "structured_annotations": {
+          "scope.Typedef" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the Thrift compiler to add a URI to the target typedef.\n\nUse of this annotation is strongly DISCOURAGED, and is provided for\nbackwards-compatibility purposes only.\n\nIndeed, Thrift IDL [typedefs](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#typedefs)\ndo not correspond to the set of user-defined types that can have unique URIs\nper the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri)\nWhile it may seem like typedefs correspond to\n[Opaque Alias Types](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#opaque-alias-types),\nthat is actually incorrect, as the \"aliased\" type that a typedef introduces\nis considered identical - at the Object Model level - to the original type.\n\nThis annotation is introduced to allow \"grandfathering in\" existing typedef\nURIs in preparation for the thrift compiler to reject such cases in the\nfuture (unless this annotation is specified).\n\nThis annoation MUST NOT be applied to a typedef for which no URI is\nspecified (either explicitly via @thrift.Uri, or implicitly through a\nnon-empty\n[package declaration](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration)).\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 284
+      },
+      "AllowUnsafeOptionalCustomDefaultValue" : {
+        "name" : "AllowUnsafeOptionalCustomDefaultValue",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the target field of a structured user-defined type (i.e., struct,\nunion or exception), whose qualifier is `optional`, to have a custom default\nvalue specified in IDL.\n\nUse of this annotation is strongly DISCOURAGED, as custom default values for\noptional fields are both non-sensical and dangerous:\n  - non-sensical because, by definition, the \"default\" state of an optional\n    field is to have no value (i.e., be \"absent\") - as explicitly specified\n    in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#structured-types).\n  - dangerous because in practice, the runtime behavior of the generated code\n    for optional fields with custom default values is inconsistent (sometimes\n    even for the same programming language!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\noptional fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field whose qualifier is not\noptional, or that doesn't have a custom default value.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 309
       }
   },
   "source_path" : "thrift/annotation/thrift",

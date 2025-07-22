@@ -109,6 +109,13 @@ impl EnforceableType {
         }
     }
 
+    pub fn mixed() -> Self {
+        EnforceableType {
+            ty: BaseType::Mixed,
+            modifiers: TypeConstraintFlags::NoFlags,
+        }
+    }
+
     pub fn is_this(&self) -> bool {
         self.ty.is_this()
     }

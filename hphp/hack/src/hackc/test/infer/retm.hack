@@ -26,3 +26,15 @@ function multi_ret(inout int $a): int {
   $a = 7;
   return 5;
 }
+
+// TEST-CHECK-BAL: define $root.softReturn
+// CHECK: define $root.softReturn($this: *void) : *HackMixed {
+// CHECK: #b0:
+// CHECK: // .column 3
+// CHECK:   n0 = $builtins.hhbc_verify_type_pred($builtins.hack_string("hello"), $builtins.hack_bool(true))
+// CHECK: // .column 3
+// CHECK:   ret $builtins.hack_string("hello")
+// CHECK: }
+function softReturn(): <<__Soft>> string {
+  return "hello";
+}

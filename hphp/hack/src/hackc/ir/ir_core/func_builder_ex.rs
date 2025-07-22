@@ -155,6 +155,10 @@ impl FuncBuilderEx for FuncBuilder {
             ));
         }
 
+        if modifiers.contains(TypeConstraintFlags::Soft) {
+            return self.is(vid, &EnforceableType::mixed(), loc);
+        }
+
         // We're just trying to do an 'is' check - we don't care if the context
         // is a TypeConstant.
         modifiers -= TypeConstraintFlags::TypeConstant;

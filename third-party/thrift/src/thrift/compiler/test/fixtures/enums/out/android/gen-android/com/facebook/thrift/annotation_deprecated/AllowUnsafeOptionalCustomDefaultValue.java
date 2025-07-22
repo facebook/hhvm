@@ -46,21 +46,21 @@ import com.facebook.thrift.protocol.*;
  * optional, or that doesn't have a custom default value.
  */
 @SuppressWarnings({ "unused", "serial" })
-public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("AllowLegacyOptionalCustomDefaultValue");
+public class AllowUnsafeOptionalCustomDefaultValue implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("AllowUnsafeOptionalCustomDefaultValue");
 
 
-  public AllowLegacyOptionalCustomDefaultValue() {
+  public AllowUnsafeOptionalCustomDefaultValue() {
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public AllowLegacyOptionalCustomDefaultValue(AllowLegacyOptionalCustomDefaultValue other) {
+  public AllowUnsafeOptionalCustomDefaultValue(AllowUnsafeOptionalCustomDefaultValue other) {
   }
 
-  public AllowLegacyOptionalCustomDefaultValue deepCopy() {
-    return new AllowLegacyOptionalCustomDefaultValue(this);
+  public AllowUnsafeOptionalCustomDefaultValue deepCopy() {
+    return new AllowUnsafeOptionalCustomDefaultValue(this);
   }
 
   @Override
@@ -69,9 +69,9 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof AllowLegacyOptionalCustomDefaultValue))
+    if (!(_that instanceof AllowUnsafeOptionalCustomDefaultValue))
       return false;
-    AllowLegacyOptionalCustomDefaultValue that = (AllowLegacyOptionalCustomDefaultValue)_that;
+    AllowUnsafeOptionalCustomDefaultValue that = (AllowUnsafeOptionalCustomDefaultValue)_that;
 
     return true;
   }
@@ -86,7 +86,7 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static AllowLegacyOptionalCustomDefaultValue deserialize(TProtocol iprot) throws TException {
+  public static AllowUnsafeOptionalCustomDefaultValue deserialize(TProtocol iprot) throws TException {
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -105,8 +105,8 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
     }
     iprot.readStructEnd();
 
-    AllowLegacyOptionalCustomDefaultValue _that;
-    _that = new AllowLegacyOptionalCustomDefaultValue(
+    AllowUnsafeOptionalCustomDefaultValue _that;
+    _that = new AllowUnsafeOptionalCustomDefaultValue(
     );
     _that.validate();
     return _that;

@@ -46,8 +46,8 @@ import com.facebook.thrift.protocol.*;
  * optional, or that doesn't have a custom default value.
  */
 @SuppressWarnings({ "unused", "serial" })
-public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Serializable, Cloneable, Comparable<AllowLegacyOptionalCustomDefaultValue> {
-  private static final TStruct STRUCT_DESC = new TStruct("AllowLegacyOptionalCustomDefaultValue");
+public class AllowUnsafeOptionalCustomDefaultValue implements TBase, java.io.Serializable, Cloneable, Comparable<AllowUnsafeOptionalCustomDefaultValue> {
+  private static final TStruct STRUCT_DESC = new TStruct("AllowUnsafeOptionalCustomDefaultValue");
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -57,10 +57,10 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(AllowLegacyOptionalCustomDefaultValue.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(AllowUnsafeOptionalCustomDefaultValue.class, metaDataMap);
   }
 
-  public AllowLegacyOptionalCustomDefaultValue() {
+  public AllowUnsafeOptionalCustomDefaultValue() {
   }
 
   public static class Builder {
@@ -68,8 +68,8 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
     public Builder() {
     }
 
-    public AllowLegacyOptionalCustomDefaultValue build() {
-      AllowLegacyOptionalCustomDefaultValue result = new AllowLegacyOptionalCustomDefaultValue();
+    public AllowUnsafeOptionalCustomDefaultValue build() {
+      AllowUnsafeOptionalCustomDefaultValue result = new AllowUnsafeOptionalCustomDefaultValue();
       return result;
     }
   }
@@ -81,11 +81,11 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public AllowLegacyOptionalCustomDefaultValue(AllowLegacyOptionalCustomDefaultValue other) {
+  public AllowUnsafeOptionalCustomDefaultValue(AllowUnsafeOptionalCustomDefaultValue other) {
   }
 
-  public AllowLegacyOptionalCustomDefaultValue deepCopy() {
-    return new AllowLegacyOptionalCustomDefaultValue(this);
+  public AllowUnsafeOptionalCustomDefaultValue deepCopy() {
+    return new AllowUnsafeOptionalCustomDefaultValue(this);
   }
 
   public void setFieldValue(int fieldID, Object __value) {
@@ -108,9 +108,9 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof AllowLegacyOptionalCustomDefaultValue))
+    if (!(_that instanceof AllowUnsafeOptionalCustomDefaultValue))
       return false;
-    AllowLegacyOptionalCustomDefaultValue that = (AllowLegacyOptionalCustomDefaultValue)_that;
+    AllowUnsafeOptionalCustomDefaultValue that = (AllowUnsafeOptionalCustomDefaultValue)_that;
 
     return true;
   }
@@ -121,7 +121,7 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
   }
 
   @Override
-  public int compareTo(AllowLegacyOptionalCustomDefaultValue other) {
+  public int compareTo(AllowUnsafeOptionalCustomDefaultValue other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -177,7 +177,7 @@ public class AllowLegacyOptionalCustomDefaultValue implements TBase, java.io.Ser
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("AllowLegacyOptionalCustomDefaultValue");
+    StringBuilder sb = new StringBuilder("AllowUnsafeOptionalCustomDefaultValue");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

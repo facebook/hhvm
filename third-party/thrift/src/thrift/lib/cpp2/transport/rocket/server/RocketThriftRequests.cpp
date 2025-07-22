@@ -301,8 +301,9 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
                        {kInteractionLoadsheddedQueueTimeoutErrorCode,
                         ResponseRpcErrorCode::
                             INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT}});
-                  if (auto errorCode = folly::get_ptr(errorCodeMap, *exPtr)) {
-                    return *errorCode;
+                  if (auto foundErrorCode =
+                          folly::get_ptr(errorCodeMap, *exPtr)) {
+                    return *foundErrorCode;
                   }
                 }
 

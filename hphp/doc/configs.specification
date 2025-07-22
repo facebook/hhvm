@@ -473,6 +473,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether operations like $c::foo() raise a notice when $c is a string
 
+- uint32_t Eval.CheckedUnsafeCastSampleRate = 0, UNKNOWN
+
+  Raise notice if a UNSAFE_CAST argument has type that doesn't match the target type
+  (Currently, this controls all uses of the VerifyTypeTS bytecode)
+
 - uint32_t Eval.ClassStringHintNoticesSampleRate = 0, UNKNOWN, globaldata
 
   Raise a notice if a Class type is passed to function that expects a
@@ -507,7 +512,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.CheckedUnsafeCast = false, UNKNOWN, globaldata|unitcacheflag|compileroption(CheckedUnsafeCast)
 
-  Semantics of UNSAFE_CAST. If set, warn when target type doesn't match runtime type.
+  Is VerifyTypeTS bytecode enabled?
 
 - bool Eval.DiamondTraitMethods = false, UNKNOWN, globaldata|unitcacheflag
 

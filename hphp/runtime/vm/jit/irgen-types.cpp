@@ -1673,7 +1673,8 @@ void emitVerifyRetTypeTS(IRGS& env) {
 }
 
 void emitVerifyTypeTS(IRGS& env) {
-  if (!Cfg::Eval::CheckedUnsafeCast) {
+  // Don't emit code if sample rate is zero
+  if (Cfg::Eval::CheckedUnsafeCastSampleRate == 0) {
     popDecRef(env);
     return;
   }

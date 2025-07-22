@@ -5467,6 +5467,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
 }
 
 void in(ISS& env, const bc::VerifyTypeTS& /*op*/) {
+  // Don't even generate code if flag isn't set
   if (!Cfg::Eval::CheckedUnsafeCast) {
     reduce(env, bc::PopC {});
     return;

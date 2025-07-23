@@ -123,6 +123,10 @@ struct sema_params {
   // (structured) type that does not need it.
   validation_level unnecessary_enable_custom_type_ordering =
       validation_level::none;
+
+  // Action to take on typedef with URI (but without the annotation that
+  // explicitly allows it, i.e. @thrift.AllowLegacyTypedefUri
+  validation_level nonallowed_typedef_with_uri = validation_level::none;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

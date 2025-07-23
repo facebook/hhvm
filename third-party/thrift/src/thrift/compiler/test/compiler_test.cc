@@ -2856,3 +2856,50 @@ TEST(CompilerTest, unresolved_struct_in_const) {
   )";
   check_compile(name_contents_map, "main.thrift");
 }
+
+TEST(Compilertest, typedef_uri) {
+  // Implicit URI, no validation
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+
+    typedef i32 MyInt1;
+  )");
+
+  // Explicit URI, no validation
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
+    typedef i32 MyInt2;
+  )");
+
+  // Implicit URI, with validation
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+
+    typedef i32 MyInt3;
+      # expected-warning@-1: Typedef `MyInt3` has a URI, which is not allowed (see @thrift.AllowLegacyTypedefUri)
+  )",
+      {"--extra-validation", "nonallowed_typedef_with_uri=warn"});
+
+  // Explicit URI, with validation
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
+    typedef i32 MyInt4;
+      # expected-warning@-2: Typedef `MyInt4` has a URI, which is not allowed (see @thrift.AllowLegacyTypedefUri)
+  )",
+      {"--extra-validation", "nonallowed_typedef_with_uri=warn"});
+
+  // No URI, with validation
+  check_compile(
+      R"(
+    typedef i32 MyInt5;
+  )",
+      {"--extra-validation", "nonallowed_typedef_with_uri=warn"});
+}

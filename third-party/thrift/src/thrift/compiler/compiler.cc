@@ -121,6 +121,11 @@ Options:
                   Action to take if a @cpp.EnableCustomTypeOrdering annotation
                   is found on a type that does not need it.
 
+                nonallowed_typedef_with_uri=none|warn|error
+                  Action to take on typedef with URI (but without the annotation
+                  that explicitly allows it, i.e.
+                  @thrift.AllowLegacyTypedefUri).
+
                 forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
                   Struct (and exception) fields with a @cpp.Ref (or
                   cpp[2].ref[_type]) annotation must be optional, unless
@@ -628,6 +633,35 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   return ctx.has_errors() ? nullptr : std::move(program_bundle);
 }
 
+/**
+ * Parses the "extra-validation" flag with the given name (`prefix`), if
+ * applicable. If `validator` corresponds indeed to the given `prefix`, it must
+ * also specify a validation level (`warn`, `error`, etc.), which will be
+ * written to the memory pointed by `target`).
+ *
+ * @return `true` if the given validator matched `prefix` and was successfully
+ * parsed into the given `target`, or `false` if `validator` does not match the
+ * given `prefix`.
+ *
+ * @throws std::runtime_error on invalid input.
+ */
+bool parse_extra_validation_with_level(
+    std::string_view prefix,
+    const std::string& validator,
+    sema_params::validation_level* target) {
+  assert(target != nullptr);
+  if (validator.find(prefix) != 0) {
+    return false;
+  };
+
+  const std::string suffix = validator.substr(prefix.size());
+  if (suffix.find('=') != 0) {
+    throw std::runtime_error("Missing '=' after validator name.");
+  }
+  *target = sema_params::parse_validation_level(suffix.substr(1));
+  return true;
+}
+
 } // namespace
 
 // Returns the input file name if successful, otherwise returns an empty
@@ -742,7 +776,7 @@ std::string parse_args(
       std::vector<std::string> validators;
       boost::algorithm::split(
           validators, *arg, [](char c) { return c == ','; });
-      for (const auto& validator : validators) {
+      for (const std::string& validator : validators) {
         if (validator == "unstructured_annotations") {
           sparams.forbid_unstructured_annotations = true;
           continue;
@@ -761,28 +795,28 @@ std::string parse_args(
           continue;
         }
 
-        static constexpr std::string_view
-            kUnecessaryEnableCustomTypeOrderingPrefix{
-                "unnecessary_enable_custom_type_ordering"};
-        if (validator.find(kUnecessaryEnableCustomTypeOrderingPrefix) == 0) {
-          try {
-            const std::string suffix = validator.substr(
-                kUnecessaryEnableCustomTypeOrderingPrefix.size());
-            if (suffix.find('=') != 0) {
-              throw std::runtime_error("Missing '=' after validator name.");
-            }
-            sparams.unnecessary_enable_custom_type_ordering =
-                sema_params::parse_validation_level(suffix.substr(1));
-          } catch (const std::exception& e) {
-            fmt::print(
-                stderr,
-                "!!! Invalid extra-validation {}: {}\n\n",
-                kUnecessaryEnableCustomTypeOrderingPrefix,
-                e.what());
-            printUsageError();
-            return {};
+        try {
+          if (parse_extra_validation_with_level(
+                  "unnecessary_enable_custom_type_ordering",
+                  validator,
+                  &sparams.unnecessary_enable_custom_type_ordering)) {
+            continue;
           }
-          continue;
+
+          if (parse_extra_validation_with_level(
+                  "nonallowed_typedef_with_uri",
+                  validator,
+                  &sparams.nonallowed_typedef_with_uri)) {
+            continue;
+          }
+        } catch (const std::exception& e) {
+          fmt::print(
+              stderr,
+              "!!! Invalid extra-validation {}: {}\n\n",
+              validator,
+              e.what());
+          printUsageError();
+          return {};
         }
 
         fprintf(

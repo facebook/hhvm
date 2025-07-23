@@ -484,6 +484,18 @@ void validate_exception_message_annotation_is_only_in_exceptions(
   }
 }
 
+diagnostic_level validation_to_diagnostic_level(
+    sema_params::validation_level validation_level) {
+  switch (validation_level) {
+    case sema_params::validation_level::error:
+      return diagnostic_level::error;
+    case sema_params::validation_level::warn:
+      return diagnostic_level::warning;
+    case sema_params::validation_level::none:
+      return diagnostic_level::debug;
+  }
+}
+
 void validate_orderable_structured_types(
     sema_context& ctx, const t_structured& node) {
   switch (OrderableTypeUtils::get_orderable_condition(
@@ -499,21 +511,10 @@ void validate_orderable_structured_types(
 
       // @cpp.EnableCustomTypeOrdering is present, but not needed.
 
-      const diagnostic_level lvl = [&]() {
-        const sema_params& sparams = ctx.sema_parameters();
-        switch (sparams.unnecessary_enable_custom_type_ordering) {
-          case sema_params::validation_level::error:
-            return diagnostic_level::error;
-          case sema_params::validation_level::warn:
-            return diagnostic_level::warning;
-          case sema_params::validation_level::none:
-            return diagnostic_level::debug;
-        }
-      }();
-
       ctx.report(
           *annotation,
-          lvl,
+          validation_to_diagnostic_level(
+              ctx.sema_parameters().unnecessary_enable_custom_type_ordering),
           "Type `{}` does not need `@cpp.EnableCustomTypeOrdering` to be "
           "orderable in C++: remove the annotation.",
           node.name());
@@ -1678,6 +1679,27 @@ void validate_py3_enable_cpp_adapter(sema_context& ctx, const t_typedef& node) {
   }
 }
 
+void validate_nonallowed_typedef_with_uri(
+    sema_context& ctx, const t_typedef& node) {
+  if (node.uri().empty()) {
+    // Typedef node does not have a URI => OK, return.
+    return;
+  }
+
+  if (node.has_structured_annotation(kAllowLegacyTypedefUriUri)) {
+    // Typedef node has a URI, but is annotated with
+    // `@thrift.AllowLegacyTypedefUri`
+    return;
+  }
+
+  ctx.report(
+      node,
+      validation_to_diagnostic_level(
+          ctx.sema_parameters().nonallowed_typedef_with_uri),
+      "Typedef `{}` has a URI, which is not allowed (see @thrift.AllowLegacyTypedefUri)",
+      node.name());
+}
+
 // TODO (T191018859): forbid as field type too
 void forbid_exception_as_method_type(
     sema_context& ctx, const t_function& node) {
@@ -1778,6 +1800,7 @@ ast_validator standard_validator() {
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);
   validator.add_typedef_visitor(&deprecate_typedef_type_annotations);
   validator.add_typedef_visitor(ValidateAnnotationPositions());
+  validator.add_typedef_visitor(&validate_nonallowed_typedef_with_uri);
 
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);

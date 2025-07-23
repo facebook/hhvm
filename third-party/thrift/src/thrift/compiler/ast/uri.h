@@ -54,6 +54,8 @@ inline constexpr auto kDisableSchemaConstUri =
     "facebook.com/thrift/annotation/DisableSchemaConst";
 inline constexpr auto kRuntimeAnnotationUri =
     "facebook.com/thrift/annotation/RuntimeAnnotation";
+inline constexpr auto kAllowLegacyTypedefUriUri =
+    "facebook.com/thrift/annotation/AllowLegacyTypedefUri";
 
 // Scope:
 inline constexpr auto kScopeProgramUri =

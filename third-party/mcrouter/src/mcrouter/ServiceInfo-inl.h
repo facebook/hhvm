@@ -103,7 +103,9 @@ class RouteHandlesCommandDispatcher {
               host, tree, level);
         },
         [&tree, &level](
-            const AccessPoint& srHost, const RequestClass& /* unused */) {
+            const AccessPoint& srHost,
+            const RequestClass& /* unused */,
+            bool /*stopTraversalByRh*/) {
           tree.append(
               std::string(level, ' ') +
               "host: " + folly::to<std::string>(srHost.getHost()) +

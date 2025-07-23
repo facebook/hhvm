@@ -199,13 +199,14 @@ template <class RouterInfo>
 template <class Request>
 typename std::enable_if<
     ListContains<typename RouterInfo::RoutableRequests, Request>::value,
-    uint64_t>::type
+    std::optional<uint64_t>>::type
 CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
     const Request& req) const {
   assert(mode_ == ThreadMode::AffinitizedRemoteThread);
 
   // Create a traverser
   uint64_t hash = 0;
+  bool skipThreadAffinity{false};
   RouteHandleTraverser<typename RouterInfo::RouteHandleIf> t(
       /* start */
       nullptr,
@@ -222,7 +223,15 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
         return detail::srHostInfoPtrFuncCarbonRouterClient(
             host, requestClass, hash);
       },
-      [&hash](const AccessPoint& srHost, const RequestClass& requestClass) {
+      [&hash, &skipThreadAffinity](
+          const AccessPoint& srHost,
+          const RequestClass& requestClass,
+          bool stopTraversalByRh) {
+        // Skip thread affinity when RH signals stop traversal
+        if (stopTraversalByRh) {
+          skipThreadAffinity = true;
+          return true;
+        }
         if (!requestClass.is(RequestClass::kShadow) &&
             srHost.getTaskId().has_value()) {
           hash = srHost.getTaskId().value();
@@ -236,18 +245,21 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
     auto config = proxies_[proxyIdx_]->getConfigLocked();
     config.second.proxyRoute().traverse(req, t);
   };
-  return hash % proxies_.size();
+  if (skipThreadAffinity) {
+    return std::nullopt;
+  }
+  return std::make_optional(hash % proxies_.size());
 }
 
 template <class RouterInfo>
 template <class Request>
 typename std::enable_if<
     !ListContains<typename RouterInfo::RoutableRequests, Request>::value,
-    uint64_t>::type
+    std::optional<uint64_t>>::type
 CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
     const Request& /* unused */) const {
   assert(mode_ == ThreadMode::AffinitizedRemoteThread);
-  return 0;
+  return std::make_optional(0);
 }
 
 template <class RouterInfo>
@@ -370,9 +382,11 @@ CarbonRouterClient<RouterInfo>::makeProxyRequestContext(
   Proxy<RouterInfo>* proxy = proxies_[proxyIdx_];
   if (mode_ == ThreadMode::AffinitizedRemoteThread) {
     auto idx = findAffinitizedProxyIdx(req);
-    proxy = proxies_[idx];
-    if (inBatch) {
-      proxiesToNotify_[idx] = true;
+    if (idx.has_value()) {
+      proxy = proxies_[idx.value()];
+      if (inBatch) {
+        proxiesToNotify_[idx.value()] = true;
+      }
     }
   }
   auto proxyRequestContext = createProxyRequestContext(

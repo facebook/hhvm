@@ -15,7 +15,6 @@
 #include <fizz/backend/libsodium/LibSodium.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
-#include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
 
 namespace fizz {

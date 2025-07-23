@@ -96,33 +96,4 @@ void HandlerCallback<void>::doDone() {
   sendReply(std::move(queue));
 }
 
-void HandlerCallbackOneWay::done() noexcept {
-#if FOLLY_HAS_COROUTINES
-  if (!shouldProcessServiceInterceptorsOnResponse()) {
-    return;
-  }
-  startOnExecutor(doInvokeServiceInterceptorsOnResponse(sharedFromThis()));
-#endif // FOLLY_HAS_COROUTINES
-}
-
-void HandlerCallbackOneWay::complete(folly::Try<folly::Unit>&& r) noexcept {
-  if (r.hasException()) {
-    exception(std::move(r).exception());
-  } else {
-    done();
-  }
-}
-
-#if FOLLY_HAS_COROUTINES
-/* static */ folly::coro::Task<void>
-HandlerCallbackOneWay::doInvokeServiceInterceptorsOnResponse(Ptr callback) {
-  folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
-      callback->processServiceInterceptorsOnResponse(
-          apache::thrift::util::TypeErasedRef::of<folly::Unit>(folly::unit)));
-  if (onResponseResult.hasException()) {
-    callback->doException(onResponseResult.exception().to_exception_ptr());
-  }
-}
-#endif // FOLLY_HAS_COROUTINES
-
 } // namespace apache::thrift

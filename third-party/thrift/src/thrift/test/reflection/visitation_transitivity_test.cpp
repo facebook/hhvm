@@ -38,7 +38,7 @@ TEST(dep_C_struct, test_transitivity) {
 }
 TEST(union1, test_union) {
   union1 s;
-  s.us_ref() = "foo";
+  s.us() = "foo";
   visit_union(s, [](auto&&, auto&& value) {
     folly::overload(
         [](string& s) { EXPECT_EQ(s, "foo"); },

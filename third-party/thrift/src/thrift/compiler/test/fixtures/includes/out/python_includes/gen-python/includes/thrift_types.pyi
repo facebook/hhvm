@@ -19,6 +19,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 
+@_typing.final
 class Included(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Included):
     MyIntField: _typing.Final[builtins.int] = ...
     MyTransitiveField: _typing.Final[_fbthrift__transitive__thrift_types.Foo] = ...

@@ -19,6 +19,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
 
 
+@_typing.final
 class EchoRequest(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.EchoRequest):
     text: _typing.Final[builtins.str] = ...
     def __init__(
@@ -37,6 +38,7 @@ class EchoRequest(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types
     def _to_py_deprecated(self) -> "service.ttypes.EchoRequest": ...  # type: ignore
 _fbthrift_EchoRequest = EchoRequest
 
+@_typing.final
 class EchoResponse(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.EchoResponse):
     text: _typing.Final[builtins.str] = ...
     def __init__(
@@ -55,6 +57,7 @@ class EchoResponse(_fbthrift_python_types.Struct, _fbthrift_python_abstract_type
     def _to_py_deprecated(self) -> "service.ttypes.EchoResponse": ...  # type: ignore
 _fbthrift_EchoResponse = EchoResponse
 
+@_typing.final
 class WhisperException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.WhisperException):
     message: _typing.Final[builtins.str] = ...
     def __init__(

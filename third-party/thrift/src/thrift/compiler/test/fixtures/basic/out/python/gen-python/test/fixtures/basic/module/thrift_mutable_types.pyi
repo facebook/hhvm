@@ -28,6 +28,7 @@ MyEnum = _fbthrift_MyEnum
 HackEnum = _fbthrift_HackEnum
 
 
+@_typing.final
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def MyIntField(self) -> builtins.int: ...
@@ -106,6 +107,7 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
+@_typing.final
 class Containers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Containers):
     @property
     def I32List(self) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]: ...
@@ -142,6 +144,7 @@ class Containers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
 _fbthrift_Containers = Containers
 
+@_typing.final
 class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
@@ -157,6 +160,7 @@ class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 
+@_typing.final
 class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.MyUnion):
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
@@ -205,6 +209,7 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abst
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 _fbthrift_MyUnion = MyUnion
 
+@_typing.final
 class MyException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.MyException):
     @property
     def MyIntField(self) -> builtins.int: ...
@@ -241,6 +246,7 @@ class MyException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fb
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
 _fbthrift_MyException = MyException
 
+@_typing.final
 class MyExceptionWithMessage(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.MyExceptionWithMessage):
     @property
     def MyIntField(self) -> builtins.int: ...
@@ -277,6 +283,7 @@ class MyExceptionWithMessage(_fbthrift_python_mutable_exceptions.MutableGenerate
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
 _fbthrift_MyExceptionWithMessage = MyExceptionWithMessage
 
+@_typing.final
 class ReservedKeyword(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ReservedKeyword):
     @property
     def reserved_field(self) -> builtins.int: ...
@@ -299,6 +306,7 @@ class ReservedKeyword(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_py
     def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
 _fbthrift_ReservedKeyword = ReservedKeyword
 
+@_typing.final
 class UnionToBeRenamed(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.UnionToBeRenamed):
     @property
     def reserved_field(self) -> builtins.int: ...

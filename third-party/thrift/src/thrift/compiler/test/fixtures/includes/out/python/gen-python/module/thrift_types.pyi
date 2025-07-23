@@ -19,6 +19,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import includes.thrift_types as _fbthrift__includes__thrift_types
 
 
+@_typing.final
 class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStruct):
     MyIncludedField: _typing.Final[_fbthrift__includes__thrift_types.Included] = ...
     MyOtherIncludedField: _typing.Final[_fbthrift__includes__thrift_types.Included] = ...

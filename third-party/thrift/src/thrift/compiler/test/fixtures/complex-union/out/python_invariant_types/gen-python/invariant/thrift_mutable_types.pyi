@@ -21,6 +21,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
+@_typing.final
 class StructForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.StructForInvariantTypes):
     @property
     def num(self) -> builtins.int: ...
@@ -43,6 +44,7 @@ class StructForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbt
     def _to_py_deprecated(self) -> "invariant.ttypes.StructForInvariantTypes": ...  # type: ignore
 _fbthrift_StructForInvariantTypes = StructForInvariantTypes
 
+@_typing.final
 class UnionForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.UnionForInvariantTypes):
     @property
     def num32(self) -> builtins.int: ...
@@ -72,6 +74,7 @@ class UnionForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbth
     def _to_py_deprecated(self) -> "invariant.ttypes.UnionForInvariantTypes": ...  # type: ignore
 _fbthrift_UnionForInvariantTypes = UnionForInvariantTypes
 
+@_typing.final
 class InvariantTypes(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.InvariantTypes):
     @property
     def struct_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_StructForInvariantTypes, builtins.int]: ...

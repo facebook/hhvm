@@ -21,6 +21,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import test.fixtures.basic.module.thrift_mutable_types as _fbthrift__test__fixtures__basic__module__thrift_mutable_types
 
 
+@_typing.final
 class EchoRequest(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.EchoRequest):
     @property
     def text(self) -> builtins.str: ...
@@ -43,6 +44,7 @@ class EchoRequest(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python
     def _to_py_deprecated(self) -> "service.ttypes.EchoRequest": ...  # type: ignore
 _fbthrift_EchoRequest = EchoRequest
 
+@_typing.final
 class EchoResponse(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.EchoResponse):
     @property
     def text(self) -> builtins.str: ...
@@ -65,6 +67,7 @@ class EchoResponse(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "service.ttypes.EchoResponse": ...  # type: ignore
 _fbthrift_EchoResponse = EchoResponse
 
+@_typing.final
 class WhisperException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.WhisperException):
     @property
     def message(self) -> builtins.str: ...

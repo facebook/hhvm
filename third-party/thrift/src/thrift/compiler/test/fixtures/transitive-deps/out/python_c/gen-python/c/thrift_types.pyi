@@ -17,6 +17,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+@_typing.final
 class C(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.C):
     i: _typing.Final[builtins.int] = ...
     def __init__(
@@ -35,6 +36,7 @@ class C(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.C):
     def _to_py_deprecated(self) -> "c.ttypes.C": ...  # type: ignore
 _fbthrift_C = C
 
+@_typing.final
 class E(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.E):
     def __init__(
         self,

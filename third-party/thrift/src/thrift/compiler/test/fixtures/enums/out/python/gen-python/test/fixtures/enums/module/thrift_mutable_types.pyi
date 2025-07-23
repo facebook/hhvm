@@ -36,6 +36,7 @@ MyBitmaskEnum1 = _fbthrift_MyBitmaskEnum1
 MyBitmaskEnum2 = _fbthrift_MyBitmaskEnum2
 
 
+@_typing.final
 class SomeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.SomeStruct):
     @property
     def reasonable(self) -> _fbthrift_Metasyntactic: ...
@@ -79,6 +80,7 @@ class SomeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...  # type: ignore
 _fbthrift_SomeStruct = SomeStruct
 
+@_typing.final
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def me2_3(self) -> _fbthrift_MyEnum2: ...

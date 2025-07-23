@@ -19,6 +19,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import foo.thrift_types as _fbthrift__foo__thrift_types
 
 
+@_typing.final
 class Fields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Fields):
     injected_field: _typing.Final[builtins.str] = ...
     def __init__(
@@ -37,6 +38,7 @@ class Fields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Fiel
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
 
+@_typing.final
 class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
     injected_field: _typing.Final[builtins.str] = ...
     def __init__(
@@ -55,6 +57,7 @@ class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
+@_typing.final
 class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
     injected_field: _typing.Final[builtins.str] = ...
     string_field: _typing.Final[builtins.str] = ...
@@ -76,6 +79,7 @@ class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
+@_typing.final
 class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
     injected_unstructured_annotation_field: _typing.Final[_typing.Optional[builtins.str]] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[builtins.str]] = ...

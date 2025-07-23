@@ -26,6 +26,7 @@ from module.thrift_enums import (
 MyEnum = _fbthrift_MyEnum
 
 
+@_typing.final
 class MyStructFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStructFloatFieldThrowExp):
     @property
     def myLongField(self) -> builtins.int: ...
@@ -69,6 +70,7 @@ class MyStructFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableStruct, _
     def _to_py_deprecated(self) -> "module.ttypes.MyStructFloatFieldThrowExp": ...  # type: ignore
 _fbthrift_MyStructFloatFieldThrowExp = MyStructFloatFieldThrowExp
 
+@_typing.final
 class MyStructMapFloatThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStructMapFloatThrowExp):
     @property
     def myLongField(self) -> builtins.int: ...
@@ -98,6 +100,7 @@ class MyStructMapFloatThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fb
     def _to_py_deprecated(self) -> "module.ttypes.MyStructMapFloatThrowExp": ...  # type: ignore
 _fbthrift_MyStructMapFloatThrowExp = MyStructMapFloatThrowExp
 
+@_typing.final
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def MyIntField(self) -> builtins.int: ...
@@ -309,6 +312,7 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
+@_typing.final
 class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.SimpleStruct):
     @property
     def age(self) -> builtins.int: ...
@@ -338,6 +342,7 @@ class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
 
+@_typing.final
 class defaultStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.defaultStruct):
     @property
     def myLongDFset(self) -> builtins.int: ...
@@ -507,6 +512,7 @@ class defaultStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.defaultStruct": ...  # type: ignore
 _fbthrift_defaultStruct = defaultStruct
 
+@_typing.final
 class MyStructTypeDef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStructTypeDef):
     @property
     def myLongField(self) -> builtins.int: ...
@@ -585,6 +591,7 @@ class MyStructTypeDef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_py
     def _to_py_deprecated(self) -> "module.ttypes.MyStructTypeDef": ...  # type: ignore
 _fbthrift_MyStructTypeDef = MyStructTypeDef
 
+@_typing.final
 class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
@@ -600,6 +607,7 @@ class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 
+@_typing.final
 class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.MyUnion):
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
@@ -662,6 +670,7 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abst
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 _fbthrift_MyUnion = MyUnion
 
+@_typing.final
 class MyUnionFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp):
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
@@ -710,6 +719,7 @@ class MyUnionFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableUnion, _fb
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionFloatFieldThrowExp": ...  # type: ignore
 _fbthrift_MyUnionFloatFieldThrowExp = MyUnionFloatFieldThrowExp
 
+@_typing.final
 class ComplexNestedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ComplexNestedStruct):
     @property
     def setOfSetOfInt(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_python_mutable_containers.MutableSet[builtins.int]]: ...
@@ -851,6 +861,7 @@ class ComplexNestedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrif
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedStruct": ...  # type: ignore
 _fbthrift_ComplexNestedStruct = ComplexNestedStruct
 
+@_typing.final
 class TypeRemapped(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TypeRemapped):
     @property
     def lsMap(self) -> _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]: ...
@@ -894,6 +905,7 @@ class TypeRemapped(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.TypeRemapped": ...  # type: ignore
 _fbthrift_TypeRemapped = TypeRemapped
 
+@_typing.final
 class emptyXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.emptyXcep):
     def __init__(
         self,
@@ -906,6 +918,7 @@ class emptyXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbth
     def _to_py_deprecated(self) -> "module.ttypes.emptyXcep": ...  # type: ignore
 _fbthrift_emptyXcep = emptyXcep
 
+@_typing.final
 class reqXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.reqXcep):
     @property
     def message(self) -> builtins.str: ...
@@ -930,6 +943,7 @@ class reqXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthri
     def _to_py_deprecated(self) -> "module.ttypes.reqXcep": ...  # type: ignore
 _fbthrift_reqXcep = reqXcep
 
+@_typing.final
 class optXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.optXcep):
     @property
     def message(self) -> _typing.Optional[builtins.str]: ...
@@ -954,6 +968,7 @@ class optXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthri
     def _to_py_deprecated(self) -> "module.ttypes.optXcep": ...  # type: ignore
 _fbthrift_optXcep = optXcep
 
+@_typing.final
 class complexException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.complexException):
     @property
     def message(self) -> builtins.str: ...
@@ -1002,6 +1017,7 @@ class complexException(_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore
 _fbthrift_complexException = complexException
 
+@_typing.final
 class Containers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Containers):
     @property
     def struct_list(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyStruct]: ...

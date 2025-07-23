@@ -18,6 +18,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import my
 
 
+@_typing.final
 class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types._fbthrift_unadapted_AnnotationWithContainers):
     names: _typing.Final[_typing.Sequence[builtins.str]] = ...
     counts: _typing.Final[_typing.Mapping[builtins.str, builtins.int]] = ...
@@ -40,6 +41,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_types.Struct
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
 _fbthrift_AnnotationWithContainers = AnnotationWithContainers
 
+@_typing.final
 class _fbthrift_unadapted_MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types._fbthrift_unadapted_MyStruct):
     abc: _typing.Final[my.AdaptedType[builtins.int]] = ...
     def __init__(

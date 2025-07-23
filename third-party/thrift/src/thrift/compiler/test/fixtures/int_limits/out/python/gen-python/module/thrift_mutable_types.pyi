@@ -19,6 +19,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
+@_typing.final
 class Limits(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Limits):
     @property
     def max_i64_field(self) -> builtins.int: ...

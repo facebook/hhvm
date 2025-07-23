@@ -21,6 +21,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import transitive.thrift_mutable_types as _fbthrift__transitive__thrift_mutable_types
 
 
+@_typing.final
 class Included(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Included):
     @property
     def MyIntField(self) -> builtins.int: ...

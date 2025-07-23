@@ -19,6 +19,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+@_typing.final
 class StructForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.StructForInvariantTypes):
     num: _typing.Final[builtins.int] = ...
     def __init__(
@@ -37,6 +38,7 @@ class StructForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "invariant.ttypes.StructForInvariantTypes": ...  # type: ignore
 _fbthrift_StructForInvariantTypes = StructForInvariantTypes
 
+@_typing.final
 class UnionForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.UnionForInvariantTypes):
     num32: _typing.Final[builtins.int] = ...
     num64: _typing.Final[builtins.int] = ...
@@ -58,6 +60,7 @@ class UnionForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "invariant.ttypes.UnionForInvariantTypes": ...  # type: ignore
 _fbthrift_UnionForInvariantTypes = UnionForInvariantTypes
 
+@_typing.final
 class InvariantTypes(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.InvariantTypes):
     struct_map: _typing.Final[_typing.Mapping[_fbthrift_StructForInvariantTypes, builtins.int]] = ...
     union_map: _typing.Final[_typing.Mapping[_fbthrift_UnionForInvariantTypes, builtins.int]] = ...

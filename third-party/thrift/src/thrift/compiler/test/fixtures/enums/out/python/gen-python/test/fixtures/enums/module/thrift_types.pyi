@@ -34,6 +34,7 @@ MyBitmaskEnum1 = _fbthrift_MyBitmaskEnum1
 MyBitmaskEnum2 = _fbthrift_MyBitmaskEnum2
 
 
+@_typing.final
 class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.SomeStruct):
     reasonable: _typing.Final[_fbthrift_Metasyntactic] = ...
     fine: _typing.Final[_fbthrift_Metasyntactic] = ...
@@ -61,6 +62,7 @@ class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.
     def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...  # type: ignore
 _fbthrift_SomeStruct = SomeStruct
 
+@_typing.final
 class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStruct):
     me2_3: _typing.Final[_fbthrift_MyEnum2] = ...
     me3_n3: _typing.Final[_fbthrift_MyEnum3] = ...

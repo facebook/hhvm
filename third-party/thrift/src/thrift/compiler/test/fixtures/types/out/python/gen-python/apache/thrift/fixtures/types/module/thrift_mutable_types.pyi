@@ -30,6 +30,7 @@ is_unscoped = _fbthrift_is_unscoped
 MyForwardRefEnum = _fbthrift_MyForwardRefEnum
 
 
+@_typing.final
 class empty_struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.empty_struct):
     def __init__(
         self,
@@ -45,6 +46,7 @@ class empty_struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.empty_struct": ...  # type: ignore
 _fbthrift_empty_struct = empty_struct
 
+@_typing.final
 class decorated_struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.decorated_struct):
     @property
     def field(self) -> builtins.str: ...
@@ -67,6 +69,7 @@ class decorated_struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_p
     def _to_py_deprecated(self) -> "module.ttypes.decorated_struct": ...  # type: ignore
 _fbthrift_decorated_struct = decorated_struct
 
+@_typing.final
 class ContainerStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ContainerStruct):
     @property
     def fieldB(self) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]: ...
@@ -138,6 +141,7 @@ class ContainerStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_py
     def _to_py_deprecated(self) -> "module.ttypes.ContainerStruct": ...  # type: ignore
 _fbthrift_ContainerStruct = ContainerStruct
 
+@_typing.final
 class CppTypeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CppTypeStruct):
     @property
     def fieldA(self) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]: ...
@@ -160,6 +164,7 @@ class CppTypeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.CppTypeStruct": ...  # type: ignore
 _fbthrift_CppTypeStruct = CppTypeStruct
 
+@_typing.final
 class VirtualStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.VirtualStruct):
     @property
     def MyIntField(self) -> builtins.int: ...
@@ -182,6 +187,7 @@ class VirtualStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.VirtualStruct": ...  # type: ignore
 _fbthrift_VirtualStruct = VirtualStruct
 
+@_typing.final
 class MyStructWithForwardRefEnum(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStructWithForwardRefEnum):
     @property
     def a(self) -> _fbthrift_MyForwardRefEnum: ...
@@ -211,6 +217,7 @@ class MyStructWithForwardRefEnum(_fbthrift_python_mutable_types.MutableStruct, _
     def _to_py_deprecated(self) -> "module.ttypes.MyStructWithForwardRefEnum": ...  # type: ignore
 _fbthrift_MyStructWithForwardRefEnum = MyStructWithForwardRefEnum
 
+@_typing.final
 class TrivialNumeric(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TrivialNumeric):
     @property
     def a(self) -> builtins.int: ...
@@ -240,6 +247,7 @@ class TrivialNumeric(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyt
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNumeric": ...  # type: ignore
 _fbthrift_TrivialNumeric = TrivialNumeric
 
+@_typing.final
 class TrivialNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TrivialNestedWithDefault):
     @property
     def z(self) -> builtins.int: ...
@@ -269,6 +277,7 @@ class TrivialNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fb
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNestedWithDefault": ...  # type: ignore
 _fbthrift_TrivialNestedWithDefault = TrivialNestedWithDefault
 
+@_typing.final
 class ComplexString(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ComplexString):
     @property
     def a(self) -> builtins.str: ...
@@ -298,6 +307,7 @@ class ComplexString(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.ComplexString": ...  # type: ignore
 _fbthrift_ComplexString = ComplexString
 
+@_typing.final
 class ComplexNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ComplexNestedWithDefault):
     @property
     def z(self) -> builtins.str: ...
@@ -327,6 +337,7 @@ class ComplexNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fb
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedWithDefault": ...  # type: ignore
 _fbthrift_ComplexNestedWithDefault = ComplexNestedWithDefault
 
+@_typing.final
 class MinPadding(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MinPadding):
     @property
     def small(self) -> builtins.int: ...
@@ -377,6 +388,7 @@ class MinPadding(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.MinPadding": ...  # type: ignore
 _fbthrift_MinPadding = MinPadding
 
+@_typing.final
 class MinPaddingWithCustomType(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MinPaddingWithCustomType):
     @property
     def small(self) -> builtins.int: ...
@@ -427,6 +439,7 @@ class MinPaddingWithCustomType(_fbthrift_python_mutable_types.MutableStruct, _fb
     def _to_py_deprecated(self) -> "module.ttypes.MinPaddingWithCustomType": ...  # type: ignore
 _fbthrift_MinPaddingWithCustomType = MinPaddingWithCustomType
 
+@_typing.final
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def MyIntField(self) -> builtins.int: ...
@@ -470,6 +483,7 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
+@_typing.final
 class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
@@ -485,6 +499,7 @@ class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 
+@_typing.final
 class Renaming(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Renaming):
     @property
     def foo(self) -> builtins.int: ...
@@ -507,6 +522,7 @@ class Renaming(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.Renaming": ...  # type: ignore
 _fbthrift_Renaming = Renaming
 
+@_typing.final
 class AnnotatedTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AnnotatedTypes):
     @property
     def binary_field(self) -> builtins.bytes: ...
@@ -536,6 +552,7 @@ class AnnotatedTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyt
     def _to_py_deprecated(self) -> "module.ttypes.AnnotatedTypes": ...  # type: ignore
 _fbthrift_AnnotatedTypes = AnnotatedTypes
 
+@_typing.final
 class ForwardUsageRoot(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ForwardUsageRoot):
     @property
     def ForwardUsageStruct(self) -> _typing.Optional[_fbthrift_ForwardUsageStruct]: ...
@@ -565,6 +582,7 @@ class ForwardUsageRoot(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_p
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageRoot": ...  # type: ignore
 _fbthrift_ForwardUsageRoot = ForwardUsageRoot
 
+@_typing.final
 class ForwardUsageStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ForwardUsageStruct):
     @property
     def foo(self) -> _typing.Optional[_fbthrift_ForwardUsageRoot]: ...
@@ -587,6 +605,7 @@ class ForwardUsageStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageStruct": ...  # type: ignore
 _fbthrift_ForwardUsageStruct = ForwardUsageStruct
 
+@_typing.final
 class ForwardUsageByRef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ForwardUsageByRef):
     @property
     def foo(self) -> _typing.Optional[_fbthrift_ForwardUsageRoot]: ...
@@ -609,6 +628,7 @@ class ForwardUsageByRef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageByRef": ...  # type: ignore
 _fbthrift_ForwardUsageByRef = ForwardUsageByRef
 
+@_typing.final
 class IncompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IncompleteMap):
     @property
     def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[builtins.int, _fbthrift_IncompleteMapDep]]: ...
@@ -631,6 +651,7 @@ class IncompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMap": ...  # type: ignore
 _fbthrift_IncompleteMap = IncompleteMap
 
+@_typing.final
 class IncompleteMapDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IncompleteMapDep):
     def __init__(
         self,
@@ -646,6 +667,7 @@ class IncompleteMapDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_p
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMapDep": ...  # type: ignore
 _fbthrift_IncompleteMapDep = IncompleteMapDep
 
+@_typing.final
 class CompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CompleteMap):
     @property
     def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[builtins.int, _fbthrift_CompleteMapDep]]: ...
@@ -668,6 +690,7 @@ class CompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMap": ...  # type: ignore
 _fbthrift_CompleteMap = CompleteMap
 
+@_typing.final
 class CompleteMapDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CompleteMapDep):
     def __init__(
         self,
@@ -683,6 +706,7 @@ class CompleteMapDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyt
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMapDep": ...  # type: ignore
 _fbthrift_CompleteMapDep = CompleteMapDep
 
+@_typing.final
 class IncompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IncompleteList):
     @property
     def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_IncompleteListDep]]: ...
@@ -705,6 +729,7 @@ class IncompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyt
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteList": ...  # type: ignore
 _fbthrift_IncompleteList = IncompleteList
 
+@_typing.final
 class IncompleteListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IncompleteListDep):
     def __init__(
         self,
@@ -720,6 +745,7 @@ class IncompleteListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteListDep": ...  # type: ignore
 _fbthrift_IncompleteListDep = IncompleteListDep
 
+@_typing.final
 class CompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CompleteList):
     @property
     def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_CompleteListDep]]: ...
@@ -742,6 +768,7 @@ class CompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.CompleteList": ...  # type: ignore
 _fbthrift_CompleteList = CompleteList
 
+@_typing.final
 class CompleteListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CompleteListDep):
     def __init__(
         self,
@@ -757,6 +784,7 @@ class CompleteListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_py
     def _to_py_deprecated(self) -> "module.ttypes.CompleteListDep": ...  # type: ignore
 _fbthrift_CompleteListDep = CompleteListDep
 
+@_typing.final
 class AdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AdaptedList):
     @property
     def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_AdaptedListDep]]: ...
@@ -779,6 +807,7 @@ class AdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedList": ...  # type: ignore
 _fbthrift_AdaptedList = AdaptedList
 
+@_typing.final
 class AdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AdaptedListDep):
     @property
     def field(self) -> _fbthrift_AdaptedList: ...
@@ -801,6 +830,7 @@ class AdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyt
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedListDep": ...  # type: ignore
 _fbthrift_AdaptedListDep = AdaptedListDep
 
+@_typing.final
 class DependentAdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.DependentAdaptedList):
     @property
     def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_DependentAdaptedListDep]]: ...
@@ -823,6 +853,7 @@ class DependentAdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthri
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedList": ...  # type: ignore
 _fbthrift_DependentAdaptedList = DependentAdaptedList
 
+@_typing.final
 class DependentAdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.DependentAdaptedListDep):
     @property
     def field(self) -> _typing.Optional[builtins.int]: ...
@@ -845,6 +876,7 @@ class DependentAdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbt
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedListDep": ...  # type: ignore
 _fbthrift_DependentAdaptedListDep = DependentAdaptedListDep
 
+@_typing.final
 class AllocatorAware(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AllocatorAware):
     @property
     def aa_list(self) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]: ...
@@ -909,6 +941,7 @@ class AllocatorAware(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyt
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware": ...  # type: ignore
 _fbthrift_AllocatorAware = AllocatorAware
 
+@_typing.final
 class AllocatorAware2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AllocatorAware2):
     @property
     def not_a_container(self) -> builtins.int: ...
@@ -938,6 +971,7 @@ class AllocatorAware2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_py
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware2": ...  # type: ignore
 _fbthrift_AllocatorAware2 = AllocatorAware2
 
+@_typing.final
 class TypedefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TypedefStruct):
     @property
     def i32_field(self) -> builtins.int: ...
@@ -974,6 +1008,7 @@ class TypedefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.TypedefStruct": ...  # type: ignore
 _fbthrift_TypedefStruct = TypedefStruct
 
+@_typing.final
 class StructWithDoubleUnderscores(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.StructWithDoubleUnderscores):
     @property
     def _StructWithDoubleUnderscores__field(self) -> builtins.int: ...

@@ -19,6 +19,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
+@_typing.final
 class TemplateLists(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TemplateLists):
     @property
     def std_string(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[builtins.str]]: ...
@@ -69,6 +70,7 @@ class TemplateLists(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateLists": ...  # type: ignore
 _fbthrift_TemplateLists = TemplateLists
 
+@_typing.final
 class TemplateSets(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TemplateSets):
     @property
     def std_set(self) -> _fbthrift_python_mutable_containers.MutableSet[builtins.str]: ...
@@ -133,6 +135,7 @@ class TemplateSets(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateSets": ...  # type: ignore
 _fbthrift_TemplateSets = TemplateSets
 
+@_typing.final
 class TemplateMaps(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TemplateMaps):
     @property
     def std_map(self) -> _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str]: ...
@@ -197,6 +200,7 @@ class TemplateMaps(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateMaps": ...  # type: ignore
 _fbthrift_TemplateMaps = TemplateMaps
 
+@_typing.final
 class TWrapped(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TWrapped):
     @property
     def fieldA(self) -> builtins.str: ...
@@ -226,6 +230,7 @@ class TWrapped(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "containers.ttypes.TWrapped": ...  # type: ignore
 _fbthrift_TWrapped = TWrapped
 
+@_typing.final
 class IndirectionA(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IndirectionA):
     @property
     def lst(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]: ...
@@ -248,6 +253,7 @@ class IndirectionA(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "containers.ttypes.IndirectionA": ...  # type: ignore
 _fbthrift_IndirectionA = IndirectionA
 
+@_typing.final
 class IndirectionB(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IndirectionB):
     @property
     def lst(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]: ...
@@ -270,6 +276,7 @@ class IndirectionB(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "containers.ttypes.IndirectionB": ...  # type: ignore
 _fbthrift_IndirectionB = IndirectionB
 
+@_typing.final
 class IndirectionC(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IndirectionC):
     @property
     def lst(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]: ...

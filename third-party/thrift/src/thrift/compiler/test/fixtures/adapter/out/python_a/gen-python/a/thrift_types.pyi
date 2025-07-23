@@ -24,6 +24,7 @@ import typeshed_two
 import typeshed_one
 
 
+@_typing.final
 class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStruct):
     a: _typing.Final[typeshed_one.AdapterOneType[_fbthrift__b__thrift_types._fbthrift_unadapted_B]] = ...
     b: _typing.Final[typeshed_three.AdapterThreeType[_fbthrift__c__thrift_types._fbthrift_unadapted_C1]] = ...

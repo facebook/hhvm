@@ -21,6 +21,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import includes.thrift_mutable_types as _fbthrift__includes__thrift_mutable_types
 
 
+@_typing.final
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def MyIncludedField(self) -> _fbthrift__includes__thrift_mutable_types.Included: ...

@@ -19,6 +19,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
+@_typing.final
 class Mixin1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Mixin1):
     @property
     def field1(self) -> builtins.str: ...
@@ -41,6 +42,7 @@ class Mixin1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abst
     def _to_py_deprecated(self) -> "module.ttypes.Mixin1": ...  # type: ignore
 _fbthrift_Mixin1 = Mixin1
 
+@_typing.final
 class Mixin2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Mixin2):
     @property
     def m1(self) -> _fbthrift_Mixin1: ...
@@ -70,6 +72,7 @@ class Mixin2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abst
     def _to_py_deprecated(self) -> "module.ttypes.Mixin2": ...  # type: ignore
 _fbthrift_Mixin2 = Mixin2
 
+@_typing.final
 class Mixin3Base(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Mixin3Base):
     @property
     def field3(self) -> builtins.str: ...
@@ -92,6 +95,7 @@ class Mixin3Base(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.Mixin3Base": ...  # type: ignore
 _fbthrift_Mixin3Base = Mixin3Base
 
+@_typing.final
 class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Foo):
     @property
     def field4(self) -> builtins.str: ...

@@ -17,6 +17,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+@_typing.final
 class Foo(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Foo):
     MyInt: _typing.Final[builtins.int] = ...
     def __init__(

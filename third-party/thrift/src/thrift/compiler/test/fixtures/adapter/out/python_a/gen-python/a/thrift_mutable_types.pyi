@@ -26,6 +26,7 @@ import typeshed_two
 import typeshed_one
 
 
+@_typing.final
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def a(self) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B]: ...

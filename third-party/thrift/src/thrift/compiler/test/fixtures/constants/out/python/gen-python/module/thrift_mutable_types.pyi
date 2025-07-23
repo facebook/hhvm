@@ -30,6 +30,7 @@ City = _fbthrift_City
 Company = _fbthrift_Company
 
 
+@_typing.final
 class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Internship):
     @property
     def weeks(self) -> builtins.int: ...
@@ -80,6 +81,7 @@ class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.Internship": ...  # type: ignore
 _fbthrift_Internship = Internship
 
+@_typing.final
 class Range(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Range):
     @property
     def min(self) -> builtins.int: ...
@@ -109,6 +111,7 @@ class Range(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstr
     def _to_py_deprecated(self) -> "module.ttypes.Range": ...  # type: ignore
 _fbthrift_Range = Range
 
+@_typing.final
 class struct1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.struct1):
     @property
     def a(self) -> builtins.int: ...
@@ -138,6 +141,7 @@ class struct1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "module.ttypes.struct1": ...  # type: ignore
 _fbthrift_struct1 = struct1
 
+@_typing.final
 class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.struct2):
     @property
     def a(self) -> builtins.int: ...
@@ -181,6 +185,7 @@ class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "module.ttypes.struct2": ...  # type: ignore
 _fbthrift_struct2 = struct2
 
+@_typing.final
 class struct3(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.struct3):
     @property
     def a(self) -> builtins.str: ...
@@ -217,6 +222,7 @@ class struct3(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "module.ttypes.struct3": ...  # type: ignore
 _fbthrift_struct3 = struct3
 
+@_typing.final
 class struct4(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.struct4):
     @property
     def a(self) -> builtins.int: ...
@@ -253,6 +259,7 @@ class struct4(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "module.ttypes.struct4": ...  # type: ignore
 _fbthrift_struct4 = struct4
 
+@_typing.final
 class union1(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.union1):
     @property
     def i(self) -> builtins.int: ...
@@ -287,6 +294,7 @@ class union1(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstr
     def _to_py_deprecated(self) -> "module.ttypes.union1": ...  # type: ignore
 _fbthrift_union1 = union1
 
+@_typing.final
 class union2(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.union2):
     @property
     def i(self) -> builtins.int: ...

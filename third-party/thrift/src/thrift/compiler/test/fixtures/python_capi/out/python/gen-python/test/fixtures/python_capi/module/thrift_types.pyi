@@ -34,6 +34,7 @@ MyEnum = _fbthrift_MyEnum
 AnnoyingEnum = _fbthrift_AnnoyingEnum
 
 
+@_typing.final
 class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStruct):
     inty: _typing.Final[builtins.int] = ...
     stringy: _typing.Final[builtins.str] = ...
@@ -73,6 +74,7 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.My
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
+@_typing.final
 class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyDataItem):
     s: _typing.Final[builtins.str] = ...
     def __init__(
@@ -91,6 +93,7 @@ class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 
+@_typing.final
 class TransitiveDoubler(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TransitiveDoubler):
     def __init__(
         self,
@@ -106,6 +109,7 @@ class TransitiveDoubler(_fbthrift_python_types.Struct, _fbthrift_python_abstract
     def _to_py_deprecated(self) -> "module.ttypes.TransitiveDoubler": ...  # type: ignore
 _fbthrift_TransitiveDoubler = TransitiveDoubler
 
+@_typing.final
 class DoubledPair(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.DoubledPair):
     s: _typing.Final[builtins.str] = ...
     x: _typing.Final[builtins.int] = ...
@@ -127,6 +131,7 @@ class DoubledPair(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types
     def _to_py_deprecated(self) -> "module.ttypes.DoubledPair": ...  # type: ignore
 _fbthrift_DoubledPair = DoubledPair
 
+@_typing.final
 class StringPair(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.StringPair):
     normal: _typing.Final[builtins.str] = ...
     doubled: _typing.Final[builtins.str] = ...
@@ -148,6 +153,7 @@ class StringPair(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.
     def _to_py_deprecated(self) -> "module.ttypes.StringPair": ...  # type: ignore
 _fbthrift_StringPair = StringPair
 
+@_typing.final
 class EmptyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.EmptyStruct):
     def __init__(
         self,
@@ -163,6 +169,7 @@ class EmptyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types
     def _to_py_deprecated(self) -> "module.ttypes.EmptyStruct": ...  # type: ignore
 _fbthrift_EmptyStruct = EmptyStruct
 
+@_typing.final
 class PrimitiveStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.PrimitiveStruct):
     booly: _typing.Final[builtins.bool] = ...
     charry: _typing.Final[builtins.int] = ...
@@ -226,6 +233,7 @@ class PrimitiveStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_t
     def _to_py_deprecated(self) -> "module.ttypes.PrimitiveStruct": ...  # type: ignore
 _fbthrift_PrimitiveStruct = PrimitiveStruct
 
+@_typing.final
 class AdaptedFields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.AdaptedFields):
     adapted_int: _typing.Final[builtins.int] = ...
     list_adapted_int: _typing.Final[_typing.Sequence[builtins.int]] = ...
@@ -253,6 +261,7 @@ class AdaptedFields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_typ
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedFields": ...  # type: ignore
 _fbthrift_AdaptedFields = AdaptedFields
 
+@_typing.final
 class ListStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.ListStruct):
     boolz: _typing.Final[_typing.Sequence[builtins.bool]] = ...
     intz: _typing.Final[_typing.Optional[_typing.Sequence[builtins.int]]] = ...
@@ -295,6 +304,7 @@ class ListStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.
     def _to_py_deprecated(self) -> "module.ttypes.ListStruct": ...  # type: ignore
 _fbthrift_ListStruct = ListStruct
 
+@_typing.final
 class SetStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.SetStruct):
     enumz: _typing.Final[_typing.AbstractSet[_fbthrift_MyEnum]] = ...
     intz: _typing.Final[_typing.Optional[_typing.AbstractSet[builtins.int]]] = ...
@@ -331,6 +341,7 @@ class SetStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.S
     def _to_py_deprecated(self) -> "module.ttypes.SetStruct": ...  # type: ignore
 _fbthrift_SetStruct = SetStruct
 
+@_typing.final
 class MapStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MapStruct):
     enumz: _typing.Final[_typing.Mapping[_fbthrift_MyEnum, builtins.str]] = ...
     intz: _typing.Final[_typing.Optional[_typing.Mapping[builtins.int, builtins.str]]] = ...
@@ -376,6 +387,7 @@ class MapStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.M
     def _to_py_deprecated(self) -> "module.ttypes.MapStruct": ...  # type: ignore
 _fbthrift_MapStruct = MapStruct
 
+@_typing.final
 class ComposeStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.ComposeStruct):
     enum_: _typing.Final[_fbthrift_MyEnum] = ...
     renamed_: _typing.Final[_fbthrift_AnnoyingEnum] = ...
@@ -421,6 +433,7 @@ class ComposeStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_typ
     def _to_py_deprecated(self) -> "module.ttypes.ComposeStruct": ...  # type: ignore
 _fbthrift_ComposeStruct = ComposeStruct
 
+@_typing.final
 class Onion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.Onion):
     myEnum: _typing.Final[_fbthrift_MyEnum] = ...
     myStruct: _typing.Final[_fbthrift_PrimitiveStruct] = ...
@@ -474,6 +487,7 @@ class Onion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.Onion)
     def _to_py_deprecated(self) -> "module.ttypes.Onion": ...  # type: ignore
 _fbthrift_Onion = Onion
 
+@_typing.final
 class SomeBinary(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.SomeBinary):
     iobuf: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
     iobuf_ptr: _typing.Final[_fbthrift_iobuf.IOBuf] = ...

@@ -19,6 +19,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
+@_typing.final
 class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.Fiery):
     @property
     def message(self) -> builtins.str: ...
@@ -37,6 +38,7 @@ class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 _fbthrift_Fiery = Fiery
 
+@_typing.final
 class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.Serious):
     @property
     def not_sonnet(self) -> _typing.Optional[builtins.str]: ...
@@ -55,6 +57,7 @@ class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthri
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 _fbthrift_Serious = Serious
 
+@_typing.final
 class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.ComplexFieldNames):
     @property
     def error_message(self) -> builtins.str: ...
@@ -79,6 +82,7 @@ class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedErro
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 _fbthrift_ComplexFieldNames = ComplexFieldNames
 
+@_typing.final
 class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.CustomFieldNames):
     @property
     def error_message(self) -> builtins.str: ...
@@ -103,6 +107,7 @@ class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 _fbthrift_CustomFieldNames = CustomFieldNames
 
+@_typing.final
 class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.ExceptionWithPrimitiveField):
     @property
     def message(self) -> builtins.str: ...
@@ -127,6 +132,7 @@ class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGen
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 _fbthrift_ExceptionWithPrimitiveField = ExceptionWithPrimitiveField
 
+@_typing.final
 class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.ExceptionWithStructuredAnnotation):
     @property
     def message_field(self) -> builtins.str: ...
@@ -151,6 +157,7 @@ class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.Muta
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
 _fbthrift_ExceptionWithStructuredAnnotation = ExceptionWithStructuredAnnotation
 
+@_typing.final
 class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.Banal):
     def __init__(
         self,

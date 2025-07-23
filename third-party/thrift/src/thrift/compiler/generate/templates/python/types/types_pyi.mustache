@@ -53,6 +53,7 @@ import {{module_path}}
 {{#program:structs}}
 
 
+@_typing.final
 class {{> structs/unadapted_name}}({{!
         }}{{#struct:union?}}{{> types/union_base }}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!

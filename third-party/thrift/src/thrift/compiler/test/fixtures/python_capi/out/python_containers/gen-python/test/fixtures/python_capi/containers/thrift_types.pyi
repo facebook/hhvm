@@ -17,6 +17,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+@_typing.final
 class TemplateLists(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TemplateLists):
     std_string: _typing.Final[_typing.Optional[_typing.Sequence[builtins.str]]] = ...
     deque_string: _typing.Final[_typing.Sequence[builtins.bytes]] = ...
@@ -47,6 +48,7 @@ class TemplateLists(_fbthrift_python_types.Struct, _fbthrift_python_abstract_typ
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateLists": ...  # type: ignore
 _fbthrift_TemplateLists = TemplateLists
 
+@_typing.final
 class TemplateSets(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TemplateSets):
     std_set: _typing.Final[_typing.AbstractSet[builtins.str]] = ...
     std_unordered: _typing.Final[_typing.AbstractSet[builtins.str]] = ...
@@ -83,6 +85,7 @@ class TemplateSets(_fbthrift_python_types.Struct, _fbthrift_python_abstract_type
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateSets": ...  # type: ignore
 _fbthrift_TemplateSets = TemplateSets
 
+@_typing.final
 class TemplateMaps(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TemplateMaps):
     std_map: _typing.Final[_typing.Mapping[builtins.str, builtins.str]] = ...
     std_unordered: _typing.Final[_typing.Mapping[builtins.str, builtins.str]] = ...
@@ -119,6 +122,7 @@ class TemplateMaps(_fbthrift_python_types.Struct, _fbthrift_python_abstract_type
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateMaps": ...  # type: ignore
 _fbthrift_TemplateMaps = TemplateMaps
 
+@_typing.final
 class TWrapped(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TWrapped):
     fieldA: _typing.Final[builtins.str] = ...
     fieldB: _typing.Final[builtins.bytes] = ...
@@ -140,6 +144,7 @@ class TWrapped(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TW
     def _to_py_deprecated(self) -> "containers.ttypes.TWrapped": ...  # type: ignore
 _fbthrift_TWrapped = TWrapped
 
+@_typing.final
 class IndirectionA(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.IndirectionA):
     lst: _typing.Final[_typing.Sequence[_fbthrift_TWrapped]] = ...
     def __init__(
@@ -158,6 +163,7 @@ class IndirectionA(_fbthrift_python_types.Struct, _fbthrift_python_abstract_type
     def _to_py_deprecated(self) -> "containers.ttypes.IndirectionA": ...  # type: ignore
 _fbthrift_IndirectionA = IndirectionA
 
+@_typing.final
 class IndirectionB(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.IndirectionB):
     lst: _typing.Final[_typing.Sequence[_fbthrift_TWrapped]] = ...
     def __init__(
@@ -176,6 +182,7 @@ class IndirectionB(_fbthrift_python_types.Struct, _fbthrift_python_abstract_type
     def _to_py_deprecated(self) -> "containers.ttypes.IndirectionB": ...  # type: ignore
 _fbthrift_IndirectionB = IndirectionB
 
+@_typing.final
 class IndirectionC(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.IndirectionC):
     lst: _typing.Final[_typing.Sequence[_fbthrift_TWrapped]] = ...
     def __init__(

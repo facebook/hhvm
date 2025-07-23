@@ -21,6 +21,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
+@_typing.final
 class ComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.ComplexUnion):
     @property
     def intValue(self) -> builtins.int: ...
@@ -83,6 +84,7 @@ class ComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python
     def _to_py_deprecated(self) -> "module.ttypes.ComplexUnion": ...  # type: ignore
 _fbthrift_ComplexUnion = ComplexUnion
 
+@_typing.final
 class ListUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.ListUnion):
     @property
     def intListValue(self) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]: ...
@@ -117,6 +119,7 @@ class ListUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.ListUnion": ...  # type: ignore
 _fbthrift_ListUnion = ListUnion
 
+@_typing.final
 class DataUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.DataUnion):
     @property
     def binaryData(self) -> builtins.bytes: ...
@@ -151,6 +154,7 @@ class DataUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.DataUnion": ...  # type: ignore
 _fbthrift_DataUnion = DataUnion
 
+@_typing.final
 class Val(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Val):
     @property
     def strVal(self) -> builtins.str: ...
@@ -187,6 +191,7 @@ class Val(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstrac
     def _to_py_deprecated(self) -> "module.ttypes.Val": ...  # type: ignore
 _fbthrift_Val = Val
 
+@_typing.final
 class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.ValUnion):
     @property
     def v1(self) -> _fbthrift_Val: ...
@@ -221,6 +226,7 @@ class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abs
     def _to_py_deprecated(self) -> "module.ttypes.ValUnion": ...  # type: ignore
 _fbthrift_ValUnion = ValUnion
 
+@_typing.final
 class VirtualComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.VirtualComplexUnion):
     @property
     def thingOne(self) -> builtins.str: ...
@@ -255,6 +261,7 @@ class VirtualComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift
     def _to_py_deprecated(self) -> "module.ttypes.VirtualComplexUnion": ...  # type: ignore
 _fbthrift_VirtualComplexUnion = VirtualComplexUnion
 
+@_typing.final
 class NonCopyableStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.NonCopyableStruct):
     @property
     def num(self) -> builtins.int: ...
@@ -277,6 +284,7 @@ class NonCopyableStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableStruct": ...  # type: ignore
 _fbthrift_NonCopyableStruct = NonCopyableStruct
 
+@_typing.final
 class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.NonCopyableUnion):
     @property
     def s(self) -> _fbthrift_NonCopyableStruct: ...

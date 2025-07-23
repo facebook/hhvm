@@ -32,6 +32,7 @@ AnEnumRenamed = _fbthrift_AnEnumRenamed
 Flags = _fbthrift_Flags
 
 
+@_typing.final
 class SimpleException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.SimpleException):
     @property
     def err_code(self) -> builtins.int: ...
@@ -50,6 +51,7 @@ class SimpleException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...  # type: ignore
 _fbthrift_SimpleException = SimpleException
 
+@_typing.final
 class OptionalRefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.OptionalRefStruct):
     @property
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]: ...
@@ -72,6 +74,7 @@ class OptionalRefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...  # type: ignore
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 
+@_typing.final
 class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.SimpleStruct):
     @property
     def is_on(self) -> builtins.bool: ...
@@ -171,6 +174,7 @@ class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
 
+@_typing.final
 class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
     @property
     def field1(self) -> _fbthrift_SimpleStruct: ...
@@ -207,6 +211,7 @@ class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbth
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...  # type: ignore
 _fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 
+@_typing.final
 class AdaptedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.AdaptedUnion):
     @property
     def best(self) -> builtins.int: ...
@@ -234,6 +239,7 @@ class AdaptedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedUnion": ...  # type: ignore
 _fbthrift_AdaptedUnion = AdaptedUnion
 
+@_typing.final
 class HiddenException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.HiddenException):
     @property
     def test(self) -> builtins.int: ...
@@ -252,6 +258,7 @@ class HiddenException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
     def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
 _fbthrift_HiddenException = HiddenException
 
+@_typing.final
 class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ComplexStruct):
     @property
     def structOne(self) -> _fbthrift_SimpleStruct: ...
@@ -330,6 +337,7 @@ class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
     def _to_py_deprecated(self) -> "module.ttypes.ComplexStruct": ...  # type: ignore
 _fbthrift_ComplexStruct = ComplexStruct
 
+@_typing.final
 class BinaryUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.BinaryUnion):
     @property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf: ...
@@ -357,6 +365,7 @@ class BinaryUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...  # type: ignore
 _fbthrift_BinaryUnion = BinaryUnion
 
+@_typing.final
 class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.BinaryUnionStruct):
     @property
     def u(self) -> _fbthrift_BinaryUnion: ...
@@ -379,6 +388,7 @@ class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...  # type: ignore
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
+@_typing.final
 class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CustomFields):
     @property
     def bool_field(self) -> builtins.bool: ...
@@ -457,6 +467,7 @@ class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
     def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...  # type: ignore
 _fbthrift_CustomFields = CustomFields
 
+@_typing.final
 class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CustomTypedefFields):
     @property
     def bool_field(self) -> builtins.bool: ...
@@ -535,6 +546,7 @@ class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrif
     def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...  # type: ignore
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 
+@_typing.final
 class AdaptedTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AdaptedTypedefFields):
     @property
     def bool_field(self) -> builtins.bool: ...

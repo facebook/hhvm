@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<24f891a7265abb1189428710f308aec6>>
+// @generated SignedSource<<7cdc0ebdcc405e7e4c84797b8f94cea7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,10 @@ pub struct Settings {
     pub root: std::path::PathBuf,
     pub watch_spec: files_to_ignore::WatchSpec,
     pub debug_logging: bool,
+    /// Value of throttle_time_ms parameter passed to Eden's stream_changes_since API.
+    /// This means that this is the minimum period (in milliseconds) between each time
+    /// Eden will send us a change notification.
+    pub throttle_time_ms: isize,
 }
 
 #[derive(

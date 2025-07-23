@@ -85,9 +85,14 @@ module EdenfsFileWatcher = struct
   type t = {
     enabled: bool;
     debug_logging: bool;
+    throttle_time_ms: int;
+        (** Value of throttle_time_ms parameter passed to Eden's stream_changes_since API.
+            This means that this is the minimum period (in milliseconds) between each time
+            Eden will send us a change notification. *)
   }
 
-  let default = { debug_logging = false; enabled = false }
+  let default =
+    { debug_logging = false; enabled = false; throttle_time_ms = 50 }
 
   let load ~current_version ~default config =
     let enabled =
@@ -104,7 +109,13 @@ module EdenfsFileWatcher = struct
         ~current_version
         config
     in
-    { debug_logging; enabled }
+    let throttle_time_ms =
+      int_
+        "edenfs_file_watcher_throttle_time_ms"
+        ~default:default.throttle_time_ms
+        config
+    in
+    { debug_logging; enabled; throttle_time_ms }
 end
 
 (** Allows to typecheck only a certain quantile of the workload. *)

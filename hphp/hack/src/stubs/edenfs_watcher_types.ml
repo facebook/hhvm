@@ -10,6 +10,10 @@ type settings = {
   root: Path.t;
   watch_spec: FilesToIgnore.watch_spec;
   debug_logging: bool;
+  throttle_time_ms: int;
+      (** Value of throttle_time_ms parameter passed to Eden's stream_changes_since API.
+          This means that this is the minimum period (in milliseconds) between each time
+          Eden will send us a change notification. *)
 }
 
 type changes =

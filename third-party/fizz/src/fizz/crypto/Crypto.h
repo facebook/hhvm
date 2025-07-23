@@ -128,7 +128,9 @@ struct P521 {
   static constexpr int keyShareLength = coordinateLength * 2 + 1;
 };
 
-struct X25519 {};
+struct X25519 {
+  static constexpr int keyShareLength = 32;
+};
 
 // KEMs
 struct Kyber512 {};

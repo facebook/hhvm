@@ -53,8 +53,9 @@ bool root_check_restrict(const char* watch_path) {
 
     auto restrict_path = fmt::format("{}/{}", watch_path, restrict_file);
     bool rv = w_path_exists(restrict_path.c_str());
-    if (rv)
+    if (rv) {
       return true;
+    }
   }
 
   return false;

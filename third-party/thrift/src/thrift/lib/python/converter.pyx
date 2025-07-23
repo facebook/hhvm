@@ -16,6 +16,7 @@ from thrift.python.mutable_types import (
     MutableStruct,
     MutableUnion,
 )
+from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.types cimport (
     FieldInfo,
     StructInfo,
@@ -119,7 +120,7 @@ cdef object _get_src_struct_field_value(object src_struct, FieldInfo field):
         return getattr(src_struct, field.py_name, None)
 
     # mutable thrift-python
-    if isinstance(src_struct, MutableStruct):
+    if isinstance(src_struct, (MutableStruct, MutableGeneratedError)):
         return getattr(src_struct, field.py_name, None)
 
     # py-deprecated types do not inherit from a specific class, so we consider them as

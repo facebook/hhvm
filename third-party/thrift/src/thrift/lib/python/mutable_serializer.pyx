@@ -17,6 +17,7 @@ from folly.iobuf cimport IOBuf
 from thrift.python.exceptions cimport Error
 from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_types cimport MutableStructOrUnion
+from thrift.python.serializer import serialize_iobuf as immutable_serialize_iobuf
 from thrift.python.protocol import Protocol
 
 
@@ -34,12 +35,29 @@ def serialize_iobuf(thrift_object, cProtocol protocol=cProtocol.COMPACT):
 
     Returns (IOBuf) Serialized `thrift_object`, using the specified `protocol`.
     """
+
+    if not isinstance(thrift_object, (MutableStructOrUnion, MutableGeneratedError)):
+        raise TypeError(
+            "thrift-python mutable serialization only supports mutable thrift-python types"
+        )
+
+    # TODO(T232104817): Revert when mutable serialization is fixed.
+    # Due to issues synchronizing mutations with internal data, we are temporarily
+    # disabling the mutable serializer. :(
+    if hasattr(thrift_object, "_to_python"):
+        # convert to thrift-python then use its serializer 
+        return immutable_serialize_iobuf(thrift_object._to_python(), protocol)
+
+    # client and service internal types don't implement _to_python, and aren't
+    # mutable by user, so just use normal mutable serializer
     if isinstance(thrift_object, MutableStructOrUnion):
         return (<MutableStructOrUnion>thrift_object)._fbthrift_serialize(protocol)
-    if isinstance(thrift_object, MutableGeneratedError):
+    else:
+        assert isinstance(thrift_object, MutableGeneratedError)
         return (<MutableGeneratedError>thrift_object)._fbthrift_serialize(protocol)
 
-    raise TypeError("thrift-python serialization only supports thrift-python types")
+
+
 
 
 def serialize(thrift_object, cProtocol protocol=cProtocol.COMPACT):

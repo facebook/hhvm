@@ -58,7 +58,8 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
                       50,
                       75,
                       95,
-                      99),
+                      99,
+                      100),
       ctrlMsgsInInterval(
           prefix + "_ctrl_msgs_in_interval",
           1 /* bucketWidth */,

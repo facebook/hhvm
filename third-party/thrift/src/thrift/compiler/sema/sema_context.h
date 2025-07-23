@@ -125,7 +125,7 @@ struct sema_params {
       validation_level::none;
 
   // Action to take on typedef with URI (but without the annotation that
-  // explicitly allows it, i.e. @thrift.AllowLegacyTypedefUri
+  // explicitly allows it, i.e. @thrift.AllowLegacyTypedefUri).
   validation_level nonallowed_typedef_with_uri = validation_level::none;
 };
 

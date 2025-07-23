@@ -254,6 +254,7 @@ add_library(
   async/processor/AsyncProcessorFunc.cpp
   async/processor/EventTask.cpp
   async/processor/GeneratedAsyncProcessorBase.cpp
+  async/processor/HandlerCallback.cpp
   async/processor/HandlerCallbackBase.cpp
   async/processor/HandlerCallbackOneWay.cpp
   async/processor/RequestParams.cpp

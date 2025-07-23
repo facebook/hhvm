@@ -626,8 +626,8 @@ TEST(fatal_struct, field_ref_getter) {
   ref_field::field_ref_getter ref;
   EXPECT_TRUE(ref(a));
   ref(a)->a() = 1;
-  EXPECT_EQ(a.field3_ref()->a(), 1);
-  a.field3_ref()->a() = 2;
+  EXPECT_EQ(a.field3()->a(), 1);
+  a.field3()->a() = 2;
   EXPECT_EQ(ref(a)->a(), 2);
   static_assert(
       std::is_same<std::unique_ptr<structA>&, decltype(ref(a))>::value);

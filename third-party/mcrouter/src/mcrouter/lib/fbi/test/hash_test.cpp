@@ -99,8 +99,9 @@ char* make_random_key(char* buffer, size_t maxLength) {
 
   for (i = 0; i < klen; i++) {
     char c;
-    while (!isprint((c = rand() % 256)) || c == ' ')
+    while (!isprint((c = rand() % 256)) || c == ' ') {
       ;
+    }
 
     buffer[i] = c;
   }
@@ -151,8 +152,9 @@ TEST(ch3, verify_correctness) {
 
     pools[num_pools] = std::vector<uint64_t>(sizes[num_pools]);
 
-    if (sizes[num_pools] == maximum_pool_size)
+    if (sizes[num_pools] == maximum_pool_size) {
       break;
+    }
   }
 
   for (i = 0; i < NUM_SAMPLES; ++i) {
@@ -193,16 +195,18 @@ TEST(ch3, verify_correctness) {
        a huge NUM_SAMPLES, so just check pools up to 1000 in size. */
 
     uint32_t pool_size = sizes[i];
-    if (pool_size > 1000)
+    if (pool_size > 1000) {
       break;
+    }
     double expected_mean = ((double)NUM_SAMPLES) / pool_size;
 
     double max_diff = 0;
     double sum = 0;
     for (j = 0; j < pool_size; j++) {
       double diff = std::abs(pools[i][j] - expected_mean);
-      if (diff > max_diff)
+      if (diff > max_diff) {
         max_diff = diff;
+      }
       sum += pools[i][j];
     }
     double mean = sum / pool_size;

@@ -67,10 +67,11 @@ double GaussianMixtureModel::getSample() {
   for (uint32_t idx = 0; idx < nComponents; ++idx) {
     if (weightsCumsum[idx] >= componentChoice) {
       double gmmSample = (*threadLocalGaussianGenerators.get())[idx]();
-      if (logTransformed)
+      if (logTransformed) {
         return exp(gmmSample);
-      else
+      } else {
         return gmmSample;
+      }
     }
   }
   LOG(FATAL)

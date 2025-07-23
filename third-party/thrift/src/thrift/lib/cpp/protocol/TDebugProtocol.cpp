@@ -211,8 +211,9 @@ uint32_t TDebugProtocol::writeFieldBegin(
     const char* name, const TType fieldType, const int16_t fieldId) {
   // sprintf(id_str, "%02d", fieldId);
   string id_str = boost::lexical_cast<string>(fieldId);
-  if (id_str.length() == 1)
+  if (id_str.length() == 1) {
     id_str = '0' + id_str;
+  }
 
   return writeIndented(
       id_str + ": " + name + " (" + fieldTypeName(fieldType) + ") = ");

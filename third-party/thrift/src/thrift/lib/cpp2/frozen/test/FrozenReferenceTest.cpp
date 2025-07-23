@@ -45,8 +45,9 @@ BoxedNode makeBoxedNode(int64_t id, const std::string& content) {
 }
 
 void fillTree(std::unique_ptr<Node>& node, int min, int max) {
-  if (min >= max)
+  if (min >= max) {
     return;
+  }
   int mid = folly::midpoint(min, max);
   node = std::make_unique<Node>();
   *node->id() = mid;

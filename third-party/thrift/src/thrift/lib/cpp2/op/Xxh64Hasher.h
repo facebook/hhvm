@@ -34,8 +34,9 @@ class Xxh64Hasher {
     XXH3_64bits_reset(state_.get());
   }
   XXH64_hash_t getResult() const {
-    if (!finalized())
+    if (!finalized()) {
       throw std::runtime_error("getResult called on non finalized hasher");
+    }
     return *result_;
   }
 
@@ -52,18 +53,21 @@ class Xxh64Hasher {
     XXH3_64bits_update(state_.get(), value.data(), value.size());
   }
   void combine(const Xxh64Hasher& other) {
-    if (!other.finalized())
+    if (!other.finalized()) {
       throw std::runtime_error("cannot combine non finalized hasher");
+    }
     combine(*other.result_);
   }
 
   void finalize() { result_ = XXH3_64bits_digest(state_.get()); }
 
   bool operator<(const Xxh64Hasher& other) const {
-    if (!finalized())
+    if (!finalized()) {
       throw std::runtime_error("less then called on non finalized hasher");
-    if (!other.finalized())
+    }
+    if (!other.finalized()) {
       throw std::runtime_error("non finalized hasher passed to less then");
+    }
     return *result_ < *other.result_;
   }
 

@@ -31,8 +31,9 @@ class Sha256Hasher {
  public:
   Sha256Hasher() { hash_.hash_init(EVP_sha256()); }
   std::array<uint8_t, SHA256_DIGEST_LENGTH> getResult() const {
-    if (!finalized())
+    if (!finalized()) {
       throw std::runtime_error("getResult called on non finalized hasher");
+    }
     return result_.value();
   }
 
@@ -49,8 +50,9 @@ class Sha256Hasher {
   }
   void combine(folly::ByteRange value) { hash_.hash_update(value); }
   void combine(const Sha256Hasher& other) {
-    if (!other.finalized())
+    if (!other.finalized()) {
       throw std::runtime_error("cannot combine non finalized hasher");
+    }
     combine(other.result_.value());
   }
 
@@ -61,10 +63,12 @@ class Sha256Hasher {
   }
 
   bool operator<(const Sha256Hasher& other) const {
-    if (!finalized())
+    if (!finalized()) {
       throw std::runtime_error("less then called on non finalized hasher");
-    if (!other.finalized())
+    }
+    if (!other.finalized()) {
       throw std::runtime_error("non finalized hasher passed to less then");
+    }
     return result_ < other.result_;
   }
 

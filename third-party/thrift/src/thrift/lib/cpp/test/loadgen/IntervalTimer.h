@@ -72,10 +72,11 @@ class IntervalTimer {
    */
   void setRatePerSec(uint64_t rate) {
     std::unique_lock guard(mutex_);
-    if (rate == 0)
+    if (rate == 0) {
       intervalNsec_ = 0;
-    else
+    } else {
       intervalNsec_ = std::nano::den / rate;
+    }
     if (intervalStart_ > std::chrono::steady_clock::time_point{}) {
       intervalStart_ = std::chrono::steady_clock::now();
     }

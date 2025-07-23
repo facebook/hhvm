@@ -31,8 +31,9 @@ class WrappedIOBufQueueAppender {
       : out_(out) {}
 
   void append(const char* s, const size_t n) {
-    if (n == 0)
+    if (n == 0) {
       return;
+    }
     out_.push(reinterpret_cast<const uint8_t*>(CHECK_NOTNULL(s)), n);
     length_ += n;
   }

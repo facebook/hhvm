@@ -74,8 +74,9 @@ EnumType enumValueOrThrow(std::string_view name) {
 template <typename EnumType>
 const char* enumName(EnumType value, const char* defaultName = nullptr) {
   const char* name = TEnumTraits<EnumType>::findName(value);
-  if (!name)
+  if (!name) {
     return defaultName;
+  }
   return name;
 }
 

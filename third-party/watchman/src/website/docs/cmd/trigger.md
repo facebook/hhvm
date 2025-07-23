@@ -107,7 +107,6 @@ The possible trigger object properties are:
 
 - `stdin` specifies how stdin should be configured for the command invocation.
   You may set the value of this property to one of the following:
-
   - the string value `/dev/null` - sets stdin to read from `/dev/null`. This is
     the default and will be used if you omit the `stdin` property.
 
@@ -131,7 +130,6 @@ The possible trigger object properties are:
   corresponding stream will be inherited from the Watchman process, which
   typically means that the command output/error stream will show up in the
   Watchman log file. If specified, the value must be a string:
-
   - `>path/to/file` - causes output to redirected to the specified file. The
     path is relative to the watched root, and will be truncated prior to being
     written to, if it exists, or created if it does not exist.

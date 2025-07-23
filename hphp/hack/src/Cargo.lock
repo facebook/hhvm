@@ -2738,6 +2738,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "io-uring"
+version = "0.7.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d93587f37623a1a17d94ef2bc9ada592f5465fe7732084ab7beefabe5c77c0c4"
+dependencies = [
+ "bitflags 2.9.0",
+ "cfg-if 1.0.0",
+ "libc",
+]
+
+[[package]]
 name = "ir"
 version = "0.0.0"
 dependencies = [
@@ -3214,6 +3225,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3be647b768db090acb35d5ec5db2b0e1f1de11133ca123b9eacf5137868f892a"
 dependencies = [
  "adler2",
+]
+
+[[package]]
+name = "mio"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "80e04d1dcff3aae0704555fe5fee3bcfaf3d1fdf8a7e521d5b9d2b42acb52cec"
+dependencies = [
+ "hermit-abi 0.3.9",
+ "libc",
+ "wasi 0.11.0+wasi-snapshot-preview1",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5416,13 +5439,17 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.45.0"
+version = "1.46.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2513ca694ef9ede0fb23fe71a4ee4107cb102b9dc1930f6d0fd77aae068ae165"
+checksum = "0cc3a2344dafbe23a245241fe8b09735b521110d30fcefbbd5feb1797ca35d17"
 dependencies = [
  "backtrace",
  "bytes",
+ "io-uring",
+ "libc",
+ "mio",
  "pin-project-lite",
+ "slab",
 ]
 
 [[package]]
@@ -6031,6 +6058,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "677d2418bec65e3338edb076e806bc1ec15693c5d0104683f2efe857f61056a9"
 dependencies = [
  "windows-targets 0.48.5",
+]
+
+[[package]]
+name = "windows-sys"
+version = "0.52.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
+dependencies = [
+ "windows-targets 0.52.6",
 ]
 
 [[package]]

@@ -29,6 +29,7 @@ mock_mc_server_LDADD = \
 	-lconcurrency \
 	-lruntime \
 	-lthrift-core \
+	-lcommon \
 	-lfmt \
 	-lfizz \
 	-lwangle \
@@ -50,6 +51,7 @@ mock_mc_thrift_server_LDADD = \
 	-lasync \
 	-lconcurrency \
 	-lthrift-core \
+	-lcommon \
 	-lfmt \
 	-lfizz \
 	-lwangle \
@@ -70,7 +72,8 @@ mock_mc_server_dual_LDADD = \
 	-lrpcmetadata \
 	-lasync \
 	-lconcurrency \
-	-lthrift-core
+	-lthrift-core \
+	-lcommon
 
 libtest_util_a_SOURCES = \
   ClientSocket.cpp \
@@ -110,4 +113,5 @@ mcrouter_network_test_LDADD = \
   -lthriftcpp2 \
   -lthriftprotocol \
   -lrpcmetadata \
-  -ltransport
+  -ltransport \
+  -lcommon

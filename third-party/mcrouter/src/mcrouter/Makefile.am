@@ -266,7 +266,8 @@ mcrouter_LDADD = \
   -lasync \
   -lconcurrency \
   -lruntime \
-  -lthrift-core
+  -lthrift-core \
+  -lcommon
 
 mcrouter_CPPFLAGS = -I..
 

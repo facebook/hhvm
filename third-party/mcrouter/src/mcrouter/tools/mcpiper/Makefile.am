@@ -46,6 +46,7 @@ mcpiper_LDADD = \
 	-lasync \
 	-lconcurrency \
 	-lruntime \
-	-lthrift-core
+	-lthrift-core \
+	-lcommon
 
 mcpiper_CPPFLAGS = -I$(top_srcdir)/..

@@ -223,10 +223,11 @@ void SSLCacheClient::connectSuccess() noexcept {
       ctx_, eventBase_, socket_->detachNetworkSocket(), false);
 
   if (!FLAGS_handshakes) {
-    if (session_ != nullptr)
+    if (session_ != nullptr) {
       sslSocket_->setSSLSession(session_);
-    else if (FLAGS_global && pSess_ != nullptr)
+    } else if (FLAGS_global && pSess_ != nullptr) {
       sslSocket_->setSSLSession(pSess_);
+    }
   }
   sslSocket_->sslConn(this);
 }

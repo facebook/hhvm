@@ -1,0 +1,6 @@
+ERROR: File "vector_index_dynamic.php", line 5, characters 3-32:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "vector_index_dynamic.php", line 3, characters 44-46:
+  Expected `int`
+  File "vector_index_dynamic.php", line 5, characters 24-27:
+  But got `dynamic`

@@ -3984,7 +3984,7 @@ end = struct
             (Some (Typing_error.Reasons_callback.unify_error_at p))
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let (env, val_ty) = Env.fresh_type_invariant env p1 in
+        let (env, val_ty) = Env.fresh_type env p1 in
         let (env, ty_err_opt) =
           SubType.sub_type_i
             env

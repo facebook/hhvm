@@ -266,6 +266,7 @@ class CarbonRouterInstanceBase {
     std::atomic<bool> enableOdslScuba = false;
     std::atomic<bool> enableOdslODS = false;
     std::atomic<bool> enableCpuMonitor = false;
+    std::atomic<bool> enableReplySource = false;
   };
   RuntimeFeatures runtimeFeatures_;
 

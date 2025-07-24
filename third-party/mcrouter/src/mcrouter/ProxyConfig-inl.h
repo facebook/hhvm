@@ -142,6 +142,8 @@ ProxyConfig<RouterInfo>::ProxyConfig(
       readBool("enable_odsl_ods", false);
   proxy.router().runtimeFeatures_.enableCpuMonitor =
       readBool("enable_cpu_monitor", false);
+  proxy.router().runtimeFeatures_.enableReplySource =
+      readBool("enable_reply_source", false);
   proxy.router().scheduleStatsCpuWorker(
       proxy.router().runtimeFeatures_.enableCpuMonitor);
 

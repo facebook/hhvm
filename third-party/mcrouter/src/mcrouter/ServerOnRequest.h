@@ -14,6 +14,7 @@
 #ifndef MCROUTER_OSS_BUILD
 #include "core_infra_security/thrift_authentication_module/ClientIdentifierHelper.h"
 #include "crypto/cat/cpp/protocol/CryptoAuthTokenRetriever.h"
+#include "ucache/protocol/UcacheReplySourceTypes.h"
 #endif
 
 #include "mcrouter/CarbonRouterClient.h"
@@ -61,13 +62,15 @@ class ServerOnRequest {
       bool remoteThread,
       ExternalStatsHandler& statsHandler,
       bool requestAclCheckerEnable,
-      bool enableKeyClientBinding = false)
+      bool enableKeyClientBinding = false,
+      bool enableReplySource = false)
       : client_(client),
         eventBase_(eventBase),
         retainSourceIp_(retainSourceIp),
         enablePassThroughMode_(enablePassThroughMode),
         remoteThread_(remoteThread),
-        enableKeyClientBinding_(enableKeyClientBinding) {
+        enableKeyClientBinding_(enableKeyClientBinding),
+        enableReplySource_(enableReplySource) {
     if constexpr (RouterInfo::useRequestAclChecker) {
       aclChecker_ = std::make_unique<RequestAclChecker>(
           statsHandler, requestAclCheckerEnable);
@@ -204,6 +207,25 @@ class ServerOnRequest {
 
     auto cb = [this, sctx = std::move(rctx), replyFn = std::move(replyFn)](
                   const Request&, ReplyT<Request>&& reply) mutable {
+#ifndef MCROUTER_OSS_BUILD
+      if constexpr (HasReplySourceBitMaskTrait<ReplyT<Request>>::value) {
+        if (enableReplySource_) {
+          auto replySourceBitMask = *reply.replySourceBitMask_ref();
+          if (replySourceBitMask) {
+            reply.replySourceBitMask_ref() =
+                (reply.replySourceBitMask_ref().value() |
+                 (1U << static_cast<uint32_t>(
+                      facebook::ucache::proto::UcacheReplySourceTypes::
+                          McrouterStandalone)));
+          } else {
+            reply.replySourceBitMask_ref() =
+                (1U << static_cast<uint32_t>(
+                     facebook::ucache::proto::UcacheReplySourceTypes::
+                         McrouterStandalone));
+          }
+        }
+      }
+#endif
       if (remoteThread_) {
         eventBase_.runInEventBaseThread([sctx = std::move(sctx),
                                          replyFn = std::move(replyFn),
@@ -230,6 +252,7 @@ class ServerOnRequest {
   const bool remoteThread_{false};
   std::unique_ptr<RequestAclChecker> aclChecker_;
   const bool enableKeyClientBinding_{false};
+  const bool enableReplySource_{false};
 };
 
 } // namespace mcrouter

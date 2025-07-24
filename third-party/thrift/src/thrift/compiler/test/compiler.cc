@@ -36,7 +36,7 @@
 namespace apache::thrift::compiler {
 // Avoid order dependence when comparing diagnostics on one line.
 bool operator<(const diagnostic& diag1, const diagnostic& diag2) {
-  // @lint-ignore-every CLANGTIDY facebook-hte-MissingBraces
+  // @lint-ignore-every CLANGTIDY readability-braces-around-statements
   if (diag1.file() != diag2.file())
     return diag1.file() < diag2.file();
   if (diag1.lineno() != diag2.lineno())

@@ -29,9 +29,11 @@ from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
 import copy
 import itertools
 
+from thrift.python.mutable_typeinfos cimport MutableStructTypeInfo
 from thrift.python.mutable_types cimport _ThriftContainerWrapper
 from thrift.python.types cimport (
     TypeInfoBase,
+    AdaptedTypeInfo,
     list_eq,
     list_lt,
 )
@@ -519,6 +521,12 @@ cdef class MutableMap:
         self._val_typeinfo = value_typeinfo
         self._key_type_is_container = key_typeinfo.is_container()
         self._value_type_is_container = value_typeinfo.is_container()
+        # Compare internal data representations only if `_value_type` is not a structured type
+        # or container type, as these may include additional information like `isset-flags`
+        # or `internal-cache`. For structured or container types, convert them to Python types,
+        # as the type system will ignore these 'hidden' fields during comparison.
+        self._use_internal_data_to_compare = not (value_typeinfo.is_container()
+            or isinstance(value_typeinfo, (AdaptedTypeInfo, MutableStructTypeInfo)))
         self._map_data = map_data
 
     def __len__(self):
@@ -529,9 +537,10 @@ cdef class MutableMap:
             return True
 
         if isinstance(other, MutableMap):
-            if self._is_same_type_of_map(other):
+            if not self._is_same_type_of_map(other):
+                raise TypeError("Cannot check MutableMap instances for equality: types do not match.")
+            if self._use_internal_data_to_compare:
                 return self._map_data == (<MutableMap>other)._map_data
-            raise TypeError("Cannot check MutableMap instances for equality: types do not match.")
 
         if not isinstance(other, Mapping):
             return NotImplemented
@@ -544,9 +553,15 @@ cdef class MutableMap:
             self_internal_value = self._map_data.get(other_internal_key, None)
             if self_internal_value is None:
                 return False
-            other_internal_value = self._value_to_internal_data(other_value)
-            if self_internal_value != other_internal_value:
-                return False
+
+            if self._use_internal_data_to_compare:
+                other_internal_value = self._value_to_internal_data(other_value)
+                if self_internal_value != other_internal_value:
+                    return False
+            else:
+                self_python_value = self._val_typeinfo.to_python_value(self_internal_value)
+                if self_python_value != other_value:
+                    return False
 
         return True
 
@@ -619,7 +634,7 @@ cdef class MutableMap:
         """
         Update MutableMap from mapping/iterable other and keywords
         """
-        if self._is_same_type_of_map(other):
+        if self._use_internal_data_to_compare and self._is_same_type_of_map(other):
             self._map_data.update(<MutableMap>other._map_data)
         elif isinstance(other, Mapping):
             for key in other:

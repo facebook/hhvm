@@ -34,12 +34,14 @@ from thrift.python.mutable_types import (
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
+    TestContainersWithStructElements as TestContainersWithStructElementsMutable,
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesMutable,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructAsListElement as TestStructAsListElementMutable,
+    TestStructBool as TestStructBoolMutable,
     TestStructContainerAssignment as TestStructContainerAssignmentMutable,
     TestStructNested_0 as TestStructNested_0_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
@@ -547,3 +549,18 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         mutable_struct = s._to_mutable_python()
         self.assertEqual(s, mutable_struct._to_python())
+
+    def test_container_with_struct_elements(self) -> None:
+        s1 = TestContainersWithStructElementsMutable()
+        s2 = TestContainersWithStructElementsMutable()
+
+        self.assertEqual(s1, s2)
+
+        s1.map_fld["1"] = TestStructBoolMutable()
+        s2.map_fld["1"] = TestStructBoolMutable()
+
+        self.assertEqual(s1, s2)
+
+        s1.map_fld["1"].is_set = False
+
+        self.assertEqual(s1, s2)

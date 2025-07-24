@@ -308,3 +308,12 @@ struct TestStructWithNestedContainers {
   15: map<i32, map<string, set<i32>>> map_i32_map_string_set_i32;
   16: list<list<map<i32, list<map<string, list<set<i32>>>>>>> many_nested;
 }
+
+struct TestStructBool {
+  1: bool is_set;
+}
+
+struct TestContainersWithStructElements {
+  1: list<TestStructBool> list_fld;
+  2: map<string, TestStructBool> map_fld;
+}

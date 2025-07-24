@@ -246,6 +246,12 @@ OPTIONAL_TRANSFORM: Dict[Target, str] = {
     Target.CPP2: "{}|FieldModifier::Optional",
 }
 
+OPTIONAL_CUSTOM_DEFAULT_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "optional_{}",
+    Target.THRIFT: "optional {}|@thrift.AllowUnsafeOptionalCustomDefaultValue",
+    Target.CPP2: "{}|FieldModifier::Optional",
+}
+
 REQUIRED_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "required_{}",
     Target.THRIFT: "required {}",
@@ -443,7 +449,17 @@ def gen_maps(
 
 
 def gen_optional(target: Target, values: Dict[str, str]) -> Dict[str, str]:
-    return _gen_unary_tramsform(OPTIONAL_TRANSFORM, target, values)
+    result = {}
+    for name, value_t in values.items():
+        if has_custom_default(value_t):
+            result[OPTIONAL_CUSTOM_DEFAULT_TRANSFORM[Target.NAME].format(name)] = (
+                OPTIONAL_CUSTOM_DEFAULT_TRANSFORM[target].format(value_t, name)
+            )
+        else:
+            result[OPTIONAL_TRANSFORM[Target.NAME].format(name)] = OPTIONAL_TRANSFORM[
+                target
+            ].format(value_t, name)
+    return result
 
 
 def gen_required(target: Target, values: Dict[str, str]) -> Dict[str, str]:

@@ -2212,57 +2212,75 @@ struct struct_optional_string {
   1: optional string field_1;
 }
 struct struct_optional_bool_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 struct struct_optional_byte_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 1;
 }
 struct struct_optional_i16_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 2;
 }
 struct struct_optional_i32_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 3;
 }
 struct struct_optional_i64_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 4;
 }
 struct struct_optional_float_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 5;
 }
 struct struct_optional_double_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 6;
 }
 struct struct_optional_binary_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "7";
 }
 struct struct_optional_string_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "8";
 }
 struct struct_optional_bool_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 struct struct_optional_byte_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 10;
 }
 struct struct_optional_i16_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 20;
 }
 struct struct_optional_i32_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 30;
 }
 struct struct_optional_i64_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 40;
 }
 struct struct_optional_float_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 50;
 }
 struct struct_optional_double_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 60;
 }
 struct struct_optional_binary_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "70";
 }
 struct struct_optional_string_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "80";
 }
 struct struct_required_list_bool {
@@ -9301,74 +9319,92 @@ struct struct_optional_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_bool_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 @cpp.UseOpEncode
 struct struct_optional_byte_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 1;
 }
 @cpp.UseOpEncode
 struct struct_optional_i16_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 2;
 }
 @cpp.UseOpEncode
 struct struct_optional_i32_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 3;
 }
 @cpp.UseOpEncode
 struct struct_optional_i64_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 4;
 }
 @cpp.UseOpEncode
 struct struct_optional_float_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 5;
 }
 @cpp.UseOpEncode
 struct struct_optional_double_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 6;
 }
 @cpp.UseOpEncode
 struct struct_optional_binary_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "7";
 }
 @cpp.UseOpEncode
 struct struct_optional_string_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "8";
 }
 @cpp.UseOpEncode
 struct struct_optional_bool_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 @cpp.UseOpEncode
 struct struct_optional_byte_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 10;
 }
 @cpp.UseOpEncode
 struct struct_optional_i16_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 20;
 }
 @cpp.UseOpEncode
 struct struct_optional_i32_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 30;
 }
 @cpp.UseOpEncode
 struct struct_optional_i64_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 40;
 }
 @cpp.UseOpEncode
 struct struct_optional_float_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 50;
 }
 @cpp.UseOpEncode
 struct struct_optional_double_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 60;
 }
 @cpp.UseOpEncode
 struct struct_optional_binary_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "70";
 }
 @cpp.UseOpEncode
 struct struct_optional_string_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "80";
 }
 @cpp.UseOpEncode
@@ -16744,57 +16780,75 @@ exception exception_optional_string {
   1: optional string field_1;
 }
 exception exception_optional_bool_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 exception exception_optional_byte_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 1;
 }
 exception exception_optional_i16_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 2;
 }
 exception exception_optional_i32_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 3;
 }
 exception exception_optional_i64_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 4;
 }
 exception exception_optional_float_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 5;
 }
 exception exception_optional_double_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 6;
 }
 exception exception_optional_binary_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "7";
 }
 exception exception_optional_string_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "8";
 }
 exception exception_optional_bool_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 exception exception_optional_byte_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 10;
 }
 exception exception_optional_i16_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 20;
 }
 exception exception_optional_i32_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 30;
 }
 exception exception_optional_i64_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 40;
 }
 exception exception_optional_float_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 50;
 }
 exception exception_optional_double_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 60;
 }
 exception exception_optional_binary_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "70";
 }
 exception exception_optional_string_alternative_custom_default {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "80";
 }
 exception exception_required_list_bool {
@@ -23833,74 +23887,92 @@ exception exception_optional_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_bool_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 @cpp.UseOpEncode
 exception exception_optional_byte_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 1;
 }
 @cpp.UseOpEncode
 exception exception_optional_i16_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 2;
 }
 @cpp.UseOpEncode
 exception exception_optional_i32_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 3;
 }
 @cpp.UseOpEncode
 exception exception_optional_i64_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 4;
 }
 @cpp.UseOpEncode
 exception exception_optional_float_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 5;
 }
 @cpp.UseOpEncode
 exception exception_optional_double_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 6;
 }
 @cpp.UseOpEncode
 exception exception_optional_binary_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "7";
 }
 @cpp.UseOpEncode
 exception exception_optional_string_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "8";
 }
 @cpp.UseOpEncode
 exception exception_optional_bool_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
 @cpp.UseOpEncode
 exception exception_optional_byte_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 10;
 }
 @cpp.UseOpEncode
 exception exception_optional_i16_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 20;
 }
 @cpp.UseOpEncode
 exception exception_optional_i32_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 30;
 }
 @cpp.UseOpEncode
 exception exception_optional_i64_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 40;
 }
 @cpp.UseOpEncode
 exception exception_optional_float_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 50;
 }
 @cpp.UseOpEncode
 exception exception_optional_double_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 60;
 }
 @cpp.UseOpEncode
 exception exception_optional_binary_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "70";
 }
 @cpp.UseOpEncode
 exception exception_optional_string_alternative_custom_default_op_encoded {
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "80";
 }
 @cpp.UseOpEncode

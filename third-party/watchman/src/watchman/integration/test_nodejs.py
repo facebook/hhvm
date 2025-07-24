@@ -6,7 +6,6 @@
 # pyre-unsafe
 
 
-import distutils.spawn
 import glob
 import inspect
 import os

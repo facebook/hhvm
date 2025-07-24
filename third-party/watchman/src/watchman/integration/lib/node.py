@@ -5,17 +5,17 @@
 
 # pyre-unsafe
 
-import distutils.spawn
 import os
+import shutil
 import subprocess
 
 
 def _find_node():
-    return os.environ.get("NODE_BIN", distutils.spawn.find_executable("node"))
+    return os.environ.get("NODE_BIN", shutil.which("node"))
 
 
 def _find_yarn():
-    return os.environ.get("YARN_PATH", distutils.spawn.find_executable("yarn"))
+    return os.environ.get("YARN_PATH", shutil.which("yarn"))
 
 
 # To avoid CI environments that put broken yarn and node executables in PATH,

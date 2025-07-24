@@ -6,7 +6,6 @@
 
 # pyre-unsafe
 
-import distutils.spawn
 import os
 import shutil
 import subprocess

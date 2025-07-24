@@ -408,6 +408,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
         ci_val;
         ci_lhs_of_null_coalesce;
         ci_expr_pos;
+        ci_array_pos;
         ci_index_pos;
       } =
         ci
@@ -421,6 +422,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
           ci_val;
           ci_lhs_of_null_coalesce;
           ci_expr_pos;
+          ci_array_pos;
           ci_index_pos;
         }
       in

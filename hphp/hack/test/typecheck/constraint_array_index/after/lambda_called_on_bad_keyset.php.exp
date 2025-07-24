@@ -1,6 +1,6 @@
-ERROR: File "lambda_called_on_bad_keyset.php", line 4, characters 6-24:
-Invalid argument (Typing[4110])
+ERROR: File "lambda_called_on_bad_keyset.php", line 3, characters 16-20:
+Invalid index type for this keyset (Typing[4449])
   File "lambda_called_on_bad_keyset.php", line 4, characters 6-24:
-  Expected `string`
+  This is a string
   File "lambda_called_on_bad_keyset.php", line 3, characters 19-19:
-  But got `int`
+  It is incompatible with an int

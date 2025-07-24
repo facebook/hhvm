@@ -1,0 +1,6 @@
+ERROR: File "vec_called_on_int_imm_map.php", line 3, characters 3-24:
+This value is not a valid key type for this container (Typing[4324])
+  File "vec_called_on_int_imm_map.php", line 3, characters 3-17:
+  This container is an object of type ImmMap<(arraykey & _), int>
+  File "vec_called_on_int_imm_map.php", line 3, characters 19-23:
+  An object of type vec<nothing> cannot be used as a key for an object of type ImmMap<(arraykey & _), int>

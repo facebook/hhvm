@@ -1,0 +1,6 @@
+ERROR: File "vec_called_on_int_imm_map.php", line 3, characters 3-24:
+Typing error (Typing[4110])
+  File "vec_called_on_int_imm_map.php", line 3, characters 3-17:
+  Expected `arraykey`
+  File "vec_called_on_int_imm_map.php", line 3, characters 19-23:
+  But got `vec<nothing>`

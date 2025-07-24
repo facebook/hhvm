@@ -4003,6 +4003,7 @@ end = struct
                         ci_val = val_ty;
                         ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
                         ci_expr_pos = p;
+                        ci_array_pos = p1;
                         ci_index_pos = p2;
                       } )))
             (Some (Typing_error.Reasons_callback.unify_error_at p))

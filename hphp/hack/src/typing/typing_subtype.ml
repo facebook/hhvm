@@ -6187,17 +6187,28 @@ end = struct
         ~rhs:{ super_like = false; super_supportdyn = false; ty_super = rhs }
         env
     in
-    let unify_default ~subtype_env lhs rhs env =
-      simplify_default ~subtype_env lhs rhs env
-      &&& simplify_default ~subtype_env rhs lhs
-    in
-    let is_immutable_container tk tv =
+    let simplify_key tk env =
+      let tk =
+        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+          Typing_make_type.locl_like
+            (Reason.dynamic_coercion (get_reason tk))
+            tk
+        else
+          tk
+      in
       simplify_default ~subtype_env can_index.ci_key tk env
-      &&& simplify_default ~subtype_env tv can_index.ci_val
     in
-    let is_mutable_container tk tv =
-      unify_default ~subtype_env can_index.ci_key tk env
-      &&& unify_default ~subtype_env tv can_index.ci_val
+    let is_container tk tv =
+      simplify_key tk env &&& simplify_default ~subtype_env tv can_index.ci_val
+    in
+    let is_vec_like tv =
+      let pos = get_pos ty_sub in
+      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
+      is_container tk tv
+    in
+    let is_dict_like tv =
+      let tk = MakeType.arraykey (Reason.idx_dict can_index.ci_array_pos) in
+      is_container tk tv
     in
     let do_tuple tup =
       match can_index.ci_shape with
@@ -6289,53 +6300,45 @@ end = struct
         Typing_env_types.(
           TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
       then
-        let subtype_env =
+        let coerce_to_dynamic =
           { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
         in
         simplify_default
-          ~subtype_env
+          ~subtype_env:coerce_to_dynamic
           can_index.ci_key
           (MakeType.dynamic (get_reason ty_sub))
       else
         valid
+    | (_, Tclass ((_, n), _, [tk; tv]))
+      when String.equal n SN.Collections.cKeyedContainer
+           || String.equal n SN.Collections.cImmMap
+           || String.equal n SN.Collections.cConstMap
+           || String.equal n SN.Collections.cMap
+           || String.equal n SN.Collections.cMutableMap
+           || String.equal n SN.Collections.cAnyArray ->
+      is_container tk tv
     | (_, Tclass ((_, n), _, [tv]))
       when String.equal n SN.Collections.cVec
            || String.equal n SN.Collections.cImmVector
-           || String.equal n SN.Collections.cConstVector ->
-      let pos = get_pos ty_sub in
-      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
-      is_immutable_container tk tv
-    | (_, Tclass ((_, n), _, [tv]))
-      when String.equal n SN.Collections.cVector
+           || String.equal n SN.Collections.cConstVector
+           || String.equal n SN.Collections.cVector
            || String.equal n SN.Collections.cMutableVector ->
-      let pos = get_pos ty_sub in
-      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
-      is_mutable_container tk tv
-    | (_, Tclass ((_, n), _, [tk; tv]))
-      when String.equal n SN.Collections.cImmMap
-           || String.equal n SN.Collections.cConstMap
-           || String.equal n SN.Collections.cAnyArray ->
-      unify_default ~subtype_env can_index.ci_key tk env
-      &&& simplify_default ~subtype_env tv can_index.ci_val
-    | (_, Tclass ((_, n), _, [tk; tv]))
-      when String.equal n SN.Collections.cMap
-           || String.equal n SN.Collections.cMutableMap ->
-      is_mutable_container tk tv
-    | (_, Tclass ((_, n), _, [tk; tv])) when String.equal n SN.Collections.cDict
+      is_vec_like tv
+    (* dict and keyset are covariant in the key type, so subsumption
+     * lets you upcast the key type beyond ty2 to arraykey.
+     *)
+    | (_, Tclass ((_, n), _, [_; tv])) when String.equal n SN.Collections.cDict
       ->
-      simplify_default ~subtype_env tk can_index.ci_key env
-      &&& simplify_default ~subtype_env tv can_index.ci_val
+      is_dict_like tv
     | (_, Tclass ((_, n), _, [tkv])) when String.equal n SN.Collections.cKeyset
       ->
-      is_immutable_container tkv tkv
-    | (_, Tvec_or_dict (tk, tv)) ->
-      unify_default ~subtype_env can_index.ci_key tk env
-      &&& simplify_default ~subtype_env tv can_index.ci_val
+      is_dict_like tkv
+    | (_, Tvec_or_dict (_, tv)) -> is_dict_like tv
     | (_, Tprim Tstring) ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
-      is_immutable_container tk tv
+      is_container tk tv
     | (r, Tprim Tnull) ->
       let pos = get_pos ty_sub in
       if can_index.ci_lhs_of_null_coalesce then

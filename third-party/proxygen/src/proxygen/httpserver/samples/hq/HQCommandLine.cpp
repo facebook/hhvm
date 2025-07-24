@@ -78,6 +78,9 @@ DEFINE_bool(pacing, false, "Whether to enable pacing on HQServer");
 DEFINE_int32(pacing_timer_tick_interval_us, 200, "Pacing timer resolution");
 DEFINE_string(psk_file, "", "Cache file to use for QUIC psks");
 DEFINE_bool(early_data, false, "Whether to use 0-rtt");
+DEFINE_bool(verify_server_cert,
+            false,
+            "Whether HQClient should verify server certificates");
 DEFINE_uint32(quic_batching_mode,
               static_cast<uint32_t>(quic::QuicBatchingMode::BATCHING_MODE_NONE),
               "QUIC batching mode");
@@ -377,6 +380,7 @@ void initializeHttpClientSettings(HQToolClientParams& hqParams) {
   folly::split(',', FLAGS_gap_ms, hqParams.requestGaps);
 
   hqParams.earlyData = FLAGS_early_data;
+  hqParams.verifyServerCert = FLAGS_verify_server_cert;
   hqParams.migrateClient = FLAGS_migrate_client;
   hqParams.txnTimeout = std::chrono::milliseconds(FLAGS_txn_timeout);
   hqParams.httpVersion.parse(FLAGS_httpversion);

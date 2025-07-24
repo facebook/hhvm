@@ -276,17 +276,22 @@ void HQClient::connectError(const quic::QuicError& error) {
 
 void HQClient::initializeQuicClient() {
   auto sock = std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_);
-  auto client = std::make_shared<quic::QuicClientTransport>(
-      qEvb_,
-      std::move(sock),
+  auto handshakeContextBuilder =
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(
               createFizzClientContext(params_, params_.earlyData))
-          .setCertificateVerifier(
-              std::make_unique<
-                  proxygen::InsecureVerifierDangerousDoNotUseInProduction>())
-          .setPskCache(params_.pskCache)
-          .build());
+          .setPskCache(params_.pskCache);
+
+  if (!params_.verifyServerCert) {
+    handshakeContextBuilder =
+        std::move(handshakeContextBuilder)
+            .setCertificateVerifier(
+                std::make_unique<
+                    proxygen::InsecureVerifierDangerousDoNotUseInProduction>());
+  }
+
+  auto client = std::make_shared<quic::QuicClientTransport>(
+      qEvb_, std::move(sock), std::move(handshakeContextBuilder).build());
   client->setPacingTimer(pacingTimer_);
   client->setHostname(params_.host);
   client->addNewPeerAddress(params_.remoteAddress.value());

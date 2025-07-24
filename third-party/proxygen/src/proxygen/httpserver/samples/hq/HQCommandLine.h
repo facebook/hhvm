@@ -25,6 +25,7 @@ struct HQToolClientParams : public HQBaseParams {
 
   folly::Optional<folly::SocketAddress> remoteAddress;
   bool earlyData;
+  bool verifyServerCert;
   std::chrono::milliseconds connectTimeout;
   proxygen::HTTPHeaders httpHeaders;
   std::string httpBody;

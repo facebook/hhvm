@@ -353,6 +353,11 @@ struct OptionalColorGroups {
   3: optional map<i32, i32> color_map;
 }
 
+struct NestedStructContainers {
+  1: list<easy> easy_list;
+  2: map<string, easy> easy_map;
+}
+
 @cpp.Type{name = "std::deque<int>"}
 typedef list<i32> list_typedef
 @cpp.Type{name = "std::unordered_set<int>"}

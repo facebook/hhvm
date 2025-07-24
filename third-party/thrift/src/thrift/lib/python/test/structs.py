@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import math
 import types
 import unittest
@@ -59,6 +60,7 @@ from testing.thrift_types import (
     Nested1,
     Nested2,
     Nested3,
+    NestedStructContainers,
     numerical,
     OptionalFile,
     Optionals,
@@ -80,6 +82,7 @@ from thrift.python.mutable_types import (
     to_thrift_map,
     to_thrift_set,
 )
+from thrift.python.protocol import Protocol
 from thrift.python.types import isset, Struct, StructOrUnion, update_nested_field
 
 ListT = TypeVar("ListT")
@@ -103,6 +106,7 @@ class StructTestsParameterized(unittest.TestCase):
         behind `test_types`.
         """
         # pyre-ignore[16]: has no attribute `test_types`
+        self.StringBucket: Type[StringBucket] = self.test_types.StringBucket
         self.OptionalFile: Type[OptionalFile] = self.test_types.OptionalFile
         self.File: Type[File] = self.test_types.File
         self.Kind: Type[Kind] = self.test_types.Kind
@@ -484,6 +488,55 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertIsNot(first_list, s.list_field)
         self.assertIsNot(first_map, s.map_field)
 
+    def test_compare_optional(self) -> None:
+        x = self.StringBucket()
+        y = self.StringBucket()
+
+        # Both are default so they are equal and neither are greater
+        self.assertFalse(x < y)
+        self.assertFalse(x > y)
+        self.assertTrue(x <= y)
+        self.assertTrue(x >= y)
+
+        x = self.StringBucket(one="one")
+
+        # x has a field set so it's greater
+        self.assertFalse(x < y)
+        self.assertTrue(x > y)
+        self.assertFalse(x <= y)
+        self.assertTrue(x >= y)
+
+        # x has an optional field set so even though it's empty string, "" > None
+        x = self.StringBucket(two="")
+        self.assertFalse(x < y)
+        self.assertTrue(x > y)
+        self.assertFalse(x <= y)
+        self.assertTrue(x >= y)
+
+        # comparisons happen in field order so because y.one > x.one, y > x
+        y = self.StringBucket(one="one")
+        self.assertTrue(x < y)
+        self.assertFalse(x > y)
+        self.assertTrue(x <= y)
+        self.assertFalse(x >= y)
+
+        z = self.easy()
+        with self.assertRaises(TypeError):
+            # TODO(ffrancet): pyre should complain about this
+            z < y  # noqa: B015
+
+    def test_instance_base_class(self) -> None:
+        self.assertIsInstance(Nested1(), Struct)
+        self.assertIsInstance(Nested1(), Nested1)
+        self.assertNotIsInstance(Nested1(), Nested2)
+        self.assertNotIsInstance(3, Nested1)
+        self.assertNotIsInstance(3, Struct)
+        self.assertTrue(issubclass(Nested1, Struct))
+        self.assertFalse(issubclass(int, Struct))
+        self.assertFalse(issubclass(int, Nested1))
+        self.assertFalse(issubclass(Struct, Nested1))
+        self.assertFalse(issubclass(Nested1, Nested2))
+
 
 class StructTestsImmutable(unittest.TestCase):
     """
@@ -721,6 +774,10 @@ class StructDeepcopyTests(unittest.TestCase):
             "thrift_mutable_types"
         )
         self.DefaultedFields: Type[DefaultedFields] = self.test_types.DefaultedFields
+        self.Nested3: Type[Nested3] = self.test_types.Nested3
+        self.NestedStructContainers: Type[NestedStructContainers] = (
+            self.test_types.NestedStructContainers
+        )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
@@ -854,55 +911,6 @@ class StructDeepcopyTests(unittest.TestCase):
             dif = copy.deepcopy(obj)
             self.assertIs(obj, dif)
 
-    def test_compare_optional(self) -> None:
-        x = self.StringBucket()
-        y = self.StringBucket()
-
-        # Both are default so they are equal and neither are greater
-        self.assertFalse(x < y)
-        self.assertFalse(x > y)
-        self.assertTrue(x <= y)
-        self.assertTrue(x >= y)
-
-        x = self.StringBucket(one="one")
-
-        # x has a field set so it's greater
-        self.assertFalse(x < y)
-        self.assertTrue(x > y)
-        self.assertFalse(x <= y)
-        self.assertTrue(x >= y)
-
-        # x has an optional field set so even though it's empty string, "" > None
-        x = self.StringBucket(two="")
-        self.assertFalse(x < y)
-        self.assertTrue(x > y)
-        self.assertFalse(x <= y)
-        self.assertTrue(x >= y)
-
-        # comparisons happen in field order so because y.one > x.one, y > x
-        y = self.StringBucket(one="one")
-        self.assertTrue(x < y)
-        self.assertFalse(x > y)
-        self.assertTrue(x <= y)
-        self.assertFalse(x >= y)
-
-        z = self.easy()
-        with self.assertRaises(TypeError):
-            # TODO(ffrancet): pyre should complain about this
-            z < y  # noqa: B015
-
-    def test_instance_base_class(self) -> None:
-        self.assertIsInstance(Nested1(), Struct)
-        self.assertIsInstance(Nested1(), Nested1)
-        self.assertNotIsInstance(Nested1(), Nested2)
-        self.assertNotIsInstance(3, Nested1)
-        self.assertNotIsInstance(3, Struct)
-        self.assertTrue(issubclass(Nested1, Struct))
-        self.assertFalse(issubclass(int, Struct))
-        self.assertFalse(issubclass(int, Nested1))
-        self.assertFalse(issubclass(Struct, Nested1))
-        self.assertFalse(issubclass(Nested1, Nested2))
-
     def test_field_deepcopy(self) -> None:
         d1 = self.DefaultedFields()
         d2 = self.DefaultedFields()
@@ -942,3 +950,86 @@ class StructDeepcopyTests(unittest.TestCase):
         self.assertEqual(len(d2.location_map[47]), 2)
         self.assertNotEqual(d1.location_map[47][0].lat, d2.location_map[47][0].lat)
         self.assertEqual(d1.location_map[47][0].lon, d2.location_map[47][0].lon)
+
+    def test_nested_struct_deepcopy(self) -> None:
+        n = self.Nested3(c=self.easy(name="foo", val=42))
+
+        n_copy = copy.deepcopy(n)
+        easy_copy = n_copy.c
+        self.assertEqual(n.c, easy_copy)
+
+        if self.is_mutable_run:
+            self.assertIsNot(n.c, easy_copy)
+        else:
+            self.assertIs(n, n_copy)
+            return
+
+        assert isinstance(easy_copy, mutable_test_types.easy)
+        easy_copy.name = "bar"
+        easy_copy.val = 128
+
+        json_copy = json.loads(
+            self.serializer.serialize(n_copy, protocol=Protocol.JSON).decode()
+        )
+        self.assertEqual(n_copy.c.name, "bar")
+        self.assertEqual(n_copy.c.val, 128)
+        self.assertEqual(json_copy["c"]["name"], "bar")
+        self.assertEqual(json_copy["c"]["val"], 128)
+
+    def test_nested_struct_list_deepcopy(self) -> None:
+        n = self.NestedStructContainers(
+            # pyre-ignore[6]: need to make ThriftListWrapper a Sequence
+            easy_list=self.to_list([self.easy(name="foo", val=42)])
+        )
+
+        n_copy = copy.deepcopy(n)
+        e_copy = n_copy.easy_list[0]
+        self.assertEqual(n.easy_list[0], e_copy)
+
+        if self.is_mutable_run:
+            self.assertIsNot(n.easy_list[0], e_copy)
+        else:
+            self.assertIs(n, n_copy)
+            return
+
+        assert isinstance(e_copy, mutable_test_types.easy)
+        e_copy.name = "bar"
+        e_copy.val = 128
+
+        json_copy = json.loads(
+            self.serializer.serialize(n_copy, protocol=Protocol.JSON).decode()
+        )
+        self.assertEqual(n_copy.easy_list[0].name, "bar")
+        self.assertEqual(n_copy.easy_list[0].val, 128)
+        # BAD: the serialized values don't match the mutated python values
+        self.assertEqual(json_copy["easy_list"][0]["name"], "bar")
+        self.assertEqual(json_copy["easy_list"][0]["val"], 128)
+
+    def test_nested_struct_map_deepcopy(self) -> None:
+        n = self.NestedStructContainers(
+            # pyre-ignore[6]: need to make ThriftListWrapper a Sequence
+            easy_map=self.to_map({"baz": self.easy(name="foo", val=42)})
+        )
+
+        n_copy = copy.deepcopy(n)
+        e_copy = n_copy.easy_map["baz"]
+        self.assertEqual(n.easy_map["baz"], e_copy)
+
+        if self.is_mutable_run:
+            self.assertIsNot(n.easy_map["baz"], e_copy)
+        else:
+            self.assertIs(n, n_copy)
+            return
+
+        assert isinstance(e_copy, mutable_test_types.easy)
+        e_copy.name = "bar"
+        e_copy.val = 128
+
+        json_copy = json.loads(
+            self.serializer.serialize(n_copy, protocol=Protocol.JSON).decode()
+        )
+        self.assertEqual(n_copy.easy_map["baz"].name, "bar")
+        self.assertEqual(n_copy.easy_map["baz"].val, 128)
+        # NOTE: after landing a mitigation, these work as expected
+        self.assertEqual(json_copy["easy_map"]["baz"]["name"], "bar")
+        self.assertEqual(json_copy["easy_map"]["baz"]["val"], 128)

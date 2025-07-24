@@ -58,7 +58,7 @@ TEST(SerializableRecordTest, Bool) {
 
   EXPECT_EQ(toDebugString(r), "Bool(true)\n");
 
-  EXPECT_EQ(encode(r).boolDatum_ref().value(), true);
+  EXPECT_EQ(encode(r).boolDatum().value(), true);
 }
 
 TEST(SerializableRecordTest, Int8) {
@@ -73,7 +73,7 @@ TEST(SerializableRecordTest, Int8) {
 
   EXPECT_EQ(toDebugString(r), "Int8(42)\n");
 
-  EXPECT_EQ(encode(r).int8Datum_ref().value(), 42);
+  EXPECT_EQ(encode(r).int8Datum().value(), 42);
 }
 
 TEST(SerializableRecordTest, Int16) {
@@ -88,7 +88,7 @@ TEST(SerializableRecordTest, Int16) {
 
   EXPECT_EQ(toDebugString(r), "Int16(42)\n");
 
-  EXPECT_EQ(encode(r).int16Datum_ref().value(), 42);
+  EXPECT_EQ(encode(r).int16Datum().value(), 42);
 }
 
 TEST(SerializableRecordTest, Int32) {
@@ -103,7 +103,7 @@ TEST(SerializableRecordTest, Int32) {
 
   EXPECT_EQ(toDebugString(r), "Int32(42)\n");
 
-  EXPECT_EQ(encode(r).int32Datum_ref().value(), 42);
+  EXPECT_EQ(encode(r).int32Datum().value(), 42);
 }
 
 TEST(SerializableRecordTest, Int64) {
@@ -118,7 +118,7 @@ TEST(SerializableRecordTest, Int64) {
 
   EXPECT_EQ(toDebugString(r), "Int64(42)\n");
 
-  EXPECT_EQ(encode(r).int64Datum_ref().value(), 42);
+  EXPECT_EQ(encode(r).int64Datum().value(), 42);
 }
 
 TEST(SerializableRecordTest, Float32) {
@@ -133,7 +133,7 @@ TEST(SerializableRecordTest, Float32) {
 
   EXPECT_EQ(toDebugString(r), "Float32(42)\n");
 
-  EXPECT_EQ(encode(r).float32Datum_ref().value(), 42);
+  EXPECT_EQ(encode(r).float32Datum().value(), 42);
 }
 
 TEST(SerializableRecordTest, Float64) {
@@ -149,7 +149,7 @@ TEST(SerializableRecordTest, Float64) {
 
   EXPECT_EQ(toDebugString(r), "Float64(42)\n");
 
-  EXPECT_EQ(encode(r).float64Datum_ref().value(), 42);
+  EXPECT_EQ(encode(r).float64Datum().value(), 42);
 }
 
 TEST(SerializableRecordTest, Text) {
@@ -164,7 +164,7 @@ TEST(SerializableRecordTest, Text) {
 
   EXPECT_EQ(toDebugString(r), "Text(\"hello\")\n");
 
-  EXPECT_EQ(encode(r).textDatum_ref().value(), "hello");
+  EXPECT_EQ(encode(r).textDatum().value(), "hello");
 }
 
 TEST(SerializableRecordTest, ByteArray) {
@@ -179,7 +179,7 @@ TEST(SerializableRecordTest, ByteArray) {
   EXPECT_EQ(toDebugString(r), "ByteArray(\"aGVsbG8=\")\n");
 
   EXPECT_TRUE(folly::IOBufEqualTo{}(
-      encode(r).byteArrayDatum_ref().value(), *makeByteArray("hello")));
+      encode(r).byteArrayDatum().value(), *makeByteArray("hello")));
 }
 
 TEST(SerializableRecordTest, Kind) {
@@ -445,28 +445,28 @@ TEST(SerializableRecordTest, InvalidFloat) {
 TEST(SerializableRecordTest, InvalidDatumSerde) {
   EXPECT_NO_THROW({
     SerializableRecordUnion raw;
-    raw.float64Datum_ref() = 0.0;
+    raw.float64Datum() = 0.0;
     decode(std::move(raw));
   });
 
   EXPECT_THROW(
       {
         SerializableRecordUnion raw;
-        raw.float64Datum_ref() = -0.0;
+        raw.float64Datum() = -0.0;
         decode(std::move(raw));
       },
       std::invalid_argument);
   EXPECT_THROW(
       {
         SerializableRecordUnion raw;
-        raw.float32Datum_ref() = std::numeric_limits<float>::quiet_NaN();
+        raw.float32Datum() = std::numeric_limits<float>::quiet_NaN();
         decode(std::move(raw));
       },
       std::invalid_argument);
   EXPECT_THROW(
       {
         SerializableRecordUnion raw;
-        raw.textDatum_ref() = "\xFF\xFE\xFD";
+        raw.textDatum() = "\xFF\xFE\xFD";
         decode(std::move(raw));
       },
       std::invalid_argument);

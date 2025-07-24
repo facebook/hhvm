@@ -231,9 +231,8 @@ void HeaderClientChannel::setRequestHeaderOptions(
   header->setClientType(getClientType());
   header->forceClientType(true);
   if (auto compressionConfig = header->getDesiredCompressionConfig()) {
-    if (auto codecRef = compressionConfig->codecConfig_ref()) {
-      if (payloadSize >
-          compressionConfig->compressionSizeLimit_ref().value_or(0)) {
+    if (auto codecRef = compressionConfig->codecConfig()) {
+      if (payloadSize > compressionConfig->compressionSizeLimit().value_or(0)) {
         switch (codecRef->getType()) {
           case CodecConfig::Type::zlibConfig:
             header->setTransform(THeader::ZLIB_TRANSFORM);
@@ -256,11 +255,11 @@ void HeaderClientChannel::attachMetadataOnce(THeader* header) {
   if (std::exchange(firstRequest_, false)) {
     ClientMetadata md;
     if (const auto& hostMetadata = ClientChannel::getHostMetadata()) {
-      md.hostname_ref().from_optional(hostMetadata->hostname);
-      md.otherMetadata_ref().from_optional(hostMetadata->otherMetadata);
+      md.hostname().from_optional(hostMetadata->hostname);
+      md.otherMetadata().from_optional(hostMetadata->otherMetadata);
     }
     if (!agentName_.empty()) {
-      md.agent_ref() = std::move(agentName_);
+      md.agent() = std::move(agentName_);
     }
     header->setClientMetadata(md);
   }

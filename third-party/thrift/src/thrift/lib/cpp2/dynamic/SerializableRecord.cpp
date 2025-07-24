@@ -92,27 +92,27 @@ SerializableRecord& SerializableRecord::operator=(
   // throw exceptions.
   switch (value.getType()) {
     case Type::boolDatum:
-      return SerializableRecord::Bool(*value.boolDatum_ref());
+      return SerializableRecord::Bool(*value.boolDatum());
     case Type::int8Datum:
-      return SerializableRecord::Int8(*value.int8Datum_ref());
+      return SerializableRecord::Int8(*value.int8Datum());
     case Type::int16Datum:
-      return SerializableRecord::Int16(*value.int16Datum_ref());
+      return SerializableRecord::Int16(*value.int16Datum());
     case Type::int32Datum:
-      return SerializableRecord::Int32(*value.int32Datum_ref());
+      return SerializableRecord::Int32(*value.int32Datum());
     case Type::int64Datum:
-      return SerializableRecord::Int64(*value.int64Datum_ref());
+      return SerializableRecord::Int64(*value.int64Datum());
     case Type::float32Datum:
-      return SerializableRecord::Float32(*value.float32Datum_ref());
+      return SerializableRecord::Float32(*value.float32Datum());
     case Type::float64Datum:
-      return SerializableRecord::Float64(*value.float64Datum_ref());
+      return SerializableRecord::Float64(*value.float64Datum());
     case Type::textDatum:
-      return SerializableRecord::Text(std::move(*value.textDatum_ref()));
+      return SerializableRecord::Text(std::move(*value.textDatum()));
     case Type::byteArrayDatum:
       // union_field_ref::value() elides the unique_ptr, which we need here.
       return SerializableRecord::ByteArray(value.move_byteArrayDatum());
     case Type::fieldSetDatum: {
       std::map<FieldId, SerializableRecordUnion>& fieldSet =
-          *value.fieldSetDatum_ref();
+          *value.fieldSetDatum();
       SerializableRecord::FieldSet result;
       for (auto&& [id, datum] : fieldSet) {
         result.emplace(id, fromThrift(std::move(datum)));
@@ -120,7 +120,7 @@ SerializableRecord& SerializableRecord::operator=(
       return result;
     }
     case Type::listDatum: {
-      std::vector<SerializableRecordUnion>& list = *value.listDatum_ref();
+      std::vector<SerializableRecordUnion>& list = *value.listDatum();
       SerializableRecord::List result;
       result.reserve(list.size());
       for (auto& datum : list) {
@@ -129,7 +129,7 @@ SerializableRecord& SerializableRecord::operator=(
       return result;
     }
     case Type::setDatum: {
-      std::vector<SerializableRecordUnion>& list = *value.setDatum_ref();
+      std::vector<SerializableRecordUnion>& list = *value.setDatum();
       SerializableRecord::Set result;
       for (auto& datum : list) {
         auto [_, inserted] = result.insert(fromThrift(std::move(datum)));
@@ -141,7 +141,7 @@ SerializableRecord& SerializableRecord::operator=(
       return result;
     }
     case Type::mapDatum: {
-      std::vector<SerializableRecordMapEntry>& list = *value.mapDatum_ref();
+      std::vector<SerializableRecordMapEntry>& list = *value.mapDatum();
       SerializableRecord::Map result;
       for (auto& entry : list) {
         SerializableRecordUnion& k = *entry.key();
@@ -169,28 +169,28 @@ SerializableRecord& SerializableRecord::operator=(
   SerializableRecordUnion result;
   switch (value.kind()) {
     case Kind::BOOL:
-      result.boolDatum_ref() = bool(value.asBool());
+      result.boolDatum() = bool(value.asBool());
       break;
     case Kind::INT8:
-      result.int8Datum_ref() = std::int8_t(value.asInt8());
+      result.int8Datum() = std::int8_t(value.asInt8());
       break;
     case Kind::INT16:
-      result.int16Datum_ref() = std::int16_t(value.asInt16());
+      result.int16Datum() = std::int16_t(value.asInt16());
       break;
     case Kind::INT32:
-      result.int32Datum_ref() = std::int32_t(value.asInt32());
+      result.int32Datum() = std::int32_t(value.asInt32());
       break;
     case Kind::INT64:
-      result.int64Datum_ref() = std::int64_t(value.asInt64());
+      result.int64Datum() = std::int64_t(value.asInt64());
       break;
     case Kind::FLOAT32:
-      result.float32Datum_ref() = float(value.asFloat32());
+      result.float32Datum() = float(value.asFloat32());
       break;
     case Kind::FLOAT64:
-      result.float64Datum_ref() = double(value.asFloat64());
+      result.float64Datum() = double(value.asFloat64());
       break;
     case Kind::TEXT:
-      result.textDatum_ref() = std::string(value.asText());
+      result.textDatum() = std::string(value.asText());
       break;
     case Kind::BYTE_ARRAY:
       result.set_byteArrayDatum(value.asByteArray()->clone());
@@ -200,7 +200,7 @@ SerializableRecord& SerializableRecord::operator=(
       for (const auto& [id, datum] : value.asFieldSet()) {
         fieldSet.emplace(id, toThrift(datum));
       }
-      result.fieldSetDatum_ref() = std::move(fieldSet);
+      result.fieldSetDatum() = std::move(fieldSet);
     } break;
     case Kind::LIST: {
       std::vector<SerializableRecordUnion> list;
@@ -209,7 +209,7 @@ SerializableRecord& SerializableRecord::operator=(
       for (const auto& r : valueAsList) {
         list.push_back(toThrift(r));
       }
-      result.listDatum_ref() = std::move(list);
+      result.listDatum() = std::move(list);
     } break;
     case Kind::SET: {
       // NOTE: the order of the output is not deterministic
@@ -219,7 +219,7 @@ SerializableRecord& SerializableRecord::operator=(
       for (const auto& r : valueAsSet) {
         set.push_back(toThrift(r));
       }
-      result.setDatum_ref() = std::move(set);
+      result.setDatum() = std::move(set);
     } break;
     case Kind::MAP: {
       // NOTE: the order of the output is not deterministic
@@ -231,7 +231,7 @@ SerializableRecord& SerializableRecord::operator=(
         entry.value() = toThrift(v);
         map.push_back(std::move(entry));
       }
-      result.mapDatum_ref() = std::move(map);
+      result.mapDatum() = std::move(map);
     } break;
     default:
       break;

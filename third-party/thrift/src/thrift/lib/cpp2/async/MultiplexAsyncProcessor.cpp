@@ -228,16 +228,15 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
            const metadata::ThriftServiceMetadataResponse& src) {
           // The multiplexed services makes reference to a composed service, so
           // we need to include it in the metadata.
-          auto& metadata = *src.metadata_ref();
-          dst.enums_ref()->insert(
-              metadata.enums_ref()->begin(), metadata.enums_ref()->end());
-          dst.structs_ref()->insert(
-              metadata.structs_ref()->begin(), metadata.structs_ref()->end());
-          dst.exceptions_ref()->insert(
-              metadata.exceptions_ref()->begin(),
-              metadata.exceptions_ref()->end());
-          dst.services_ref()->insert(
-              metadata.services_ref()->begin(), metadata.services_ref()->end());
+          auto& metadata = *src.metadata();
+          dst.enums()->insert(
+              metadata.enums()->begin(), metadata.enums()->end());
+          dst.structs()->insert(
+              metadata.structs()->begin(), metadata.structs()->end());
+          dst.exceptions()->insert(
+              metadata.exceptions()->begin(), metadata.exceptions()->end());
+          dst.services()->insert(
+              metadata.services()->begin(), metadata.services()->end());
         };
 
     for (auto& processor : processors_) {
@@ -245,18 +244,18 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
       processor->getServiceMetadata(response);
       // Copying gives precedence to earlier inserted entries - this matches
       // the semantics of the processor method delegation.
-      copyMetadataInto(*actualResponse.metadata_ref(), response);
+      copyMetadataInto(*actualResponse.metadata(), response);
 
-      actualResponse.services_ref()->insert(
-          actualResponse.services_ref()->end(),
-          response.services_ref()->begin(),
-          response.services_ref()->end());
+      actualResponse.services()->insert(
+          actualResponse.services()->end(),
+          response.services()->begin(),
+          response.services()->end());
     }
 
     // The underlying AsyncProcessor::getServiceMetadata may not be implemented
     // if using: a service compiled without metadata support; or a custom
     // AsyncProcessor implementation
-    if (actualResponse.services_ref()->empty()) {
+    if (actualResponse.services()->empty()) {
       return;
     }
 
@@ -264,13 +263,11 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
     // There is no "correct" way to set context for MultiplexAsyncProcessor.
     // Our best guess would be the first service, which is likely to be most
     // relevant to the user.
-    const auto& defaultServiceContextRef =
-        actualResponse.services_ref()->front();
-    actualResponse.context_ref()->service_info_ref() =
-        actualResponse.metadata_ref()->services_ref()->at(
-            *defaultServiceContextRef.service_name_ref());
-    actualResponse.context_ref()->module_ref() =
-        *defaultServiceContextRef.module_ref();
+    const auto& defaultServiceContextRef = actualResponse.services()->front();
+    actualResponse.context()->service_info() =
+        actualResponse.metadata()->services()->at(
+            *defaultServiceContextRef.service_name());
+    actualResponse.context()->module() = *defaultServiceContextRef.module();
   }
 
   void terminateInteraction(
@@ -336,7 +333,7 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
       Cpp2RequestContext* context, AsyncProcessor& processor) {
     if (auto interactionCreate = context->getInteractionCreate();
         interactionCreate.has_value() &&
-        *interactionCreate->interactionId_ref() > 0) {
+        *interactionCreate->interactionId() > 0) {
       if (&processor == defaultInteractionProcessor_) {
         return;
       }
@@ -350,7 +347,7 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
         // which means that the underlying processor should fail (and close
         // the connection) - it's safe to ignore the duplicated ID.
         inflightInteractions_.emplace(
-            *interactionCreate->interactionId_ref(), &processor);
+            *interactionCreate->interactionId(), &processor);
       }
     }
   }

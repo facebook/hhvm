@@ -325,8 +325,13 @@ def has_custom_default(s: str) -> bool:
     False
     >>> has_custom_default("i32{42}|thrift.box")
     True
+    >>> has_custom_default("@MyAnnot{name = 42}|thrift.box")
+    False
     """
-    return s.find("{") != -1 and s.find("}") != -1
+    for mod in s.split("|"):
+        if mod.find("@") == -1 and mod.find("{") != -1 and mod.find("}") != -1:
+            return True
+    return False
 
 
 def remove_custom_default(s: str) -> str:

@@ -718,6 +718,12 @@ void ThriftServer::setup() {
     // back to ThriftServer
     connEventCallback_ = std::make_shared<ConnectionEventCallback>(*this);
     ServerBootstrap::useConnectionEventCallback(connEventCallback_);
+
+    // Interceptor onStartServing() needs to be called before we bind to the
+    // socket, otherwise it is possible for connections to be accepted
+    // (and onConnection() called) before onStartServing is called.
+    callInterceptorsOnStartServing();
+
     if (socket_) {
       ServerBootstrap::bind(std::move(socket_));
     } else if (!getAddress().isInitialized()) {
@@ -782,7 +788,7 @@ void ThriftServer::setup() {
     internalStatus_.store(ServerStatus::STARTING, std::memory_order_release);
 
     // Called after setup
-    callOnStartServing();
+    callHandlersOnStartServing();
 
     // After the onStartServing hooks have finished, we are ready to handle
     // requests, at least from the server's perspective.
@@ -1805,23 +1811,23 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
   }
 }
 
-void ThriftServer::callOnStartServing() {
+void ThriftServer::callInterceptorsOnStartServing() {
 #if FOLLY_HAS_COROUTINES
-  {
-    ServiceInterceptorBase::InitParams initParams;
+  ServiceInterceptorBase::InitParams initParams;
 #ifdef THRIFT_SCHEMA_AVAILABLE
-    initParams.serviceSchema =
-        decoratedProcessorFactory_->getServiceSchemaNodes();
+  initParams.serviceSchema =
+      decoratedProcessorFactory_->getServiceSchemaNodes();
 #endif
 
-    std::vector<folly::coro::Task<void>> tasks;
-    for (const auto& interceptor : getServiceInterceptors()) {
-      tasks.emplace_back(interceptor->co_onStartServing(initParams));
-    }
-    folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
+  std::vector<folly::coro::Task<void>> tasks;
+  for (const auto& interceptor : getServiceInterceptors()) {
+    tasks.emplace_back(interceptor->co_onStartServing(initParams));
   }
+  folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
 #endif // FOLLY_HAS_COROUTINES
+}
 
+void ThriftServer::callHandlersOnStartServing() {
   auto handlerList = collectServiceHandlers();
   // Exception is handled in setup()
   std::vector<folly::SemiFuture<folly::Unit>> futures;

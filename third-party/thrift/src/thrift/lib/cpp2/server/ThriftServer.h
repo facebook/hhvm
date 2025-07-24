@@ -1976,7 +1976,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void stopCPUWorkers();
   void stopAcceptingAndJoinOutstandingRequests();
 
-  void callOnStartServing();
+  void callInterceptorsOnStartServing();
+  void callHandlersOnStartServing();
   void callOnStopRequested();
 
   void ensureDecoratedProcessorFactoryInitialized();

@@ -14,7 +14,7 @@ test = false
 
 [dependencies]
 anyhow = "1.0.98"
-clap = { version = "4.5.38", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.5.41", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 direct_decl_parser = { version = "0.0.0", path = "../direct_decl_parser" }
 hh_config = { version = "0.0.0", path = "../../../../utils/hh_config/cargo" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }

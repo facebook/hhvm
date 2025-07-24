@@ -1692,7 +1692,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             s.unqualified_map_string_i32, s_clone.unqualified_map_string_i32
         )
         self.assertEqual(b"abc", bytes(s_clone.unqualified_binary))
-        self.assertIs(s.unqualified_binary, s_clone.unqualified_binary)
+        # deep copy uses serialization-deserialization, so it's a true copy
+        self.assertIsNot(s.unqualified_binary, s_clone.unqualified_binary)
 
     def test_call_reset_field_to_standard_default(self) -> None:
         s1 = TestStructCopyMutable(

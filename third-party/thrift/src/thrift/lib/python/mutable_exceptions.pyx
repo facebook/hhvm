@@ -18,6 +18,7 @@ from libcpp.utility cimport move as std_move
 import copy
 
 from thrift.python.mutable_serializer cimport c_mutable_serialize, c_mutable_deserialize
+import thrift.python.mutable_serializer as mutable_serializer
 from thrift.python.mutable_types cimport (
     MutableStructInfo,
     set_mutable_struct_field,
@@ -203,8 +204,16 @@ cdef class MutableGeneratedError(Error):
         fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
         return f"{type(self).__name__}({fields})"
 
+
+    def __copy__(MutableGeneratedError self):
+        assert isinstance(self._fbthrift_data[-1], MutableGeneratedError)
+        return self._fbthrift_from_internal_data(copy.copy(self._fbthrift_data[:-1]))
+
     def __deepcopy__(MutableGeneratedError self, memo):
-        return self._fbthrift_from_internal_data(copy.deepcopy(self._fbthrift_data, memo))
+        # Use serialization-deserialization to create a truly fresh copy.
+        # See the comment for MutableStruct.__deepcopy__ for more explanation.
+        cdef bytes buf = mutable_serializer.serialize(self, Protocol.BINARY)
+        return mutable_serializer.deserialize(type(self), buf, Protocol.BINARY)
 
     def __eq__(MutableGeneratedError self, other):
         if other is self:

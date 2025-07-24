@@ -482,18 +482,10 @@ class SerializerTests(unittest.TestCase):
             # Accessing the property is when the string is decoded as UTF-8.
             sb.one
 
-        if self.is_mutable_run:
-            # TODO(T232104817): Revert when mutable serialization is fixed.
-            # Temporary: mutable structs are converted to thrift-python
-            # while we fix mutable serialization issues. The conversion
-            # raises UnicodeDecodeError.
-            with self.assertRaises(UnicodeDecodeError):
-                self.serializer.serialize(sb, protocol=Protocol.BINARY)
-        else:
-            # thrift-python retains non-unicode string without
-            # data loss on serialization roundtrip
-            reserialized = self.serializer.serialize(sb, protocol=Protocol.BINARY)
-            self.assertEqual(encoded, reserialized)
+        # curiously, thrift-python can retain non-unicode string without
+        # data loss on serialization roundtrip
+        reserialized = self.serializer.serialize(sb, protocol=Protocol.BINARY)
+        self.assertEqual(encoded, reserialized)
 
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:

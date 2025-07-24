@@ -18,6 +18,8 @@
 
 from __future__ import annotations
 
+import copy
+
 import types
 
 import unittest
@@ -309,3 +311,25 @@ class ExceptionTests(unittest.TestCase):
         self.assertFalse(issubclass(int, HardErrorType))
         self.assertFalse(issubclass(int, GeneratedError))
         self.assertFalse(issubclass(HardErrorType, Struct))
+
+    def test_copy(self) -> None:
+        x = self.HardError(errortext="err", code=2)
+        y = copy.copy(x)
+        self.assertEqual(x, y)
+        self.assertIs(x.errortext, y.errortext)
+        if self.is_mutable_run:
+            self.assertIsNot(x, y)
+        else:
+            self.assertIs(x, y)
+
+    def test_deepcopy(self) -> None:
+        x = self.HardError(errortext="err", code=2)
+        y = copy.deepcopy(x)
+        self.assertEqual(x, y)
+
+        if self.is_mutable_run:
+            self.assertIsNot(x, y)
+            # strings are different, but ints are same (small int optimization)
+            self.assertIsNot(x.errortext, y.errortext)
+        else:
+            self.assertIs(x, y)

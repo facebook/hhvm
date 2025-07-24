@@ -26,6 +26,7 @@ import copy
 
 from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_serializer cimport c_mutable_serialize, c_mutable_deserialize
+import thrift.python.mutable_serializer as mutable_serializer
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
     MutableSetTypeInfo,
@@ -339,10 +340,15 @@ cdef class MutableStruct(MutableStructOrUnion):
         return self_copy
 
     def __deepcopy__(self, memo):
-        # When `deepcopy` is called on an instance (`self`), the instance must
-        # already be populated in `_fbthrift_data`.
-        assert self._fbthrift_has_struct_instance(self._fbthrift_data)
-        return self._fbthrift_from_internal_data(copy.deepcopy(self._fbthrift_data[:-1]))
+        # Use serialization-deserialization to create a truly fresh copy.
+        # Using deepcopy with memo has implications for containers of structs
+        # where references to the same struct in container in original 
+        # cause the same linking to be present in copied container.
+        # For example, if we have lst = [s, s], then deepcopy(lst) with memo
+        # yields [s1, s1]. But deepcopy semantic implies each object should
+        # be a fresh copy, so we instead product deepycopy(lst) -> [s1, s2]
+        cdef bytes buf = mutable_serializer.serialize(self, Protocol.BINARY)
+        return mutable_serializer.deserialize(type(self), buf, Protocol.BINARY)
 
     def fbthrift_copy_from(self, other):
         """
@@ -1104,10 +1110,10 @@ cdef class MutableUnion(MutableStructOrUnion):
         return self._fbthrift_from_internal_data(copy.copy(self._fbthrift_data[:-1]))
 
     def __deepcopy__(self, memo):
-        # When `deepcopy` is called on an instance (`self`), the instance must
-        # already be populated in `_fbthrift_data`.
-        assert len(self._fbthrift_data) == 3
-        return self._fbthrift_from_internal_data(copy.deepcopy(self._fbthrift_data[:-1]))
+        # Use serialization-deserialization to create a truly fresh copy.
+        # See the comment for MutableStruct.__deepcopy__ for more explanation.
+        cdef bytes buf = mutable_serializer.serialize(self, Protocol.BINARY)
+        return mutable_serializer.deserialize(type(self), buf, Protocol.BINARY)
 
     @classmethod
     def _fbthrift_from_internal_data(cls, data):

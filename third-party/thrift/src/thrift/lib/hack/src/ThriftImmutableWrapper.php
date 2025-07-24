@@ -19,8 +19,16 @@
 /**
  * Immutable Wrapper class on Thrift structs exposing generic capabilities.
  *
- * Note: this base class must only expose readonly methods and must never
- * allow a caller to mutate the underlying thrift object.
+ * Hack stores complex types by reference. This means that the underlying
+ * thrift object is a reference. To prevent any accidental mutation to the
+ * original object, one must only expose through this wrapper readonly methods
+ * that return:
+ * - primtive types, e.g., bool, int, float, string,
+ * - or value types such as Hack arrays https://docs.hhvm.com/hack/arrays-and-collections/mutating-values
+ * - or a (deep) copy of a complex type,
+ * - or alternatively (not recommended) a nested immutable thrift struct, which
+ * is subject to the same rules above.
+ *
  */
 <<__ConsistentConstruct, Oncalls('signals_infra')>>
 abstract class ThriftImmutableWrapper

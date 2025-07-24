@@ -209,7 +209,6 @@ class HTTP1xCodec : public HTTPCodec {
   http_parser parser_;
   const folly::IOBuf* currentIngressBuf_;
   std::unique_ptr<HTTPMessage> msg_;
-  std::unique_ptr<HTTPMessage> upgradeRequest_;
   std::unique_ptr<HTTPHeaders> trailers_;
   std::string currentHeaderName_;
   folly::StringPiece currentHeaderNameStringPiece_;

@@ -113,7 +113,6 @@ HTTP1xCodec::HTTP1xCodec(TransportDirection direction,
       ingressUpgrade_(false),
       ingressUpgradeComplete_(false),
       egressUpgrade_(false),
-      nativeUpgrade_(false),
       headersComplete_(false),
       releaseEgressAfterRequest_(false) {
   switch (direction) {
@@ -1235,22 +1234,11 @@ int HTTP1xCodec::onMessageComplete() {
   switch (transportDirection_) {
     case TransportDirection::DOWNSTREAM: {
       requestPending_ = false;
-      if (upgradeRequest_) {
-        ingressUpgrade_ =
-            callback_->onNativeProtocolUpgrade(ingressTxnID_,
-                                               upgradeResult_.first,
-                                               upgradeResult_.second,
-                                               *upgradeRequest_);
-        upgradeRequest_.reset();
-      }
-      // else there was no match, OR we upgraded to http/1.1 OR someone
-      // specified a non-native protocol in the setAllowedUpgradeProtocols.
-      // No-ops
       break;
     }
     case TransportDirection::UPSTREAM:
       responsePending_ = is1xxResponse_;
-      if (is1xxResponse_ && !nativeUpgrade_ && !ingressUpgrade_) {
+      if (is1xxResponse_ && !ingressUpgrade_) {
         // Some other 1xx status code, which doesn't terminate the message
         return 0;
       }
@@ -1259,12 +1247,8 @@ int HTTP1xCodec::onMessageComplete() {
   // For downstream, always call onMessageComplete. If native upgrade,
   // pass upgrade=false. Else pass ingressUpgrade_.
   // For upstream, call onMessagComplete if not native upgrade.
-  if (!nativeUpgrade_) {
-    callback_->onMessageComplete(ingressTxnID_, ingressUpgrade_);
-  } else if (transportDirection_ == TransportDirection::DOWNSTREAM) {
-    // native upgrade and downstream.
-    callback_->onMessageComplete(ingressTxnID_, false);
-  }
+  callback_->onMessageComplete(ingressTxnID_, ingressUpgrade_);
+
   // else we suppressed onHeadersComplete, suppress onMessageComplete also.
   // The new codec will handle these callbacks with the real message
 

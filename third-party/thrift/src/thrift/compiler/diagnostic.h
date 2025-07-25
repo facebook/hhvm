@@ -219,6 +219,7 @@ struct diagnostic_params {
   bool debug = false;
   bool info = false;
   int warn_level = 1;
+  bool log_metrics = true;
 
   bool should_report(diagnostic_level level) const {
     switch (level) {

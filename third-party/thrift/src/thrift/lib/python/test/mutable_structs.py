@@ -14,6 +14,7 @@
 
 # pyre-strict
 
+import copy
 import pickle
 import types
 import typing
@@ -46,6 +47,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructNested_0 as TestStructNested_0_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
+    TestStructWithFloatingPoint as TestStructWithFloatingPointMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
 
@@ -564,3 +566,20 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s1.map_fld["1"].is_set = False
 
         self.assertEqual(s1, s2)
+
+    def test_deepcopy_floating_point(self) -> None:
+        p = 3.14159265359
+        s1 = TestStructWithFloatingPointMutable(float_field=p, double_field=p)
+
+        self.assertEqual(s1.float_field, p)
+        self.assertEqual(s1.double_field, p)
+
+        s2 = copy.deepcopy(s1)  # or s1()
+
+        self.assertEqual(s2.double_field, p)
+
+        # In Python, runtime floating-point numbers are double precision;
+        # however, during a deepcopy, the object goes through a serialization
+        # cycle, and the Thrift float field is truncated to its 'real' value
+        # that can be held by a single precision floating field
+        self.assertNotEqual(s2.float_field, p)

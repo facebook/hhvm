@@ -317,3 +317,8 @@ struct TestContainersWithStructElements {
   1: list<TestStructBool> list_fld;
   2: map<string, TestStructBool> map_fld;
 }
+
+struct TestStructWithFloatingPoint {
+  1: float float_field;
+  2: double double_field;
+}

@@ -695,29 +695,10 @@ class TypeSystemFacade final : public type_system::TypeSystem {
 
   std::optional<type_system::DefinitionRef> getUserDefinedType(
       type_system::UriView uri) const override {
-    const DefinitionNode* def = resolver_.getDefinitionNodeByUri(uri);
-    if (!def) {
-      return std::nullopt;
+    if (const DefinitionNode* def = resolver_.getDefinitionNodeByUri(uri)) {
+      return convertUserDefinedType(def);
     }
-
-    {
-      std::shared_lock rlock(cacheMutex_);
-      if (auto it = cache_.find(def); it != cache_.end()) {
-        return folly::variant_match(it->second, [](auto& def) {
-          return type_system::DefinitionRef{&def};
-        });
-      }
-    }
-
-    std::unique_lock wlock(cacheMutex_);
-    if (auto it = cache_.find(def); it != cache_.end()) {
-      return folly::variant_match(it->second, [](auto& def) {
-        return type_system::DefinitionRef{&def};
-      });
-    }
-
-    // Holding the lock allows shedding the const qualifier
-    return const_cast<TypeSystemFacade&>(*this).convertUserDefinedType(def);
+    return std::nullopt;
   }
 
   std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
@@ -730,10 +711,27 @@ class TypeSystemFacade final : public type_system::TypeSystem {
 
   // Convert the definition to TypeSystem's representation.
   type_system::DefinitionRef convertUserDefinedType(
-      const DefinitionNode* rootSgDef) const {
+      const DefinitionNode* def) const {
+    auto toTSDefinitionRef = [](const TSDefinition* ts) {
+      return folly::variant_match(*ts, [](auto& member) {
+        return type_system::DefinitionRef{&member};
+      });
+    };
+
+    {
+      std::shared_lock rlock(cacheMutex_);
+      if (auto cached = folly::get_ptr(cache_, def)) {
+        return toTSDefinitionRef(cached);
+      }
+    }
+
     std::unique_lock wlock(cacheMutex_);
-    return const_cast<TypeSystemFacade*>(this)->convertUserDefinedType(
-        rootSgDef);
+    if (auto cached = folly::get_ptr(cache_, def)) {
+      return toTSDefinitionRef(cached);
+    }
+
+    // Holding the lock allows shedding the const qualifier
+    return const_cast<TypeSystemFacade&>(*this).convertUserDefinedType(def);
   }
 
   const DefinitionNode& reverseUserDefinedType(

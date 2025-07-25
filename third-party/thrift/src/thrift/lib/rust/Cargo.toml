@@ -18,7 +18,7 @@ bytes = { version = "1.10", features = ["serde"] }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 ghost = "0.1.17"
 num-derive = "0.4.2"
-num-traits = { version = "0.2.18", default-features = false }
+num-traits = { version = "0.2.19", default-features = false }
 ordered-float = { version = "3.7", features = ["serde"] }
 panic-message = "0.3"
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "unbounded_depth"] }

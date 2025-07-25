@@ -69,7 +69,7 @@ TYPED_TEST_P(Cpp2OpsTest, Simple) {
 
 REGISTER_TYPED_TEST_CASE_P(Cpp2OpsTest, Simple);
 
-typedef testing::Types<cpp2::Native> Types;
+using Types = testing::Types<cpp2::Native>;
 INSTANTIATE_TYPED_TEST_CASE_P(Cpp2OpsTest, Cpp2OpsTest, Types);
 
 } // namespace thrift::test::cpp2ops

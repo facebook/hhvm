@@ -128,6 +128,10 @@ Options:
                   that explicitly allows it, i.e.
                   @thrift.AllowLegacyTypedefUri).
 
+                typedef_explicit_uri=none|warn|error
+                  Action to take on typedef with a non-empty explicit URI
+                  (specified using the @thrift.Uri annotation).
+
                 forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
                   Struct (and exception) fields with a @cpp.Ref (or
                   cpp[2].ref[_type]) annotation must be optional, unless
@@ -811,6 +815,13 @@ std::string parse_args(
                   "nonallowed_typedef_with_uri",
                   validator,
                   &sparams.nonallowed_typedef_with_uri)) {
+            continue;
+          }
+
+          if (parse_extra_validation_with_level(
+                  "typedef_explicit_uri",
+                  validator,
+                  &sparams.typedef_explicit_uri)) {
             continue;
           }
         } catch (const std::exception& e) {

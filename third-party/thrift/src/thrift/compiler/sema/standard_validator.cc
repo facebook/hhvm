@@ -1700,6 +1700,20 @@ void validate_nonallowed_typedef_with_uri(
       node.name());
 }
 
+void validate_typedef_with_explicit_uri(
+    sema_context& ctx, const t_typedef& node) {
+  if (node.uri().empty() || !node.explicit_uri()) {
+    return;
+  }
+
+  ctx.report(
+      node,
+      validation_to_diagnostic_level(
+          ctx.sema_parameters().typedef_explicit_uri),
+      "Typedef `{}` has an explicit URI, which is not allowed",
+      node.name());
+}
+
 // TODO (T191018859): forbid as field type too
 void forbid_exception_as_method_type(
     sema_context& ctx, const t_function& node) {
@@ -1801,6 +1815,7 @@ ast_validator standard_validator() {
   validator.add_typedef_visitor(&deprecate_typedef_type_annotations);
   validator.add_typedef_visitor(ValidateAnnotationPositions());
   validator.add_typedef_visitor(&validate_nonallowed_typedef_with_uri);
+  validator.add_typedef_visitor(&validate_typedef_with_explicit_uri);
 
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);

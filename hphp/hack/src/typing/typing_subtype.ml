@@ -6289,12 +6289,9 @@ end = struct
           ~fail:
             (Some
                Typing_error.(
-                 primary
-                 @@ Primary.Generic_unify
-                      {
-                        pos = can_index.ci_index_pos;
-                        msg = Reason.string_of_ureason Reason.index_shape;
-                      }))
+                 shape
+                 @@ Primary.Shape.Invalid_shape_field_name
+                      { pos = can_index.ci_index_pos; is_empty = false }))
           env
     in
     match deref ty_sub with

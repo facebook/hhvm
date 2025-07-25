@@ -908,9 +908,8 @@ class TypeSystemFacade final : public type_system::TypeSystem {
   }
 
   type_system::TypeRef convertType(const TypeRef& type) {
-    using Result = type_system::TypeRef;
     return type.trueType().visit(
-        [](const Primitive& primitive) -> Result {
+        [](const Primitive& primitive) {
           switch (primitive) {
             case Primitive::BOOL:
               return type_system::TypeRef{type_system::TypeRef::Bool{}};
@@ -932,35 +931,35 @@ class TypeSystemFacade final : public type_system::TypeSystem {
               return type_system::TypeRef{type_system::TypeRef::Binary{}};
           }
         },
-        [&](const StructNode& s) -> Result {
+        [&](const StructNode& s) {
           return type_system::TypeRef{
               std::get<type_system::StructNode>(cache_.at(&s.definition()))};
         },
-        [&](const UnionNode& u) -> Result {
+        [&](const UnionNode& u) {
           return type_system::TypeRef{
               std::get<type_system::UnionNode>(cache_.at(&u.definition()))};
         },
-        [&](const ExceptionNode&) -> Result {
+        [&](const ExceptionNode&) -> type_system::TypeRef {
           folly::throw_exception<std::runtime_error>(
               "Exceptions aren't supported by TypeSystem");
         },
-        [&](const EnumNode& e) -> Result {
+        [&](const EnumNode& e) {
           return type_system::TypeRef{
               std::get<type_system::EnumNode>(cache_.at(&e.definition()))};
         },
-        [&](const TypedefNode&) -> Result {
+        [&](const TypedefNode&) -> type_system::TypeRef {
           folly::throw_exception<std::logic_error>(
               "Typedefs should have been resolved by trueType call");
         },
-        [&](const List& l) -> Result {
+        [&](const List& l) {
           return type_system::TypeRef{
               type_system::TypeRef::List{convertType(l.elementType())}};
         },
-        [&](const Set& s) -> Result {
+        [&](const Set& s) {
           return type_system::TypeRef{
               type_system::TypeRef::Set{convertType(s.elementType())}};
         },
-        [&](const Map& m) -> Result {
+        [&](const Map& m) {
           return type_system::TypeRef{type_system::TypeRef::Map{
               convertType(m.keyType()), convertType(m.valueType())}};
         });

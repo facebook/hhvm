@@ -73,7 +73,8 @@ void ProxyHandler::onRequest(std::unique_ptr<HTTPMessage> headers) noexcept {
     upstreamSock_->connect(this, addr, FLAGS_proxy_connect_timeout);
   } else {
     // A more sophisticated proxy would have a connection pool here
-    const folly::SocketOptionMap opts{{{SOL_SOCKET, SO_REUSEADDR}, 1}};
+    const folly::SocketOptionMap opts{
+        {{.level = SOL_SOCKET, .optname = SO_REUSEADDR}, 1}};
     downstream_->pauseIngress();
     connector_.connect(folly::EventBaseManager::get()->getEventBase(),
                        addr,

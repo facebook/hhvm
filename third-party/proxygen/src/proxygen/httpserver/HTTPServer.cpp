@@ -144,7 +144,8 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
       auto codecFactory = addresses_[i].codecFactory;
       auto acceptorFactory =
           getAcceptorFactory
-              ? getAcceptorFactory({accConfig, std::move(codecFactory)})
+              ? getAcceptorFactory({.accConfig = accConfig,
+                                    .codecFactory = std::move(codecFactory)})
               : std::make_shared<AcceptorFactory>(
                     options_, codecFactory, accConfig, sessionInfoCb_);
       bootstrap_.push_back(wangle::ServerBootstrap<wangle::DefaultPipeline>());

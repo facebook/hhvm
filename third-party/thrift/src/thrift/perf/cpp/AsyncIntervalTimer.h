@@ -74,10 +74,11 @@ class AsyncIntervalTimer {
   void setRatePerSec(uint64_t rate, uint32_t threads) {
     std::unique_lock guard(mutex_);
     double shift = loadgen::RNG::getReal(0, 1);
-    if (rate == 0)
+    if (rate == 0) {
       intervalNsec_ = 0;
-    else
+    } else {
       intervalNsec_ = (std::nano::den * threads) / rate;
+    }
 
     // With interval per operation per thread, you know the time gap in which
     // all the threads should start, pick a random spot in that time gap

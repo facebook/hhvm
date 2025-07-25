@@ -944,55 +944,6 @@ RegionDescPtr selectRegion(const RegionContext& context,
   return region;
 }
 
-RegionDescPtr selectHotRegion(TransID transId) {
-  auto const profData = jit::profData();
-  assertx(profData);
-  auto const& func = *profData->transRec(transId)->func();
-  FuncId funcId = func.getFuncId();
-  TransCFG cfg(funcId, profData);
-  assertx(regionMode() != RegionMode::Method);
-  RegionDescPtr region;
-  HotTransContext ctx;
-  ctx.cfg = &cfg;
-  ctx.profData = profData;
-  ctx.entries = {transId};
-  ctx.maxBCInstrs = Cfg::Jit::MaxRegionInstrs;
-  switch (pgoRegionMode(func)) {
-    case PGORegionMode::Hottrace:
-      region = selectHotTrace(ctx);
-      break;
-
-    case PGORegionMode::Hotblock:
-      region = selectHotBlock(transId, profData, cfg);
-      break;
-
-    case PGORegionMode::WholeCFG:
-    case PGORegionMode::HotCFG:
-      region = selectHotCFG(ctx);
-      break;
-  }
-  assertx(region);
-
-  if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-    std::string dotFileName = std::string("/tmp/trans-cfg-") +
-                              folly::to<std::string>(transId) + ".dot";
-
-    std::ofstream outFile(dotFileName);
-    if (outFile.is_open()) {
-      cfg.print(outFile, funcId, profData);
-      outFile.close();
-    }
-
-    FTRACE(5, "selectHotRegion: New Translation (file: {}) {}\n",
-           dotFileName, region ? show(*region) : std::string("empty region"));
-  }
-
-  always_assert(region->instrSize() <= Cfg::Jit::MaxRegionInstrs);
-
-  if (region->empty()) return nullptr;
-  return region;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 static bool postCondMismatch(const RegionDesc::TypedLocation& postCond,

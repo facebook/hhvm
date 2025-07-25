@@ -474,12 +474,6 @@ struct RegionEntryKey {
  */
 RegionDescPtr selectRegion(const RegionContext& context, TransKind kind);
 
-/*
- * Select a compilation region based on profiling information.  This
- * is used in JitPGO mode.  Argument transId specifies the profiling
- * translation that triggered the profiling-based region selection.
- */
-RegionDescPtr selectHotRegion(TransID transId);
 
 /*
  * Select a compilation region as long as possible using the given context.

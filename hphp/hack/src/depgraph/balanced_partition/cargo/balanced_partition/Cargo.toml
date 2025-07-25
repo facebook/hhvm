@@ -13,5 +13,5 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 itertools = "0.14.0"
-log = { version = "0.4.22", features = ["kv_unstable", "kv_unstable_std"] }
+log = { version = "0.4.27", features = ["kv_unstable", "kv_unstable_std"] }
 rayon = "1.9.0"

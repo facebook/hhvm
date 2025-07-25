@@ -15,5 +15,5 @@ b2i_macros = { version = "0.0.0", path = "b2i_macros" }
 ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 ir = { version = "0.0.0", path = "../.." }
-log = { version = "0.4.22", features = ["kv_unstable", "kv_unstable_std"] }
+log = { version = "0.4.27", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { version = "0.0.0", path = "../../../../utils/newtype" }

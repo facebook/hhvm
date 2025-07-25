@@ -15,6 +15,6 @@ anyhow = "1.0.98"
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 ir_core = { version = "0.0.0", path = "../ir_core" }
 itertools = "0.14.0"
-log = { version = "0.4.22", features = ["kv_unstable", "kv_unstable_std"] }
+log = { version = "0.4.27", features = ["kv_unstable", "kv_unstable_std"] }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 parse_macro_ir = { version = "0.0.0", path = "../cargo/parse_macro" }

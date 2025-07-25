@@ -20,7 +20,7 @@ depgraph_compress = { version = "0.0.0", path = "../../../depgraph/depgraph_comp
 depgraph_reader = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_reader" }
 depgraph_writer = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_writer" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
-log = { version = "0.4.22", features = ["kv_unstable", "kv_unstable_std"] }
+log = { version = "0.4.27", features = ["kv_unstable", "kv_unstable_std"] }
 memmap2 = "0.9.5"
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }

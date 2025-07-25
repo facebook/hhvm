@@ -41,6 +41,83 @@ namespace apache::thrift::compiler {
 
 namespace {
 
+enum class types_file_kind { not_a_types_file, source_file, type_stub };
+enum class type_kind { abstract, immutable, mutable_ };
+
+class python_generator_context {
+ public:
+  static python_generator_context create(const t_program* program) {
+    return {program, false, type_kind::abstract};
+  }
+
+  static python_generator_context create_patch(const t_program* program) {
+    return {program, true, type_kind::immutable};
+  }
+
+  python_generator_context(python_generator_context&&) = default;
+  python_generator_context& operator=(python_generator_context&&) = default;
+
+  const t_program* program() const noexcept { return program_; }
+
+  void reset(
+      const types_file_kind& types_file_kind,
+      const type_kind& type_kind) noexcept {
+    types_file_kind_ = types_file_kind;
+    type_kind_ = type_kind;
+  }
+
+  void set_enable_abstract_types(const bool& value) noexcept {
+    enable_abstract_types_ = value;
+  }
+  bool enable_abstract_types() const noexcept { return enable_abstract_types_; }
+
+  bool is_patch_file() const noexcept { return is_patch_file_; }
+
+  bool is_types_file() const noexcept {
+    return types_file_kind_ != types_file_kind::not_a_types_file;
+  }
+  bool is_source_file() const noexcept {
+    return types_file_kind_ == types_file_kind::source_file;
+  }
+  bool is_type_stub() const noexcept {
+    return types_file_kind_ == types_file_kind::type_stub;
+  }
+
+  bool generate_abstract_types() const noexcept {
+    return type_kind_ == type_kind::abstract;
+  }
+  bool generate_immutable_types() const noexcept {
+    return type_kind_ == type_kind::immutable;
+  }
+  bool generate_mutable_types() const noexcept {
+    return type_kind_ == type_kind::mutable_;
+  }
+
+  const std::string_view types_import_path() const {
+    switch (type_kind_) {
+      case type_kind::abstract:
+        return "thrift_abstract_types";
+      case type_kind::mutable_:
+        return "thrift_mutable_types";
+      case type_kind::immutable:
+        return "thrift_types";
+    }
+  }
+
+ private:
+  python_generator_context(
+      const t_program* program, bool is_patch_file, type_kind type_kind)
+      : program_(program),
+        is_patch_file_(is_patch_file),
+        type_kind_(type_kind) {}
+
+  const t_program* program_;
+  bool enable_abstract_types_ = false;
+  bool is_patch_file_ = false;
+  types_file_kind types_file_kind_ = types_file_kind::not_a_types_file;
+  type_kind type_kind_;
+};
+
 const t_const* find_structured_adapter_annotation(
     const t_named& node, const char* uri = kPythonAdapterUri) {
   return node.find_structured_annotation_or_null(uri);
@@ -178,8 +255,11 @@ bool field_has_invariant_type(const t_field* field) {
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
-      const t_program* p, mstch_context& ctx, mstch_element_position pos)
-      : mstch_program(p, ctx, pos) {
+      const t_program* p,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      std::shared_ptr<python_generator_context> python_ctx)
+      : mstch_program(p, ctx, pos), python_context_(std::move(python_ctx)) {
     register_methods(
         this,
         {
@@ -231,9 +311,9 @@ class python_mstch_program : public mstch_program {
 
   mstch::node py3_auto_migrate() { return has_option("auto_migrate"); }
 
-  mstch::node is_types_file() { return has_option("is_types_file"); }
-  mstch::node is_source_file() { return has_option("is_source_file"); }
-  mstch::node is_type_stub() { return has_option("is_type_stub"); }
+  mstch::node is_types_file() { return python_context_->is_types_file(); }
+  mstch::node is_source_file() { return python_context_->is_source_file(); }
+  mstch::node is_type_stub() { return python_context_->is_type_stub(); }
 
   mstch::node include_namespaces() {
     std::vector<const Namespace*> namespaces;
@@ -313,19 +393,19 @@ class python_mstch_program : public mstch_program {
   }
 
   mstch::node generate_abstract_types() {
-    return !get_option("generate_abstract_types").empty();
+    return python_context_->generate_abstract_types();
   }
 
   mstch::node generate_mutable_types() {
-    return !get_option("generate_mutable_types").empty();
+    return python_context_->generate_mutable_types();
   }
 
   mstch::node generate_immutable_types() {
-    return !get_option("generate_immutable_types").empty();
+    return python_context_->generate_immutable_types();
   }
 
   mstch::node enable_abstract_types() {
-    return !get_option("enable_abstract_types").empty();
+    return python_context_->enable_abstract_types();
   }
 
  protected:
@@ -513,6 +593,7 @@ class python_mstch_program : public mstch_program {
     return a;
   }
 
+  std::shared_ptr<python_generator_context> python_context_;
   std::unordered_map<std::string, Namespace> include_namespaces_;
   std::unordered_set<const t_type*> seen_types_;
   std::unordered_set<std::string_view> adapter_modules_;
@@ -701,9 +782,9 @@ class python_mstch_type : public mstch_type {
       const t_type* type,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_program* prog)
+      std::shared_ptr<python_generator_context> python_ctx)
       : mstch_type(type->get_true_type(), ctx, pos),
-        prog_(prog),
+        python_context_(std::move(python_ctx)),
         adapter_annotation_(find_structured_adapter_annotation(*type)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*type)) {
@@ -733,43 +814,15 @@ class python_mstch_type : public mstch_type {
   }
 
   mstch::node module_name() {
-    std::string_view types_import_path = [this]() {
-      if (!get_option("generate_abstract_types").empty()) {
-        return ".thrift_abstract_types";
-      }
-      if (!get_option("generate_mutable_types").empty()) {
-        return ".thrift_mutable_types";
-      }
-      if (!get_option("generate_immutable_types").empty()) {
-        return ".thrift_types";
-      }
-      throw std::runtime_error(
-          "Expected one option out of generate_abstract_types, generate_immutable_types, or generate_mutable_types to be set, and none are set.");
-    }();
-
     return get_py3_namespace_with_name_and_prefix(
                get_type_program(), get_option("root_module_prefix"))
-        .append(types_import_path);
+        .append(fmt::format(".{}", python_context_->types_import_path()));
   }
 
   mstch::node module_mangle() {
-    std::string_view types_import_path = [this]() {
-      if (!get_option("generate_abstract_types").empty()) {
-        return "__thrift_abstract_types";
-      }
-      if (!get_option("generate_mutable_types").empty()) {
-        return "__thrift_mutable_types";
-      }
-      if (!get_option("generate_immutable_types").empty()) {
-        return "__thrift_types";
-      }
-      throw std::runtime_error(
-          "Expected one option out of generate_abstract_types, generate_immutable_types, or generate_mutable_types to be set, and none are set.");
-    }();
-
     return mangle_program_path(
                get_type_program(), get_option("root_module_prefix"))
-        .append(types_import_path);
+        .append(fmt::format("__{}", python_context_->types_import_path()));
   }
 
   mstch::node patch_module_path() {
@@ -800,14 +853,14 @@ class python_mstch_type : public mstch_type {
   }
 
   mstch::node need_module_path() {
-    if (!has_option("is_types_file")) {
+    if (!python_context_->is_types_file()) {
       return true;
     }
     return is_type_defined_in_the_current_program();
   }
 
   mstch::node need_patch_module_path() {
-    if (!has_option("is_patch_file")) {
+    if (!python_context_->is_patch_file()) {
       return true;
     }
     return is_type_defined_in_the_current_program();
@@ -815,7 +868,7 @@ class python_mstch_type : public mstch_type {
 
   mstch::node is_external_program() {
     auto p = type_->program();
-    return p && p != prog_;
+    return p && p != python_context_->program();
   }
 
   mstch::node is_integer() { return type_->is_any_int() || type_->is_byte(); }
@@ -834,19 +887,19 @@ class python_mstch_type : public mstch_type {
     if (const t_program* p = type_->program()) {
       return p;
     }
-    return prog_;
+    return python_context_->program();
   }
 
   bool is_type_defined_in_the_current_program() {
     if (const t_program* prog = type_->program()) {
-      if (prog != prog_) {
+      if (prog != python_context_->program()) {
         return true;
       }
     }
     return false;
   }
 
-  const t_program* prog_;
+  std::shared_ptr<python_generator_context> python_context_;
   const t_const* adapter_annotation_;
   const t_const* transitive_adapter_annotation_;
 };
@@ -1190,6 +1243,13 @@ class t_mstch_python_generator : public t_mstch_generator {
     return opts;
   }
 
+  void process_options(
+      const std::map<std::string, std::string>& options) override {
+    t_mstch_generator::process_options(options);
+    python_context_ = std::make_shared<python_generator_context>(
+        python_generator_context::create(program_));
+  }
+
   std::string template_prefix() const override { return "python"; }
 
   void generate_program() override {
@@ -1226,16 +1286,13 @@ class t_mstch_python_generator : public t_mstch_generator {
     }
   }
 
-  enum class TypesFileKind { NotATypesFile, SourceFile, TypeStub };
-  enum class TypeKind { Abstract, Immutable, Mutable };
-
  protected:
   bool should_resolve_typedefs() const override { return true; }
   void set_mstch_factories();
   void generate_file(
       const std::string& template_name,
-      TypesFileKind types_file_kind,
-      TypeKind type_kind,
+      types_file_kind types_file_kind,
+      type_kind type_kind,
       const std::filesystem::path& base);
   void set_types_file(bool val);
   void generate_types();
@@ -1243,6 +1300,7 @@ class t_mstch_python_generator : public t_mstch_generator {
   void generate_clients();
   void generate_services();
 
+  std::shared_ptr<python_generator_context> python_context_;
   std::filesystem::path generate_root_path_;
 };
 
@@ -1460,11 +1518,11 @@ class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 };
 
 void t_mstch_python_generator::set_mstch_factories() {
-  mstch_context_.add<python_mstch_program>();
+  mstch_context_.add<python_mstch_program>(python_context_);
   mstch_context_.add<python_mstch_service>(program_);
   mstch_context_.add<python_mstch_interaction>(program_);
   mstch_context_.add<python_mstch_function>();
-  mstch_context_.add<python_mstch_type>(program_);
+  mstch_context_.add<python_mstch_type>(python_context_);
   mstch_context_.add<python_mstch_typedef>();
   mstch_context_.add<python_mstch_struct>();
   mstch_context_.add<python_mstch_field>();
@@ -1477,24 +1535,12 @@ void t_mstch_python_generator::set_mstch_factories() {
 
 void t_mstch_python_generator::generate_file(
     const std::string& template_name,
-    TypesFileKind types_file_kind,
-    TypeKind type_kind,
+    types_file_kind types_file_kind,
+    type_kind type_kind,
     const std::filesystem::path& base = {}) {
   t_program* program = get_program();
   const std::string& program_name = program->name();
-  mstch_context_
-      .set_or_erase_option(
-          types_file_kind != TypesFileKind::NotATypesFile, "is_types_file", "")
-      .set_or_erase_option(
-          types_file_kind == TypesFileKind::SourceFile, "is_source_file", "")
-      .set_or_erase_option(
-          types_file_kind == TypesFileKind::TypeStub, "is_type_stub", "")
-      .set_or_erase_option(
-          type_kind == TypeKind::Abstract, "generate_abstract_types", "yes")
-      .set_or_erase_option(
-          type_kind == TypeKind::Immutable, "generate_immutable_types", "yes")
-      .set_or_erase_option(
-          type_kind == TypeKind::Mutable, "generate_mutable_types", "yes");
+  python_context_->reset(types_file_kind, type_kind);
 
   std::shared_ptr<mstch_base> mstch_program =
       make_mstch_program_cached(program, mstch_context_);
@@ -1508,52 +1554,51 @@ void t_mstch_python_generator::generate_file(
 void t_mstch_python_generator::generate_types() {
   // DO_BEFORE(satishvk, 20250130): Remove flags related to abstract types after
   // launch.
-  const bool enable_abstract_types = !has_option("disable_abstract_types");
+  python_context_->set_enable_abstract_types(
+      !has_option("disable_abstract_types"));
 
-  mstch_context_.set_or_erase_option(
-      enable_abstract_types, "enable_abstract_types", "true");
   generate_file(
       "thrift_types.py",
-      TypesFileKind::SourceFile,
-      TypeKind::Immutable,
+      types_file_kind::source_file,
+      type_kind::immutable,
       generate_root_path_);
   generate_file(
       "thrift_types.pyi",
-      TypesFileKind::TypeStub,
-      TypeKind::Immutable,
+      types_file_kind::type_stub,
+      type_kind::immutable,
       generate_root_path_);
   generate_file(
       "thrift_enums.py",
-      TypesFileKind::SourceFile,
-      TypeKind::Immutable,
+      types_file_kind::source_file,
+      type_kind::immutable,
       generate_root_path_);
 
   generate_file(
       "thrift_abstract_types.py",
-      TypesFileKind::SourceFile,
-      TypeKind::Abstract,
+      types_file_kind::source_file,
+      type_kind::abstract,
       generate_root_path_);
 
   generate_file(
       "thrift_mutable_types.py",
-      TypesFileKind::SourceFile,
-      TypeKind::Mutable,
+      types_file_kind::source_file,
+      type_kind::mutable_,
       generate_root_path_);
 
   generate_file(
       "thrift_mutable_types.pyi",
-      TypesFileKind::TypeStub,
-      TypeKind::Mutable,
+      types_file_kind::type_stub,
+      type_kind::mutable_,
       generate_root_path_);
 
-  mstch_context_.options["enable_abstract_types"] = "true";
+  python_context_->set_enable_abstract_types(true);
 }
 
 void t_mstch_python_generator::generate_metadata() {
   generate_file(
       "thrift_metadata.py",
-      TypesFileKind::SourceFile,
-      TypeKind::Immutable,
+      types_file_kind::source_file,
+      type_kind::immutable,
       generate_root_path_);
 }
 
@@ -1566,14 +1611,14 @@ void t_mstch_python_generator::generate_clients() {
 
   generate_file(
       "thrift_clients.py",
-      TypesFileKind::NotATypesFile,
-      TypeKind::Immutable,
+      types_file_kind::not_a_types_file,
+      type_kind::immutable,
       generate_root_path_);
 
   generate_file(
       "thrift_mutable_clients.py",
-      TypesFileKind::NotATypesFile,
-      TypeKind::Mutable,
+      types_file_kind::not_a_types_file,
+      type_kind::mutable_,
       generate_root_path_);
 }
 
@@ -1585,14 +1630,14 @@ void t_mstch_python_generator::generate_services() {
   }
   generate_file(
       "thrift_services.py",
-      TypesFileKind::NotATypesFile,
-      TypeKind::Immutable,
+      types_file_kind::not_a_types_file,
+      type_kind::immutable,
       generate_root_path_);
 
   generate_file(
       "thrift_mutable_services.py",
-      TypesFileKind::NotATypesFile,
-      TypeKind::Mutable,
+      types_file_kind::not_a_types_file,
+      type_kind::mutable_,
       generate_root_path_);
 }
 
@@ -1609,14 +1654,19 @@ class t_python_patch_generator : public t_mstch_generator {
     return opts;
   }
 
+  void process_options(
+      const std::map<std::string, std::string>& options) override {
+    t_mstch_generator::process_options(options);
+    python_context_ = std::make_shared<python_generator_context>(
+        python_generator_context::create_patch(program_));
+  }
+
   std::string template_prefix() const override { return "patch"; }
 
   void generate_program() override {
     out_dir_base_ = "gen-python-patch";
 
     set_mstch_factories();
-    mstch_context_.set_or_erase_option(true, "generate_immutable_types", "yes");
-    mstch_context_.set_or_erase_option(true, "is_patch_file", "");
     const auto* program = get_program();
     auto mstch_program = mstch_context_.program_factory->make_mstch_object(
         program, mstch_context_);
@@ -1628,11 +1678,13 @@ class t_python_patch_generator : public t_mstch_generator {
   }
 
  private:
+  std::shared_ptr<python_generator_context> python_context_;
+
   void set_mstch_factories() {
-    mstch_context_.add<python_mstch_program>();
+    mstch_context_.add<python_mstch_program>(python_context_);
     mstch_context_.add<python_mstch_struct>();
     mstch_context_.add<python_mstch_field>();
-    mstch_context_.add<python_mstch_type>(program_);
+    mstch_context_.add<python_mstch_type>(python_context_);
   }
 };
 

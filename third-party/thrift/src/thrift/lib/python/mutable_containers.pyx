@@ -538,7 +538,7 @@ cdef class MutableMap:
 
         if isinstance(other, MutableMap):
             if not self._is_same_type_of_map(other):
-                raise TypeError("Cannot check MutableMap instances for equality: types do not match.")
+                return False 
             if self._use_internal_data_to_compare:
                 return self._map_data == (<MutableMap>other)._map_data
 

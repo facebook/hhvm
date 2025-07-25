@@ -304,8 +304,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotEqual({"a": 1}, mutable_map)
         self.assertNotEqual(mutable_map, {"a": 1})
 
-        with self.assertRaisesRegex(TypeError, "types do not match"):
-            _ = mutable_map == MutableMap(typeinfo_i32, typeinfo_string, {})
+        self.assertNotEqual(mutable_map, MutableMap(typeinfo_i32, typeinfo_string, {}))
 
     def test_setitem(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})

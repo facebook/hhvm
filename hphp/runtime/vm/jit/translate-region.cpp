@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/bc-pattern.h"
 
+#include "hphp/runtime/vm/jit/inline-stitching.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
@@ -907,10 +908,12 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
          show(irgs));
 
   if (Cfg::HHIR::EnableInliningPass) {
-    assertx(calleeRegionAndUnit.unit());
-    auto unit = calleeRegionAndUnit.unit();
-    return stitchInlinedRegion(irgs, psk.srcKey, entry, *calleeRegion,
-                               *unit);
+    auto stitchContext = irgen::InlineStitchingContext {
+      irgs.unit, *calleeRegionAndUnit.unit(), irgs.irb.get(), psk.srcKey, entry, 
+      fp(irgs), sp(irgs), ctx, irgs,
+    };    
+    irgen::stitchCalleeUnit(stitchContext);
+    return true;
   }
 
   irgen::beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost,

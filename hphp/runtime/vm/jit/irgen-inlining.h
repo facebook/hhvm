@@ -87,12 +87,6 @@ bool spillInlinedFrames(IRGS& env);
  */
 SSATmp* genCalleeFP(IRGS& env, const Func* callee);
 
-/**
- * Stitch callee's IRUnit into caller's IRGS.
- */
-bool stitchInlinedRegion(irgen::IRGS& irgs, SrcKey callerSk, SrcKey calleeSk,
-                         const RegionDesc& calleeRegion, IRUnit& calleeUnit);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

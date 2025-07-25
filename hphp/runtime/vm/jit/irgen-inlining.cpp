@@ -771,16 +771,6 @@ bool spillInlinedFrames(IRGS& env) {
   return spilled;
 }
 
-void fixCalleeUnit(const IRGS& env, IRUnit& unit) {
-}
-
-
-bool stitchInlinedRegion(irgen::IRGS& irgs, SrcKey callerSk, SrcKey calleeSk,
-                         const RegionDesc& calleeRegion, IRUnit& calleeUnit) {
-    fixCalleeUnit(irgs, calleeUnit);
-    return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

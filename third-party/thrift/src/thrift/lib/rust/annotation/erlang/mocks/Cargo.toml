@@ -22,7 +22,7 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 erlang__clients = { package = "erlang_clients", version = "0.0.1+unstable", path = "../clients" }
 erlang__types = { package = "erlang", version = "0.0.1+unstable", path = ".." }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
-futures = { version = "0.3.30", features = ["async-await", "compat"] }
+futures = { version = "0.3.31", features = ["async-await", "compat"] }
 scope = { version = "0.0.1+unstable", path = "../../scope" }
 scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
 scope_mocks = { version = "0.0.1+unstable", path = "../../scope/mocks" }

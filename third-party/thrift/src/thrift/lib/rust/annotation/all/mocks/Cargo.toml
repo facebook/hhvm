@@ -28,7 +28,7 @@ erlang = { version = "0.0.1+unstable", path = "../../erlang" }
 erlang_clients = { version = "0.0.1+unstable", path = "../../erlang/clients" }
 erlang_mocks = { version = "0.0.1+unstable", path = "../../erlang/mocks" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
-futures = { version = "0.3.30", features = ["async-await", "compat"] }
+futures = { version = "0.3.31", features = ["async-await", "compat"] }
 go = { version = "0.0.1+unstable", path = "../../go" }
 go_clients = { version = "0.0.1+unstable", path = "../../go/clients" }
 go_mocks = { version = "0.0.1+unstable", path = "../../go/mocks" }

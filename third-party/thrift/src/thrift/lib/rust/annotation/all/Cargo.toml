@@ -21,7 +21,7 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 cpp = { version = "0.0.1+unstable", path = "../cpp" }
 erlang = { version = "0.0.1+unstable", path = "../erlang" }
 fbthrift = { version = "0.0.1+unstable", path = "../.." }
-futures = { version = "0.3.30", features = ["async-await", "compat"] }
+futures = { version = "0.3.31", features = ["async-await", "compat"] }
 go = { version = "0.0.1+unstable", path = "../go" }
 hack = { version = "0.0.1+unstable", path = "../hack" }
 java = { version = "0.0.1+unstable", path = "../java" }

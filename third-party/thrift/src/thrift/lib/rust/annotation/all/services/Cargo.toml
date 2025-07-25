@@ -25,7 +25,7 @@ cpp_services = { version = "0.0.1+unstable", path = "../../cpp/services" }
 erlang = { version = "0.0.1+unstable", path = "../../erlang" }
 erlang_services = { version = "0.0.1+unstable", path = "../../erlang/services" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
-futures = { version = "0.3.30", features = ["async-await", "compat"] }
+futures = { version = "0.3.31", features = ["async-await", "compat"] }
 go = { version = "0.0.1+unstable", path = "../../go" }
 go_services = { version = "0.0.1+unstable", path = "../../go/services" }
 hack = { version = "0.0.1+unstable", path = "../../hack" }

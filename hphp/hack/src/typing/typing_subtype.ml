@@ -6210,23 +6210,41 @@ end = struct
       let tk = MakeType.arraykey (Reason.idx_dict can_index.ci_array_pos) in
       is_container tk tv
     in
-    let do_tuple tup =
+    let tuple_oob env =
+      invalid
+        ~fail:
+          (Some
+             Typing_error.(
+               primary
+               @@ Primary.Generic_unify
+                    {
+                      pos = can_index.ci_index_pos;
+                      msg = Reason.string_of_ureason Reason.URtuple_OOB;
+                    }))
+        env
+    in
+    let do_tuple_optional required optional variadic =
       match can_index.ci_shape with
       | IntLit i ->
-        (match List.nth tup i with
+        (match List.nth required i with
         | Some ty -> simplify_default ~subtype_env ty can_index.ci_val env
         | None ->
-          invalid
-            ~fail:
-              (Some
-                 Typing_error.(
-                   primary
-                   @@ Primary.Generic_unify
-                        {
-                          pos = can_index.ci_index_pos;
-                          msg = Reason.string_of_ureason Reason.URtuple_OOB;
-                        }))
-            env)
+          let i = i - List.length required in
+          (match List.nth optional i with
+          | Some ty ->
+            if can_index.ci_lhs_of_null_coalesce then
+              simplify_default ~subtype_env ty can_index.ci_val env
+            else
+              tuple_oob env
+          | None ->
+            let i = i - List.length optional in
+            (match variadic with
+            | Some ty ->
+              if can_index.ci_lhs_of_null_coalesce && i >= 0 then
+                simplify_default ~subtype_env ty can_index.ci_val env
+              else
+                tuple_oob env
+            | None -> tuple_oob env)))
       | _ ->
         invalid
           ~fail:
@@ -6240,6 +6258,7 @@ end = struct
                       }))
           env
     in
+    let do_tuple_basic tup = do_tuple_optional tup [] None in
     let do_shape r { s_fields = fdm; s_origin; s_unknown_value = _ } =
       match can_index.ci_shape with
       | StringLit s ->
@@ -6433,8 +6452,10 @@ end = struct
           rhs
           env)
     | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
-      do_tuple tup
-    | (_, Ttuple tup) -> do_tuple tup.t_required
+      do_tuple_basic tup
+    | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+      do_tuple_optional t_required t_optional (Some t_variadic)
+    | (_, Ttuple { t_required; _ }) -> do_tuple_basic t_required
     | (r, Tshape ts) -> do_shape r ts
     | (r, Tnewtype (name_sub, [ty_sub], _))
       when String.equal name_sub SN.Classes.cSupportDyn ->

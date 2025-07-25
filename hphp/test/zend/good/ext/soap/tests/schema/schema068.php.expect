@@ -1,8 +1,0 @@
-object(stdClass) (2) {
-  ["str"]=>
-  string(3) "str"
-  ["int"]=>
-  int(5)
-}
-
-Fatal error: Uncaught SoapFault exception: [Client] SOAP_ERROR: Encoding: Attribute 'int' has fixed value '5' (value '4' is not allowed)

@@ -2051,7 +2051,7 @@ void HHVM_METHOD(SoapServer, addFunction,
 
   Array funcs;
   if (func.isString()) {
-    funcs.append(func);
+    throw SoapException("Adding functions by string is unsupported");
   } else if (func.isArray()) {
     funcs = func.toArray();
   } else if (func.isInteger()) {

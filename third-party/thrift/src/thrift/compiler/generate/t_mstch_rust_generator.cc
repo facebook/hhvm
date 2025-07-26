@@ -15,9 +15,6 @@
  */
 
 #include <cassert>
-#include <cctype>
-#include <fstream>
-#include <iostream>
 #include <set>
 #include <stdexcept>
 #include <string>

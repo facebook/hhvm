@@ -518,8 +518,8 @@ TEST(AstVisitorTest, stream) {
 
 TEST(AstVisitorTest, modifications) {
   t_program program("path/to/program.thrift", "/root/path/to/program.thrift");
-  program.create_def<t_union>(&program, "Union1");
-  program.create_def<t_union>(&program, "Union2");
+  program.add_def(std::make_unique<t_union>(&program, "Union1"));
+  program.add_def(std::make_unique<t_union>(&program, "Union2"));
   std::vector<std::string> seen;
 
   ast_visitor visitor;
@@ -528,8 +528,8 @@ TEST(AstVisitorTest, modifications) {
     // Add some more nodes, which will actually show up in the current
     // traversal.
     if (std::isdigit(node.name().back())) { // Don't recurse indefinitely.
-      program.create_def<t_union>(&program, node.name() + "a");
-      program.create_def<t_union>(&program, node.name() + "b");
+      program.add_def(std::make_unique<t_union>(&program, node.name() + "a"));
+      program.add_def(std::make_unique<t_union>(&program, node.name() + "b"));
     }
   });
   visitor(program);

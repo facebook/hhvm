@@ -123,10 +123,6 @@ class t_program : public t_named {
     add_definition(std::move(definition));
     return *ptr;
   }
-  template <typename T, typename... Args>
-  T& create_def(Args&&... args) {
-    return add_def(std::make_unique<T>(std::forward<Args>(args)...));
-  }
 
   // Concrete instantiation of container types.
   node_list_view<t_container> type_instantiations() { return type_insts_; }

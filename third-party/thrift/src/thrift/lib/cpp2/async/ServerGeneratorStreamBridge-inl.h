@@ -68,7 +68,8 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
             co_return;
           case detail::StreamControl::PAUSE:
             if (contextStack) {
-              contextStack->onStreamPauseReceive();
+              contextStack->onStreamPause(
+                  details::STREAM_PAUSE_REASON::EXPLICIT_PAUSE);
             }
             pauseStream = true;
             break;
@@ -131,6 +132,9 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
 
     if (contextStack) {
       contextStack->onStreamNext();
+      if (credits == 0) {
+        contextStack->onStreamPause(details::STREAM_PAUSE_REASON::NO_CREDITS);
+      }
     }
   }
 }

@@ -33,6 +33,11 @@ enum class SINK_ENDING_TYPES {
   COMPLETE_WITH_ERROR = 1,
   ERROR = 2,
 };
+
+enum class STREAM_PAUSE_REASON {
+  NO_CREDITS = 0,
+  EXPLICIT_PAUSE = 1,
+};
 } // namespace details
 
 // EXPERIMENTAL: DO NOT USE WITHOUT TALKING TO THRIFT TEAM
@@ -47,7 +52,7 @@ class StreamEventHandler {
   virtual void onStreamSubscribe(void*, const StreamContext&) {}
   virtual void onStreamNext(void*) {}
   virtual void onStreamCredit(void*, uint32_t) {}
-  virtual void onStreamPauseReceive(void*) {}
+  virtual void onStreamPause(void*, details::STREAM_PAUSE_REASON) {}
   virtual void onStreamResumeReceive(void*) {}
   virtual void handleStreamErrorWrapped(
       void*, const folly::exception_wrapper&) {}

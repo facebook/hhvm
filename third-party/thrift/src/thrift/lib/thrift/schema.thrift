@@ -53,7 +53,6 @@ namespace go thrift.lib.thrift.schema
  * An unordered set of value ids, that can contain *at most one* value of any type.
  * Values correspond to the struct StructuredAnnotation.
  */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef set<id.ValueId> AnnotationIds
@@ -88,7 +87,6 @@ struct StructuredAnnotation {
  * Changing the order of definitions is always backward compatible.
  */
 // TODO(afuller): Add conformance tests to make sure this is true.
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef list<id.DefinitionId> DefinitionIds
@@ -99,7 +97,6 @@ typedef list<id.DefinitionId> DefinitionIds
  * Changing the order of include is always backwards compatible.
  */
 // TODO(afuller): Add conformance tests to make sure this is true.
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef list<id.ProgramId> IncludeIds
@@ -324,7 +321,6 @@ struct Field {
  */
 // TODO(afuller): Add native wrappers that provide O(1) access to fields by id,
 // name, type, etc.
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @thrift.Experimental // TODO: Adapt!
 typedef list<Field> Fields
@@ -430,7 +426,6 @@ struct Exception {
  *
  * Changing the order of exceptions is always backward compatible.
  */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @thrift.Experimental // TODO: Adapt!
 typedef list<Field> Exceptions
@@ -526,7 +521,6 @@ union ReturnType {
 }
 
 /** A container of Thrift function return type. */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 typedef list<ReturnType> ReturnTypes
 
@@ -570,7 +564,6 @@ struct Function {
  *
  * Changing the order of fields is always backward compatible.
  */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @thrift.Experimental // TODO: Adapt!
 typedef list<Function> Functions
@@ -649,7 +642,6 @@ union Definition {
 }
 
 /** A list of definitions (Structs, Enums, Services, etc), accessible by `DefinitionId`. */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 typedef list<Definition> DefinitionList
 
@@ -661,11 +653,9 @@ typedef list<Definition> DefinitionList
  *  but not across different schemas including the definition
  *  nor across different snapshots of the same schema.
  */
-@thrift.AllowLegacyTypedefUri
 typedef standard.ByteString DefinitionKey
 
 /** A map of definitions (Structs, Enums, Services, etc), accessible by `DefinitionKey`. */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 typedef map<DefinitionKey, Definition> DefinitionMap
 
@@ -737,13 +727,11 @@ struct Program {
 }
 
 /** A list of programs, accessible by `ProgramId`. */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 @cpp.Type{template = "std::deque"}
 typedef list<Program> ProgramList
 
 /** A hash of the value, but stored internally as ValueId */
-@thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
 typedef id.ValueId ValueKey
 

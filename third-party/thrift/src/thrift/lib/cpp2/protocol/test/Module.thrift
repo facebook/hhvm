@@ -23,7 +23,6 @@ cpp_include "folly/container/F14Map.h"
 cpp_include "folly/container/F14Set.h"
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/thrift.thrift"
 
 struct StructWithEmptyMap {
   1: map<string, i64> myMap;
@@ -91,7 +90,6 @@ struct DebugHashedAssociative {
   1: map<i64, set<i64>> value;
 }
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "folly::F14FastSet"}
 typedef set<i64> F14SetI64
 
@@ -157,7 +155,6 @@ union UnionIntegers {
   2: i32 myI32;
 }
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 

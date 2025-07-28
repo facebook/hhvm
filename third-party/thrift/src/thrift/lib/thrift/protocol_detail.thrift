@@ -58,12 +58,10 @@ struct Object {
 }
 
 // We need this to use float/double as set/map key in rust
-@thrift.AllowLegacyTypedefUri
 @rust.NewType
 @rust.Ord
 @rust.Type{name = "OrderedFloat<f32>"}
 typedef float Float
-@thrift.AllowLegacyTypedefUri
 @rust.NewType
 @rust.Ord
 @rust.Type{name = "OrderedFloat<f64>"}

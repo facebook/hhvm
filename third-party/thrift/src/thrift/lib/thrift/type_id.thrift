@@ -57,7 +57,6 @@ struct MapTypeId {
   2: optional TypeId valueType;
 }
 
-@thrift.AllowLegacyTypedefUri
 typedef string Uri
 
 // These adapters are necessary because the other adapted types (e.g. TypeId)

@@ -22,7 +22,6 @@ package "test.dev/thrift/lib/java/test/wrapper"
 
 namespace java.swift com.facebook.thrift.test.wrapper
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.any.AnyAdapter",
   typeClassName = "com.facebook.thrift.any.Any",
@@ -43,28 +42,24 @@ struct TestStruct {
   17: list<i32> wrappedDoubleAdaptedIntList_field;
 }
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary SlicedByteBuf
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i32 adaptedInt
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ShortToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i16 adaptedShort
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
   typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<List<String>>',

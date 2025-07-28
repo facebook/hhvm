@@ -47,7 +47,6 @@ namespace py.asyncio apache_thrift_asyncio.patch
 namespace go thrift.lib.thrift.patch
 namespace py thrift.lib.thrift.patch
 
-@thrift.AllowLegacyTypedefUri
 typedef id.FieldId FieldId
 
 /**
@@ -286,6 +285,5 @@ struct BinaryPatch {
 }
 
 // TODO change the element type to FieldId
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::op::detail::FieldIdListToSetAdapter"}
 typedef list<i16> FieldIdList

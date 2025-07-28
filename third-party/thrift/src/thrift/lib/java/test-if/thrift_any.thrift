@@ -23,14 +23,12 @@ package "test.dev/thrift/lib/java/test/thrift/any"
 
 namespace java.swift com.facebook.thrift.test.thrift.any
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.any.AnyAdapter",
   typeClassName = "com.facebook.thrift.any.Any",
 }
 typedef any.Any Any
 
-@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.any.SemiAnyAdapter",
   typeClassName = "com.facebook.thrift.any.SemiAny",

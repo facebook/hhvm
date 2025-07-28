@@ -19,7 +19,6 @@ namespace py3 python_test
 
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/scope.thrift"
-include "thrift/annotation/thrift.thrift"
 
 @python.Adapter{
   name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
@@ -30,17 +29,14 @@ struct AsDatetime {
   1: string signature;
 }
 
-@thrift.AllowLegacyTypedefUri
 @AsDatetime{signature = "DatetimeTypedef"}
 typedef i32 Datetime
 
-@thrift.AllowLegacyTypedefUri
 @python.Adapter{
   name = "thrift.python.test.adapters.atoi.AtoiAdapter",
   typeHint = "int",
 }
 typedef string AdaptedInt2
-@thrift.AllowLegacyTypedefUri
 typedef AdaptedInt2 AdaptedInt
 
 @python.Adapter{
@@ -51,7 +47,6 @@ struct Baz {
   1: string name;
 }
 
-@thrift.AllowLegacyTypedefUri
 @python.Adapter{
   name = "thrift.python.test.adapters.noop.Wrapper",
   typeHint = "thrift.python.test.adapters.noop.Wrapped[]",

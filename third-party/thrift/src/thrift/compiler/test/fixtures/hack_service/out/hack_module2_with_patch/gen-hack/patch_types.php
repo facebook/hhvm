@@ -1779,10 +1779,6 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'assign' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::IOBuf",
@@ -1799,10 +1795,6 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'prepend' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::IOBuf",
@@ -1819,10 +1811,6 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'append' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::IOBuf",

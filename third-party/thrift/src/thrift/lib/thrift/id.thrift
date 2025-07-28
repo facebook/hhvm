@@ -43,7 +43,6 @@ namespace py thrift.lib.thrift.id
 cpp_include "thrift/lib/thrift/detail/id.h"
 
 /** A field id is a signed 16-bit integer. */
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>",
 }
@@ -98,7 +97,6 @@ typedef i16 FieldId
 // TODO(afuller): Consider adding a new thrift base type (or special
 // annotation?), so we are not required to double zigzag encode here, just
 // to get normal varint encoding, at least for newer Thrift protocols.
-@thrift.AllowLegacyTypedefUri
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef i64 ExternId
 
@@ -108,7 +106,6 @@ const ExternId noId = 0;
 // The id of an externally stored Thrift Value.
 //
 // See 'any.thrift'.
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>",
 }
@@ -117,7 +114,6 @@ typedef ExternId ValueId
 // The id of an externally stored Thrift Protocol.
 //
 // See 'type.thrift'.
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>",
 }
@@ -126,7 +122,6 @@ typedef ExternId ProtocolId
 // The id of an externally stored type.
 //
 // See 'type.thrift'.
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::TypeId>",
 }
@@ -135,7 +130,6 @@ typedef ExternId TypeId
 // The id of an externally stored definition.
 //
 // See 'schema.thrift'.
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::DefinitionId>",
 }
@@ -144,7 +138,6 @@ typedef ExternId DefinitionId
 // The id of an externally stored program.
 //
 // See 'schema.thrift'.
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProgramId>",
 }
@@ -153,7 +146,6 @@ typedef ExternId ProgramId
 // The id of externally stored source code.
 //
 // TODO(afuller): Add concrete definitions for 'source'.
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::SourceId>",
 }

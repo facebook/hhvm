@@ -46,7 +46,6 @@ enum Void {
  *
  * Each language can map this type into a customized memory efficient object.
  */
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::fbstring"}
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
@@ -60,7 +59,6 @@ typedef binary ByteString
  * Each language can map this type into a customized memory efficient object.
  * May be used for zero-copy slice of data.
  */
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::IOBuf"}
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",

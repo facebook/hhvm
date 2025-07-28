@@ -15,7 +15,7 @@
 #include <folly/Optional.h>
 #include <folly/Random.h>
 #include <folly/String.h>
-#include <folly/hash/Hash.h>
+#include <folly/hash/SpookyHashV2.h>
 #include <folly/json/json.h>
 
 #include "mcrouter/lib/config/ImportResolverIf.h"
@@ -158,6 +158,21 @@ size_t unescapeUntil(StringPiece from, string& to, char c) {
   }
   return string::npos;
 }
+
+// This hasher guarantees to produce same hash values across program
+// invocations.
+struct Hasher {
+  constexpr size_t operator()(folly::StringPiece sp) const {
+    constexpr uint64_t kSeed = 0;
+    return static_cast<size_t>(
+        folly::hash::SpookyHashV2::Hash64(sp.begin(), sp.size(), kSeed));
+  }
+
+  constexpr size_t operator()(int64_t val) const {
+    auto const u64 = static_cast<uint64_t>(val);
+    return static_cast<size_t>(folly::hash::twang_mix64(u64));
+  }
+};
 
 } // namespace
 
@@ -500,9 +515,9 @@ class ConfigPreprocessor::BuiltIns {
   static dynamic hashMacro(Context&& ctx) {
     const auto& val = ctx.at("value");
     if (val.isInt()) {
-      return folly::Hash()(val.getInt());
+      return Hasher()(val.getInt());
     } else if (val.isString()) {
-      return folly::Hash()(val.stringPiece());
+      return Hasher()(val.stringPiece());
     } else {
       // invalid
       throwLogic("Hash: can not cast {} to int or string", val.typeName());
@@ -557,7 +572,7 @@ class ConfigPreprocessor::BuiltIns {
     if (key.isInt()) {
       keyHash = key.getInt();
     } else if (key.isString()) {
-      keyHash = folly::Hash()(key.stringPiece());
+      keyHash = Hasher()(key.stringPiece());
     } else {
       throwLogic(
           "WeightedHash: key is {}, expected string or int", key.typeName());

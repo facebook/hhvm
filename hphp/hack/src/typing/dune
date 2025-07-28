@@ -261,7 +261,6 @@
   typing_per_cont_ops
   typing_regex
   typing_sequencing
-  typing_structure
   typing_substring
   typing_try
   typing_xhp)
@@ -385,6 +384,7 @@
   typing_shapes
   typing_subtype
   typing_subtype_tconst
+  typing_structure
   typing_taccess
   typing_type_member
   typing_union)

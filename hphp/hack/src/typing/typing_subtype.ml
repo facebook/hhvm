@@ -6528,12 +6528,50 @@ end = struct
         ~lhs:{ sub_supportdyn = Some r_sub; ty_sub }
         ~rhs
         env
-    | (r_sub, Tnewtype (alias_name, _, ty_newtype)) ->
+    | (r_sub, Tnewtype (name_sub, [ty], ty_newtype))
+      when String.equal name_sub SN.FB.cTypeStructure ->
+      (match deref ty_newtype with
+      | ( r,
+          Tshape
+            { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } )
+        ->
+        let (env, fields) =
+          Typing_structure.transform_shapemap
+            env
+            can_index.ci_array_pos
+            ty
+            fields
+        in
+        let ty =
+          mk
+            ( r,
+              Tshape
+                {
+                  s_origin = Missing_origin;
+                  s_unknown_value = shape_kind;
+                  s_fields = fields;
+                } )
+        in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = ty }
+          ~rhs
+          env
+      | _ ->
+        Common.simplify_newtype_l
+          ~subtype_env
+          ~this_ty
+          ~mk_prop
+          (sub_supportdyn, r_sub, name_sub, ty_newtype)
+          rhs
+          env)
+    | (r_sub, Tnewtype (name_sub, _, ty_newtype)) ->
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
         ~mk_prop
-        (sub_supportdyn, r_sub, alias_name, ty_newtype)
+        (sub_supportdyn, r_sub, name_sub, ty_newtype)
         rhs
         env
     | (r_sub, Tdependent (dep_ty, ty_inner)) ->

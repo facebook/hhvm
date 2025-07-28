@@ -66,8 +66,9 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
       size_t numReplicas,
       bool allSync,
       bool firstHit = false) {
-    if (testRh_)
+    if (testRh_) {
       testRh_.reset();
+    }
     try {
       testRh_ = getKeySplitRoute(numReplicas, allSync, firstHit);
     } catch (const std::exception&) {
@@ -90,10 +91,12 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
 
   void testCreate(size_t numReplicas, bool allSync, bool firstHit = false) {
     // set up the route handle under test
-    if (th_)
+    if (th_) {
       th_.reset();
-    if (rh_)
+    }
+    if (rh_) {
       rh_.reset();
+    }
     th_ = std::make_shared<TestHandle>(
         GetRouteTestData(carbon::Result::FOUND, "a"));
     rh_ = std::make_shared<KeySplitRouteHandle>(

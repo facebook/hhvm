@@ -27,6 +27,8 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/python/streaming/PythonUserException.h>
+#include <thrift/lib/python/streaming/StreamElementEncoder.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
@@ -34,86 +36,7 @@ namespace apache::thrift::python {
 
 constexpr size_t kMaxUexwSize = 1024;
 
-class PythonUserException : public std::exception {
- public:
-  PythonUserException(
-      std::string type, std::string reason, std::unique_ptr<folly::IOBuf> buf)
-      : type_(std::move(type)),
-        reason_(std::move(reason)),
-        buf_(std::move(buf)) {}
-  PythonUserException(const PythonUserException& ex)
-      : type_(ex.type_), reason_(ex.reason_), buf_(ex.buf_->clone()) {}
-
-  PythonUserException& operator=(const PythonUserException& ex) {
-    type_ = ex.type_;
-    reason_ = ex.reason_;
-    buf_ = ex.buf_->clone();
-    return *this;
-  }
-
-  const std::string& type() const { return type_; }
-  const std::string& reason() const { return reason_; }
-  const folly::IOBuf* buf() const { return buf_.get(); }
-  const char* what() const noexcept override { return reason_.c_str(); }
-
- private:
-  std::string type_;
-  std::string reason_;
-  std::unique_ptr<folly::IOBuf> buf_;
-};
-
 namespace detail {
-
-template <class Protocol>
-class PythonStreamElementEncoder final
-    : public apache::thrift::detail::StreamElementEncoder<
-          std::unique_ptr<::folly::IOBuf>> {
-  folly::Try<apache::thrift::StreamPayload> operator()(
-      std::unique_ptr<::folly::IOBuf>&& val) override {
-    apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
-    apache::thrift::PayloadMetadata payloadMetadata;
-    payloadMetadata.responseMetadata().ensure();
-    streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
-    return folly::Try<apache::thrift::StreamPayload>(
-        {std::move(val), std::move(streamPayloadMetadata)});
-  }
-
-  folly::Try<apache::thrift::StreamPayload> operator()(
-      folly::exception_wrapper&& e) override {
-    Protocol prot;
-    folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-
-    apache::thrift::PayloadExceptionMetadata exceptionMetadata;
-    apache::thrift::PayloadExceptionMetadataBase exceptionMetadataBase;
-    if (e.with_exception([&](const PythonUserException& py_ex) {
-          prot.setOutput(&queue, 0);
-          queue.append(*py_ex.buf());
-          exceptionMetadata.declaredException() =
-              apache::thrift::PayloadDeclaredExceptionMetadata();
-        })) {
-    } else {
-      constexpr size_t kQueueAppenderGrowth = 4096;
-      prot.setOutput(&queue, kQueueAppenderGrowth);
-      apache::thrift::TApplicationException ex(e.what().toStdString());
-      exceptionMetadataBase.what_utf8() = ex.what();
-      apache::thrift::detail::serializeExceptionBody(&prot, &ex);
-      apache::thrift::PayloadAppUnknownExceptionMetdata aue;
-      aue.errorClassification().ensure().blame() =
-          apache::thrift::ErrorBlame::SERVER;
-      exceptionMetadata.appUnknownException() = std::move(aue);
-    }
-
-    exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
-    apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
-    apache::thrift::PayloadMetadata payloadMetadata;
-    payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
-    streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
-    return folly::Try<apache::thrift::StreamPayload>(
-        folly::exception_wrapper(apache::thrift::detail::EncodedStreamError(
-            apache::thrift::StreamPayload(
-                std::move(queue).move(), std::move(streamPayloadMetadata)))));
-  }
-};
 
 template <class ProtocolIn, class ProtocolOut>
 static apache::thrift::SerializedResponse return_serialized(

@@ -41,7 +41,7 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::a
         SINGLE_REQUEST_STREAMING_RESPONSE = 4
         SINK = 6
 
-cdef extern from "thrift/lib/python/server/util.h" namespace "::apache::thrift::python":
+cdef extern from "thrift/lib/python/streaming/PythonUserException.h" namespace "::apache::thrift::python":
     cdef cppclass cPythonUserException "::apache::thrift::python::PythonUserException"(cException):
         cPythonUserException(string, string, unique_ptr[cIOBuf] buf) except +
 

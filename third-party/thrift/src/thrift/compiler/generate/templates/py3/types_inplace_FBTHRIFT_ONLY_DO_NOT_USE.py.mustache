@@ -112,18 +112,18 @@ class {{struct:name}}({{> types/python_struct_class }}):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
-    {{#struct:fields_and_mixin_fields}}{{#field:type}}{{#type:needs_convert?}}
+    {{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
         "_fbthrift_inner__{{field:py_name}}",
-    {{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}{{#struct:union?}}
+    {{/type:needs_convert?}}{{/field:type}}{{/struct:py3_fields}}{{#struct:union?}}
         "_fbthrift_inner__type",
         "_fbthrift_inner__value",
     {{/struct:union?}}
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.{{struct:name}}
     _FBTHRIFT__FIELD_NAMES = (
-        {{#struct:fields_and_mixin_fields}}
+        {{#struct:py3_fields}}
         "{{field:py_name}}",
-        {{/struct:fields_and_mixin_fields}}
+        {{/struct:py3_fields}}
     )
     {{#struct:allow_inheritance?}}
     _fbthrift_allow_inheritance_DO_NOT_USE = True
@@ -132,11 +132,11 @@ class {{struct:name}}({{> types/python_struct_class }}):
     Type = _fbthrift__{{struct:name}}Type
     {{/struct:union?}}
     _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:py3_fields}}
     {{#field:type}}{{#type:needs_convert?}}
     _fbthrift_inner__{{field:py_name}} : {{> inplace/field_type}} | None
     {{/type:needs_convert?}}{{/field:type}}
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:py3_fields}}
     {{#struct:union?}}
     _fbthrift_inner__type: Type
     _fbthrift_inner__value: {{> inplace/union_value_type }}
@@ -159,11 +159,11 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
     def __new__(_fbthrift__cls, *args, **kwargs) -> {{struct:name}}:
         instance = super().__new__(_fbthrift__cls)
-        {{#struct:fields_and_mixin_fields}}
+        {{#struct:py3_fields}}
         {{#field:type}}{{#type:needs_convert?}}
         instance._fbthrift_inner__{{field:py_name}} = None
         {{/type:needs_convert?}}{{/field:type}}
-        {{/struct:fields_and_mixin_fields}}
+        {{/struct:py3_fields}}
         {{#struct:union?}}
         instance._fbthrift_inner__type = None
         instance._fbthrift_inner__value = None
@@ -209,7 +209,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
     def __get_thrift_name__():
         return "{{program:name}}.{{struct:name}}"
 
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:py3_fields}}
     @_python__property
     def {{field:py_name}}(self) -> {{> inplace/field_type}}:
 {{#field:type}}{{#type:needs_convert?}}
@@ -242,7 +242,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
         return __python_val
 {{/field:optional_default?}}{{/type:needs_convert?}}{{/field:type}}
 
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:py3_fields}}
     {{#struct:union?}}
     @_python__property
     def type(self) -> _fbthrift_python_types.{{struct:name}}.Type:
@@ -253,10 +253,10 @@ class {{struct:name}}({{> types/python_struct_class }}):
     @_python__property
     def value(self) -> {{> inplace/union_value_type }}:
         match self._fbthrift__inner.type:
-{{#struct:fields_and_mixin_fields}}{{#field:type}}{{#type:needs_convert?}}
+{{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
             case _fbthrift_python_types.{{struct:name}}.Type.{{field:py_name}}:
                 return self.{{field:py_name}}
-{{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}
+{{/type:needs_convert?}}{{/field:type}}{{/struct:py3_fields}}
             case _:
                 return self._fbthrift__inner.value
 

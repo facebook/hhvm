@@ -51,7 +51,6 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     object init_unicode_from_cpp(...)
     T* get_union_field_value[T](...) except +
     const T& deref_const[T](...)
-    void mixin_deprecation_log_error(const char* struct_name, const char* field_name)
 
     cdef cppclass set_iter[T]:
         set_iter()

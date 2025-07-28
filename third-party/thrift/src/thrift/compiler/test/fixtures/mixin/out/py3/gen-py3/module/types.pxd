@@ -67,7 +67,6 @@ cdef class Mixin2(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__Mixin2_FieldsSetter _fields_setter
     cdef inline object m1_impl(self)
     cdef inline object field2_impl(self)
-    cdef inline object field1_impl(self)
     cdef Mixin1 __fbthrift_cached_m1
 
     @staticmethod
@@ -91,10 +90,6 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline object field4_impl(self)
     cdef inline object m2_impl(self)
     cdef inline object m3_impl(self)
-    cdef inline object m1_impl(self)
-    cdef inline object field2_impl(self)
-    cdef inline object field1_impl(self)
-    cdef inline object field3_impl(self)
     cdef Mixin2 __fbthrift_cached_m2
     cdef Mixin3Base __fbthrift_cached_m3
 

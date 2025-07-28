@@ -213,7 +213,6 @@ class py3_mstch_program : public mstch_program {
     visit_types_for_objects();
     visit_types_for_constants();
     visit_types_for_typedefs();
-    visit_types_for_mixin_fields();
 
     for (const t_function* func : lifecycleFunctions()) {
       add_function_by_unique_return_type(
@@ -432,17 +431,6 @@ class py3_mstch_program : public mstch_program {
       }
       visit_type(typedef_def);
       typedefs_.push_back(typedef_def);
-    }
-  }
-
-  void visit_types_for_mixin_fields() {
-    for (const t_structured* strct : program_->structs_and_unions()) {
-      if (is_hidden(*strct)) {
-        continue;
-      }
-      for (const auto& m : cpp2::get_mixins_and_members(*strct)) {
-        visit_type(m.member->get_type());
-      }
     }
   }
 
@@ -954,8 +942,6 @@ class py3_mstch_struct : public mstch_struct {
             {"struct:exception_message?",
              &py3_mstch_struct::hasExceptionMessage},
             {"struct:exception_message", &py3_mstch_struct::exceptionMessage},
-            {"struct:fields_and_mixin_fields",
-             &py3_mstch_struct::fields_and_mixin_fields},
             {"struct:py3_fields", &py3_mstch_struct::py3_fields},
             {"struct:py3_fields?", &py3_mstch_struct::has_py3_fields},
             {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
@@ -1030,15 +1016,6 @@ class py3_mstch_struct : public mstch_struct {
     return false;
   }
 
-  mstch::node fields_and_mixin_fields() {
-    std::vector<const t_field*> fields = py3_fields_;
-    for (const auto& m : cpp2::get_mixins_and_members(*struct_)) {
-      fields.push_back(m.member);
-    }
-
-    return make_mstch_fields(fields);
-  }
-
  private:
   std::vector<const t_field*> py3_fields_;
   bool hidden_fields = false;
@@ -1082,13 +1059,7 @@ class py3_mstch_field : public mstch_field {
             {"field:hasPyName?", &py3_mstch_field::hasPyName},
             {"field:boxed_ref?", &py3_mstch_field::boxed_ref},
             {"field:has_ref_api?", &py3_mstch_field::hasRefApi},
-            {"field:is_mixin?", &py3_mstch_field::is_mixin},
         });
-  }
-
-  mstch::node is_mixin() {
-    return mstch_field::field_context_ == nullptr ||
-        mstch_field::field_context_->strct == nullptr;
   }
 
   mstch::node isRef() { return is_ref(); }
@@ -1155,15 +1126,6 @@ class py3_mstch_field : public mstch_field {
   }
 
   mstch::node hasRefApi() {
-    // Mixin is a special case (T126232678) because it does not contain
-    // a valid pointer to the top level struct
-    bool isMixin =
-        ((mstch_field::field_context_ == nullptr) ||
-         (mstch_field::field_context_->strct == nullptr));
-    if (isMixin) {
-      return false;
-    }
-
     const t_structured* parentStruct = mstch_field::field_context_->strct;
     return generate_legacy_api(*parentStruct);
   }

@@ -73,7 +73,6 @@ from thrift.py3.types cimport (
     {{#program:inplace_migrate?}}
     deref_const as __deref_const,
     {{/program:inplace_migrate?}}
-    mixin_deprecation_log_error,
 )
 from thrift.py3.types cimport _ensure_py3_or_raise, _ensure_py3_container_or_raise
 cimport thrift.py3.serializer as serializer
@@ -217,7 +216,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         {{/struct:exception?}}
         return __fbthrift_inst
 
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:py3_fields}}
     cdef inline {{field:py_name}}_impl(self):
         {{#field:optional?}}
         {{^field:hasDefaultValue?}}
@@ -236,12 +235,9 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
 
     @property
     def {{field:py_name}}(self):
-        {{#field:is_mixin?}}
-        mixin_deprecation_log_error(b"{{struct:name}}", b"{{field:py_name}}")
-        {{/field:is_mixin?}}
         return self.{{field:py_name}}_impl()
 
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:py3_fields}}
 
     def __hash__({{struct:name}} self):
         return super().__hash__()

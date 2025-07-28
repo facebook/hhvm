@@ -36,7 +36,6 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
-    mixin_deprecation_log_error,
 )
 from thrift.py3.types cimport _ensure_py3_or_raise, _ensure_py3_container_or_raise
 cimport thrift.py3.serializer as serializer

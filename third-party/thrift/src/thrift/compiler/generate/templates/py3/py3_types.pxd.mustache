@@ -69,9 +69,9 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     cdef shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     {{^struct:union?}}
     cdef _fbthrift_types_fields.__{{struct:name}}_FieldsSetter _fields_setter
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:py3_fields}}
     cdef inline object {{field:py_name}}_impl(self)
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:py3_fields}}
     {{!Memoized Python wrappers of struct fields, created lazily}}
     {{#struct:py3_fields}}
     {{#field:type}}{{#type:structured}}

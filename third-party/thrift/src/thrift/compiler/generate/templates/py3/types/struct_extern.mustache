@@ -56,7 +56,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
         {{/struct:is_struct_orderable?}}
         {{/struct:cpp_noncomparable}}
     {{^struct:union?}}
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:py3_fields}}
         {{#field:has_ref_accessor?}}
         {{#field:optional?}}
         __optional_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
@@ -80,7 +80,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
         {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}} {{field:py_name}}_ref "{{> types/field_cppname}}" ()
         {{/field:reference?}}
         {{/field:has_ref_accessor?}}
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:py3_fields}}
     {{/struct:union?}}
     {{#struct:union?}}
         {{> types/c_struct }}__type getType() const

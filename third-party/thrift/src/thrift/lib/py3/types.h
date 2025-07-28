@@ -203,14 +203,4 @@ PyObject* init_unicode_from_cpp(const T& str) {
   return PyUnicode_FromStringAndSize(str.data(), str.size());
 }
 
-inline void mixin_deprecation_log_error(
-    const char* struct_name, const char* field_name) {
-  LOG_FIRST_N(ERROR, 10)
-      << "*** DEPRECATION WARNING *** field `" << field_name << "` in struct `"
-      << struct_name << "` is a mixin field. Accessing it in builds after"
-      << " July 28, 2025 will result in AttributeError. Please reach out"
-      << " to thrift-python team if you need help migrating to explicit"
-      << " field access.";
-}
-
 } // namespace thrift::py3

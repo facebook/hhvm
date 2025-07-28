@@ -18,7 +18,6 @@ import unittest
 
 from testing.a.types import Foo, Mixin3, Union
 from testing.b.types import Mixin1, Mixin2
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 
 
 class MixinTest(unittest.TestCase):
@@ -42,14 +41,9 @@ class MixinTest(unittest.TestCase):
         foo = self.make_foo()
         self.assertEqual(foo.field4, "4")
 
-    @brokenInAutoMigrate()
-    def test_foo_mixin(self) -> None:
+    def test_foo_mixin_python_compat(self) -> None:
         foo = self.make_foo()
-        # pyre-ignore[16]: removed in next diff
-        self.assertIsNone(foo.field2)
-        # pyre-ignore[16]: removed in next diff
-        self.assertEqual(foo.field1, "1")
-        # pyre-ignore[16]: removed in next diff
-        self.assertEqual(foo.field3, "3")
-        # pyre-ignore[16]: removed in next diff
-        self.assertEqual(foo.field5, "5")
+        self.assertIsNone(foo.m2.field2)
+        self.assertEqual(foo.m2.m1.field1, "1")
+        self.assertEqual(foo.m3.field3, "3")
+        self.assertEqual(foo.u.field5, "5")

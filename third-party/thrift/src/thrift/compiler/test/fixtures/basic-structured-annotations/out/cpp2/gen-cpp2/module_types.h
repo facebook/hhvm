@@ -859,43 +859,51 @@ class structured_annotation_recursive final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse_ref() & {
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE fbthrift_T& recurse_ref() & {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse_ref() const& {
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const fbthrift_T& recurse_ref() const& {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse_ref() && {
-    return static_cast<::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE fbthrift_T&& recurse_ref() && {
+    return static_cast<fbthrift_T&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse_ref() const&& {
-    return static_cast<const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const fbthrift_T&& recurse_ref() const&& {
+    return static_cast<const fbthrift_T&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse() & {
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE fbthrift_T& recurse() & {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse() const& {
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const fbthrift_T& recurse() const& {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse() && {
-    return static_cast<::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE fbthrift_T&& recurse() && {
+    return static_cast<fbthrift_T&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse() const&& {
-    return static_cast<const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  template <typename..., typename fbthrift_T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const fbthrift_T&& recurse() const&& {
+    return static_cast<const fbthrift_T&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "forward" } */

@@ -5,4 +5,5 @@ java: mstch_java src/module.thrift
 rust: mstch_rust src/module.thrift
 pyi: mstch_pyi src/module.thrift
 py: py:json src/module.thrift
+python: mstch_python src/module.thrift
 json_experimental: json_experimental src/module.thrift

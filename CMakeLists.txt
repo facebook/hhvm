@@ -1,9 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-# Make `get_target_property()` on a target that does not exist a fatal error
-# https://cmake.org/cmake/help/v3.0/policy/CMP0045.html
-cmake_policy(SET CMP0045 NEW)
-# ditto for add_dependencies(): https://cmake.org/cmake/help/v3.0/policy/CMP0046.html
-cmake_policy(SET CMP0046 NEW)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -63,7 +58,7 @@ if(NOT SKIP_CCACHE)
       message(STATUS "Found ccache: ${CCACHE_FOUND} - enabling ccache as compiler wrapper")
     else()
       message(STATUS "Found ccache - ccache already in use as C and/or CXX compiler wrapper")
-   endif()
+    endif()
   endif(CCACHE_FOUND)
 endif(NOT SKIP_CCACHE)
 

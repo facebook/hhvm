@@ -28,7 +28,7 @@ using namespace wangle;
 
 DEFINE_int32(port, 11219, "test file server port");
 
-typedef Pipeline<IOBufQueue&, std::string> FileServerPipeline;
+using FileServerPipeline = Pipeline<IOBufQueue&, std::string>;
 
 class FileServerHandler : public HandlerAdapter<std::string> {
  public:

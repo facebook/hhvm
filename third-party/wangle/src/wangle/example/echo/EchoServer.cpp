@@ -27,7 +27,7 @@ using namespace wangle;
 
 DEFINE_int32(port, 8080, "echo server port");
 
-typedef Pipeline<IOBufQueue&, std::string> EchoPipeline;
+using EchoPipeline = Pipeline<IOBufQueue&, std::string>;
 
 // the main logic of our echo server; receives a string and writes it straight
 // back

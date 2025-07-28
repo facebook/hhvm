@@ -53,7 +53,7 @@ const std::string SESSION_KEY = "test_client";
  * Test cert and key are available in wangle/ssl/test/certs
  */
 namespace {
-typedef Pipeline<folly::IOBufQueue&, std::string> EchoPipeline;
+using EchoPipeline = Pipeline<folly::IOBufQueue&, std::string>;
 
 // the handler for receiving messages back from the server
 class EchoHandler : public HandlerAdapter<std::string> {

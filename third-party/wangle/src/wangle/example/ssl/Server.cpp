@@ -46,7 +46,7 @@ DEFINE_bool(
 using namespace wangle;
 using namespace folly;
 
-typedef Pipeline<IOBufQueue&, std::string> EchoPipeline;
+using EchoPipeline = Pipeline<IOBufQueue&, std::string>;
 
 namespace {
 // the main logic of our echo server; receives a string and writes it straight

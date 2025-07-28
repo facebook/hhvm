@@ -31,7 +31,7 @@ using namespace wangle;
 DEFINE_int32(port, 23, "test telnet server port");
 DEFINE_string(host, "::1", "test telnet server address");
 
-typedef Pipeline<folly::IOBufQueue&, std::string> TelnetPipeline;
+using TelnetPipeline = Pipeline<folly::IOBufQueue&, std::string>;
 
 class TelnetHandler : public HandlerAdapter<std::string> {
  public:

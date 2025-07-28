@@ -31,7 +31,7 @@ using namespace wangle;
 DEFINE_int32(port, 8080, "echo server port");
 DEFINE_string(host, "::1", "echo server address");
 
-typedef Pipeline<folly::IOBufQueue&, std::string> EchoPipeline;
+using EchoPipeline = Pipeline<folly::IOBufQueue&, std::string>;
 
 // the handler for receiving messages back from the server
 class EchoHandler : public HandlerAdapter<std::string> {

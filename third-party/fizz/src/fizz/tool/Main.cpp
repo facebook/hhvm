@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
     showUsage();
     return 1;
   } else {
-    if (fizzUtilities.count(arguments[1])) {
+    if (fizzUtilities.contains(arguments[1])) {
       return fizzUtilities.at(arguments[1])(arguments);
     } else {
       std::cerr << "Unknown command '" << arguments[1] << "'." << std::endl;

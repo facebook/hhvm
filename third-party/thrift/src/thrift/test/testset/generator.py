@@ -19,7 +19,7 @@ import doctest
 import os
 import sys
 from enum import Enum
-from typing import Dict, Iterable, List, Optional, TextIO
+from typing import Dict, Iterable, List, Optional, TextIO, Tuple
 
 
 class Target(Enum):
@@ -149,6 +149,15 @@ PRIMITIVE_TYPES_WITH_ALTERNATIVE_CUSTOM_DEFAULT = (
 KEY_TYPES = (
     "string",
     "i64",
+)
+
+VALID_HACK_KEY_TYPES = (
+    "byte",
+    "i16",
+    "i32",
+    "i64",
+    "string",
+    "binary",
 )
 
 CPP2_TYPE_NS = "type"
@@ -517,10 +526,39 @@ def gen_container_fields(target: Target, include_empty: bool = True) -> Dict[str
     return {**lists, **nested_lists, **sets, **nested_sets, **maps, **maps_to_sets}
 
 
+def skip_codegen_non_hack_container_key(values: Dict[str, str]) -> Dict[str, str]:
+    def is_container_valid(ty: str) -> bool:
+        """Recursive check to see if a type contains invalid container keys"""
+        if ty.startswith("set<") and ty.endswith(">"):
+            return ty[4:-1] in VALID_HACK_KEY_TYPES
+        elif ty.startswith("map<") and ty.endswith(">"):
+            elems = ty[4:-1].split(",", 1)
+            return elems[0] in VALID_HACK_KEY_TYPES and is_container_valid(
+                elems[1].strip()
+            )
+        else:
+            return True
+
+    def maybe_mark_skip(item: str) -> str:
+        content = item.split("|")
+        if (
+            is_container_valid(
+                content[0].replace("optional ", "").replace("required ", "")
+            )
+            or "@hack.SkipCodegen" in item
+        ):
+            return item
+        else:
+            return item + "|@hack.SkipCodegen{reason = 'Invalid key type'}"
+
+    return {k: maybe_mark_skip(v) for k, v in values.items()}
+
+
 def gen_structured_fields(target: Target, include_empty: bool = True) -> Dict[str, str]:
     ret = gen_container_fields(target, include_empty)
     ret.update(**gen_cpp_ref(target, ret), **gen_shared_cpp_ref(target, ret))
     ret.update(gen_primatives(target, PRIMITIVE_TYPES))
+    ret = skip_codegen_non_hack_container_key(ret)
     return ret
 
 
@@ -555,6 +593,8 @@ def gen_struct_fields(target: Target, include_empty: bool = True) -> Dict[str, s
         **gen_field_adapted(target, gen_container_fields(target)),
     )
     ret.update(**gen_lazy_fields(target))
+    ret = skip_codegen_non_hack_container_key(ret)
+
     return ret
 
 

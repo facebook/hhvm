@@ -84,6 +84,7 @@ struct struct_list_list_struct_empty {
   1: list<list<struct_empty>> field_1;
 }
 struct struct_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 struct struct_set_byte {
@@ -99,9 +100,11 @@ struct struct_set_i64 {
   1: set<i64> field_1;
 }
 struct struct_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 struct struct_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 struct struct_set_binary {
@@ -111,36 +114,47 @@ struct struct_set_string {
   1: set<string> field_1;
 }
 struct struct_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 struct struct_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 struct struct_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 struct struct_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 struct struct_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 struct struct_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 struct struct_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 struct struct_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 struct struct_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 struct struct_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 struct struct_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool {
@@ -204,6 +218,7 @@ struct struct_map_i64_struct_empty {
   1: map<i64, struct_empty> field_1;
 }
 struct struct_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 struct struct_map_string_set_byte {
@@ -219,9 +234,11 @@ struct struct_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
 struct struct_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 struct struct_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 struct struct_map_string_set_binary {
@@ -231,9 +248,11 @@ struct struct_map_string_set_string {
   1: map<string, set<string>> field_1;
 }
 struct struct_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 struct struct_map_i64_set_byte {
@@ -249,9 +268,11 @@ struct struct_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
 }
 struct struct_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 struct struct_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 struct struct_map_i64_set_binary {
@@ -261,6 +282,7 @@ struct struct_map_i64_set_string {
   1: map<i64, set<string>> field_1;
 }
 struct struct_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_list_bool_cpp_ref {
@@ -366,6 +388,7 @@ struct struct_list_list_struct_empty_cpp_ref {
 struct struct_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 struct struct_set_byte_cpp_ref {
@@ -391,11 +414,13 @@ struct struct_set_i64_cpp_ref {
 struct struct_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 struct struct_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 struct struct_set_binary_cpp_ref {
@@ -411,56 +436,67 @@ struct struct_set_string_cpp_ref {
 struct struct_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 struct struct_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 struct struct_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 struct struct_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 struct struct_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 struct struct_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 struct struct_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 struct struct_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 struct struct_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 struct struct_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 struct struct_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool_cpp_ref {
@@ -566,6 +602,7 @@ struct struct_map_i64_struct_empty_cpp_ref {
 struct struct_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 struct struct_map_string_set_byte_cpp_ref {
@@ -591,11 +628,13 @@ struct struct_map_string_set_i64_cpp_ref {
 struct struct_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 struct struct_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 struct struct_map_string_set_binary_cpp_ref {
@@ -611,11 +650,13 @@ struct struct_map_string_set_string_cpp_ref {
 struct struct_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 struct struct_map_i64_set_byte_cpp_ref {
@@ -641,11 +682,13 @@ struct struct_map_i64_set_i64_cpp_ref {
 struct struct_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 struct struct_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 struct struct_map_i64_set_binary_cpp_ref {
@@ -661,6 +704,7 @@ struct struct_map_i64_set_string_cpp_ref {
 struct struct_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_list_bool_shared_cpp_ref {
@@ -766,6 +810,7 @@ struct struct_list_list_struct_empty_shared_cpp_ref {
 struct struct_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 struct struct_set_byte_shared_cpp_ref {
@@ -791,11 +836,13 @@ struct struct_set_i64_shared_cpp_ref {
 struct struct_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 struct struct_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 struct struct_set_binary_shared_cpp_ref {
@@ -811,56 +858,67 @@ struct struct_set_string_shared_cpp_ref {
 struct struct_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 struct struct_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 struct struct_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 struct struct_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 struct struct_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 struct struct_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 struct struct_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 struct struct_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 struct struct_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 struct struct_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 struct struct_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool_shared_cpp_ref {
@@ -966,6 +1024,7 @@ struct struct_map_i64_struct_empty_shared_cpp_ref {
 struct struct_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 struct struct_map_string_set_byte_shared_cpp_ref {
@@ -991,11 +1050,13 @@ struct struct_map_string_set_i64_shared_cpp_ref {
 struct struct_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 struct struct_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 struct struct_map_string_set_binary_shared_cpp_ref {
@@ -1011,11 +1072,13 @@ struct struct_map_string_set_string_shared_cpp_ref {
 struct struct_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 struct struct_map_i64_set_byte_shared_cpp_ref {
@@ -1041,11 +1104,13 @@ struct struct_map_i64_set_i64_shared_cpp_ref {
 struct struct_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 struct struct_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 struct struct_map_i64_set_binary_shared_cpp_ref {
@@ -1061,6 +1126,7 @@ struct struct_map_i64_set_string_shared_cpp_ref {
 struct struct_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_bool {
@@ -1205,6 +1271,7 @@ struct struct_optional_list_list_struct_empty {
   1: optional list<list<struct_empty>> field_1;
 }
 struct struct_optional_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 struct struct_optional_set_byte {
@@ -1220,9 +1287,11 @@ struct struct_optional_set_i64 {
   1: optional set<i64> field_1;
 }
 struct struct_optional_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 struct struct_optional_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 struct struct_optional_set_binary {
@@ -1232,36 +1301,47 @@ struct struct_optional_set_string {
   1: optional set<string> field_1;
 }
 struct struct_optional_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 struct struct_optional_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 struct struct_optional_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 struct struct_optional_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 struct struct_optional_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 struct struct_optional_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 struct struct_optional_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 struct struct_optional_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 struct struct_optional_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 struct struct_optional_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 struct struct_optional_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool {
@@ -1325,6 +1405,7 @@ struct struct_optional_map_i64_struct_empty {
   1: optional map<i64, struct_empty> field_1;
 }
 struct struct_optional_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 struct struct_optional_map_string_set_byte {
@@ -1340,9 +1421,11 @@ struct struct_optional_map_string_set_i64 {
   1: optional map<string, set<i64>> field_1;
 }
 struct struct_optional_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 struct struct_optional_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 struct struct_optional_map_string_set_binary {
@@ -1352,9 +1435,11 @@ struct struct_optional_map_string_set_string {
   1: optional map<string, set<string>> field_1;
 }
 struct struct_optional_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 struct struct_optional_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 struct struct_optional_map_i64_set_byte {
@@ -1370,9 +1455,11 @@ struct struct_optional_map_i64_set_i64 {
   1: optional map<i64, set<i64>> field_1;
 }
 struct struct_optional_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 struct struct_optional_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 struct struct_optional_map_i64_set_binary {
@@ -1382,6 +1469,7 @@ struct struct_optional_map_i64_set_string {
   1: optional map<i64, set<string>> field_1;
 }
 struct struct_optional_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_optional_list_bool_cpp_ref {
@@ -1487,6 +1575,7 @@ struct struct_optional_list_list_struct_empty_cpp_ref {
 struct struct_optional_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 struct struct_optional_set_byte_cpp_ref {
@@ -1512,11 +1601,13 @@ struct struct_optional_set_i64_cpp_ref {
 struct struct_optional_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 struct struct_optional_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 struct struct_optional_set_binary_cpp_ref {
@@ -1532,56 +1623,67 @@ struct struct_optional_set_string_cpp_ref {
 struct struct_optional_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 struct struct_optional_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 struct struct_optional_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 struct struct_optional_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 struct struct_optional_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 struct struct_optional_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 struct struct_optional_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 struct struct_optional_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 struct struct_optional_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 struct struct_optional_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 struct struct_optional_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool_cpp_ref {
@@ -1687,6 +1789,7 @@ struct struct_optional_map_i64_struct_empty_cpp_ref {
 struct struct_optional_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 struct struct_optional_map_string_set_byte_cpp_ref {
@@ -1712,11 +1815,13 @@ struct struct_optional_map_string_set_i64_cpp_ref {
 struct struct_optional_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 struct struct_optional_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 struct struct_optional_map_string_set_binary_cpp_ref {
@@ -1732,11 +1837,13 @@ struct struct_optional_map_string_set_string_cpp_ref {
 struct struct_optional_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 struct struct_optional_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 struct struct_optional_map_i64_set_byte_cpp_ref {
@@ -1762,11 +1869,13 @@ struct struct_optional_map_i64_set_i64_cpp_ref {
 struct struct_optional_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 struct struct_optional_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 struct struct_optional_map_i64_set_binary_cpp_ref {
@@ -1782,6 +1891,7 @@ struct struct_optional_map_i64_set_string_cpp_ref {
 struct struct_optional_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_optional_list_bool_shared_cpp_ref {
@@ -1887,6 +1997,7 @@ struct struct_optional_list_list_struct_empty_shared_cpp_ref {
 struct struct_optional_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 struct struct_optional_set_byte_shared_cpp_ref {
@@ -1912,11 +2023,13 @@ struct struct_optional_set_i64_shared_cpp_ref {
 struct struct_optional_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 struct struct_optional_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 struct struct_optional_set_binary_shared_cpp_ref {
@@ -1932,56 +2045,67 @@ struct struct_optional_set_string_shared_cpp_ref {
 struct struct_optional_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 struct struct_optional_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 struct struct_optional_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 struct struct_optional_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 struct struct_optional_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 struct struct_optional_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 struct struct_optional_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 struct struct_optional_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 struct struct_optional_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 struct struct_optional_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 struct struct_optional_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool_shared_cpp_ref {
@@ -2087,6 +2211,7 @@ struct struct_optional_map_i64_struct_empty_shared_cpp_ref {
 struct struct_optional_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 struct struct_optional_map_string_set_byte_shared_cpp_ref {
@@ -2112,11 +2237,13 @@ struct struct_optional_map_string_set_i64_shared_cpp_ref {
 struct struct_optional_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 struct struct_optional_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 struct struct_optional_map_string_set_binary_shared_cpp_ref {
@@ -2132,11 +2259,13 @@ struct struct_optional_map_string_set_string_shared_cpp_ref {
 struct struct_optional_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 struct struct_optional_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 struct struct_optional_map_i64_set_byte_shared_cpp_ref {
@@ -2162,11 +2291,13 @@ struct struct_optional_map_i64_set_i64_shared_cpp_ref {
 struct struct_optional_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 struct struct_optional_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 struct struct_optional_map_i64_set_binary_shared_cpp_ref {
@@ -2182,6 +2313,7 @@ struct struct_optional_map_i64_set_string_shared_cpp_ref {
 struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_optional_bool {
@@ -2344,6 +2476,7 @@ struct struct_required_list_list_struct_empty {
   1: required list<list<struct_empty>> field_1;
 }
 struct struct_required_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 struct struct_required_set_byte {
@@ -2359,9 +2492,11 @@ struct struct_required_set_i64 {
   1: required set<i64> field_1;
 }
 struct struct_required_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 struct struct_required_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 struct struct_required_set_binary {
@@ -2371,36 +2506,47 @@ struct struct_required_set_string {
   1: required set<string> field_1;
 }
 struct struct_required_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 struct struct_required_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 struct struct_required_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 struct struct_required_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 struct struct_required_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 struct struct_required_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 struct struct_required_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 struct struct_required_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 struct struct_required_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 struct struct_required_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 struct struct_required_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 struct struct_required_map_string_bool {
@@ -2464,6 +2610,7 @@ struct struct_required_map_i64_struct_empty {
   1: required map<i64, struct_empty> field_1;
 }
 struct struct_required_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 struct struct_required_map_string_set_byte {
@@ -2479,9 +2626,11 @@ struct struct_required_map_string_set_i64 {
   1: required map<string, set<i64>> field_1;
 }
 struct struct_required_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 struct struct_required_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 struct struct_required_map_string_set_binary {
@@ -2491,9 +2640,11 @@ struct struct_required_map_string_set_string {
   1: required map<string, set<string>> field_1;
 }
 struct struct_required_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 struct struct_required_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 struct struct_required_map_i64_set_byte {
@@ -2509,9 +2660,11 @@ struct struct_required_map_i64_set_i64 {
   1: required map<i64, set<i64>> field_1;
 }
 struct struct_required_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 struct struct_required_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 struct struct_required_map_i64_set_binary {
@@ -2521,6 +2674,7 @@ struct struct_required_map_i64_set_string {
   1: required map<i64, set<string>> field_1;
 }
 struct struct_required_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 struct struct_required_list_bool_cpp_ref {
@@ -2626,6 +2780,7 @@ struct struct_required_list_list_struct_empty_cpp_ref {
 struct struct_required_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 struct struct_required_set_byte_cpp_ref {
@@ -2651,11 +2806,13 @@ struct struct_required_set_i64_cpp_ref {
 struct struct_required_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 struct struct_required_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 struct struct_required_set_binary_cpp_ref {
@@ -2671,56 +2828,67 @@ struct struct_required_set_string_cpp_ref {
 struct struct_required_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 struct struct_required_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 struct struct_required_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 struct struct_required_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 struct struct_required_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 struct struct_required_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 struct struct_required_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 struct struct_required_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 struct struct_required_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 struct struct_required_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 struct struct_required_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 struct struct_required_map_string_bool_cpp_ref {
@@ -2826,6 +2994,7 @@ struct struct_required_map_i64_struct_empty_cpp_ref {
 struct struct_required_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 struct struct_required_map_string_set_byte_cpp_ref {
@@ -2851,11 +3020,13 @@ struct struct_required_map_string_set_i64_cpp_ref {
 struct struct_required_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 struct struct_required_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 struct struct_required_map_string_set_binary_cpp_ref {
@@ -2871,11 +3042,13 @@ struct struct_required_map_string_set_string_cpp_ref {
 struct struct_required_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 struct struct_required_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 struct struct_required_map_i64_set_byte_cpp_ref {
@@ -2901,11 +3074,13 @@ struct struct_required_map_i64_set_i64_cpp_ref {
 struct struct_required_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 struct struct_required_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 struct struct_required_map_i64_set_binary_cpp_ref {
@@ -2921,6 +3096,7 @@ struct struct_required_map_i64_set_string_cpp_ref {
 struct struct_required_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 struct struct_required_list_bool_shared_cpp_ref {
@@ -3026,6 +3202,7 @@ struct struct_required_list_list_struct_empty_shared_cpp_ref {
 struct struct_required_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 struct struct_required_set_byte_shared_cpp_ref {
@@ -3051,11 +3228,13 @@ struct struct_required_set_i64_shared_cpp_ref {
 struct struct_required_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 struct struct_required_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 struct struct_required_set_binary_shared_cpp_ref {
@@ -3071,56 +3250,67 @@ struct struct_required_set_string_shared_cpp_ref {
 struct struct_required_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 struct struct_required_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 struct struct_required_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 struct struct_required_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 struct struct_required_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 struct struct_required_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 struct struct_required_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 struct struct_required_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 struct struct_required_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 struct struct_required_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 struct struct_required_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 struct struct_required_map_string_bool_shared_cpp_ref {
@@ -3226,6 +3416,7 @@ struct struct_required_map_i64_struct_empty_shared_cpp_ref {
 struct struct_required_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 struct struct_required_map_string_set_byte_shared_cpp_ref {
@@ -3251,11 +3442,13 @@ struct struct_required_map_string_set_i64_shared_cpp_ref {
 struct struct_required_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 struct struct_required_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 struct struct_required_map_string_set_binary_shared_cpp_ref {
@@ -3271,11 +3464,13 @@ struct struct_required_map_string_set_string_shared_cpp_ref {
 struct struct_required_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 struct struct_required_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 struct struct_required_map_i64_set_byte_shared_cpp_ref {
@@ -3301,11 +3496,13 @@ struct struct_required_map_i64_set_i64_shared_cpp_ref {
 struct struct_required_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 struct struct_required_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 struct struct_required_map_i64_set_binary_shared_cpp_ref {
@@ -3321,6 +3518,7 @@ struct struct_required_map_i64_set_string_shared_cpp_ref {
 struct struct_required_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 struct struct_required_bool {
@@ -3485,6 +3683,7 @@ struct struct_terse_list_list_struct_empty {
   1: list<list<struct_empty>> field_1;
 }
 struct struct_terse_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -3505,10 +3704,12 @@ struct struct_terse_set_i64 {
   1: set<i64> field_1;
 }
 struct struct_terse_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 struct struct_terse_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -3521,46 +3722,57 @@ struct struct_terse_set_string {
   1: set<string> field_1;
 }
 struct struct_terse_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 struct struct_terse_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 struct struct_terse_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 struct struct_terse_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 struct struct_terse_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 struct struct_terse_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 struct struct_terse_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 struct struct_terse_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 struct struct_terse_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 struct struct_terse_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 struct struct_terse_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -3645,6 +3857,7 @@ struct struct_terse_map_i64_struct_empty {
   1: map<i64, struct_empty> field_1;
 }
 struct struct_terse_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -3665,10 +3878,12 @@ struct struct_terse_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
 struct struct_terse_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 struct struct_terse_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -3681,10 +3896,12 @@ struct struct_terse_map_string_set_string {
   1: map<string, set<string>> field_1;
 }
 struct struct_terse_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_terse_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -3705,10 +3922,12 @@ struct struct_terse_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
 }
 struct struct_terse_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 struct struct_terse_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -3721,6 +3940,7 @@ struct struct_terse_map_i64_set_string {
   1: map<i64, set<string>> field_1;
 }
 struct struct_terse_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -3847,6 +4067,7 @@ struct struct_terse_list_list_struct_empty_cpp_ref {
 struct struct_terse_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -3877,12 +4098,14 @@ struct struct_terse_set_i64_cpp_ref {
 struct struct_terse_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 struct struct_terse_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -3901,66 +4124,77 @@ struct struct_terse_set_string_cpp_ref {
 struct struct_terse_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 struct struct_terse_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 struct struct_terse_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 struct struct_terse_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 struct struct_terse_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 struct struct_terse_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 struct struct_terse_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 struct struct_terse_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 struct struct_terse_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 struct struct_terse_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 struct struct_terse_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -4087,6 +4321,7 @@ struct struct_terse_map_i64_struct_empty_cpp_ref {
 struct struct_terse_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -4117,12 +4352,14 @@ struct struct_terse_map_string_set_i64_cpp_ref {
 struct struct_terse_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 struct struct_terse_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -4141,12 +4378,14 @@ struct struct_terse_map_string_set_string_cpp_ref {
 struct struct_terse_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_terse_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -4177,12 +4416,14 @@ struct struct_terse_map_i64_set_i64_cpp_ref {
 struct struct_terse_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 struct struct_terse_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -4201,6 +4442,7 @@ struct struct_terse_map_i64_set_string_cpp_ref {
 struct struct_terse_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -4327,6 +4569,7 @@ struct struct_terse_list_list_struct_empty_shared_cpp_ref {
 struct struct_terse_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -4357,12 +4600,14 @@ struct struct_terse_set_i64_shared_cpp_ref {
 struct struct_terse_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 struct struct_terse_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -4381,66 +4626,77 @@ struct struct_terse_set_string_shared_cpp_ref {
 struct struct_terse_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 struct struct_terse_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 struct struct_terse_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 struct struct_terse_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 struct struct_terse_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 struct struct_terse_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 struct struct_terse_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 struct struct_terse_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 struct struct_terse_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 struct struct_terse_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 struct struct_terse_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -4567,6 +4823,7 @@ struct struct_terse_map_i64_struct_empty_shared_cpp_ref {
 struct struct_terse_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -4597,12 +4854,14 @@ struct struct_terse_map_string_set_i64_shared_cpp_ref {
 struct struct_terse_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 struct struct_terse_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -4621,12 +4880,14 @@ struct struct_terse_map_string_set_string_shared_cpp_ref {
 struct struct_terse_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_terse_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -4657,12 +4918,14 @@ struct struct_terse_map_i64_set_i64_shared_cpp_ref {
 struct struct_terse_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 struct struct_terse_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -4681,6 +4944,7 @@ struct struct_terse_map_i64_set_string_shared_cpp_ref {
 struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -4802,6 +5066,7 @@ struct struct_optional_list_list_struct_empty_box {
 }
 struct struct_optional_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 struct struct_optional_set_byte_box {
@@ -4822,10 +5087,12 @@ struct struct_optional_set_i64_box {
 }
 struct struct_optional_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 struct struct_optional_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 struct struct_optional_set_binary_box {
@@ -4838,46 +5105,57 @@ struct struct_optional_set_string_box {
 }
 struct struct_optional_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 struct struct_optional_set_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 struct struct_optional_set_set_byte_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 struct struct_optional_set_set_i16_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 struct struct_optional_set_set_i32_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 struct struct_optional_set_set_i64_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 struct struct_optional_set_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 struct struct_optional_set_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 struct struct_optional_set_set_binary_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 struct struct_optional_set_set_string_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 struct struct_optional_set_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool_box {
@@ -4962,6 +5240,7 @@ struct struct_optional_map_i64_struct_empty_box {
 }
 struct struct_optional_map_string_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 struct struct_optional_map_string_set_byte_box {
@@ -4982,10 +5261,12 @@ struct struct_optional_map_string_set_i64_box {
 }
 struct struct_optional_map_string_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 struct struct_optional_map_string_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 struct struct_optional_map_string_set_binary_box {
@@ -4998,10 +5279,12 @@ struct struct_optional_map_string_set_string_box {
 }
 struct struct_optional_map_string_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 struct struct_optional_map_i64_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 struct struct_optional_map_i64_set_byte_box {
@@ -5022,10 +5305,12 @@ struct struct_optional_map_i64_set_i64_box {
 }
 struct struct_optional_map_i64_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 struct struct_optional_map_i64_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 struct struct_optional_map_i64_set_binary_box {
@@ -5038,6 +5323,7 @@ struct struct_optional_map_i64_set_string_box {
 }
 struct struct_optional_map_i64_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_adapted_bool {
@@ -5248,6 +5534,7 @@ struct struct_adapted_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 struct struct_adapted_set_byte {
@@ -5283,6 +5570,7 @@ struct struct_adapted_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 struct struct_adapted_set_double {
@@ -5290,6 +5578,7 @@ struct struct_adapted_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 struct struct_adapted_set_binary {
@@ -5311,6 +5600,7 @@ struct struct_adapted_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 struct struct_adapted_set_set_bool {
@@ -5318,6 +5608,7 @@ struct struct_adapted_set_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 struct struct_adapted_set_set_byte {
@@ -5325,6 +5616,7 @@ struct struct_adapted_set_set_byte {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 struct struct_adapted_set_set_i16 {
@@ -5332,6 +5624,7 @@ struct struct_adapted_set_set_i16 {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 struct struct_adapted_set_set_i32 {
@@ -5339,6 +5632,7 @@ struct struct_adapted_set_set_i32 {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 struct struct_adapted_set_set_i64 {
@@ -5346,6 +5640,7 @@ struct struct_adapted_set_set_i64 {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 struct struct_adapted_set_set_float {
@@ -5353,6 +5648,7 @@ struct struct_adapted_set_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 struct struct_adapted_set_set_double {
@@ -5360,6 +5656,7 @@ struct struct_adapted_set_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 struct struct_adapted_set_set_binary {
@@ -5367,6 +5664,7 @@ struct struct_adapted_set_set_binary {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 struct struct_adapted_set_set_string {
@@ -5374,6 +5672,7 @@ struct struct_adapted_set_set_string {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 struct struct_adapted_set_set_struct_empty {
@@ -5381,6 +5680,7 @@ struct struct_adapted_set_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 struct struct_adapted_map_string_bool {
@@ -5528,6 +5828,7 @@ struct struct_adapted_map_string_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 struct struct_adapted_map_string_set_byte {
@@ -5563,6 +5864,7 @@ struct struct_adapted_map_string_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 struct struct_adapted_map_string_set_double {
@@ -5570,6 +5872,7 @@ struct struct_adapted_map_string_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 struct struct_adapted_map_string_set_binary {
@@ -5591,6 +5894,7 @@ struct struct_adapted_map_string_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_adapted_map_i64_set_bool {
@@ -5598,6 +5902,7 @@ struct struct_adapted_map_i64_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 struct struct_adapted_map_i64_set_byte {
@@ -5633,6 +5938,7 @@ struct struct_adapted_map_i64_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 struct struct_adapted_map_i64_set_double {
@@ -5640,6 +5946,7 @@ struct struct_adapted_map_i64_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 struct struct_adapted_map_i64_set_binary {
@@ -5661,6 +5968,7 @@ struct struct_adapted_map_i64_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_field_adapted_bool {
@@ -5871,6 +6179,7 @@ struct struct_field_adapted_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 struct struct_field_adapted_set_byte {
@@ -5906,6 +6215,7 @@ struct struct_field_adapted_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 struct struct_field_adapted_set_double {
@@ -5913,6 +6223,7 @@ struct struct_field_adapted_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 struct struct_field_adapted_set_binary {
@@ -5934,6 +6245,7 @@ struct struct_field_adapted_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 struct struct_field_adapted_set_set_bool {
@@ -5941,6 +6253,7 @@ struct struct_field_adapted_set_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 struct struct_field_adapted_set_set_byte {
@@ -5948,6 +6261,7 @@ struct struct_field_adapted_set_set_byte {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 struct struct_field_adapted_set_set_i16 {
@@ -5955,6 +6269,7 @@ struct struct_field_adapted_set_set_i16 {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 struct struct_field_adapted_set_set_i32 {
@@ -5962,6 +6277,7 @@ struct struct_field_adapted_set_set_i32 {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 struct struct_field_adapted_set_set_i64 {
@@ -5969,6 +6285,7 @@ struct struct_field_adapted_set_set_i64 {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 struct struct_field_adapted_set_set_float {
@@ -5976,6 +6293,7 @@ struct struct_field_adapted_set_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 struct struct_field_adapted_set_set_double {
@@ -5983,6 +6301,7 @@ struct struct_field_adapted_set_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 struct struct_field_adapted_set_set_binary {
@@ -5990,6 +6309,7 @@ struct struct_field_adapted_set_set_binary {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 struct struct_field_adapted_set_set_string {
@@ -5997,6 +6317,7 @@ struct struct_field_adapted_set_set_string {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 struct struct_field_adapted_set_set_struct_empty {
@@ -6004,6 +6325,7 @@ struct struct_field_adapted_set_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 struct struct_field_adapted_map_string_bool {
@@ -6151,6 +6473,7 @@ struct struct_field_adapted_map_string_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 struct struct_field_adapted_map_string_set_byte {
@@ -6186,6 +6509,7 @@ struct struct_field_adapted_map_string_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 struct struct_field_adapted_map_string_set_double {
@@ -6193,6 +6517,7 @@ struct struct_field_adapted_map_string_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 struct struct_field_adapted_map_string_set_binary {
@@ -6214,6 +6539,7 @@ struct struct_field_adapted_map_string_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_field_adapted_map_i64_set_bool {
@@ -6221,6 +6547,7 @@ struct struct_field_adapted_map_i64_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 struct struct_field_adapted_map_i64_set_byte {
@@ -6256,6 +6583,7 @@ struct struct_field_adapted_map_i64_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 struct struct_field_adapted_map_i64_set_double {
@@ -6263,6 +6591,7 @@ struct struct_field_adapted_map_i64_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 struct struct_field_adapted_map_i64_set_binary {
@@ -6284,6 +6613,7 @@ struct struct_field_adapted_map_i64_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_list_bool_lazy {
@@ -6368,6 +6698,7 @@ struct struct_list_list_struct_empty_lazy {
 }
 struct struct_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 struct struct_set_byte_lazy {
@@ -6388,10 +6719,12 @@ struct struct_set_i64_lazy {
 }
 struct struct_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 struct struct_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 struct struct_set_binary_lazy {
@@ -6404,46 +6737,57 @@ struct struct_set_string_lazy {
 }
 struct struct_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 struct struct_set_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 struct struct_set_set_byte_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 struct struct_set_set_i16_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 struct struct_set_set_i32_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 struct struct_set_set_i64_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 struct struct_set_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 struct struct_set_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 struct struct_set_set_binary_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 struct struct_set_set_string_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 struct struct_set_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool_lazy {
@@ -6528,6 +6872,7 @@ struct struct_map_i64_struct_empty_lazy {
 }
 struct struct_map_string_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 struct struct_map_string_set_byte_lazy {
@@ -6548,10 +6893,12 @@ struct struct_map_string_set_i64_lazy {
 }
 struct struct_map_string_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 struct struct_map_string_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 struct struct_map_string_set_binary_lazy {
@@ -6564,10 +6911,12 @@ struct struct_map_string_set_string_lazy {
 }
 struct struct_map_string_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 struct struct_map_i64_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 struct struct_map_i64_set_byte_lazy {
@@ -6588,10 +6937,12 @@ struct struct_map_i64_set_i64_lazy {
 }
 struct struct_map_i64_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 struct struct_map_i64_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 struct struct_map_i64_set_binary_lazy {
@@ -6604,6 +6955,7 @@ struct struct_map_i64_set_string_lazy {
 }
 struct struct_map_i64_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_string_lazy {
@@ -6695,6 +7047,7 @@ struct struct_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -6715,10 +7068,12 @@ struct struct_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -6731,46 +7086,57 @@ struct struct_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -6855,6 +7221,7 @@ struct struct_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -6875,10 +7242,12 @@ struct struct_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -6891,10 +7260,12 @@ struct struct_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -6915,10 +7286,12 @@ struct struct_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -6931,6 +7304,7 @@ struct struct_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -7057,6 +7431,7 @@ struct struct_list_list_struct_empty_cpp_ref_op_encoded {
 struct struct_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -7087,12 +7462,14 @@ struct struct_set_i64_cpp_ref_op_encoded {
 struct struct_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -7111,66 +7488,77 @@ struct struct_set_string_cpp_ref_op_encoded {
 struct struct_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -7297,6 +7685,7 @@ struct struct_map_i64_struct_empty_cpp_ref_op_encoded {
 struct struct_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -7327,12 +7716,14 @@ struct struct_map_string_set_i64_cpp_ref_op_encoded {
 struct struct_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -7351,12 +7742,14 @@ struct struct_map_string_set_string_cpp_ref_op_encoded {
 struct struct_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -7387,12 +7780,14 @@ struct struct_map_i64_set_i64_cpp_ref_op_encoded {
 struct struct_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -7411,6 +7806,7 @@ struct struct_map_i64_set_string_cpp_ref_op_encoded {
 struct struct_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -7537,6 +7933,7 @@ struct struct_list_list_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -7567,12 +7964,14 @@ struct struct_set_i64_shared_cpp_ref_op_encoded {
 struct struct_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -7591,66 +7990,77 @@ struct struct_set_string_shared_cpp_ref_op_encoded {
 struct struct_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -7777,6 +8187,7 @@ struct struct_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -7807,12 +8218,14 @@ struct struct_map_string_set_i64_shared_cpp_ref_op_encoded {
 struct struct_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -7831,12 +8244,14 @@ struct struct_map_string_set_string_shared_cpp_ref_op_encoded {
 struct struct_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -7867,12 +8282,14 @@ struct struct_map_i64_set_i64_shared_cpp_ref_op_encoded {
 struct struct_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -7891,6 +8308,7 @@ struct struct_map_i64_set_string_shared_cpp_ref_op_encoded {
 struct struct_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -8083,6 +8501,7 @@ struct struct_optional_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -8103,10 +8522,12 @@ struct struct_optional_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -8119,46 +8540,57 @@ struct struct_optional_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -8243,6 +8675,7 @@ struct struct_optional_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -8263,10 +8696,12 @@ struct struct_optional_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -8279,10 +8714,12 @@ struct struct_optional_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -8303,10 +8740,12 @@ struct struct_optional_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -8319,6 +8758,7 @@ struct struct_optional_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -8445,6 +8885,7 @@ struct struct_optional_list_list_struct_empty_cpp_ref_op_encoded {
 struct struct_optional_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -8475,12 +8916,14 @@ struct struct_optional_set_i64_cpp_ref_op_encoded {
 struct struct_optional_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -8499,66 +8942,77 @@ struct struct_optional_set_string_cpp_ref_op_encoded {
 struct struct_optional_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -8685,6 +9139,7 @@ struct struct_optional_map_i64_struct_empty_cpp_ref_op_encoded {
 struct struct_optional_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -8715,12 +9170,14 @@ struct struct_optional_map_string_set_i64_cpp_ref_op_encoded {
 struct struct_optional_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -8739,12 +9196,14 @@ struct struct_optional_map_string_set_string_cpp_ref_op_encoded {
 struct struct_optional_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -8775,12 +9234,14 @@ struct struct_optional_map_i64_set_i64_cpp_ref_op_encoded {
 struct struct_optional_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -8799,6 +9260,7 @@ struct struct_optional_map_i64_set_string_cpp_ref_op_encoded {
 struct struct_optional_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -8925,6 +9387,7 @@ struct struct_optional_list_list_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_optional_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -8955,12 +9418,14 @@ struct struct_optional_set_i64_shared_cpp_ref_op_encoded {
 struct struct_optional_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -8979,66 +9444,77 @@ struct struct_optional_set_string_shared_cpp_ref_op_encoded {
 struct struct_optional_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -9165,6 +9641,7 @@ struct struct_optional_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_optional_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -9195,12 +9672,14 @@ struct struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
 struct struct_optional_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -9219,12 +9698,14 @@ struct struct_optional_map_string_set_string_shared_cpp_ref_op_encoded {
 struct struct_optional_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -9255,12 +9736,14 @@ struct struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
 struct struct_optional_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -9279,6 +9762,7 @@ struct struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
 struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -9489,6 +9973,7 @@ struct struct_required_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -9509,10 +9994,12 @@ struct struct_required_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -9525,46 +10012,57 @@ struct struct_required_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -9649,6 +10147,7 @@ struct struct_required_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -9669,10 +10168,12 @@ struct struct_required_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -9685,10 +10186,12 @@ struct struct_required_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -9709,10 +10212,12 @@ struct struct_required_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -9725,6 +10230,7 @@ struct struct_required_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -9851,6 +10357,7 @@ struct struct_required_list_list_struct_empty_cpp_ref_op_encoded {
 struct struct_required_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -9881,12 +10388,14 @@ struct struct_required_set_i64_cpp_ref_op_encoded {
 struct struct_required_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -9905,66 +10414,77 @@ struct struct_required_set_string_cpp_ref_op_encoded {
 struct struct_required_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -10091,6 +10611,7 @@ struct struct_required_map_i64_struct_empty_cpp_ref_op_encoded {
 struct struct_required_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -10121,12 +10642,14 @@ struct struct_required_map_string_set_i64_cpp_ref_op_encoded {
 struct struct_required_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -10145,12 +10668,14 @@ struct struct_required_map_string_set_string_cpp_ref_op_encoded {
 struct struct_required_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -10181,12 +10706,14 @@ struct struct_required_map_i64_set_i64_cpp_ref_op_encoded {
 struct struct_required_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -10205,6 +10732,7 @@ struct struct_required_map_i64_set_string_cpp_ref_op_encoded {
 struct struct_required_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -10331,6 +10859,7 @@ struct struct_required_list_list_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_required_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -10361,12 +10890,14 @@ struct struct_required_set_i64_shared_cpp_ref_op_encoded {
 struct struct_required_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -10385,66 +10916,77 @@ struct struct_required_set_string_shared_cpp_ref_op_encoded {
 struct struct_required_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -10571,6 +11113,7 @@ struct struct_required_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_required_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -10601,12 +11144,14 @@ struct struct_required_map_string_set_i64_shared_cpp_ref_op_encoded {
 struct struct_required_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -10625,12 +11170,14 @@ struct struct_required_map_string_set_string_shared_cpp_ref_op_encoded {
 struct struct_required_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -10661,12 +11208,14 @@ struct struct_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
 struct struct_required_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -10685,6 +11234,7 @@ struct struct_required_map_i64_set_string_shared_cpp_ref_op_encoded {
 struct struct_required_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -10897,6 +11447,7 @@ struct struct_terse_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -10922,11 +11473,13 @@ struct struct_terse_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -10942,56 +11495,67 @@ struct struct_terse_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -11097,6 +11661,7 @@ struct struct_terse_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -11122,11 +11687,13 @@ struct struct_terse_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -11142,11 +11709,13 @@ struct struct_terse_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -11172,11 +11741,13 @@ struct struct_terse_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -11192,6 +11763,7 @@ struct struct_terse_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -11339,6 +11911,7 @@ struct struct_terse_list_list_struct_empty_cpp_ref_op_encoded {
 struct struct_terse_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -11374,6 +11947,7 @@ struct struct_terse_set_i64_cpp_ref_op_encoded {
 struct struct_terse_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
@@ -11381,6 +11955,7 @@ struct struct_terse_set_float_cpp_ref_op_encoded {
 struct struct_terse_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -11402,6 +11977,7 @@ struct struct_terse_set_string_cpp_ref_op_encoded {
 struct struct_terse_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
@@ -11409,6 +11985,7 @@ struct struct_terse_set_struct_empty_cpp_ref_op_encoded {
 struct struct_terse_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
@@ -11416,6 +11993,7 @@ struct struct_terse_set_set_bool_cpp_ref_op_encoded {
 struct struct_terse_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
@@ -11423,6 +12001,7 @@ struct struct_terse_set_set_byte_cpp_ref_op_encoded {
 struct struct_terse_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
@@ -11430,6 +12009,7 @@ struct struct_terse_set_set_i16_cpp_ref_op_encoded {
 struct struct_terse_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
@@ -11437,6 +12017,7 @@ struct struct_terse_set_set_i32_cpp_ref_op_encoded {
 struct struct_terse_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
@@ -11444,6 +12025,7 @@ struct struct_terse_set_set_i64_cpp_ref_op_encoded {
 struct struct_terse_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
@@ -11451,6 +12033,7 @@ struct struct_terse_set_set_float_cpp_ref_op_encoded {
 struct struct_terse_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
@@ -11458,6 +12041,7 @@ struct struct_terse_set_set_double_cpp_ref_op_encoded {
 struct struct_terse_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
@@ -11465,6 +12049,7 @@ struct struct_terse_set_set_binary_cpp_ref_op_encoded {
 struct struct_terse_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
@@ -11472,6 +12057,7 @@ struct struct_terse_set_set_string_cpp_ref_op_encoded {
 struct struct_terse_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -11619,6 +12205,7 @@ struct struct_terse_map_i64_struct_empty_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -11654,6 +12241,7 @@ struct struct_terse_map_string_set_i64_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
@@ -11661,6 +12249,7 @@ struct struct_terse_map_string_set_float_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -11682,6 +12271,7 @@ struct struct_terse_map_string_set_string_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
@@ -11689,6 +12279,7 @@ struct struct_terse_map_string_set_struct_empty_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -11724,6 +12315,7 @@ struct struct_terse_map_i64_set_i64_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
@@ -11731,6 +12323,7 @@ struct struct_terse_map_i64_set_float_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -11752,6 +12345,7 @@ struct struct_terse_map_i64_set_string_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -11899,6 +12493,7 @@ struct struct_terse_list_list_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_terse_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -11934,6 +12529,7 @@ struct struct_terse_set_i64_shared_cpp_ref_op_encoded {
 struct struct_terse_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
@@ -11941,6 +12537,7 @@ struct struct_terse_set_float_shared_cpp_ref_op_encoded {
 struct struct_terse_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -11962,6 +12559,7 @@ struct struct_terse_set_string_shared_cpp_ref_op_encoded {
 struct struct_terse_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
@@ -11969,6 +12567,7 @@ struct struct_terse_set_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
@@ -11976,6 +12575,7 @@ struct struct_terse_set_set_bool_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
@@ -11983,6 +12583,7 @@ struct struct_terse_set_set_byte_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
@@ -11990,6 +12591,7 @@ struct struct_terse_set_set_i16_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
@@ -11997,6 +12599,7 @@ struct struct_terse_set_set_i32_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
@@ -12004,6 +12607,7 @@ struct struct_terse_set_set_i64_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
@@ -12011,6 +12615,7 @@ struct struct_terse_set_set_float_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
@@ -12018,6 +12623,7 @@ struct struct_terse_set_set_double_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
@@ -12025,6 +12631,7 @@ struct struct_terse_set_set_binary_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
@@ -12032,6 +12639,7 @@ struct struct_terse_set_set_string_shared_cpp_ref_op_encoded {
 struct struct_terse_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -12179,6 +12787,7 @@ struct struct_terse_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -12214,6 +12823,7 @@ struct struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
@@ -12221,6 +12831,7 @@ struct struct_terse_map_string_set_float_shared_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -12242,6 +12853,7 @@ struct struct_terse_map_string_set_string_shared_cpp_ref_op_encoded {
 struct struct_terse_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
@@ -12249,6 +12861,7 @@ struct struct_terse_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -12284,6 +12897,7 @@ struct struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
@@ -12291,6 +12905,7 @@ struct struct_terse_map_i64_set_float_shared_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -12312,6 +12927,7 @@ struct struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
 struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -12463,6 +13079,7 @@ struct struct_optional_list_list_struct_empty_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -12488,11 +13105,13 @@ struct struct_optional_set_i64_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -12508,56 +13127,67 @@ struct struct_optional_set_string_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_byte_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i16_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i32_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_i64_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_binary_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_string_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -12663,6 +13293,7 @@ struct struct_optional_map_i64_struct_empty_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -12688,11 +13319,13 @@ struct struct_optional_map_string_set_i64_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -12708,11 +13341,13 @@ struct struct_optional_map_string_set_string_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -12738,11 +13373,13 @@ struct struct_optional_map_i64_set_i64_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -12758,6 +13395,7 @@ struct struct_optional_map_i64_set_string_box_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -12998,6 +13636,7 @@ struct struct_adapted_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -13038,6 +13677,7 @@ struct struct_adapted_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
@@ -13046,6 +13686,7 @@ struct struct_adapted_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -13070,6 +13711,7 @@ struct struct_adapted_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
@@ -13078,6 +13720,7 @@ struct struct_adapted_set_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -13086,6 +13729,7 @@ struct struct_adapted_set_set_byte_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
@@ -13094,6 +13738,7 @@ struct struct_adapted_set_set_i16_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
@@ -13102,6 +13747,7 @@ struct struct_adapted_set_set_i32_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
@@ -13110,6 +13756,7 @@ struct struct_adapted_set_set_i64_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -13118,6 +13765,7 @@ struct struct_adapted_set_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -13126,6 +13774,7 @@ struct struct_adapted_set_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -13134,6 +13783,7 @@ struct struct_adapted_set_set_binary_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
@@ -13142,6 +13792,7 @@ struct struct_adapted_set_set_string_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
@@ -13150,6 +13801,7 @@ struct struct_adapted_set_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -13318,6 +13970,7 @@ struct struct_adapted_map_string_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -13358,6 +14011,7 @@ struct struct_adapted_map_string_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -13366,6 +14020,7 @@ struct struct_adapted_map_string_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -13390,6 +14045,7 @@ struct struct_adapted_map_string_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -13398,6 +14054,7 @@ struct struct_adapted_map_i64_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -13438,6 +14095,7 @@ struct struct_adapted_map_i64_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -13446,6 +14104,7 @@ struct struct_adapted_map_i64_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -13470,6 +14129,7 @@ struct struct_adapted_map_i64_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -13710,6 +14370,7 @@ struct struct_field_adapted_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -13750,6 +14411,7 @@ struct struct_field_adapted_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
@@ -13758,6 +14420,7 @@ struct struct_field_adapted_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -13782,6 +14445,7 @@ struct struct_field_adapted_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
@@ -13790,6 +14454,7 @@ struct struct_field_adapted_set_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -13798,6 +14463,7 @@ struct struct_field_adapted_set_set_byte_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
@@ -13806,6 +14472,7 @@ struct struct_field_adapted_set_set_i16_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
@@ -13814,6 +14481,7 @@ struct struct_field_adapted_set_set_i32_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
@@ -13822,6 +14490,7 @@ struct struct_field_adapted_set_set_i64_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -13830,6 +14499,7 @@ struct struct_field_adapted_set_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -13838,6 +14508,7 @@ struct struct_field_adapted_set_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -13846,6 +14517,7 @@ struct struct_field_adapted_set_set_binary_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
@@ -13854,6 +14526,7 @@ struct struct_field_adapted_set_set_string_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
@@ -13862,6 +14535,7 @@ struct struct_field_adapted_set_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -14030,6 +14704,7 @@ struct struct_field_adapted_map_string_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -14070,6 +14745,7 @@ struct struct_field_adapted_map_string_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -14078,6 +14754,7 @@ struct struct_field_adapted_map_string_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -14102,6 +14779,7 @@ struct struct_field_adapted_map_string_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -14110,6 +14788,7 @@ struct struct_field_adapted_map_i64_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -14150,6 +14829,7 @@ struct struct_field_adapted_map_i64_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -14158,6 +14838,7 @@ struct struct_field_adapted_map_i64_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -14182,6 +14863,7 @@ struct struct_field_adapted_map_i64_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -14287,6 +14969,7 @@ struct struct_list_list_struct_empty_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -14312,11 +14995,13 @@ struct struct_set_i64_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -14332,56 +15017,67 @@ struct struct_set_string_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_byte_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i16_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i32_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_i64_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_binary_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_string_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -14487,6 +15183,7 @@ struct struct_map_i64_struct_empty_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_map_string_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -14512,11 +15209,13 @@ struct struct_map_string_set_i64_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_map_string_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -14532,11 +15231,13 @@ struct struct_map_string_set_string_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_map_string_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -14562,11 +15263,13 @@ struct struct_map_i64_set_i64_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_map_i64_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -14582,6 +15285,7 @@ struct struct_map_i64_set_string_lazy_op_encoded {
 @cpp.UseOpEncode
 struct struct_map_i64_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -14652,6 +15356,7 @@ exception exception_list_list_struct_empty {
   1: list<list<struct_empty>> field_1;
 }
 exception exception_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 exception exception_set_byte {
@@ -14667,9 +15372,11 @@ exception exception_set_i64 {
   1: set<i64> field_1;
 }
 exception exception_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 exception exception_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 exception exception_set_binary {
@@ -14679,36 +15386,47 @@ exception exception_set_string {
   1: set<string> field_1;
 }
 exception exception_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 exception exception_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 exception exception_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 exception exception_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 exception exception_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 exception exception_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 exception exception_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 exception exception_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 exception exception_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 exception exception_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 exception exception_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool {
@@ -14772,6 +15490,7 @@ exception exception_map_i64_struct_empty {
   1: map<i64, struct_empty> field_1;
 }
 exception exception_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 exception exception_map_string_set_byte {
@@ -14787,9 +15506,11 @@ exception exception_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
 exception exception_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 exception exception_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 exception exception_map_string_set_binary {
@@ -14799,9 +15520,11 @@ exception exception_map_string_set_string {
   1: map<string, set<string>> field_1;
 }
 exception exception_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 exception exception_map_i64_set_byte {
@@ -14817,9 +15540,11 @@ exception exception_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
 }
 exception exception_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 exception exception_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 exception exception_map_i64_set_binary {
@@ -14829,6 +15554,7 @@ exception exception_map_i64_set_string {
   1: map<i64, set<string>> field_1;
 }
 exception exception_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_list_bool_cpp_ref {
@@ -14934,6 +15660,7 @@ exception exception_list_list_struct_empty_cpp_ref {
 exception exception_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 exception exception_set_byte_cpp_ref {
@@ -14959,11 +15686,13 @@ exception exception_set_i64_cpp_ref {
 exception exception_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 exception exception_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 exception exception_set_binary_cpp_ref {
@@ -14979,56 +15708,67 @@ exception exception_set_string_cpp_ref {
 exception exception_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 exception exception_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 exception exception_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 exception exception_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 exception exception_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 exception exception_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 exception exception_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 exception exception_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 exception exception_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 exception exception_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 exception exception_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool_cpp_ref {
@@ -15134,6 +15874,7 @@ exception exception_map_i64_struct_empty_cpp_ref {
 exception exception_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 exception exception_map_string_set_byte_cpp_ref {
@@ -15159,11 +15900,13 @@ exception exception_map_string_set_i64_cpp_ref {
 exception exception_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 exception exception_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 exception exception_map_string_set_binary_cpp_ref {
@@ -15179,11 +15922,13 @@ exception exception_map_string_set_string_cpp_ref {
 exception exception_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 exception exception_map_i64_set_byte_cpp_ref {
@@ -15209,11 +15954,13 @@ exception exception_map_i64_set_i64_cpp_ref {
 exception exception_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 exception exception_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 exception exception_map_i64_set_binary_cpp_ref {
@@ -15229,6 +15976,7 @@ exception exception_map_i64_set_string_cpp_ref {
 exception exception_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_list_bool_shared_cpp_ref {
@@ -15334,6 +16082,7 @@ exception exception_list_list_struct_empty_shared_cpp_ref {
 exception exception_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 exception exception_set_byte_shared_cpp_ref {
@@ -15359,11 +16108,13 @@ exception exception_set_i64_shared_cpp_ref {
 exception exception_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 exception exception_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 exception exception_set_binary_shared_cpp_ref {
@@ -15379,56 +16130,67 @@ exception exception_set_string_shared_cpp_ref {
 exception exception_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 exception exception_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 exception exception_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 exception exception_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 exception exception_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 exception exception_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 exception exception_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 exception exception_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 exception exception_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 exception exception_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 exception exception_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool_shared_cpp_ref {
@@ -15534,6 +16296,7 @@ exception exception_map_i64_struct_empty_shared_cpp_ref {
 exception exception_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 exception exception_map_string_set_byte_shared_cpp_ref {
@@ -15559,11 +16322,13 @@ exception exception_map_string_set_i64_shared_cpp_ref {
 exception exception_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 exception exception_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 exception exception_map_string_set_binary_shared_cpp_ref {
@@ -15579,11 +16344,13 @@ exception exception_map_string_set_string_shared_cpp_ref {
 exception exception_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 exception exception_map_i64_set_byte_shared_cpp_ref {
@@ -15609,11 +16376,13 @@ exception exception_map_i64_set_i64_shared_cpp_ref {
 exception exception_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 exception exception_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 exception exception_map_i64_set_binary_shared_cpp_ref {
@@ -15629,6 +16398,7 @@ exception exception_map_i64_set_string_shared_cpp_ref {
 exception exception_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_bool {
@@ -15773,6 +16543,7 @@ exception exception_optional_list_list_struct_empty {
   1: optional list<list<struct_empty>> field_1;
 }
 exception exception_optional_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 exception exception_optional_set_byte {
@@ -15788,9 +16559,11 @@ exception exception_optional_set_i64 {
   1: optional set<i64> field_1;
 }
 exception exception_optional_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 exception exception_optional_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 exception exception_optional_set_binary {
@@ -15800,36 +16573,47 @@ exception exception_optional_set_string {
   1: optional set<string> field_1;
 }
 exception exception_optional_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 exception exception_optional_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 exception exception_optional_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 exception exception_optional_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 exception exception_optional_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 exception exception_optional_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 exception exception_optional_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 exception exception_optional_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 exception exception_optional_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 exception exception_optional_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 exception exception_optional_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool {
@@ -15893,6 +16677,7 @@ exception exception_optional_map_i64_struct_empty {
   1: optional map<i64, struct_empty> field_1;
 }
 exception exception_optional_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 exception exception_optional_map_string_set_byte {
@@ -15908,9 +16693,11 @@ exception exception_optional_map_string_set_i64 {
   1: optional map<string, set<i64>> field_1;
 }
 exception exception_optional_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 exception exception_optional_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 exception exception_optional_map_string_set_binary {
@@ -15920,9 +16707,11 @@ exception exception_optional_map_string_set_string {
   1: optional map<string, set<string>> field_1;
 }
 exception exception_optional_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 exception exception_optional_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 exception exception_optional_map_i64_set_byte {
@@ -15938,9 +16727,11 @@ exception exception_optional_map_i64_set_i64 {
   1: optional map<i64, set<i64>> field_1;
 }
 exception exception_optional_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 exception exception_optional_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 exception exception_optional_map_i64_set_binary {
@@ -15950,6 +16741,7 @@ exception exception_optional_map_i64_set_string {
   1: optional map<i64, set<string>> field_1;
 }
 exception exception_optional_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_optional_list_bool_cpp_ref {
@@ -16055,6 +16847,7 @@ exception exception_optional_list_list_struct_empty_cpp_ref {
 exception exception_optional_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 exception exception_optional_set_byte_cpp_ref {
@@ -16080,11 +16873,13 @@ exception exception_optional_set_i64_cpp_ref {
 exception exception_optional_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 exception exception_optional_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 exception exception_optional_set_binary_cpp_ref {
@@ -16100,56 +16895,67 @@ exception exception_optional_set_string_cpp_ref {
 exception exception_optional_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 exception exception_optional_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 exception exception_optional_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 exception exception_optional_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 exception exception_optional_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 exception exception_optional_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 exception exception_optional_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 exception exception_optional_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 exception exception_optional_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 exception exception_optional_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 exception exception_optional_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool_cpp_ref {
@@ -16255,6 +17061,7 @@ exception exception_optional_map_i64_struct_empty_cpp_ref {
 exception exception_optional_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 exception exception_optional_map_string_set_byte_cpp_ref {
@@ -16280,11 +17087,13 @@ exception exception_optional_map_string_set_i64_cpp_ref {
 exception exception_optional_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 exception exception_optional_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 exception exception_optional_map_string_set_binary_cpp_ref {
@@ -16300,11 +17109,13 @@ exception exception_optional_map_string_set_string_cpp_ref {
 exception exception_optional_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 exception exception_optional_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 exception exception_optional_map_i64_set_byte_cpp_ref {
@@ -16330,11 +17141,13 @@ exception exception_optional_map_i64_set_i64_cpp_ref {
 exception exception_optional_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 exception exception_optional_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 exception exception_optional_map_i64_set_binary_cpp_ref {
@@ -16350,6 +17163,7 @@ exception exception_optional_map_i64_set_string_cpp_ref {
 exception exception_optional_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_optional_list_bool_shared_cpp_ref {
@@ -16455,6 +17269,7 @@ exception exception_optional_list_list_struct_empty_shared_cpp_ref {
 exception exception_optional_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 exception exception_optional_set_byte_shared_cpp_ref {
@@ -16480,11 +17295,13 @@ exception exception_optional_set_i64_shared_cpp_ref {
 exception exception_optional_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 exception exception_optional_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 exception exception_optional_set_binary_shared_cpp_ref {
@@ -16500,56 +17317,67 @@ exception exception_optional_set_string_shared_cpp_ref {
 exception exception_optional_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 exception exception_optional_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 exception exception_optional_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 exception exception_optional_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 exception exception_optional_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 exception exception_optional_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 exception exception_optional_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 exception exception_optional_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 exception exception_optional_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 exception exception_optional_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 exception exception_optional_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool_shared_cpp_ref {
@@ -16655,6 +17483,7 @@ exception exception_optional_map_i64_struct_empty_shared_cpp_ref {
 exception exception_optional_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 exception exception_optional_map_string_set_byte_shared_cpp_ref {
@@ -16680,11 +17509,13 @@ exception exception_optional_map_string_set_i64_shared_cpp_ref {
 exception exception_optional_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 exception exception_optional_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 exception exception_optional_map_string_set_binary_shared_cpp_ref {
@@ -16700,11 +17531,13 @@ exception exception_optional_map_string_set_string_shared_cpp_ref {
 exception exception_optional_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 exception exception_optional_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 exception exception_optional_map_i64_set_byte_shared_cpp_ref {
@@ -16730,11 +17563,13 @@ exception exception_optional_map_i64_set_i64_shared_cpp_ref {
 exception exception_optional_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 exception exception_optional_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 exception exception_optional_map_i64_set_binary_shared_cpp_ref {
@@ -16750,6 +17585,7 @@ exception exception_optional_map_i64_set_string_shared_cpp_ref {
 exception exception_optional_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_optional_bool {
@@ -16912,6 +17748,7 @@ exception exception_required_list_list_struct_empty {
   1: required list<list<struct_empty>> field_1;
 }
 exception exception_required_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 exception exception_required_set_byte {
@@ -16927,9 +17764,11 @@ exception exception_required_set_i64 {
   1: required set<i64> field_1;
 }
 exception exception_required_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 exception exception_required_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 exception exception_required_set_binary {
@@ -16939,36 +17778,47 @@ exception exception_required_set_string {
   1: required set<string> field_1;
 }
 exception exception_required_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 exception exception_required_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 exception exception_required_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 exception exception_required_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 exception exception_required_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 exception exception_required_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 exception exception_required_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 exception exception_required_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 exception exception_required_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 exception exception_required_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 exception exception_required_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 exception exception_required_map_string_bool {
@@ -17032,6 +17882,7 @@ exception exception_required_map_i64_struct_empty {
   1: required map<i64, struct_empty> field_1;
 }
 exception exception_required_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 exception exception_required_map_string_set_byte {
@@ -17047,9 +17898,11 @@ exception exception_required_map_string_set_i64 {
   1: required map<string, set<i64>> field_1;
 }
 exception exception_required_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 exception exception_required_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 exception exception_required_map_string_set_binary {
@@ -17059,9 +17912,11 @@ exception exception_required_map_string_set_string {
   1: required map<string, set<string>> field_1;
 }
 exception exception_required_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 exception exception_required_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 exception exception_required_map_i64_set_byte {
@@ -17077,9 +17932,11 @@ exception exception_required_map_i64_set_i64 {
   1: required map<i64, set<i64>> field_1;
 }
 exception exception_required_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 exception exception_required_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 exception exception_required_map_i64_set_binary {
@@ -17089,6 +17946,7 @@ exception exception_required_map_i64_set_string {
   1: required map<i64, set<string>> field_1;
 }
 exception exception_required_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 exception exception_required_list_bool_cpp_ref {
@@ -17194,6 +18052,7 @@ exception exception_required_list_list_struct_empty_cpp_ref {
 exception exception_required_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 exception exception_required_set_byte_cpp_ref {
@@ -17219,11 +18078,13 @@ exception exception_required_set_i64_cpp_ref {
 exception exception_required_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 exception exception_required_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 exception exception_required_set_binary_cpp_ref {
@@ -17239,56 +18100,67 @@ exception exception_required_set_string_cpp_ref {
 exception exception_required_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 exception exception_required_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 exception exception_required_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 exception exception_required_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 exception exception_required_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 exception exception_required_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 exception exception_required_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 exception exception_required_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 exception exception_required_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 exception exception_required_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 exception exception_required_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 exception exception_required_map_string_bool_cpp_ref {
@@ -17394,6 +18266,7 @@ exception exception_required_map_i64_struct_empty_cpp_ref {
 exception exception_required_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 exception exception_required_map_string_set_byte_cpp_ref {
@@ -17419,11 +18292,13 @@ exception exception_required_map_string_set_i64_cpp_ref {
 exception exception_required_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 exception exception_required_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 exception exception_required_map_string_set_binary_cpp_ref {
@@ -17439,11 +18314,13 @@ exception exception_required_map_string_set_string_cpp_ref {
 exception exception_required_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 exception exception_required_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 exception exception_required_map_i64_set_byte_cpp_ref {
@@ -17469,11 +18346,13 @@ exception exception_required_map_i64_set_i64_cpp_ref {
 exception exception_required_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 exception exception_required_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 exception exception_required_map_i64_set_binary_cpp_ref {
@@ -17489,6 +18368,7 @@ exception exception_required_map_i64_set_string_cpp_ref {
 exception exception_required_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 exception exception_required_list_bool_shared_cpp_ref {
@@ -17594,6 +18474,7 @@ exception exception_required_list_list_struct_empty_shared_cpp_ref {
 exception exception_required_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 exception exception_required_set_byte_shared_cpp_ref {
@@ -17619,11 +18500,13 @@ exception exception_required_set_i64_shared_cpp_ref {
 exception exception_required_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 exception exception_required_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 exception exception_required_set_binary_shared_cpp_ref {
@@ -17639,56 +18522,67 @@ exception exception_required_set_string_shared_cpp_ref {
 exception exception_required_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 exception exception_required_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 exception exception_required_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 exception exception_required_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 exception exception_required_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 exception exception_required_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 exception exception_required_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 exception exception_required_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 exception exception_required_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 exception exception_required_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 exception exception_required_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 exception exception_required_map_string_bool_shared_cpp_ref {
@@ -17794,6 +18688,7 @@ exception exception_required_map_i64_struct_empty_shared_cpp_ref {
 exception exception_required_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 exception exception_required_map_string_set_byte_shared_cpp_ref {
@@ -17819,11 +18714,13 @@ exception exception_required_map_string_set_i64_shared_cpp_ref {
 exception exception_required_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 exception exception_required_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 exception exception_required_map_string_set_binary_shared_cpp_ref {
@@ -17839,11 +18736,13 @@ exception exception_required_map_string_set_string_shared_cpp_ref {
 exception exception_required_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 exception exception_required_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 exception exception_required_map_i64_set_byte_shared_cpp_ref {
@@ -17869,11 +18768,13 @@ exception exception_required_map_i64_set_i64_shared_cpp_ref {
 exception exception_required_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 exception exception_required_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 exception exception_required_map_i64_set_binary_shared_cpp_ref {
@@ -17889,6 +18790,7 @@ exception exception_required_map_i64_set_string_shared_cpp_ref {
 exception exception_required_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 exception exception_required_bool {
@@ -18053,6 +18955,7 @@ exception exception_terse_list_list_struct_empty {
   1: list<list<struct_empty>> field_1;
 }
 exception exception_terse_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -18073,10 +18976,12 @@ exception exception_terse_set_i64 {
   1: set<i64> field_1;
 }
 exception exception_terse_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 exception exception_terse_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -18089,46 +18994,57 @@ exception exception_terse_set_string {
   1: set<string> field_1;
 }
 exception exception_terse_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 exception exception_terse_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 exception exception_terse_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 exception exception_terse_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 exception exception_terse_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 exception exception_terse_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 exception exception_terse_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 exception exception_terse_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 exception exception_terse_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 exception exception_terse_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 exception exception_terse_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -18213,6 +19129,7 @@ exception exception_terse_map_i64_struct_empty {
   1: map<i64, struct_empty> field_1;
 }
 exception exception_terse_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -18233,10 +19150,12 @@ exception exception_terse_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
 exception exception_terse_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 exception exception_terse_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -18249,10 +19168,12 @@ exception exception_terse_map_string_set_string {
   1: map<string, set<string>> field_1;
 }
 exception exception_terse_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_terse_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -18273,10 +19194,12 @@ exception exception_terse_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
 }
 exception exception_terse_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 exception exception_terse_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -18289,6 +19212,7 @@ exception exception_terse_map_i64_set_string {
   1: map<i64, set<string>> field_1;
 }
 exception exception_terse_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -18415,6 +19339,7 @@ exception exception_terse_list_list_struct_empty_cpp_ref {
 exception exception_terse_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -18445,12 +19370,14 @@ exception exception_terse_set_i64_cpp_ref {
 exception exception_terse_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 exception exception_terse_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -18469,66 +19396,77 @@ exception exception_terse_set_string_cpp_ref {
 exception exception_terse_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 exception exception_terse_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 exception exception_terse_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 exception exception_terse_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 exception exception_terse_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 exception exception_terse_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 exception exception_terse_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 exception exception_terse_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 exception exception_terse_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 exception exception_terse_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 exception exception_terse_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -18655,6 +19593,7 @@ exception exception_terse_map_i64_struct_empty_cpp_ref {
 exception exception_terse_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -18685,12 +19624,14 @@ exception exception_terse_map_string_set_i64_cpp_ref {
 exception exception_terse_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 exception exception_terse_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -18709,12 +19650,14 @@ exception exception_terse_map_string_set_string_cpp_ref {
 exception exception_terse_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_terse_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -18745,12 +19688,14 @@ exception exception_terse_map_i64_set_i64_cpp_ref {
 exception exception_terse_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 exception exception_terse_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -18769,6 +19714,7 @@ exception exception_terse_map_i64_set_string_cpp_ref {
 exception exception_terse_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -18895,6 +19841,7 @@ exception exception_terse_list_list_struct_empty_shared_cpp_ref {
 exception exception_terse_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -18925,12 +19872,14 @@ exception exception_terse_set_i64_shared_cpp_ref {
 exception exception_terse_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 exception exception_terse_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -18949,66 +19898,77 @@ exception exception_terse_set_string_shared_cpp_ref {
 exception exception_terse_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 exception exception_terse_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 exception exception_terse_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 exception exception_terse_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 exception exception_terse_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 exception exception_terse_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 exception exception_terse_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 exception exception_terse_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 exception exception_terse_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 exception exception_terse_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 exception exception_terse_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -19135,6 +20095,7 @@ exception exception_terse_map_i64_struct_empty_shared_cpp_ref {
 exception exception_terse_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -19165,12 +20126,14 @@ exception exception_terse_map_string_set_i64_shared_cpp_ref {
 exception exception_terse_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 exception exception_terse_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -19189,12 +20152,14 @@ exception exception_terse_map_string_set_string_shared_cpp_ref {
 exception exception_terse_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_terse_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -19225,12 +20190,14 @@ exception exception_terse_map_i64_set_i64_shared_cpp_ref {
 exception exception_terse_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 exception exception_terse_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -19249,6 +20216,7 @@ exception exception_terse_map_i64_set_string_shared_cpp_ref {
 exception exception_terse_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -19370,6 +20338,7 @@ exception exception_optional_list_list_struct_empty_box {
 }
 exception exception_optional_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 exception exception_optional_set_byte_box {
@@ -19390,10 +20359,12 @@ exception exception_optional_set_i64_box {
 }
 exception exception_optional_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 exception exception_optional_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 exception exception_optional_set_binary_box {
@@ -19406,46 +20377,57 @@ exception exception_optional_set_string_box {
 }
 exception exception_optional_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 exception exception_optional_set_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 exception exception_optional_set_set_byte_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 exception exception_optional_set_set_i16_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 exception exception_optional_set_set_i32_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 exception exception_optional_set_set_i64_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 exception exception_optional_set_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 exception exception_optional_set_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 exception exception_optional_set_set_binary_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 exception exception_optional_set_set_string_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 exception exception_optional_set_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool_box {
@@ -19530,6 +20512,7 @@ exception exception_optional_map_i64_struct_empty_box {
 }
 exception exception_optional_map_string_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 exception exception_optional_map_string_set_byte_box {
@@ -19550,10 +20533,12 @@ exception exception_optional_map_string_set_i64_box {
 }
 exception exception_optional_map_string_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 exception exception_optional_map_string_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 exception exception_optional_map_string_set_binary_box {
@@ -19566,10 +20551,12 @@ exception exception_optional_map_string_set_string_box {
 }
 exception exception_optional_map_string_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 exception exception_optional_map_i64_set_bool_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 exception exception_optional_map_i64_set_byte_box {
@@ -19590,10 +20577,12 @@ exception exception_optional_map_i64_set_i64_box {
 }
 exception exception_optional_map_i64_set_float_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 exception exception_optional_map_i64_set_double_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 exception exception_optional_map_i64_set_binary_box {
@@ -19606,6 +20595,7 @@ exception exception_optional_map_i64_set_string_box {
 }
 exception exception_optional_map_i64_set_struct_empty_box {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_adapted_bool {
@@ -19816,6 +20806,7 @@ exception exception_adapted_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 exception exception_adapted_set_byte {
@@ -19851,6 +20842,7 @@ exception exception_adapted_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 exception exception_adapted_set_double {
@@ -19858,6 +20850,7 @@ exception exception_adapted_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 exception exception_adapted_set_binary {
@@ -19879,6 +20872,7 @@ exception exception_adapted_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 exception exception_adapted_set_set_bool {
@@ -19886,6 +20880,7 @@ exception exception_adapted_set_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 exception exception_adapted_set_set_byte {
@@ -19893,6 +20888,7 @@ exception exception_adapted_set_set_byte {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 exception exception_adapted_set_set_i16 {
@@ -19900,6 +20896,7 @@ exception exception_adapted_set_set_i16 {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 exception exception_adapted_set_set_i32 {
@@ -19907,6 +20904,7 @@ exception exception_adapted_set_set_i32 {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 exception exception_adapted_set_set_i64 {
@@ -19914,6 +20912,7 @@ exception exception_adapted_set_set_i64 {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 exception exception_adapted_set_set_float {
@@ -19921,6 +20920,7 @@ exception exception_adapted_set_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 exception exception_adapted_set_set_double {
@@ -19928,6 +20928,7 @@ exception exception_adapted_set_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 exception exception_adapted_set_set_binary {
@@ -19935,6 +20936,7 @@ exception exception_adapted_set_set_binary {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 exception exception_adapted_set_set_string {
@@ -19942,6 +20944,7 @@ exception exception_adapted_set_set_string {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 exception exception_adapted_set_set_struct_empty {
@@ -19949,6 +20952,7 @@ exception exception_adapted_set_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 exception exception_adapted_map_string_bool {
@@ -20096,6 +21100,7 @@ exception exception_adapted_map_string_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 exception exception_adapted_map_string_set_byte {
@@ -20131,6 +21136,7 @@ exception exception_adapted_map_string_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 exception exception_adapted_map_string_set_double {
@@ -20138,6 +21144,7 @@ exception exception_adapted_map_string_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 exception exception_adapted_map_string_set_binary {
@@ -20159,6 +21166,7 @@ exception exception_adapted_map_string_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_adapted_map_i64_set_bool {
@@ -20166,6 +21174,7 @@ exception exception_adapted_map_i64_set_bool {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 exception exception_adapted_map_i64_set_byte {
@@ -20201,6 +21210,7 @@ exception exception_adapted_map_i64_set_float {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 exception exception_adapted_map_i64_set_double {
@@ -20208,6 +21218,7 @@ exception exception_adapted_map_i64_set_double {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 exception exception_adapted_map_i64_set_binary {
@@ -20229,6 +21240,7 @@ exception exception_adapted_map_i64_set_struct_empty {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_field_adapted_bool {
@@ -20439,6 +21451,7 @@ exception exception_field_adapted_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 exception exception_field_adapted_set_byte {
@@ -20474,6 +21487,7 @@ exception exception_field_adapted_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 exception exception_field_adapted_set_double {
@@ -20481,6 +21495,7 @@ exception exception_field_adapted_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 exception exception_field_adapted_set_binary {
@@ -20502,6 +21517,7 @@ exception exception_field_adapted_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 exception exception_field_adapted_set_set_bool {
@@ -20509,6 +21525,7 @@ exception exception_field_adapted_set_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 exception exception_field_adapted_set_set_byte {
@@ -20516,6 +21533,7 @@ exception exception_field_adapted_set_set_byte {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 exception exception_field_adapted_set_set_i16 {
@@ -20523,6 +21541,7 @@ exception exception_field_adapted_set_set_i16 {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 exception exception_field_adapted_set_set_i32 {
@@ -20530,6 +21549,7 @@ exception exception_field_adapted_set_set_i32 {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 exception exception_field_adapted_set_set_i64 {
@@ -20537,6 +21557,7 @@ exception exception_field_adapted_set_set_i64 {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 exception exception_field_adapted_set_set_float {
@@ -20544,6 +21565,7 @@ exception exception_field_adapted_set_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 exception exception_field_adapted_set_set_double {
@@ -20551,6 +21573,7 @@ exception exception_field_adapted_set_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 exception exception_field_adapted_set_set_binary {
@@ -20558,6 +21581,7 @@ exception exception_field_adapted_set_set_binary {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 exception exception_field_adapted_set_set_string {
@@ -20565,6 +21589,7 @@ exception exception_field_adapted_set_set_string {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 exception exception_field_adapted_set_set_struct_empty {
@@ -20572,6 +21597,7 @@ exception exception_field_adapted_set_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 exception exception_field_adapted_map_string_bool {
@@ -20719,6 +21745,7 @@ exception exception_field_adapted_map_string_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 exception exception_field_adapted_map_string_set_byte {
@@ -20754,6 +21781,7 @@ exception exception_field_adapted_map_string_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 exception exception_field_adapted_map_string_set_double {
@@ -20761,6 +21789,7 @@ exception exception_field_adapted_map_string_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 exception exception_field_adapted_map_string_set_binary {
@@ -20782,6 +21811,7 @@ exception exception_field_adapted_map_string_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_field_adapted_map_i64_set_bool {
@@ -20789,6 +21819,7 @@ exception exception_field_adapted_map_i64_set_bool {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 exception exception_field_adapted_map_i64_set_byte {
@@ -20824,6 +21855,7 @@ exception exception_field_adapted_map_i64_set_float {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 exception exception_field_adapted_map_i64_set_double {
@@ -20831,6 +21863,7 @@ exception exception_field_adapted_map_i64_set_double {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 exception exception_field_adapted_map_i64_set_binary {
@@ -20852,6 +21885,7 @@ exception exception_field_adapted_map_i64_set_struct_empty {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_list_bool_lazy {
@@ -20936,6 +21970,7 @@ exception exception_list_list_struct_empty_lazy {
 }
 exception exception_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 exception exception_set_byte_lazy {
@@ -20956,10 +21991,12 @@ exception exception_set_i64_lazy {
 }
 exception exception_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 exception exception_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 exception exception_set_binary_lazy {
@@ -20972,46 +22009,57 @@ exception exception_set_string_lazy {
 }
 exception exception_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 exception exception_set_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 exception exception_set_set_byte_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 exception exception_set_set_i16_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 exception exception_set_set_i32_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 exception exception_set_set_i64_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 exception exception_set_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 exception exception_set_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 exception exception_set_set_binary_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 exception exception_set_set_string_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 exception exception_set_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool_lazy {
@@ -21096,6 +22144,7 @@ exception exception_map_i64_struct_empty_lazy {
 }
 exception exception_map_string_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 exception exception_map_string_set_byte_lazy {
@@ -21116,10 +22165,12 @@ exception exception_map_string_set_i64_lazy {
 }
 exception exception_map_string_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 exception exception_map_string_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 exception exception_map_string_set_binary_lazy {
@@ -21132,10 +22183,12 @@ exception exception_map_string_set_string_lazy {
 }
 exception exception_map_string_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 exception exception_map_i64_set_bool_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 exception exception_map_i64_set_byte_lazy {
@@ -21156,10 +22209,12 @@ exception exception_map_i64_set_i64_lazy {
 }
 exception exception_map_i64_set_float_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 exception exception_map_i64_set_double_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 exception exception_map_i64_set_binary_lazy {
@@ -21172,6 +22227,7 @@ exception exception_map_i64_set_string_lazy {
 }
 exception exception_map_i64_set_struct_empty_lazy {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_string_lazy {
@@ -21263,6 +22319,7 @@ exception exception_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -21283,10 +22340,12 @@ exception exception_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -21299,46 +22358,57 @@ exception exception_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -21423,6 +22493,7 @@ exception exception_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -21443,10 +22514,12 @@ exception exception_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -21459,10 +22532,12 @@ exception exception_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -21483,10 +22558,12 @@ exception exception_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -21499,6 +22576,7 @@ exception exception_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -21625,6 +22703,7 @@ exception exception_list_list_struct_empty_cpp_ref_op_encoded {
 exception exception_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -21655,12 +22734,14 @@ exception exception_set_i64_cpp_ref_op_encoded {
 exception exception_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -21679,66 +22760,77 @@ exception exception_set_string_cpp_ref_op_encoded {
 exception exception_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -21865,6 +22957,7 @@ exception exception_map_i64_struct_empty_cpp_ref_op_encoded {
 exception exception_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -21895,12 +22988,14 @@ exception exception_map_string_set_i64_cpp_ref_op_encoded {
 exception exception_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -21919,12 +23014,14 @@ exception exception_map_string_set_string_cpp_ref_op_encoded {
 exception exception_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -21955,12 +23052,14 @@ exception exception_map_i64_set_i64_cpp_ref_op_encoded {
 exception exception_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -21979,6 +23078,7 @@ exception exception_map_i64_set_string_cpp_ref_op_encoded {
 exception exception_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -22105,6 +23205,7 @@ exception exception_list_list_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -22135,12 +23236,14 @@ exception exception_set_i64_shared_cpp_ref_op_encoded {
 exception exception_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -22159,66 +23262,77 @@ exception exception_set_string_shared_cpp_ref_op_encoded {
 exception exception_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -22345,6 +23459,7 @@ exception exception_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -22375,12 +23490,14 @@ exception exception_map_string_set_i64_shared_cpp_ref_op_encoded {
 exception exception_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -22399,12 +23516,14 @@ exception exception_map_string_set_string_shared_cpp_ref_op_encoded {
 exception exception_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -22435,12 +23554,14 @@ exception exception_map_i64_set_i64_shared_cpp_ref_op_encoded {
 exception exception_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -22459,6 +23580,7 @@ exception exception_map_i64_set_string_shared_cpp_ref_op_encoded {
 exception exception_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -22651,6 +23773,7 @@ exception exception_optional_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -22671,10 +23794,12 @@ exception exception_optional_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -22687,46 +23812,57 @@ exception exception_optional_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -22811,6 +23947,7 @@ exception exception_optional_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -22831,10 +23968,12 @@ exception exception_optional_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -22847,10 +23986,12 @@ exception exception_optional_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -22871,10 +24012,12 @@ exception exception_optional_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -22887,6 +24030,7 @@ exception exception_optional_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -23013,6 +24157,7 @@ exception exception_optional_list_list_struct_empty_cpp_ref_op_encoded {
 exception exception_optional_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -23043,12 +24188,14 @@ exception exception_optional_set_i64_cpp_ref_op_encoded {
 exception exception_optional_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -23067,66 +24214,77 @@ exception exception_optional_set_string_cpp_ref_op_encoded {
 exception exception_optional_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -23253,6 +24411,7 @@ exception exception_optional_map_i64_struct_empty_cpp_ref_op_encoded {
 exception exception_optional_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -23283,12 +24442,14 @@ exception exception_optional_map_string_set_i64_cpp_ref_op_encoded {
 exception exception_optional_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -23307,12 +24468,14 @@ exception exception_optional_map_string_set_string_cpp_ref_op_encoded {
 exception exception_optional_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -23343,12 +24506,14 @@ exception exception_optional_map_i64_set_i64_cpp_ref_op_encoded {
 exception exception_optional_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -23367,6 +24532,7 @@ exception exception_optional_map_i64_set_string_cpp_ref_op_encoded {
 exception exception_optional_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -23493,6 +24659,7 @@ exception exception_optional_list_list_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_optional_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -23523,12 +24690,14 @@ exception exception_optional_set_i64_shared_cpp_ref_op_encoded {
 exception exception_optional_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -23547,66 +24716,77 @@ exception exception_optional_set_string_shared_cpp_ref_op_encoded {
 exception exception_optional_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -23733,6 +24913,7 @@ exception exception_optional_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_optional_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -23763,12 +24944,14 @@ exception exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
 exception exception_optional_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -23787,12 +24970,14 @@ exception exception_optional_map_string_set_string_shared_cpp_ref_op_encoded {
 exception exception_optional_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -23823,12 +25008,14 @@ exception exception_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
 exception exception_optional_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -23847,6 +25034,7 @@ exception exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
 exception exception_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -24057,6 +25245,7 @@ exception exception_required_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -24077,10 +25266,12 @@ exception exception_required_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -24093,46 +25284,57 @@ exception exception_required_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -24217,6 +25419,7 @@ exception exception_required_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -24237,10 +25440,12 @@ exception exception_required_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -24253,10 +25458,12 @@ exception exception_required_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -24277,10 +25484,12 @@ exception exception_required_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -24293,6 +25502,7 @@ exception exception_required_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -24419,6 +25629,7 @@ exception exception_required_list_list_struct_empty_cpp_ref_op_encoded {
 exception exception_required_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -24449,12 +25660,14 @@ exception exception_required_set_i64_cpp_ref_op_encoded {
 exception exception_required_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -24473,66 +25686,77 @@ exception exception_required_set_string_cpp_ref_op_encoded {
 exception exception_required_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -24659,6 +25883,7 @@ exception exception_required_map_i64_struct_empty_cpp_ref_op_encoded {
 exception exception_required_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -24689,12 +25914,14 @@ exception exception_required_map_string_set_i64_cpp_ref_op_encoded {
 exception exception_required_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -24713,12 +25940,14 @@ exception exception_required_map_string_set_string_cpp_ref_op_encoded {
 exception exception_required_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -24749,12 +25978,14 @@ exception exception_required_map_i64_set_i64_cpp_ref_op_encoded {
 exception exception_required_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -24773,6 +26004,7 @@ exception exception_required_map_i64_set_string_cpp_ref_op_encoded {
 exception exception_required_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -24899,6 +26131,7 @@ exception exception_required_list_list_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_required_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -24929,12 +26162,14 @@ exception exception_required_set_i64_shared_cpp_ref_op_encoded {
 exception exception_required_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -24953,66 +26188,77 @@ exception exception_required_set_string_shared_cpp_ref_op_encoded {
 exception exception_required_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -25139,6 +26385,7 @@ exception exception_required_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_required_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -25169,12 +26416,14 @@ exception exception_required_map_string_set_i64_shared_cpp_ref_op_encoded {
 exception exception_required_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -25193,12 +26442,14 @@ exception exception_required_map_string_set_string_shared_cpp_ref_op_encoded {
 exception exception_required_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -25229,12 +26480,14 @@ exception exception_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
 exception exception_required_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -25253,6 +26506,7 @@ exception exception_required_map_i64_set_string_shared_cpp_ref_op_encoded {
 exception exception_required_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -25465,6 +26719,7 @@ exception exception_terse_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -25490,11 +26745,13 @@ exception exception_terse_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -25510,56 +26767,67 @@ exception exception_terse_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -25665,6 +26933,7 @@ exception exception_terse_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -25690,11 +26959,13 @@ exception exception_terse_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -25710,11 +26981,13 @@ exception exception_terse_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -25740,11 +27013,13 @@ exception exception_terse_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -25760,6 +27035,7 @@ exception exception_terse_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -25907,6 +27183,7 @@ exception exception_terse_list_list_struct_empty_cpp_ref_op_encoded {
 exception exception_terse_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -25942,6 +27219,7 @@ exception exception_terse_set_i64_cpp_ref_op_encoded {
 exception exception_terse_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
@@ -25949,6 +27227,7 @@ exception exception_terse_set_float_cpp_ref_op_encoded {
 exception exception_terse_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -25970,6 +27249,7 @@ exception exception_terse_set_string_cpp_ref_op_encoded {
 exception exception_terse_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
@@ -25977,6 +27257,7 @@ exception exception_terse_set_struct_empty_cpp_ref_op_encoded {
 exception exception_terse_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
@@ -25984,6 +27265,7 @@ exception exception_terse_set_set_bool_cpp_ref_op_encoded {
 exception exception_terse_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
@@ -25991,6 +27273,7 @@ exception exception_terse_set_set_byte_cpp_ref_op_encoded {
 exception exception_terse_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
@@ -25998,6 +27281,7 @@ exception exception_terse_set_set_i16_cpp_ref_op_encoded {
 exception exception_terse_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
@@ -26005,6 +27289,7 @@ exception exception_terse_set_set_i32_cpp_ref_op_encoded {
 exception exception_terse_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
@@ -26012,6 +27297,7 @@ exception exception_terse_set_set_i64_cpp_ref_op_encoded {
 exception exception_terse_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
@@ -26019,6 +27305,7 @@ exception exception_terse_set_set_float_cpp_ref_op_encoded {
 exception exception_terse_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
@@ -26026,6 +27313,7 @@ exception exception_terse_set_set_double_cpp_ref_op_encoded {
 exception exception_terse_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
@@ -26033,6 +27321,7 @@ exception exception_terse_set_set_binary_cpp_ref_op_encoded {
 exception exception_terse_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
@@ -26040,6 +27329,7 @@ exception exception_terse_set_set_string_cpp_ref_op_encoded {
 exception exception_terse_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -26187,6 +27477,7 @@ exception exception_terse_map_i64_struct_empty_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -26222,6 +27513,7 @@ exception exception_terse_map_string_set_i64_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
@@ -26229,6 +27521,7 @@ exception exception_terse_map_string_set_float_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -26250,6 +27543,7 @@ exception exception_terse_map_string_set_string_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
@@ -26257,6 +27551,7 @@ exception exception_terse_map_string_set_struct_empty_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -26292,6 +27587,7 @@ exception exception_terse_map_i64_set_i64_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
@@ -26299,6 +27595,7 @@ exception exception_terse_map_i64_set_float_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -26320,6 +27617,7 @@ exception exception_terse_map_i64_set_string_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -26467,6 +27765,7 @@ exception exception_terse_list_list_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_terse_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
@@ -26502,6 +27801,7 @@ exception exception_terse_set_i64_shared_cpp_ref_op_encoded {
 exception exception_terse_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
@@ -26509,6 +27809,7 @@ exception exception_terse_set_float_shared_cpp_ref_op_encoded {
 exception exception_terse_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
@@ -26530,6 +27831,7 @@ exception exception_terse_set_string_shared_cpp_ref_op_encoded {
 exception exception_terse_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
@@ -26537,6 +27839,7 @@ exception exception_terse_set_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
@@ -26544,6 +27847,7 @@ exception exception_terse_set_set_bool_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
@@ -26551,6 +27855,7 @@ exception exception_terse_set_set_byte_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
@@ -26558,6 +27863,7 @@ exception exception_terse_set_set_i16_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
@@ -26565,6 +27871,7 @@ exception exception_terse_set_set_i32_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
@@ -26572,6 +27879,7 @@ exception exception_terse_set_set_i64_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
@@ -26579,6 +27887,7 @@ exception exception_terse_set_set_float_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
@@ -26586,6 +27895,7 @@ exception exception_terse_set_set_double_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
@@ -26593,6 +27903,7 @@ exception exception_terse_set_set_binary_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
@@ -26600,6 +27911,7 @@ exception exception_terse_set_set_string_shared_cpp_ref_op_encoded {
 exception exception_terse_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
@@ -26747,6 +28059,7 @@ exception exception_terse_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
@@ -26782,6 +28095,7 @@ exception exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
@@ -26789,6 +28103,7 @@ exception exception_terse_map_string_set_float_shared_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
@@ -26810,6 +28125,7 @@ exception exception_terse_map_string_set_string_shared_cpp_ref_op_encoded {
 exception exception_terse_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
@@ -26817,6 +28133,7 @@ exception exception_terse_map_string_set_struct_empty_shared_cpp_ref_op_encoded 
 exception exception_terse_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
@@ -26852,6 +28169,7 @@ exception exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
@@ -26859,6 +28177,7 @@ exception exception_terse_map_i64_set_float_shared_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
@@ -26880,6 +28199,7 @@ exception exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
 exception exception_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
@@ -27031,6 +28351,7 @@ exception exception_optional_list_list_struct_empty_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -27056,11 +28377,13 @@ exception exception_optional_set_i64_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -27076,56 +28399,67 @@ exception exception_optional_set_string_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_byte_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i16_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i32_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_i64_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_binary_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_string_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -27231,6 +28565,7 @@ exception exception_optional_map_i64_struct_empty_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -27256,11 +28591,13 @@ exception exception_optional_map_string_set_i64_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -27276,11 +28613,13 @@ exception exception_optional_map_string_set_string_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_bool_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -27306,11 +28645,13 @@ exception exception_optional_map_i64_set_i64_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_float_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_double_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -27326,6 +28667,7 @@ exception exception_optional_map_i64_set_string_box_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_struct_empty_box_op_encoded {
   @thrift.Box
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -27566,6 +28908,7 @@ exception exception_adapted_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -27606,6 +28949,7 @@ exception exception_adapted_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
@@ -27614,6 +28958,7 @@ exception exception_adapted_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -27638,6 +28983,7 @@ exception exception_adapted_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
@@ -27646,6 +28992,7 @@ exception exception_adapted_set_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -27654,6 +29001,7 @@ exception exception_adapted_set_set_byte_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
@@ -27662,6 +29010,7 @@ exception exception_adapted_set_set_i16_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
@@ -27670,6 +29019,7 @@ exception exception_adapted_set_set_i32_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
@@ -27678,6 +29028,7 @@ exception exception_adapted_set_set_i64_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -27686,6 +29037,7 @@ exception exception_adapted_set_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -27694,6 +29046,7 @@ exception exception_adapted_set_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -27702,6 +29055,7 @@ exception exception_adapted_set_set_binary_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
@@ -27710,6 +29064,7 @@ exception exception_adapted_set_set_string_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
@@ -27718,6 +29073,7 @@ exception exception_adapted_set_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -27886,6 +29242,7 @@ exception exception_adapted_map_string_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -27926,6 +29283,7 @@ exception exception_adapted_map_string_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -27934,6 +29292,7 @@ exception exception_adapted_map_string_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -27958,6 +29317,7 @@ exception exception_adapted_map_string_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -27966,6 +29326,7 @@ exception exception_adapted_map_i64_set_bool_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -28006,6 +29367,7 @@ exception exception_adapted_map_i64_set_float_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -28014,6 +29376,7 @@ exception exception_adapted_map_i64_set_double_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -28038,6 +29401,7 @@ exception exception_adapted_map_i64_set_struct_empty_op_encoded {
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -28278,6 +29642,7 @@ exception exception_field_adapted_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -28318,6 +29683,7 @@ exception exception_field_adapted_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
@@ -28326,6 +29692,7 @@ exception exception_field_adapted_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -28350,6 +29717,7 @@ exception exception_field_adapted_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
@@ -28358,6 +29726,7 @@ exception exception_field_adapted_set_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -28366,6 +29735,7 @@ exception exception_field_adapted_set_set_byte_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
@@ -28374,6 +29744,7 @@ exception exception_field_adapted_set_set_i16_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
@@ -28382,6 +29753,7 @@ exception exception_field_adapted_set_set_i32_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
@@ -28390,6 +29762,7 @@ exception exception_field_adapted_set_set_i64_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -28398,6 +29771,7 @@ exception exception_field_adapted_set_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -28406,6 +29780,7 @@ exception exception_field_adapted_set_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -28414,6 +29789,7 @@ exception exception_field_adapted_set_set_binary_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
@@ -28422,6 +29798,7 @@ exception exception_field_adapted_set_set_string_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
@@ -28430,6 +29807,7 @@ exception exception_field_adapted_set_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -28598,6 +29976,7 @@ exception exception_field_adapted_map_string_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -28638,6 +30017,7 @@ exception exception_field_adapted_map_string_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -28646,6 +30026,7 @@ exception exception_field_adapted_map_string_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -28670,6 +30051,7 @@ exception exception_field_adapted_map_string_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -28678,6 +30060,7 @@ exception exception_field_adapted_map_i64_set_bool_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -28718,6 +30101,7 @@ exception exception_field_adapted_map_i64_set_float_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
@@ -28726,6 +30110,7 @@ exception exception_field_adapted_map_i64_set_double_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -28750,6 +30135,7 @@ exception exception_field_adapted_map_i64_set_struct_empty_op_encoded {
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -28855,6 +30241,7 @@ exception exception_list_list_struct_empty_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
 @cpp.UseOpEncode
@@ -28880,11 +30267,13 @@ exception exception_set_i64_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
 @cpp.UseOpEncode
@@ -28900,56 +30289,67 @@ exception exception_set_string_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_byte_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i16_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i32_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_i64_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_binary_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_string_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -29055,6 +30455,7 @@ exception exception_map_i64_struct_empty_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_map_string_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -29080,11 +30481,13 @@ exception exception_map_string_set_i64_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_map_string_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -29100,11 +30503,13 @@ exception exception_map_string_set_string_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_map_string_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_bool_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
 @cpp.UseOpEncode
@@ -29130,11 +30535,13 @@ exception exception_map_i64_set_i64_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_map_i64_set_float_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_double_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
 @cpp.UseOpEncode
@@ -29150,6 +30557,7 @@ exception exception_map_i64_set_string_lazy_op_encoded {
 @cpp.UseOpEncode
 exception exception_map_i64_set_struct_empty_lazy_op_encoded {
   @cpp.Lazy
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
@@ -30139,7 +31547,9 @@ union union_list_list_struct_empty {
   2: list<list<struct_empty>> field_2;
 }
 union union_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<bool> field_2;
 }
 union union_set_byte {
@@ -30159,11 +31569,15 @@ union union_set_i64 {
   2: set<i64> field_2;
 }
 union union_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<float> field_2;
 }
 union union_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<double> field_2;
 }
 union union_set_binary {
@@ -30175,47 +31589,69 @@ union union_set_string {
   2: set<string> field_2;
 }
 union union_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<struct_empty> field_2;
 }
 union union_set_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<bool>> field_2;
 }
 union union_set_set_byte {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<byte>> field_2;
 }
 union union_set_set_i16 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i16>> field_2;
 }
 union union_set_set_i32 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i32>> field_2;
 }
 union union_set_set_i64 {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i64>> field_2;
 }
 union union_set_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<float>> field_2;
 }
 union union_set_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<double>> field_2;
 }
 union union_set_set_binary {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<binary>> field_2;
 }
 union union_set_set_string {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<string>> field_2;
 }
 union union_set_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<struct_empty>> field_2;
 }
 union union_map_string_bool {
@@ -30299,7 +31735,9 @@ union union_map_i64_struct_empty {
   2: map<i64, struct_empty> field_2;
 }
 union union_map_string_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<bool>> field_2;
 }
 union union_map_string_set_byte {
@@ -30319,11 +31757,15 @@ union union_map_string_set_i64 {
   2: map<string, set<i64>> field_2;
 }
 union union_map_string_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<float>> field_2;
 }
 union union_map_string_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<double>> field_2;
 }
 union union_map_string_set_binary {
@@ -30335,11 +31777,15 @@ union union_map_string_set_string {
   2: map<string, set<string>> field_2;
 }
 union union_map_string_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<struct_empty>> field_2;
 }
 union union_map_i64_set_bool {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<bool>> field_2;
 }
 union union_map_i64_set_byte {
@@ -30359,11 +31805,15 @@ union union_map_i64_set_i64 {
   2: map<i64, set<i64>> field_2;
 }
 union union_map_i64_set_float {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<float>> field_2;
 }
 union union_map_i64_set_double {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<double>> field_2;
 }
 union union_map_i64_set_binary {
@@ -30375,7 +31825,9 @@ union union_map_i64_set_string {
   2: map<i64, set<string>> field_2;
 }
 union union_map_i64_set_struct_empty {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
 union union_list_bool_cpp_ref {
@@ -30541,9 +31993,11 @@ union union_list_list_struct_empty_cpp_ref {
 union union_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<bool> field_2;
 }
 union union_set_byte_cpp_ref {
@@ -30581,17 +32035,21 @@ union union_set_i64_cpp_ref {
 union union_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<float> field_2;
 }
 union union_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<double> field_2;
 }
 union union_set_binary_cpp_ref {
@@ -30613,89 +32071,111 @@ union union_set_string_cpp_ref {
 union union_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<struct_empty> field_2;
 }
 union union_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<bool>> field_2;
 }
 union union_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<byte>> field_2;
 }
 union union_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i16>> field_2;
 }
 union union_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i32>> field_2;
 }
 union union_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i64>> field_2;
 }
 union union_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<float>> field_2;
 }
 union union_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<double>> field_2;
 }
 union union_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<binary>> field_2;
 }
 union union_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<string>> field_2;
 }
 union union_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<struct_empty>> field_2;
 }
 union union_map_string_bool_cpp_ref {
@@ -30861,9 +32341,11 @@ union union_map_i64_struct_empty_cpp_ref {
 union union_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<bool>> field_2;
 }
 union union_map_string_set_byte_cpp_ref {
@@ -30901,17 +32383,21 @@ union union_map_string_set_i64_cpp_ref {
 union union_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<float>> field_2;
 }
 union union_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<double>> field_2;
 }
 union union_map_string_set_binary_cpp_ref {
@@ -30933,17 +32419,21 @@ union union_map_string_set_string_cpp_ref {
 union union_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<struct_empty>> field_2;
 }
 union union_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<bool>> field_2;
 }
 union union_map_i64_set_byte_cpp_ref {
@@ -30981,17 +32471,21 @@ union union_map_i64_set_i64_cpp_ref {
 union union_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<float>> field_2;
 }
 union union_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<double>> field_2;
 }
 union union_map_i64_set_binary_cpp_ref {
@@ -31013,9 +32507,11 @@ union union_map_i64_set_string_cpp_ref {
 union union_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
 union union_list_bool_shared_cpp_ref {
@@ -31181,9 +32677,11 @@ union union_list_list_struct_empty_shared_cpp_ref {
 union union_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<bool> field_2;
 }
 union union_set_byte_shared_cpp_ref {
@@ -31221,17 +32719,21 @@ union union_set_i64_shared_cpp_ref {
 union union_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<float> field_2;
 }
 union union_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<double> field_2;
 }
 union union_set_binary_shared_cpp_ref {
@@ -31253,89 +32755,111 @@ union union_set_string_shared_cpp_ref {
 union union_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<struct_empty> field_2;
 }
 union union_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<bool>> field_2;
 }
 union union_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<byte>> field_2;
 }
 union union_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i16>> field_2;
 }
 union union_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i32>> field_2;
 }
 union union_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i64>> field_2;
 }
 union union_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<float>> field_2;
 }
 union union_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<double>> field_2;
 }
 union union_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<binary>> field_2;
 }
 union union_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<string>> field_2;
 }
 union union_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<struct_empty>> field_2;
 }
 union union_map_string_bool_shared_cpp_ref {
@@ -31501,9 +33025,11 @@ union union_map_i64_struct_empty_shared_cpp_ref {
 union union_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<bool>> field_2;
 }
 union union_map_string_set_byte_shared_cpp_ref {
@@ -31541,17 +33067,21 @@ union union_map_string_set_i64_shared_cpp_ref {
 union union_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<float>> field_2;
 }
 union union_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<double>> field_2;
 }
 union union_map_string_set_binary_shared_cpp_ref {
@@ -31573,17 +33103,21 @@ union union_map_string_set_string_shared_cpp_ref {
 union union_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<struct_empty>> field_2;
 }
 union union_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<bool>> field_2;
 }
 union union_map_i64_set_byte_shared_cpp_ref {
@@ -31621,17 +33155,21 @@ union union_map_i64_set_i64_shared_cpp_ref {
 union union_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<float>> field_2;
 }
 union union_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<double>> field_2;
 }
 union union_map_i64_set_binary_shared_cpp_ref {
@@ -31653,9 +33191,11 @@ union union_map_i64_set_string_shared_cpp_ref {
 union union_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
 union union_bool {
@@ -31799,7 +33339,9 @@ union union_list_list_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 union union_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<bool> field_2;
 }
 @cpp.UseOpEncode
@@ -31824,12 +33366,16 @@ union union_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 union union_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<float> field_2;
 }
 @cpp.UseOpEncode
 union union_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<double> field_2;
 }
 @cpp.UseOpEncode
@@ -31844,57 +33390,79 @@ union union_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 union union_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<struct_empty> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<bool>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_byte_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<byte>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i16_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i16>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i32_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i64_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i64>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<double>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_binary_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<binary>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_string_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
@@ -31999,7 +33567,9 @@ union union_map_i64_struct_empty_op_encoded {
 }
 @cpp.UseOpEncode
 union union_map_string_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<bool>> field_2;
 }
 @cpp.UseOpEncode
@@ -32024,12 +33594,16 @@ union union_map_string_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 union union_map_string_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<double>> field_2;
 }
 @cpp.UseOpEncode
@@ -32044,12 +33618,16 @@ union union_map_string_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 union union_map_string_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_bool_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<bool>> field_2;
 }
 @cpp.UseOpEncode
@@ -32074,12 +33652,16 @@ union union_map_i64_set_i64_op_encoded {
 }
 @cpp.UseOpEncode
 union union_map_i64_set_float_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_double_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<double>> field_2;
 }
 @cpp.UseOpEncode
@@ -32094,7 +33676,9 @@ union union_map_i64_set_string_op_encoded {
 }
 @cpp.UseOpEncode
 union union_map_i64_set_struct_empty_op_encoded {
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
@@ -32281,9 +33865,11 @@ union union_list_list_struct_empty_cpp_ref_op_encoded {
 union union_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<bool> field_2;
 }
 @cpp.UseOpEncode
@@ -32326,18 +33912,22 @@ union union_set_i64_cpp_ref_op_encoded {
 union union_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<float> field_2;
 }
 @cpp.UseOpEncode
 union union_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<double> field_2;
 }
 @cpp.UseOpEncode
@@ -32362,99 +33952,121 @@ union union_set_string_cpp_ref_op_encoded {
 union union_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<struct_empty> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<bool>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<byte>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i16>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i64>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<double>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<binary>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
@@ -32641,9 +34253,11 @@ union union_map_i64_struct_empty_cpp_ref_op_encoded {
 union union_map_string_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<bool>> field_2;
 }
 @cpp.UseOpEncode
@@ -32686,18 +34300,22 @@ union union_map_string_set_i64_cpp_ref_op_encoded {
 union union_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<double>> field_2;
 }
 @cpp.UseOpEncode
@@ -32722,18 +34340,22 @@ union union_map_string_set_string_cpp_ref_op_encoded {
 union union_map_string_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<bool>> field_2;
 }
 @cpp.UseOpEncode
@@ -32776,18 +34398,22 @@ union union_map_i64_set_i64_cpp_ref_op_encoded {
 union union_map_i64_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<double>> field_2;
 }
 @cpp.UseOpEncode
@@ -32812,9 +34438,11 @@ union union_map_i64_set_string_cpp_ref_op_encoded {
 union union_map_i64_set_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
@@ -33001,9 +34629,11 @@ union union_list_list_struct_empty_shared_cpp_ref_op_encoded {
 union union_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<bool> field_2;
 }
 @cpp.UseOpEncode
@@ -33046,18 +34676,22 @@ union union_set_i64_shared_cpp_ref_op_encoded {
 union union_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<float> field_2;
 }
 @cpp.UseOpEncode
 union union_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<double> field_2;
 }
 @cpp.UseOpEncode
@@ -33082,99 +34716,121 @@ union union_set_string_shared_cpp_ref_op_encoded {
 union union_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<struct_empty> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<bool>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<byte>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i16>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<i64>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<double>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<binary>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_set_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: set<set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
@@ -33361,9 +35017,11 @@ union union_map_i64_struct_empty_shared_cpp_ref_op_encoded {
 union union_map_string_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<bool>> field_2;
 }
 @cpp.UseOpEncode
@@ -33406,18 +35064,22 @@ union union_map_string_set_i64_shared_cpp_ref_op_encoded {
 union union_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<double>> field_2;
 }
 @cpp.UseOpEncode
@@ -33442,18 +35104,22 @@ union union_map_string_set_string_shared_cpp_ref_op_encoded {
 union union_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<string, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<bool>> field_2;
 }
 @cpp.UseOpEncode
@@ -33496,18 +35162,22 @@ union union_map_i64_set_i64_shared_cpp_ref_op_encoded {
 union union_map_i64_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<float>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<double>> field_2;
 }
 @cpp.UseOpEncode
@@ -33532,9 +35202,11 @@ union union_map_i64_set_string_shared_cpp_ref_op_encoded {
 union union_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode

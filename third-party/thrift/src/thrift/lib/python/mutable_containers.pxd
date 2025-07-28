@@ -37,10 +37,8 @@ cdef class MutableMap:
     cdef TypeInfoBase _key_typeinfo
     cdef TypeInfoBase _val_typeinfo
     cdef dict _map_data
-    cdef bint _key_type_is_container
     cdef bint _value_type_is_container
     cdef bint _use_internal_data_to_compare
-    cdef _key_to_internal_data(self, object)
     cdef _value_to_internal_data(self, object)
 
 cdef class MapKeysView:

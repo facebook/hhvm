@@ -407,6 +407,9 @@ cdef class MutableSet:
         if self is other:
             return True
 
+        # Note: comparing internal data is buggy if any elements are
+        # mutable structs. However, this is not possible because MutableStruct
+        # etc. and mutable containers are not hashable.
         if self._is_same_type_of_set(other):
             return self._set_data == (<MutableSet>other)._set_data
 
@@ -417,8 +420,7 @@ cdef class MutableSet:
             return False
 
         for value in other:
-            internal_value = self._val_typeinfo.to_internal_data(value)
-            if internal_value not in self._set_data:
+            if value not in self:
                 return False
 
         return True
@@ -512,14 +514,13 @@ cdef class MutableMap:
     the [`MutableMap` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
     """
 
-    def __cinit__(MutableSet self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict map_data not None):
+    def __cinit__(MutableMap self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict map_data not None):
         """
         map_data: It should contain valid elements. Any invalid elements within
             `map_data` may lead to undefined behavior.
         """
         self._key_typeinfo = key_typeinfo
         self._val_typeinfo = value_typeinfo
-        self._key_type_is_container = key_typeinfo.is_container()
         self._value_type_is_container = value_typeinfo.is_container()
         # Compare internal data representations only if `_value_type` is not a structured type
         # or container type, as these may include additional information like `isset-flags`
@@ -549,19 +550,10 @@ cdef class MutableMap:
             return False
 
         for other_key, other_value in other.items():
-            other_internal_key = self._key_to_internal_data(other_key)
-            self_internal_value = self._map_data.get(other_internal_key, None)
-            if self_internal_value is None:
+            self_value = self.get(other_key, None)
+            # self cannot contain None values, so None means not present
+            if self_value is None or self_value != other_value:
                 return False
-
-            if self._use_internal_data_to_compare:
-                other_internal_value = self._value_to_internal_data(other_value)
-                if self_internal_value != other_internal_value:
-                    return False
-            else:
-                self_python_value = self._val_typeinfo.to_python_value(self_internal_value)
-                if self_python_value != other_value:
-                    return False
 
         return True
 
@@ -676,7 +668,7 @@ cdef class MutableMap:
         return (self._key_typeinfo.same_as((<MutableMap>other)._key_typeinfo)
             and self._val_typeinfo.same_as((<MutableMap>other)._val_typeinfo))
 
-    # The `_{key,value}_to_internal_data()` methods are internal and used to wrap
+    # The `_value_to_internal_data()` methods are internal and used to wrap
     # the value or key when they are containers. This should be done implicitly
     # in some cases. For example, for a given map field (map<int, list<int>>),
     # the user must use `to_thrift_map()` for assignment:
@@ -687,13 +679,10 @@ cdef class MutableMap:
     #
     # s.map_field == {1: [1]}
     #
-    # These methods are called when an implicit wrapper is needed.
-    cdef _key_to_internal_data(self, value):
-        return self._key_typeinfo.to_internal_data(
-                _ThriftContainerWrapper(value)
-                if self._key_type_is_container
-                else value)
-
+    # These is no `_key_to_internal_data` method because mutable containers
+    # cannot be used as keys (not hashable) 
+    #
+    # This method is called when an implicit wrapper is needed.
     cdef _value_to_internal_data(self, value):
         return self._val_typeinfo.to_internal_data(
                 _ThriftContainerWrapper(value)

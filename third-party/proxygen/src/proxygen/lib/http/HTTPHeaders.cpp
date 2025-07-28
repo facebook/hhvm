@@ -262,8 +262,9 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
         char const* str = stdStr.c_str();
 
         // skip leading whitespace
-        while (isLWS(*str))
+        while (isLWS(*str)) {
           str++;
+        }
 
         while (*str != 0) {
           char const* pos = strchr(str, ',');
@@ -272,8 +273,9 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
 
             // count chars in the token
             len = 0;
-            while (str[len] != 0 && !isLWS(str[len]))
+            while (str[len] != 0 && !isLWS(str[len])) {
               len++;
+            }
             if (len > 0) {
               string hdr(str, len);
               if (transferHeaderIfPresent(hdr, strippedHeaders)) {
@@ -285,8 +287,9 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
           }
           len = pos - str;
           // strip trailing whitespace
-          while (len > 0 && isLWS(str[len - 1]))
+          while (len > 0 && isLWS(str[len - 1])) {
             len--;
+          }
           if (len > 0) {
             // non-empty token
             string hdr(str, len);
@@ -297,8 +300,9 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
           str = pos + 1;
 
           // skip whitespace
-          while (isLWS(*str))
+          while (isLWS(*str)) {
             str++;
+          }
         }
         return false; // continue processing "connection" headers
       });

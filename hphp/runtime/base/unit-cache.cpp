@@ -949,7 +949,7 @@ getNonRepoCacheWithWrapper(const StringData* rpath) {
   return std::make_pair(&s_nonRepoUnitCache, nullptr);
 }
 
-const StringData* resolveRequestedPath(const StringData* requestedPath,
+FOLLY_NOINLINE const StringData* resolveRequestedPath(const StringData* requestedPath,
                                        bool alreadyRealpath) {
   auto const rpath = [&] (const StringData* p) {
     if (!Cfg::Eval::CheckSymLink || alreadyRealpath) {
@@ -1251,6 +1251,10 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
   return cu;
 }
 
+FOLLY_NOINLINE int resolveStat(const std::string& path, struct stat* buf) {
+  return statSyscall(path, buf);
+}
+
 CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
                                  struct stat& statInfo,
                                  OptLog& ent,
@@ -1311,7 +1315,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
     // we need to recheck it, and repopulate the cache with the most current
     // hash and stat() data.
     if (forAutoload) {
-      if (statSyscall(rpath->data(), &statInfo) == -1 ||
+      if (resolveStat(rpath->data(), &statInfo) == -1 ||
           S_ISDIR(statInfo.st_mode)) {
         return CachedUnit{};
       }
@@ -1605,7 +1609,7 @@ void invalidateUnit(StringData* path) {
   erase(s_nonRepoUnitCache);
 }
 
-String resolveVmInclude(const StringData* path,
+FOLLY_NOINLINE String resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,
                         bool allow_dir /* = false */) {

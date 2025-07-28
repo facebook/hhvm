@@ -48,7 +48,9 @@ typedef any_rep.AnyStruct Any
 typedef any_rep.SemiAnyStruct SemiAny
 
 /** A list of SemiAny values, accessible by ValueId. */
+@thrift.AllowLegacyTypedefUri
 typedef list<Any> AnyValueList
 
 /** A list of SemiAny values, accessible by ValueId. */
+@thrift.AllowLegacyTypedefUri
 typedef list<SemiAny> SemiAnyValueList

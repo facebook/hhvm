@@ -22,13 +22,16 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/type_id.thrift"
 include "thrift/lib/thrift/record.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/lib/thrift/detail/TypeSystemAdapter.h"
 cpp_include "folly/container/F14Map.h"
 
 namespace cpp2 apache.thrift.type_system
 
+@thrift.AllowLegacyTypedefUri
 typedef id.FieldId FieldId
+@thrift.AllowLegacyTypedefUri
 typedef string FieldName
 
 /**

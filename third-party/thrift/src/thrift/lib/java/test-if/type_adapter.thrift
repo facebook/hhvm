@@ -23,6 +23,7 @@ include "thrift/lib/thrift/any.thrift"
 @thrift.Experimental
 package "facebook.com/thrift/test/adapter"
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.any.AnyAdapter",
   typeClassName = "com.facebook.thrift.any.Any",
@@ -34,145 +35,173 @@ enum TestEnum {
   ONE = 1,
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef i32 MyInt
+@thrift.AllowLegacyTypedefUri
 typedef MyInt Integer
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary SlicedByteBuf
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.CopiedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary CopiedByteBuf
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary UnpooledByteBuf
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.DateTypeAdapter",
   typeClassName = "java.util.Date",
 }
 typedef i64 Date
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.BooleanToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef bool adaptedBoolean
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ByteToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef byte adaptedByte
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ShortToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i16 adaptedShort
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef Integer adaptedInt
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.LongToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i64 adaptedLong
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.FloatToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef float adaptedFloat
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.DoubleToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef double adaptedDouble
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.StringToByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef string adaptedString
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ListToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef list<i32> adaptedIntList
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ListToHexTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef list<binary> adaptedBinaryList
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ListToStringListTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef list<list<i32>> adaptedListIntList
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntSetToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef set<i32> adaptedIntSet
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.BinarySetToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef set<binary> adaptedBinarySet
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef map<i32, i32> adaptedIntMap
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntBinaryMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef map<i32, binary> adaptedIntBinaryMap
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntStringMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef map<i32, string> adaptedIntStringMap
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntBinaryMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef map<i32, string_5578> adaptedIntBinaryStringMap
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntBinaryListMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef map<i32, list<binary>> adaptedIntBinaryListMap
 
+@thrift.AllowLegacyTypedefUri
 typedef adaptedBoolean doubleTypedefBoolean
+@thrift.AllowLegacyTypedefUri
 typedef adaptedInt doubleTypedefInt
+@thrift.AllowLegacyTypedefUri
 typedef doubleTypedefInt multipleTypedefInt
 
+@thrift.AllowLegacyTypedefUri
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"java.swift.binary_string": "1"},
 }
@@ -182,28 +211,36 @@ typedef doubleTypedefInt multipleTypedefInt
 }
 typedef string BinaryString
 
+@thrift.AllowLegacyTypedefUri
 typedef binary data
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.CopiedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef data CopiedByteBufData
+@thrift.AllowLegacyTypedefUri
 typedef CopiedByteBufData NestedBinTypeDef
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
   typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<List<String>>',
 }
 typedef list<adaptedInt> doubleAdaptedIntList
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
   typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.adapter.test.Wrapped<List<String>>>',
 }
 typedef list<doubleAdaptedIntList> tripleAdaptedIntList
+@thrift.AllowLegacyTypedefUri
 typedef tripleAdaptedIntList tripleAdaptedIntList1
+@thrift.AllowLegacyTypedefUri
 typedef tripleAdaptedIntList1 tripleAdaptedIntList2
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
   typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.adapter.test.Wrapped<List<String>>>>',
@@ -214,6 +251,7 @@ safe permanent client exception InnerException {
   1: i32 int_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
   typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.test.adapter.InnerException>',
@@ -224,6 +262,7 @@ union InnerUnion {
   1: i32 int_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
   typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.test.adapter.InnerUnion>',
@@ -986,6 +1025,7 @@ safe permanent client exception AdaptedTestException {
 }
 
 // The following were automatically generated and may benefit from renaming.
+@thrift.AllowLegacyTypedefUri
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"java.swift.binary_string": "1"},
 }

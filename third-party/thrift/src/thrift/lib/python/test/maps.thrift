@@ -18,9 +18,11 @@ package "thrift.com/python/test"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace py3 python_test
 
+@thrift.AllowLegacyTypedefUri
 @python.Adapter{
   name = "thrift.python.test.adapters.atoi.AtoiAdapter",
   typeHint = "int",
@@ -28,13 +30,21 @@ namespace py3 python_test
 typedef string AtoIValue
 
 const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
+@thrift.AllowLegacyTypedefUri
 typedef list<i32> I32List
+@thrift.AllowLegacyTypedefUri
 typedef map<string, i64> StrIntMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, I32List> StrI32ListMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, easy> StrEasyMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, string> StrStrMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, AtoIValue> StrAtoIValueMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, StrI32ListMap> StrStrIntListMapMap
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::F14FastMap<std::string, folly::fbstring>"}
 typedef map<string, string> F14MapFollyString
 

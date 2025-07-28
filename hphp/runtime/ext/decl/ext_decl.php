@@ -381,6 +381,16 @@ namespace HH {
     public function getClass(string $name)[]: ?ExtDeclClass;
 
     /*
+     * Get the public API for a given class in a file.
+     *
+     * @param string $name - the class name with or without the global
+     *                       namespace prefix
+     * @return string - the maybe-empty string for the API.
+     */
+    <<__Native>>
+    public function getPublicApiForClass(string $name)[]: string;
+
+    /*
      * Query the content for all the top level file attributes.
      *
      * @return vec<ExtDeclAttribute> - Array of the file attributes

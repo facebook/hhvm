@@ -908,6 +908,17 @@ static Variant HHVM_METHOD(FileDecls, getClass, const String& name) {
   return decls.empty() ? init_null_variant : populateClass(decls[0]);
 }
 
+static String HHVM_METHOD(FileDecls, getPublicApiForClass, const String& name) {
+  if (name.empty()) {
+    return String{};
+  }
+  auto data = Native::data<FileDecls>(this_);
+  data->validateState();
+  auto const api =
+      hackc::get_public_api_for_class(**data->declsHolder, toRustStr(name));
+  return api.empty() ? String{} : rustToString(api[0]);
+}
+
 static Array HHVM_METHOD(FileDecls, getFileAttributes) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
@@ -1218,6 +1229,8 @@ struct DeclExtension final : Extension {
     HHVM_MALIAS(HH\\FileDecls, getFileTypedef, FileDecls, getFileTypedef);
     HHVM_MALIAS(HH\\FileDecls, getFile, FileDecls, getFile);
     HHVM_MALIAS(HH\\FileDecls, getShapeKeys, FileDecls, getShapeKeys);
+    HHVM_MALIAS(
+        HH\\FileDecls, getPublicApiForClass, FileDecls, getPublicApiForClass);
 
     Native::registerNativeDataInfo<FileDecls>();
   }

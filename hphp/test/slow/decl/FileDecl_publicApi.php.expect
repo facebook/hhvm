@@ -1,0 +1,16 @@
+class FooBar {
+  const type fooType = shape('k1' => int, BAD_CLS::BAD_CONST => string);
+  const type clsTest = shape(GaryTestClass::TEST_STRING => int);
+  public function defaultVal(optional string $a): string;
+  public static function genFoo(string $_, int $a): Awaitable<int>;
+}
+class Derived extends Base implements IImplementable {
+  public function fromInterface(): void;
+}
+abstract class HasManyConsts {
+  const int MY_IDX = 1;
+  const type TKey = string;
+  public function doesNothing(int $a): void;
+}
+class VecLike<T> implements StackLike<T>, IImplementable {
+}

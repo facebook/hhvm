@@ -4,8 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt::Write;
+
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
+use hhbc_string_utils::strip_hh_ns;
 use oxidized::ast_defs::Id;
 use oxidized::direct_decl_parser::ParsedFile;
 use oxidized::shallow_decl_defs::AbstractTypeconst;
@@ -572,6 +575,145 @@ pub fn get_class(parsed_file: &ParsedFileHolder, name: &str) -> Option<ExtDeclCl
         }
     }
 }
+
+pub fn get_public_api_for_class(
+    parsed_file: &ParsedFileHolder,
+    name: &str,
+) -> Result<String, std::fmt::Error> {
+    let mut buffer = String::with_capacity(100); // TODO, use filesize as hint
+    let class = get_class(parsed_file, name);
+    let Some(class) = class else {
+        return Ok(buffer);
+    };
+    if class.final_ {
+        write!(buffer, "final ")?;
+    }
+    if class.abstract_ {
+        write!(buffer, "abstract ")?;
+    }
+    write!(buffer, "{} {}", class.kind, class.name)?;
+    if !class.tparams.is_empty() {
+        write!(buffer, "<")?;
+        write!(
+            buffer,
+            "{}",
+            class
+                .tparams
+                .iter()
+                .map(|tp| tp.name.as_str())
+                .collect::<Vec<&str>>()
+                .join(", ")
+        )?;
+        write!(buffer, ">")?;
+    }
+    write_class_edges(&mut buffer, &class)?;
+    writeln!(buffer, " {{")?;
+    write_consts(&mut buffer, class.consts)?;
+    write_typeconsts(&mut buffer, class.typeconsts)?;
+    write_methods(&mut buffer, class.methods, false)?;
+    write_methods(&mut buffer, class.static_methods, true)?;
+    writeln!(buffer, "}}")?;
+    buffer.shrink_to_fit();
+    Ok(buffer)
+}
+
+// ==== BEGIN: writer helper methods for get_public_api_for_class
+fn write_class_edges<W: Write>(buffer: &mut W, cls: &ExtDeclClass) -> Result<(), std::fmt::Error> {
+    if !cls.extends.is_empty() {
+        write!(buffer, " extends {}", cls.extends.join(", "))?;
+    }
+    if !cls.implements.is_empty() {
+        write!(buffer, " implements {}", cls.implements.join(", "))?;
+    }
+    Ok(())
+}
+
+fn write_methods<W: Write>(
+    buffer: &mut W,
+    methods: impl IntoIterator<Item = ExtDeclMethod>,
+    is_static: bool,
+) -> Result<(), std::fmt::Error> {
+    for method in methods
+        .into_iter()
+        .filter(|method| method.visibility == "public")
+    {
+        write_method(buffer, &method, is_static)?
+    }
+    Ok(())
+}
+
+fn write_method<W: Write>(
+    buffer: &mut W,
+    method: &ExtDeclMethod,
+    is_static: bool,
+) -> Result<(), std::fmt::Error> {
+    let Some(signature) = method.signature.first() else {
+        return Ok(()); // not sure this can be empty for a method, unless we has a bug
+    };
+
+    write!(buffer, "  public")?;
+    if is_static {
+        write!(buffer, " static")?;
+    }
+    write!(buffer, " function {}(", method.name)?;
+    let params = &signature.params;
+    if !params.is_empty() {
+        let last_idx = params.len() - 1;
+        for (idx, param) in params.iter().enumerate() {
+            if param.is_inout {
+                write!(buffer, "inout ")?;
+            }
+            if param.is_readonly {
+                write!(buffer, "readonly ")?;
+            }
+            // NOTE: this will add the optional keyword even if the parameter
+            // is only inferred to be optional via a default value.
+            // This means you don't get a perfect 1:1 mapping.
+            if param.is_optional {
+                write!(buffer, "optional ")?
+            }
+            write!(buffer, "{} {}", param.type_, param.name)?;
+            if idx != last_idx {
+                write!(buffer, ", ")?;
+            }
+        }
+    }
+    writeln!(buffer, "): {};", strip_hh_ns(&signature.return_type))?;
+    Ok(())
+}
+
+fn write_consts<W, I>(buffer: &mut W, consts: I) -> Result<(), std::fmt::Error>
+where
+    W: Write,
+    I: IntoIterator<Item = ExtDeclClassConst>,
+{
+    for classconst in consts {
+        write!(buffer, "  ")?;
+        if classconst.is_abstract {
+            write!(buffer, "abstract ")?;
+        }
+        writeln!(
+            buffer,
+            "const {} {} = {};",
+            classconst.type_, classconst.name, classconst.value
+        )?;
+    }
+    Ok(())
+}
+
+fn write_typeconsts<W, I>(buffer: &mut W, consts: I) -> Result<(), std::fmt::Error>
+where
+    W: Write,
+    I: IntoIterator<Item = ExtDeclClassTypeConst>,
+{
+    for tc in consts {
+        write!(buffer, "  ")?;
+        writeln!(buffer, "const type {} = {};", tc.name, tc.kind)?;
+    }
+    Ok(())
+}
+
+// ==== END: writer helper methods for get_public_api_for_class
 
 // ========== Complex fields ==========
 

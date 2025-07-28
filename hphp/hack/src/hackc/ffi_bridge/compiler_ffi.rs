@@ -510,6 +510,8 @@ mod ffi {
         /// SAFETY: i must have been a valid BytesId from a previous intern_bytes()
         /// call in this process.
         unsafe fn deref_bytes(i: u32) -> &'static [u8];
+
+        fn get_public_api_for_class(decls: &DeclsHolder, name: &str) -> Vec<String>;
     }
 
     extern "C++" {
@@ -980,6 +982,13 @@ fn get_type_structure(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeS
 
 fn get_shape_keys(holder: &DeclsHolder, name: &str) -> Vec<String> {
     ext_decl::get_shape_keys(&holder.parsed_file, name)
+}
+
+fn get_public_api_for_class(holder: &DeclsHolder, name: &str) -> Vec<String> {
+    match ext_decl::get_public_api_for_class(&holder.parsed_file, name) {
+        Ok(string) => vec![string],
+        Err(_) => vec![],
+    }
 }
 
 // SAFETY: i must be a raw bitcast from a valid BytesId

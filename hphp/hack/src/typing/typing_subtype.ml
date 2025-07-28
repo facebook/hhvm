@@ -6468,14 +6468,40 @@ end = struct
     | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
       do_tuple_optional t_required t_optional (Some t_variadic)
     | (_, Ttuple { t_required; _ }) -> do_tuple_basic t_required
-    | (r, Tshape ts) -> do_shape r ts
-    | (r, Tnewtype (name_sub, [ty_sub], _))
+    | (r_sub, Tshape ts) -> do_shape r_sub ts
+    | (r_sub, Tgeneric generic_nm) ->
+      Common.simplify_generic_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop
+        (sub_supportdyn, r_sub, generic_nm)
+        rhs
+        rhs
+        env
+    | (r_sub, Tnewtype (name_sub, [ty_sub], _))
       when String.equal name_sub SN.Classes.cSupportDyn ->
       simplify
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn = Some r; ty_sub }
+        ~lhs:{ sub_supportdyn = Some r_sub; ty_sub }
         ~rhs
+        env
+    | (r_sub, Tnewtype (alias_name, _, ty_newtype)) ->
+      Common.simplify_newtype_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop
+        (sub_supportdyn, r_sub, alias_name, ty_newtype)
+        rhs
+        env
+    | (r_sub, Tdependent (dep_ty, ty_inner)) ->
+      Common.simplify_dependent_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop
+        (sub_supportdyn, r_sub, dep_ty, ty_inner)
+        rhs
         env
     | _ -> invalid ~fail env
 end

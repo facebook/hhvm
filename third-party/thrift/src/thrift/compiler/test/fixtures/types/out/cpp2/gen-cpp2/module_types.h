@@ -4012,51 +4012,43 @@ class ForwardUsageStruct final  {
   bool operator==(const ForwardUsageStruct&) const;
   bool operator<(const ForwardUsageStruct&) const;
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T& foo_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo_ref() & {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T& foo_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo_ref() const& {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T&& foo_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo_ref() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T&& foo_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T& foo() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo() & {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T& foo() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo() const& {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T&& foo() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T&& foo() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   template <class Protocol_>
@@ -4190,51 +4182,43 @@ class ForwardUsageRoot final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_ForwardUsageStruct), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE fbthrift_T& ForwardUsageByRef_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>& ForwardUsageByRef_ref() & {
     return __fbthrift_field_ForwardUsageByRef;
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE const fbthrift_T& ForwardUsageByRef_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>& ForwardUsageByRef_ref() const& {
     return __fbthrift_field_ForwardUsageByRef;
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE fbthrift_T&& ForwardUsageByRef_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_ForwardUsageByRef);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&& ForwardUsageByRef_ref() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&&>(__fbthrift_field_ForwardUsageByRef);
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE const fbthrift_T&& ForwardUsageByRef_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_ForwardUsageByRef);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&& ForwardUsageByRef_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&&>(__fbthrift_field_ForwardUsageByRef);
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE fbthrift_T& ForwardUsageByRef() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>& ForwardUsageByRef() & {
     return __fbthrift_field_ForwardUsageByRef;
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE const fbthrift_T& ForwardUsageByRef() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>& ForwardUsageByRef() const& {
     return __fbthrift_field_ForwardUsageByRef;
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE fbthrift_T&& ForwardUsageByRef() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_ForwardUsageByRef);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&& ForwardUsageByRef() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&&>(__fbthrift_field_ForwardUsageByRef);
   }
 
   /** Glean { "field": "ForwardUsageByRef" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
-  FOLLY_ERASE const fbthrift_T&& ForwardUsageByRef() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_ForwardUsageByRef);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&& ForwardUsageByRef() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>&&>(__fbthrift_field_ForwardUsageByRef);
   }
 
   /** Glean { "field": "ForwardUsageStruct" } */
@@ -4344,51 +4328,43 @@ class ForwardUsageByRef final  {
   bool operator==(const ForwardUsageByRef&) const;
   bool operator<(const ForwardUsageByRef&) const;
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T& foo_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo_ref() & {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T& foo_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo_ref() const& {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T&& foo_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo_ref() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T&& foo_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T& foo() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo() & {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T& foo() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo() const& {
     return __fbthrift_field_foo;
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE fbthrift_T&& foo() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   /** Glean { "field": "foo" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
-  FOLLY_ERASE const fbthrift_T&& foo() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_foo);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&& foo() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>&&>(__fbthrift_field_foo);
   }
 
   template <class Protocol_>
@@ -6180,98 +6156,82 @@ class AllocatorAware final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_not_a_container), __isset.at(4), __isset.bit(4)};
   }
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T& aa_unique_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_unique_ref() & {
     return __fbthrift_field_aa_unique;
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T& aa_unique_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_unique_ref() const& {
     return __fbthrift_field_aa_unique;
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T&& aa_unique_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_aa_unique);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_unique_ref() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_unique);
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T&& aa_unique_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_aa_unique);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_unique_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_unique);
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T& aa_unique() & {
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_unique() & {
     return __fbthrift_field_aa_unique;
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T& aa_unique() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_unique() const& {
     return __fbthrift_field_aa_unique;
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T&& aa_unique() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_aa_unique);
+  FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_unique() && {
+    return static_cast<::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_unique);
   }
 
   /** Glean { "field": "aa_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T&& aa_unique() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_aa_unique);
+  FOLLY_ERASE const ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_unique() const&& {
+    return static_cast<const ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_unique);
   }
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T& aa_shared_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_shared_ref() & {
     return __fbthrift_field_aa_shared;
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T& aa_shared_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_shared_ref() const& {
     return __fbthrift_field_aa_shared;
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T&& aa_shared_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_aa_shared);
+  FOLLY_ERASE ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_shared_ref() && {
+    return static_cast<::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_shared);
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T&& aa_shared_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_aa_shared);
+  FOLLY_ERASE const ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_shared_ref() const&& {
+    return static_cast<const ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_shared);
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T& aa_shared() & {
+  FOLLY_ERASE ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_shared() & {
     return __fbthrift_field_aa_shared;
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T& aa_shared() const& {
+  FOLLY_ERASE const ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>& aa_shared() const& {
     return __fbthrift_field_aa_shared;
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE fbthrift_T&& aa_shared() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_aa_shared);
+  FOLLY_ERASE ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_shared() && {
+    return static_cast<::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_shared);
   }
 
   /** Glean { "field": "aa_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
-  FOLLY_ERASE const fbthrift_T&& aa_shared() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_aa_shared);
+  FOLLY_ERASE const ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&& aa_shared() const&& {
+    return static_cast<const ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>&&>(__fbthrift_field_aa_shared);
   }
 
   /** Glean { "field": "aa_list" } */

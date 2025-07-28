@@ -8191,51 +8191,43 @@ class MyIncludedStruct final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_MyIncludedStruct), __isset.at(1), __isset.bit(1)};
   }
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE fbthrift_T& ARefField_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::AStruct>& ARefField_ref() & {
     return __fbthrift_field_ARefField;
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE const fbthrift_T& ARefField_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::AStruct>& ARefField_ref() const& {
     return __fbthrift_field_ARefField;
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE fbthrift_T&& ARefField_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_ARefField);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::AStruct>&& ARefField_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::AStruct>&&>(__fbthrift_field_ARefField);
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE const fbthrift_T&& ARefField_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_ARefField);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::AStruct>&& ARefField_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::AStruct>&&>(__fbthrift_field_ARefField);
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE fbthrift_T& ARefField() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::AStruct>& ARefField() & {
     return __fbthrift_field_ARefField;
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE const fbthrift_T& ARefField() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::AStruct>& ARefField() const& {
     return __fbthrift_field_ARefField;
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE fbthrift_T&& ARefField() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_ARefField);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::AStruct>&& ARefField() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::AStruct>&&>(__fbthrift_field_ARefField);
   }
 
   /** Glean { "field": "ARefField" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::AStruct>>
-  FOLLY_ERASE const fbthrift_T&& ARefField() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_ARefField);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::AStruct>&& ARefField() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::AStruct>&&>(__fbthrift_field_ARefField);
   }
 
   /** Glean { "field": "ARequiredField" } */
@@ -8564,418 +8556,346 @@ class AnnotatedStruct  {
     return {static_cast<fbthrift_T&&>(this->no_annotation), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& cpp_unique_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& cpp_unique_ref_ref() & {
     return cpp_unique_ref;
   }
 
   /** Glean { "field": "cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& cpp_unique_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& cpp_unique_ref_ref() const& {
     return cpp_unique_ref;
   }
 
   /** Glean { "field": "cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& cpp_unique_ref_ref() && {
-    return static_cast<fbthrift_T&&>(cpp_unique_ref);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& cpp_unique_ref_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(cpp_unique_ref);
   }
 
   /** Glean { "field": "cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& cpp_unique_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(cpp_unique_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& cpp_unique_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(cpp_unique_ref);
   }
   /** Glean { "field": "cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& cpp2_unique_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& cpp2_unique_ref_ref() & {
     return cpp2_unique_ref;
   }
 
   /** Glean { "field": "cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& cpp2_unique_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& cpp2_unique_ref_ref() const& {
     return cpp2_unique_ref;
   }
 
   /** Glean { "field": "cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& cpp2_unique_ref_ref() && {
-    return static_cast<fbthrift_T&&>(cpp2_unique_ref);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& cpp2_unique_ref_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(cpp2_unique_ref);
   }
 
   /** Glean { "field": "cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& cpp2_unique_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(cpp2_unique_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& cpp2_unique_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(cpp2_unique_ref);
   }
   /** Glean { "field": "container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE fbthrift_T& container_with_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>& container_with_ref_ref() & {
     return container_with_ref;
   }
 
   /** Glean { "field": "container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE const fbthrift_T& container_with_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>& container_with_ref_ref() const& {
     return container_with_ref;
   }
 
   /** Glean { "field": "container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE fbthrift_T&& container_with_ref_ref() && {
-    return static_cast<fbthrift_T&&>(container_with_ref);
+  FOLLY_ERASE ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>&& container_with_ref_ref() && {
+    return static_cast<::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>&&>(container_with_ref);
   }
 
   /** Glean { "field": "container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE const fbthrift_T&& container_with_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(container_with_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>&& container_with_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>&&>(container_with_ref);
   }
   /** Glean { "field": "req_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& req_cpp_unique_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& req_cpp_unique_ref_ref() & {
     return req_cpp_unique_ref;
   }
 
   /** Glean { "field": "req_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& req_cpp_unique_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& req_cpp_unique_ref_ref() const& {
     return req_cpp_unique_ref;
   }
 
   /** Glean { "field": "req_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& req_cpp_unique_ref_ref() && {
-    return static_cast<fbthrift_T&&>(req_cpp_unique_ref);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& req_cpp_unique_ref_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(req_cpp_unique_ref);
   }
 
   /** Glean { "field": "req_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& req_cpp_unique_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(req_cpp_unique_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& req_cpp_unique_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(req_cpp_unique_ref);
   }
   /** Glean { "field": "req_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& req_cpp2_unique_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& req_cpp2_unique_ref_ref() & {
     return req_cpp2_unique_ref;
   }
 
   /** Glean { "field": "req_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& req_cpp2_unique_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& req_cpp2_unique_ref_ref() const& {
     return req_cpp2_unique_ref;
   }
 
   /** Glean { "field": "req_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& req_cpp2_unique_ref_ref() && {
-    return static_cast<fbthrift_T&&>(req_cpp2_unique_ref);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& req_cpp2_unique_ref_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(req_cpp2_unique_ref);
   }
 
   /** Glean { "field": "req_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& req_cpp2_unique_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(req_cpp2_unique_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& req_cpp2_unique_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(req_cpp2_unique_ref);
   }
   /** Glean { "field": "req_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE fbthrift_T& req_container_with_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::vector<::std::string>>& req_container_with_ref_ref() & {
     return req_container_with_ref;
   }
 
   /** Glean { "field": "req_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE const fbthrift_T& req_container_with_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::vector<::std::string>>& req_container_with_ref_ref() const& {
     return req_container_with_ref;
   }
 
   /** Glean { "field": "req_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE fbthrift_T&& req_container_with_ref_ref() && {
-    return static_cast<fbthrift_T&&>(req_container_with_ref);
+  FOLLY_ERASE ::std::unique_ptr<::std::vector<::std::string>>&& req_container_with_ref_ref() && {
+    return static_cast<::std::unique_ptr<::std::vector<::std::string>>&&>(req_container_with_ref);
   }
 
   /** Glean { "field": "req_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE const fbthrift_T&& req_container_with_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(req_container_with_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::std::vector<::std::string>>&& req_container_with_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::std::vector<::std::string>>&&>(req_container_with_ref);
   }
   /** Glean { "field": "opt_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& opt_cpp_unique_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& opt_cpp_unique_ref_ref() & {
     return opt_cpp_unique_ref;
   }
 
   /** Glean { "field": "opt_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& opt_cpp_unique_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& opt_cpp_unique_ref_ref() const& {
     return opt_cpp_unique_ref;
   }
 
   /** Glean { "field": "opt_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& opt_cpp_unique_ref_ref() && {
-    return static_cast<fbthrift_T&&>(opt_cpp_unique_ref);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& opt_cpp_unique_ref_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(opt_cpp_unique_ref);
   }
 
   /** Glean { "field": "opt_cpp_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& opt_cpp_unique_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(opt_cpp_unique_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& opt_cpp_unique_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(opt_cpp_unique_ref);
   }
   /** Glean { "field": "opt_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& opt_cpp2_unique_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& opt_cpp2_unique_ref_ref() & {
     return opt_cpp2_unique_ref;
   }
 
   /** Glean { "field": "opt_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& opt_cpp2_unique_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& opt_cpp2_unique_ref_ref() const& {
     return opt_cpp2_unique_ref;
   }
 
   /** Glean { "field": "opt_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& opt_cpp2_unique_ref_ref() && {
-    return static_cast<fbthrift_T&&>(opt_cpp2_unique_ref);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& opt_cpp2_unique_ref_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(opt_cpp2_unique_ref);
   }
 
   /** Glean { "field": "opt_cpp2_unique_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& opt_cpp2_unique_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(opt_cpp2_unique_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& opt_cpp2_unique_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(opt_cpp2_unique_ref);
   }
   /** Glean { "field": "opt_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE fbthrift_T& opt_container_with_ref_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::set<::std::int32_t>>& opt_container_with_ref_ref() & {
     return opt_container_with_ref;
   }
 
   /** Glean { "field": "opt_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE const fbthrift_T& opt_container_with_ref_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::set<::std::int32_t>>& opt_container_with_ref_ref() const& {
     return opt_container_with_ref;
   }
 
   /** Glean { "field": "opt_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE fbthrift_T&& opt_container_with_ref_ref() && {
-    return static_cast<fbthrift_T&&>(opt_container_with_ref);
+  FOLLY_ERASE ::std::unique_ptr<::std::set<::std::int32_t>>&& opt_container_with_ref_ref() && {
+    return static_cast<::std::unique_ptr<::std::set<::std::int32_t>>&&>(opt_container_with_ref);
   }
 
   /** Glean { "field": "opt_container_with_ref" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE const fbthrift_T&& opt_container_with_ref_ref() const&& {
-    return static_cast<const fbthrift_T&&>(opt_container_with_ref);
+  FOLLY_ERASE const ::std::unique_ptr<::std::set<::std::int32_t>>&& opt_container_with_ref_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::std::set<::std::int32_t>>&&>(opt_container_with_ref);
   }
   /** Glean { "field": "ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& ref_type_unique_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& ref_type_unique_ref() & {
     return ref_type_unique;
   }
 
   /** Glean { "field": "ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& ref_type_unique_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& ref_type_unique_ref() const& {
     return ref_type_unique;
   }
 
   /** Glean { "field": "ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& ref_type_unique_ref() && {
-    return static_cast<fbthrift_T&&>(ref_type_unique);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& ref_type_unique_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(ref_type_unique);
   }
 
   /** Glean { "field": "ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& ref_type_unique_ref() const&& {
-    return static_cast<const fbthrift_T&&>(ref_type_unique);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& ref_type_unique_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(ref_type_unique);
   }
   /** Glean { "field": "ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& ref_type_shared_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<::some::valid::ns::containerStruct>& ref_type_shared_ref() & {
     return ref_type_shared;
   }
 
   /** Glean { "field": "ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& ref_type_shared_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<::some::valid::ns::containerStruct>& ref_type_shared_ref() const& {
     return ref_type_shared;
   }
 
   /** Glean { "field": "ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& ref_type_shared_ref() && {
-    return static_cast<fbthrift_T&&>(ref_type_shared);
+  FOLLY_ERASE ::std::shared_ptr<::some::valid::ns::containerStruct>&& ref_type_shared_ref() && {
+    return static_cast<::std::shared_ptr<::some::valid::ns::containerStruct>&&>(ref_type_shared);
   }
 
   /** Glean { "field": "ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& ref_type_shared_ref() const&& {
-    return static_cast<const fbthrift_T&&>(ref_type_shared);
+  FOLLY_ERASE const ::std::shared_ptr<::some::valid::ns::containerStruct>&& ref_type_shared_ref() const&& {
+    return static_cast<const ::std::shared_ptr<::some::valid::ns::containerStruct>&&>(ref_type_shared);
   }
   /** Glean { "field": "ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE fbthrift_T& ref_type_const_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>& ref_type_const_ref() & {
     return ref_type_const;
   }
 
   /** Glean { "field": "ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE const fbthrift_T& ref_type_const_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>& ref_type_const_ref() const& {
     return ref_type_const;
   }
 
   /** Glean { "field": "ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE fbthrift_T&& ref_type_const_ref() && {
-    return static_cast<fbthrift_T&&>(ref_type_const);
+  FOLLY_ERASE ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>&& ref_type_const_ref() && {
+    return static_cast<::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>&&>(ref_type_const);
   }
 
   /** Glean { "field": "ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>
-  FOLLY_ERASE const fbthrift_T&& ref_type_const_ref() const&& {
-    return static_cast<const fbthrift_T&&>(ref_type_const);
+  FOLLY_ERASE const ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>&& ref_type_const_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>&&>(ref_type_const);
   }
   /** Glean { "field": "req_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& req_ref_type_shared_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<::some::valid::ns::containerStruct>& req_ref_type_shared_ref() & {
     return req_ref_type_shared;
   }
 
   /** Glean { "field": "req_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& req_ref_type_shared_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<::some::valid::ns::containerStruct>& req_ref_type_shared_ref() const& {
     return req_ref_type_shared;
   }
 
   /** Glean { "field": "req_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& req_ref_type_shared_ref() && {
-    return static_cast<fbthrift_T&&>(req_ref_type_shared);
+  FOLLY_ERASE ::std::shared_ptr<::some::valid::ns::containerStruct>&& req_ref_type_shared_ref() && {
+    return static_cast<::std::shared_ptr<::some::valid::ns::containerStruct>&&>(req_ref_type_shared);
   }
 
   /** Glean { "field": "req_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& req_ref_type_shared_ref() const&& {
-    return static_cast<const fbthrift_T&&>(req_ref_type_shared);
+  FOLLY_ERASE const ::std::shared_ptr<::some::valid::ns::containerStruct>&& req_ref_type_shared_ref() const&& {
+    return static_cast<const ::std::shared_ptr<::some::valid::ns::containerStruct>&&>(req_ref_type_shared);
   }
   /** Glean { "field": "req_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& req_ref_type_const_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::some::valid::ns::containerStruct>& req_ref_type_const_ref() & {
     return req_ref_type_const;
   }
 
   /** Glean { "field": "req_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& req_ref_type_const_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::some::valid::ns::containerStruct>& req_ref_type_const_ref() const& {
     return req_ref_type_const;
   }
 
   /** Glean { "field": "req_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& req_ref_type_const_ref() && {
-    return static_cast<fbthrift_T&&>(req_ref_type_const);
+  FOLLY_ERASE ::std::shared_ptr<const ::some::valid::ns::containerStruct>&& req_ref_type_const_ref() && {
+    return static_cast<::std::shared_ptr<const ::some::valid::ns::containerStruct>&&>(req_ref_type_const);
   }
 
   /** Glean { "field": "req_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& req_ref_type_const_ref() const&& {
-    return static_cast<const fbthrift_T&&>(req_ref_type_const);
+  FOLLY_ERASE const ::std::shared_ptr<const ::some::valid::ns::containerStruct>&& req_ref_type_const_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::some::valid::ns::containerStruct>&&>(req_ref_type_const);
   }
   /** Glean { "field": "req_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE fbthrift_T& req_ref_type_unique_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::vector<::std::string>>& req_ref_type_unique_ref() & {
     return req_ref_type_unique;
   }
 
   /** Glean { "field": "req_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE const fbthrift_T& req_ref_type_unique_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::vector<::std::string>>& req_ref_type_unique_ref() const& {
     return req_ref_type_unique;
   }
 
   /** Glean { "field": "req_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE fbthrift_T&& req_ref_type_unique_ref() && {
-    return static_cast<fbthrift_T&&>(req_ref_type_unique);
+  FOLLY_ERASE ::std::unique_ptr<::std::vector<::std::string>>&& req_ref_type_unique_ref() && {
+    return static_cast<::std::unique_ptr<::std::vector<::std::string>>&&>(req_ref_type_unique);
   }
 
   /** Glean { "field": "req_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::vector<::std::string>>>
-  FOLLY_ERASE const fbthrift_T&& req_ref_type_unique_ref() const&& {
-    return static_cast<const fbthrift_T&&>(req_ref_type_unique);
+  FOLLY_ERASE const ::std::unique_ptr<::std::vector<::std::string>>&& req_ref_type_unique_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::std::vector<::std::string>>&&>(req_ref_type_unique);
   }
   /** Glean { "field": "opt_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& opt_ref_type_const_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::some::valid::ns::containerStruct>& opt_ref_type_const_ref() & {
     return opt_ref_type_const;
   }
 
   /** Glean { "field": "opt_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& opt_ref_type_const_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::some::valid::ns::containerStruct>& opt_ref_type_const_ref() const& {
     return opt_ref_type_const;
   }
 
   /** Glean { "field": "opt_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& opt_ref_type_const_ref() && {
-    return static_cast<fbthrift_T&&>(opt_ref_type_const);
+  FOLLY_ERASE ::std::shared_ptr<const ::some::valid::ns::containerStruct>&& opt_ref_type_const_ref() && {
+    return static_cast<::std::shared_ptr<const ::some::valid::ns::containerStruct>&&>(opt_ref_type_const);
   }
 
   /** Glean { "field": "opt_ref_type_const" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& opt_ref_type_const_ref() const&& {
-    return static_cast<const fbthrift_T&&>(opt_ref_type_const);
+  FOLLY_ERASE const ::std::shared_ptr<const ::some::valid::ns::containerStruct>&& opt_ref_type_const_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::some::valid::ns::containerStruct>&&>(opt_ref_type_const);
   }
   /** Glean { "field": "opt_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T& opt_ref_type_unique_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>& opt_ref_type_unique_ref() & {
     return opt_ref_type_unique;
   }
 
   /** Glean { "field": "opt_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T& opt_ref_type_unique_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>& opt_ref_type_unique_ref() const& {
     return opt_ref_type_unique;
   }
 
   /** Glean { "field": "opt_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE fbthrift_T&& opt_ref_type_unique_ref() && {
-    return static_cast<fbthrift_T&&>(opt_ref_type_unique);
+  FOLLY_ERASE ::std::unique_ptr<::some::valid::ns::containerStruct>&& opt_ref_type_unique_ref() && {
+    return static_cast<::std::unique_ptr<::some::valid::ns::containerStruct>&&>(opt_ref_type_unique);
   }
 
   /** Glean { "field": "opt_ref_type_unique" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::some::valid::ns::containerStruct>>
-  FOLLY_ERASE const fbthrift_T&& opt_ref_type_unique_ref() const&& {
-    return static_cast<const fbthrift_T&&>(opt_ref_type_unique);
+  FOLLY_ERASE const ::std::unique_ptr<::some::valid::ns::containerStruct>&& opt_ref_type_unique_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::some::valid::ns::containerStruct>&&>(opt_ref_type_unique);
   }
   /** Glean { "field": "opt_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE fbthrift_T& opt_ref_type_shared_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<::std::set<::std::int32_t>>& opt_ref_type_shared_ref() & {
     return opt_ref_type_shared;
   }
 
   /** Glean { "field": "opt_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE const fbthrift_T& opt_ref_type_shared_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<::std::set<::std::int32_t>>& opt_ref_type_shared_ref() const& {
     return opt_ref_type_shared;
   }
 
   /** Glean { "field": "opt_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE fbthrift_T&& opt_ref_type_shared_ref() && {
-    return static_cast<fbthrift_T&&>(opt_ref_type_shared);
+  FOLLY_ERASE ::std::shared_ptr<::std::set<::std::int32_t>>&& opt_ref_type_shared_ref() && {
+    return static_cast<::std::shared_ptr<::std::set<::std::int32_t>>&&>(opt_ref_type_shared);
   }
 
   /** Glean { "field": "opt_ref_type_shared" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<::std::set<::std::int32_t>>>
-  FOLLY_ERASE const fbthrift_T&& opt_ref_type_shared_ref() const&& {
-    return static_cast<const fbthrift_T&&>(opt_ref_type_shared);
+  FOLLY_ERASE const ::std::shared_ptr<::std::set<::std::int32_t>>&& opt_ref_type_shared_ref() const&& {
+    return static_cast<const ::std::shared_ptr<::std::set<::std::int32_t>>&&>(opt_ref_type_shared);
   }
 
   /** Glean { "field": "base_type" } */

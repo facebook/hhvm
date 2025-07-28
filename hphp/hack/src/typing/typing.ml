@@ -3995,12 +3995,8 @@ end = struct
                     Tcan_index
                       {
                         ci_key = key_ty;
-                        ci_shape =
-                          (match e2 with
-                          | (_, _, Int i) -> IntLit (int_of_string i)
-                          | (_, _, String s) -> StringLit s
-                          | _ -> Generic);
                         ci_val = val_ty;
+                        ci_index_expr = e2;
                         ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
                         ci_expr_pos = p;
                         ci_array_pos = p1;

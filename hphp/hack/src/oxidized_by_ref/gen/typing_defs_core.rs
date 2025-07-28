@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd30293f05e036404e28e9d980a2b759>>
+// @generated SignedSource<<0800d9262b4b9ea13719c555cae84368>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1129,30 +1129,3 @@ pub enum TupleExtra<'a> {
 }
 impl<'a> TrivialDrop for TupleExtra<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TupleExtra<'arena>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving show")]
-#[repr(C, u8)]
-pub enum CanIndexShape<'a> {
-    IntLit(isize),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    StringLit(&'a str),
-    Generic,
-}
-impl<'a> TrivialDrop for CanIndexShape<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(CanIndexShape<'arena>);

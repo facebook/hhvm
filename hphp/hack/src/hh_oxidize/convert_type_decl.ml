@@ -230,6 +230,7 @@ end = struct
         "typing_defs_core::HasMember";
         "typing_defs_core::Destructure";
         "typing_defs_core::DestructureKind";
+        "typing_defs_core::CanIndex";
         "typing_defs_core::ConstraintType_";
         "typing_defs_core::ConstraintType";
         "typing_defs_core::InternalType";

@@ -1,0 +1,4 @@
+ERROR: File "shapes_cc_4.php", line 25, characters 44-45:
+No class constant `X3` in `X` (Typing[4090])
+  File "shapes_cc_4.php", line 14, characters 7-7:
+  Declaration of `X` is here

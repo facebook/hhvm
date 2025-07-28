@@ -404,8 +404,8 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
     method on_Tcan_index env r ci =
       let {
         ci_key;
-        ci_shape;
         ci_val;
+        ci_index_expr;
         ci_lhs_of_null_coalesce;
         ci_expr_pos;
         ci_array_pos;
@@ -418,8 +418,8 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let ci =
         {
           ci_key;
-          ci_shape;
           ci_val;
+          ci_index_expr;
           ci_lhs_of_null_coalesce;
           ci_expr_pos;
           ci_array_pos;

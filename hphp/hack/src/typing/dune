@@ -248,7 +248,6 @@
   typing_array_access
   typing_async
   typing_attributes
-  typing_class_pointers
   typing_debug
   typing_escape
   typing_expand
@@ -262,7 +261,6 @@
   typing_per_cont_ops
   typing_regex
   typing_sequencing
-  typing_shapes
   typing_structure
   typing_substring
   typing_try
@@ -364,6 +362,7 @@
   subtype_recursion_tracker
   typing_algebra
   typing_case_types
+  typing_class_pointers
   typing_coeffects
   typing_coercion
   typing_dynamic
@@ -383,6 +382,7 @@
   typing_return
   typing_solver
   typing_solver_utils
+  typing_shapes
   typing_subtype
   typing_subtype_tconst
   typing_taccess

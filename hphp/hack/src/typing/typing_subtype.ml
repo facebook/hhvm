@@ -6198,9 +6198,10 @@ end = struct
       in
       simplify_default ~subtype_env can_index.ci_key tk env
     in
-    let is_container tk tv env =
-      simplify_key tk env &&& simplify_default ~subtype_env tv can_index.ci_val
+    let simplify_val tv env =
+      simplify_default ~subtype_env tv can_index.ci_val env
     in
+    let is_container tk tv env = simplify_key tk env &&& simplify_val tv in
     let is_vec_like tv env =
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
@@ -6233,27 +6234,30 @@ end = struct
         env
     in
     let do_tuple_optional required optional variadic =
-      match can_index.ci_shape with
-      | IntLit i ->
-        (match List.nth required i with
-        | Some ty -> simplify_default ~subtype_env ty can_index.ci_val env
-        | None ->
-          let i = i - List.length required in
-          (match List.nth optional i with
-          | Some ty ->
-            if can_index.ci_lhs_of_null_coalesce then
-              simplify_default ~subtype_env ty can_index.ci_val env
-            else
-              tuple_oob env
+      match can_index.ci_index_expr with
+      | (_, _, Int i) ->
+        (match int_of_string_opt i with
+        | None -> tuple_oob env
+        | Some i ->
+          (match List.nth required i with
+          | Some ty -> simplify_val ty env
           | None ->
-            let i = i - List.length optional in
-            (match variadic with
+            let i = i - List.length required in
+            (match List.nth optional i with
             | Some ty ->
-              if can_index.ci_lhs_of_null_coalesce && i >= 0 then
-                simplify_default ~subtype_env ty can_index.ci_val env
+              if can_index.ci_lhs_of_null_coalesce then
+                simplify_val ty env
               else
                 tuple_oob env
-            | None -> tuple_oob env)))
+            | None ->
+              let i = i - List.length optional in
+              (match variadic with
+              | Some ty ->
+                if can_index.ci_lhs_of_null_coalesce && i >= 0 then
+                  simplify_val ty env
+                else
+                  tuple_oob env
+              | None -> tuple_oob env))))
       | _ ->
         invalid
           ~fail:
@@ -6269,18 +6273,40 @@ end = struct
     in
     let do_tuple_basic tup = do_tuple_optional tup [] None in
     let do_shape r { s_fields = fdm; s_origin; s_unknown_value = _ } =
-      match can_index.ci_shape with
-      | StringLit s ->
-        let decl_pos =
-          match s_origin with
-          | From_alias (_, Some pos) -> pos
-          | _ -> Reason.to_pos r
+      let (_, p, _) = can_index.ci_index_expr in
+      Typing_shapes.do_with_field_expr
+        env
+        can_index.ci_index_expr
+        ~with_error:
+          ((* there was already an error in shape_field name,
+              don't report another one for a missing field *)
+           valid
+             env)
+      @@ fun field ->
+      if can_index.ci_lhs_of_null_coalesce then
+        (* The expression $s['x'] ?? $y is semantically equivalent to
+           Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
+           the left of a coalesce operator, then for type checking it
+           can be treated as if it evaluated to null instead of
+           throwing an exception if the field 'x' doesn't exist in $s.
+        *)
+        let (env, ty) =
+          Typing_shapes.idx_without_default
+            env
+            ty_sub
+            field
+            ~expr_pos:can_index.ci_expr_pos
+            ~shape_pos:can_index.ci_array_pos
         in
-        let field = TSFlit_str (decl_pos, s) in
-        (match TShapeMap.find_opt field fdm with
-        | Some { sft_optional = _; sft_ty = ty } ->
-          simplify_default ~subtype_env ty can_index.ci_val env
+        simplify_val ty env
+      else
+        match TShapeMap.find_opt field fdm with
         | None ->
+          let decl_pos =
+            match s_origin with
+            | From_alias (_, Some pos) -> pos
+            | _ -> Reason.to_pos r
+          in
           invalid
             ~fail:
               (Some
@@ -6288,20 +6314,35 @@ end = struct
                    primary
                    @@ Primary.Undefined_field
                         {
-                          pos = can_index.ci_index_pos;
+                          pos = p;
                           name = TUtils.get_printable_shape_field_name field;
                           decl_pos;
                         }))
-            env)
-      | _ ->
-        invalid
-          ~fail:
-            (Some
-               Typing_error.(
-                 shape
-                 @@ Primary.Shape.Invalid_shape_field_name
-                      { pos = can_index.ci_index_pos; is_empty = false }))
-          env
+            env
+        | Some { sft_optional; sft_ty } ->
+          if sft_optional then
+            let declared_field =
+              List.find_exn
+                ~f:(fun x -> TShapeField.equal field x)
+                (TShapeMap.keys fdm)
+            in
+            invalid
+              ~fail:
+                (Some
+                   Typing_error.(
+                     primary
+                     @@ Primary.Array_get_with_optional_field
+                          {
+                            recv_pos = can_index.ci_array_pos;
+                            field_pos = p;
+                            field_name =
+                              TUtils.get_printable_shape_field_name field;
+                            decl_pos =
+                              Typing_defs.TShapeField.pos declared_field;
+                          }))
+              env
+          else
+            simplify_val sft_ty env
     in
     match deref ty_sub with
     | (_, Tvar _) ->

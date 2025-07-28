@@ -643,22 +643,13 @@ type destructure = {
 [@@deriving show]
 
 (* A can_index constraint represents the ability to do an array index operation.
- * We should have t <: { ci_key; ci_shape; ci_val } when t is a type that supports
- * being index with a value of type ci_key, and will return a value of ci_val. The
- * ci_shape field is necessary because shapes (and tuples) are required to be
- * indexed with certain literals, and so in those cases it is not sufficient to
- * record simply the type of the index.
+ * We should have t <: { ci_key; ci_val; _ } when t is a type that supports
+ * being index with a value of type ci_key, and will return a value of ci_val.
  *)
-type can_index_shape =
-  | IntLit of int
-  | StringLit of string
-  | Generic
-[@@deriving show]
-
 type can_index = {
   ci_key: locl_ty;
-  ci_shape: can_index_shape;
   ci_val: locl_ty;
+  ci_index_expr: Nast.expr;
   ci_lhs_of_null_coalesce: bool;
   ci_expr_pos: Pos.t;
   ci_array_pos: Pos.t;

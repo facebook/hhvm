@@ -651,21 +651,8 @@ module Full = struct
     let (fuel, key_doc) = k ~fuel ci.ci_key in
     let (fuel, val_doc) = k ~fuel ci.ci_val in
     ( fuel,
-      match ci.ci_shape with
-      | Generic ->
-        Concat
-          [text "can_index"; text "("; key_doc; comma_sep; val_doc; text ")"]
-      | _ ->
-        Concat
-          [
-            text "can_index";
-            text "(";
-            key_doc;
-            text "(shape_field)";
-            comma_sep;
-            val_doc;
-            text ")";
-          ] )
+      Concat [text "can_index"; text "("; key_doc; comma_sep; val_doc; text ")"]
+    )
 
   let tcan_traverse ~fuel k ct =
     match ct.ct_key with

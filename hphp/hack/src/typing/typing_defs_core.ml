@@ -1429,16 +1429,10 @@ type has_member = {
 }
 [@@deriving show]
 
-type can_index_shape =
-  | IntLit of int
-  | StringLit of string
-  | Generic
-[@@deriving show]
-
 type can_index = {
   ci_key: locl_ty;
-  ci_shape: can_index_shape;
   ci_val: locl_ty;
+  ci_index_expr: Nast.expr;
   ci_lhs_of_null_coalesce: bool;
   ci_expr_pos: Pos.t;
   ci_array_pos: Pos.t;
@@ -1562,23 +1556,24 @@ let has_member_compare ~normalize_lists hm1 hm2 =
           chain_compare (class_id_compare cid1 cid2) (fun _ ->
               Option.compare (List.compare targ_compare) targs1 targs2)))
 
-let can_index_shape_compare cis1 cis2 =
-  match (cis1, cis2) with
-  | (IntLit i1, IntLit i2) -> Int.compare i1 i2
-  | (IntLit _, _) -> -1
-  | (_, IntLit _) -> 1
-  | (StringLit s1, StringLit s2) -> String.compare s1 s2
-  | (StringLit _, _) -> -1
-  | (_, StringLit _) -> 1
-  | (Generic, Generic) -> 0
-
 let can_index_compare ~normalize_lists ci1 ci2 =
-  match ty_compare ~normalize_lists ci1.ci_key ci2.ci_key with
-  | 0 ->
-    (match ty_compare ~normalize_lists ci1.ci_val ci2.ci_val with
-    | 0 -> can_index_shape_compare ci1.ci_shape ci2.ci_shape
-    | comp -> comp)
-  | comp -> comp
+  (* not comparing the ast because it is decided by expr_pos *)
+  chain_compare (ty_compare ~normalize_lists ci1.ci_key ci2.ci_key) (fun _ ->
+      chain_compare
+        (ty_compare ~normalize_lists ci1.ci_val ci2.ci_val)
+        (fun _ ->
+          chain_compare
+            (Bool.compare
+               ci1.ci_lhs_of_null_coalesce
+               ci2.ci_lhs_of_null_coalesce)
+            (fun _ ->
+              chain_compare
+                (Aast.compare_pos ci1.ci_expr_pos ci2.ci_expr_pos)
+                (fun _ ->
+                  chain_compare
+                    (Aast.compare_pos ci1.ci_array_pos ci2.ci_array_pos)
+                    (fun _ ->
+                      Aast.compare_pos ci1.ci_index_pos ci2.ci_index_pos)))))
 
 let can_traverse_compare ~normalize_lists ct1 ct2 =
   chain_compare

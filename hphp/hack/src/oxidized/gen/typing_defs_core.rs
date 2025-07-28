@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bde68601b3f5637330eb0d668b49a7ad>>
+// @generated SignedSource<<7e5c7a8b100acae4b22f00056bc313b5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1149,30 +1149,6 @@ pub struct HasMember {
     Debug,
     Deserialize,
     Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving show")]
-#[repr(C, u8)]
-pub enum CanIndexShape {
-    IntLit(isize),
-    StringLit(String),
-    Generic,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -1187,8 +1163,8 @@ pub enum CanIndexShape {
 #[repr(C)]
 pub struct CanIndex {
     pub key: Ty,
-    pub shape: CanIndexShape,
     pub val: Ty,
+    pub index_expr: nast::Expr,
     pub lhs_of_null_coalesce: bool,
     pub expr_pos: pos::Pos,
     pub array_pos: pos::Pos,

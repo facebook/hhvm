@@ -1,2 +1,4 @@
 ERROR: File "shape_bad_index.php", line 3, characters 19-19:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+This shape doesn't have a field `0` (Typing[4108])
+  File "shape_bad_index.php", line 4, characters 6-20:
+  The shape is defined here

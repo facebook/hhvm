@@ -8,7 +8,6 @@
 #include "BigValueRoute.h"
 
 #include <folly/Format.h>
-#include <folly/fibers/WhenN.h>
 
 #include "mcrouter/lib/fbi/cpp/ParsingUtil.h"
 

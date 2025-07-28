@@ -16,7 +16,6 @@
 #include "mcrouter/CarbonRouterFactory.h"
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/routes/CarbonLookasideRoute.h"
-#include "mcrouter/routes/McrouterRouteHandle.h"
 
 namespace facebook {
 namespace memcache {

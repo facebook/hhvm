@@ -150,8 +150,9 @@ class QMINScheme : public CompressionScheme {
       TAILQ_REMOVE(&stream->sm_chunks, chunk, sc_next);
       stream->sm_read_off += chunk->sc_sz;
       return chunk;
-    } else
+    } else {
       return nullptr;
+    }
   }
 
   explicit QMINScheme(CompressionSimulator *sim, uint32_t /*tableSize*/)
@@ -309,8 +310,9 @@ class QMINScheme : public CompressionScheme {
              sizeof(qms_ctl[0].write_off));
       qms_ctl[0].write_off += ctl_msg_sz;
       ctl_msg_sz_with_off = ctl_msg_sz + sizeof(qms_ctl[0].write_off);
-    } else
+    } else {
       ctl_msg_sz_with_off = 0;
+    }
     memcpy(outbuf + max_ctl - ctl_msg_sz_with_off - sizeof(ctl_msg_sz),
            &ctl_msg_sz,
            sizeof(ctl_msg_sz));

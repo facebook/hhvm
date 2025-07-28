@@ -6198,17 +6198,26 @@ end = struct
       in
       simplify_default ~subtype_env can_index.ci_key tk env
     in
-    let is_container tk tv =
+    let is_container tk tv env =
       simplify_key tk env &&& simplify_default ~subtype_env tv can_index.ci_val
     in
-    let is_vec_like tv =
+    let is_vec_like tv env =
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
-      is_container tk tv
+      is_container tk tv env
     in
-    let is_dict_like tv =
+    let is_dict_like tv env =
       let tk = MakeType.arraykey (Reason.idx_dict can_index.ci_array_pos) in
-      is_container tk tv
+      is_container tk tv env
+    in
+    let pessimise_type env ty =
+      Typing_union.union env ty (MakeType.dynamic (get_reason ty))
+    in
+    let maybe_pessimise_type env ty =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        pessimise_type env ty
+      else
+        (env, ty)
     in
     let tuple_oob env =
       invalid
@@ -6332,29 +6341,35 @@ end = struct
            || String.equal n SN.Collections.cMap
            || String.equal n SN.Collections.cMutableMap
            || String.equal n SN.Collections.cAnyArray ->
-      is_container tk tv
+      let (env, tv) = maybe_pessimise_type env tv in
+      is_container tk tv env
+    | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVec ->
+      is_vec_like tv env
     | (_, Tclass ((_, n), _, [tv]))
-      when String.equal n SN.Collections.cVec
-           || String.equal n SN.Collections.cImmVector
+      when String.equal n SN.Collections.cImmVector
            || String.equal n SN.Collections.cConstVector
            || String.equal n SN.Collections.cVector
            || String.equal n SN.Collections.cMutableVector ->
-      is_vec_like tv
+      let (env, tv) = maybe_pessimise_type env tv in
+      is_vec_like tv env
     (* dict and keyset are covariant in the key type, so subsumption
      * lets you upcast the key type beyond ty2 to arraykey.
      *)
     | (_, Tclass ((_, n), _, [_; tv])) when String.equal n SN.Collections.cDict
       ->
-      is_dict_like tv
+      is_dict_like tv env
     | (_, Tclass ((_, n), _, [tkv])) when String.equal n SN.Collections.cKeyset
       ->
-      is_dict_like tkv
-    | (_, Tvec_or_dict (_, tv)) -> is_dict_like tv
+      is_dict_like tkv env
+    | (_, Tvec_or_dict (_, tv)) ->
+      let (env, tv) = maybe_pessimise_type env tv in
+      is_dict_like tv env
     | (_, Tprim Tstring) ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
-      is_container tk tv
+      let (env, tv) = maybe_pessimise_type env tv in
+      is_container tk tv env
     | (r, Tprim Tnull) ->
       let pos = get_pos ty_sub in
       if can_index.ci_lhs_of_null_coalesce then

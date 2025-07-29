@@ -94,7 +94,7 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
   if (isEbMethod && !isFactoryFunction) {
     auto tile = folly::makeTryWith([&] {
       return nullthrows(createInteractionImpl(
-          std::move(*interactionCreate->interactionName_ref()).str(),
+          std::move(*interactionCreate->interactionName()).str(),
           reqCtx->getHeader()->getProtocolId()));
     });
     if (tile.hasException()) {
@@ -134,7 +134,7 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
           std::exception_ptr ex;
           try {
             auto tilePtr = nullthrows(createInteractionImpl(
-                std::move(*interactionCreate->interactionName_ref()).str(),
+                std::move(*interactionCreate->interactionName()).str(),
                 reqCtx->getHeader()->getProtocolId()));
             eb.add([=, &conn, &eb, t = std::move(tilePtr)]() mutable {
               TilePtr tile{t.release(), &eb};
@@ -391,7 +391,7 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(ServerRequest& req) {
   if (auto interactionId = ctx->getInteractionId()) {
     if (auto interactionCreate = ctx->getInteractionCreate()) {
       if (!interactionName ||
-          *interactionCreate->interactionName_ref() !=
+          *interactionCreate->interactionName() !=
               std::string_view(interactionName.value())) {
         interactionMetadataValid = false;
       } else if (!createInteraction(req)) {
@@ -455,12 +455,12 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(
   bool interactionMetadataValid;
   if (auto interactionId = ctx->getInteractionId()) {
     if (auto interactionCreate = ctx->getInteractionCreate()) {
-      if (*interactionCreate->interactionName_ref() != interaction) {
+      if (*interactionCreate->interactionName() != interaction) {
         interactionMetadataValid = false;
       } else if (!createInteraction(
                      req,
                      interactionId,
-                     std::move(*interactionCreate->interactionName_ref()).str(),
+                     std::move(*interactionCreate->interactionName()).str(),
                      *ctx,
                      tm,
                      *eb,

@@ -138,7 +138,7 @@ folly::Try<FirstResponsePayload> decodeResponseError(
   folly::Optional<std::string> exCode;
   TApplicationException::TApplicationExceptionType exType{
       TApplicationException::UNKNOWN};
-  switch (responseError.code_ref().value_or(ResponseRpcErrorCode::UNKNOWN)) {
+  switch (responseError.code().value_or(ResponseRpcErrorCode::UNKNOWN)) {
     case ResponseRpcErrorCode::OVERLOAD:
       exCode = kOverloadedErrorCode;
       exType = TApplicationException::LOADSHEDDING;
@@ -224,15 +224,15 @@ folly::Try<FirstResponsePayload> decodeResponseError(
 
   ResponseRpcMetadata metadata;
   if (exCode) {
-    metadata.otherMetadata_ref().emplace();
-    (*metadata.otherMetadata_ref())[detail::kHeaderEx] = *exCode;
+    metadata.otherMetadata().emplace();
+    (*metadata.otherMetadata())[detail::kHeaderEx] = *exCode;
   }
-  if (auto loadRef = responseError.load_ref()) {
-    metadata.load_ref() = *loadRef;
+  if (auto loadRef = responseError.load()) {
+    metadata.load() = *loadRef;
   }
   return folly::Try<FirstResponsePayload>(FirstResponsePayload(
       handler.handleException(TApplicationException(
-          exType, responseError.what_utf8_ref().value_or(""))),
+          exType, responseError.what_utf8().value_or(""))),
       std::move(metadata)));
 }
 
@@ -243,9 +243,9 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
     std::unique_ptr<folly::IOBuf>& payload,
     Handler& handler) {
   (void)protocolId;
-  if (auto payloadMetadataRef = metadata.payloadMetadata_ref()) {
+  if (auto payloadMetadataRef = metadata.payloadMetadata()) {
     const auto isProxiedResponse =
-        metadata.proxiedPayloadMetadata_ref().has_value();
+        metadata.proxiedPayloadMetadata().has_value();
 
     switch (payloadMetadataRef->getType()) {
       case PayloadMetadata::Type::responseMetadata:
@@ -254,13 +254,13 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
       case PayloadMetadata::Type::exceptionMetadata: {
         auto& exceptionMetadataBase =
             payloadMetadataRef->get_exceptionMetadata();
-        auto otherMetadataRef = metadata.otherMetadata_ref();
+        auto otherMetadataRef = metadata.otherMetadata();
         if (!otherMetadataRef) {
           otherMetadataRef.emplace();
         }
-        auto exceptionNameRef = exceptionMetadataBase.name_utf8_ref();
-        auto exceptionWhatRef = exceptionMetadataBase.what_utf8_ref();
-        if (auto exceptionMetadataRef = exceptionMetadataBase.metadata_ref()) {
+        auto exceptionNameRef = exceptionMetadataBase.name_utf8();
+        auto exceptionWhatRef = exceptionMetadataBase.what_utf8();
+        if (auto exceptionMetadataRef = exceptionMetadataBase.metadata()) {
           auto metaType = exceptionMetadataRef->getType();
           switch (metaType) {
             case PayloadExceptionMetadata::Type::declaredException:
@@ -276,8 +276,8 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
                                        : detail::kHeaderUexw] =
                         *exceptionWhatRef;
               }
-              if (auto dExClass = exceptionMetadataRef->declaredException_ref()
-                                      ->errorClassification_ref()) {
+              if (auto dExClass = exceptionMetadataRef->declaredException()
+                                      ->errorClassification()) {
                 auto metaStr =
                     apache::thrift::detail::serializeErrorClassification(
                         *dExClass);
@@ -309,28 +309,25 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
                     folly::exceptionStr(folly::current_exception())
                         .toStdString());
               }
-              if (*anyException.protocol_ref() == type::kNoProtocol) {
-                anyException.protocol_ref() =
+              if (*anyException.protocol() == type::kNoProtocol) {
+                anyException.protocol() =
                     protocolId == protocol::T_COMPACT_PROTOCOL
                     ? type::Protocol::get<type::StandardProtocol::Compact>()
                     : type::Protocol::get<type::StandardProtocol::Binary>();
               }
-              auto exceptionTypeRef = anyException.type_ref()
-                                          ->toThrift()
-                                          .name_ref()
-                                          ->exceptionType_ref();
-              if (exceptionTypeRef && exceptionTypeRef->uri_ref() &&
-                  anyException.protocol_ref() ==
+              auto exceptionTypeRef =
+                  anyException.type()->toThrift().name()->exceptionType();
+              if (exceptionTypeRef && exceptionTypeRef->uri() &&
+                  anyException.protocol() ==
                       type::Protocol::get<type::StandardProtocol::Compact>()) {
                 (*otherMetadataRef)
                     [isProxiedResponse ? detail::kHeaderProxiedAnyexType
                                        : detail::kHeaderAnyexType] =
-                        *exceptionTypeRef->uri_ref();
+                        *exceptionTypeRef->uri();
                 (*otherMetadataRef)
                     [isProxiedResponse ? detail::kHeaderProxiedAnyex
                                        : detail::kHeaderAnyex] =
-                        protocol::base64Encode(
-                            anyException.data_ref()->coalesce());
+                        protocol::base64Encode(anyException.data()->coalesce());
               }
               payload = handler.handleException(
                   TApplicationException(exceptionWhatRef.value_or("")));
@@ -340,10 +337,9 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
             default:
               switch (metaType) {
                 case PayloadExceptionMetadata::Type::appUnknownException:
-                  if (auto ec = exceptionMetadataRef->appUnknownException_ref()
-                                    ->errorClassification_ref()) {
-                    if (ec->blame_ref() &&
-                        *ec->blame_ref() == ErrorBlame::CLIENT) {
+                  if (auto ec = exceptionMetadataRef->appUnknownException()
+                                    ->errorClassification()) {
+                    if (ec->blame() && *ec->blame() == ErrorBlame::CLIENT) {
                       (*otherMetadataRef)
                           [isProxiedResponse ? detail::kHeaderProxiedEx
                                              : detail::kHeaderEx] =
@@ -675,10 +671,10 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       tHeader->fds = std::move(tryFds->dcheckReceivedOrEmpty());
     }
     if (THRIFT_FLAG(rocket_client_enable_bidirectional_propagation)) {
-      auto otherMetadata = response->metadata.otherMetadata_ref();
+      auto otherMetadata = response->metadata.otherMetadata();
       if (!otherMetadata ||
           !detail::ingestFrameworkMetadataOnResponseHeader(*otherMetadata)) {
-        if (auto tfmr = response->metadata.frameworkMetadata_ref()) {
+        if (auto tfmr = response->metadata.frameworkMetadata()) {
           detail::ingestFrameworkMetadataOnResponse(std::move(*tfmr));
         }
       }
@@ -728,32 +724,31 @@ class RocketClientChannel::SingleRequestNoResponseCallback final
 
 RequestSetupMetadata RocketClientChannel::populateSetupMetadata(
     RequestSetupMetadata&& meta) {
-  meta.maxVersion_ref() =
+  meta.maxVersion() =
       std::min(kRocketClientMaxVersion, THRIFT_FLAG(rocket_client_max_version));
-  meta.minVersion_ref() = kRocketClientMinVersion;
-  auto& clientMetadata = meta.clientMetadata_ref().ensure();
+  meta.minVersion() = kRocketClientMinVersion;
+  auto& clientMetadata = meta.clientMetadata().ensure();
 
   if (const auto& hostMetadata = ClientChannel::getHostMetadata()) {
     // TODO: verify if we can avoid overriding hostname blindly
     // here.
-    clientMetadata.hostname_ref().from_optional(hostMetadata->hostname);
+    clientMetadata.hostname().from_optional(hostMetadata->hostname);
     // no otherMetadata provided in populateSetupMetadata override, copy
     // hostMetadata.otherMetadata directly instead of doing inserts
     if (!apache::thrift::get_pointer(clientMetadata.otherMetadata())) {
-      clientMetadata.otherMetadata_ref().from_optional(
-          hostMetadata->otherMetadata);
+      clientMetadata.otherMetadata().from_optional(hostMetadata->otherMetadata);
     } else if (hostMetadata->otherMetadata) {
-      DCHECK(clientMetadata.otherMetadata_ref());
+      DCHECK(clientMetadata.otherMetadata());
       // append values from hostMetadata.otherMetadata to
       // clientMetadata.otherMetadata
-      clientMetadata.otherMetadata_ref()->insert(
+      clientMetadata.otherMetadata()->insert(
           hostMetadata->otherMetadata->begin(),
           hostMetadata->otherMetadata->end());
     }
   }
 
-  if (!clientMetadata.agent_ref()) {
-    clientMetadata.agent_ref() = "RocketClientChannel.cpp";
+  if (!clientMetadata.agent()) {
+    clientMetadata.agent() = "RocketClientChannel.cpp";
   }
 
   return meta;
@@ -876,7 +871,7 @@ void RocketClientChannel::sendRequestStream(
       rpcOptions.getChunkBufferSize(),
       new FirstRequestProcessorStream(
           header->getProtocolId(),
-          std::move(*metadata.name_ref()),
+          std::move(*metadata.name()),
           clientCallback,
           evb_,
           DestructionGuardedClient(this)));
@@ -920,7 +915,7 @@ void RocketClientChannel::sendRequestSink(
       firstResponseTimeout.value_or(std::chrono::milliseconds(0)),
       new FirstRequestProcessorSink(
           header->getProtocolId(),
-          std::move(*metadata.name_ref()),
+          std::move(*metadata.name()),
           clientCallback,
           evb_,
           DestructionGuardedClient(this)),
@@ -1031,8 +1026,8 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
   const bool isSync = cb->isSync() || rpcOptions.getForceSyncOnFiber();
   SingleRequestSingleResponseCallback callback(
       std::move(cb),
-      static_cast<uint16_t>(*metadata.protocol_ref()),
-      std::move(*metadata.name_ref()),
+      static_cast<uint16_t>(*metadata.protocol()),
+      std::move(*metadata.name()),
       requestSerializedSize,
       requestWireSize,
       requestMetadataAndPayloadSize,
@@ -1109,8 +1104,8 @@ RocketClientChannel::getInteractionHandle(const RpcOptions& rpcOptions) {
     evb_->dcheckIsInEventBaseThread();
     if (auto* name = folly::get_ptr(pendingInteractions_, interactionId)) {
       InteractionCreate create;
-      create.interactionId_ref() = interactionId;
-      create.interactionName_ref() = std::move(*name).str();
+      create.interactionId() = interactionId;
+      create.interactionName() = std::move(*name).str();
       pendingInteractions_.erase(interactionId);
       return create;
     } else {

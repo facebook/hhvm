@@ -225,7 +225,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
 
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef: {
-        SerializableStructDefinition& structDef = *def.structDef_ref();
+        SerializableStructDefinition& structDef = *def.structDef();
         StructNode& structNode = std::get<StructNode>(uninitDef);
         structNode = StructNode(
             uri,
@@ -239,7 +239,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
         }
       } break;
       case SerializableTypeDefinition::Type::unionDef: {
-        SerializableUnionDefinition& unionDef = *def.unionDef_ref();
+        SerializableUnionDefinition& unionDef = *def.unionDef();
         UnionNode& unionNode = std::get<UnionNode>(uninitDef);
         unionNode = UnionNode(
             uri,
@@ -253,7 +253,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
         }
       } break;
       case SerializableTypeDefinition::Type::enumDef: {
-        SerializableEnumDefinition& enumDef = *def.enumDef_ref();
+        SerializableEnumDefinition& enumDef = *def.enumDef();
         std::vector<EnumNode::Value> values;
         values.reserve(enumDef.values()->size());
         for (SerializableEnumValueDefinition& mapping : *enumDef.values()) {
@@ -275,7 +275,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
       } break;
       case SerializableTypeDefinition::Type::opaqueAliasDef: {
         SerializableOpaqueAliasDefinition& opaqueAliasDef =
-            *def.opaqueAliasDef_ref();
+            *def.opaqueAliasDef();
         OpaqueAliasNode& opaqueAliasNode = std::get<OpaqueAliasNode>(uninitDef);
         opaqueAliasNode = OpaqueAliasNode(
             uri,
@@ -434,17 +434,16 @@ void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
         entry.sourceInfo().to_optional();
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef:
-        addType(uri, std::move(*def.structDef_ref()), std::move(sourceInfo));
+        addType(uri, std::move(*def.structDef()), std::move(sourceInfo));
         break;
       case SerializableTypeDefinition::Type::unionDef:
-        addType(uri, std::move(*def.unionDef_ref()), std::move(sourceInfo));
+        addType(uri, std::move(*def.unionDef()), std::move(sourceInfo));
         break;
       case SerializableTypeDefinition::Type::enumDef:
-        addType(uri, std::move(*def.enumDef_ref()), std::move(sourceInfo));
+        addType(uri, std::move(*def.enumDef()), std::move(sourceInfo));
         break;
       case SerializableTypeDefinition::Type::opaqueAliasDef:
-        addType(
-            uri, std::move(*def.opaqueAliasDef_ref()), std::move(sourceInfo));
+        addType(uri, std::move(*def.opaqueAliasDef()), std::move(sourceInfo));
         break;
       default:
         folly::assume_unreachable();

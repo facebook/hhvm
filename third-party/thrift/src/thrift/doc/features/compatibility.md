@@ -80,7 +80,7 @@ The incompatible field will be dropped during deserialization. There will be tem
 
 ### **How to avoid incompatible versions**
 
-Instead of modifying the name/id and type, it's recommanded to
+Instead of modifying the name/id and type, it's recommended to
 
 1. Create a new field with desired name/id and type
 2. Modify writer to write to both field
@@ -94,7 +94,7 @@ struct Foo {
   1: i32 field;
 }
 ```
-We want to change type of `Foo.field` from `i32` to `i64`. If we change it directly, deserializer will drop this field due to type mismatches. To avoid this problem, it's recommanded to create a new field first, then double writes the data to both field before deleting the old field.
+We want to change type of `Foo.field` from `i32` to `i64`. If we change it directly, deserializer will drop this field due to type mismatches. To avoid this problem, it's recommended to create a new field first, then double writes the data to both field before deleting the old field.
 
 ```
 struct Foo {

@@ -13,6 +13,7 @@ from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
@@ -2393,7 +2394,7 @@ constEnumUnion = MyUnion(myEnum=MyEnum.MyValue2)
 stringTypedef = str
 longTypeDef = int
 mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
-listTypedef = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_double)
+listTypedef = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_double)
 floatTypedef = float
 FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
 binary_4918 = bytes

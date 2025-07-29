@@ -21,7 +21,15 @@ from typing import cast
 
 from python_test.containers.thrift_mutable_types import Foo, Lists
 
-from thrift.python.mutable_containers import MutableList
+from python_test.lists.thrift_mutable_types import (
+    easy,
+    EasyList,
+    I32List,
+    ListOfStrToI32Map,
+    StrList2D,
+)
+
+from thrift.python.mutable_containers import MutableList, MutableMap
 
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
 from thrift.python.mutable_types import to_thrift_list
@@ -476,3 +484,128 @@ class MutableListNestedTest(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "not in list"):
             _ = mutable_list.index([3])
+
+
+class MutableListTypedefTest(unittest.TestCase):
+    TYPE_ERROR_MESSAGE = (
+        "Expected values to be an instance of Thrift mutable list with matching "
+        r"element type, or the result of `to_thrift_list\(\)`, but got type "
+        r"<class '(list|int)'>."
+    )
+
+    def test_list_i32(self) -> None:
+        """
+        typedef list<i32> I32List
+        """
+        # Mutable container typedef should be initialized with the same mutable
+        # container type, or it should be wrapped with `to_thrift_list()`.
+        # Otherwise, it will result in both runtime and Pyre errors.
+        with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
+            # pyre-ignore[6]: Intentional for test
+            _ = I32List([1, 2, 3])
+
+        # Initialize with `to_thrift_python()` and verify that the initial
+        # Python list `lst` and the MutableList `i32list` are separate lists.
+        lst = [1, 2, 3]
+        i32list: MutableList[int] = I32List(to_thrift_list(lst))
+        self.assertEqual([1, 2, 3], i32list)
+
+        lst[0] = 11
+        self.assertEqual([11, 2, 3], lst)
+        self.assertEqual([1, 2, 3], i32list)
+
+    def test_str_list_2d(self) -> None:
+        """
+        typedef list<list<string>> StrList2D
+        """
+        # Mutable container typedef should be initialized with the same mutable
+        # container type, or it should be wrapped with `to_thrift_list()`.
+        # Otherwise, it will result in both runtime and Pyre errors.
+        with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
+            # pyre-ignore[6]: Intentional for test
+            _ = StrList2D([["a", "b"], ["c", "d"]])
+
+        # Initialize with `to_thrift_python()` and verify that the initial
+        # Python list `lst` and the MutableList `strlist2d` are separate lists.
+        lst = [["a", "b"], ["c", "d"]]
+        strlist2d: MutableList[MutableList[str]] = StrList2D(to_thrift_list(lst))
+        self.assertEqual([["a", "b"], ["c", "d"]], strlist2d)
+
+        lst[0][0] = "A"
+        self.assertEqual([["A", "b"], ["c", "d"]], lst)
+        self.assertEqual([["a", "b"], ["c", "d"]], strlist2d)
+
+    def test_init_typedef_with_same_type(self) -> None:
+        """
+        typedef list<list<string>> StrList2D
+        """
+        # Initializing the typedef container with the same mutable container
+        # carries reference semantics.
+        strlist2d_1 = StrList2D(to_thrift_list([["a"], ["c"]]))
+        strlist2d_2 = StrList2D(strlist2d_1)
+
+        self.assertEqual(strlist2d_1, strlist2d_2)
+        strlist2d_1[0].append("b")
+        self.assertEqual([["a", "b"], ["c"]], strlist2d_1)
+        self.assertEqual(strlist2d_1, strlist2d_2)
+
+        strlist2d_2[1].append("d")
+        self.assertEqual([["a", "b"], ["c", "d"]], strlist2d_2)
+        self.assertEqual(strlist2d_1, strlist2d_2)
+
+    def test_str_list_of_str_to_i32_map(self) -> None:
+        """
+        typedef list<map<string, i32>> ListOfStrToI32Map
+        """
+        # Mutable container typedef should be initialized with the same mutable
+        # container type, or it should be wrapped with `to_thrift_list()`.
+        # Otherwise, it will result in both runtime and Pyre errors.
+        with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
+            # pyre-ignore[6]: Intentional for test
+            _ = ListOfStrToI32Map([{"a": 1, "b": 2}])
+
+        lst = [{"a": 1, "b": 2}]
+        strlist2d: MutableList[MutableMap[str, int]] = ListOfStrToI32Map(
+            to_thrift_list(lst)
+        )
+        self.assertEqual([{"a": 1, "b": 2}], strlist2d)
+
+    def test_easy_list(self) -> None:
+        """
+        struct easy {
+            3: optional string name;
+            1: i32 val;
+            ...
+        }
+        typedef list<easy> EasyList
+        """
+        # If the elements are structured types, `to_thrift_list()` does not
+        # deep-copy them; they carry reference semantics.
+        lst = [easy(val=1), easy(val=2), easy(val=3)]
+        easylist: MutableList[easy] = EasyList(to_thrift_list(lst))
+        self.assertIs(lst[0], easylist[0])
+        self.assertIs(lst[1], easylist[1])
+        self.assertIs(lst[2], easylist[2])
+        self.assertEqual(lst, easylist)
+
+        # The elements are the "same" but the containers are different.
+        # Popping from one container does not affect the other.
+        lst.pop()
+        self.assertNotEqual(lst, easylist)
+
+    def test_default_init_and_populate(self) -> None:
+        """
+        typedef list<i32> I32List
+        """
+        i32list: MutableList[int] = I32List(to_thrift_list([]))
+        self.assertEqual([], i32list)
+        i32list.append(1)
+        self.assertEqual([1], i32list)
+        i32list.append(2)
+        self.assertEqual([1, 2], i32list)
+
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            # pyre-ignore[6]: Intentional for test
+            i32list.append("Not an integer")

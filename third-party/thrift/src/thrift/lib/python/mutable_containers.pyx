@@ -29,7 +29,10 @@ from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
 import copy
 import itertools
 
-from thrift.python.mutable_typeinfos cimport MutableStructTypeInfo
+from thrift.python.mutable_typeinfos cimport (
+    MutableListTypeInfo,
+    MutableStructTypeInfo,
+)
 from thrift.python.mutable_types cimport _ThriftContainerWrapper
 from thrift.python.types cimport (
     TypeInfoBase,
@@ -37,6 +40,21 @@ from thrift.python.types cimport (
     list_eq,
     list_lt,
 )
+
+
+@_cython__final
+cdef class MutableListTypeFactory:
+    cdef TypeInfoBase value_typeinfo
+    def __init__(self, value_typeinfo):
+        self.value_typeinfo = value_typeinfo
+
+    def __call__(self, values=None):
+        if values is None:
+            return MutableList(self.value_typeinfo, [])
+
+        list_typeinfo = MutableListTypeInfo(self.value_typeinfo)
+        internal_data = list_typeinfo.to_internal_data(values)
+        return MutableList(self.value_typeinfo, internal_data)
 
 
 @_cython__final

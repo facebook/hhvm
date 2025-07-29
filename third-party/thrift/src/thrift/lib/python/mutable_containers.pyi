@@ -47,11 +47,14 @@ from thrift.python.mutable_types import (
 T = TypeVar("T")
 
 class MutableList(MutableSequence[T]):
+    @overload
     def __init__(
         self,
         typeinfo: object,
         list_data: List[T],
     ) -> None: ...
+    @overload
+    def __init__(self, init_data: MutableList[T] | _ThriftListWrapper) -> None: ...
     def __len__(self) -> int: ...
     @overload
     def __getitem__(self, index: int) -> T: ...

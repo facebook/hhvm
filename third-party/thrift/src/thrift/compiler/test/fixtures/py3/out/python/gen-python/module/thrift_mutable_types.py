@@ -15,6 +15,7 @@ from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.mutable_types as _fbthrift_python_mutable_types
+import fbcode.thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import fbcode.thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import fbcode.thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
@@ -1236,7 +1237,7 @@ CustomInteger = int
 CustomDouble = float
 CustomString = str
 CustomBinary = bytes
-CustomList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
+CustomList = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 CustomStruct = _fbthrift_SimpleStruct
@@ -1245,7 +1246,7 @@ AdaptedInteger = int
 AdaptedDouble = float
 AdaptedString = str
 AdaptedBinary = bytes
-AdaptedList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
+AdaptedList = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 AdaptedStruct = _fbthrift_SimpleStruct

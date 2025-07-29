@@ -34,6 +34,7 @@ typedef list<i32> I32List
 typedef list<easy> EasyList
 typedef list<string> StringList
 typedef list<list<string>> StrList2D
+typedef list<map<string, i32>> ListOfStrToI32Map
 typedef list<AtoIValue> AtoIValueList
 
 struct easy {

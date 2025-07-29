@@ -115,15 +115,15 @@ class ListTests(unittest.TestCase):
             self.I32List([None, None, None])
 
     def test_list_creation_with_list_items(self) -> None:
-        a = self.to_list(["one", "two", "three"])
-        b = self.to_list(["cyan", "magenta", "yellow"])
-        c = self.to_list(["foo", "bar", "baz"])
-        d = self.to_list(["I", "II", "III"])
+        a = ["one", "two", "three"]
+        b = ["cyan", "magenta", "yellow"]
+        c = ["foo", "bar", "baz"]
+        d = ["I", "II", "III"]
         # pyre-ignore[6]: TODO: Thrift-Container init
-        self.StrList2D([a, b, c, d])
+        self.StrList2D(self.to_list([a, b, c, d]))
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
-            self.StrList2D([a, [None]])
+            self.StrList2D(self.to_list([a, [None]]))
 
     def test_list_add(self) -> None:
         other_list = [99, 88, 77, 66, 55]
@@ -142,7 +142,8 @@ class ListTests(unittest.TestCase):
         self.assertIsInstance(new_list, tuple)
 
     def test_list_creation(self) -> None:
-        self.I32List(range(10))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        self.I32List(self.to_list(range(10)))
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
             self.I32List([1, "b", "c", "four"])
@@ -159,7 +160,8 @@ class ListTests(unittest.TestCase):
             I32List().__dict__
 
     def test_index(self) -> None:
-        x = self.I32List([1, 2, 3, 4, 1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.I32List(self.to_list([1, 2, 3, 4, 1, 2, 3, 4]))
         y = list(x)
         self.assertEqual(x.index(2), y.index(2))
         self.assertEqual(x.index(2, 3), y.index(2, 3))
@@ -175,7 +177,8 @@ class ListTests(unittest.TestCase):
         self.assertEqual(x.index(4, -20, -2), y.index(4, -20, -2))
 
     def test_slicing(self) -> None:
-        x = self.I32List([1, 2, 3, 4, 1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.I32List(self.to_list([1, 2, 3, 4, 1, 2, 3, 4]))
         y = list(x)
         self.assertEqual(x[2:], y[2:])
         self.assertEqual(x[:5], y[:5])
@@ -186,9 +189,12 @@ class ListTests(unittest.TestCase):
         self.assertEqual(x[-1:-5:-1], y[-1:-5:-1])
 
     def test_comparisons(self) -> None:
-        x = self.I32List([1, 2, 3, 4])
-        y = self.I32List([1, 2, 3, 4, 5])
-        z = self.I32List([1, 2, 3, 1, 10])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.I32List(self.to_list([1, 2, 3, 4]))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        y = self.I32List(self.to_list([1, 2, 3, 4, 5]))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        z = self.I32List(self.to_list([1, 2, 3, 1, 10]))
 
         self.assertLess(x, y)
         self.assertLess(z, x)
@@ -201,7 +207,8 @@ class ListTests(unittest.TestCase):
         self.assertGreaterEqual(x, z)
         self.assertLessEqual(x, y)
 
-        x2 = self.I32List([1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x2 = self.I32List(self.to_list([1, 2, 3, 4]))
         self.assertEqual(x, x2)
         self.assertLessEqual(x, x2)
         self.assertGreaterEqual(x, x2)
@@ -216,19 +223,22 @@ class ListTests(unittest.TestCase):
         self.assertLessEqual(x3, y)
 
     def test_no_raise_on_type_error(self) -> None:
-        t_list = self.I32List([1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        t_list = self.I32List(self.to_list([1, 2, 3, 4]))
         self.assertFalse(t_list == self.easy())
         self.assertFalse(self.easy() == t_list)
         self.assertNotEqual(t_list, self.easy())
         self.assertNotEqual(self.easy(), t_list)
 
     def test_string_list(self) -> None:
-        self.StringList(["hello", "world"])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        self.StringList(self.to_list(["hello", "world"]))
         with self.assertRaises(TypeError):
             self.StringList("hello")
 
     def test_count(self) -> None:
-        x = self.I32List([1, 2, 3, 4, 1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.I32List(self.to_list([1, 2, 3, 4, 1, 2, 3, 4]))
         y = list(x)
         self.assertEqual(x.count(2), y.count(2))
         self.assertEqual(x.count(5), y.count(5))
@@ -277,13 +287,16 @@ class ListTests(unittest.TestCase):
             self.assertEqual(clist.colorList[clist.colorList.index(1)], self.Color.blue)
 
     def test_struct_list(self) -> None:
-        a = self.EasyList([self.easy()])
-        b = self.EasyList([self.easy(val=0)])
-        c = self.EasyList([self.easy(val=1)])
         # pyre-ignore[6]: TODO: Thrift-Container init
-        d = self.EasyList([self.easy(val_list=self.to_list([]))])
+        a = self.EasyList(self.to_list([self.easy()]))
         # pyre-ignore[6]: TODO: Thrift-Container init
-        e = self.EasyList([self.easy(val_list=self.to_list([1]))])
+        b = self.EasyList(self.to_list([self.easy(val=0)]))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        c = self.EasyList(self.to_list([self.easy(val=1)]))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        d = self.EasyList(self.to_list([self.easy(val_list=self.to_list([]))]))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        e = self.EasyList(self.to_list([self.easy(val_list=self.to_list([1]))]))
         self.assertEqual(a, b)
         self.assertEqual(a, d)
         self.assertNotEqual(a, c)
@@ -297,8 +310,14 @@ class ListTests(unittest.TestCase):
         self.assertGreaterEqual(c, e)
 
     def test_list_module_name(self) -> None:
-        easy_list = self.EasyList([self.easy()])
-        self.assertEqual(easy_list.__class__.__module__, "thrift.python.types")
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        easy_list = self.EasyList(self.to_list([self.easy()]))
+        if self.is_mutable_run:
+            self.assertEqual(
+                easy_list.__class__.__module__, "thrift.python.mutable_containers"
+            )
+        else:
+            self.assertEqual(easy_list.__class__.__module__, "thrift.python.types")
 
     def test_struct_with_list_fields(self) -> None:
         s = self.Lists(
@@ -357,7 +376,8 @@ class ListTests(unittest.TestCase):
     def test_adapted_lists(self) -> None:
         int_list = [1, 2, 3]
 
-        self.assertEqual(int_list, self.AtoIValueList(int_list))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        self.assertEqual(int_list, self.AtoIValueList(self.to_list(int_list)))
 
     def test_unicode_const(self) -> None:
         self.assertEqual(self.unicode_list, ["Bulgaria", "Benin", "Saint Barthélemy"])

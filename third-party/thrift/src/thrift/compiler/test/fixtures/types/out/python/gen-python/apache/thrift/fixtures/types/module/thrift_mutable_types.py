@@ -13,6 +13,7 @@ from abc import ABCMeta as _fbthrift_ABCMeta
 import apache.thrift.fixtures.types.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
@@ -2348,10 +2349,10 @@ _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 TBinary = bytes
 IntTypedef = int
 UintTypedef = int
-SomeListOfTypeMap_2468 = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string))
+SomeListOfTypeMap_2468 = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string))
 TBinary_8623 = bytes
 i32_9314 = int
-list_i32_9187 = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
+list_i32_9187 = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 map_i32_i32_9565 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 map_i32_string_1261 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string)
 set_i32_7070 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)

@@ -5,3 +5,25 @@
 
 package matching_names
 
+import (
+    "context"
+    "errors"
+    "fmt"
+    "io"
+    "reflect"
+
+    includesAlso "IncludesAlso"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
+)
+
+var _ = includesAlso.GoUnusedProtection__
+// (needed to ensure safety because of naive import list construction)
+var _ = context.Background
+var _ = errors.New
+var _ = fmt.Printf
+var _ = io.EOF
+var _ = reflect.Ptr
+var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
+

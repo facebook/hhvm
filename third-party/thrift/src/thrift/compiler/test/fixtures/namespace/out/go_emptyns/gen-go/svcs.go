@@ -5,7 +5,6 @@
 
 package emptyns
 
-
 import (
     "context"
     "errors"

@@ -16,8 +16,6 @@
 }}
 {{> common/header}}
 
-{{#program:services?}}
-
 import (
     "context"
     "errors"
@@ -50,6 +48,7 @@ var _ = metadata.GoUnusedProtection__
 {{/program:import_metadata_package?}}
 {{/program:gen_metadata?}}
 
+{{#program:services?}}
 {{#program:services}}
 {{> svc/interface}}
 

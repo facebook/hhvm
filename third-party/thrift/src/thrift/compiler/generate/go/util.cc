@@ -629,7 +629,7 @@ std::vector<const t_struct*> get_service_req_resp_structs(
 
     auto req_struct_name =
         go::munge_ident("req" + svcGoName + funcGoName, false);
-    auto req_struct = new t_struct(service->program(), req_struct_name);
+    auto req_struct = new t_struct(func->program(), req_struct_name);
     for (auto member : func->params().get_members()) {
       req_struct->append_field(std::unique_ptr<t_field>(member));
     }
@@ -637,7 +637,7 @@ std::vector<const t_struct*> get_service_req_resp_structs(
 
     auto resp_struct_name =
         go::munge_ident("resp" + svcGoName + funcGoName, false);
-    auto resp_struct = new t_struct(service->program(), resp_struct_name);
+    auto resp_struct = new t_struct(func->program(), resp_struct_name);
     if (!func->return_type()->is_void()) {
       auto resp_field = std::make_unique<t_field>(
           func->return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
@@ -656,7 +656,7 @@ std::vector<const t_struct*> get_service_req_resp_structs(
     if (func->stream()) {
       auto stream_struct_name =
           go::munge_ident("stream" + svcGoName + funcGoName, false);
-      auto stream_struct = new t_struct(service->program(), stream_struct_name);
+      auto stream_struct = new t_struct(func->program(), stream_struct_name);
       auto elem_field = std::make_unique<t_field>(
           func->stream()->elem_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
       elem_field->set_qualifier(t_field_qualifier::optional);

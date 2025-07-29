@@ -53,7 +53,7 @@ void randomTestWithSeed(int seed) {
   LazyStruct lazyFoo;
 
   constexpr bool kIsOptional = apache::thrift::detail::is_optional_field_ref_v<
-      std::remove_reference_t<decltype(foo.field4_ref())>>;
+      std::remove_reference_t<decltype(foo.field4())>>;
 
   auto create = [](const std::vector<int32_t>& field4) {
     std::pair<Struct, LazyStruct> ret;

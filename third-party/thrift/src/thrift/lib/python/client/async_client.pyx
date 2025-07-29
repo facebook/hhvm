@@ -36,7 +36,7 @@ from thrift.python.mutable_serializer import (
     serialize_iobuf as serialize_iobuf_mutable,
     deserialize as deserialize_mutable,
 )
-from thrift.python.stream cimport ClientBufferedStream
+from thrift.python.streaming.stream cimport ClientBufferedStream
 from thrift.python.common cimport cRpcOptions, RpcOptions
 
 @cython.auto_pickle(False)

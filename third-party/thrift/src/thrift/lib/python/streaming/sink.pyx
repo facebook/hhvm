@@ -20,7 +20,7 @@ from folly.executor cimport get_executor
 from cython.operator import dereference
 from libcpp.memory cimport make_shared, make_unique, shared_ptr
 from libcpp.utility cimport move
-from thrift.python.util cimport toAsyncGenerator
+
 
 # TODO: (pyamane) This is here just to validate the types are correct for now
 cdef void generator(object iterator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept:
@@ -42,3 +42,9 @@ cdef class ClientSink:
       toAsyncGenerator[unique_ptr[cIOBuf]](iterator, get_executor(), generator)
     )
     return "pass"
+
+
+cdef public api void cancelAsyncGenerator(object generator):
+    asyncio.get_event_loop().create_task(
+        generator.aclose()
+    )

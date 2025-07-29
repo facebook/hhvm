@@ -20,7 +20,7 @@ from __future__ import annotations
 from typing import AsyncIterator
 from unittest import IsolatedAsyncioTestCase
 
-from thrift.python.sink import ClientSink
+from thrift.python.streaming.sink import ClientSink
 
 
 class SinkTests(IsolatedAsyncioTestCase):

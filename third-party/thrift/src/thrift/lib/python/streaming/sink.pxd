@@ -29,6 +29,13 @@ cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
     TInitResponse response
     cClientSink[TChunk, TFinalResponse] sink
 
+cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrift::python":
+  cAsyncGenerator[TChunk] toAsyncGenerator[TChunk](
+    object,
+    cFollyExecutor*,
+    void(*)(object, cFollyPromise[optional[TChunk]])
+  )
+
 cdef class ClientSink:
   cdef shared_ptr[cClientSink[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] _cpp_obj
   @staticmethod
@@ -36,3 +43,5 @@ cdef class ClientSink:
 
 cdef class ResponseAndClientSink:
   pass
+
+cdef api void cancelAsyncGenerator(object generator)

@@ -17,8 +17,8 @@
 #include <stdexcept>
 
 #include <folly/Portability.h>
-#include <thrift/lib/python/util.h>
-#include <thrift/lib/python/util_api.h> // @manual
+#include <thrift/lib/python/streaming/Sink.h>
+#include <thrift/lib/python/streaming/sink_api.h> // @manual
 
 #if FOLLY_HAS_COROUTINES
 
@@ -27,8 +27,8 @@ namespace apache::thrift::python {
 namespace {
 
 void do_import() {
-  if (0 != import_thrift__python__util()) {
-    throw std::runtime_error("import_thrift__python__util__cancel failed");
+  if (0 != import_thrift__python__streaming__sink()) {
+    throw std::runtime_error("import_thrift__python__sink__cancel failed");
   }
 }
 

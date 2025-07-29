@@ -15,9 +15,7 @@
  */
 
 #include <map>
-#include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -216,7 +214,7 @@ void test_mixed_fields_struct() {
 
   auto objs = Serializer::template serialize<std::string>(obj);
   T objd;
-  Serializer::template deserialize(objs, objd);
+  Serializer::deserialize(objs, objd);
 
   EXPECT_EQ(obj, objd);
 }
@@ -234,7 +232,7 @@ void test_nested_mixed_struct() {
   EXPECT_EQ(objd.mixed_field()->def_int_field(), 0);
   EXPECT_EQ(objd.mixed_field()->opt_int_field().value_unchecked(), 0);
 
-  Serializer::template deserialize(objs, objd);
+  Serializer::deserialize(objs, objd);
 
   EXPECT_EQ(objd.mixed_field()->terse_int_field(), 0);
   EXPECT_EQ(objd.mixed_field()->def_int_field(), 0);
@@ -267,7 +265,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct) {
 
   auto objs = TypeParam::template serialize<std::string>(obj);
   terse_write::CppRefTerseStruct objd;
-  TypeParam::template deserialize(objs, objd);
+  TypeParam::deserialize(objs, objd);
 
   EXPECT_EQ(obj, objd);
 }
@@ -328,7 +326,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, CustomStringFieldsDeserialization) {
   auto emptys = TypeParam::template serialize<std::string>(empty);
 
   tablebased_terse_write::CustomStringFields objd;
-  TypeParam::template deserialize(emptys, objd);
+  TypeParam::deserialize(emptys, objd);
 
   EXPECT_TRUE(objd.iobuf_field()->empty());
   EXPECT_FALSE((*objd.iobuf_ptr_field()));
@@ -440,7 +438,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, AdaptedFields) {
 
   objs = TypeParam::template serialize<std::string>(obj);
   terse_write::AdaptedFields objd;
-  TypeParam::template deserialize(objs, objd);
+  TypeParam::deserialize(objs, objd);
 
   EXPECT_EQ(obj, objd);
   EXPECT_EQ(emptys, objs);
@@ -476,7 +474,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, AdaptedStringFields) {
 
   objs = TypeParam::template serialize<std::string>(obj);
   terse_write::AdaptedStringFields objd;
-  TypeParam::template deserialize(objs, objd);
+  TypeParam::deserialize(objs, objd);
 
   EXPECT_EQ(obj, objd);
   EXPECT_EQ(emptys, objs);
@@ -516,7 +514,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, AdaptedListFields) {
 
   objs = TypeParam::template serialize<std::string>(obj);
   terse_write::AdaptedListFields objd;
-  TypeParam::template deserialize(objs, objd);
+  TypeParam::deserialize(objs, objd);
 
   EXPECT_EQ(obj, objd);
   EXPECT_EQ(emptys, objs);
@@ -536,7 +534,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, TerseException) {
 
   objs = TypeParam::template serialize<std::string>(obj);
   terse_write::TerseException objd;
-  TypeParam::template deserialize(objs, objd);
+  TypeParam::deserialize(objs, objd);
 
   EXPECT_EQ(obj, objd);
   EXPECT_EQ(emptys, objs);

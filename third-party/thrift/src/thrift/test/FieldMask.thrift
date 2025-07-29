@@ -102,6 +102,7 @@ struct SharedConstPointerStruct {
   2: optional Foo2 shared_const;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::protocol::MaskAdapter<Bar>"}
 typedef field_mask.Mask TypedBarMask
 
@@ -111,6 +112,7 @@ struct MaskStruct {
   2: TypedBarMask mask2;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::AnyData>",
 }

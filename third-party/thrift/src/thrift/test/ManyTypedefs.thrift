@@ -18,10 +18,14 @@ package "thrift.org/test"
 namespace go thrift.test.ManyTypedefs
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyTypedefUri
 typedef list<int32> biglist
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "std::unordered_map"}
 typedef map<int32, int32> bigmap
+@thrift.AllowLegacyTypedefUri
 typedef i32 int32
 
 struct struct1 {

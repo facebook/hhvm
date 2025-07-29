@@ -1536,7 +1536,6 @@ TEST_F(HTTPUpstreamSessionTest, FailedUpgradeDrainsSession) {
   folly::DelayedDestruction::DestructorGuard g(httpSession_);
   HTTPMessage req = getGetRequest();
   req.setEgressWebsocketUpgrade();
-  req.getHeaders().set(HTTP_HEADER_UPGRADE, "websocket");
 
   auto handler = openTransaction();
   handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {

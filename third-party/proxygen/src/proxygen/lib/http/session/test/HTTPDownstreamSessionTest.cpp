@@ -4497,6 +4497,41 @@ TEST_F(HTTPDownstreamSessionTest, InvariantViolation) {
   gracefulShutdown();
 }
 
+TEST_F(HTTPDownstreamSessionTest, WebsocketUpgradeSessionUnresuable) {
+  /**
+   * after rejecting a client's upgrade, the HTTPDownstreamSession should no
+   * longer be parsing bytes off the wire
+   */
+  folly::DelayedDestruction::DestructorGuard g(httpSession_);
+
+  // rejects client ws upgrade w/ 400
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&](auto msg) {
+    EXPECT_TRUE(msg->isIngressWebsocketUpgrade());
+    handler->sendReplyCode(401);
+  });
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+
+  // send client ws upgrade
+  auto wsReq = getGetRequest();
+  wsReq.setEgressWebsocketUpgrade();
+  sendRequest(wsReq, /*eom=*/false);
+  flushRequests(/*eof=*/false);
+  evbLoopNonBlockN(2);
+
+  // send another request, nothing should be parsed (need to use a new codec to
+  // avoid CHECK failures)
+  EXPECT_CALL(mockController_, getRequestHandler(_, _)).Times(0);
+  HTTP1xCodec codec{TransportDirection::UPSTREAM};
+  auto req = getGetRequest();
+  codec.generateHeader(requests_, codec.createStream(), req, /*eom=*/true);
+  flushRequests(/*eof=*/false);
+  evbLoopNonBlockN(2);
+
+  gracefulShutdown();
+}
+
 TEST_F(HTTP2DownstreamSessionTest, InvariantViolation) {
   auto handler = addSimpleStrictHandler();
   auto& txn = handler->txn_;

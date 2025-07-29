@@ -51,7 +51,7 @@ class ProxyBase;
 /** statistics ftw */
 
 struct stat_s;
-typedef std::string (*string_fn_t)(void*);
+using string_fn_t = std::string (*)(void*);
 
 enum stat_type_t {
   stat_string,

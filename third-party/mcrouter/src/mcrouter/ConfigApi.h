@@ -37,8 +37,8 @@ class FileDataProvider;
  */
 class ConfigApi : public ConfigApiIf {
  public:
-  typedef std::function<void()> Callback;
-  typedef CallbackPool<>::CallbackHandle CallbackHandle;
+  using Callback = std::function<void()>;
+  using CallbackHandle = CallbackPool<>::CallbackHandle;
   struct PartialUpdate;
 
   static const char* const kFilePrefix;

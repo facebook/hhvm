@@ -28,8 +28,9 @@ func PrependError(prepend string, err error) error {
 	if t, ok := err.(ProtocolException); ok {
 		return NewProtocolExceptionWithType(t.TypeID(), errors.New(prepend+err.Error()))
 	}
-	if t, ok := err.(ApplicationExceptionIf); ok {
-		return NewApplicationException(t.TypeID(), prepend+t.Error())
+	var appError *ApplicationException
+	if errors.As(err, &appError) {
+		return NewApplicationException(appError.TypeID(), prepend+appError.Error())
 	}
 
 	return errors.New(prepend + err.Error())

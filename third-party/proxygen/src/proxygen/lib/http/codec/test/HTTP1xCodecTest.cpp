@@ -854,6 +854,80 @@ TEST(HTTP1xCodecTest, WebsocketConnectionHeader) {
             "upgrade, keep-alive");
 }
 
+TEST(HTTP1xCodecTest, WebsocketUpgradeSecondTxn) {
+  /**
+   * RFC9110:
+   *  For example, a CONNECT request or a request with the Upgrade header field
+   *  can occur at any time, not just in the first message on a connection.
+   */
+  HTTP1xCodec upstream{TransportDirection::UPSTREAM};
+  HTTP1xCodec downstream{TransportDirection::DOWNSTREAM};
+  HTTP1xCodecCallback upstreamCbs;
+  HTTP1xCodecCallback downstreamCbs;
+  folly::IOBufQueue buf;
+
+  downstream.setCallback(&downstreamCbs);
+  upstream.setCallback(&upstreamCbs);
+
+  // generate req/res for simple `GET /` request
+  {
+    HTTPMessage req;
+    req.setHTTPVersion(1, 1);
+    req.setMethod(HTTPMethod::GET);
+    req.setURL("/");
+    auto streamId = upstream.createStream();
+
+    // parse downstream req
+    upstream.generateHeader(buf, streamId, req, /*eom=*/true);
+    downstream.onIngress(*buf.front());
+    buf.reset();
+
+    // send downstream resp
+    HTTPMessage resp;
+    resp.setHTTPVersion(1, 1);
+    resp.setStatusCode(200);
+    buf.reset();
+    downstream.generateHeader(buf, streamId, resp, /*eom=*/true);
+    upstream.onIngress(*buf.front());
+    buf.reset();
+
+    // both codecs should be reusable
+    EXPECT_TRUE(upstream.isReusable() && downstream.isReusable());
+  }
+
+  // reusing the same codec, generate req/res for ws request
+  {
+    HTTPMessage req;
+    req.setHTTPVersion(1, 1);
+    req.setURL("/websocket");
+    req.setEgressWebsocketUpgrade();
+    auto streamID = upstream.createStream();
+    upstream.generateHeader(buf, streamID, req);
+
+    downstream.onIngress(*buf.front());
+    EXPECT_EQ(downstreamCbs.headersComplete, 2);
+    auto& msg = downstreamCbs.msg_;
+    EXPECT_TRUE(msg->isIngressWebsocketUpgrade());
+    auto ws_key_header =
+        msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_SEC_WEBSOCKET_KEY);
+    EXPECT_NE(ws_key_header, empty_string);
+
+    HTTPMessage resp;
+    resp.setHTTPVersion(1, 1);
+    resp.setStatusCode(101);
+    resp.setEgressWebsocketUpgrade();
+    buf.reset();
+    downstream.generateHeader(buf, streamID, resp);
+    upstream.onIngress(*buf.front());
+    auto ws_accept_header = upstreamCbs.msg_->getHeaders().getSingleOrEmpty(
+        HTTP_HEADER_SEC_WEBSOCKET_ACCEPT);
+    EXPECT_NE(ws_accept_header, empty_string);
+
+    // both codecs should no longer be reusable
+    EXPECT_TRUE(!upstream.isReusable() && !downstream.isReusable());
+  }
+}
+
 TEST(HTTP1xCodecTest, TrailersAndEomAreNotGeneratedWhenNonChunked) {
   // Verify that generateTrailes and generateEom result in 0 bytes
   // generated when message is not chunked.

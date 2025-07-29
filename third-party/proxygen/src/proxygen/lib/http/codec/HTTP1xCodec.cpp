@@ -574,7 +574,7 @@ void HTTP1xCodec::generateHeader(
       // We'll generate a new Connection header based on the keepalive_
       // state
       return;
-    } else if (code == HTTP_HEADER_UPGRADE && txn == 1) {
+    } else if (code == HTTP_HEADER_UPGRADE) {
       hasUpgradeHeader = true;
       if (upstream) {
         // save in case we get a 101 Switching Protocols
@@ -650,7 +650,7 @@ void HTTP1xCodec::generateHeader(
 
   // websocket headers
   if (msg.isEgressWebsocketUpgrade()) {
-    if (!hasUpgradeHeader && txn == 1) {
+    if (!hasUpgradeHeader) {
       // upgradeHeader_ is set in serializeWwebsocketHeader for requests.
       serializeWebsocketHeader(writeBuf, len, upstream);
       if (!hasUpgradeTokeninConnection) {
@@ -1244,13 +1244,7 @@ int HTTP1xCodec::onMessageComplete() {
       }
   }
 
-  // For downstream, always call onMessageComplete. If native upgrade,
-  // pass upgrade=false. Else pass ingressUpgrade_.
-  // For upstream, call onMessagComplete if not native upgrade.
   callback_->onMessageComplete(ingressTxnID_, ingressUpgrade_);
-
-  // else we suppressed onHeadersComplete, suppress onMessageComplete also.
-  // The new codec will handle these callbacks with the real message
 
   if (ingressUpgrade_) {
     ingressUpgradeComplete_ = true;

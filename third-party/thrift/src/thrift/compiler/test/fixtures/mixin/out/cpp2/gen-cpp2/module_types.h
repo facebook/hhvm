@@ -366,18 +366,18 @@ class Mixin2 final  {
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> field2() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
   }
+  FOLLY_ERASE auto field1() &           { return m1_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1() const&      { return m1_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1() &&          { return std::move(*m1_ref()).field1_ref(); }
+  FOLLY_ERASE auto field1() const&&     { return std::move(*m1_ref()).field1_ref(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() &       { return m1_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1_ref() &       { return field1(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() const&  { return m1_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1_ref() const&  { return field1(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() &&      { return std::move(*m1_ref()).field1_ref(); }
+  FOLLY_ERASE auto field1_ref() &&      { return std::move(*this).field1(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() const&& { return std::move(*m1_ref()).field1_ref(); }
-  FOLLY_ERASE auto field1() &           { return field1_ref(); }
-  FOLLY_ERASE auto field1() const&      { return field1_ref(); }
-  FOLLY_ERASE auto field1() &&          { return std::move(*this).field1_ref(); }
-  FOLLY_ERASE auto field1() const&&     { return std::move(*this).field1_ref(); }
+  FOLLY_ERASE auto field1_ref() const&& { return std::move(*this).field1(); }
 
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
@@ -766,54 +766,54 @@ class Foo final  {
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> m3() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_m3), __isset.at(2), __isset.bit(2)};
   }
+  FOLLY_ERASE auto m1() &           { return m2_ref()->m1_ref(); }
+  FOLLY_ERASE auto m1() const&      { return m2_ref()->m1_ref(); }
+  FOLLY_ERASE auto m1() &&          { return std::move(*m2_ref()).m1_ref(); }
+  FOLLY_ERASE auto m1() const&&     { return std::move(*m2_ref()).m1_ref(); }
   [[deprecated("m1_ref() is deprecated, use m1() instead.")]]
-  FOLLY_ERASE auto m1_ref() &       { return m2_ref()->m1_ref(); }
+  FOLLY_ERASE auto m1_ref() &       { return m1(); }
   [[deprecated("m1_ref() is deprecated, use m1() instead.")]]
-  FOLLY_ERASE auto m1_ref() const&  { return m2_ref()->m1_ref(); }
+  FOLLY_ERASE auto m1_ref() const&  { return m1(); }
   [[deprecated("m1_ref() is deprecated, use m1() instead.")]]
-  FOLLY_ERASE auto m1_ref() &&      { return std::move(*m2_ref()).m1_ref(); }
+  FOLLY_ERASE auto m1_ref() &&      { return std::move(*this).m1(); }
   [[deprecated("m1_ref() is deprecated, use m1() instead.")]]
-  FOLLY_ERASE auto m1_ref() const&& { return std::move(*m2_ref()).m1_ref(); }
-  FOLLY_ERASE auto m1() &           { return m1_ref(); }
-  FOLLY_ERASE auto m1() const&      { return m1_ref(); }
-  FOLLY_ERASE auto m1() &&          { return std::move(*this).m1_ref(); }
-  FOLLY_ERASE auto m1() const&&     { return std::move(*this).m1_ref(); }
+  FOLLY_ERASE auto m1_ref() const&& { return std::move(*this).m1(); }
+  FOLLY_ERASE auto field2() &           { return m2_ref()->field2_ref(); }
+  FOLLY_ERASE auto field2() const&      { return m2_ref()->field2_ref(); }
+  FOLLY_ERASE auto field2() &&          { return std::move(*m2_ref()).field2_ref(); }
+  FOLLY_ERASE auto field2() const&&     { return std::move(*m2_ref()).field2_ref(); }
   [[deprecated("field2_ref() is deprecated, use field2() instead.")]]
-  FOLLY_ERASE auto field2_ref() &       { return m2_ref()->field2_ref(); }
+  FOLLY_ERASE auto field2_ref() &       { return field2(); }
   [[deprecated("field2_ref() is deprecated, use field2() instead.")]]
-  FOLLY_ERASE auto field2_ref() const&  { return m2_ref()->field2_ref(); }
+  FOLLY_ERASE auto field2_ref() const&  { return field2(); }
   [[deprecated("field2_ref() is deprecated, use field2() instead.")]]
-  FOLLY_ERASE auto field2_ref() &&      { return std::move(*m2_ref()).field2_ref(); }
+  FOLLY_ERASE auto field2_ref() &&      { return std::move(*this).field2(); }
   [[deprecated("field2_ref() is deprecated, use field2() instead.")]]
-  FOLLY_ERASE auto field2_ref() const&& { return std::move(*m2_ref()).field2_ref(); }
-  FOLLY_ERASE auto field2() &           { return field2_ref(); }
-  FOLLY_ERASE auto field2() const&      { return field2_ref(); }
-  FOLLY_ERASE auto field2() &&          { return std::move(*this).field2_ref(); }
-  FOLLY_ERASE auto field2() const&&     { return std::move(*this).field2_ref(); }
+  FOLLY_ERASE auto field2_ref() const&& { return std::move(*this).field2(); }
+  FOLLY_ERASE auto field1() &           { return m2_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1() const&      { return m2_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1() &&          { return std::move(*m2_ref()).field1_ref(); }
+  FOLLY_ERASE auto field1() const&&     { return std::move(*m2_ref()).field1_ref(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() &       { return m2_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1_ref() &       { return field1(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() const&  { return m2_ref()->field1_ref(); }
+  FOLLY_ERASE auto field1_ref() const&  { return field1(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() &&      { return std::move(*m2_ref()).field1_ref(); }
+  FOLLY_ERASE auto field1_ref() &&      { return std::move(*this).field1(); }
   [[deprecated("field1_ref() is deprecated, use field1() instead.")]]
-  FOLLY_ERASE auto field1_ref() const&& { return std::move(*m2_ref()).field1_ref(); }
-  FOLLY_ERASE auto field1() &           { return field1_ref(); }
-  FOLLY_ERASE auto field1() const&      { return field1_ref(); }
-  FOLLY_ERASE auto field1() &&          { return std::move(*this).field1_ref(); }
-  FOLLY_ERASE auto field1() const&&     { return std::move(*this).field1_ref(); }
+  FOLLY_ERASE auto field1_ref() const&& { return std::move(*this).field1(); }
+  FOLLY_ERASE auto field3() &           { return m3_ref()->field3_ref(); }
+  FOLLY_ERASE auto field3() const&      { return m3_ref()->field3_ref(); }
+  FOLLY_ERASE auto field3() &&          { return std::move(*m3_ref()).field3_ref(); }
+  FOLLY_ERASE auto field3() const&&     { return std::move(*m3_ref()).field3_ref(); }
   [[deprecated("field3_ref() is deprecated, use field3() instead.")]]
-  FOLLY_ERASE auto field3_ref() &       { return m3_ref()->field3_ref(); }
+  FOLLY_ERASE auto field3_ref() &       { return field3(); }
   [[deprecated("field3_ref() is deprecated, use field3() instead.")]]
-  FOLLY_ERASE auto field3_ref() const&  { return m3_ref()->field3_ref(); }
+  FOLLY_ERASE auto field3_ref() const&  { return field3(); }
   [[deprecated("field3_ref() is deprecated, use field3() instead.")]]
-  FOLLY_ERASE auto field3_ref() &&      { return std::move(*m3_ref()).field3_ref(); }
+  FOLLY_ERASE auto field3_ref() &&      { return std::move(*this).field3(); }
   [[deprecated("field3_ref() is deprecated, use field3() instead.")]]
-  FOLLY_ERASE auto field3_ref() const&& { return std::move(*m3_ref()).field3_ref(); }
-  FOLLY_ERASE auto field3() &           { return field3_ref(); }
-  FOLLY_ERASE auto field3() const&      { return field3_ref(); }
-  FOLLY_ERASE auto field3() &&          { return std::move(*this).field3_ref(); }
-  FOLLY_ERASE auto field3() const&&     { return std::move(*this).field3_ref(); }
+  FOLLY_ERASE auto field3_ref() const&& { return std::move(*this).field3(); }
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]

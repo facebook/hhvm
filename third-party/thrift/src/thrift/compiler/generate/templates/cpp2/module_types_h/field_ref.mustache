@@ -135,21 +135,21 @@
 {{/struct:fields}}
 {{#struct:mixin_fields}}
 {{^struct:legacy_api?}}
+ public:
+{{/struct:legacy_api?}}
+  FOLLY_ERASE auto {{mixin:field_name}}() &           { return {{mixin:name}}_ref()->{{mixin:accessor}}(); }
+  FOLLY_ERASE auto {{mixin:field_name}}() const&      { return {{mixin:name}}_ref()->{{mixin:accessor}}(); }
+  FOLLY_ERASE auto {{mixin:field_name}}() &&          { return std::move(*{{mixin:name}}_ref()).{{mixin:accessor}}(); }
+  FOLLY_ERASE auto {{mixin:field_name}}() const&&     { return std::move(*{{mixin:name}}_ref()).{{mixin:accessor}}(); }
+{{^struct:legacy_api?}}
  private:
 {{/struct:legacy_api?}}
   [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
-  FOLLY_ERASE auto {{mixin:field_name}}_ref() &       { return {{mixin:name}}_ref()->{{mixin:accessor}}(); }
+  FOLLY_ERASE auto {{mixin:field_name}}_ref() &       { return {{mixin:field_name}}(); }
   [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
-  FOLLY_ERASE auto {{mixin:field_name}}_ref() const&  { return {{mixin:name}}_ref()->{{mixin:accessor}}(); }
+  FOLLY_ERASE auto {{mixin:field_name}}_ref() const&  { return {{mixin:field_name}}(); }
   [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
-  FOLLY_ERASE auto {{mixin:field_name}}_ref() &&      { return std::move(*{{mixin:name}}_ref()).{{mixin:accessor}}(); }
+  FOLLY_ERASE auto {{mixin:field_name}}_ref() &&      { return std::move(*this).{{mixin:field_name}}(); }
   [[deprecated("{{mixin:field_name}}_ref() is deprecated, use {{mixin:field_name}}() instead.")]]
-  FOLLY_ERASE auto {{mixin:field_name}}_ref() const&& { return std::move(*{{mixin:name}}_ref()).{{mixin:accessor}}(); }
-{{^struct:legacy_api?}}
- public:
-{{/struct:legacy_api?}}
-  FOLLY_ERASE auto {{mixin:field_name}}() &           { return {{mixin:field_name}}_ref(); }
-  FOLLY_ERASE auto {{mixin:field_name}}() const&      { return {{mixin:field_name}}_ref(); }
-  FOLLY_ERASE auto {{mixin:field_name}}() &&          { return std::move(*this).{{mixin:field_name}}_ref(); }
-  FOLLY_ERASE auto {{mixin:field_name}}() const&&     { return std::move(*this).{{mixin:field_name}}_ref(); }
+  FOLLY_ERASE auto {{mixin:field_name}}_ref() const&& { return std::move(*this).{{mixin:field_name}}(); }
 {{/struct:mixin_fields}}

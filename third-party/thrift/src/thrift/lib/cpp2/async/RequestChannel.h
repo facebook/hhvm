@@ -104,14 +104,7 @@ class RequestChannel : virtual public folly::DelayedDestruction {
   ~RequestChannel() override {}
 
  public:
-  /**
-   * ReplyCallback will be invoked when the reply to this request is
-   * received.  TRequestChannel is responsible for associating requests with
-   * responses, and invoking the correct ReplyCallback when a response
-   * message is received.
-   *
-   * cb must not be null.
-   */
+  // Invokes one of the below methods on the event base thread.
   template <RpcKind Kind, typename RpcOptions>
   void sendRequestAsync(
       RpcOptions&&,
@@ -121,14 +114,6 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       typename apache::thrift::detail::RequestClientCallbackType<Kind>::Ptr,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
-  /**
-   * ReplyCallback will be invoked when the reply to this request is
-   * received.  TRequestChannel is responsible for associating requests with
-   * responses, and invoking the correct ReplyCallback when a response
-   * message is received.
-   *
-   * cb must not be null.
-   */
   virtual void sendRequestResponse(
       const RpcOptions&,
       MethodMetadata&&,
@@ -137,10 +122,6 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       RequestClientCallback::Ptr,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
-  /* Similar to sendRequest, although replyReceived will never be called
-   *
-   * Null RequestCallback is allowed for oneway requests
-   */
   virtual void sendRequestNoResponse(
       const RpcOptions&,
       MethodMetadata&&,
@@ -149,14 +130,6 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       RequestClientCallback::Ptr,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
-  /**
-   * ReplyCallback will be invoked when the reply to this request is
-   * received.  RequestChannel is responsible for associating requests with
-   * responses, and invoking the correct ReplyCallback when a response
-   * message is received. A response to this request may contain a stream.
-   *
-   * cb must not be null.
-   */
   virtual void sendRequestStream(
       const RpcOptions& rpcOptions,
       MethodMetadata&&,

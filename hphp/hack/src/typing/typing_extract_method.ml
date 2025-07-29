@@ -16,10 +16,9 @@ let mk_tparam pos name tp_constraints =
       tp_reified = Ast_defs.Erased;
       tp_user_attributes = [];
     }
-(* -- This analysis --------------------------------------------------------- *)
 
-module This_variance : sig
-  val of_fun_ty :
+module Variance_analysis : sig
+  val analyse_this :
     Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
     env:Typing_env_types.env ->
     Ast_defs.variance option
@@ -46,18 +45,14 @@ end = struct
     | (Contravariant, Covariant) ->
       Invariant
 
-  let update acc var =
-    Some (Option.value_map acc ~default:var ~f:(fun acc -> join acc var))
-
-  let is_invariant v =
-    Option.value_map v ~default:false ~f:(function
-        | Ast_defs.Invariant -> true
-        | _ -> false)
-
-  let rec find (ty : Typing_defs_core.decl_ty) ~var ~acc ~env =
+  let rec find
+      (ty : Typing_defs_core.decl_ty) ~var ~update ~is_invariant ~acc ~env =
     let open Typing_defs_core in
+    (* Update the accumulator *)
+    let acc = update ty acc var in
+    (* Traverse the type *)
     match get_node ty with
-    | Tthis -> update acc var
+    | Tthis
     | Tmixed
     | Twildcard
     | Tany _
@@ -70,22 +65,24 @@ end = struct
     | Toption ty
     | Tlike ty
     | Tclass_ptr ty ->
-      find ty ~var ~acc ~env
+      find ty ~var ~update ~is_invariant ~acc ~env
     | Tvec_or_dict (ty_k, ty_v) ->
-      let acc = find ty_k ~var ~acc ~env in
+      let acc = find ty_k ~var ~update ~is_invariant ~acc ~env in
       if is_invariant acc then
         acc
       else
-        find ty_v ~var ~acc ~env
+        find ty_v ~var ~update ~is_invariant ~acc ~env
     | Tunion tys
     | Tintersection tys ->
-      find_list tys ~var ~acc ~env
+      find_list tys ~var ~update ~is_invariant ~acc ~env
     | Trefinement (ty, _class_refinement) ->
       (* TODO - should this include refinements?? *)
-      find ty ~var ~acc ~env
-    | Tfun fun_ty -> find_fun_ty fun_ty ~var ~acc ~env
-    | Ttuple tuple_ty -> find_tuple_ty tuple_ty ~var ~acc ~env
-    | Tshape shape_ty -> find_shape_ty shape_ty ~var ~acc ~env
+      find ty ~var ~update ~is_invariant ~acc ~env
+    | Tfun fun_ty -> find_fun_ty fun_ty ~var ~update ~is_invariant ~acc ~env
+    | Ttuple tuple_ty ->
+      find_tuple_ty tuple_ty ~var ~update ~is_invariant ~acc ~env
+    | Tshape shape_ty ->
+      find_shape_ty shape_ty ~var ~update ~is_invariant ~acc ~env
     | Tapply ((_, class_name), tys) -> begin
       let tparams_opt =
         Option.map
@@ -94,70 +91,133 @@ end = struct
       in
 
       Option.value_map tparams_opt ~default:acc ~f:(fun tparams ->
-          find_with_tparams tys tparams ~var ~acc ~env)
+          find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env)
     end
 
-  and find_list tys ~var ~acc ~env =
+  and find_list tys ~var ~update ~is_invariant ~acc ~env =
     match tys with
     | [] -> acc
     | ty :: tys ->
-      let acc = find ty ~var ~acc ~env in
+      let acc = find ty ~var ~update ~is_invariant ~acc ~env in
       if is_invariant acc then
         acc
       else
-        find_list tys ~var ~acc ~env
+        find_list tys ~var ~update ~is_invariant ~acc ~env
 
-  and find_with_tparams tys tparams ~var ~acc ~env =
+  and find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env =
     match (tys, tparams) with
-    | (ty :: tys, { tp_variance; _ } :: tparams) ->
-      let acc = find ty ~var:(mul var tp_variance) ~acc ~env in
+    | (ty :: tys, Typing_defs.{ tp_variance; _ } :: tparams) ->
+      let acc =
+        find ty ~var:(mul var tp_variance) ~is_invariant ~update ~acc ~env
+      in
       if is_invariant acc then
         acc
       else
-        find_with_tparams tys tparams ~var ~acc ~env
+        find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env
     | ([], _)
     | (_, []) ->
       (* Assumes well-formedness *)
       acc
 
-  and find_tuple_ty { t_required; t_extra } ~var ~acc ~env =
-    let acc = find_list t_required ~var ~acc ~env in
+  and find_tuple_ty
+      Typing_defs_core.{ t_required; t_extra }
+      ~var
+      ~update
+      ~is_invariant
+      ~acc
+      ~env =
+    let acc = find_list t_required ~var ~update ~is_invariant ~acc ~env in
     if is_invariant acc then
       acc
     else begin
       match t_extra with
-      | Tsplat ty -> find ty ~var ~acc ~env
-      | Textra { t_optional; t_variadic } -> begin
-        let acc = find_list t_optional ~var ~acc ~env in
+      | Typing_defs_core.Tsplat ty ->
+        find ty ~var ~update ~is_invariant ~acc ~env
+      | Typing_defs_core.Textra { t_optional; t_variadic } -> begin
+        let acc = find_list t_optional ~var ~update ~is_invariant ~acc ~env in
         if is_invariant acc then
           acc
         else
-          find t_variadic ~var ~acc ~env
+          find t_variadic ~var ~update ~is_invariant ~acc ~env
       end
     end
 
-  and find_shape_ty { s_unknown_value; s_fields; _ } ~var ~acc ~env =
-    let acc = find s_unknown_value ~var ~acc ~env in
+  and find_shape_ty
+      Typing_defs_core.{ s_unknown_value; s_fields; _ }
+      ~var
+      ~update
+      ~is_invariant
+      ~acc
+      ~env =
+    let acc = find s_unknown_value ~var ~update ~is_invariant ~acc ~env in
     if is_invariant acc then
       acc
     else
       let tys =
         List.map
           (Typing_defs_core.TShapeMap.bindings s_fields)
-          ~f:(fun (_, { sft_ty; _ }) -> sft_ty)
+          ~f:(fun (_, Typing_defs_core.{ sft_ty; _ }) -> sft_ty)
       in
-      find_list tys ~var ~acc ~env
+      find_list tys ~var ~update ~is_invariant ~acc ~env
 
-  and find_fun_ty { ft_params; ft_ret; _ } ~var ~acc ~env =
-    let acc = find ft_ret ~var ~acc ~env in
+  and find_fun_ty
+      Typing_defs_core.{ ft_params; ft_ret; _ }
+      ~var
+      ~update
+      ~is_invariant
+      ~acc
+      ~env =
+    let acc = find ft_ret ~var ~update ~is_invariant ~acc ~env in
     if is_invariant acc then
       acc
     else
       let var = mul var Ast_defs.Contravariant in
-      let tys = List.map ft_params ~f:(fun { fp_type; _ } -> fp_type) in
-      find_list tys ~var ~acc ~env
+      let tys =
+        List.map ft_params ~f:(fun Typing_defs_core.{ fp_type; _ } -> fp_type)
+      in
+      find_list tys ~var ~update ~is_invariant ~acc ~env
 
-  let of_fun_ty fun_ty ~env = find_fun_ty fun_ty ~var:Covariant ~acc:None ~env
+  let update acc var =
+    Some (Option.value_map acc ~default:var ~f:(fun acc -> join acc var))
+
+  let update_this ty acc var =
+    let open Typing_defs_core in
+    match get_node ty with
+    | Tthis -> update acc var
+    | Tmixed
+    | Twildcard
+    | Tany _
+    | Tnonnull
+    | Tdynamic
+    | Tprim _
+    | Tgeneric _
+    | Taccess _
+    | Toption _
+    | Tlike _
+    | Tclass_ptr _
+    | Tvec_or_dict _
+    | Tunion _
+    | Tintersection _
+    | Trefinement _
+    | Tfun _
+    | Ttuple _
+    | Tshape _
+    | Tapply _ ->
+      acc
+
+  let is_invariant v =
+    Option.value_map v ~default:false ~f:(function
+        | Ast_defs.Invariant -> true
+        | _ -> false)
+
+  let analyse_this fun_ty ~env =
+    find_fun_ty
+      fun_ty
+      ~var:Ast_defs.Covariant
+      ~update:update_this
+      ~is_invariant
+      ~acc:None
+      ~env
 end
 
 (* -- Type constant analysis and substitutions ------------------------------ *)
@@ -1286,7 +1346,7 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
          final class *)
       None
     else
-      This_variance.of_fun_ty fun_ty ~env
+      Variance_analysis.analyse_this fun_ty ~env
   in
 
   (* Record the list of type parameter appearing in the original function type;

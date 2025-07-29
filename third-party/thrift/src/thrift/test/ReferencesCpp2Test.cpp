@@ -23,7 +23,7 @@
 #include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/gen-cpp2/References_types.h>
-#include <thrift/test/gen-cpp2/References_types.tcc>
+#include <thrift/test/gen-cpp2/References_types_custom_protocol.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::test;

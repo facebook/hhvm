@@ -21,7 +21,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types.h>
-#include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types.tcc>
+#include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
 
 namespace apache::thrift::test {
 

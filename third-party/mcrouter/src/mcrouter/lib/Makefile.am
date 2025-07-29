@@ -99,14 +99,14 @@ libmcrouter_a_SOURCES = \
   carbon/gen-cpp2/carbon_result_types_compact.cpp \
   carbon/gen-cpp2/carbon_result_types_binary.cpp \
   carbon/gen-cpp2/carbon_result_types.h \
-  carbon/gen-cpp2/carbon_result_types.tcc \
+  carbon/gen-cpp2/carbon_result_types_custom_protocol.h \
   carbon/gen-cpp2/carbon_result_data.cpp \
   carbon/gen-cpp2/carbon_result_data.h \
   carbon/gen-cpp2/carbon_types.cpp \
   carbon/gen-cpp2/carbon_types_compact.cpp \
   carbon/gen-cpp2/carbon_types_binary.cpp \
   carbon/gen-cpp2/carbon_types.h \
-  carbon/gen-cpp2/carbon_types.tcc \
+  carbon/gen-cpp2/carbon_types_custom_protocol.h \
   carbon/gen-cpp2/carbon_data.cpp \
   carbon/gen-cpp2/carbon_data.h \
   config/ConfigPreprocessor.cpp \
@@ -202,7 +202,7 @@ libmcrouter_a_SOURCES = \
   network/gen/gen-cpp2/Common_types_compact.cpp \
   network/gen/gen-cpp2/Common_types_binary.cpp \
   network/gen/gen-cpp2/Common_types.h \
-  network/gen/gen-cpp2/Common_types.tcc \
+  network/gen/gen-cpp2/Common_types_custom_protocol.h \
   network/gen/gen-cpp2/Common_data.cpp \
   network/gen/gen-cpp2/Common_data.h \
   network/gen/gen-cpp2/MemcacheAsyncClient.cpp \
@@ -213,14 +213,14 @@ libmcrouter_a_SOURCES = \
   network/gen/gen-cpp2/MemcacheService_types_compact.cpp \
   network/gen/gen-cpp2/MemcacheService_types_binary.cpp \
   network/gen/gen-cpp2/MemcacheService_types.h \
-  network/gen/gen-cpp2/MemcacheService_types.tcc \
+  network/gen/gen-cpp2/MemcacheService_types_custom_protocol.h \
   network/gen/gen-cpp2/MemcacheService_data.cpp \
   network/gen/gen-cpp2/MemcacheService_data.h \
   network/gen/gen-cpp2/Memcache_types.cpp \
   network/gen/gen-cpp2/Memcache_types_compact.cpp \
   network/gen/gen-cpp2/Memcache_types_binary.cpp \
   network/gen/gen-cpp2/Memcache_types.h \
-  network/gen/gen-cpp2/Memcache_types.tcc \
+  network/gen/gen-cpp2/Memcache_types_custom_protocol.h \
   network/gen/gen-cpp2/Memcache_data.cpp \
   network/gen/gen-cpp2/Memcache_data.h \
   network/FizzContextProvider.cpp \

@@ -50,7 +50,11 @@ function main(): void {
     }
 
     interface StackLike<T> {}
-    class VecLike<T> implements StackLike<T>, IImplementable {}
+    class VecLike<T> implements StackLike<T>, IImplementable {
+      public function __construct() {
+        return parent::__construct();
+      }
+    }
   ';
 
     $instance = HH\FileDecls::parseText($text);

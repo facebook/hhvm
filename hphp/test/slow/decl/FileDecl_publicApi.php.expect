@@ -13,4 +13,5 @@ abstract class HasManyConsts {
   public function doesNothing(int $a): void;
 }
 class VecLike<T> implements StackLike<T>, IImplementable {
+  public function __construct(): void;
 }

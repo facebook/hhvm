@@ -610,6 +610,9 @@ pub fn get_public_api_for_class(
     writeln!(buffer, " {{")?;
     write_consts(&mut buffer, class.consts)?;
     write_typeconsts(&mut buffer, class.typeconsts)?;
+    if let Some(constructor) = class.constructor.first() {
+        write_method(&mut buffer, constructor, false)?;
+    }
     write_methods(&mut buffer, class.methods, false)?;
     write_methods(&mut buffer, class.static_methods, true)?;
     writeln!(buffer, "}}")?;

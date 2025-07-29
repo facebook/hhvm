@@ -33,7 +33,7 @@ impl FeatureName {
             Package => OngoingRelease,
             RequirePackage => Unstable,
             CaseTypes => Preview,
-            CaseTypeWhereClauses => Unstable,
+            CaseTypeWhereClauses => Preview,
             ModuleLevelTraits => OngoingRelease,
             ModuleLevelTraitsExtensions => OngoingRelease,
             TypedLocalVariables => Preview,

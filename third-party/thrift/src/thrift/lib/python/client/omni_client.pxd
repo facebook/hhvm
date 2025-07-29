@@ -65,10 +65,14 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::apache::th
     cdef cppclass cIOBufClientBufferedStream "::apache::thrift::python::client::IOBufClientBufferedStream":
         pass
 
+    cdef cppclass cIOBufClientSink "::apache::thrift::python::client::IOBufClientSink":
+        pass
+
     cdef cppclass cOmniClientResponseWithHeaders "::apache::thrift::python::client::OmniClientResponseWithHeaders":
         cExpected[unique_ptr[cIOBuf], cFollyExceptionWrapper] buf
         F14NodeMap[string, string] headers
         unique_ptr[cIOBufClientBufferedStream] stream
+        unique_ptr[cIOBufClientSink] sink
 
     cdef cppclass cOmniClient "::apache::thrift::python::client::OmniClient" nogil:
         cOmniClient(cRequestChannel_ptr channel, const string& serviceName)

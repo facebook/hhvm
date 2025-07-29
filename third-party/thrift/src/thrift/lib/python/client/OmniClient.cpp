@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
+#include <thrift/lib/python/streaming/StreamElementEncoder.h>
 
 namespace apache::thrift::python::client {
 
@@ -154,6 +155,28 @@ std::unique_ptr<IOBufClientBufferedStream> extractClientStream(
       state.extractStreamBridge(),
       decode_stream_element,
       state.bufferOptions());
+}
+
+std::unique_ptr<IOBufClientSink> extractClientSink(
+    apache::thrift::ClientReceiveState& state,
+    apache::thrift::protocol::PROTOCOL_TYPES protocol) {
+  switch (protocol) {
+    case apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL: {
+      static python::detail::PythonStreamElementEncoder<
+          apache::thrift::BinaryProtocolWriter>
+          encoder;
+      return std::make_unique<IOBufClientSink>(
+          state.extractSink(), &encoder, decode_stream_element);
+    }
+    case apache::thrift::protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
+      static python::detail::PythonStreamElementEncoder<
+          apache::thrift::CompactProtocolWriter>
+          encoder;
+      return std::make_unique<IOBufClientSink>(
+          state.extractSink(), &encoder, decode_stream_element);
+    default:
+      LOG(FATAL) << "Only BINARY and COMPACT protocols are supported";
+  }
 }
 
 } // namespace
@@ -330,6 +353,9 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
           resp.buf = std::move(state.serializedResponse().buffer);
           if (rpcKind == RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE) {
             resp.stream = extractClientStream(state);
+          } else if (rpcKind == RpcKind::SINK) {
+            resp.sink = extractClientSink(
+                state, apache::thrift::protocol::PROTOCOL_TYPES(protocol));
           }
 
         } else if (state.messageType() == MessageType::T_EXCEPTION) {

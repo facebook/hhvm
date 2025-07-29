@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -40,10 +41,14 @@ using RequestChannelShared = std::shared_ptr<apache::thrift::RequestChannel>;
 using IOBufClientBufferedStream =
     apache::thrift::ClientBufferedStream<folly::IOBuf>;
 
+using IOBufClientSink =
+    apache::thrift::ClientSink<std::unique_ptr<folly::IOBuf>, folly::IOBuf>;
+
 struct OmniClientResponseWithHeaders {
   folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper> buf;
   apache::thrift::transport::THeader::StringToStringMap headers;
   std::unique_ptr<IOBufClientBufferedStream> stream;
+  std::unique_ptr<IOBufClientSink> sink;
 };
 
 /**

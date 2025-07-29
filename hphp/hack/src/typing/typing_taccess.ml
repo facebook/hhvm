@@ -132,7 +132,7 @@ let eliminate_recursive_access ty type_const_name this_ty =
   match get_node this_ty with
   | Tdependent (DTexpr expr_id, _) ->
     let this_name = Expression_id.display expr_id in
-    let f ty ~ctx =
+    let on_ty ty ~ctx =
       match deref ty with
       | (reason, Taccess (root_ty, (_, name)))
         when String.equal name type_const_name -> begin
@@ -147,8 +147,8 @@ let eliminate_recursive_access ty type_const_name this_ty =
         | _ -> (ctx, `Continue ty)
       end
       | _ -> (ctx, `Continue ty)
-    in
-    Typing_defs_core.transform_top_down_decl_ty ty ~f ~ctx:()
+    and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+    Typing_defs_core.transform_top_down_decl_ty ty ~on_ty ~on_rc_bound ~ctx:()
   | _ -> ty
 
 (** [create_root_from_type_constant ctx env root class_name class_]

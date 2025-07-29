@@ -2008,52 +2008,80 @@ end
 let find_locl_ty locl_ty ~p = Find_locl.find_ty locl_ty ~p
 
 module Transform_top_down_decl = struct
-  let rec transform ty ~f ~ctx =
-    match f ty ~ctx with
+  let rec transform ty ~on_ty ~on_rc_bound ~ctx =
+    match on_ty ty ~ctx with
     | (_, `Stop ty) -> ty
-    | (ctx, `Continue ty) -> traverse ty ~f ~ctx
-    | (ctx, `Restart ty) -> transform ty ~f ~ctx
+    | (ctx, `Continue ty) -> traverse ty ~on_ty ~on_rc_bound ~ctx
+    | (ctx, `Restart ty) -> transform ty ~on_ty ~on_rc_bound ~ctx
 
-  and traverse ty ~f ~ctx =
+  and traverse ty ~on_ty ~on_rc_bound ~ctx =
     match deref ty with
     | ( _,
         ( Tthis | Tmixed | Twildcard | Tany _ | Tnonnull | Tdynamic | Tprim _
         | Tgeneric _ ) ) ->
       ty
-    | (r, Tlike ty) -> mk (r, Tlike (transform ty ~f ~ctx))
-    | (r, Toption ty) -> mk (r, Toption (transform ty ~f ~ctx))
-    | (r, Tclass_ptr ty) -> mk (r, Tclass_ptr (transform ty ~f ~ctx))
-    | (r, Taccess (ty, id)) -> mk (r, Taccess (transform ty ~f ~ctx, id))
+    | (r, Tlike ty) -> mk (r, Tlike (transform ty ~on_ty ~on_rc_bound ~ctx))
+    | (r, Toption ty) -> mk (r, Toption (transform ty ~on_ty ~on_rc_bound ~ctx))
+    | (r, Tclass_ptr ty) ->
+      mk (r, Tclass_ptr (transform ty ~on_ty ~on_rc_bound ~ctx))
+    | (r, Taccess (ty, id)) ->
+      mk (r, Taccess (transform ty ~on_ty ~on_rc_bound ~ctx, id))
     | (r, Tvec_or_dict (ty_k, ty_v)) ->
-      mk (r, Tvec_or_dict (transform ty_k ~f ~ctx, transform ty_v ~f ~ctx))
-    | (r, Tunion tys) -> mk (r, Tunion (List.map tys ~f:(transform ~f ~ctx)))
+      mk
+        ( r,
+          Tvec_or_dict
+            ( transform ty_k ~on_ty ~on_rc_bound ~ctx,
+              transform ty_v ~on_ty ~on_rc_bound ~ctx ) )
+    | (r, Tunion tys) ->
+      mk (r, Tunion (List.map tys ~f:(transform ~on_ty ~on_rc_bound ~ctx)))
     | (r, Tintersection tys) ->
-      mk (r, Tintersection (List.map tys ~f:(transform ~f ~ctx)))
+      mk
+        (r, Tintersection (List.map tys ~f:(transform ~on_ty ~on_rc_bound ~ctx)))
     | (r, Tapply (id, tys)) ->
-      mk (r, Tapply (id, List.map tys ~f:(transform ~f ~ctx)))
+      mk (r, Tapply (id, List.map tys ~f:(transform ~on_ty ~on_rc_bound ~ctx)))
     | (r, Trefinement (ty, class_refinement)) ->
       mk
         ( r,
           Trefinement
-            ( transform ty ~f ~ctx,
-              traverse_class_refinement class_refinement ~f ~ctx ) )
-    | (r, Tfun fun_ty) -> mk (r, Tfun (traverse_fun_ty fun_ty ~f ~ctx))
-    | (r, Ttuple tuple_ty) -> mk (r, Ttuple (traverse_tuple_ty tuple_ty ~f ~ctx))
-    | (r, Tshape shape_ty) -> mk (r, Tshape (traverse_shape_ty shape_ty ~f ~ctx))
+            ( transform ty ~on_ty ~on_rc_bound ~ctx,
+              traverse_class_refinement
+                class_refinement
+                ~on_ty
+                ~on_rc_bound
+                ~ctx ) )
+    | (r, Tfun fun_ty) ->
+      mk (r, Tfun (traverse_fun_ty fun_ty ~on_ty ~on_rc_bound ~ctx))
+    | (r, Ttuple tuple_ty) ->
+      mk (r, Ttuple (traverse_tuple_ty tuple_ty ~on_ty ~on_rc_bound ~ctx))
+    | (r, Tshape shape_ty) ->
+      mk (r, Tshape (traverse_shape_ty shape_ty ~on_ty ~on_rc_bound ~ctx))
 
-  and traverse_class_refinement { cr_consts } ~f ~ctx =
-    { cr_consts = SMap.map (traverse_refined_const ~f ~ctx) cr_consts }
+  and traverse_class_refinement { cr_consts } ~on_ty ~on_rc_bound ~ctx =
+    {
+      cr_consts =
+        SMap.map (traverse_refined_const ~on_ty ~on_rc_bound ~ctx) cr_consts;
+    }
 
-  and traverse_refined_const { rc_bound; rc_is_ctx } ~f ~ctx =
-    let rc_bound = traverse_rc_bound rc_bound ~f ~ctx in
+  and traverse_refined_const { rc_bound; rc_is_ctx } ~on_ty ~on_rc_bound ~ctx =
+    let rc_bound = transform_rc_bound rc_bound ~on_ty ~on_rc_bound ~ctx in
     { rc_bound; rc_is_ctx }
 
-  and traverse_rc_bound rc_bound ~f ~ctx =
+  and transform_rc_bound rc_bound ~on_ty ~on_rc_bound ~ctx =
+    match on_rc_bound rc_bound ~ctx with
+    | (_, `Stop rc_bound) -> rc_bound
+    | (ctx, `Continue rc_bound) ->
+      traverse_rc_bound rc_bound ~on_ty ~on_rc_bound ~ctx
+    | (ctx, `Restart rc_bound) ->
+      transform_rc_bound rc_bound ~on_ty ~on_rc_bound ~ctx
+
+  and traverse_rc_bound rc_bound ~on_ty ~on_rc_bound ~ctx =
     match rc_bound with
-    | TRexact ty -> TRexact (transform ty ~f ~ctx)
+    | TRexact ty -> TRexact (transform ty ~on_ty ~on_rc_bound ~ctx)
     | TRloose { tr_lower; tr_upper } ->
-      let tr_lower = List.map tr_lower ~f:(transform ~f ~ctx)
-      and tr_upper = List.map tr_upper ~f:(transform ~f ~ctx) in
+      let tr_lower = List.map tr_lower ~f:(transform ~on_ty ~on_rc_bound ~ctx)
+      and tr_upper =
+        List.map tr_upper ~f:(transform ~on_ty ~on_rc_bound ~ctx)
+      in
       TRloose { tr_lower; tr_upper }
 
   and traverse_fun_ty
@@ -2065,28 +2093,32 @@ module Transform_top_down_decl = struct
          ft_ret;
          _;
        } as fun_ty)
-      ~f
+      ~on_ty
+      ~on_rc_bound
       ~ctx =
     let ft_tparams =
       List.map ft_tparams ~f:(fun ({ tp_constraints; _ } as tparam) ->
           let tp_constraints =
             List.map tp_constraints ~f:(fun (cstr_kind, ty) ->
-                (cstr_kind, transform ty ~f ~ctx))
+                (cstr_kind, transform ty ~on_ty ~on_rc_bound ~ctx))
           in
           { tparam with tp_constraints })
     and ft_params =
       List.map ft_params ~f:(fun ({ fp_type; _ } as fun_param) ->
-          let fp_type = transform fp_type ~f ~ctx in
+          let fp_type = transform fp_type ~on_ty ~on_rc_bound ~ctx in
           { fun_param with fp_type })
     and ft_implicit_params =
       let { capability } = ft_implicit_params in
       match capability with
       | CapDefaults _ -> ft_implicit_params
-      | CapTy ty -> { capability = CapTy (transform ty ~f ~ctx) }
+      | CapTy ty ->
+        { capability = CapTy (transform ty ~on_ty ~on_rc_bound ~ctx) }
     and ft_where_constraints =
       List.map ft_where_constraints ~f:(fun (ty1, cstr_kind, ty2) ->
-          (transform ty1 ~f ~ctx, cstr_kind, transform ty2 ~f ~ctx))
-    and ft_ret = transform ft_ret ~f ~ctx in
+          ( transform ty1 ~on_ty ~on_rc_bound ~ctx,
+            cstr_kind,
+            transform ty2 ~on_ty ~on_rc_bound ~ctx ))
+    and ft_ret = transform ft_ret ~on_ty ~on_rc_bound ~ctx in
     {
       fun_ty with
       ft_tparams;
@@ -2096,32 +2128,34 @@ module Transform_top_down_decl = struct
       ft_ret;
     }
 
-  and traverse_tuple_ty { t_required; t_extra } ~f ~ctx =
-    let t_required = List.map t_required ~f:(transform ~f ~ctx)
+  and traverse_tuple_ty { t_required; t_extra } ~on_ty ~on_rc_bound ~ctx =
+    let t_required = List.map t_required ~f:(transform ~on_ty ~on_rc_bound ~ctx)
     and t_extra =
       match t_extra with
-      | Tsplat ty -> Tsplat (transform ty ~f ~ctx)
+      | Tsplat ty -> Tsplat (transform ty ~on_ty ~on_rc_bound ~ctx)
       | Textra { t_optional; t_variadic } ->
-        let t_optional = List.map t_optional ~f:(transform ~f ~ctx)
-        and t_variadic = transform t_variadic ~f ~ctx in
+        let t_optional =
+          List.map t_optional ~f:(transform ~on_ty ~on_rc_bound ~ctx)
+        and t_variadic = transform t_variadic ~on_ty ~on_rc_bound ~ctx in
         Textra { t_optional; t_variadic }
     in
     { t_required; t_extra }
 
-  and traverse_shape_ty { s_origin; s_unknown_value; s_fields } ~f ~ctx =
-    let s_unknown_value = transform s_unknown_value ~f ~ctx
+  and traverse_shape_ty
+      { s_origin; s_unknown_value; s_fields } ~on_ty ~on_rc_bound ~ctx =
+    let s_unknown_value = transform s_unknown_value ~on_ty ~on_rc_bound ~ctx
     and s_fields =
       TShapeMap.map
         (fun { sft_optional; sft_ty } ->
-          let sft_ty = transform sft_ty ~f ~ctx in
+          let sft_ty = transform sft_ty ~on_ty ~on_rc_bound ~ctx in
           { sft_optional; sft_ty })
         s_fields
     in
     { s_origin; s_unknown_value; s_fields }
 end
 
-let transform_top_down_decl_ty decl_ty ~f ~ctx =
-  Transform_top_down_decl.transform decl_ty ~f ~ctx
+let transform_top_down_decl_ty decl_ty ~on_ty ~on_rc_bound ~ctx =
+  Transform_top_down_decl.transform decl_ty ~on_ty ~on_rc_bound ~ctx
 
 let is_type_tag_generic_wildcard generic =
   match generic with

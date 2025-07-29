@@ -527,21 +527,21 @@ end = struct
         build this reason rest ~k:(fun root ->
             k (mk (reason, Taccess (root, next))))
     in
-    let f ty ~ctx =
+    let on_ty ty ~ctx =
       match deref ty with
       | (reason, Tthis) -> build ty reason prefix ~k:(fun ty -> (ctx, `Stop ty))
       | _ -> (ctx, `Continue ty)
-    in
-    Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~f
+    and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+    Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
 
   let replace_this_with ty ~replacement =
     let open Typing_defs_core in
-    let f ty ~ctx =
+    let on_ty ty ~ctx =
       match get_node ty with
       | Tthis -> (ctx, `Stop replacement)
       | _ -> (ctx, `Continue ty)
-    in
-    Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~f
+    and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+    Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
 
   (** Accumulate all types mentioned in the definition or bounds of a type constant *)
   let accumulate_tys typeconst tys =
@@ -578,8 +578,10 @@ end = struct
         in
         (ctx, `Stop decl_ty)
       | _ -> (ctx, `Continue decl_ty)
+    and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+    let _ =
+      Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
     in
-    let _ = Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~f:on_ty in
     !paths
   (* -- Core logic ---------------------------------------------------------  *)
 
@@ -855,17 +857,21 @@ end = struct
     (* For the analysis of this we need to subsitute occurrences of typeconst
        access rooted in the explicit class with [this] *)
     let this_trie =
-      let f ty ~ctx =
+      let on_ty ty ~ctx =
         let open Typing_defs_core in
         match deref ty with
         | (reason, Tapply ((_, class_name), _))
           when String.equal this_name class_name ->
           (ctx, `Stop (mk (reason, Tthis)))
         | _ -> (ctx, `Continue ty)
-      in
+      and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
       Trie.transform
         this_trie
-        ~f:(Typing_defs_core.transform_top_down_decl_ty ~ctx:() ~f)
+        ~f:
+          (Typing_defs_core.transform_top_down_decl_ty
+             ~ctx:()
+             ~on_ty
+             ~on_rc_bound)
     in
     { t with this_trie; tries }
 
@@ -893,7 +899,7 @@ end = struct
 
     (* -- Application ------------------------------------------------------- *)
     let apply { this_name; this_ty; this_subst; class_subst; _ } ty =
-      let transform ty ~ctx =
+      let on_ty ty ~ctx =
         let open Typing_defs_core in
         match get_node ty with
         | Tthis -> (ctx, `Stop this_ty)
@@ -937,10 +943,11 @@ end = struct
                 (ctx, `Restart ty))
         end
         | _ -> (ctx, `Continue ty)
-      in
+      and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
       Typing_defs_core.transform_top_down_decl_ty
         ty
-        ~f:transform
+        ~on_ty
+        ~on_rc_bound
         ~ctx:SSet.empty
 
     let apply_fun_ty t fun_ty =
@@ -1238,8 +1245,10 @@ let ty_generics names ty =
       let () = acc := SSet.add nm !acc in
       (ctx, `Stop decl_ty)
     | _ -> (ctx, `Continue decl_ty)
+  and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+  let _ =
+    Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
   in
-  let _ = Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~f:on_ty in
   !acc
 
 let drop_unused_generics fun_ty ~names =

@@ -44,6 +44,7 @@ func ReadPersonID(p thrift.Decoder) (PersonID, error) {
     return decodeResult, decodeErr
 }
 
+
 type Animal int32
 
 const (

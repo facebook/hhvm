@@ -89,6 +89,7 @@ func ReadContainerTypedef(p thrift.Decoder) (ContainerTypedef, error) {
     }()
     return decodeResult, decodeErr
 }
+
 type ComplexUnion struct {
     IntValue *int64 `thrift:"intValue,1" json:"intValue,omitempty" db:"intValue"`
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`

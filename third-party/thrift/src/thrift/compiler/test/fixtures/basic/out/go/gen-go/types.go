@@ -61,6 +61,7 @@ func ReadMyEnumAlias(p thrift.Decoder) (MyEnumAlias, error) {
     return decodeResult, decodeErr
 }
 
+
 type MyDataItemAlias = MyDataItem
 
 func NewMyDataItemAlias() *MyDataItemAlias {
@@ -87,6 +88,7 @@ func ReadMyDataItemAlias(p thrift.Decoder) (*MyDataItemAlias, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type MyEnum int32
 

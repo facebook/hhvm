@@ -45,6 +45,7 @@ func ReadIncredibleStruct(p thrift.Decoder) (*IncredibleStruct, error) {
     return decodeResult, decodeErr
 }
 
+
 type BrilliantStruct = MyStruct
 
 func NewBrilliantStruct() *BrilliantStruct {
@@ -71,6 +72,7 @@ func ReadBrilliantStruct(p thrift.Decoder) (*BrilliantStruct, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type ListString_6884 = []string
 
@@ -126,6 +128,7 @@ func ReadListString_6884(p thrift.Decoder) (ListString_6884, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type MyEnum int32
 

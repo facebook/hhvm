@@ -44,6 +44,7 @@ func ReadLanyard(p thrift.Decoder) (Lanyard, error) {
     return decodeResult, decodeErr
 }
 
+
 type Number = int32
 
 func NewNumber() Number {
@@ -69,6 +70,7 @@ func ReadNumber(p thrift.Decoder) (Number, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type B int32
 

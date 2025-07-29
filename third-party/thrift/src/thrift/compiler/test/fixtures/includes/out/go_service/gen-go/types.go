@@ -49,6 +49,7 @@ func ReadIncludesIncluded(p thrift.Decoder) (*IncludesIncluded, error) {
     return decodeResult, decodeErr
 }
 
+
 type IncludesTransitiveFoo = includes.TransitiveFoo
 
 func NewIncludesTransitiveFoo() *IncludesTransitiveFoo {
@@ -75,6 +76,7 @@ func ReadIncludesTransitiveFoo(p thrift.Decoder) (*IncludesTransitiveFoo, error)
     }()
     return decodeResult, decodeErr
 }
+
 
 // Service req/resp structs (below)
 type reqMyServiceQuery struct {

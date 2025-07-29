@@ -64,6 +64,7 @@ func ReadMyCompany(p thrift.Decoder) (MyCompany, error) {
     return decodeResult, decodeErr
 }
 
+
 type MyStringIdentifier = string
 
 func NewMyStringIdentifier() MyStringIdentifier {
@@ -90,6 +91,7 @@ func ReadMyStringIdentifier(p thrift.Decoder) (MyStringIdentifier, error) {
     return decodeResult, decodeErr
 }
 
+
 type MyIntIdentifier = int32
 
 func NewMyIntIdentifier() MyIntIdentifier {
@@ -115,6 +117,7 @@ func ReadMyIntIdentifier(p thrift.Decoder) (MyIntIdentifier, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type MyMapIdentifier = map[string]string
 
@@ -187,6 +190,7 @@ func ReadMyMapIdentifier(p thrift.Decoder) (MyMapIdentifier, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type EmptyEnum int32
 

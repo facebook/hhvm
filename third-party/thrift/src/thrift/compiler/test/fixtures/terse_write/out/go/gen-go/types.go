@@ -44,6 +44,7 @@ func ReadMyInteger(p thrift.Decoder) (MyInteger, error) {
     return decodeResult, decodeErr
 }
 
+
 type MyEnum int32
 
 const (

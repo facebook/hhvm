@@ -48,6 +48,7 @@ func ReadPlate(p thrift.Decoder) (Plate, error) {
     return decodeResult, decodeErr
 }
 
+
 type State = string
 
 func NewState() State {
@@ -74,6 +75,7 @@ func ReadState(p thrift.Decoder) (State, error) {
     return decodeResult, decodeErr
 }
 
+
 type Year = int32
 
 func NewYear() Year {
@@ -99,6 +101,7 @@ func ReadYear(p thrift.Decoder) (Year, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type Drivers = []string
 
@@ -155,6 +158,7 @@ func ReadDrivers(p thrift.Decoder) (Drivers, error) {
     return decodeResult, decodeErr
 }
 
+
 type Accessory = module0.Accessory
 
 func NewAccessory() *Accessory {
@@ -182,6 +186,7 @@ func ReadAccessory(p thrift.Decoder) (*Accessory, error) {
     return decodeResult, decodeErr
 }
 
+
 type CarPartName = module0.PartName
 
 func NewCarPartName() *CarPartName {
@@ -208,6 +213,7 @@ func ReadCarPartName(p thrift.Decoder) (*CarPartName, error) {
     }()
     return decodeResult, decodeErr
 }
+
 
 type Enum = module2.Enum
 
@@ -253,6 +259,7 @@ func ReadEnum(p thrift.Decoder) (Enum, error) {
     return decodeResult, decodeErr
 }
 
+
 type Car = Automobile
 
 func NewCar() *Car {
@@ -279,6 +286,7 @@ func ReadCar(p thrift.Decoder) (*Car, error) {
     }()
     return decodeResult, decodeErr
 }
+
 type Automobile struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
     PreviousPlate *Plate `thrift:"previous_plate,2,optional" json:"previous_plate,omitempty" db:"previous_plate"`

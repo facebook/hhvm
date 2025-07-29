@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type Metasyntactic int32
 
 const (
@@ -58,7 +57,6 @@ func MetasyntacticFromString(s string) (Metasyntactic, error) {
     }
     return Metasyntactic(0), fmt.Errorf("not a valid Metasyntactic string")
 }
-
 
 type MyEnum1 int32
 
@@ -107,7 +105,6 @@ func MyEnum1FromString(s string) (MyEnum1, error) {
     return MyEnum1(0), fmt.Errorf("not a valid MyEnum1 string")
 }
 
-
 type MyEnum2 int32
 
 const (
@@ -145,7 +142,6 @@ func MyEnum2FromString(s string) (MyEnum2, error) {
     }
     return MyEnum2(0), fmt.Errorf("not a valid MyEnum2 string")
 }
-
 
 type MyEnum3 int32
 
@@ -194,7 +190,6 @@ func MyEnum3FromString(s string) (MyEnum3, error) {
     return MyEnum3(0), fmt.Errorf("not a valid MyEnum3 string")
 }
 
-
 type MyEnum4 int32
 
 const (
@@ -236,7 +231,6 @@ func MyEnum4FromString(s string) (MyEnum4, error) {
     return MyEnum4(0), fmt.Errorf("not a valid MyEnum4 string")
 }
 
-
 type MyBitmaskEnum1 int32
 
 const (
@@ -274,7 +268,6 @@ func MyBitmaskEnum1FromString(s string) (MyBitmaskEnum1, error) {
     }
     return MyBitmaskEnum1(0), fmt.Errorf("not a valid MyBitmaskEnum1 string")
 }
-
 
 type MyBitmaskEnum2 int32
 
@@ -894,7 +887,6 @@ func (x *MyStruct) setDefaults() *MyStruct {
               MyEnum1_ME1_1,
           )
 }
-
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.

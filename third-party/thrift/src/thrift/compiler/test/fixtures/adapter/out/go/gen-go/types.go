@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type SetWithAdapter = []string
 
 func NewSetWithAdapter() SetWithAdapter {
@@ -73,7 +72,6 @@ func ReadSetWithAdapter(p thrift.Decoder) (SetWithAdapter, error) {
     return decodeResult, decodeErr
 }
 
-
 type StringWithAdapter = string
 
 func NewStringWithAdapter() StringWithAdapter {
@@ -99,7 +97,6 @@ func ReadStringWithAdapter(p thrift.Decoder) (StringWithAdapter, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type ListWithElemAdapter = []StringWithAdapter
 
@@ -157,7 +154,6 @@ func ReadListWithElemAdapter(p thrift.Decoder) (ListWithElemAdapter, error) {
     return decodeResult, decodeErr
 }
 
-
 type ListWithElemAdapterWithAdapter = ListWithElemAdapter
 
 func NewListWithElemAdapterWithAdapter() ListWithElemAdapterWithAdapter {
@@ -185,7 +181,6 @@ func ReadListWithElemAdapterWithAdapter(p thrift.Decoder) (ListWithElemAdapterWi
     return decodeResult, decodeErr
 }
 
-
 type MyI64 = int64
 
 func NewMyI64() MyI64 {
@@ -211,7 +206,6 @@ func ReadMyI64(p thrift.Decoder) (MyI64, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type DoubleTypedefI64 = MyI64
 
@@ -240,7 +234,6 @@ func ReadDoubleTypedefI64(p thrift.Decoder) (DoubleTypedefI64, error) {
     return decodeResult, decodeErr
 }
 
-
 type MyI32 = int32
 
 func NewMyI32() MyI32 {
@@ -266,7 +259,6 @@ func ReadMyI32(p thrift.Decoder) (MyI32, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type FooWithAdapter = Foo
 
@@ -295,7 +287,6 @@ func ReadFooWithAdapter(p thrift.Decoder) (*FooWithAdapter, error) {
     return decodeResult, decodeErr
 }
 
-
 type StructWithAdapter = Bar
 
 func NewStructWithAdapter() *StructWithAdapter {
@@ -322,7 +313,6 @@ func ReadStructWithAdapter(p thrift.Decoder) (*StructWithAdapter, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type UnionWithAdapter = Baz
 
@@ -351,7 +341,6 @@ func ReadUnionWithAdapter(p thrift.Decoder) (*UnionWithAdapter, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedA = A
 
 func NewAdaptedA() *AdaptedA {
@@ -379,7 +368,6 @@ func ReadAdaptedA(p thrift.Decoder) (*AdaptedA, error) {
     return decodeResult, decodeErr
 }
 
-
 type StringWithCppAdapter = string
 
 func NewStringWithCppAdapter() StringWithCppAdapter {
@@ -405,7 +393,6 @@ func ReadStringWithCppAdapter(p thrift.Decoder) (StringWithCppAdapter, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type DurationMs = int64
 
@@ -433,7 +420,6 @@ func ReadDurationMs(p thrift.Decoder) (DurationMs, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedBool = bool
 
 func NewAdaptedBool() AdaptedBool {
@@ -459,7 +445,6 @@ func ReadAdaptedBool(p thrift.Decoder) (AdaptedBool, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type AdaptedByte = int8
 
@@ -488,7 +473,6 @@ func ReadAdaptedByte(p thrift.Decoder) (AdaptedByte, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedShort = int16
 
 func NewAdaptedShort() AdaptedShort {
@@ -514,7 +498,6 @@ func ReadAdaptedShort(p thrift.Decoder) (AdaptedShort, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type AdaptedInteger = int32
 
@@ -542,7 +525,6 @@ func ReadAdaptedInteger(p thrift.Decoder) (AdaptedInteger, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedLong = int64
 
 func NewAdaptedLong() AdaptedLong {
@@ -568,7 +550,6 @@ func ReadAdaptedLong(p thrift.Decoder) (AdaptedLong, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type AdaptedDouble = float64
 
@@ -596,7 +577,6 @@ func ReadAdaptedDouble(p thrift.Decoder) (AdaptedDouble, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedString = string
 
 func NewAdaptedString() AdaptedString {
@@ -622,7 +602,6 @@ func ReadAdaptedString(p thrift.Decoder) (AdaptedString, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type DoubleTypedefBool = AdaptedBool
 
@@ -651,7 +630,6 @@ func ReadDoubleTypedefBool(p thrift.Decoder) (DoubleTypedefBool, error) {
     return decodeResult, decodeErr
 }
 
-
 type IOBuf = []byte
 
 func NewIOBuf() IOBuf {
@@ -677,7 +655,6 @@ func ReadIOBuf(p thrift.Decoder) (IOBuf, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type CustomProtocolType = IOBuf
 
@@ -706,7 +683,6 @@ func ReadCustomProtocolType(p thrift.Decoder) (CustomProtocolType, error) {
     return decodeResult, decodeErr
 }
 
-
 type IndirectionString = string
 
 func NewIndirectionString() IndirectionString {
@@ -732,7 +708,6 @@ func ReadIndirectionString(p thrift.Decoder) (IndirectionString, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type AdaptedEnum = ThriftAdaptedEnum
 
@@ -777,7 +752,6 @@ func ReadAdaptedEnum(p thrift.Decoder) (AdaptedEnum, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedTypedef = AdaptedStruct
 
 func NewAdaptedTypedef() *AdaptedTypedef {
@@ -804,7 +778,6 @@ func ReadAdaptedTypedef(p thrift.Decoder) (*AdaptedTypedef, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type TypedefOfDirect = DirectlyAdaptedStruct
 
@@ -833,7 +806,6 @@ func ReadTypedefOfDirect(p thrift.Decoder) (*TypedefOfDirect, error) {
     return decodeResult, decodeErr
 }
 
-
 type AdaptedCircularAdaptee = CircularAdaptee
 
 func NewAdaptedCircularAdaptee() *AdaptedCircularAdaptee {
@@ -861,7 +833,6 @@ func ReadAdaptedCircularAdaptee(p thrift.Decoder) (*AdaptedCircularAdaptee, erro
     return decodeResult, decodeErr
 }
 
-
 type CountingInt = int64
 
 func NewCountingInt() CountingInt {
@@ -887,7 +858,6 @@ func ReadCountingInt(p thrift.Decoder) (CountingInt, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type FooWithAdapter_9317 = FooWithAdapter
 
@@ -916,7 +886,6 @@ func ReadFooWithAdapter_9317(p thrift.Decoder) (*FooWithAdapter_9317, error) {
     return decodeResult, decodeErr
 }
 
-
 type ListWithElemAdapterWithAdapter_2312 = ListWithElemAdapterWithAdapter
 
 func NewListWithElemAdapterWithAdapter_2312() ListWithElemAdapterWithAdapter_2312 {
@@ -943,7 +912,6 @@ func ReadListWithElemAdapterWithAdapter_2312(p thrift.Decoder) (ListWithElemAdap
     }()
     return decodeResult, decodeErr
 }
-
 
 type MyI32_4873 = MyI32
 
@@ -972,7 +940,6 @@ func ReadMyI32_4873(p thrift.Decoder) (MyI32_4873, error) {
     return decodeResult, decodeErr
 }
 
-
 type StringWithAdapter_7208 = StringWithAdapter
 
 func NewStringWithAdapter_7208() StringWithAdapter_7208 {
@@ -999,7 +966,6 @@ func ReadStringWithAdapter_7208(p thrift.Decoder) (StringWithAdapter_7208, error
     }()
     return decodeResult, decodeErr
 }
-
 
 type Baz_7352 = Baz
 
@@ -1028,7 +994,6 @@ func ReadBaz_7352(p thrift.Decoder) (*Baz_7352, error) {
     return decodeResult, decodeErr
 }
 
-
 type Foo_3943 = Foo
 
 func NewFoo_3943() *Foo_3943 {
@@ -1055,7 +1020,6 @@ func ReadFoo_3943(p thrift.Decoder) (*Foo_3943, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type Foo_6868 = Foo
 
@@ -1084,7 +1048,6 @@ func ReadFoo_6868(p thrift.Decoder) (*Foo_6868, error) {
     return decodeResult, decodeErr
 }
 
-
 type Binary_5673 = []byte
 
 func NewBinary_5673() Binary_5673 {
@@ -1111,7 +1074,6 @@ func ReadBinary_5673(p thrift.Decoder) (Binary_5673, error) {
     return decodeResult, decodeErr
 }
 
-
 type I32_5137 = int32
 
 func NewI32_5137() I32_5137 {
@@ -1137,7 +1099,6 @@ func ReadI32_5137(p thrift.Decoder) (I32_5137, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type MapString_ListWithElemAdapterWithAdapter_8454 = map[string]ListWithElemAdapterWithAdapter_2312
 
@@ -1212,7 +1173,6 @@ func ReadMapString_ListWithElemAdapterWithAdapter_8454(p thrift.Decoder) (MapStr
     return decodeResult, decodeErr
 }
 
-
 type Color int32
 
 const (
@@ -1253,7 +1213,6 @@ func ColorFromString(s string) (Color, error) {
     }
     return Color(0), fmt.Errorf("not a valid Color string")
 }
-
 
 type ThriftAdaptedEnum int32
 
@@ -9351,8 +9310,6 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) setDefaults() *RenamedSt
         SetFieldNonCompat(0)
 }
 
-
-// Service req/resp structs (below)
 type reqServiceFunc struct {
     Arg1 StringWithAdapter_7208 `thrift:"arg1,1" json:"arg1" db:"arg1"`
     Arg2 StringWithCppAdapter `thrift:"arg2,2" json:"arg2" db:"arg2"`

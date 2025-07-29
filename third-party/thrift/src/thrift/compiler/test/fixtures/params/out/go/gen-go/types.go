@@ -17,8 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
-// Service req/resp structs (below)
 type reqNestedContainersMapList struct {
     Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }

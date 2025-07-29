@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type PersonID = int64
 
 func NewPersonID() PersonID {
@@ -43,7 +42,6 @@ func ReadPersonID(p thrift.Decoder) (PersonID, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type Animal int32
 
@@ -1445,7 +1443,6 @@ func (x *Person) setDefaults() *Person {
         SetIdNonCompat(NewPersonID()).
         SetNameNonCompat("")
 }
-
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.

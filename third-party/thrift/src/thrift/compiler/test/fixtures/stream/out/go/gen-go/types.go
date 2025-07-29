@@ -242,8 +242,6 @@ func (x *FooEx2) setDefaults() *FooEx2 {
 func (x *FooEx2) Error() string {
     return x.String()
 }
-
-// Service req/resp structs (below)
 type reqPubSubStreamingServiceReturnstream struct {
     I32From int32 `thrift:"i32_from,1" json:"i32_from" db:"i32_from"`
     I32To int32 `thrift:"i32_to,2" json:"i32_to" db:"i32_to"`

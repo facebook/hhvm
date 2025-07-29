@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type ContainerTypedef = map[int16]string
 
 func NewContainerTypedef() ContainerTypedef {
@@ -1962,7 +1961,6 @@ func (x *NonCopyableUnion) String() string {
 func (x *NonCopyableUnion) setDefaults() *NonCopyableUnion {
     return x
 }
-
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.

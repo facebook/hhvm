@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type Enum int32
 
 const (
@@ -55,6 +54,5 @@ func EnumFromString(s string) (Enum, error) {
     }
     return Enum(0), fmt.Errorf("not a valid Enum string")
 }
-
 
 

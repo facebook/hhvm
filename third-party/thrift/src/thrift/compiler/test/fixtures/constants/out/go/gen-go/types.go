@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type MyCompany = Company
 
 const (
@@ -64,7 +63,6 @@ func ReadMyCompany(p thrift.Decoder) (MyCompany, error) {
     return decodeResult, decodeErr
 }
 
-
 type MyStringIdentifier = string
 
 func NewMyStringIdentifier() MyStringIdentifier {
@@ -91,7 +89,6 @@ func ReadMyStringIdentifier(p thrift.Decoder) (MyStringIdentifier, error) {
     return decodeResult, decodeErr
 }
 
-
 type MyIntIdentifier = int32
 
 func NewMyIntIdentifier() MyIntIdentifier {
@@ -117,7 +114,6 @@ func ReadMyIntIdentifier(p thrift.Decoder) (MyIntIdentifier, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type MyMapIdentifier = map[string]string
 
@@ -191,7 +187,6 @@ func ReadMyMapIdentifier(p thrift.Decoder) (MyMapIdentifier, error) {
     return decodeResult, decodeErr
 }
 
-
 type EmptyEnum int32
 
 const (
@@ -220,7 +215,6 @@ func EmptyEnumFromString(s string) (EmptyEnum, error) {
     }
     return EmptyEnum(0), fmt.Errorf("not a valid EmptyEnum string")
 }
-
 
 type City int32
 
@@ -262,7 +256,6 @@ func CityFromString(s string) (City, error) {
     }
     return City(0), fmt.Errorf("not a valid City string")
 }
-
 
 type Company int32
 
@@ -2287,7 +2280,6 @@ func (x *Union2) String() string {
 func (x *Union2) setDefaults() *Union2 {
     return x
 }
-
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.

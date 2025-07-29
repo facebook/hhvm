@@ -562,8 +562,6 @@ func (x *NonComparableStruct) setDefaults() *NonComparableStruct {
         SetBazNonCompat(make(map[*NonComparableStruct]int64))
 }
 
-
-// Service req/resp structs (below)
 type reqGetEntityGetEntity struct {
     R *GetEntityRequest `thrift:"r,1" json:"r" db:"r"`
 }

@@ -21,7 +21,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type IncludesIncluded = includes.Included
 
 func NewIncludesIncluded() *IncludesIncluded {
@@ -48,7 +47,6 @@ func ReadIncludesIncluded(p thrift.Decoder) (*IncludesIncluded, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type IncludesTransitiveFoo = includes.TransitiveFoo
 
@@ -77,8 +75,6 @@ func ReadIncludesTransitiveFoo(p thrift.Decoder) (*IncludesTransitiveFoo, error)
     return decodeResult, decodeErr
 }
 
-
-// Service req/resp structs (below)
 type reqMyServiceQuery struct {
     S *module.MyStruct `thrift:"s,1" json:"s" db:"s"`
     I *includes.Included `thrift:"i,2" json:"i" db:"i"`

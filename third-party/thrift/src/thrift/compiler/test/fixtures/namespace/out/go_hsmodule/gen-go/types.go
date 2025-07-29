@@ -136,8 +136,6 @@ func (x *HsFoo) setDefaults() *HsFoo {
         SetMyIntNonCompat(0)
 }
 
-
-// Service req/resp structs (below)
 type reqHsTestServiceInit struct {
     Int1 int64 `thrift:"int1,1" json:"int1" db:"int1"`
 }

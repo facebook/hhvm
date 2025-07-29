@@ -1023,8 +1023,6 @@ func (x *Banal) setDefaults() *Banal {
 func (x *Banal) Error() string {
     return x.String()
 }
-
-// Service req/resp structs (below)
 type reqRaiserDoBland struct {
 }
 // Compile time interface enforcer

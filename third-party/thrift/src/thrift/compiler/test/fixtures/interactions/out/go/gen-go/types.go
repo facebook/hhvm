@@ -260,8 +260,6 @@ func (x *ShouldBeBoxed) setDefaults() *ShouldBeBoxed {
         SetSessionIdNonCompat("")
 }
 
-
-// Service req/resp structs (below)
 type reqMyServiceFoo struct {
 }
 // Compile time interface enforcer

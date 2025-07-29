@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type MyInteger = int32
 
 func NewMyInteger() MyInteger {
@@ -43,7 +42,6 @@ func ReadMyInteger(p thrift.Decoder) (MyInteger, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type MyEnum int32
 
@@ -4388,7 +4386,6 @@ func (x *TerseException) setDefaults() *TerseException {
 func (x *TerseException) Error() string {
     return x.String()
 }
-
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

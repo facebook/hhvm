@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type Lanyard = string
 
 func NewLanyard() Lanyard {
@@ -44,7 +43,6 @@ func ReadLanyard(p thrift.Decoder) (Lanyard, error) {
     return decodeResult, decodeErr
 }
 
-
 type Number = int32
 
 func NewNumber() Number {
@@ -70,7 +68,6 @@ func ReadNumber(p thrift.Decoder) (Number, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type B int32
 
@@ -551,8 +548,6 @@ func (x *Bang) setDefaults() *Bang {
 func (x *Bang) Error() string {
     return x.String()
 }
-
-// Service req/resp structs (below)
 type reqCF struct {
 }
 // Compile time interface enforcer

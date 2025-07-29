@@ -19,7 +19,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type TBinary = []byte
 
 func NewTBinary() TBinary {
@@ -46,7 +45,6 @@ func ReadTBinary(p thrift.Decoder) (TBinary, error) {
     return decodeResult, decodeErr
 }
 
-
 type IntTypedef = int32
 
 func NewIntTypedef() IntTypedef {
@@ -72,7 +70,6 @@ func ReadIntTypedef(p thrift.Decoder) (IntTypedef, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type UintTypedef = IntTypedef
 
@@ -101,7 +98,6 @@ func ReadUintTypedef(p thrift.Decoder) (UintTypedef, error) {
     return decodeResult, decodeErr
 }
 
-
 type SomeListOfTypeMap_2468 = included.SomeListOfTypeMap
 
 func NewSomeListOfTypeMap_2468() SomeListOfTypeMap_2468 {
@@ -128,7 +124,6 @@ func ReadSomeListOfTypeMap_2468(p thrift.Decoder) (SomeListOfTypeMap_2468, error
     }()
     return decodeResult, decodeErr
 }
-
 
 type TBinary_8623 = TBinary
 
@@ -157,7 +152,6 @@ func ReadTBinary_8623(p thrift.Decoder) (TBinary_8623, error) {
     return decodeResult, decodeErr
 }
 
-
 type I32_9314 = int32
 
 func NewI32_9314() I32_9314 {
@@ -183,7 +177,6 @@ func ReadI32_9314(p thrift.Decoder) (I32_9314, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type ListI32_9187 = []int32
 
@@ -239,7 +232,6 @@ func ReadListI32_9187(p thrift.Decoder) (ListI32_9187, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type MapI32I32_9565 = map[int32]int32
 
@@ -313,7 +305,6 @@ func ReadMapI32I32_9565(p thrift.Decoder) (MapI32I32_9565, error) {
     return decodeResult, decodeErr
 }
 
-
 type MapI32String_1261 = map[int32]string
 
 func NewMapI32String_1261() MapI32String_1261 {
@@ -386,7 +377,6 @@ func ReadMapI32String_1261(p thrift.Decoder) (MapI32String_1261, error) {
     return decodeResult, decodeErr
 }
 
-
 type SetI32_7070 = []int32
 
 func NewSetI32_7070() SetI32_7070 {
@@ -441,7 +431,6 @@ func ReadSetI32_7070(p thrift.Decoder) (SetI32_7070, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type SetI32_7194 = []int32
 
@@ -498,7 +487,6 @@ func ReadSetI32_7194(p thrift.Decoder) (SetI32_7194, error) {
     return decodeResult, decodeErr
 }
 
-
 type String_5252 = string
 
 func NewString_5252() String_5252 {
@@ -524,7 +512,6 @@ func ReadString_5252(p thrift.Decoder) (String_5252, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type HasBitwiseOps int32
 
@@ -570,7 +557,6 @@ func HasBitwiseOpsFromString(s string) (HasBitwiseOps, error) {
     return HasBitwiseOps(0), fmt.Errorf("not a valid HasBitwiseOps string")
 }
 
-
 type IsUnscoped int32
 
 const (
@@ -605,7 +591,6 @@ func IsUnscopedFromString(s string) (IsUnscoped, error) {
     }
     return IsUnscoped(0), fmt.Errorf("not a valid IsUnscoped string")
 }
-
 
 type MyForwardRefEnum int32
 
@@ -6879,8 +6864,6 @@ func (x *StructWithDoubleUnderscores) setDefaults() *StructWithDoubleUnderscores
         Set_FieldNonCompat(0)
 }
 
-
-// Service req/resp structs (below)
 type reqSomeServiceBounceMap struct {
     M included.SomeMap `thrift:"m,1" json:"m" db:"m"`
 }

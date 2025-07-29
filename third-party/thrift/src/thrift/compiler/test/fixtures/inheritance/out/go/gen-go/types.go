@@ -17,8 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
-// Service req/resp structs (below)
 type reqMyRootDoRoot struct {
 }
 // Compile time interface enforcer

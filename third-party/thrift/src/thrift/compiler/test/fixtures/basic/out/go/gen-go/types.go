@@ -17,7 +17,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
 type MyEnumAlias = MyEnum
 
 const (
@@ -61,7 +60,6 @@ func ReadMyEnumAlias(p thrift.Decoder) (MyEnumAlias, error) {
     return decodeResult, decodeErr
 }
 
-
 type MyDataItemAlias = MyDataItem
 
 func NewMyDataItemAlias() *MyDataItemAlias {
@@ -88,7 +86,6 @@ func ReadMyDataItemAlias(p thrift.Decoder) (*MyDataItemAlias, error) {
     }()
     return decodeResult, decodeErr
 }
-
 
 type MyEnum int32
 
@@ -124,7 +121,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
     }
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
 }
-
 
 type HackEnum int32
 
@@ -2317,8 +2313,6 @@ func (x *UnionToBeRenamed) setDefaults() *UnionToBeRenamed {
     return x
 }
 
-
-// Service req/resp structs (below)
 type reqFooServiceSimpleRPC struct {
 }
 // Compile time interface enforcer

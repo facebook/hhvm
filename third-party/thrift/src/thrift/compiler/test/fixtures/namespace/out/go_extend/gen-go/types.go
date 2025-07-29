@@ -19,8 +19,6 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-
-// Service req/resp structs (below)
 type reqExtendTestServiceCheck struct {
     Struct1 *test0.HsFoo `thrift:"struct1,1" json:"struct1" db:"struct1"`
 }

@@ -22,6 +22,12 @@ module Variance_analysis : sig
     Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
     env:Typing_env_types.env ->
     Ast_defs.variance option
+
+  val analyse_ty_params :
+    Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
+    SSet.t ->
+    env:Typing_env_types.env ->
+    Ast_defs.variance option SMap.t
 end = struct
   let mul v1 v2 =
     let open Ast_defs in
@@ -75,9 +81,62 @@ end = struct
     | Tunion tys
     | Tintersection tys ->
       find_list tys ~var ~update ~is_invariant ~acc ~env
-    | Trefinement (ty, _class_refinement) ->
-      (* TODO - should this include refinements?? *)
-      find ty ~var ~update ~is_invariant ~acc ~env
+    | Trefinement (ty, { cr_consts }) ->
+      let acc = find ty ~var ~update ~is_invariant ~acc ~env in
+      if is_invariant acc then
+        acc
+      else
+        (* Treat any generics / `this` appearing as refinements as invariant.
+            Doing so prevents us substituting for the upper or lower bounds of
+            generated type parameters and correctly handles cases like this:
+
+           abstract class WithRfmt {
+             abstract const type T  as arraykey;
+             public function foo(this::T $_) : void {}
+           }
+
+           Before any optimization, the generated type of
+           `meth_caller(WithRfmt::class, 'foo')` is:
+
+           ```
+           (function
+             <TThis as WithRfmt with type { T = T#0 }
+             , T#0 as arraykey
+             >(TThis, T#0): void
+           )
+           ```
+           if we don't treat `T#0` as invariant, we'll end up subsituting it for
+           is upper bound (`arraykey`) and end up with a type like this:
+
+           ```
+           (function
+             (WithRfmt with { type T as arraykey }
+             ,arraykey
+             ) : void
+           )
+           ```
+
+           and lose the restriction that the second argument must be connected
+           to the type constant `T` in the first, e.g. we would be free to
+           pass a subclass of `WithRfmt` with the type constant `T`
+           defined as `int` and a second argument of type `string`.
+
+           With the invariant treatment, we end up with a type like this:
+
+           ```
+           (function
+             <T#0 as arraykey>
+             (WithRfmt with type { T = T#0 }
+             ,T#0
+             )
+           ) : void
+
+           We have correctly substituted `TThis` for its upper bound but we
+           have left `T#0`. We are then guaranteed that the second argument is
+           connected to the type constant `T` in the first argument.
+           ```
+        *)
+        find_cr_consts (SMap.values cr_consts) ~update ~is_invariant ~acc ~env
     | Tfun fun_ty -> find_fun_ty fun_ty ~var ~update ~is_invariant ~acc ~env
     | Ttuple tuple_ty ->
       find_tuple_ty tuple_ty ~var ~update ~is_invariant ~acc ~env
@@ -93,6 +152,45 @@ end = struct
       Option.value_map tparams_opt ~default:acc ~f:(fun tparams ->
           find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env)
     end
+
+  and find_cr_consts cr_consts ~update ~is_invariant ~acc ~env =
+    match cr_consts with
+    | [] -> acc
+    | Typing_defs_core.{ rc_bound = TRexact ty; _ } :: cr_consts ->
+      let acc =
+        find ty ~var:Ast_defs.Invariant ~update ~is_invariant ~acc ~env
+      in
+      if is_invariant acc then
+        acc
+      else
+        find_cr_consts cr_consts ~update ~is_invariant ~acc ~env
+    | Typing_defs_core.{ rc_bound = TRloose { tr_upper; tr_lower }; _ }
+      :: cr_consts ->
+      let acc =
+        find_list
+          tr_upper
+          ~var:Ast_defs.Invariant
+          ~update
+          ~is_invariant
+          ~acc
+          ~env
+      in
+      if is_invariant acc then
+        acc
+      else
+        let acc =
+          find_list
+            tr_lower
+            ~var:Ast_defs.Invariant
+            ~update
+            ~is_invariant
+            ~acc
+            ~env
+        in
+        if is_invariant acc then
+          acc
+        else
+          find_cr_consts cr_consts ~update ~is_invariant ~acc ~env
 
   and find_list tys ~var ~update ~is_invariant ~acc ~env =
     match tys with
@@ -177,6 +275,78 @@ end = struct
       in
       find_list tys ~var ~update ~is_invariant ~acc ~env
 
+  let find_this_in_refinement ty =
+    let open Typing_defs_core in
+    let res = ref false in
+    let on_rc_bound rc_bound ~ctx:_ = (true, `Continue rc_bound)
+    and on_ty ty ~ctx =
+      match get_node ty with
+      | Tthis when ctx ->
+        res := true;
+        (ctx, `Stop ty)
+      | _ -> (ctx, `Continue ty)
+    in
+    let _ =
+      Typing_defs_core.transform_top_down_decl_ty
+        ty
+        ~ctx:false
+        ~on_ty
+        ~on_rc_bound
+    in
+    !res
+
+  let mentions_this ty =
+    let open Typing_defs_core in
+    let res = ref false in
+    let on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound)
+    and on_ty ty ~ctx =
+      match get_node ty with
+      | Tthis ->
+        res := true;
+        (ctx, `Stop ty)
+      | _ -> (ctx, `Continue ty)
+    in
+    let _ =
+      Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
+    in
+    !res
+
+  let find_ty_params_in_refinement ty =
+    let open Typing_defs_core in
+    let res = ref SSet.empty in
+    let on_rc_bound rc_bound ~ctx:_ = (true, `Continue rc_bound)
+    and on_ty ty ~ctx =
+      match get_node ty with
+      | Tgeneric nm when ctx ->
+        res := SSet.add nm !res;
+        (ctx, `Stop ty)
+      | _ -> (ctx, `Continue ty)
+    in
+    let _ =
+      Typing_defs_core.transform_top_down_decl_ty
+        ty
+        ~ctx:false
+        ~on_ty
+        ~on_rc_bound
+    in
+    !res
+
+  let mentioned_ty_params ty =
+    let open Typing_defs_core in
+    let res = ref SSet.empty in
+    let on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound)
+    and on_ty ty ~ctx =
+      match get_node ty with
+      | Tgeneric nm ->
+        res := SSet.add nm !res;
+        (ctx, `Stop ty)
+      | _ -> (ctx, `Continue ty)
+    in
+    let _ =
+      Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
+    in
+    !res
+
   let update acc var =
     Some (Option.value_map acc ~default:var ~f:(fun acc -> join acc var))
 
@@ -211,13 +381,127 @@ end = struct
         | _ -> false)
 
   let analyse_this fun_ty ~env =
-    find_fun_ty
-      fun_ty
-      ~var:Ast_defs.Covariant
-      ~update:update_this
-      ~is_invariant
-      ~acc:None
-      ~env
+    let v_opt =
+      find_fun_ty
+        fun_ty
+        ~var:Ast_defs.Covariant
+        ~update:update_this
+        ~is_invariant
+        ~acc:None
+        ~env
+    in
+    match v_opt with
+    | Some Ast_defs.Invariant -> Some Ast_defs.Invariant
+    | _ ->
+      (* The previous traversal is looking for usage of `this` in parameters and return type.
+         However, we also need to prevent the substituion of `this` for its bound if it appears
+         on the rhs of a class refinement in the bound of a type parameter or in a where constraint *)
+      let open Typing_defs_core in
+      let { ft_tparams; ft_where_constraints; _ } = fun_ty in
+      let res =
+        List.fold_result
+          ft_tparams
+          ~init:false
+          ~f:(fun acc { tp_constraints; _ } ->
+            List.fold_result tp_constraints ~init:acc ~f:(fun acc (_, ty) ->
+                if find_this_in_refinement ty then
+                  Error ()
+                else
+                  Ok acc))
+      in
+      if Result.is_error res then
+        Some Ast_defs.Invariant
+      else
+        let res =
+          List.fold_result
+            ft_where_constraints
+            ~init:false
+            ~f:(fun acc (ty1, _, ty2) ->
+              if mentions_this ty1 || mentions_this ty2 then
+                Error ()
+              else
+                Ok acc)
+        in
+        if Result.is_error res then
+          Some Ast_defs.Invariant
+        else
+          v_opt
+
+  let update_ty_params ty_param_names ty acc var =
+    let open Typing_defs_core in
+    match get_node ty with
+    | Tgeneric name when SSet.mem name ty_param_names ->
+      SMap.update
+        name
+        (function
+          | None
+          | Some None ->
+            Some (Some var)
+          | Some (Some v) -> Some (Some (join v var)))
+        acc
+    | Tthis
+    | Tmixed
+    | Twildcard
+    | Tany _
+    | Tnonnull
+    | Tdynamic
+    | Tprim _
+    | Tgeneric _
+    | Taccess _
+    | Toption _
+    | Tlike _
+    | Tclass_ptr _
+    | Tvec_or_dict _
+    | Tunion _
+    | Tintersection _
+    | Trefinement _
+    | Tfun _
+    | Ttuple _
+    | Tshape _
+    | Tapply _ ->
+      acc
+
+  let all_invariant vs = SMap.for_all (fun _ v -> is_invariant v) vs
+
+  let analyse_ty_params fun_ty ty_param_names ~env =
+    let update = update_ty_params ty_param_names
+    and acc =
+      SMap.of_list
+        (List.map (SSet.elements ty_param_names) ~f:(fun name -> (name, None)))
+    in
+    let var_opt =
+      find_fun_ty
+        fun_ty
+        ~var:Ast_defs.Covariant
+        ~update
+        ~is_invariant:all_invariant
+        ~acc
+        ~env
+    and in_rfmt =
+      let open Typing_defs_core in
+      List.fold_left
+        fun_ty.ft_tparams
+        ~init:SSet.empty
+        ~f:(fun acc { tp_constraints; _ } ->
+          List.fold_left tp_constraints ~init:acc ~f:(fun acc (_, ty) ->
+              SSet.union acc (find_ty_params_in_refinement ty)))
+    and in_where_constraint =
+      let open Typing_defs_core in
+      List.fold_left
+        fun_ty.ft_where_constraints
+        ~init:SSet.empty
+        ~f:(fun acc (ty1, _, ty2) ->
+          SSet.union
+            (SSet.union acc (mentioned_ty_params ty1))
+            (mentioned_ty_params ty2))
+    in
+    SMap.mapi
+      (fun nm var_opt ->
+        if SSet.mem nm in_rfmt || SSet.mem nm in_where_constraint then
+          Some Ast_defs.Invariant
+        else
+          var_opt)
+      var_opt
 end
 
 (* -- Type constant analysis and substitutions ------------------------------ *)
@@ -1337,6 +1621,22 @@ let gen_this_name ft_tparams =
   in
   aux None
 
+let apply_subst_generic fun_ty subst =
+  let open Typing_defs_core in
+  let on_ty ty ~ctx =
+    match get_node ty with
+    | Tgeneric nm ->
+      (match SMap.find_opt nm subst with
+      | Some ty -> (ctx, `Stop ty)
+      | None -> (ctx, `Stop ty))
+    | _ -> (ctx, `Continue ty)
+  and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+  let ty = mk (Typing_reason.none, Tfun fun_ty) in
+  let ty = transform_top_down_decl_ty ty ~on_ty ~on_rc_bound ~ctx:() in
+  match get_node ty with
+  | Tfun fun_ty -> fun_ty
+  | _ -> failwith "Expected function type"
+
 (* -- API ------------------------------------------------------------------- *)
 let extract_static_method fun_ty ~class_name ~folded_class ~env =
   (* We will need to handle substitution of [this] differently depending on
@@ -1428,7 +1728,9 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
             ( Typing_reason.witness_from_decl (fst class_name),
               Tgeneric this_generic_name ))
       in
-      let subst = { subst with this_ty = this_generic_ty } in
+      let subst =
+        Typeconst_analysis.Subst.{ subst with this_ty = this_generic_ty }
+      in
       (* Replace occurrences of this in the upperbound with the generic *)
       let this_ty_upper_bound =
         Typeconst_analysis.Subst.apply subst refined_this_ty
@@ -1456,6 +1758,63 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
      - any concrete [Taccess] with its definition (except where its definition is abstract...)
      - any abstract [Taccess] with the corresponding generic *)
   let fun_ty = Typeconst_analysis.Subst.apply_fun_ty subst fun_ty in
+
+  (* Next, analyse the variance of the remaining generics; if any occur
+     only co- or contravariantly in the function type we can avoid quantifying
+     over them by substituting for their lower- or upper-bound respectively *)
+  let fun_ty =
+    let open Typing_defs_core in
+    let { ft_tparams; _ } = fun_ty in
+    let ty_param_names =
+      SSet.of_list (List.map ft_tparams ~f:(fun { tp_name = (_, nm); _ } -> nm))
+    in
+    let ty_param_bounds =
+      SMap.of_list
+        (List.map
+           ft_tparams
+           ~f:(fun { tp_name = (pos, nm); tp_constraints; _ } ->
+             (nm, (pos, tp_constraints))))
+    in
+    let variances =
+      Variance_analysis.analyse_ty_params fun_ty ty_param_names ~env
+    in
+    let subst =
+      SMap.filter_map
+        (fun name variance_opt ->
+          match variance_opt with
+          | None
+          | Some Ast_defs.Invariant ->
+            None
+          | Some Ast_defs.Contravariant ->
+            let (pos, constraints) = SMap.find name ty_param_bounds in
+            let ubs =
+              List.filter_map constraints ~f:(fun (c, ty) ->
+                  match c with
+                  | Ast_defs.Constraint_as
+                  | Ast_defs.Constraint_eq ->
+                    Some ty
+                  | _ -> None)
+            in
+            let reason = Typing_reason.witness_from_decl pos in
+            let ub = Typing_make_type.intersection reason ubs in
+            Some ub
+          | Some Ast_defs.Covariant ->
+            let (pos, constraints) = SMap.find name ty_param_bounds in
+            let lbs =
+              List.filter_map constraints ~f:(fun (c, ty) ->
+                  match c with
+                  | Ast_defs.Constraint_super
+                  | Ast_defs.Constraint_eq ->
+                    Some ty
+                  | _ -> None)
+            in
+            let reason = Typing_reason.witness_from_decl pos in
+            let lb = Typing_make_type.union reason lbs in
+            Some lb)
+        variances
+    in
+    apply_subst_generic fun_ty subst
+  in
 
   (* We may have introduced some unused generics; check which ones appear
      in parameters, implicit parameters or the return type and then find the

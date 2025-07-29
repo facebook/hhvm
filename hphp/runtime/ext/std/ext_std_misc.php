@@ -131,6 +131,17 @@ const int ERA_D_T_FMT = 131120;
 const int ERA_T_FMT =   131121;
 const int CRNCYSTR =    262159;
 
+newtype BuiltinPseudoConstantLineNumber as int = int;
+newtype BuiltinPseudoConstantName as string = string;
+newtype BuiltinPseudoConstantClass as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantTrait as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantFile as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantDir as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantFunction as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantMethod as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantNamespace as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantCompilerFrontend as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+
 /** Checks whether the client disconnected.
  * @return int - Returns 1 if client disconnected, 0 otherwise.
  */

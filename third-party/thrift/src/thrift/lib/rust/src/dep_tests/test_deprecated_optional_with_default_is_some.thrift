@@ -16,8 +16,11 @@
 
 namespace cpp2 facebook
 
+include "thrift/annotation/thrift.thrift"
+
 struct Struct {
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string optDef = "IAMOPTWITHDEF";
   2: bool marker;
 }

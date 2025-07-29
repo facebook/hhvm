@@ -27,6 +27,7 @@ struct Small {
 
 struct SubStruct {
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string optDef = "IAMUSELESSOPTWITHDEF";
   2: required string req_def = "IAMREQ";
   // @lint-ignore THRIFTCHECKS

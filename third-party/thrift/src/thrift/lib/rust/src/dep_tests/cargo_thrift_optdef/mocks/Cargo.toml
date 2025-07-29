@@ -23,6 +23,9 @@ fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 test_deprecated_optional_with_default_is_some_if__clients = { package = "test_deprecated_optional_with_default_is_some_if_clients", version = "0.0.1+unstable", path = "../clients" }
 test_deprecated_optional_with_default_is_some_if__types = { package = "test_deprecated_optional_with_default_is_some_if", version = "0.0.1+unstable", path = ".." }
+thrift = { version = "0.0.1+unstable", path = "../../../../annotation/thrift" }
+thrift_clients = { version = "0.0.1+unstable", path = "../../../../annotation/thrift/clients" }
+thrift_mocks = { version = "0.0.1+unstable", path = "../../../../annotation/thrift/mocks" }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]

@@ -19,48 +19,33 @@ package types
 import (
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPrependError(t *testing.T) {
 	err := NewApplicationException(INTERNAL_ERROR, "original error")
-	err2, ok := PrependError("Prepend: ", err).(ApplicationExceptionIf)
-	if !ok {
-		t.Fatal("Couldn't cast error ApplicationException")
-	}
-	if err2.Error() != "Prepend: original error" {
-		t.Fatal("Unexpected error string")
-	}
-	if err2.TypeID() != INTERNAL_ERROR {
-		t.Fatal("Unexpected type error")
-	}
+	err2 := PrependError("Prepend: ", err)
+	var appErr *ApplicationException
+	require.ErrorAs(t, err2, &appErr)
+	require.Equal(t, "Prepend: original error", appErr.Error())
+	require.EqualValues(t, INTERNAL_ERROR, appErr.TypeID())
 
 	err3 := NewProtocolExceptionWithType(INVALID_DATA, errors.New("original error"))
-	err4, ok := PrependError("Prepend: ", err3).(ProtocolException)
-	if !ok {
-		t.Fatal("Couldn't cast error ProtocolException")
-	}
-	if err4.Error() != "Prepend: original error" {
-		t.Fatal("Unexpected error string")
-	}
-	if err4.TypeID() != INVALID_DATA {
-		t.Fatal("Unexpected type error")
-	}
+	err4 := PrependError("Prepend: ", err3)
+	var protErr *protocolException
+	require.ErrorAs(t, err4, &protErr)
+	require.Equal(t, "Prepend: original error", protErr.Error())
+	require.EqualValues(t, INVALID_DATA, protErr.TypeID())
 
 	err5 := NewTransportException(TIMED_OUT, "original error")
-	err6, ok := PrependError("Prepend: ", err5).(TransportException)
-	if !ok {
-		t.Fatal("Couldn't cast error TransportException")
-	}
-	if err6.Error() != "Prepend: original error" {
-		t.Fatal("Unexpected error string")
-	}
-	if err6.TypeID() != TIMED_OUT {
-		t.Fatal("Unexpected type error")
-	}
+	err6 := PrependError("Prepend: ", err5)
+	var transErr *transportException
+	require.ErrorAs(t, err6, &transErr)
+	require.Equal(t, "Prepend: original error", transErr.Error())
+	require.EqualValues(t, TIMED_OUT, transErr.TypeID())
 
 	err7 := errors.New("original error")
 	err8 := PrependError("Prepend: ", err7)
-	if err8.Error() != "Prepend: original error" {
-		t.Fatal("Unexpected error string")
-	}
+	require.Equal(t, "Prepend: original error", err8.Error())
 }

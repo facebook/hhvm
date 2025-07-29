@@ -133,8 +133,8 @@ void compare_impl(const T& original, const T& modified, FieldIdToMask& mask) {
     int16_t fieldId = folly::to_underlying(id());
     auto&& original_field = op::get<Id>(original);
     auto&& modified_field = op::get<Id>(modified);
-    auto* original_ptr = op::getValueOrNull(original_field);
-    auto* modified_ptr = op::getValueOrNull(modified_field);
+    auto* original_ptr = op::get_value_or_null(original_field);
+    auto* modified_ptr = op::get_value_or_null(modified_field);
 
     if (!original_ptr && !modified_ptr) { // same
       return;

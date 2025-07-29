@@ -122,7 +122,7 @@ struct PatchIfSetApplier<type::adapted<Adapter, Tag>> {
   void operator()(const Patch& patch, FieldRef&& ref) {
     using value_type = typename Patch::value_type;
     if constexpr (std::is_same_v<value_type, type::native_type<Tag>>) {
-      if (auto* value = getValueOrNull(ref)) {
+      if (auto* value = get_value_or_null(ref)) {
         type::native_type<Tag> temp = Adapter::toThrift(std::move(*value));
         patch.apply(temp);
         ref = Adapter::fromThrift(std::move(temp));

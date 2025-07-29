@@ -60,41 +60,41 @@ template <typename Id, typename T>
 void testFieldRef(T obj) {
   auto field = op::get<Id>(obj);
   field = 2;
-  EXPECT_EQ(*op::getValueOrNull(field), 2);
+  EXPECT_EQ(*op::get_value_or_null(field), 2);
   // test with const T&
   const auto& objRef = obj;
   auto fieldConst = op::get<Id>(objRef);
-  EXPECT_EQ(*op::getValueOrNull(fieldConst), 2);
+  EXPECT_EQ(*op::get_value_or_null(fieldConst), 2);
 }
 
 template <typename Id, typename T>
 void testGetValueNotOptional(T obj) {
   auto field = op::get<Id>(obj);
-  EXPECT_EQ(*op::getValueOrNull(field), 0);
+  EXPECT_EQ(*op::get_value_or_null(field), 0);
   testFieldRef<Id>(obj);
 }
 
 template <typename Id, typename T>
 void testGetValueOptional(T obj) {
   auto field = op::get<Id>(obj);
-  EXPECT_EQ(op::getValueOrNull(field), nullptr);
+  EXPECT_EQ(op::get_value_or_null(field), nullptr);
   testFieldRef<Id>(obj);
 }
 
 template <typename Id, typename T>
 void testGetValueSmartPointer(T obj) {
   auto& field = op::get<Id>(obj);
-  EXPECT_EQ(op::getValueOrNull(field), nullptr);
+  EXPECT_EQ(op::get_value_or_null(field), nullptr);
   if constexpr (thrift::detail::is_unique_ptr_v<
                     std::remove_reference_t<decltype(field)>>) {
     field = std::make_unique<int32_t>(2);
   } else {
     field = std::make_shared<int32_t>(2);
   }
-  EXPECT_EQ(*op::getValueOrNull(field), 2);
+  EXPECT_EQ(*op::get_value_or_null(field), 2);
   // test with const T&
   const auto& fieldConst = field;
-  EXPECT_EQ(*op::getValueOrNull(fieldConst), 2);
+  EXPECT_EQ(*op::get_value_or_null(fieldConst), 2);
 }
 
 TEST(GetValueOrNullTest, FieldRefNotOptional) {
@@ -117,29 +117,30 @@ TEST(GetValueOrNullTest, SmartPointer) {
 
 TEST(GetValueOrNullTest, Optional) {
   std::optional<int> opt;
-  EXPECT_EQ(op::getValueOrNull(opt), nullptr);
+  EXPECT_EQ(op::get_value_or_null(opt), nullptr);
   opt = 1;
-  EXPECT_EQ(*op::getValueOrNull(opt), 1);
+  EXPECT_EQ(*op::get_value_or_null(opt), 1);
   // test with const T&
   const auto& optConst = opt;
   opt = 2;
-  EXPECT_EQ(*op::getValueOrNull(optConst), 2);
+  EXPECT_EQ(*op::get_value_or_null(optConst), 2);
 }
 
 TEST(GetValueOrNullTest, Union) {
   {
     UnionStruct obj;
-    EXPECT_EQ(op::getValueOrNull(obj.field()), nullptr);
+    EXPECT_EQ(op::get_value_or_null(obj.field()), nullptr);
     obj.field().emplace().int_field() = 2;
-    EXPECT_EQ(op::getValueOrNull(obj.field())->get_int_field(), 2);
+    EXPECT_EQ(op::get_value_or_null(obj.field())->get_int_field(), 2);
   }
   {
     // test with const T&
     UnionStruct obj;
     const auto& objConst = obj;
-    EXPECT_EQ(op::getValueOrNull(objConst.field()), nullptr);
+    EXPECT_EQ(op::get_value_or_null(objConst.field()), nullptr);
     obj.field().emplace().string_field() = "foo";
-    EXPECT_EQ(op::getValueOrNull(objConst.field())->get_string_field(), "foo");
+    EXPECT_EQ(
+        op::get_value_or_null(objConst.field())->get_string_field(), "foo");
   }
 }
 

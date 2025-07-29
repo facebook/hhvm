@@ -243,7 +243,7 @@ void ensure_fields(MaskRef ref, T& t) {
       // Need to ensure the struct object.
       using FieldType = op::get_native_type<T, Ord>;
       if constexpr (is_thrift_class_v<FieldType>) {
-        auto& value = *op::getValueOrNull(field_ref);
+        auto& value = *op::get_value_or_null(field_ref);
         ensure_fields(next, value);
         return;
       }
@@ -285,7 +285,7 @@ void clear_fields(MaskRef ref, T& t) {
         return;
       }
       using FieldType = op::get_native_type<T, Ord>;
-      auto* field_value = op::getValueOrNull(field_ref);
+      auto* field_value = op::get_value_or_null(field_ref);
       if (!field_value) {
         errorIfNotCompatible<op::get_type_tag<T, Ord>>(next.mask);
         return;
@@ -330,7 +330,7 @@ bool filter_fields(MaskRef ref, const T& src, T& ret) {
     using FieldType = op::get_native_type<T, Ord>;
     auto&& src_ref = op::get<Ord>(src);
     auto&& ret_ref = op::get<Ord>(ret);
-    bool srcHasValue = bool(op::getValueOrNull(src_ref));
+    bool srcHasValue = bool(op::get_value_or_null(src_ref));
     if (!srcHasValue) { // skip
       errorIfNotCompatible<op::get_type_tag<T, Ord>>(next.mask);
     } else if (next.isAllMask()) {

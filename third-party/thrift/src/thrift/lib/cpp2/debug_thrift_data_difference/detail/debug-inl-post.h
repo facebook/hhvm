@@ -298,9 +298,9 @@ struct debug_thrift_data_difference_impl<apache::thrift::type::union_t<T>>
           auto guard =
               scoped_path::member(path, apache::thrift::op::get_name_v<T, Id>);
 
-          const auto* lPtr = apache::thrift::op::getValueOrNull(
+          const auto* lPtr = apache::thrift::op::get_value_or_null(
               apache::thrift::op::get<Id>(lhs));
-          const auto* rPtr = apache::thrift::op::getValueOrNull(
+          const auto* rPtr = apache::thrift::op::get_value_or_null(
               apache::thrift::op::get<Id>(rhs));
 
           return recurse_into_ptr<Tag>(
@@ -335,7 +335,7 @@ struct debug_thrift_data_difference_impl<apache::thrift::type::union_t<T>>
           auto guard =
               scoped_path::member(path, apache::thrift::op::get_name_v<T, Id>);
 
-          const auto* fieldPtr = apache::thrift::op::getValueOrNull(
+          const auto* fieldPtr = apache::thrift::op::get_value_or_null(
               apache::thrift::op::get<Id>(variant));
           visit_changed_field<Change, Tag>(
               path, fieldPtr, std::forward<Callback>(callback));
@@ -358,10 +358,10 @@ struct debug_thrift_data_difference_impl<apache::thrift::type::struct_t<T>>
       using Id = decltype(id);
       using Tag = apache::thrift::op::get_type_tag<T, Id>;
 
-      const auto* lPtr =
-          apache::thrift::op::getValueOrNull(apache::thrift::op::get<Id>(lhs));
-      const auto* rPtr =
-          apache::thrift::op::getValueOrNull(apache::thrift::op::get<Id>(rhs));
+      const auto* lPtr = apache::thrift::op::get_value_or_null(
+          apache::thrift::op::get<Id>(lhs));
+      const auto* rPtr = apache::thrift::op::get_value_or_null(
+          apache::thrift::op::get<Id>(rhs));
 
       if (!lPtr && !rPtr) {
         return;

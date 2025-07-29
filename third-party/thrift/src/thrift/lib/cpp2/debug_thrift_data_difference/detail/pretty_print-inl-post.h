@@ -156,7 +156,7 @@ struct pretty_print_impl<apache::thrift::type::union_t<T>>
           scope.newline();
           scope << apache::thrift::util::enumName(what.getType(), nullptr)
                 << ": ";
-          if (const auto* fieldPtr = apache::thrift::op::getValueOrNull(
+          if (const auto* fieldPtr = apache::thrift::op::get_value_or_null(
                   apache::thrift::op::get<Id>(what))) {
             recurse_into<Tag>(scope, *fieldPtr);
           }
@@ -189,7 +189,7 @@ struct pretty_print_impl<apache::thrift::type::struct_t<T>>
       constexpr auto index =
           folly::to_underlying(apache::thrift::op::get_ordinal_v<T, Id>);
 
-      if (const auto* fieldPtr = apache::thrift::op::getValueOrNull(
+      if (const auto* fieldPtr = apache::thrift::op::get_value_or_null(
               apache::thrift::op::get<Id>(what))) {
         auto scope = out.start_scope();
         scope << apache::thrift::op::get_name_v<T, Id> << ": ";

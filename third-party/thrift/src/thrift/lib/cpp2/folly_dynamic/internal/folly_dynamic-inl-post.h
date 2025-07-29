@@ -333,7 +333,7 @@ struct dynamic_converter_impl_field {
     using Id = apache::thrift::field_id<FieldId>;
 
     folly::StringPiece fieldName = apache::thrift::op::get_name_v<Struct, Id>;
-    if (const auto* ref = apache::thrift::op::getValueOrNull(
+    if (const auto* ref = apache::thrift::op::get_value_or_null(
             apache::thrift::op::get<Id>(input))) {
       dynamic_converter_impl<Tag>::to(out[fieldName], *ref, format);
     } else if (!apache::thrift::detail::is_optional_or_union_field_ref_v<

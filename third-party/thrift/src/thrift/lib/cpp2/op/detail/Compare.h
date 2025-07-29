@@ -748,8 +748,8 @@ folly::ordering compareStructFields(const T& lhs, const T& rhs) {
 
     using Ord = decltype(ord);
     using Tag = get_type_tag<T, Ord>;
-    const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
-    const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
+    const auto* lhsValue = get_value_or_null(get<Ord>(lhs));
+    const auto* rhsValue = get_value_or_null(get<Ord>(rhs));
 
     if (lhsValue == nullptr && rhsValue == nullptr) {
       return;
@@ -802,8 +802,8 @@ struct StructEquality {
 
       using Ord = decltype(ord);
       using Tag = get_type_tag<T, Ord>;
-      const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
-      const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
+      const auto* lhsValue = get_value_or_null(get<Ord>(lhs));
+      const auto* rhsValue = get_value_or_null(get<Ord>(rhs));
 
       if (lhsValue == nullptr && rhsValue == nullptr) {
         return;

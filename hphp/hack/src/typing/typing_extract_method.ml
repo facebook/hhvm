@@ -557,7 +557,7 @@ module Typeconst_analysis : sig
     t ->
     Typing_defs_core.decl_phase Typing_defs_core.ty ->
     Typing_env_types.env ->
-    Subst.t
+    Typing_env_types.env * Subst.t
 end = struct
   (** Helper to accumulate the path of projections on a given root type *)
   let rec access_path root prefix =
@@ -1249,26 +1249,16 @@ end = struct
       lower_bound: Typing_defs_core.decl_phase Typing_defs_core.ty option;
     }
 
-    (** Generate locally fresh names for generics *)
-    let fresh_name names prefix =
-      let n =
-        match SMap.find_opt prefix names with
-        | Some n -> n + 1
-        | None -> 0
-      in
-      let name = Format.sprintf {|%s#%d|} prefix n in
-      (SMap.add prefix n names, name)
-
     (* -- Build substitution for concrete type constants -------------------- *)
 
-    let class_subst_help trie names generics =
+    let class_subst_help trie env generics =
       let rec aux Trie.{ base; children } (const_name, rev_path) acc =
         let acc =
           match base with
           | Typeconst { typeconst = Typing_defs.(TCConcrete { tc_type }); _ } ->
-            let (subst, names, generics) = acc in
+            let (subst, env, generics) = acc in
             let key = String.concat ~sep:"::" (List.rev rev_path) in
-            (SMap.add key tc_type subst, names, generics)
+            (SMap.add key tc_type subst, env, generics)
           | Typeconst
               {
                 typeconst =
@@ -1282,8 +1272,10 @@ end = struct
                 pos;
                 _;
               } ->
-            let (subst, names, generics) = acc in
-            let (names, generic_name) = fresh_name names const_name in
+            let (subst, env, generics) = acc in
+            let (env, generic_name) =
+              Typing_env.fresh_param_name env const_name
+            in
             let subst =
               let key = String.concat ~sep:"::" (List.rev rev_path) in
               let reason = Typing_reason.witness_from_decl pos in
@@ -1293,7 +1285,7 @@ end = struct
             let generics =
               SMap.add generic_name { pos; upper_bound; lower_bound } generics
             in
-            (subst, names, generics)
+            (subst, env, generics)
           | Root -> acc
         in
         SMap.fold
@@ -1304,15 +1296,15 @@ end = struct
           children
           acc
       in
-      aux trie ("", []) (SMap.empty, names, generics)
+      aux trie ("", []) (SMap.empty, env, generics)
 
-    let class_subst { tries; _ } names generics =
+    let class_subst { tries; _ } env generics =
       SMap.fold
-        (fun class_name (_ty, trie) (tries, names, generics) ->
-          let (subst, names, generics) = class_subst_help trie names generics in
-          (SMap.add class_name subst tries, names, generics))
+        (fun class_name (_ty, trie) (tries, env, generics) ->
+          let (subst, env, generics) = class_subst_help trie env generics in
+          (SMap.add class_name subst tries, env, generics))
         tries
-        (SMap.empty, names, generics)
+        (SMap.empty, env, generics)
 
     (* -- Build substitution for abstract type constants -------------------- *)
 
@@ -1365,15 +1357,15 @@ end = struct
     let update acc ~key ~typeconst ~pos ~children ~path =
       match typeconst with
       | Typing_defs.(TCConcrete { tc_type }) ->
-        let (subst, names, generics) = acc in
+        let (subst, env, generics) = acc in
         let subst =
           SMap.add (String.concat (List.rev path) ~sep:"::") tc_type subst
         in
-        (subst, names, generics)
+        (subst, env, generics)
       | Typing_defs.(TCAbstract { atc_as_constraint; atc_super_constraint; _ })
         ->
-        let (subst, names, generics) = acc in
-        let (names, generic_name) = fresh_name names key in
+        let (subst, env, generics) = acc in
+        let (env, generic_name) = Typing_env.fresh_param_name env key in
         let subst =
           let key = String.concat (List.rev path) ~sep:"::" in
           let reason = Typing_reason.witness_from_decl pos in
@@ -1390,9 +1382,9 @@ end = struct
         let generics =
           SMap.add generic_name { pos; upper_bound; lower_bound } generics
         in
-        (subst, names, generics)
+        (subst, env, generics)
 
-    let this_subst { this_trie; _ } names generics =
+    let this_subst { this_trie; _ } env generics =
       let Trie.{ base; children } = this_trie in
       let rec aux children ~path ~init =
         SMap.fold
@@ -1410,7 +1402,7 @@ end = struct
           children
           init
       in
-      let init = (SMap.empty, names, generics) in
+      let init = (SMap.empty, env, generics) in
       match base with
       | Trie.Root -> aux children ~path:[] ~init
       | _ -> init
@@ -1497,21 +1489,17 @@ end = struct
           mk_tparam pos name tp_constraints)
 
     let of_typeconst_analysis analysis this_name this_ty env =
-      let (this_subst, class_subst, generics) =
-        let names = SMap.empty and generics = SMap.empty in
-        let (this_subst, names, generics) =
-          this_subst analysis names generics
-        in
-        let (class_subst, _names, generics) =
-          class_subst analysis names generics
-        in
-        (this_subst, class_subst, generics)
+      let (this_subst, class_subst, generics, env) =
+        let generics = SMap.empty in
+        let (this_subst, env, generics) = this_subst analysis env generics in
+        let (class_subst, env, generics) = class_subst analysis env generics in
+        (this_subst, class_subst, generics, env)
       in
       let tparams = mk_tparams generics env in
       let subst = { this_name; this_ty; this_subst; class_subst; tparams } in
       (* Apply refinements to [this] to ensure it lines up with any abstract constants *)
       let this_ty = refine_this this_ty this_subst (this_constants analysis) in
-      { subst with this_ty }
+      (env, { subst with this_ty })
   end
 
   let to_subst t this_ty env =
@@ -1698,7 +1686,7 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
      substitution from to be applied to [Taccess] types and a refined version
      of [this] with equalities to generics standing in for abstract type
      constants *)
-  let subst = Typeconst_analysis.to_subst analysis this_ty env in
+  let (env, subst) = Typeconst_analysis.to_subst analysis this_ty env in
 
   (* Add class-level generics, the generics for [this] and any generics
      for abstract type constants; some of these may end up not being used
@@ -1823,7 +1811,7 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
      we need to keep the original type params if they are marked as reify *)
   let fun_ty = drop_unused_generics fun_ty ~names:original_tparam_names in
 
-  fun_ty
+  (env, fun_ty)
 
 let extract_instance_method fun_ty ~class_name ~folded_class ~env =
   let self_param =

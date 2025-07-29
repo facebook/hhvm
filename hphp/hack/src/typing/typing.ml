@@ -8365,7 +8365,7 @@ end = struct
     (* Extract the static method by incorporating any class-level generics
        and transforming abstract type constants into generics and subsituting
        'concrete' type constants *)
-    let fun_ty =
+    let (env, fun_ty) =
       Typing_extract_method.extract_static_method
         fun_ty
         ~env
@@ -8915,7 +8915,7 @@ end = struct
           (* Extract the static method by incorporating any class-level generics
              and transforming abstract type constants into generics and subsituting
              'concrete' type constants *)
-          let fun_ty =
+          let (env, fun_ty) =
             let class_name =
               let (pos, name) = class_name in
               (Pos_or_decl.of_raw_pos pos, name)

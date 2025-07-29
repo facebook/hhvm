@@ -11,11 +11,11 @@ val extract_static_method :
   class_name:Typing_defs_core.pos_id ->
   folded_class:Folded_class.t ->
   env:Typing_env_types.env ->
-  Typing_defs_core.decl_ty Typing_defs_core.fun_type
+  Typing_env_types.env * Typing_defs_core.decl_ty Typing_defs_core.fun_type
 
 val extract_instance_method :
   Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
   class_name:Typing_defs_core.pos_id ->
   folded_class:Folded_class.t ->
   env:Typing_env_types.env ->
-  Typing_defs_core.decl_ty Typing_defs_core.fun_type
+  Typing_env_types.env * Typing_defs_core.decl_ty Typing_defs_core.fun_type

@@ -19,7 +19,6 @@
 #include <set>
 
 #include <gtest/gtest.h>
-#include <folly/CppAttributes.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/lib/cpp2/protocol/detail/ReservedId.h>
 

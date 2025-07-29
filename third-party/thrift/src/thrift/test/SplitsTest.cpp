@@ -15,7 +15,6 @@
  */
 
 #include <thrift/test/gen-cpp2/Service1.h>
-#include <thrift/test/gen-cpp2/Service2.h>
 #include <thrift/test/gen-cpp2/SplitsTest_types.h>
 
 #include <gtest/gtest.h>

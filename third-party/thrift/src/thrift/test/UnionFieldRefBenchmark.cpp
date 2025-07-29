@@ -16,7 +16,6 @@
 
 #include <glog/logging.h>
 #include <folly/Benchmark.h>
-#include <folly/Portability.h>
 #include <folly/init/Init.h>
 #include <thrift/test/gen-cpp2/UnionFieldRef_types.h>
 

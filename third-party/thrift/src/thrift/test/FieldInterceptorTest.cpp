@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/FieldInterceptorTest.h>
 #include <thrift/test/gen-cpp2/field_interceptor_types.h>
 

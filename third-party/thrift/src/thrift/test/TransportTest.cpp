@@ -16,14 +16,12 @@
 
 #include <csignal>
 #include <cstdlib>
-#include <ctime>
 #include <functional>
 #include <random>
 
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/portability/Unistd.h>
-#include <folly/testing/TestUtil.h>
 
 #include <thrift/lib/cpp/transport/TBufferTransports.h>
 #include <thrift/lib/cpp/transport/TFDTransport.h>

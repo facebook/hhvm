@@ -1425,7 +1425,7 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
     );
   } else {
     tasks.emplace_back(
-      co_withExecutor(m_executor.sticky(), emitAll(callback, index, edgesPath))
+      co_withExecutor(m_executor.sticky(), emitAll(callback, index, edgesPath, filesInBuildPath))
     );
   }
   co_await coro::collectAllRange(std::move(tasks));
@@ -1510,28 +1510,42 @@ void saveFilesInBuild(const std::vector<StringData *>& files_in_build,
 // then repeat the process until we have no new files to emit.
 coro::Task<void>
 Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
-                 const std::filesystem::path& edgesPath) {
+                 const std::filesystem::path& edgesPath,
+                 const std::filesystem::path& filesInBuildPath) {
   auto const logEdges = !edgesPath.native().empty();
+  auto const logFiles = !filesInBuildPath.native().empty();
 
   // Find the initial set of groups
   auto input_groups = co_await groupAll(m_directories, true, true);
 
   // Select the files specified as inputs, collect ondemand file names.
   std::vector<SymbolRefEdge> edges;
+  std::vector<StringData *> files_in_build;
   EmitInfo info;
+
   {
     Timer timer{Timer::WallTime, "emitting inputs"};
     info = co_await emitGroups(
-      std::move(input_groups), callback, index, false /* on demand */);
+      std::move(input_groups), callback, index, false /* on demand */, logFiles);
     if (logEdges) {
       edges.insert(
         edges.end(), info.m_ondemand.m_edges.begin(), info.m_ondemand.m_edges.end()
       );
     }
+    if (logFiles) {
+      files_in_build.insert(
+        files_in_build.end(), info.m_files_in_build.begin(), info.m_files_in_build.end()
+      );
+    }
     m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
   }
 
-  if (info.m_ondemand.m_files.empty()) co_return;
+  if (info.m_ondemand.m_files.empty()) {
+    if (logFiles) {
+      saveFilesInBuild(files_in_build, filesInBuildPath);
+    }
+    co_return;
+  }
 
   Timer timer{Timer::WallTime, "emitting on-demand"};
   // We have ondemand files, so keep emitting until a fix point.
@@ -1539,18 +1553,26 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
     Groups ondemand_groups;
     groupFiles(ondemand_groups, std::move(info.m_ondemand.m_files));
     info = co_await emitGroups(
-      std::move(ondemand_groups), callback, index, true /* on demand */);
+      std::move(ondemand_groups), callback, index, true /* on demand */, logFiles);
     if (logEdges) {
       edges.insert(
         edges.end(), info.m_ondemand.m_edges.begin(), info.m_ondemand.m_edges.end()
       );
     }
+    if (logFiles) {
+      files_in_build.insert(
+        files_in_build.end(), info.m_files_in_build.begin(), info.m_files_in_build.end()
+      );
+    }
   } while (!info.m_ondemand.m_files.empty());
   m_ondemandMicros = std::chrono::microseconds{timer.getMicroSeconds()};
 
-  // Save edge list to a text file, if requested
+  // Save edge and file list to a text file, if requested
   if (logEdges) {
     saveSymbolRefEdges(std::move(edges), edgesPath);
+  }
+  if (logFiles) {
+    saveFilesInBuild(files_in_build, filesInBuildPath);
   }
 
   co_return;
@@ -1608,7 +1630,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   {
     Timer timer{Timer::WallTime, "emitting inputs"};
     info = co_await emitGroups(
-      std::move(input_groups), callback, index, symbolRefsEnabled /* forceInclusion */);
+      std::move(input_groups), callback, index, symbolRefsEnabled /* forceInclusion */, logFiles);
     if (logEdges) {
       edges.insert(
         edges.end(), info.m_ondemand.m_edges.begin(), info.m_ondemand.m_edges.end()
@@ -1627,11 +1649,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   // - building with PackageV2 only
   if ((info.m_ondemand.m_files.empty() && buildWithSymbolRefsOnly) ||
       buildWithPackagesOnly) {
-    // Save edge list to a text file, if requested
-    if (logEdges) {
-      saveSymbolRefEdges(std::move(edges), edgesPath);
-    }
-     if (logFiles) {
+    if (logFiles) {
       saveFilesInBuild(files_in_build, filesInBuildPath);
     }
     co_return;
@@ -1646,7 +1664,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
       Groups ondemand_groups;
       groupFiles(ondemand_groups, std::move(info.m_ondemand.m_files));
       info = co_await emitGroups(
-        std::move(ondemand_groups), callback, index, true /* forceInclusion */);
+        std::move(ondemand_groups), callback, index, true /* forceInclusion */, logFiles);
       if (logEdges) {
         edges.insert(
           edges.end(), info.m_ondemand.m_edges.begin(), info.m_ondemand.m_edges.end()
@@ -1688,7 +1706,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
     Groups filtered_groups =
       co_await groupAll(excluded_dirs, true, false, /* failHard */ false);
     info = co_await emitGroups(
-      std::move(filtered_groups), callback, index, false /* forceInclusion */);
+      std::move(filtered_groups), callback, index, false /* forceInclusion */, logFiles);
     m_filteredPackageMicros = std::chrono::microseconds{timer.getMicroSeconds()};
     if (logFiles) {
       files_in_build.insert(
@@ -1714,7 +1732,8 @@ coro::Task<Package::EmitInfo> Package::emitGroups(
   Groups groups,
   const EmitCallback& callback,
   const UnitIndex& index,
-  bool forceInclusion
+  bool forceInclusion,
+  bool logFiles
 ) {
   if (groups.empty()) co_return EmitInfo{};
 
@@ -1723,7 +1742,7 @@ coro::Task<Package::EmitInfo> Package::emitGroups(
   std::vector<coro::TaskWithExecutor<EmitInfo>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
-      co_withExecutor(m_executor.sticky(), emitGroup(std::move(group), callback, index, forceInclusion))
+		       co_withExecutor(m_executor.sticky(), emitGroup(std::move(group), callback, index, forceInclusion, logFiles))
     );
   }
 
@@ -1756,7 +1775,8 @@ coro::Task<Package::EmitInfo> Package::emitGroup(
     Group group,
     const EmitCallback& callback,
     const UnitIndex& index,
-    bool isOnDemand
+    bool isOnDemand,
+    bool logFiles
 ) {
   using namespace folly::gen;
 
@@ -1814,7 +1834,9 @@ coro::Task<Package::EmitInfo> Package::emitGroup(
         _Exit(HPHP_EXIT_FAILURE);
       }
       auto const filename = makeStaticString(group.m_files[i].native());
-      if (Cfg::Eval::PackageV2) files_in_build.push_back(filename);
+      if (logFiles) {
+        files_in_build.push_back(filename);
+      }
       if (Option::ForceEnableSymbolRefs || Cfg::Eval::ActiveDeployment.empty()) {
         // Resolve any symbol refs into files to parse ondemand
         resolveOnDemand(ondemand, filename, meta.m_symbol_refs, index);

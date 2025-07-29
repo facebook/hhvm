@@ -343,14 +343,15 @@ private:
       const std::vector<ParseMeta>&, std::vector<FileData>&, size_t attempts);
 
   folly::coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
+                                  const std::filesystem::path&,
                                   const std::filesystem::path&);
   folly::coro::Task<void> emitAllPackageV2(const EmitCallback&, const UnitIndex&,
                                            const std::filesystem::path&,
                                            const std::filesystem::path&);
   folly::coro::Task<EmitInfo>
-  emitGroups(Groups, const EmitCallback&, const UnitIndex&, bool);
+  emitGroups(Groups, const EmitCallback&, const UnitIndex&, bool, bool);
   folly::coro::Task<EmitInfo>
-  emitGroup(Group, const EmitCallback&, const UnitIndex&, bool);
+  emitGroup(Group, const EmitCallback&, const UnitIndex&, bool, bool);
 
   void resolveOnDemand(OndemandInfo&, const StringData* fromFile,
       const SymbolRefs&, const UnitIndex&, bool report = false);

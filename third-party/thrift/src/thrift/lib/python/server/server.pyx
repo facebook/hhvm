@@ -18,7 +18,7 @@ import traceback
 
 from thrift.python.exceptions import ApplicationError
 from thrift.python.metadata import gen_metadata, ThriftMetadata
-from thrift.python.protocol import Protocol
+from thrift.python.protocol import Protocol, RpcKind
 from thrift.python.types import ServiceInterface
 from thrift.python.serializer import serialize_iobuf
 
@@ -32,6 +32,5 @@ from thrift.python.server_impl.request_context import (
 )
 from thrift.python.server_impl.python_async_processor import (
     PythonUserException,
-    RpcKind,
 )
 from thrift.python.server_impl.interceptor.server_module import PythonServerModule

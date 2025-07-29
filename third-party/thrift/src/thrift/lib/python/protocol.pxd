@@ -19,3 +19,11 @@ cdef extern from "<thrift/lib/cpp/protocol/TProtocolTypes.h>" namespace "apache:
         DEPRECATED_VERBOSE_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
         COMPACT "apache::thrift::protocol::T_COMPACT_PROTOCOL"
         JSON "apache::thrift::protocol::T_SIMPLE_JSON_PROTOCOL"
+
+
+cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
+    cpdef enum class RpcKind:
+        SINGLE_REQUEST_SINGLE_RESPONSE = 0
+        SINGLE_REQUEST_NO_RESPONSE = 1
+        SINGLE_REQUEST_STREAMING_RESPONSE = 4
+        SINK = 6

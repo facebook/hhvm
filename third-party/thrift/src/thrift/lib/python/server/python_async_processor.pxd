@@ -19,6 +19,7 @@ from libcpp.map cimport map as cmap
 from libcpp.pair cimport pair
 from libcpp.vector cimport vector as cvector
 from folly.iobuf cimport cIOBuf
+from thrift.python.protocol cimport RpcKind
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.server_impl.async_processor cimport (
     cAsyncProcessorFactory,
@@ -33,13 +34,6 @@ from folly.executor cimport cAsyncioExecutor
 # Make a typedef to workaround this.
 ctypedef PyObject* PyObjPtr
 
-
-cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
-    cpdef enum class RpcKind:
-        SINGLE_REQUEST_SINGLE_RESPONSE = 0
-        SINGLE_REQUEST_NO_RESPONSE = 1
-        SINGLE_REQUEST_STREAMING_RESPONSE = 4
-        SINK = 6
 
 cdef extern from "thrift/lib/python/streaming/PythonUserException.h" namespace "::apache::thrift::python":
     cdef cppclass cPythonUserException "::apache::thrift::python::PythonUserException"(cException):

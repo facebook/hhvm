@@ -6436,7 +6436,10 @@ end = struct
                       }))
           env
     | (r, Toption t) ->
-      if can_index.ci_lhs_of_null_coalesce then
+      if
+        can_index.ci_lhs_of_null_coalesce
+        || Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
+      then
         simplify
           ~subtype_env
           ~this_ty

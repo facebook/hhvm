@@ -210,7 +210,7 @@ type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
 and type_tag_generic =
   | Filled of locl_phase ty
-  | Wildcard of string
+  | Wildcard of int
 
 and type_tag =
   | BoolTag

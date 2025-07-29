@@ -7681,19 +7681,19 @@ end = struct
           p
       in
       let generics_map =
-        SMap.map (fun (_tparam, locl_ty) -> locl_ty) instantiated_tparams
+        IMap.map (fun (_tparam, locl_ty) -> locl_ty) instantiated_tparams
       in
       let assumptions = assumptions_f generics_map in
       let env = update_env_with_assumptions env assumptions in
       let (env, tparam_substs) =
         Type_parameter_env_ops.simplify_tpenv
           env
-          (SMap.values
-          @@ SMap.map (fun (tp, ty) -> (Some tp, ty)) instantiated_tparams)
+          (IMap.values
+          @@ IMap.map (fun (tp, ty) -> (Some tp, ty)) instantiated_tparams)
           reason
       in
       let generics_map =
-        SMap.map
+        IMap.map
           (fun ((_tp, name), _ty) -> SMap.find name tparam_substs)
           instantiated_tparams
       in
@@ -8126,7 +8126,7 @@ end = struct
       | _ -> begin
         match Result.ok @@ Typing_refinement.TyPredicate.of_ty env hint_ty with
         | None -> default_branch env
-        | Some (env, (_, predicate)) ->
+        | Some (_, predicate) ->
           branch_for_type_switch
             env
             ~p

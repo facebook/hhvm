@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0800d9262b4b9ea13719c555cae84368>>
+// @generated SignedSource<<25fea87521478c49dc53a0fc029de81d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -498,8 +498,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 pub enum TypeTagGeneric<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Filled(&'a Ty<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Wildcard(&'a str),
+    Wildcard(isize),
 }
 impl<'a> TrivialDrop for TypeTagGeneric<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypeTagGeneric<'arena>);

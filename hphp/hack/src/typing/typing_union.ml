@@ -484,7 +484,7 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
     | (ty, (_, Tneg predicate))
     | ((_, Tneg predicate), ty) ->
       (match Result.ok @@ Typing_refinement.TyPredicate.of_ty env (mk ty) with
-      | Some (env, other) when equal_type_predicate predicate other ->
+      | Some other when equal_type_predicate predicate other ->
         (env, Some (MakeType.mixed r))
       | _ -> ty_equiv env ty1 ty2 ~are_ty_param:false)
     | ( ( _,

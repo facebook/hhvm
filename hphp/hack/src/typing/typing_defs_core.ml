@@ -242,7 +242,7 @@ type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
 and type_tag_generic =
   | Filled of locl_phase ty
-  | Wildcard of string
+  | Wildcard of int
 
 and type_tag =
   | BoolTag
@@ -863,9 +863,9 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Filled@ ";
       pp_ty fmt ty;
       Format.fprintf fmt "@])"
-    | Wildcard string ->
+    | Wildcard id ->
       Format.fprintf fmt "(@[<2>Wildcard@ ";
-      Format.pp_print_string fmt string;
+      Format.pp_print_int fmt id;
       Format.fprintf fmt "@])"
 
   and pp_type_tag fmt tag =
@@ -1253,7 +1253,7 @@ and compare_type_predicate (_, p1) (_, p2) =
 
 and compare_type_tag_generic g1 g2 =
   match (g1, g2) with
-  | (Wildcard s1, Wildcard s2) -> String.compare s1 s2
+  | (Wildcard id1, Wildcard id2) -> Int.compare id1 id2
   | (Filled ty1, Filled ty2) -> ty_compare ty1 ty2
   | (Wildcard _, Filled _) -> 1
   | (Filled _, Wildcard _) -> -1

@@ -1197,13 +1197,15 @@ module Full = struct
     let k ~fuel lty = locl_ty ~fuel ~hide_internals to_doc st penv lty in
     let g ~fuel g =
       match g with
-      | Wildcard s ->
+      | Wildcard id ->
         ( fuel,
           text
-            (if hide_internals then
-              "_"
+            ("_"
+            ^
+            if hide_internals then
+              ""
             else
-              s) )
+              string_of_int id) )
       | Filled ty -> k ~fuel ty
     in
     let tag_doc fuel tag =

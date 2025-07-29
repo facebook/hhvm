@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e5c7a8b100acae4b22f00056bc313b5>>
+// @generated SignedSource<<a3e1b9a0479404bf2f7ab6d49c2ef735>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -520,7 +520,7 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
 #[repr(C, u8)]
 pub enum TypeTagGeneric {
     Filled(Ty),
-    Wildcard(String),
+    Wildcard(isize),
 }
 
 #[derive(

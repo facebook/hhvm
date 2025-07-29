@@ -32,7 +32,7 @@ module Uninstantiated_typing_logic : sig
   val disj : subtype_prop -> subtype_prop -> subtype_prop
 
   val instantiate_prop :
-    Typing_defs.locl_ty SMap.t ->
+    Typing_defs.locl_ty IMap.t ->
     Pos.t ->
     subtype_prop ->
     Typing_logic.subtype_prop
@@ -101,17 +101,17 @@ module TyPredicate : sig
   val of_ty :
     Typing_env_types.env ->
     Typing_defs.locl_ty ->
-    (Typing_env_types.env * Typing_defs.type_predicate, string) Result.t
+    (Typing_defs.type_predicate, string) Result.t
 
   val instantiate_wildcards_for_predicate :
     Typing_env_types.env ->
     Typing_defs.type_predicate ->
     Pos.t ->
     Typing_env_types.env
-    * ((Typing_defs.decl_tparam * string) * Typing_defs.locl_ty) SMap.t
+    * ((Typing_defs.decl_tparam * string) * Typing_defs.locl_ty) IMap.t
 
   val to_ty :
-    Typing_defs.locl_ty SMap.t ->
+    Typing_defs.locl_ty IMap.t ->
     Pos.t ->
     Typing_defs.type_predicate ->
     Typing_defs.locl_ty

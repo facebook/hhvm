@@ -220,14 +220,66 @@ class HasUsecaseIdTrait<
     std::void_t<decltype(std::declval<Message>().usecaseId_ref())>>
     : public std::true_type {};
 
+template <typename Message, typename = std::enable_if_t<true>>
+class HasTenantIdTrait : public std::false_type {};
 template <typename Message>
-std::optional<int64_t> getUsecaseId(Message& message) {
+class HasTenantIdTrait<
+    Message,
+    std::void_t<decltype(std::declval<Message>().tenantId())>>
+    : public std::true_type {};
+
+template <typename Message, typename = std::enable_if_t<true>>
+class HasMcTenantIdTrait : public std::false_type {};
+template <typename Message>
+class HasMcTenantIdTrait<
+    Message,
+    std::void_t<decltype(std::declval<Message>().mcTenantId_ref())>>
+    : public std::true_type {};
+
+template <typename Message>
+std::optional<int64_t> getUsecaseIdForLogging(Message& message) {
   if constexpr (HasUsecaseIdTrait<Message>::value) {
     if (message.usecaseId_ref().has_value()) {
       return {*message.usecaseId_ref()};
     }
+    return std::nullopt;
+  } else if constexpr (HasMcTenantIdTrait<Message>::value) {
+    if (message.mcTenantId_ref().has_value()) {
+      return {*message.mcTenantId_ref()};
+    }
+    return std::nullopt;
+  } else if constexpr (HasTenantIdTrait<Message>::value) {
+    // Temporary helper while we are migrating to the new tenantId field.
+    // If sent from a new client that sets the tenantId field always use that.
+    if (*message.tenantId() > 0) {
+      return *message.tenantId();
+    }
+    auto id = static_cast<uint32_t>(*message.usecaseId_deprecated());
+    if (id > 0) {
+      return id;
+    }
+    return std::nullopt;
+  } else {
+    return std::nullopt;
   }
-  return std::nullopt;
+}
+
+template <typename Message>
+uint32_t getTenantId(Message& message) {
+  if constexpr (HasMcTenantIdTrait<Message>::value) {
+    if (message.mcTenantId().has_value()) {
+      return *message.mcTenantId();
+    }
+    return 0;
+  } else {
+    static_assert(HasTenantIdTrait<Message>::value);
+    // Temporary helper while we are migrating to the new tenantId field.
+    // If sent from a new client that sets the tenantId field always use that.
+    if (*message.tenantId() > 0) {
+      return *message.tenantId();
+    }
+    return static_cast<uint32_t>(*message.usecaseId_deprecated());
+  }
 }
 
 template <typename Message, typename = std::enable_if_t<true>>

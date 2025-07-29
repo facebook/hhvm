@@ -30,7 +30,7 @@ struct MemcacheRequestCommon {
   3: optional string bucketId
   4: optional i64 productId
   5: optional i32 regionalizationEntity
-  6: optional carbon.ui32 usecaseId
+  6: optional carbon.ui32 mcTenantId
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);

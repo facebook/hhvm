@@ -152,7 +152,7 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
           /* poolIndex */ std::nullopt,
           getProductId(request),
           getRegionalizationEntity(request),
-          getUsecaseId(request));
+          getUsecaseIdForLogging(request));
 
       assert(additionalLogger_.hasValue());
       additionalLogger_->logBeforeRequestSent(request, loggerContext);
@@ -206,7 +206,7 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
         poolIndex,
         getProductId(request),
         getRegionalizationEntity(request),
-        getUsecaseId(request),
+        getUsecaseIdForLogging(request),
         getReplySourceBitMask(reply),
         fiber_local<RouterInfo>::getBigValueContext());
     assert(logger_.hasValue());

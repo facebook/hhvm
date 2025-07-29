@@ -224,8 +224,8 @@ class GetBucketCommandDispatcher {
       folly::StringPiece keyStr,
       Proxy<RouterInfo>& proxy,
       const ProxyRoute<RouterInfo>& proxyRoute) {
-    using KeyBucketKeyspaceTuple = std::
-        tuple<std::string, std::string, std::string, std::optional<int64_t>>;
+    using KeyBucketKeyspaceTuple =
+        std::tuple<std::string, std::string, std::string, uint32_t>;
     proxy.fiberManager().addTaskFinally(
         [keyStr, &proxy, &proxyRoute]() {
           auto keyBucketKeyspaceTuples =
@@ -234,12 +234,12 @@ class GetBucketCommandDispatcher {
                         std::string keyRecorded,
                         const uint64_t bucketIdRecorded,
                         const std::string_view bucketizationKeyspaceRecorded,
-                        std::optional<int64_t> usecaseId) {
-            keyBucketKeyspaceTuples->push_back(std::make_tuple(
+                        uint32_t tenantId) {
+            keyBucketKeyspaceTuples->emplace_back(
                 std::move(keyRecorded),
                 folly::to<std::string>(bucketIdRecorded),
                 folly::to<std::string>(bucketizationKeyspaceRecorded),
-                std::move(usecaseId)));
+                tenantId);
           };
           folly::fibers::Baton baton;
           auto rctx =
@@ -259,7 +259,7 @@ class GetBucketCommandDispatcher {
                   data) {
           std::string str;
           const auto& tuplesPtr = *data;
-          for (const auto& [key, bucket, keyspace, usecaseId] : *tuplesPtr) {
+          for (const auto& [key, bucket, keyspace, tenantId] : *tuplesPtr) {
             if (!str.empty()) {
               str.append("\r\n");
             }
@@ -270,8 +270,7 @@ class GetBucketCommandDispatcher {
             str.append(keyspace);
             str.push_back('\t');
             str.append(
-                usecaseId.has_value() ? folly::to<std::string>(*usecaseId)
-                                      : "null");
+                tenantId > 0 ? folly::to<std::string>(tenantId) : "null");
           }
           ReplyT<ServiceInfoRequest> reply(carbon::Result::FOUND);
           reply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, str);

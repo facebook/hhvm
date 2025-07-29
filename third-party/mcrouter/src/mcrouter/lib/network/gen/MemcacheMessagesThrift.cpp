@@ -53,7 +53,7 @@ void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
         break;
       }
       case 6: {
-        reader.readField(usecaseId_ref(), fieldType);
+        reader.readField(mcTenantId_ref(), fieldType);
         break;
       }
       default: {

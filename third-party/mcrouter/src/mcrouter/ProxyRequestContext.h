@@ -50,11 +50,8 @@ class ProxyRequestContext {
   using ClientCallback =
       std::function<void(const PoolContext&, const AccessPoint&)>;
   using ShardSplitCallback = std::function<void(const ShardSplitter&, bool)>;
-  using BucketizationCallback = std::function<void(
-      std::string,
-      const uint64_t,
-      const std::string&,
-      std::optional<int64_t>)>;
+  using BucketizationCallback = std::function<
+      void(std::string, const uint64_t, const std::string&, uint32_t)>;
 
   virtual ~ProxyRequestContext();
 
@@ -90,8 +87,14 @@ class ProxyRequestContext {
       const std::string& keyspace,
       const Request& req) const {
     if (recording_ && recordingState_->bucketizationCallback) {
+      uint32_t tenantId = 0;
+      if constexpr (
+          HasTenantIdTrait<Request>::value ||
+          HasMcTenantIdTrait<Request>::value) {
+        tenantId = getTenantId(req);
+      }
       recordingState_->bucketizationCallback(
-          std::move(key), bucketId, keyspace, getUsecaseId(req));
+          std::move(key), bucketId, keyspace, tenantId);
     }
   }
 

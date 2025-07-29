@@ -193,7 +193,7 @@ std::vector<McGetRequest> BigValueRoute<RouterInfo>::chunkGetRequests(
     // override key with chunk keys
     auto& bigGetReq =
         bigGetReqs.emplace_back(createChunkKey(baseKey, i, info.suffix()));
-    bigGetReq.usecaseId_ref().copy_from(req.usecaseId_ref());
+    bigGetReq.mcTenantId().copy_from(req.mcTenantId());
     if constexpr (HasFlagsTrait<FromRequest>::value) {
       bigGetReq.flags_ref() = *req.flags_ref();
     }
@@ -254,7 +254,7 @@ BigValueRoute<RouterInfo>::chunkUpdateRequests(const Request& req) const {
         createChunkKey(req.key_ref()->fullKey(), i, info.suffix()));
     chunkReq.value_ref() = std::move(chunkValue);
     chunkReq.exptime_ref() = *req.exptime_ref();
-    chunkReq.usecaseId_ref().copy_from(req.usecaseId_ref());
+    chunkReq.mcTenantId().copy_from(req.mcTenantId());
     chunkReq.flags_ref() = *req.flags_ref();
   }
 

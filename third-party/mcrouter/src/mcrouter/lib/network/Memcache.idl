@@ -23,8 +23,8 @@ struct MemcacheRequestCommon {
   4: optional int64_t productId;
   # Regionalization entity
   5: optional int32_t regionalizationEntity;
-  # Usecase ID
-  6: optional uint32_t usecaseId;
+  # Tenant ID
+  6: optional uint32_t mcTenantId;
 };
 
 struct MemcacheReplyCommon {

@@ -42,7 +42,6 @@ abstract final class ThriftUtil {
     nameof QRTModelMapping,
     nameof SignalMappingCollectionV2,
     nameof WebsiteEventContextParamStruct,
-    nameof artillery2_StringRestraint,
     nameof galileo_GalileoClientViewShardedMap,
     nameof galileo_NoTransform,
     nameof ig_launcher_Whitelist,

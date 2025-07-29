@@ -17,6 +17,7 @@
 #include <thrift/compiler/generate/cpp/util.h>
 
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -174,7 +175,8 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   auto si = t_set(i);
   auto mii = t_map(i, i);
 
-  const t_type* no_uniques[] = {&i, &li, &lli, &si, &mii};
+  const auto no_uniques =
+      std::to_array<const t_type*>({&i, &li, &lli, &si, &mii});
   for (const auto* no_unique : no_uniques) {
     // no_unique f;
     auto f = t_field(*no_unique, "f", 1);
@@ -190,14 +192,15 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   auto sp = t_set(p);
   auto mip = t_map(i, p);
 
-  const t_type* uniques[] = {&p, &lp, &llp, &sp, &mip};
+  const auto uniques = std::to_array<const t_type*>({&p, &lp, &llp, &sp, &mip});
   for (const auto* unique : uniques) {
     // unique f;
     auto f = t_field(*unique, "f", 1);
     EXPECT_TRUE(cpp2::field_transitively_refers_to_unique(&f));
   }
 
-  const t_type* types[] = {&i, &li, &si, &mii, &p, &lp, &sp, &mip};
+  const auto types =
+      std::to_array<const t_type*>({&i, &li, &si, &mii, &p, &lp, &sp, &mip});
   for (const auto* type : types) {
     // type r (cpp.ref = "true");
     auto r = t_field(*type, "r", 1);

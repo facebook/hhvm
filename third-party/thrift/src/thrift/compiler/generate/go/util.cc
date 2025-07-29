@@ -132,7 +132,7 @@ void codegen_data::compute_struct_to_field_names() {
 
 void codegen_data::compute_service_to_req_resp_structs() {
   for (auto service : current_program_->services()) {
-    std::vector<t_struct*> req_resp_structs =
+    std::vector<const t_struct*> req_resp_structs =
         go::get_service_req_resp_structs(service);
     service_to_req_resp_structs[service->name()] = req_resp_structs;
     for (auto struct_ : req_resp_structs) {
@@ -615,8 +615,9 @@ std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {
   return field_names;
 }
 
-std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
-  std::vector<t_struct*> req_resp_structs;
+std::vector<const t_struct*> get_service_req_resp_structs(
+    const t_service* service) {
+  std::vector<const t_struct*> req_resp_structs;
   auto svcGoName = go::munge_ident(service->name());
   for (auto func : service->get_functions()) {
     if (!go::is_func_go_client_supported(func) &&

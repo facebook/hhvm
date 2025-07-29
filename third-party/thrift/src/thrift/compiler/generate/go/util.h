@@ -54,8 +54,8 @@ class codegen_data {
   // This set will help us track these srtucts by name.
   std::set<std::string> req_resp_struct_names;
   // Mapping of service name to a vector of req/resp structs for that service.
-  std::map<std::string, std::vector<t_struct*>> service_to_req_resp_structs =
-      {};
+  std::map<std::string, std::vector<const t_struct*>>
+      service_to_req_resp_structs = {};
   // A vector of types for which we need to generate metadata.
   // Order matters here - items later in the list may have a dependency
   // on items earlier in the list. This ensures that the Go code can
@@ -157,7 +157,8 @@ std::string get_go_func_name(const t_function* func);
 
 std::set<std::string> get_struct_go_field_names(const t_structured* tstruct);
 
-std::vector<t_struct*> get_service_req_resp_structs(const t_service* service);
+std::vector<const t_struct*> get_service_req_resp_structs(
+    const t_service* service);
 
 const std::string* get_go_name_annotation(const t_named* node);
 const std::string* get_go_tag_annotation(const t_named* node);

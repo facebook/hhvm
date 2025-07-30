@@ -36,13 +36,18 @@ class CertManagerTest : public Test {
     return cert;
   }
 
+  ClientHello getChlo() {
+    ClientHello chlo;
+    return chlo;
+  }
+
   CertManager manager_;
 };
 
 TEST_F(CertManagerTest, TestNoMatchDefault) {
   auto cert = getCert("blah.com", {}, kRsa);
   manager_.addCertAndSetDefault(cert);
-  auto res = manager_.getCert(std::string("test.com"), kRsa, kRsa, {});
+  auto res = manager_.getCert(std::string("test.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
   EXPECT_TRUE(manager_.hasCerts());
 }
@@ -50,27 +55,27 @@ TEST_F(CertManagerTest, TestNoMatchDefault) {
 TEST_F(CertManagerTest, TestNoSniDefault) {
   auto cert = getCert("blah.com", {}, kRsa);
   manager_.addCertAndSetDefault(cert);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  auto res = manager_.getCert(folly::none, kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 }
 
 TEST_F(CertManagerTest, TestWildcardDefault) {
   auto cert = getCert("*.blah.com", {}, kRsa);
   manager_.addCertAndSetDefault(cert);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  auto res = manager_.getCert(folly::none, kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 }
 
 TEST_F(CertManagerTest, TestUppercaseDefault) {
   auto cert = getCert("BLAH.com", {}, kRsa);
   manager_.addCertAndSetDefault(cert);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  auto res = manager_.getCert(folly::none, kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 }
 
 TEST_F(CertManagerTest, TestNoDefault) {
   EXPECT_FALSE(
-      manager_.getCert(std::string("blah.com"), {}, {}, {}).hasValue());
+      manager_.getCert(std::string("blah.com"), {}, {}, getChlo()).hasValue());
   EXPECT_FALSE(manager_.hasCerts());
 }
 
@@ -85,7 +90,7 @@ TEST_F(CertManagerTest, TestSigSchemesServerPref) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {});
+      getChlo());
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
 
@@ -93,7 +98,7 @@ TEST_F(CertManagerTest, TestSigSchemesServerPref) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {});
+      getChlo());
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -108,7 +113,7 @@ TEST_F(CertManagerTest, TestClientSigScheme) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
       {SignatureScheme::rsa_pss_sha512},
-      {});
+      getChlo());
   EXPECT_EQ(res->cert, cert2);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -123,7 +128,7 @@ TEST_F(CertManagerTest, TestClientSigSchemeWildcardMatch) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
       {SignatureScheme::rsa_pss_sha512},
-      {});
+      getChlo());
   EXPECT_EQ(res->cert, cert2);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -136,7 +141,7 @@ TEST_F(CertManagerTest, TestClientSigSchemeNoMatch) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha256},
       {SignatureScheme::rsa_pss_sha512},
-      {});
+      getChlo());
   EXPECT_FALSE(res);
 }
 
@@ -147,13 +152,14 @@ TEST_F(CertManagerTest, TestAlts) {
       kRsa);
   manager_.addCert(cert);
 
-  auto res = manager_.getCert(std::string("www.test.com"), kRsa, kRsa, {});
+  auto res =
+      manager_.getCert(std::string("www.test.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 
-  res = manager_.getCert(std::string("www.example.com"), kRsa, kRsa, {});
+  res = manager_.getCert(std::string("www.example.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 
-  res = manager_.getCert(std::string("foo.example.com"), kRsa, kRsa, {});
+  res = manager_.getCert(std::string("foo.example.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 }
 
@@ -161,11 +167,13 @@ TEST_F(CertManagerTest, TestWildcard) {
   auto cert = getCert("*.test.com", {}, kRsa);
   manager_.addCert(cert);
 
-  auto res = manager_.getCert(std::string("bar.test.com"), kRsa, kRsa, {});
+  auto res =
+      manager_.getCert(std::string("bar.test.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
 
-  EXPECT_FALSE(manager_.getCert(std::string("foo.bar.test.com"), kRsa, kRsa, {})
-                   .hasValue());
+  EXPECT_FALSE(
+      manager_.getCert(std::string("foo.bar.test.com"), kRsa, kRsa, getChlo())
+          .hasValue());
 }
 
 TEST_F(CertManagerTest, TestExactMatch) {
@@ -174,7 +182,8 @@ TEST_F(CertManagerTest, TestExactMatch) {
   manager_.addCert(cert1);
   manager_.addCert(cert2);
 
-  auto res = manager_.getCert(std::string("foo.test.com"), kRsa, kRsa, {});
+  auto res =
+      manager_.getCert(std::string("foo.test.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert2);
 }
 
@@ -182,10 +191,11 @@ TEST_F(CertManagerTest, TestNoWildcard) {
   auto cert = getCert("foo.test.com", {}, kRsa);
   manager_.addCert(cert);
 
-  EXPECT_FALSE(manager_.getCert(std::string("blah.test.com"), kRsa, kRsa, {})
-                   .hasValue());
   EXPECT_FALSE(
-      manager_.getCert(std::string("test.com"), kRsa, kRsa, {}).hasValue());
+      manager_.getCert(std::string("blah.test.com"), kRsa, kRsa, getChlo())
+          .hasValue());
+  EXPECT_FALSE(manager_.getCert(std::string("test.com"), kRsa, kRsa, getChlo())
+                   .hasValue());
 }
 
 TEST_F(CertManagerTest, TestGetByIdentity) {

@@ -726,12 +726,18 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.hostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.hostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -993,12 +999,18 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.hostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.hostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -1320,12 +1332,18 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.hostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.hostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -1644,12 +1662,18 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.fakehostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.fakehostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -1915,12 +1939,18 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.hostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.hostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -2690,12 +2720,18 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.hostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.hostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -3207,12 +3243,18 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.hostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.hostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,
@@ -3486,12 +3528,18 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
-              const std::vector<Extension>& /* peerExtensions */) {
+              const ClientHello& chlo) {
             EXPECT_EQ(*sni, "www.fakehostname.com");
             EXPECT_EQ(peerSigSchemes.size(), 2);
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
+            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            EXPECT_TRUE(!serverNameList->server_name_list.empty());
+            EXPECT_EQ(
+                serverNameList->server_name_list.front()
+                    .hostname->to<std::string>(),
+                "www.fakehostname.com");
             return CertManager::CertMatch(CertManager::CertMatchStruct{
                 cert_,
                 SignatureScheme::ecdsa_secp256r1_sha256,

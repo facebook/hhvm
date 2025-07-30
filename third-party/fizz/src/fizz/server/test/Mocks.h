@@ -227,7 +227,7 @@ class MockCertManager : public CertManager {
       (const folly::Optional<std::string>& sni,
        const std::vector<SignatureScheme>& supportedSigSchemes,
        const std::vector<SignatureScheme>& peerSigSchemes,
-       const std::vector<Extension>& peerExtensions),
+       const ClientHello& chlo),
       (const));
   MOCK_METHOD(
       std::shared_ptr<SelfCert>,

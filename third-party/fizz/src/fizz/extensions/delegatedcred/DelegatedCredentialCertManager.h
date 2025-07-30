@@ -23,7 +23,7 @@ class DelegatedCredentialCertManager : public server::CertManager {
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,
-      const std::vector<Extension>& peerExtensions) const override;
+      const ClientHello& chlo) const override;
 
   std::shared_ptr<SelfCert> getCert(const std::string& identity) const override;
 

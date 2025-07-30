@@ -213,12 +213,12 @@ class FizzServerContext {
   getCert(
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& peerSigSchemes,
-      const std::vector<Extension>& peerExtensions) const {
+      const ClientHello& chlo) const {
     if (!certManager_) {
       return folly::none;
     }
-    auto result = certManager_->getCert(
-        sni, supportedSigSchemes_, peerSigSchemes, peerExtensions);
+    auto result =
+        certManager_->getCert(sni, supportedSigSchemes_, peerSigSchemes, chlo);
     if (result) {
       return std::make_pair(result->cert, result->scheme);
     } else {

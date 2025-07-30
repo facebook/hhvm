@@ -41,7 +41,7 @@ CertManager::CertMatch CertManager::getCert(
     const Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
-    const std::vector<Extension>& /*peerExtensions*/) const {
+    const ClientHello& /* chlo */) const {
   if (sni) {
     auto key = *sni;
     toLowerAscii(key);

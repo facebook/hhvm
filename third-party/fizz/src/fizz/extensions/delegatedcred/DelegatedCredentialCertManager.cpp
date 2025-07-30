@@ -16,21 +16,20 @@ CertManager::CertMatch DelegatedCredentialCertManager::getCert(
     const folly::Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
-    const std::vector<Extension>& peerExtensions) const {
-  auto credential = getExtension<DelegatedCredentialSupport>(peerExtensions);
+    const ClientHello& chlo) const {
+  auto credential = getExtension<DelegatedCredentialSupport>(chlo.extensions);
 
   if (credential) {
     auto dcRes = dcMgr_.getCert(
         sni,
         supportedSigSchemes,
         credential->supported_signature_algorithms,
-        peerExtensions);
+        chlo);
     if (dcRes) {
       return dcRes;
     }
   }
-  return CertManager::getCert(
-      sni, supportedSigSchemes, peerSigSchemes, peerExtensions);
+  return CertManager::getCert(sni, supportedSigSchemes, peerSigSchemes, chlo);
 }
 
 // Falls back to non-delegated if no match.

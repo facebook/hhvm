@@ -48,16 +48,13 @@ var _ = metadata.GoUnusedProtection__
 {{/program:import_metadata_package?}}
 {{/program:gen_metadata?}}
 
-{{#program:interactions?}}
 {{#program:interactions}}
 {{> svc/interface}}
 
 {{> svc/client}}
 
 {{/program:interactions}}
-{{/program:interactions?}}
 
-{{#program:services?}}
 {{#program:services}}
 {{> svc/interface}}
 
@@ -66,4 +63,3 @@ var _ = metadata.GoUnusedProtection__
 {{> svc/processor}}
 
 {{/program:services}}
-{{/program:services?}}

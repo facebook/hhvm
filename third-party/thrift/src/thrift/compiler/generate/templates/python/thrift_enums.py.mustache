@@ -43,8 +43,8 @@ class {{enum:name}}(_fbthrift_python_types.{{!
 
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
-        return {{#enum:thrift_uri}}"{{enum:thrift_uri}}"{{/enum:thrift_uri}}{{!
-            }}{{^enum:thrift_uri}}None{{/enum:thrift_uri}}
+        return {{#enum:uri}}"{{enum:uri}}"{{/enum:uri}}{{!
+            }}{{^enum:uri}}None{{/enum:uri}}
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

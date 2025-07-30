@@ -29,12 +29,12 @@ class Client<{{service:qualified_name}}> : public {{#service:extends}}::{{servic
   std::string_view getServiceName() const noexcept override {
     return "{{service:parent_service_name}}";
   }
-{{#service:thrift_uri}}
+{{#service:uri}}
 
   static std::string_view __fbthrift_thrift_uri() {
-    return "{{service:thrift_uri}}";
+    return "{{service:uri}}";
   }
-{{/service:thrift_uri}}
+{{/service:uri}}
 
 {{#service:interactions}}
 {{> service_h/interaction_async_client}}

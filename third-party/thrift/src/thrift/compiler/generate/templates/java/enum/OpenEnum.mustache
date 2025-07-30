@@ -49,9 +49,9 @@ public class {{enum:javaCapitalName}} extends ThriftEnum<{{enum:javaCapitalName}
 
   static {
     init();
-    {{#enum:thrift_uri}}
-    com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("{{enum:thrift_uri}}"), {{enum:javaCapitalName}}.class, {{enum:javaCapitalName}}::read0));
-    {{/enum:thrift_uri}}
+    {{#enum:uri}}
+    com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("{{enum:uri}}"), {{enum:javaCapitalName}}.class, {{enum:javaCapitalName}}::read0));
+    {{/enum:uri}}
   }
 
   private {{enum:javaCapitalName}}(int value) {
@@ -66,7 +66,7 @@ public class {{enum:javaCapitalName}} extends ThriftEnum<{{enum:javaCapitalName}
   @Override
   public boolean isValueUnrecognized() {
     return value == UNRECOGNIZED_VALUE;
-  }  
+  }
 
   @Override
   public int ordinal() {

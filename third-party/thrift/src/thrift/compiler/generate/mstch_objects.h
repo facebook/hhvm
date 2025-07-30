@@ -534,7 +534,6 @@ class mstch_service : public mstch_base {
             {"service:streams?", &mstch_service::has_streams},
             {"service:sinks?", &mstch_service::has_sinks},
             {"service:annotations", &mstch_service::annotations},
-            {"service:thrift_uri", &mstch_service::thrift_uri},
             {"service:parent_service_name",
              &mstch_service::parent_service_name},
             {"service:interaction?", &mstch_service::is_interaction},
@@ -577,7 +576,6 @@ class mstch_service : public mstch_base {
   mstch::node functions();
   mstch::node extends();
   mstch::node annotations() { return mstch_base::annotations(service_); }
-  mstch::node thrift_uri() { return service_->uri(); }
 
   mstch::node parent_service_name() { return parent_service()->name(); }
 
@@ -962,7 +960,6 @@ class mstch_struct : public mstch_base {
             {"struct:union?", &mstch_struct::is_union},
             {"struct:plain?", &mstch_struct::is_plain},
             {"struct:annotations", &mstch_struct::annotations},
-            {"struct:thrift_uri", &mstch_struct::thrift_uri},
             {"struct:structured_annotations?",
              &mstch_struct::has_structured_annotations},
             {"struct:structured_annotations",
@@ -1008,7 +1005,6 @@ class mstch_struct : public mstch_base {
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(struct_);
   }
-  mstch::node thrift_uri() { return struct_->uri(); }
 
   mstch::node exception_safety();
   mstch::node exception_blame();
@@ -1230,7 +1226,6 @@ class mstch_enum : public mstch_base {
             {"enum:enum_type_legacy?", &mstch_enum::is_enum_type_legacy},
             {"enum:enum_type_open?", &mstch_enum::is_enum_type_open},
             {"enum:unused", &mstch_enum::unused_value},
-            {"enum:thrift_uri", &mstch_enum::thrift_uri},
         });
   }
 
@@ -1286,7 +1281,6 @@ class mstch_enum : public mstch_base {
     }
     return action == def && annotation->value()->get_map().empty();
   }
-  mstch::node thrift_uri() { return enum_->uri(); }
 
  protected:
   const t_enum* enum_;

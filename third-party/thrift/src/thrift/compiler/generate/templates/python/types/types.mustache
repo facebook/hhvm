@@ -105,8 +105,8 @@ class {{> structs/unadapted_name}}{{!
 
     @staticmethod
     def __get_thrift_uri__():
-        return {{#struct:thrift_uri}}"{{struct:thrift_uri}}"{{/struct:thrift_uri}}{{!
-            }}{{^struct:thrift_uri}}None{{/struct:thrift_uri}}
+        return {{#struct:uri}}"{{struct:uri}}"{{/struct:uri}}{{!
+            }}{{^struct:uri}}None{{/struct:uri}}
 
 {{#program:generate_immutable_types}}
     @classmethod

@@ -59,12 +59,12 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cp
     return "{{program:name}}";
   }
 
-  {{#enum:thrift_uri}}
+  {{#enum:uri}}
   FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "{{enum:thrift_uri}}";
+    return "{{enum:uri}}";
   }
 
-  {{/enum:thrift_uri}}
+  {{/enum:uri}}
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);

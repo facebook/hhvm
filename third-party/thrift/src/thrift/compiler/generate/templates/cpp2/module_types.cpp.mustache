@@ -105,12 +105,12 @@ namespace {{program:qualified_namespace}} {
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
 
-{{#struct:thrift_uri}}
+{{#struct:uri}}
 std::string_view {{struct:cpp_underlying_name}}::__fbthrift_thrift_uri() {
-  return "{{struct:thrift_uri}}";
+  return "{{struct:uri}}";
 }
 
-{{/struct:thrift_uri}}
+{{/struct:uri}}
 std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<{{struct:cpp_underlying_name}}>::fields_names[folly::to_underlying(ord) - 1];

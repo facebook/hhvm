@@ -25,14 +25,14 @@ func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
     {{#program:structs}}
-    {{#struct:thrift_uri}}
-    registry.RegisterType("{{struct:thrift_uri}}", func() any { return {{struct:go_qualified_new_func}}() })
-    {{/struct:thrift_uri}}
+    {{#struct:uri}}
+    registry.RegisterType("{{struct:uri}}", func() any { return {{struct:go_qualified_new_func}}() })
+    {{/struct:uri}}
     {{/program:structs}}
 
     {{#program:enums}}
-    {{#enum:thrift_uri}}
-    registry.RegisterType("{{enum:thrift_uri}}", func() any { return {{enum:go_name}}(0) })
-    {{/enum:thrift_uri}}
+    {{#enum:uri}}
+    registry.RegisterType("{{enum:uri}}", func() any { return {{enum:go_name}}(0) })
+    {{/enum:uri}}
     {{/program:enums}}
 }

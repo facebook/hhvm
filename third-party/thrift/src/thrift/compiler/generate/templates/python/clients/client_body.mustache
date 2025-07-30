@@ -24,8 +24,8 @@ def __get_thrift_name__() -> str:
 
 @staticmethod
 def __get_thrift_uri__() -> _typing.Optional[str]:
-    return {{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
-        }}{{^service:thrift_uri}}None{{/service:thrift_uri}}
+    return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
+        }}{{^service:uri}}None{{/service:uri}}
 
 @staticmethod
 def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -57,8 +57,8 @@ class Async({{#service:extends}}{{!
 
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return {{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
-            }}{{^service:thrift_uri}}None{{/service:thrift_uri}}
+        return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
+            }}{{^service:uri}}None{{/service:uri}}
 
     {{^service:interaction?}}
     @staticmethod
@@ -104,8 +104,8 @@ class Async({{#service:extends}}{{!
             interaction_position=_fbthrift_InteractionMethodPosition.Member,
             interaction_name="{{service:name}}",
             {{/service:interaction?}}
-            uri_or_name={{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
-                }}{{^service:thrift_uri}}"{{service:name}}"{{/service:thrift_uri}},
+            uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
+                }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
             rpc_options=rpc_options,{{!
 }}{{#program:generate_mutable_types}}
             is_mutable_types=True,{{!
@@ -175,8 +175,8 @@ class Sync({{#service:extends}}{{!
 
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return {{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
-            }}{{^service:thrift_uri}}None{{/service:thrift_uri}}
+        return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
+            }}{{^service:uri}}None{{/service:uri}}
 
     {{^service:interaction?}}
     @staticmethod
@@ -203,8 +203,8 @@ class Sync({{#service:extends}}{{!
             {{> types/function_args_type}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> clients/client_return_type}},
-            uri_or_name={{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
-                }}{{^service:thrift_uri}}"{{service:name}}"{{/service:thrift_uri}},
+            uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
+                }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
             rpc_options=rpc_options,{{!
 }}{{#program:generate_mutable_types}}
             is_mutable_types=True,{{!

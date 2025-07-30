@@ -171,9 +171,9 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
 const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService {{service:metadata_name}};
   {{service:metadata_name}}.name() = "{{program:name}}.{{service:name}}";
-  {{#if (not (string.empty? service:thrift_uri))}}
-  {{service:metadata_name}}.uri() = "{{service:thrift_uri}}";
-  {{/if (not (string.empty? service:thrift_uri))}}
+  {{#if (not (string.empty? service:uri))}}
+  {{service:metadata_name}}.uri() = "{{service:uri}}";
+  {{/if (not (string.empty? service:uri))}}
 {{#service:functions?}}
   static const ThriftFunctionGenerator functions[] = {
 {{#service:functions}}{{^function:starts_interaction?}}

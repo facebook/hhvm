@@ -69,6 +69,7 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
   def.property(
       "structured_annotations",
       mem_fn(&t_named::structured_annotations, proto.of<t_const>()));
+  def.property("uri", mem_fn(&t_named::uri));
 
   def.property("definition_key", [this](const t_named& named) {
     map::raw m;

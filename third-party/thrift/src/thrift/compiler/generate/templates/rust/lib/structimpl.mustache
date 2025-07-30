@@ -82,14 +82,14 @@ impl ::std::panic::UnwindSafe for self::{{struct:rust_name}} {}
 impl ::fbthrift::GetTType for self::{{struct:rust_name}} {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
-{{#struct:thrift_uri}}
+{{#struct:uri}}
 
 impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
     fn uri() -> &'static ::std::primitive::str {
-        "{{struct:thrift_uri}}"
+        "{{struct:uri}}"
     }
 }
-{{/struct:thrift_uri}}
+{{/struct:uri}}
 
 impl ::fbthrift::GetTypeNameType for self::{{struct:rust_name}} {
     fn type_name_type() -> fbthrift::TypeNameType {

@@ -42,12 +42,12 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
 
  public:
   std::string_view getGeneratedName() const override { return "{{service:name}}"; }
-{{#service:thrift_uri}}
+{{#service:uri}}
 
   static std::string_view __fbthrift_thrift_uri() {
-    return "{{service:thrift_uri}}";
+    return "{{service:uri}}";
   }
-{{/service:thrift_uri}}
+{{/service:uri}}
 
   typedef {{service:qualified_name}}AsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

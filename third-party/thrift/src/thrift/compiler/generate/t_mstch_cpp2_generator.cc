@@ -2339,7 +2339,6 @@ class cpp_mstch_const : public mstch_const {
             {"constant:cpp_type", &cpp_mstch_const::cpp_type},
             {"constant:cpp_runtime_annotation?",
              &cpp_mstch_const::cpp_runtime_annotation},
-            {"constant:uri", &cpp_mstch_const::uri},
             {"constant:has_extra_arg?", &cpp_mstch_const::has_extra_arg},
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
@@ -2372,7 +2371,6 @@ class cpp_mstch_const : public mstch_const {
   mstch::node cpp_type() {
     return cpp_context_->resolver().get_native_type(*const_);
   }
-  mstch::node uri() { return const_->uri(); }
   mstch::node has_extra_arg() {
     return cpp2::get_transitive_annotation_of_adapter_or_null(*const_) !=
         nullptr;

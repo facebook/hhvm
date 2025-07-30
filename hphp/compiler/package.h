@@ -343,7 +343,8 @@ struct Package {
                                const EmitCallback&,
                                const LocalCallback&,
                                const std::filesystem::path&,
-                               const std::filesystem::path&);
+                               const std::filesystem::path&,
+                               bool);
 
 private:
 
@@ -408,7 +409,8 @@ private:
                                   const std::filesystem::path&);
   folly::coro::Task<void> emitAllPackageV2(const EmitCallback&, const UnitIndex&,
                                            const std::filesystem::path&,
-                                           const std::filesystem::path&);
+                                           const std::filesystem::path&,
+                                           bool);
 
 
   folly::coro::Task<EmitInfo>

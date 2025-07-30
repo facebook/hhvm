@@ -110,6 +110,7 @@ struct CompilerOptions {
   bool coredump;
   std::string ondemandEdgesPath;
   std::string filesInBuildPath;
+  bool logPackageBuildDrift;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -562,6 +563,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("report-files-in-build",
      value<std::string>(&po.filesInBuildPath),
      "Write the list of files included in the build to the specified file")
+    ("log-package-build-drift",
+     value<bool>(&po.logPackageBuildDrift)->default_value(false),
+     "Log to scuba the files pulled by packagev2 and not symbolrefs, and viceversa")
     ;
 
   positional_options_description p;
@@ -1590,7 +1594,8 @@ bool process(CompilerOptions &po) {
     }
 
     if (!coro::blockingWait(package->emit(*index, emitRemoteUnit, emitLocalUnit,
-                                          po.ondemandEdgesPath, po.filesInBuildPath))) {
+                                          po.ondemandEdgesPath, po.filesInBuildPath,
+                                          po.logPackageBuildDrift))) {
       return false;
     }
 

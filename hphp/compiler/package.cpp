@@ -1385,7 +1385,8 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
                                const EmitCallback& callback,
                                const LocalCallback& localCallback,
                                const std::filesystem::path& edgesPath,
-                               const std::filesystem::path& filesInBuildPath) {
+                               const std::filesystem::path& filesInBuildPath,
+                               bool logPackageBuildDrift) {
   assertx(callback);
   assertx(localCallback);
 
@@ -1421,7 +1422,8 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
   }
   if (Cfg::Eval::PackageV2) {
     tasks.emplace_back(
-      co_withExecutor(m_executor.sticky(), emitAllPackageV2(callback, index, edgesPath, filesInBuildPath))
+      co_withExecutor(m_executor.sticky(),
+        emitAllPackageV2(callback, index, edgesPath, filesInBuildPath, logPackageBuildDrift))
     );
   } else {
     tasks.emplace_back(
@@ -1522,6 +1524,35 @@ void saveFilesInBuild(const std::vector<FileInBuildInfo>& files_in_build,
     fprintf(f, "f [%s] %s\n", show(file.m_reason), file.m_file->data());
   }
   Logger::FInfo("Saved the files in the build to {}", filesInBuildPath.native());
+}
+
+/* log to scuba files drifting between symbolrefs and package builds */
+void logPackageDrift(const std::vector<FileInBuildInfo>& files_in_build) {
+  StructuredLogEntry ent;
+  for (auto const& file : files_in_build) {
+    if (file.m_reason != FileInBuildReason::fromSymbolRefsAndPackageV2) {
+      ent.setStr("filepath", file.m_file->data());
+      ent.setStr("reason", show(file.m_reason));
+      ent.force_init = true;
+      StructuredLog::log("packagev2_www_build_drift", ent);
+    }
+  }
+}
+
+void saveBuildInfo(const std::vector<SymbolRefEdge>& edges,
+                   const std::filesystem::path& edgesPath,
+                   const std::vector<FileInBuildInfo>& files_in_build,
+                   const std::filesystem::path& filesInBuildPath,
+                   bool logPackageBuildDrift) {
+  if (!edgesPath.native().empty()) {
+    saveSymbolRefEdges(std::move(edges), edgesPath);
+  }
+  if (!filesInBuildPath.native().empty()) {
+    saveFilesInBuild(files_in_build, filesInBuildPath);
+  }
+  if (logPackageBuildDrift) {
+    logPackageDrift(files_in_build);
+  }
 }
 }
 
@@ -1627,9 +1658,11 @@ void Package::logBuildInfo(std::vector<SymbolRefEdge>& edges,
 coro::Task<void>
 Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
                  const std::filesystem::path& edgesPath,
-                 const std::filesystem::path& filesInBuildPath) {
+                 const std::filesystem::path& filesInBuildPath,
+                 bool logPackageBuildDrift) {
   auto const logEdges = !edgesPath.native().empty();
-  auto const logFiles = !filesInBuildPath.native().empty();
+  auto const logFiles =
+    !filesInBuildPath.native().empty() || logPackageBuildDrift;
 
   // Find the initial set of groups
   // - if building with SymbolRefs, both files and dirs must be filtered out
@@ -1676,8 +1709,11 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   if ((info.m_ondemand.m_files.empty() &&
        buildMode == PackageV2BuildMode::symbolRefsOnly) ||
       buildMode == PackageV2BuildMode::packagesOnly) {
-    // Save file list to a text file, if requested
-    if (logFiles) saveFilesInBuild(files_in_build, filesInBuildPath);
+
+    // Before returning, save build information to text files and/or scuba
+    saveBuildInfo(std::move(edges), edgesPath,
+                  std::move(files_in_build), filesInBuildPath,
+                  logPackageBuildDrift);
 
     co_return;
   }
@@ -1733,9 +1769,10 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
     logBuildInfo(edges, files_in_build, info, false, logFiles);
   }
 
-  // Save edge list to a text file, if requested
-  if (logEdges) saveSymbolRefEdges(std::move(edges), edgesPath);
-  if (logFiles) saveFilesInBuild(files_in_build, filesInBuildPath);
+  // Before returning, save build information to text files and/or scuba
+  saveBuildInfo(std::move(edges), edgesPath,
+                std::move(files_in_build), filesInBuildPath,
+                logPackageBuildDrift);
 
   co_return;
 }

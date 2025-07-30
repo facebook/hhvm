@@ -16,7 +16,7 @@ namespace extensions {
 // This is a base "interface" for testing/mock purposes.
 class SelfDelegatedCredential : public SelfCert {
  public:
-  virtual ~SelfDelegatedCredential() = default;
+  virtual ~SelfDelegatedCredential() override = default;
   virtual const DelegatedCredential& getDelegatedCredential() const = 0;
 };
 

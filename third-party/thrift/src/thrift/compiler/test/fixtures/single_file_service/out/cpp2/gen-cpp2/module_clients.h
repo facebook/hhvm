@@ -58,7 +58,7 @@ class I final : public apache::thrift::InteractionHandle {
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "I", "function": "interact"} */
- void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
+  void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void fbthrift_serialize_and_send_interact(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
@@ -602,7 +602,7 @@ class I final : public apache::thrift::InteractionHandle {
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "I", "function": "interact"} */
- void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
+  void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void fbthrift_serialize_and_send_interact(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:

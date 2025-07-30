@@ -30,11 +30,11 @@ namespace {{service:qualified_namespace}} {
 
 {{> service_async_client_cpp/future_functions}}
 
-{{^service:reduced_client?}}{{^function:creates_interaction?}}{{^function:stream?}}
+{{#function:legacy_client_methods?}}{{^function:stream?}}
 void apache::thrift::Client<{{service:qualified_name}}>::{{function:self.cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{function:comma}}{{> service_common/function_param_list_client}}) {
   {{function:self.cpp_name}}(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)){{function:comma}}{{> service_common/param_list}});
 }
-{{/function:stream?}}{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:stream?}}{{/function:legacy_client_methods?}}
 {{/function:sink?}}
 
 {{> service_async_client_cpp/coroutine_functions}}
@@ -46,9 +46,9 @@ void apache::thrift::Client<{{service:qualified_name}}>::{{function:self.cpp_nam
 {{> service_async_client_cpp/received}}
 
 
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:virtual_client_methods?}}
 {{> service_async_client_cpp/received_instance}}
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:virtual_client_methods?}}
 
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}

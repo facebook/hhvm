@@ -40,17 +40,6 @@ std::vector<std::string> split_namespace(const std::string& s);
  */
 std::unordered_set<const t_type*> collect_types(const t_structured* strct);
 
-// Returns whether to generate legacy APIs. DEPRECATED!
-inline bool generate_legacy_api(const t_program&) {
-  return true;
-}
-inline bool generate_legacy_api(const t_structured&) {
-  return true;
-}
-inline bool generate_legacy_api(const t_service&) {
-  return true;
-}
-
 enum class nonascii_handling { octal_escape, no_escape };
 
 /**

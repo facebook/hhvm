@@ -47,7 +47,7 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxedInteraction", "function": "getABox"} */
- void getABox(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
+  void getABox(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void fbthrift_serialize_and_send_getABox(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
@@ -154,7 +154,7 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
  public:
 };
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxService", "function": "getABoxSession"} */
- void getABoxSession(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle, const ::cpp2::ShouldBeBoxed& p_req);
+  void getABoxSession(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle, const ::cpp2::ShouldBeBoxed& p_req);
  protected:
   void fbthrift_serialize_and_send_getABoxSession(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle, const ::cpp2::ShouldBeBoxed& p_req, bool stealRpcOptions = false);
  public:

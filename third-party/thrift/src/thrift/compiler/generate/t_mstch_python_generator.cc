@@ -984,9 +984,7 @@ class python_mstch_struct : public mstch_struct {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);
   }
 
-  mstch::node legacy_api() {
-    return ::apache::thrift::compiler::generate_legacy_api(*struct_);
-  }
+  mstch::node legacy_api() { return true; }
 
   mstch::node num_fields() { return struct_->fields().size(); }
 

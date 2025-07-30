@@ -1125,10 +1125,7 @@ class py3_mstch_field : public mstch_field {
     return gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
   }
 
-  mstch::node hasRefApi() {
-    const t_structured* parentStruct = mstch_field::field_context_->strct;
-    return generate_legacy_api(*parentStruct);
-  }
+  mstch::node hasRefApi() { return true; }
 
  protected:
   RefType get_ref_type() {

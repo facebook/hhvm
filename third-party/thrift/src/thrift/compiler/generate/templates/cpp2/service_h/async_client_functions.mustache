@@ -21,13 +21,12 @@
   {{type:name}} {{function:self.cpp_name}}();
 {{/function:starts_interaction?}}{{^function:starts_interaction?}}
 {{^function:sink?}}
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:legacy_client_methods?}}
 {{> common/fun_docblock}}
   virtual void {{function:self.cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function:comma}}{{> service_common/function_param_list_client}});
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:legacy_client_methods?}}
 {{> common/fun_docblock}}
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
-  virtual{{/function:creates_interaction?}}{{/service:reduced_client?}} void {{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}void {{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}});
 {{/function:sink?}}
  protected:
   void fbthrift_serialize_and_send_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{> types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}}, bool stealRpcOptions = false);
@@ -36,29 +35,29 @@
 
 {{^function:sync_returns_by_outparam?}}
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}{{> types/return_type_client}} sync_{{function:self.cpp_name}}({{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}{{> types/return_type_client}} sync_{{function:self.cpp_name}}({{> service_common/function_param_list_client}});
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}{{> types/return_type_client}} sync_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}{{> types/return_type_client}} sync_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
 {{/function:sync_returns_by_outparam?}}
 {{#function:sync_returns_by_outparam?}}
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}void sync_{{function:self.cpp_name}}({{function:self.cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}void sync_{{function:self.cpp_name}}({{function:self.cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}void sync_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:self.cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}void sync_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:self.cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
 {{/function:sync_returns_by_outparam?}}
 
-{{^service:reduced_client?}}{{^function:creates_interaction?}}{{^function:stream?}}
+{{#function:legacy_client_methods?}}{{^function:stream?}}
 {{> common/fun_docblock}}
   virtual folly::Future<{{> types/return_type_client_lift_unit}}> future_{{function:self.cpp_name}}({{> service_common/function_param_list_client}});
-{{/function:stream?}}{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:stream?}}{{/function:legacy_client_methods?}}
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:self.cpp_name}}({{> service_common/function_param_list_client}});
-{{^service:reduced_client?}}{{^function:creates_interaction?}}{{^function:stream?}}
+  {{#if function:virtual_client_methods?}}virtual {{/if}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:self.cpp_name}}({{> service_common/function_param_list_client}});
+{{#function:legacy_client_methods?}}{{^function:stream?}}
 {{> common/fun_docblock}}
   virtual folly::Future<{{> types/return_type_client_lift_unit}}> future_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
-{{/function:stream?}}{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:stream?}}{{/function:legacy_client_methods?}}
 {{> common/fun_docblock}}
-  {{^service:reduced_client?}}{{^function:creates_interaction?}}virtual {{/function:creates_interaction?}}{{/service:reduced_client?}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
 {{#function:creates_interaction?}}
 {{> common/fun_docblock}}
   std::pair<
@@ -67,7 +66,7 @@
   > eager_semifuture_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
 {{/function:creates_interaction?}}
 {{^function:oneway?}}
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:legacy_client_methods?}}
 {{#function:has_deprecated_header_client_methods}}
 {{^function:stream?}}
 {{> common/fun_docblock}}
@@ -81,7 +80,7 @@
   FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>> sync_complete_{{function:self.cpp_name}}(
       apache::thrift::RpcOptions&& rpcOptions{{function:comma}} {{> service_common/function_param_list_client}});
 {{/type:sync_methods_return_try?}}
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:legacy_client_methods?}}
 {{/function:oneway?}}
 
 #if FOLLY_HAS_COROUTINES
@@ -214,13 +213,13 @@
  public:
 #endif // FOLLY_HAS_COROUTINES
 
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:legacy_client_methods?}}
 {{^function:stream?}}
 {{> common/fun_docblock}}
   virtual void {{function:self.cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}});
 {{/function:stream?}}
 
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:legacy_client_methods?}}
 {{/function:sink?}}{{#function:sink?}}
 #if FOLLY_HAS_COROUTINES
 {{> common/fun_docblock}}
@@ -236,13 +235,13 @@
   static folly::exception_wrapper recv_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
 {{> common/fun_docblock}}
   static void recv_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:virtual_client_methods?}}
   // Mock friendly virtual instance method
 {{> common/fun_docblock}}
   virtual void recv_instance_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
 {{> common/fun_docblock}}
   virtual folly::exception_wrapper recv_instance_wrapped_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:virtual_client_methods?}}
 {{/function:oneway?}}
 {{/function:self.cpp_recv_arg?}}
 {{#function:self.cpp_recv_arg?}}
@@ -251,24 +250,24 @@
 {{^function:sync_returns_by_outparam?}}
 {{> common/fun_docblock}}
   static {{> types/return_type_client_no_handle}} recv_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:virtual_client_methods?}}
   // Mock friendly virtual instance method
 {{> common/fun_docblock}}
   virtual {{> types/return_type_client_no_handle}} recv_instance_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state);
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:virtual_client_methods?}}
 {{/function:sync_returns_by_outparam?}}{{#function:sync_returns_by_outparam?}}
 {{> common/fun_docblock}}
   static void recv_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state);
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:virtual_client_methods?}}
   // Mock friendly virtual instance method
 {{> common/fun_docblock}}
   virtual void recv_instance_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state);
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:virtual_client_methods?}}
 {{/function:sync_returns_by_outparam?}}
-{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:virtual_client_methods?}}
 {{> common/fun_docblock}}
   virtual folly::exception_wrapper recv_instance_wrapped_{{function:self.cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state);
-{{/function:creates_interaction?}}{{/service:reduced_client?}}
+{{/function:virtual_client_methods?}}
 {{/function:self.cpp_recv_arg?}}
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_{{function:self.cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{> service_common/function_param_list_client}});

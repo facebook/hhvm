@@ -216,6 +216,10 @@ bool has_schema(source_manager& sm, const t_program& program) {
   return program.find(schematizer::name_schema(sm, program));
 }
 
+bool generate_reduced_client(const t_interface& i) {
+  return i.is_interaction();
+}
+
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -720,9 +724,7 @@ class cpp_mstch_program : public mstch_program {
     return includes.size() + 1;
   }
   mstch::node frozen_packed() { return get_option("frozen") == "packed"; }
-  mstch::node legacy_api() {
-    return ::apache::thrift::compiler::generate_legacy_api(*program_);
-  }
+  mstch::node legacy_api() { return true; }
   mstch::node fatal_languages() {
     mstch::array a;
     for (const auto& pair : program_->namespaces()) {
@@ -1050,9 +1052,7 @@ class cpp_mstch_service : public mstch_service {
   mstch::node parent_service_qualified_name() {
     return cpp2::get_service_qualified_name(*parent_service());
   }
-  mstch::node reduced_client() {
-    return service_->is_interaction() || !generate_legacy_api(*service_);
-  }
+  mstch::node reduced_client() { return generate_reduced_client(*service_); }
   mstch::node thrift_uri_or_service_name() {
     return service_->uri().empty() ? parent_service_name() : service_->uri();
   }
@@ -1104,6 +1104,10 @@ class cpp_mstch_function : public mstch_function {
             {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
             {"function:has_deprecated_header_client_methods",
              &cpp_mstch_function::has_deprecated_header_client_methods},
+            {"function:virtual_client_methods?",
+             &cpp_mstch_function::virtual_client_methods},
+            {"function:legacy_client_methods?",
+             &cpp_mstch_function::legacy_client_methods},
         });
   }
   mstch::node event_based() {
@@ -1139,6 +1143,14 @@ class cpp_mstch_function : public mstch_function {
             kCppGenerateDeprecatedHeaderClientMethodsUri) ||
         interface_->has_unstructured_annotation(
             "cpp.generate_deprecated_header_client_methods");
+  }
+
+  mstch::node virtual_client_methods() {
+    return !generate_reduced_client(*interface_) && !function_->interaction();
+  }
+
+  mstch::node legacy_client_methods() {
+    return !generate_reduced_client(*interface_) && !function_->interaction();
   }
 
  private:
@@ -1478,11 +1490,7 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node mixin_fields() {
     mstch::array fields;
     for (auto i : cpp2::get_mixins_and_members(*struct_)) {
-      const auto suffix =
-          ::apache::thrift::compiler::generate_legacy_api(*struct_) ||
-              i.mixin->type()->is<t_union>()
-          ? "_ref"
-          : "";
+      const auto suffix = "_ref";
       fields.push_back(mstch::map{
           {"mixin:name", i.mixin->name()},
           {"mixin:field_name", i.member->name()},
@@ -1708,9 +1716,7 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node get_legacy_type_id() {
     return std::to_string(struct_->get_type_id());
   }
-  mstch::node legacy_api() {
-    return ::apache::thrift::compiler::generate_legacy_api(*struct_);
-  }
+  mstch::node legacy_api() { return true; }
   mstch::node metadata_name() {
     return struct_->program()->name() + "_" + struct_->name();
   }

@@ -124,7 +124,7 @@ std::pair<
 }
 
 {{/function:creates_interaction?}}
-{{#function:has_deprecated_header_client_methods}}{{^function:oneway?}}{{^service:reduced_client?}}{{^function:creates_interaction?}}
+{{#function:has_deprecated_header_client_methods}}{{^function:oneway?}}{{#function:legacy_client_methods?}}
 {{^function:stream?}}
 folly::Future<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>> {{> service_common/client_class_name}}::header_future_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>>;
@@ -142,4 +142,4 @@ folly::SemiFuture<std::pair<{{> types/return_type_client_lift_unit}}, std::uniqu
   {{function:self.cpp_name}}(rpcOptions, std::move(callback){{function:comma}}{{> service_common/param_list}});
   return std::move(callbackAndFuture.second);
 }
-{{/function:creates_interaction?}}{{/service:reduced_client?}}{{/function:oneway?}}{{/function:has_deprecated_header_client_methods}}
+{{/function:legacy_client_methods?}}{{/function:oneway?}}{{/function:has_deprecated_header_client_methods}}

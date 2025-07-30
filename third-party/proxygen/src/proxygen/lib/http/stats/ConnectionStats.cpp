@@ -12,11 +12,10 @@ using namespace facebook::fb303;
 
 namespace proxygen {
 
-TLConnectionStats::TLConnectionStats(const std::string& prefix,
-                                     uint8_t verbosity) {
+MinimalConnectionStats::MinimalConnectionStats(const std::string& prefix,
+                                               uint8_t verbosity) {
   req_.emplace(prefix + "_req", SUM, RATE); // RATE used
   egressBytes_.emplace(prefix + "_egress_bytes", SUM);
-  responseCodes_.emplace(prefix + "_", verbosity);
   upstreamLoadShed_.emplace(prefix + "_req_was_loadshed_by_upstream", SUM);
 
   if (verbosity > 8) {
@@ -44,54 +43,65 @@ TLConnectionStats::TLConnectionStats(const std::string& prefix,
   }
 }
 
-void TLConnectionStats::recordConnectionOpen() {
+void MinimalConnectionStats::recordConnectionOpen() {
   BaseStats::incrementOptionalCounter(currConns_, 1);
   BaseStats::addToOptionalStat(newConns_, 1);
 }
 
-void TLConnectionStats::recordTcpConnectionOpen() {
+void MinimalConnectionStats::recordTcpConnectionOpen() {
   BaseStats::incrementOptionalCounter(currTcpConns_, 1);
   BaseStats::addToOptionalStat(newTcpConns_, 1);
 }
 
-void TLConnectionStats::recordConnectionClose() {
+void MinimalConnectionStats::recordConnectionClose() {
   BaseStats::incrementOptionalCounter(currConns_, -1);
 }
 
-void TLConnectionStats::recordRequest() {
+void MinimalConnectionStats::recordRequest() {
   BaseStats::addToOptionalStat(req_, 1);
+}
+
+void MinimalConnectionStats::recordResponse(
+    folly::Optional<uint16_t> responseCode, bool hasRetryAfterHeader) {
+  BaseStats::addToOptionalStat(resp_, 1);
+  if (responseCode.has_value() && upstreamLoadShed_ && hasRetryAfterHeader &&
+      responseCode.value() == 503) {
+    upstreamLoadShed_->add(1);
+  }
+}
+
+void MinimalConnectionStats::recordDuration(size_t duration) {
+  BaseStats::addToOptionalStat(totalDuration_, duration);
+}
+
+void MinimalConnectionStats::addEgressBytes(size_t bytes) {
+  BaseStats::addToOptionalStat(egressBytes_, bytes);
+}
+
+void MinimalConnectionStats::addIngressBytes(size_t bytes) {
+  BaseStats::addToOptionalStat(ingressBytes_, bytes);
+}
+
+void MinimalConnectionStats::addEgressBodyBytes(size_t bytes) {
+  BaseStats::addToOptionalStat(egressBodyBytes_, bytes);
+}
+
+void MinimalConnectionStats::addIngressBodyBytes(size_t bytes) {
+  BaseStats::addToOptionalStat(ingressBodyBytes_, bytes);
+}
+
+TLConnectionStats::TLConnectionStats(const std::string& prefix,
+                                     uint8_t verbosity)
+    : MinimalConnectionStats(prefix, verbosity) {
+  responseCodes_.emplace(prefix + "_", verbosity);
 }
 
 void TLConnectionStats::recordResponse(folly::Optional<uint16_t> responseCode,
                                        bool hasRetryAfterHeader) {
-  BaseStats::addToOptionalStat(resp_, 1);
+  MinimalConnectionStats::recordResponse(responseCode, hasRetryAfterHeader);
   if (responseCodes_ && responseCode.has_value()) {
     responseCodes_->addStatus(responseCode.value());
-    if (upstreamLoadShed_ && hasRetryAfterHeader &&
-        responseCode.value() == 503) {
-      upstreamLoadShed_->add(1);
-    }
   }
-}
-
-void TLConnectionStats::recordDuration(size_t duration) {
-  BaseStats::addToOptionalStat(totalDuration_, duration);
-}
-
-void TLConnectionStats::addEgressBytes(size_t bytes) {
-  BaseStats::addToOptionalStat(egressBytes_, bytes);
-}
-
-void TLConnectionStats::addIngressBytes(size_t bytes) {
-  BaseStats::addToOptionalStat(ingressBytes_, bytes);
-}
-
-void TLConnectionStats::addEgressBodyBytes(size_t bytes) {
-  BaseStats::addToOptionalStat(egressBodyBytes_, bytes);
-}
-
-void TLConnectionStats::addIngressBodyBytes(size_t bytes) {
-  BaseStats::addToOptionalStat(ingressBodyBytes_, bytes);
 }
 
 } // namespace proxygen

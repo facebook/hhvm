@@ -49,10 +49,12 @@ class ConnectionStats {
 /**
  * Wraps connection stat counters.  One instance should be created per
  * uniquely named counter and shared accross threads as necessary.
+ * This class doesn't include response code statistics. If those are needed use
+ * TLConnectionStats defined below.
  */
-class TLConnectionStats : public ConnectionStats {
+class MinimalConnectionStats : public ConnectionStats {
  public:
-  explicit TLConnectionStats(const std::string& prefix, uint8_t verbosity);
+  explicit MinimalConnectionStats(const std::string& prefix, uint8_t verbosity);
 
   void recordConnectionOpen() override;
 
@@ -82,7 +84,6 @@ class TLConnectionStats : public ConnectionStats {
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
-  std::optional<TLResponseCodeStats> responseCodes_;
   std::optional<StatsWrapper::TLTimeseriesMinute> upstreamLoadShed_;
   std::optional<StatsWrapper::TLHistogram> totalDuration_;
 
@@ -91,6 +92,22 @@ class TLConnectionStats : public ConnectionStats {
 
   std::optional<StatsWrapper::TLCounter> currTcpConns_;
   std::optional<StatsWrapper::TLTimeseries> newTcpConns_;
+};
+
+/*
+ * Adds response code stats to the basic connection stats.
+ * If you are unsure what class to use, use this one. It should be used as the
+ * default for most cases.
+ */
+class TLConnectionStats : public MinimalConnectionStats {
+ public:
+  explicit TLConnectionStats(const std::string& prefix, uint8_t verbosity);
+
+  void recordResponse(folly::Optional<uint16_t> responseCode = folly::none,
+                      bool hasRetryAfterHeader = false) override;
+
+ private:
+  std::optional<TLResponseCodeStats> responseCodes_;
 };
 
 } // namespace proxygen

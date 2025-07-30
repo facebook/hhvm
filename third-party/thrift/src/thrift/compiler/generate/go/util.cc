@@ -132,17 +132,16 @@ void codegen_data::compute_struct_to_field_names() {
 
 void codegen_data::compute_req_resp_structs() {
   for (auto service : current_program_->services()) {
-    std::vector<const t_struct*> service_req_resp_structs =
-        go::get_service_req_resp_structs(service);
-    req_resp_structs.insert(
-        req_resp_structs.end(),
-        service_req_resp_structs.begin(),
-        service_req_resp_structs.end());
-    for (auto struct_ : service_req_resp_structs) {
-      req_resp_struct_names.insert(struct_->name());
-      struct_to_field_names[struct_->name()] =
-          go::get_struct_go_field_names(struct_);
+    auto svcGoName = go::munge_ident(service->name());
+    for (auto func : service->get_functions()) {
+      make_func_req_resp_structs(func, svcGoName, req_resp_structs);
     }
+  }
+
+  for (auto struct_ : req_resp_structs) {
+    req_resp_struct_names.insert(struct_->name());
+    struct_to_field_names[struct_->name()] =
+        go::get_struct_go_field_names(struct_);
   }
 }
 
@@ -618,63 +617,58 @@ std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {
   return field_names;
 }
 
-std::vector<const t_struct*> get_service_req_resp_structs(
-    const t_service* service) {
-  std::vector<const t_struct*> req_resp_structs;
-  auto svcGoName = go::munge_ident(service->name());
-  for (auto func : service->get_functions()) {
-    if (!go::is_func_go_client_supported(func) &&
-        !go::is_func_go_server_supported(func)) {
-      continue;
-    }
+void make_func_req_resp_structs(
+    const t_function* func,
+    const std::string& prefix,
+    std::vector<const t_struct*>& req_resp_structs) {
+  if (!go::is_func_go_client_supported(func) &&
+      !go::is_func_go_server_supported(func)) {
+    return;
+  }
 
-    auto funcGoName = go::get_go_func_name(func);
+  auto funcGoName = go::get_go_func_name(func);
 
-    auto req_struct_name =
-        go::munge_ident("req" + svcGoName + funcGoName, false);
-    auto req_struct = new t_struct(func->program(), req_struct_name);
-    for (auto member : func->params().get_members()) {
-      req_struct->append_field(std::unique_ptr<t_field>(member));
-    }
-    req_resp_structs.push_back(req_struct);
+  auto req_struct_name = go::munge_ident("req" + prefix + funcGoName, false);
+  auto req_struct = new t_struct(func->program(), req_struct_name);
+  for (auto member : func->params().get_members()) {
+    req_struct->append_field(std::unique_ptr<t_field>(member));
+  }
+  req_resp_structs.push_back(req_struct);
 
-    auto resp_struct_name =
-        go::munge_ident("resp" + svcGoName + funcGoName, false);
-    auto resp_struct = new t_struct(func->program(), resp_struct_name);
-    if (!func->return_type()->is_void()) {
-      auto resp_field = std::make_unique<t_field>(
-          func->return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
-      resp_field->set_qualifier(t_field_qualifier::optional);
-      resp_struct->append_field(std::move(resp_field));
-    }
-    if (func->exceptions() != nullptr) {
-      for (const auto& xs : func->exceptions()->get_members()) {
-        auto xc_ptr = std::unique_ptr<t_field>(xs);
-        xc_ptr->set_qualifier(t_field_qualifier::optional);
-        resp_struct->append_field(std::move(xc_ptr));
-      }
-    }
-    req_resp_structs.push_back(resp_struct);
-
-    if (func->stream()) {
-      auto stream_struct_name =
-          go::munge_ident("stream" + svcGoName + funcGoName, false);
-      auto stream_struct = new t_struct(func->program(), stream_struct_name);
-      auto elem_field = std::make_unique<t_field>(
-          func->stream()->elem_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
-      elem_field->set_qualifier(t_field_qualifier::optional);
-      stream_struct->append_field(std::move(elem_field));
-      if (func->stream()->exceptions() != nullptr) {
-        for (const auto& xs : func->stream()->exceptions()->get_members()) {
-          auto xc_ptr = std::unique_ptr<t_field>(xs);
-          xc_ptr->set_qualifier(t_field_qualifier::optional);
-          stream_struct->append_field(std::move(xc_ptr));
-        }
-      }
-      req_resp_structs.push_back(stream_struct);
+  auto resp_struct_name = go::munge_ident("resp" + prefix + funcGoName, false);
+  auto resp_struct = new t_struct(func->program(), resp_struct_name);
+  if (!func->return_type()->is_void()) {
+    auto resp_field = std::make_unique<t_field>(
+        func->return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+    resp_field->set_qualifier(t_field_qualifier::optional);
+    resp_struct->append_field(std::move(resp_field));
+  }
+  if (func->exceptions() != nullptr) {
+    for (const auto& xs : func->exceptions()->get_members()) {
+      auto xc_ptr = std::unique_ptr<t_field>(xs);
+      xc_ptr->set_qualifier(t_field_qualifier::optional);
+      resp_struct->append_field(std::move(xc_ptr));
     }
   }
-  return req_resp_structs;
+  req_resp_structs.push_back(resp_struct);
+
+  if (func->stream()) {
+    auto stream_struct_name =
+        go::munge_ident("stream" + prefix + funcGoName, false);
+    auto stream_struct = new t_struct(func->program(), stream_struct_name);
+    auto elem_field = std::make_unique<t_field>(
+        func->stream()->elem_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+    elem_field->set_qualifier(t_field_qualifier::optional);
+    stream_struct->append_field(std::move(elem_field));
+    if (func->stream()->exceptions() != nullptr) {
+      for (const auto& xs : func->stream()->exceptions()->get_members()) {
+        auto xc_ptr = std::unique_ptr<t_field>(xs);
+        xc_ptr->set_qualifier(t_field_qualifier::optional);
+        stream_struct->append_field(std::move(xc_ptr));
+      }
+    }
+    req_resp_structs.push_back(stream_struct);
+  }
 }
 
 const std::string* get_go_name_annotation(const t_named* node) {

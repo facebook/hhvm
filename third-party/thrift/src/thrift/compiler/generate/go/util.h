@@ -156,8 +156,10 @@ std::string get_go_func_name(const t_function* func);
 
 std::set<std::string> get_struct_go_field_names(const t_structured* tstruct);
 
-std::vector<const t_struct*> get_service_req_resp_structs(
-    const t_service* service);
+void make_func_req_resp_structs(
+    const t_function* func,
+    const std::string& prefix,
+    std::vector<const t_struct*>& req_resp_structs);
 
 const std::string* get_go_name_annotation(const t_named* node);
 const std::string* get_go_tag_annotation(const t_named* node);

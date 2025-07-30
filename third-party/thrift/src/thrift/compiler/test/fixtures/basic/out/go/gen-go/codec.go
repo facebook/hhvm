@@ -594,30 +594,100 @@ var (
                 "reserved_field": 0,
             },
         }
-    premadeStructSpec_reqFooServiceSimpleRPC =
+    premadeStructSpec_reqDbMixedStackArgumentsGetDataByKey0 =
         &thrift.StructSpec{
-            Name:                 "reqFooServiceSimpleRPC",
-            ScopedName:           "module.reqFooServiceSimpleRPC",
+            Name:                 "reqDbMixedStackArgumentsGetDataByKey0",
+            ScopedName:           "module.reqDbMixedStackArgumentsGetDataByKey0",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "key",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
             },
             FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
             },
             FieldSpecNameToIndex: map[string]int{
+                "key": 0,
             },
         }
-    premadeStructSpec_respFooServiceSimpleRPC =
+    premadeStructSpec_respDbMixedStackArgumentsGetDataByKey0 =
         &thrift.StructSpec{
-            Name:                 "respFooServiceSimpleRPC",
-            ScopedName:           "module.respFooServiceSimpleRPC",
+            Name:                 "respDbMixedStackArgumentsGetDataByKey0",
+            ScopedName:           "module.respDbMixedStackArgumentsGetDataByKey0",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRING,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_binary,
+                    MustBeSetToSerialize: true,
+                },
             },
             FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
             },
             FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqDbMixedStackArgumentsGetDataByKey1 =
+        &thrift.StructSpec{
+            Name:                 "reqDbMixedStackArgumentsGetDataByKey1",
+            ScopedName:           "module.reqDbMixedStackArgumentsGetDataByKey1",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "key",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "key": 0,
+            },
+        }
+    premadeStructSpec_respDbMixedStackArgumentsGetDataByKey1 =
+        &thrift.StructSpec{
+            Name:                 "respDbMixedStackArgumentsGetDataByKey1",
+            ScopedName:           "module.respDbMixedStackArgumentsGetDataByKey1",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRING,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_binary,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
             },
         }
     premadeStructSpec_reqFB303ServiceSimpleRPC =
@@ -666,6 +736,32 @@ var (
             },
             FieldSpecNameToIndex: map[string]int{
                 "success": 0,
+            },
+        }
+    premadeStructSpec_reqFooServiceSimpleRPC =
+        &thrift.StructSpec{
+            Name:                 "reqFooServiceSimpleRPC",
+            ScopedName:           "module.reqFooServiceSimpleRPC",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respFooServiceSimpleRPC =
+        &thrift.StructSpec{
+            Name:                 "respFooServiceSimpleRPC",
+            ScopedName:           "module.respFooServiceSimpleRPC",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
             },
         }
     premadeStructSpec_reqMyServicePing =
@@ -1058,102 +1154,6 @@ var (
             FieldSpecIDToIndex:   map[int16]int{
             },
             FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_reqDbMixedStackArgumentsGetDataByKey0 =
-        &thrift.StructSpec{
-            Name:                 "reqDbMixedStackArgumentsGetDataByKey0",
-            ScopedName:           "module.reqDbMixedStackArgumentsGetDataByKey0",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   1,
-                    WireType:             thrift.STRING,
-                    Name:                 "key",
-                    ReflectIndex:         0,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_string,
-                    MustBeSetToSerialize: false,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                1: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "key": 0,
-            },
-        }
-    premadeStructSpec_respDbMixedStackArgumentsGetDataByKey0 =
-        &thrift.StructSpec{
-            Name:                 "respDbMixedStackArgumentsGetDataByKey0",
-            ScopedName:           "module.respDbMixedStackArgumentsGetDataByKey0",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   0,
-                    WireType:             thrift.STRING,
-                    Name:                 "success",
-                    ReflectIndex:         0,
-                    IsOptional:           true,
-                    ValueTypeSpec:        premadeCodecTypeSpec_binary,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                0: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "success": 0,
-            },
-        }
-    premadeStructSpec_reqDbMixedStackArgumentsGetDataByKey1 =
-        &thrift.StructSpec{
-            Name:                 "reqDbMixedStackArgumentsGetDataByKey1",
-            ScopedName:           "module.reqDbMixedStackArgumentsGetDataByKey1",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   1,
-                    WireType:             thrift.STRING,
-                    Name:                 "key",
-                    ReflectIndex:         0,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_string,
-                    MustBeSetToSerialize: false,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                1: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "key": 0,
-            },
-        }
-    premadeStructSpec_respDbMixedStackArgumentsGetDataByKey1 =
-        &thrift.StructSpec{
-            Name:                 "respDbMixedStackArgumentsGetDataByKey1",
-            ScopedName:           "module.respDbMixedStackArgumentsGetDataByKey1",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   0,
-                    WireType:             thrift.STRING,
-                    Name:                 "success",
-                    ReflectIndex:         0,
-                    IsOptional:           true,
-                    ValueTypeSpec:        premadeCodecTypeSpec_binary,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                0: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "success": 0,
             },
         }
 )

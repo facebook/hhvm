@@ -101,32 +101,6 @@ var (
                 "sessionId": 0,
             },
         }
-    premadeStructSpec_reqMyServiceFoo =
-        &thrift.StructSpec{
-            Name:                 "reqMyServiceFoo",
-            ScopedName:           "module.reqMyServiceFoo",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respMyServiceFoo =
-        &thrift.StructSpec{
-            Name:                 "respMyServiceFoo",
-            ScopedName:           "module.respMyServiceFoo",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
     premadeStructSpec_reqFactoriesFoo =
         &thrift.StructSpec{
             Name:                 "reqFactoriesFoo",
@@ -144,32 +118,6 @@ var (
         &thrift.StructSpec{
             Name:                 "respFactoriesFoo",
             ScopedName:           "module.respFactoriesFoo",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_reqPerformFoo =
-        &thrift.StructSpec{
-            Name:                 "reqPerformFoo",
-            ScopedName:           "module.reqPerformFoo",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respPerformFoo =
-        &thrift.StructSpec{
-            Name:                 "respPerformFoo",
-            ScopedName:           "module.respPerformFoo",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
@@ -214,6 +162,58 @@ var (
             },
             FieldSpecNameToIndex: map[string]int{
                 "success": 0,
+            },
+        }
+    premadeStructSpec_reqMyServiceFoo =
+        &thrift.StructSpec{
+            Name:                 "reqMyServiceFoo",
+            ScopedName:           "module.reqMyServiceFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyServiceFoo =
+        &thrift.StructSpec{
+            Name:                 "respMyServiceFoo",
+            ScopedName:           "module.respMyServiceFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqPerformFoo =
+        &thrift.StructSpec{
+            Name:                 "reqPerformFoo",
+            ScopedName:           "module.reqPerformFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respPerformFoo =
+        &thrift.StructSpec{
+            Name:                 "respPerformFoo",
+            ScopedName:           "module.respPerformFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
             },
         }
 )

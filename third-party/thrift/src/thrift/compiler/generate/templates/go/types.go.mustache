@@ -48,12 +48,10 @@ var _ = thrift.VOID
 
 {{/program:structs}}
 {{! Req/resp srtucts }}
-{{#program:services}}
-{{#service:req_resp_structs}}
+{{#program:req_resp_structs}}
 {{> types/struct}}
 
-{{/service:req_resp_structs}}
-{{/program:services}}
+{{/program:req_resp_structs}}
 
 {{#program:structs?}}
 {{> common/registry}}

@@ -9310,376 +9310,6 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) setDefaults() *RenamedSt
         SetFieldNonCompat(0)
 }
 
-type reqServiceFunc struct {
-    Arg1 StringWithAdapter_7208 `thrift:"arg1,1" json:"arg1" db:"arg1"`
-    Arg2 StringWithCppAdapter `thrift:"arg2,2" json:"arg2" db:"arg2"`
-    Arg3 *Foo `thrift:"arg3,3" json:"arg3" db:"arg3"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*reqServiceFunc)(nil)
-
-// Deprecated: ServiceFuncArgsDeprecated is deprecated, since it is supposed to be internal.
-type ServiceFuncArgsDeprecated = reqServiceFunc
-
-func newReqServiceFunc() *reqServiceFunc {
-    return (&reqServiceFunc{}).setDefaults()
-}
-
-func (x *reqServiceFunc) GetArg1() StringWithAdapter_7208 {
-    return x.Arg1
-}
-
-func (x *reqServiceFunc) GetArg2() StringWithCppAdapter {
-    return x.Arg2
-}
-
-func (x *reqServiceFunc) GetArg3() *Foo {
-    if !x.IsSetArg3() {
-        return nil
-    }
-    return x.Arg3
-}
-
-func (x *reqServiceFunc) SetArg1NonCompat(value StringWithAdapter_7208) *reqServiceFunc {
-    x.Arg1 = value
-    return x
-}
-
-func (x *reqServiceFunc) SetArg1(value StringWithAdapter_7208) *reqServiceFunc {
-    x.Arg1 = value
-    return x
-}
-
-func (x *reqServiceFunc) SetArg2NonCompat(value StringWithCppAdapter) *reqServiceFunc {
-    x.Arg2 = value
-    return x
-}
-
-func (x *reqServiceFunc) SetArg2(value StringWithCppAdapter) *reqServiceFunc {
-    x.Arg2 = value
-    return x
-}
-
-func (x *reqServiceFunc) SetArg3NonCompat(value *Foo) *reqServiceFunc {
-    x.Arg3 = value
-    return x
-}
-
-func (x *reqServiceFunc) SetArg3(value *Foo) *reqServiceFunc {
-    x.Arg3 = value
-    return x
-}
-
-func (x *reqServiceFunc) IsSetArg3() bool {
-    return x != nil && x.Arg3 != nil
-}
-
-func (x *reqServiceFunc) writeField1(p thrift.Encoder) error {  // Arg1
-    if err := p.WriteFieldBegin("arg1", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("reqServiceFunc write field begin error: ", err)
-    }
-
-    item := x.Arg1
-    err := WriteStringWithAdapter_7208(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqServiceFunc write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqServiceFunc) writeField2(p thrift.Encoder) error {  // Arg2
-    if err := p.WriteFieldBegin("arg2", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("reqServiceFunc write field begin error: ", err)
-    }
-
-    item := x.Arg2
-    err := WriteStringWithCppAdapter(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqServiceFunc write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqServiceFunc) writeField3(p thrift.Encoder) error {  // Arg3
-    if !x.IsSetArg3() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("arg3", thrift.STRUCT, 3); err != nil {
-        return thrift.PrependError("reqServiceFunc write field begin error: ", err)
-    }
-
-    item := x.Arg3
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqServiceFunc write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqServiceFunc) readField1(p thrift.Decoder) error {  // Arg1
-    result, err := ReadStringWithAdapter_7208(p)
-    if err != nil {
-        return err
-    }
-
-    x.Arg1 = result
-    return nil
-}
-
-func (x *reqServiceFunc) readField2(p thrift.Decoder) error {  // Arg2
-    result, err := ReadStringWithCppAdapter(p)
-    if err != nil {
-        return err
-    }
-
-    x.Arg2 = result
-    return nil
-}
-
-func (x *reqServiceFunc) readField3(p thrift.Decoder) error {  // Arg3
-    result := NewFoo()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Arg3 = result
-    return nil
-}
-
-
-
-
-func (x *reqServiceFunc) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
-        return thrift.PrependError("reqServiceFunc write struct begin error: ", err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-    if err := x.writeField2(p); err != nil {
-        return err
-    }
-    if err := x.writeField3(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqServiceFunc write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqServiceFunc write struct end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqServiceFunc) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqServiceFunc read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqServiceFunc field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "arg1")):  // arg1
-            fieldReadErr = x.readField1(p)
-        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "arg2")):  // arg2
-            fieldReadErr = x.readField2(p)
-        case ((id == 3 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "arg3")):  // arg3
-            fieldReadErr = x.readField3(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqServiceFunc read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *reqServiceFunc) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *reqServiceFunc) setDefaults() *reqServiceFunc {
-    return x.
-        SetArg1NonCompat(NewStringWithAdapter_7208()).
-        SetArg2NonCompat(NewStringWithCppAdapter()).
-        SetArg3NonCompat(NewFoo())
-}
-
-type respServiceFunc struct {
-    Success *MyI32_4873 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*respServiceFunc)(nil)
-var _ thrift.WritableResult = (*respServiceFunc)(nil)
-
-// Deprecated: ServiceFuncResultDeprecated is deprecated, since it is supposed to be internal.
-type ServiceFuncResultDeprecated = respServiceFunc
-
-func newRespServiceFunc() *respServiceFunc {
-    return (&respServiceFunc{}).setDefaults()
-}
-
-func (x *respServiceFunc) GetSuccess() MyI32_4873 {
-    if !x.IsSetSuccess() {
-        return NewMyI32_4873()
-    }
-    return *x.Success
-}
-
-func (x *respServiceFunc) SetSuccessNonCompat(value MyI32_4873) *respServiceFunc {
-    x.Success = &value
-    return x
-}
-
-func (x *respServiceFunc) SetSuccess(value *MyI32_4873) *respServiceFunc {
-    x.Success = value
-    return x
-}
-
-func (x *respServiceFunc) IsSetSuccess() bool {
-    return x != nil && x.Success != nil
-}
-
-func (x *respServiceFunc) writeField0(p thrift.Encoder) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("respServiceFunc write field begin error: ", err)
-    }
-
-    item := *x.Success
-    err := WriteMyI32_4873(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respServiceFunc write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *respServiceFunc) readField0(p thrift.Decoder) error {  // Success
-    result, err := ReadMyI32_4873(p)
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
-
-
-
-func (x *respServiceFunc) Exception() thrift.WritableException {
-    return nil
-}
-
-func (x *respServiceFunc) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("respServiceFunc"); err != nil {
-        return thrift.PrependError("respServiceFunc write struct begin error: ", err)
-    }
-
-    if err := x.writeField0(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respServiceFunc write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respServiceFunc write struct end error: ", err)
-    }
-    return nil
-}
-
-func (x *respServiceFunc) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respServiceFunc read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respServiceFunc field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
-            fieldReadErr = x.readField0(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respServiceFunc read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *respServiceFunc) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *respServiceFunc) setDefaults() *respServiceFunc {
-    return x
-}
-
 type reqAdapterServiceCount struct {
 }
 // Compile time interface enforcer
@@ -10165,6 +9795,376 @@ func (x *respAdapterServiceAdaptedTypes) String() string {
 }
 
 func (x *respAdapterServiceAdaptedTypes) setDefaults() *respAdapterServiceAdaptedTypes {
+    return x
+}
+
+type reqServiceFunc struct {
+    Arg1 StringWithAdapter_7208 `thrift:"arg1,1" json:"arg1" db:"arg1"`
+    Arg2 StringWithCppAdapter `thrift:"arg2,2" json:"arg2" db:"arg2"`
+    Arg3 *Foo `thrift:"arg3,3" json:"arg3" db:"arg3"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqServiceFunc)(nil)
+
+// Deprecated: ServiceFuncArgsDeprecated is deprecated, since it is supposed to be internal.
+type ServiceFuncArgsDeprecated = reqServiceFunc
+
+func newReqServiceFunc() *reqServiceFunc {
+    return (&reqServiceFunc{}).setDefaults()
+}
+
+func (x *reqServiceFunc) GetArg1() StringWithAdapter_7208 {
+    return x.Arg1
+}
+
+func (x *reqServiceFunc) GetArg2() StringWithCppAdapter {
+    return x.Arg2
+}
+
+func (x *reqServiceFunc) GetArg3() *Foo {
+    if !x.IsSetArg3() {
+        return nil
+    }
+    return x.Arg3
+}
+
+func (x *reqServiceFunc) SetArg1NonCompat(value StringWithAdapter_7208) *reqServiceFunc {
+    x.Arg1 = value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg1(value StringWithAdapter_7208) *reqServiceFunc {
+    x.Arg1 = value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg2NonCompat(value StringWithCppAdapter) *reqServiceFunc {
+    x.Arg2 = value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg2(value StringWithCppAdapter) *reqServiceFunc {
+    x.Arg2 = value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg3NonCompat(value *Foo) *reqServiceFunc {
+    x.Arg3 = value
+    return x
+}
+
+func (x *reqServiceFunc) SetArg3(value *Foo) *reqServiceFunc {
+    x.Arg3 = value
+    return x
+}
+
+func (x *reqServiceFunc) IsSetArg3() bool {
+    return x != nil && x.Arg3 != nil
+}
+
+func (x *reqServiceFunc) writeField1(p thrift.Encoder) error {  // Arg1
+    if err := p.WriteFieldBegin("arg1", thrift.STRING, 1); err != nil {
+        return thrift.PrependError("reqServiceFunc write field begin error: ", err)
+    }
+
+    item := x.Arg1
+    err := WriteStringWithAdapter_7208(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqServiceFunc write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqServiceFunc) writeField2(p thrift.Encoder) error {  // Arg2
+    if err := p.WriteFieldBegin("arg2", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("reqServiceFunc write field begin error: ", err)
+    }
+
+    item := x.Arg2
+    err := WriteStringWithCppAdapter(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqServiceFunc write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqServiceFunc) writeField3(p thrift.Encoder) error {  // Arg3
+    if !x.IsSetArg3() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("arg3", thrift.STRUCT, 3); err != nil {
+        return thrift.PrependError("reqServiceFunc write field begin error: ", err)
+    }
+
+    item := x.Arg3
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqServiceFunc write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqServiceFunc) readField1(p thrift.Decoder) error {  // Arg1
+    result, err := ReadStringWithAdapter_7208(p)
+    if err != nil {
+        return err
+    }
+
+    x.Arg1 = result
+    return nil
+}
+
+func (x *reqServiceFunc) readField2(p thrift.Decoder) error {  // Arg2
+    result, err := ReadStringWithCppAdapter(p)
+    if err != nil {
+        return err
+    }
+
+    x.Arg2 = result
+    return nil
+}
+
+func (x *reqServiceFunc) readField3(p thrift.Decoder) error {  // Arg3
+    result := NewFoo()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Arg3 = result
+    return nil
+}
+
+
+
+
+func (x *reqServiceFunc) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
+        return thrift.PrependError("reqServiceFunc write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqServiceFunc write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqServiceFunc write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqServiceFunc) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqServiceFunc read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqServiceFunc field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "arg1")):  // arg1
+            fieldReadErr = x.readField1(p)
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "arg2")):  // arg2
+            fieldReadErr = x.readField2(p)
+        case ((id == 3 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "arg3")):  // arg3
+            fieldReadErr = x.readField3(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqServiceFunc read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqServiceFunc) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqServiceFunc) setDefaults() *reqServiceFunc {
+    return x.
+        SetArg1NonCompat(NewStringWithAdapter_7208()).
+        SetArg2NonCompat(NewStringWithCppAdapter()).
+        SetArg3NonCompat(NewFoo())
+}
+
+type respServiceFunc struct {
+    Success *MyI32_4873 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respServiceFunc)(nil)
+var _ thrift.WritableResult = (*respServiceFunc)(nil)
+
+// Deprecated: ServiceFuncResultDeprecated is deprecated, since it is supposed to be internal.
+type ServiceFuncResultDeprecated = respServiceFunc
+
+func newRespServiceFunc() *respServiceFunc {
+    return (&respServiceFunc{}).setDefaults()
+}
+
+func (x *respServiceFunc) GetSuccess() MyI32_4873 {
+    if !x.IsSetSuccess() {
+        return NewMyI32_4873()
+    }
+    return *x.Success
+}
+
+func (x *respServiceFunc) SetSuccessNonCompat(value MyI32_4873) *respServiceFunc {
+    x.Success = &value
+    return x
+}
+
+func (x *respServiceFunc) SetSuccess(value *MyI32_4873) *respServiceFunc {
+    x.Success = value
+    return x
+}
+
+func (x *respServiceFunc) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respServiceFunc) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("respServiceFunc write field begin error: ", err)
+    }
+
+    item := *x.Success
+    err := WriteMyI32_4873(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respServiceFunc write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respServiceFunc) readField0(p thrift.Decoder) error {  // Success
+    result, err := ReadMyI32_4873(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *respServiceFunc) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respServiceFunc) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respServiceFunc"); err != nil {
+        return thrift.PrependError("respServiceFunc write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respServiceFunc write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respServiceFunc write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respServiceFunc) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respServiceFunc read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respServiceFunc field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respServiceFunc read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respServiceFunc) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respServiceFunc) setDefaults() *respServiceFunc {
     return x
 }
 

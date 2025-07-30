@@ -17,45 +17,45 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 
-type reqMyRootDoRoot struct {
+type reqMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = (*reqMyRootDoRoot)(nil)
+var _ thrift.Struct = (*reqMyLeafDoLeaf)(nil)
 
-// Deprecated: MyRootDoRootArgsDeprecated is deprecated, since it is supposed to be internal.
-type MyRootDoRootArgsDeprecated = reqMyRootDoRoot
+// Deprecated: MyLeafDoLeafArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyLeafDoLeafArgsDeprecated = reqMyLeafDoLeaf
 
-func newReqMyRootDoRoot() *reqMyRootDoRoot {
-    return (&reqMyRootDoRoot{}).setDefaults()
+func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
+    return (&reqMyLeafDoLeaf{}).setDefaults()
 }
 
 
 
-func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot write struct begin error: ", err)
+func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
+        return thrift.PrependError("reqMyLeafDoLeaf write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot write field stop error: ", err)
+        return thrift.PrependError("reqMyLeafDoLeaf write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot write struct end error: ", err)
+        return thrift.PrependError("reqMyLeafDoLeaf write struct end error: ", err)
     }
     return nil
 }
 
-func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
+func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot read error: ", err)
+        return thrift.PrependError("reqMyLeafDoLeaf read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyRootDoRoot field %d ('%s') read error: ", id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyLeafDoLeaf field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -78,64 +78,64 @@ func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot read struct end error: ", err)
+        return thrift.PrependError("reqMyLeafDoLeaf read struct end error: ", err)
     }
 
     return nil
 }
 
-func (x *reqMyRootDoRoot) String() string {
+func (x *reqMyLeafDoLeaf) String() string {
     return thrift.StructToString(reflect.ValueOf(x))
 }
 
-func (x *reqMyRootDoRoot) setDefaults() *reqMyRootDoRoot {
+func (x *reqMyLeafDoLeaf) setDefaults() *reqMyLeafDoLeaf {
     return x
 }
 
-type respMyRootDoRoot struct {
+type respMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = (*respMyRootDoRoot)(nil)
-var _ thrift.WritableResult = (*respMyRootDoRoot)(nil)
+var _ thrift.Struct = (*respMyLeafDoLeaf)(nil)
+var _ thrift.WritableResult = (*respMyLeafDoLeaf)(nil)
 
-// Deprecated: MyRootDoRootResultDeprecated is deprecated, since it is supposed to be internal.
-type MyRootDoRootResultDeprecated = respMyRootDoRoot
+// Deprecated: MyLeafDoLeafResultDeprecated is deprecated, since it is supposed to be internal.
+type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
 
-func newRespMyRootDoRoot() *respMyRootDoRoot {
-    return (&respMyRootDoRoot{}).setDefaults()
+func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
+    return (&respMyLeafDoLeaf{}).setDefaults()
 }
 
 
 
-func (x *respMyRootDoRoot) Exception() thrift.WritableException {
+func (x *respMyLeafDoLeaf) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyRootDoRoot) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
-        return thrift.PrependError("respMyRootDoRoot write struct begin error: ", err)
+func (x *respMyLeafDoLeaf) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
+        return thrift.PrependError("respMyLeafDoLeaf write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot write field stop error: ", err)
+        return thrift.PrependError("respMyLeafDoLeaf write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot write struct end error: ", err)
+        return thrift.PrependError("respMyLeafDoLeaf write struct end error: ", err)
     }
     return nil
 }
 
-func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
+func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot read error: ", err)
+        return thrift.PrependError("respMyLeafDoLeaf read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyRootDoRoot field %d ('%s') read error: ", id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyLeafDoLeaf field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -158,17 +158,17 @@ func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot read struct end error: ", err)
+        return thrift.PrependError("respMyLeafDoLeaf read struct end error: ", err)
     }
 
     return nil
 }
 
-func (x *respMyRootDoRoot) String() string {
+func (x *respMyLeafDoLeaf) String() string {
     return thrift.StructToString(reflect.ValueOf(x))
 }
 
-func (x *respMyRootDoRoot) setDefaults() *respMyRootDoRoot {
+func (x *respMyLeafDoLeaf) setDefaults() *respMyLeafDoLeaf {
     return x
 }
 
@@ -327,45 +327,45 @@ func (x *respMyNodeDoMid) setDefaults() *respMyNodeDoMid {
     return x
 }
 
-type reqMyLeafDoLeaf struct {
+type reqMyRootDoRoot struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = (*reqMyLeafDoLeaf)(nil)
+var _ thrift.Struct = (*reqMyRootDoRoot)(nil)
 
-// Deprecated: MyLeafDoLeafArgsDeprecated is deprecated, since it is supposed to be internal.
-type MyLeafDoLeafArgsDeprecated = reqMyLeafDoLeaf
+// Deprecated: MyRootDoRootArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyRootDoRootArgsDeprecated = reqMyRootDoRoot
 
-func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
-    return (&reqMyLeafDoLeaf{}).setDefaults()
+func newReqMyRootDoRoot() *reqMyRootDoRoot {
+    return (&reqMyRootDoRoot{}).setDefaults()
 }
 
 
 
-func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf write struct begin error: ", err)
+func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
+        return thrift.PrependError("reqMyRootDoRoot write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf write field stop error: ", err)
+        return thrift.PrependError("reqMyRootDoRoot write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf write struct end error: ", err)
+        return thrift.PrependError("reqMyRootDoRoot write struct end error: ", err)
     }
     return nil
 }
 
-func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
+func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf read error: ", err)
+        return thrift.PrependError("reqMyRootDoRoot read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyLeafDoLeaf field %d ('%s') read error: ", id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyRootDoRoot field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -388,64 +388,64 @@ func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf read struct end error: ", err)
+        return thrift.PrependError("reqMyRootDoRoot read struct end error: ", err)
     }
 
     return nil
 }
 
-func (x *reqMyLeafDoLeaf) String() string {
+func (x *reqMyRootDoRoot) String() string {
     return thrift.StructToString(reflect.ValueOf(x))
 }
 
-func (x *reqMyLeafDoLeaf) setDefaults() *reqMyLeafDoLeaf {
+func (x *reqMyRootDoRoot) setDefaults() *reqMyRootDoRoot {
     return x
 }
 
-type respMyLeafDoLeaf struct {
+type respMyRootDoRoot struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = (*respMyLeafDoLeaf)(nil)
-var _ thrift.WritableResult = (*respMyLeafDoLeaf)(nil)
+var _ thrift.Struct = (*respMyRootDoRoot)(nil)
+var _ thrift.WritableResult = (*respMyRootDoRoot)(nil)
 
-// Deprecated: MyLeafDoLeafResultDeprecated is deprecated, since it is supposed to be internal.
-type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
+// Deprecated: MyRootDoRootResultDeprecated is deprecated, since it is supposed to be internal.
+type MyRootDoRootResultDeprecated = respMyRootDoRoot
 
-func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
-    return (&respMyLeafDoLeaf{}).setDefaults()
+func newRespMyRootDoRoot() *respMyRootDoRoot {
+    return (&respMyRootDoRoot{}).setDefaults()
 }
 
 
 
-func (x *respMyLeafDoLeaf) Exception() thrift.WritableException {
+func (x *respMyRootDoRoot) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyLeafDoLeaf) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf write struct begin error: ", err)
+func (x *respMyRootDoRoot) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
+        return thrift.PrependError("respMyRootDoRoot write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf write field stop error: ", err)
+        return thrift.PrependError("respMyRootDoRoot write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf write struct end error: ", err)
+        return thrift.PrependError("respMyRootDoRoot write struct end error: ", err)
     }
     return nil
 }
 
-func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
+func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf read error: ", err)
+        return thrift.PrependError("respMyRootDoRoot read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyLeafDoLeaf field %d ('%s') read error: ", id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyRootDoRoot field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -468,17 +468,17 @@ func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf read struct end error: ", err)
+        return thrift.PrependError("respMyRootDoRoot read struct end error: ", err)
     }
 
     return nil
 }
 
-func (x *respMyLeafDoLeaf) String() string {
+func (x *respMyRootDoRoot) String() string {
     return thrift.StructToString(reflect.ValueOf(x))
 }
 
-func (x *respMyLeafDoLeaf) setDefaults() *respMyLeafDoLeaf {
+func (x *respMyRootDoRoot) setDefaults() *respMyRootDoRoot {
     return x
 }
 

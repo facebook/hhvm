@@ -2313,125 +2313,89 @@ func (x *UnionToBeRenamed) setDefaults() *UnionToBeRenamed {
     return x
 }
 
-type reqFooServiceSimpleRPC struct {
+type reqDbMixedStackArgumentsGetDataByKey0 struct {
+    Key string `thrift:"key,1" json:"key" db:"key"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = (*reqFooServiceSimpleRPC)(nil)
+var _ thrift.Struct = (*reqDbMixedStackArgumentsGetDataByKey0)(nil)
 
-// Deprecated: FooServiceSimpleRPCArgsDeprecated is deprecated, since it is supposed to be internal.
-type FooServiceSimpleRPCArgsDeprecated = reqFooServiceSimpleRPC
+// Deprecated: DbMixedStackArgumentsGetDataByKey0ArgsDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey0ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey0
 
-func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
-    return (&reqFooServiceSimpleRPC{}).setDefaults()
+func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
+    return (&reqDbMixedStackArgumentsGetDataByKey0{}).setDefaults()
 }
 
-
-
-func (x *reqFooServiceSimpleRPC) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("reqFooServiceSimpleRPC"); err != nil {
-        return thrift.PrependError("reqFooServiceSimpleRPC write struct begin error: ", err)
-    }
-
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqFooServiceSimpleRPC write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqFooServiceSimpleRPC write struct end error: ", err)
-    }
-    return nil
+func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
+    return x.Key
 }
 
-func (x *reqFooServiceSimpleRPC) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqFooServiceSimpleRPC read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqFooServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqFooServiceSimpleRPC read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *reqFooServiceSimpleRPC) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *reqFooServiceSimpleRPC) setDefaults() *reqFooServiceSimpleRPC {
+func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKeyNonCompat(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
+    x.Key = value
     return x
 }
 
-type respFooServiceSimpleRPC struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*respFooServiceSimpleRPC)(nil)
-var _ thrift.WritableResult = (*respFooServiceSimpleRPC)(nil)
-
-// Deprecated: FooServiceSimpleRPCResultDeprecated is deprecated, since it is supposed to be internal.
-type FooServiceSimpleRPCResultDeprecated = respFooServiceSimpleRPC
-
-func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
-    return (&respFooServiceSimpleRPC{}).setDefaults()
+func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
+    x.Key = value
+    return x
 }
 
+func (x *reqDbMixedStackArgumentsGetDataByKey0) writeField1(p thrift.Encoder) error {  // Key
+    if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field begin error: ", err)
+    }
 
+    item := x.Key
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
 
-func (x *respFooServiceSimpleRPC) Exception() thrift.WritableException {
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field end error: ", err)
+    }
     return nil
 }
 
-func (x *respFooServiceSimpleRPC) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("respFooServiceSimpleRPC"); err != nil {
-        return thrift.PrependError("respFooServiceSimpleRPC write struct begin error: ", err)
+func (x *reqDbMixedStackArgumentsGetDataByKey0) readField1(p thrift.Decoder) error {  // Key
+    result, err := p.ReadString()
+    if err != nil {
+        return err
     }
 
+    x.Key = result
+    return nil
+}
+
+
+
+func (x *reqDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey0"); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFooServiceSimpleRPC write field stop error: ", err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFooServiceSimpleRPC write struct end error: ", err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct end error: ", err)
     }
     return nil
 }
 
-func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
+func (x *reqDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFooServiceSimpleRPC read error: ", err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFooServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqDbMixedStackArgumentsGetDataByKey0 field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2440,6 +2404,8 @@ func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "key")):  // key
+            fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
         }
@@ -2454,17 +2420,414 @@ func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFooServiceSimpleRPC read struct end error: ", err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 read struct end error: ", err)
     }
 
     return nil
 }
 
-func (x *respFooServiceSimpleRPC) String() string {
+func (x *reqDbMixedStackArgumentsGetDataByKey0) String() string {
     return thrift.StructToString(reflect.ValueOf(x))
 }
 
-func (x *respFooServiceSimpleRPC) setDefaults() *respFooServiceSimpleRPC {
+func (x *reqDbMixedStackArgumentsGetDataByKey0) setDefaults() *reqDbMixedStackArgumentsGetDataByKey0 {
+    return x.
+        SetKeyNonCompat("")
+}
+
+type respDbMixedStackArgumentsGetDataByKey0 struct {
+    Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respDbMixedStackArgumentsGetDataByKey0)(nil)
+var _ thrift.WritableResult = (*respDbMixedStackArgumentsGetDataByKey0)(nil)
+
+// Deprecated: DbMixedStackArgumentsGetDataByKey0ResultDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey0ResultDeprecated = respDbMixedStackArgumentsGetDataByKey0
+
+func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
+    return (&respDbMixedStackArgumentsGetDataByKey0{}).setDefaults()
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) GetSuccess() []byte {
+    if !x.IsSetSuccess() {
+        return []byte("")
+    }
+    return x.Success
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccessNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
+    x.Success = value
+    return x
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccess(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
+    x.Success = value
+    return x
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := p.WriteBinary(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadBinary()
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey0"); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respDbMixedStackArgumentsGetDataByKey0 field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey0) setDefaults() *respDbMixedStackArgumentsGetDataByKey0 {
+    return x
+}
+
+type reqDbMixedStackArgumentsGetDataByKey1 struct {
+    Key string `thrift:"key,1" json:"key" db:"key"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqDbMixedStackArgumentsGetDataByKey1)(nil)
+
+// Deprecated: DbMixedStackArgumentsGetDataByKey1ArgsDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey1ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey1
+
+func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
+    return (&reqDbMixedStackArgumentsGetDataByKey1{}).setDefaults()
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
+    return x.Key
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKeyNonCompat(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
+    x.Key = value
+    return x
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
+    x.Key = value
+    return x
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) writeField1(p thrift.Encoder) error {  // Key
+    if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field begin error: ", err)
+    }
+
+    item := x.Key
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) readField1(p thrift.Decoder) error {  // Key
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Key = result
+    return nil
+}
+
+
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey1"); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqDbMixedStackArgumentsGetDataByKey1 field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "key")):  // key
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) setDefaults() *reqDbMixedStackArgumentsGetDataByKey1 {
+    return x.
+        SetKeyNonCompat("")
+}
+
+type respDbMixedStackArgumentsGetDataByKey1 struct {
+    Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respDbMixedStackArgumentsGetDataByKey1)(nil)
+var _ thrift.WritableResult = (*respDbMixedStackArgumentsGetDataByKey1)(nil)
+
+// Deprecated: DbMixedStackArgumentsGetDataByKey1ResultDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey1ResultDeprecated = respDbMixedStackArgumentsGetDataByKey1
+
+func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
+    return (&respDbMixedStackArgumentsGetDataByKey1{}).setDefaults()
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) GetSuccess() []byte {
+    if !x.IsSetSuccess() {
+        return []byte("")
+    }
+    return x.Success
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccessNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
+    x.Success = value
+    return x
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccess(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
+    x.Success = value
+    return x
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := p.WriteBinary(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadBinary()
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey1"); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respDbMixedStackArgumentsGetDataByKey1 field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) setDefaults() *respDbMixedStackArgumentsGetDataByKey1 {
     return x
 }
 
@@ -2726,6 +3089,161 @@ func (x *respFB303ServiceSimpleRPC) String() string {
 }
 
 func (x *respFB303ServiceSimpleRPC) setDefaults() *respFB303ServiceSimpleRPC {
+    return x
+}
+
+type reqFooServiceSimpleRPC struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqFooServiceSimpleRPC)(nil)
+
+// Deprecated: FooServiceSimpleRPCArgsDeprecated is deprecated, since it is supposed to be internal.
+type FooServiceSimpleRPCArgsDeprecated = reqFooServiceSimpleRPC
+
+func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
+    return (&reqFooServiceSimpleRPC{}).setDefaults()
+}
+
+
+
+func (x *reqFooServiceSimpleRPC) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqFooServiceSimpleRPC"); err != nil {
+        return thrift.PrependError("reqFooServiceSimpleRPC write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqFooServiceSimpleRPC write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqFooServiceSimpleRPC write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqFooServiceSimpleRPC) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqFooServiceSimpleRPC read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqFooServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqFooServiceSimpleRPC read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqFooServiceSimpleRPC) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqFooServiceSimpleRPC) setDefaults() *reqFooServiceSimpleRPC {
+    return x
+}
+
+type respFooServiceSimpleRPC struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFooServiceSimpleRPC)(nil)
+var _ thrift.WritableResult = (*respFooServiceSimpleRPC)(nil)
+
+// Deprecated: FooServiceSimpleRPCResultDeprecated is deprecated, since it is supposed to be internal.
+type FooServiceSimpleRPCResultDeprecated = respFooServiceSimpleRPC
+
+func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
+    return (&respFooServiceSimpleRPC{}).setDefaults()
+}
+
+
+
+func (x *respFooServiceSimpleRPC) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFooServiceSimpleRPC) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFooServiceSimpleRPC"); err != nil {
+        return thrift.PrependError("respFooServiceSimpleRPC write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFooServiceSimpleRPC write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFooServiceSimpleRPC write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFooServiceSimpleRPC read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFooServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFooServiceSimpleRPC read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFooServiceSimpleRPC) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFooServiceSimpleRPC) setDefaults() *respFooServiceSimpleRPC {
     return x
 }
 
@@ -4912,524 +5430,6 @@ func (x *respMyServiceRpcSkippedCodegen) String() string {
 }
 
 func (x *respMyServiceRpcSkippedCodegen) setDefaults() *respMyServiceRpcSkippedCodegen {
-    return x
-}
-
-type reqDbMixedStackArgumentsGetDataByKey0 struct {
-    Key string `thrift:"key,1" json:"key" db:"key"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*reqDbMixedStackArgumentsGetDataByKey0)(nil)
-
-// Deprecated: DbMixedStackArgumentsGetDataByKey0ArgsDeprecated is deprecated, since it is supposed to be internal.
-type DbMixedStackArgumentsGetDataByKey0ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey0
-
-func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
-    return (&reqDbMixedStackArgumentsGetDataByKey0{}).setDefaults()
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
-    return x.Key
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKeyNonCompat(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
-    x.Key = value
-    return x
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
-    x.Key = value
-    return x
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) writeField1(p thrift.Encoder) error {  // Key
-    if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field begin error: ", err)
-    }
-
-    item := x.Key
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) readField1(p thrift.Decoder) error {  // Key
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Key = result
-    return nil
-}
-
-
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey0"); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqDbMixedStackArgumentsGetDataByKey0 field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "key")):  // key
-            fieldReadErr = x.readField1(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) setDefaults() *reqDbMixedStackArgumentsGetDataByKey0 {
-    return x.
-        SetKeyNonCompat("")
-}
-
-type respDbMixedStackArgumentsGetDataByKey0 struct {
-    Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*respDbMixedStackArgumentsGetDataByKey0)(nil)
-var _ thrift.WritableResult = (*respDbMixedStackArgumentsGetDataByKey0)(nil)
-
-// Deprecated: DbMixedStackArgumentsGetDataByKey0ResultDeprecated is deprecated, since it is supposed to be internal.
-type DbMixedStackArgumentsGetDataByKey0ResultDeprecated = respDbMixedStackArgumentsGetDataByKey0
-
-func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
-    return (&respDbMixedStackArgumentsGetDataByKey0{}).setDefaults()
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) GetSuccess() []byte {
-    if !x.IsSetSuccess() {
-        return []byte("")
-    }
-    return x.Success
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccessNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
-    x.Success = value
-    return x
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccess(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
-    x.Success = value
-    return x
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) IsSetSuccess() bool {
-    return x != nil && x.Success != nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Encoder) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field begin error: ", err)
-    }
-
-    item := x.Success
-    if err := p.WriteBinary(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadBinary()
-    if err != nil {
-        return err
-    }
-
-    x.Success = result
-    return nil
-}
-
-
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableException {
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey0"); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
-    }
-
-    if err := x.writeField0(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write struct end error: ", err)
-    }
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respDbMixedStackArgumentsGetDataByKey0 field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case ((id == 0 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
-            fieldReadErr = x.readField0(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) setDefaults() *respDbMixedStackArgumentsGetDataByKey0 {
-    return x
-}
-
-type reqDbMixedStackArgumentsGetDataByKey1 struct {
-    Key string `thrift:"key,1" json:"key" db:"key"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*reqDbMixedStackArgumentsGetDataByKey1)(nil)
-
-// Deprecated: DbMixedStackArgumentsGetDataByKey1ArgsDeprecated is deprecated, since it is supposed to be internal.
-type DbMixedStackArgumentsGetDataByKey1ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey1
-
-func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
-    return (&reqDbMixedStackArgumentsGetDataByKey1{}).setDefaults()
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
-    return x.Key
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKeyNonCompat(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
-    x.Key = value
-    return x
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
-    x.Key = value
-    return x
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) writeField1(p thrift.Encoder) error {  // Key
-    if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field begin error: ", err)
-    }
-
-    item := x.Key
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) readField1(p thrift.Decoder) error {  // Key
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Key = result
-    return nil
-}
-
-
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey1"); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write struct begin error: ", err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write struct end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqDbMixedStackArgumentsGetDataByKey1 field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "key")):  // key
-            fieldReadErr = x.readField1(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) setDefaults() *reqDbMixedStackArgumentsGetDataByKey1 {
-    return x.
-        SetKeyNonCompat("")
-}
-
-type respDbMixedStackArgumentsGetDataByKey1 struct {
-    Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*respDbMixedStackArgumentsGetDataByKey1)(nil)
-var _ thrift.WritableResult = (*respDbMixedStackArgumentsGetDataByKey1)(nil)
-
-// Deprecated: DbMixedStackArgumentsGetDataByKey1ResultDeprecated is deprecated, since it is supposed to be internal.
-type DbMixedStackArgumentsGetDataByKey1ResultDeprecated = respDbMixedStackArgumentsGetDataByKey1
-
-func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
-    return (&respDbMixedStackArgumentsGetDataByKey1{}).setDefaults()
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) GetSuccess() []byte {
-    if !x.IsSetSuccess() {
-        return []byte("")
-    }
-    return x.Success
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccessNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
-    x.Success = value
-    return x
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccess(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
-    x.Success = value
-    return x
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) IsSetSuccess() bool {
-    return x != nil && x.Success != nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Encoder) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field begin error: ", err)
-    }
-
-    item := x.Success
-    if err := p.WriteBinary(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadBinary()
-    if err != nil {
-        return err
-    }
-
-    x.Success = result
-    return nil
-}
-
-
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) Exception() thrift.WritableException {
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey1"); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write struct begin error: ", err)
-    }
-
-    if err := x.writeField0(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field stop error: ", err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write struct end error: ", err)
-    }
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 read error: ", err)
-    }
-
-    for {
-        fieldName, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respDbMixedStackArgumentsGetDataByKey1 field %d ('%s') read error: ", id, fieldName), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case ((id == 0 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
-            fieldReadErr = x.readField0(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 read struct end error: ", err)
-    }
-
-    return nil
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) setDefaults() *respDbMixedStackArgumentsGetDataByKey1 {
     return x
 }
 

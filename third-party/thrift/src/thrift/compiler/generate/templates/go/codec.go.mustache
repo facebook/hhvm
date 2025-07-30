@@ -52,12 +52,10 @@ var (
     {{struct:struct_spec_name}} =
         {{> spec/codec_struct_spec}}
     {{/program:structs}}
-    {{#program:services}}
-    {{#service:req_resp_structs}}
+    {{#program:req_resp_structs}}
     {{struct:struct_spec_name}} =
         {{> spec/codec_struct_spec}}
-    {{/service:req_resp_structs}}
-    {{/program:services}}
+    {{/program:req_resp_structs}}
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

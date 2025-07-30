@@ -97,6 +97,7 @@ class mstch_go_program : public mstch_program {
              &mstch_go_program::metadata_qualifier},
             {"program:thrift_metadata_types",
              &mstch_go_program::thrift_metadata_types},
+            {"program:req_resp_structs", &mstch_go_program::req_resp_structs},
         });
   }
   mstch::node go_pkg_name() {
@@ -145,6 +146,14 @@ class mstch_go_program : public mstch_program {
   mstch::node thrift_metadata_types() {
     return make_mstch_array(
         data_.thrift_metadata_types, *context_.type_factory);
+  }
+  mstch::node req_resp_structs() {
+    std::vector<const t_struct*> req_resp_structs;
+    for (const auto& pair : data_.service_to_req_resp_structs) {
+      req_resp_structs.insert(
+          req_resp_structs.end(), pair.second.begin(), pair.second.end());
+    }
+    return make_mstch_array(req_resp_structs, *context_.struct_factory);
   }
 
  private:
@@ -551,7 +560,6 @@ class mstch_go_service : public mstch_service {
             {"service:go_qualified_name", &mstch_go_service::go_qualified_name},
             {"service:go_package_alias_prefix",
              &mstch_go_service::go_package_alias_prefix_},
-            {"service:req_resp_structs", &mstch_go_service::req_resp_structs},
             {"service:scoped_name", &mstch_go_service::scoped_name},
         });
   }
@@ -566,17 +574,6 @@ class mstch_go_service : public mstch_service {
     return data_.go_package_alias_prefix(service_->program());
   }
   mstch::node scoped_name() { return service_->get_scoped_name(); }
-
-  mstch::node req_resp_structs() {
-    auto req_resp_structs =
-        data_.service_to_req_resp_structs.find(service_->name());
-    if (req_resp_structs != data_.service_to_req_resp_structs.end()) {
-      return make_mstch_array(
-          req_resp_structs->second, *context_.struct_factory);
-    }
-    throw std::runtime_error(
-        "unable to get req/resp structs for service " + service_->name());
-  }
 
  private:
   go::codegen_data& data_;

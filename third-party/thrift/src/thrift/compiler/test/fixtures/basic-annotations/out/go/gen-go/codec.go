@@ -335,6 +335,121 @@ var (
                 "password": 1,
             },
         }
+    premadeStructSpec_reqBadServiceBar =
+        &thrift.StructSpec{
+            Name:                 "reqBadServiceBar",
+            ScopedName:           "module.reqBadServiceBar",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respBadServiceBar =
+        &thrift.StructSpec{
+            Name:                 "respBadServiceBar",
+            ScopedName:           "module.respBadServiceBar",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqFooBarBazServiceFooStructured =
+        &thrift.StructSpec{
+            Name:                 "reqFooBarBazServiceFooStructured",
+            ScopedName:           "module.reqFooBarBazServiceFooStructured",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respFooBarBazServiceFooStructured =
+        &thrift.StructSpec{
+            Name:                 "respFooBarBazServiceFooStructured",
+            ScopedName:           "module.respFooBarBazServiceFooStructured",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqFooBarBazServiceBarNonStructured =
+        &thrift.StructSpec{
+            Name:                 "reqFooBarBazServiceBarNonStructured",
+            ScopedName:           "module.reqFooBarBazServiceBarNonStructured",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respFooBarBazServiceBarNonStructured =
+        &thrift.StructSpec{
+            Name:                 "respFooBarBazServiceBarNonStructured",
+            ScopedName:           "module.respFooBarBazServiceBarNonStructured",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqFooBarBazServiceBaz =
+        &thrift.StructSpec{
+            Name:                 "reqFooBarBazServiceBaz",
+            ScopedName:           "module.reqFooBarBazServiceBaz",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respFooBarBazServiceBaz =
+        &thrift.StructSpec{
+            Name:                 "respFooBarBazServiceBaz",
+            ScopedName:           "module.respFooBarBazServiceBaz",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
     premadeStructSpec_reqMyServicePing =
         &thrift.StructSpec{
             Name:                 "reqMyServicePing",
@@ -627,6 +742,32 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
+    premadeStructSpec_reqMyServicePrioChildPang =
+        &thrift.StructSpec{
+            Name:                 "reqMyServicePrioChildPang",
+            ScopedName:           "module.reqMyServicePrioChildPang",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyServicePrioChildPang =
+        &thrift.StructSpec{
+            Name:                 "respMyServicePrioChildPang",
+            ScopedName:           "module.respMyServicePrioChildPang",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
     premadeStructSpec_reqMyServicePrioParentPing =
         &thrift.StructSpec{
             Name:                 "reqMyServicePrioParentPing",
@@ -670,147 +811,6 @@ var (
         &thrift.StructSpec{
             Name:                 "respMyServicePrioParentPong",
             ScopedName:           "module.respMyServicePrioParentPong",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_reqMyServicePrioChildPang =
-        &thrift.StructSpec{
-            Name:                 "reqMyServicePrioChildPang",
-            ScopedName:           "module.reqMyServicePrioChildPang",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respMyServicePrioChildPang =
-        &thrift.StructSpec{
-            Name:                 "respMyServicePrioChildPang",
-            ScopedName:           "module.respMyServicePrioChildPang",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_reqBadServiceBar =
-        &thrift.StructSpec{
-            Name:                 "reqBadServiceBar",
-            ScopedName:           "module.reqBadServiceBar",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respBadServiceBar =
-        &thrift.StructSpec{
-            Name:                 "respBadServiceBar",
-            ScopedName:           "module.respBadServiceBar",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   0,
-                    WireType:             thrift.I32,
-                    Name:                 "success",
-                    ReflectIndex:         0,
-                    IsOptional:           true,
-                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                0: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "success": 0,
-            },
-        }
-    premadeStructSpec_reqFooBarBazServiceFooStructured =
-        &thrift.StructSpec{
-            Name:                 "reqFooBarBazServiceFooStructured",
-            ScopedName:           "module.reqFooBarBazServiceFooStructured",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respFooBarBazServiceFooStructured =
-        &thrift.StructSpec{
-            Name:                 "respFooBarBazServiceFooStructured",
-            ScopedName:           "module.respFooBarBazServiceFooStructured",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_reqFooBarBazServiceBarNonStructured =
-        &thrift.StructSpec{
-            Name:                 "reqFooBarBazServiceBarNonStructured",
-            ScopedName:           "module.reqFooBarBazServiceBarNonStructured",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respFooBarBazServiceBarNonStructured =
-        &thrift.StructSpec{
-            Name:                 "respFooBarBazServiceBarNonStructured",
-            ScopedName:           "module.respFooBarBazServiceBarNonStructured",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_reqFooBarBazServiceBaz =
-        &thrift.StructSpec{
-            Name:                 "reqFooBarBazServiceBaz",
-            ScopedName:           "module.reqFooBarBazServiceBaz",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_respFooBarBazServiceBaz =
-        &thrift.StructSpec{
-            Name:                 "respFooBarBazServiceBaz",
-            ScopedName:           "module.respFooBarBazServiceBaz",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{

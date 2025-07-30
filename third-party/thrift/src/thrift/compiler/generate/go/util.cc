@@ -137,6 +137,12 @@ void codegen_data::compute_req_resp_structs() {
       make_func_req_resp_structs(func, svcGoName, req_resp_structs);
     }
   }
+  for (auto interaction : current_program_->interactions()) {
+    auto interactionGoName = go::munge_ident(interaction->name());
+    for (auto func : interaction->get_functions()) {
+      make_func_req_resp_structs(func, interactionGoName, req_resp_structs);
+    }
+  }
 
   for (auto struct_ : req_resp_structs) {
     req_resp_struct_names.insert(struct_->name());

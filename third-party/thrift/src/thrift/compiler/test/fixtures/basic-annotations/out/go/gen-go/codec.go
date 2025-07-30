@@ -820,6 +820,32 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
+    premadeStructSpec_reqBadInteractionFoo =
+        &thrift.StructSpec{
+            Name:                 "reqBadInteractionFoo",
+            ScopedName:           "module.reqBadInteractionFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respBadInteractionFoo =
+        &thrift.StructSpec{
+            Name:                 "respBadInteractionFoo",
+            ScopedName:           "module.respBadInteractionFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

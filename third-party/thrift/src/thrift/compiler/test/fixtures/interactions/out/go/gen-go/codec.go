@@ -216,6 +216,306 @@ var (
                 "success": 0,
             },
         }
+    premadeStructSpec_reqMyInteractionFrobnicate =
+        &thrift.StructSpec{
+            Name:                 "reqMyInteractionFrobnicate",
+            ScopedName:           "module.reqMyInteractionFrobnicate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyInteractionFrobnicate =
+        &thrift.StructSpec{
+            Name:                 "respMyInteractionFrobnicate",
+            ScopedName:           "module.respMyInteractionFrobnicate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_CustomException,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
+    premadeStructSpec_reqMyInteractionPing =
+        &thrift.StructSpec{
+            Name:                 "reqMyInteractionPing",
+            ScopedName:           "module.reqMyInteractionPing",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyInteractionPing =
+        &thrift.StructSpec{
+            Name:                 "respMyInteractionPing",
+            ScopedName:           "module.respMyInteractionPing",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqMyInteractionTruthify =
+        &thrift.StructSpec{
+            Name:                 "reqMyInteractionTruthify",
+            ScopedName:           "module.reqMyInteractionTruthify",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyInteractionTruthify =
+        &thrift.StructSpec{
+            Name:                 "respMyInteractionTruthify",
+            ScopedName:           "module.respMyInteractionTruthify",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamMyInteractionTruthify =
+        &thrift.StructSpec{
+            Name:                 "streamMyInteractionTruthify",
+            ScopedName:           "module.streamMyInteractionTruthify",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.BOOL,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqMyInteractionFastFrobnicate =
+        &thrift.StructSpec{
+            Name:                 "reqMyInteractionFastFrobnicate",
+            ScopedName:           "module.reqMyInteractionFastFrobnicate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyInteractionFastFrobnicate =
+        &thrift.StructSpec{
+            Name:                 "respMyInteractionFastFrobnicate",
+            ScopedName:           "module.respMyInteractionFastFrobnicate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqMyInteractionFastPing =
+        &thrift.StructSpec{
+            Name:                 "reqMyInteractionFastPing",
+            ScopedName:           "module.reqMyInteractionFastPing",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyInteractionFastPing =
+        &thrift.StructSpec{
+            Name:                 "respMyInteractionFastPing",
+            ScopedName:           "module.respMyInteractionFastPing",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqMyInteractionFastTruthify =
+        &thrift.StructSpec{
+            Name:                 "reqMyInteractionFastTruthify",
+            ScopedName:           "module.reqMyInteractionFastTruthify",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyInteractionFastTruthify =
+        &thrift.StructSpec{
+            Name:                 "respMyInteractionFastTruthify",
+            ScopedName:           "module.respMyInteractionFastTruthify",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamMyInteractionFastTruthify =
+        &thrift.StructSpec{
+            Name:                 "streamMyInteractionFastTruthify",
+            ScopedName:           "module.streamMyInteractionFastTruthify",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.BOOL,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqSerialInteractionFrobnicate =
+        &thrift.StructSpec{
+            Name:                 "reqSerialInteractionFrobnicate",
+            ScopedName:           "module.reqSerialInteractionFrobnicate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSerialInteractionFrobnicate =
+        &thrift.StructSpec{
+            Name:                 "respSerialInteractionFrobnicate",
+            ScopedName:           "module.respSerialInteractionFrobnicate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqBoxedInteractionGetABox =
+        &thrift.StructSpec{
+            Name:                 "reqBoxedInteractionGetABox",
+            ScopedName:           "module.reqBoxedInteractionGetABox",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respBoxedInteractionGetABox =
+        &thrift.StructSpec{
+            Name:                 "respBoxedInteractionGetABox",
+            ScopedName:           "module.respBoxedInteractionGetABox",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_ShouldBeBoxed,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

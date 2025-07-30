@@ -939,6 +939,1759 @@ func (x *respInteractWithSharedDoSomeSimilarThings) setDefaults() *respInteractW
     return x
 }
 
+type reqMyInteractionFrobnicate struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyInteractionFrobnicate)(nil)
+
+// Deprecated: MyInteractionFrobnicateArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFrobnicateArgsDeprecated = reqMyInteractionFrobnicate
+
+func newReqMyInteractionFrobnicate() *reqMyInteractionFrobnicate {
+    return (&reqMyInteractionFrobnicate{}).setDefaults()
+}
+
+
+
+func (x *reqMyInteractionFrobnicate) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyInteractionFrobnicate"); err != nil {
+        return thrift.PrependError("reqMyInteractionFrobnicate write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqMyInteractionFrobnicate write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFrobnicate write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqMyInteractionFrobnicate) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqMyInteractionFrobnicate read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqMyInteractionFrobnicate field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFrobnicate read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqMyInteractionFrobnicate) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqMyInteractionFrobnicate) setDefaults() *reqMyInteractionFrobnicate {
+    return x
+}
+
+type respMyInteractionFrobnicate struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *CustomException `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyInteractionFrobnicate)(nil)
+var _ thrift.WritableResult = (*respMyInteractionFrobnicate)(nil)
+
+// Deprecated: MyInteractionFrobnicateResultDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFrobnicateResultDeprecated = respMyInteractionFrobnicate
+
+func newRespMyInteractionFrobnicate() *respMyInteractionFrobnicate {
+    return (&respMyInteractionFrobnicate{}).setDefaults()
+}
+
+func (x *respMyInteractionFrobnicate) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *respMyInteractionFrobnicate) GetEx() *CustomException {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respMyInteractionFrobnicate) SetSuccessNonCompat(value int32) *respMyInteractionFrobnicate {
+    x.Success = &value
+    return x
+}
+
+func (x *respMyInteractionFrobnicate) SetSuccess(value *int32) *respMyInteractionFrobnicate {
+    x.Success = value
+    return x
+}
+
+func (x *respMyInteractionFrobnicate) SetExNonCompat(value *CustomException) *respMyInteractionFrobnicate {
+    x.Ex = value
+    return x
+}
+
+func (x *respMyInteractionFrobnicate) SetEx(value *CustomException) *respMyInteractionFrobnicate {
+    x.Ex = value
+    return x
+}
+
+func (x *respMyInteractionFrobnicate) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respMyInteractionFrobnicate) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *respMyInteractionFrobnicate) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFrobnicate) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFrobnicate) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respMyInteractionFrobnicate) readField1(p thrift.Decoder) error {  // Ex
+    result := NewCustomException()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *respMyInteractionFrobnicate) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *respMyInteractionFrobnicate) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyInteractionFrobnicate"); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFrobnicate) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respMyInteractionFrobnicate field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFrobnicate read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respMyInteractionFrobnicate) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respMyInteractionFrobnicate) setDefaults() *respMyInteractionFrobnicate {
+    return x
+}
+
+type reqMyInteractionPing struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyInteractionPing)(nil)
+
+// Deprecated: MyInteractionPingArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionPingArgsDeprecated = reqMyInteractionPing
+
+func newReqMyInteractionPing() *reqMyInteractionPing {
+    return (&reqMyInteractionPing{}).setDefaults()
+}
+
+
+
+func (x *reqMyInteractionPing) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyInteractionPing"); err != nil {
+        return thrift.PrependError("reqMyInteractionPing write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqMyInteractionPing write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionPing write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqMyInteractionPing) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqMyInteractionPing read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqMyInteractionPing field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionPing read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqMyInteractionPing) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqMyInteractionPing) setDefaults() *reqMyInteractionPing {
+    return x
+}
+
+type respMyInteractionPing struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyInteractionPing)(nil)
+var _ thrift.WritableResult = (*respMyInteractionPing)(nil)
+
+// Deprecated: MyInteractionPingResultDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionPingResultDeprecated = respMyInteractionPing
+
+func newRespMyInteractionPing() *respMyInteractionPing {
+    return (&respMyInteractionPing{}).setDefaults()
+}
+
+
+
+func (x *respMyInteractionPing) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyInteractionPing) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyInteractionPing"); err != nil {
+        return thrift.PrependError("respMyInteractionPing write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respMyInteractionPing write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionPing write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionPing) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respMyInteractionPing read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respMyInteractionPing field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionPing read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respMyInteractionPing) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respMyInteractionPing) setDefaults() *respMyInteractionPing {
+    return x
+}
+
+type reqMyInteractionTruthify struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyInteractionTruthify)(nil)
+
+// Deprecated: MyInteractionTruthifyArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionTruthifyArgsDeprecated = reqMyInteractionTruthify
+
+func newReqMyInteractionTruthify() *reqMyInteractionTruthify {
+    return (&reqMyInteractionTruthify{}).setDefaults()
+}
+
+
+
+func (x *reqMyInteractionTruthify) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyInteractionTruthify"); err != nil {
+        return thrift.PrependError("reqMyInteractionTruthify write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqMyInteractionTruthify write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionTruthify write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqMyInteractionTruthify) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqMyInteractionTruthify read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqMyInteractionTruthify field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionTruthify read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqMyInteractionTruthify) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqMyInteractionTruthify) setDefaults() *reqMyInteractionTruthify {
+    return x
+}
+
+type respMyInteractionTruthify struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyInteractionTruthify)(nil)
+var _ thrift.WritableResult = (*respMyInteractionTruthify)(nil)
+
+// Deprecated: MyInteractionTruthifyResultDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionTruthifyResultDeprecated = respMyInteractionTruthify
+
+func newRespMyInteractionTruthify() *respMyInteractionTruthify {
+    return (&respMyInteractionTruthify{}).setDefaults()
+}
+
+
+
+func (x *respMyInteractionTruthify) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyInteractionTruthify) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyInteractionTruthify"); err != nil {
+        return thrift.PrependError("respMyInteractionTruthify write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respMyInteractionTruthify write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionTruthify write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionTruthify) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respMyInteractionTruthify read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respMyInteractionTruthify field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionTruthify read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respMyInteractionTruthify) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respMyInteractionTruthify) setDefaults() *respMyInteractionTruthify {
+    return x
+}
+
+type streamMyInteractionTruthify struct {
+    Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamMyInteractionTruthify)(nil)
+var _ thrift.WritableResult = (*streamMyInteractionTruthify)(nil)
+
+// Deprecated: streamMyInteractionTruthifyResultDeprecated is deprecated, since it is supposed to be internal.
+type streamMyInteractionTruthifyResultDeprecated = streamMyInteractionTruthify
+
+func newStreamMyInteractionTruthify() *streamMyInteractionTruthify {
+    return (&streamMyInteractionTruthify{}).setDefaults()
+}
+
+func (x *streamMyInteractionTruthify) GetSuccess() bool {
+    if !x.IsSetSuccess() {
+        return false
+    }
+    return *x.Success
+}
+
+func (x *streamMyInteractionTruthify) SetSuccessNonCompat(value bool) *streamMyInteractionTruthify {
+    x.Success = &value
+    return x
+}
+
+func (x *streamMyInteractionTruthify) SetSuccess(value *bool) *streamMyInteractionTruthify {
+    x.Success = value
+    return x
+}
+
+func (x *streamMyInteractionTruthify) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamMyInteractionTruthify) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteBool(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamMyInteractionTruthify) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamMyInteractionTruthify) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamMyInteractionTruthify) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamMyInteractionTruthify"); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamMyInteractionTruthify) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamMyInteractionTruthify field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.BOOL) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamMyInteractionTruthify read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamMyInteractionTruthify) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamMyInteractionTruthify) setDefaults() *streamMyInteractionTruthify {
+    return x
+}
+
+type reqMyInteractionFastFrobnicate struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyInteractionFastFrobnicate)(nil)
+
+// Deprecated: MyInteractionFastFrobnicateArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFastFrobnicateArgsDeprecated = reqMyInteractionFastFrobnicate
+
+func newReqMyInteractionFastFrobnicate() *reqMyInteractionFastFrobnicate {
+    return (&reqMyInteractionFastFrobnicate{}).setDefaults()
+}
+
+
+
+func (x *reqMyInteractionFastFrobnicate) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyInteractionFastFrobnicate"); err != nil {
+        return thrift.PrependError("reqMyInteractionFastFrobnicate write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastFrobnicate write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastFrobnicate write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqMyInteractionFastFrobnicate) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastFrobnicate read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqMyInteractionFastFrobnicate field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastFrobnicate read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqMyInteractionFastFrobnicate) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqMyInteractionFastFrobnicate) setDefaults() *reqMyInteractionFastFrobnicate {
+    return x
+}
+
+type respMyInteractionFastFrobnicate struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyInteractionFastFrobnicate)(nil)
+var _ thrift.WritableResult = (*respMyInteractionFastFrobnicate)(nil)
+
+// Deprecated: MyInteractionFastFrobnicateResultDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFastFrobnicateResultDeprecated = respMyInteractionFastFrobnicate
+
+func newRespMyInteractionFastFrobnicate() *respMyInteractionFastFrobnicate {
+    return (&respMyInteractionFastFrobnicate{}).setDefaults()
+}
+
+func (x *respMyInteractionFastFrobnicate) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *respMyInteractionFastFrobnicate) SetSuccessNonCompat(value int32) *respMyInteractionFastFrobnicate {
+    x.Success = &value
+    return x
+}
+
+func (x *respMyInteractionFastFrobnicate) SetSuccess(value *int32) *respMyInteractionFastFrobnicate {
+    x.Success = value
+    return x
+}
+
+func (x *respMyInteractionFastFrobnicate) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respMyInteractionFastFrobnicate) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFastFrobnicate) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *respMyInteractionFastFrobnicate) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyInteractionFastFrobnicate) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyInteractionFastFrobnicate"); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFastFrobnicate) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respMyInteractionFastFrobnicate field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastFrobnicate read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respMyInteractionFastFrobnicate) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respMyInteractionFastFrobnicate) setDefaults() *respMyInteractionFastFrobnicate {
+    return x
+}
+
+type reqMyInteractionFastPing struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyInteractionFastPing)(nil)
+
+// Deprecated: MyInteractionFastPingArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFastPingArgsDeprecated = reqMyInteractionFastPing
+
+func newReqMyInteractionFastPing() *reqMyInteractionFastPing {
+    return (&reqMyInteractionFastPing{}).setDefaults()
+}
+
+
+
+func (x *reqMyInteractionFastPing) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyInteractionFastPing"); err != nil {
+        return thrift.PrependError("reqMyInteractionFastPing write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastPing write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastPing write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqMyInteractionFastPing) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastPing read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqMyInteractionFastPing field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastPing read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqMyInteractionFastPing) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqMyInteractionFastPing) setDefaults() *reqMyInteractionFastPing {
+    return x
+}
+
+type respMyInteractionFastPing struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyInteractionFastPing)(nil)
+var _ thrift.WritableResult = (*respMyInteractionFastPing)(nil)
+
+// Deprecated: MyInteractionFastPingResultDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFastPingResultDeprecated = respMyInteractionFastPing
+
+func newRespMyInteractionFastPing() *respMyInteractionFastPing {
+    return (&respMyInteractionFastPing{}).setDefaults()
+}
+
+
+
+func (x *respMyInteractionFastPing) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyInteractionFastPing) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyInteractionFastPing"); err != nil {
+        return thrift.PrependError("respMyInteractionFastPing write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respMyInteractionFastPing write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastPing write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFastPing) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respMyInteractionFastPing read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respMyInteractionFastPing field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastPing read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respMyInteractionFastPing) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respMyInteractionFastPing) setDefaults() *respMyInteractionFastPing {
+    return x
+}
+
+type reqMyInteractionFastTruthify struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyInteractionFastTruthify)(nil)
+
+// Deprecated: MyInteractionFastTruthifyArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFastTruthifyArgsDeprecated = reqMyInteractionFastTruthify
+
+func newReqMyInteractionFastTruthify() *reqMyInteractionFastTruthify {
+    return (&reqMyInteractionFastTruthify{}).setDefaults()
+}
+
+
+
+func (x *reqMyInteractionFastTruthify) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyInteractionFastTruthify"); err != nil {
+        return thrift.PrependError("reqMyInteractionFastTruthify write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastTruthify write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastTruthify write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqMyInteractionFastTruthify) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastTruthify read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqMyInteractionFastTruthify field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqMyInteractionFastTruthify read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqMyInteractionFastTruthify) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqMyInteractionFastTruthify) setDefaults() *reqMyInteractionFastTruthify {
+    return x
+}
+
+type respMyInteractionFastTruthify struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyInteractionFastTruthify)(nil)
+var _ thrift.WritableResult = (*respMyInteractionFastTruthify)(nil)
+
+// Deprecated: MyInteractionFastTruthifyResultDeprecated is deprecated, since it is supposed to be internal.
+type MyInteractionFastTruthifyResultDeprecated = respMyInteractionFastTruthify
+
+func newRespMyInteractionFastTruthify() *respMyInteractionFastTruthify {
+    return (&respMyInteractionFastTruthify{}).setDefaults()
+}
+
+
+
+func (x *respMyInteractionFastTruthify) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyInteractionFastTruthify) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyInteractionFastTruthify"); err != nil {
+        return thrift.PrependError("respMyInteractionFastTruthify write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respMyInteractionFastTruthify write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastTruthify write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respMyInteractionFastTruthify) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respMyInteractionFastTruthify read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respMyInteractionFastTruthify field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respMyInteractionFastTruthify read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respMyInteractionFastTruthify) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respMyInteractionFastTruthify) setDefaults() *respMyInteractionFastTruthify {
+    return x
+}
+
+type streamMyInteractionFastTruthify struct {
+    Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamMyInteractionFastTruthify)(nil)
+var _ thrift.WritableResult = (*streamMyInteractionFastTruthify)(nil)
+
+// Deprecated: streamMyInteractionFastTruthifyResultDeprecated is deprecated, since it is supposed to be internal.
+type streamMyInteractionFastTruthifyResultDeprecated = streamMyInteractionFastTruthify
+
+func newStreamMyInteractionFastTruthify() *streamMyInteractionFastTruthify {
+    return (&streamMyInteractionFastTruthify{}).setDefaults()
+}
+
+func (x *streamMyInteractionFastTruthify) GetSuccess() bool {
+    if !x.IsSetSuccess() {
+        return false
+    }
+    return *x.Success
+}
+
+func (x *streamMyInteractionFastTruthify) SetSuccessNonCompat(value bool) *streamMyInteractionFastTruthify {
+    x.Success = &value
+    return x
+}
+
+func (x *streamMyInteractionFastTruthify) SetSuccess(value *bool) *streamMyInteractionFastTruthify {
+    x.Success = value
+    return x
+}
+
+func (x *streamMyInteractionFastTruthify) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamMyInteractionFastTruthify) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteBool(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamMyInteractionFastTruthify) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+func (x *streamMyInteractionFastTruthify) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamMyInteractionFastTruthify) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamMyInteractionFastTruthify"); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamMyInteractionFastTruthify) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamMyInteractionFastTruthify field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.BOOL) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamMyInteractionFastTruthify read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamMyInteractionFastTruthify) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamMyInteractionFastTruthify) setDefaults() *streamMyInteractionFastTruthify {
+    return x
+}
+
+type reqSerialInteractionFrobnicate struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSerialInteractionFrobnicate)(nil)
+
+// Deprecated: SerialInteractionFrobnicateArgsDeprecated is deprecated, since it is supposed to be internal.
+type SerialInteractionFrobnicateArgsDeprecated = reqSerialInteractionFrobnicate
+
+func newReqSerialInteractionFrobnicate() *reqSerialInteractionFrobnicate {
+    return (&reqSerialInteractionFrobnicate{}).setDefaults()
+}
+
+
+
+func (x *reqSerialInteractionFrobnicate) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSerialInteractionFrobnicate"); err != nil {
+        return thrift.PrependError("reqSerialInteractionFrobnicate write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSerialInteractionFrobnicate write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSerialInteractionFrobnicate write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSerialInteractionFrobnicate) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSerialInteractionFrobnicate read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSerialInteractionFrobnicate field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSerialInteractionFrobnicate read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSerialInteractionFrobnicate) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSerialInteractionFrobnicate) setDefaults() *reqSerialInteractionFrobnicate {
+    return x
+}
+
+type respSerialInteractionFrobnicate struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSerialInteractionFrobnicate)(nil)
+var _ thrift.WritableResult = (*respSerialInteractionFrobnicate)(nil)
+
+// Deprecated: SerialInteractionFrobnicateResultDeprecated is deprecated, since it is supposed to be internal.
+type SerialInteractionFrobnicateResultDeprecated = respSerialInteractionFrobnicate
+
+func newRespSerialInteractionFrobnicate() *respSerialInteractionFrobnicate {
+    return (&respSerialInteractionFrobnicate{}).setDefaults()
+}
+
+
+
+func (x *respSerialInteractionFrobnicate) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSerialInteractionFrobnicate) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSerialInteractionFrobnicate"); err != nil {
+        return thrift.PrependError("respSerialInteractionFrobnicate write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSerialInteractionFrobnicate write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSerialInteractionFrobnicate write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSerialInteractionFrobnicate) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSerialInteractionFrobnicate read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSerialInteractionFrobnicate field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSerialInteractionFrobnicate read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSerialInteractionFrobnicate) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSerialInteractionFrobnicate) setDefaults() *respSerialInteractionFrobnicate {
+    return x
+}
+
+type reqBoxedInteractionGetABox struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqBoxedInteractionGetABox)(nil)
+
+// Deprecated: BoxedInteractionGetABoxArgsDeprecated is deprecated, since it is supposed to be internal.
+type BoxedInteractionGetABoxArgsDeprecated = reqBoxedInteractionGetABox
+
+func newReqBoxedInteractionGetABox() *reqBoxedInteractionGetABox {
+    return (&reqBoxedInteractionGetABox{}).setDefaults()
+}
+
+
+
+func (x *reqBoxedInteractionGetABox) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqBoxedInteractionGetABox"); err != nil {
+        return thrift.PrependError("reqBoxedInteractionGetABox write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqBoxedInteractionGetABox write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqBoxedInteractionGetABox write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqBoxedInteractionGetABox) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqBoxedInteractionGetABox read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqBoxedInteractionGetABox field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqBoxedInteractionGetABox read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqBoxedInteractionGetABox) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqBoxedInteractionGetABox) setDefaults() *reqBoxedInteractionGetABox {
+    return x
+}
+
+type respBoxedInteractionGetABox struct {
+    Success *ShouldBeBoxed `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respBoxedInteractionGetABox)(nil)
+var _ thrift.WritableResult = (*respBoxedInteractionGetABox)(nil)
+
+// Deprecated: BoxedInteractionGetABoxResultDeprecated is deprecated, since it is supposed to be internal.
+type BoxedInteractionGetABoxResultDeprecated = respBoxedInteractionGetABox
+
+func newRespBoxedInteractionGetABox() *respBoxedInteractionGetABox {
+    return (&respBoxedInteractionGetABox{}).setDefaults()
+}
+
+func (x *respBoxedInteractionGetABox) GetSuccess() *ShouldBeBoxed {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respBoxedInteractionGetABox) SetSuccessNonCompat(value *ShouldBeBoxed) *respBoxedInteractionGetABox {
+    x.Success = value
+    return x
+}
+
+func (x *respBoxedInteractionGetABox) SetSuccess(value *ShouldBeBoxed) *respBoxedInteractionGetABox {
+    x.Success = value
+    return x
+}
+
+func (x *respBoxedInteractionGetABox) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respBoxedInteractionGetABox) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBoxedInteractionGetABox) readField0(p thrift.Decoder) error {  // Success
+    result := NewShouldBeBoxed()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respBoxedInteractionGetABox) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respBoxedInteractionGetABox) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respBoxedInteractionGetABox"); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBoxedInteractionGetABox) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respBoxedInteractionGetABox field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respBoxedInteractionGetABox read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respBoxedInteractionGetABox) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respBoxedInteractionGetABox) setDefaults() *respBoxedInteractionGetABox {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

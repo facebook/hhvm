@@ -3871,6 +3871,161 @@ func (x *respFooBarBazServiceBaz) setDefaults() *respFooBarBazServiceBaz {
     return x
 }
 
+type reqBadInteractionFoo struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqBadInteractionFoo)(nil)
+
+// Deprecated: BadInteractionFooArgsDeprecated is deprecated, since it is supposed to be internal.
+type BadInteractionFooArgsDeprecated = reqBadInteractionFoo
+
+func newReqBadInteractionFoo() *reqBadInteractionFoo {
+    return (&reqBadInteractionFoo{}).setDefaults()
+}
+
+
+
+func (x *reqBadInteractionFoo) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqBadInteractionFoo"); err != nil {
+        return thrift.PrependError("reqBadInteractionFoo write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqBadInteractionFoo write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqBadInteractionFoo write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqBadInteractionFoo) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqBadInteractionFoo read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqBadInteractionFoo field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqBadInteractionFoo read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqBadInteractionFoo) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqBadInteractionFoo) setDefaults() *reqBadInteractionFoo {
+    return x
+}
+
+type respBadInteractionFoo struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respBadInteractionFoo)(nil)
+var _ thrift.WritableResult = (*respBadInteractionFoo)(nil)
+
+// Deprecated: BadInteractionFooResultDeprecated is deprecated, since it is supposed to be internal.
+type BadInteractionFooResultDeprecated = respBadInteractionFoo
+
+func newRespBadInteractionFoo() *respBadInteractionFoo {
+    return (&respBadInteractionFoo{}).setDefaults()
+}
+
+
+
+func (x *respBadInteractionFoo) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respBadInteractionFoo) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respBadInteractionFoo"); err != nil {
+        return thrift.PrependError("respBadInteractionFoo write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respBadInteractionFoo write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respBadInteractionFoo write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBadInteractionFoo) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respBadInteractionFoo read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respBadInteractionFoo field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respBadInteractionFoo read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respBadInteractionFoo) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respBadInteractionFoo) setDefaults() *respBadInteractionFoo {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

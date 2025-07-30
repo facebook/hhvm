@@ -15,6 +15,7 @@
  */
 
 #include <string>
+#include <string_view>
 #include <fmt/core.h>
 #include <range/v3/view.hpp>
 
@@ -317,7 +318,7 @@ class structure_annotations {
           attrs.push_back(fmt::format(
               "{}{}{}",
               delim,
-              fmt::string_view(start, pos - start - trailing_spaces),
+              std::string_view(start, pos - start - trailing_spaces),
               delim));
           start = pos + 1;
           for (; start != end && isspace(*start); ++start) {

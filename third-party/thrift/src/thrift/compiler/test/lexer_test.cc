@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include <gtest/gtest.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/lexer.h>
@@ -23,14 +25,14 @@ using namespace apache::thrift::compiler;
 class LexerTest : public testing::Test {
  public:
   source_manager source_mgr;
-  fmt::string_view doc_comment;
+  std::string_view doc_comment;
   diagnostics_engine diags;
 
   lexer make_lexer(const std::string& source) {
     return {
         source_mgr.add_virtual_file("", source),
         diags,
-        [this](fmt::string_view text, source_range) { doc_comment = text; }};
+        [this](std::string_view text, source_range) { doc_comment = text; }};
   }
 
   LexerTest() : diags(source_mgr, [](diagnostic) {}) {}

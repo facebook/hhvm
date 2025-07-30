@@ -18,6 +18,7 @@
 
 #include <cctype>
 #include <memory>
+#include <string_view>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -31,11 +32,11 @@ class base_program_test : public testing::Test {
   t_program program_{"path/to/program.thrift", "/root/path/to/program.thrift"};
 
   template <typename T>
-  T& create_def(const std::string& name, fmt::string_view uri = {}) {
+  T& create_def(const std::string& name, std::string_view uri = {}) {
     return program_.add_def(std::make_unique<T>(&program_, name), uri);
   }
 
-  t_struct& create_annotation(const std::string& name, fmt::string_view uri) {
+  t_struct& create_annotation(const std::string& name, std::string_view uri) {
     return create_def<t_struct>(name, uri);
   }
 

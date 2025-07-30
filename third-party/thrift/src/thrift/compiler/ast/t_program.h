@@ -21,6 +21,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -115,7 +116,7 @@ class t_program : public t_named {
   //  - returns a mutable reference to the stored value, so it can be
   //  additionally configured.
   template <typename T>
-  T& add_def(std::unique_ptr<T> definition, fmt::string_view uri = {}) {
+  T& add_def(std::unique_ptr<T> definition, std::string_view uri = {}) {
     auto* ptr = definition.get();
     if (uri.data() != nullptr) {
       definition->set_uri(std::string(uri.data(), uri.size()));
@@ -221,9 +222,9 @@ class t_program : public t_named {
   std::vector<t_program*> get_includes_for_codegen() const {
     std::vector<t_program*> included_programs;
     for (const auto& include : includes_) {
-      static const fmt::string_view prefix = "thrift/annotation/";
+      static const std::string_view prefix = "thrift/annotation/";
       auto path = include->raw_path();
-      if (fmt::string_view(path.data(), std::min(path.size(), prefix.size())) ==
+      if (std::string_view(path.data(), std::min(path.size(), prefix.size())) ==
           prefix) {
         continue;
       }

@@ -15,9 +15,9 @@
  */
 
 #include <fstream>
+#include <string_view>
 
 #include <boost/filesystem/operations.hpp>
-#include <fmt/core.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/ScopeGuard.h>
@@ -37,7 +37,7 @@ TEST(SourceLocationTest, get_file) {
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
-  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source->text);
+  EXPECT_EQ(std::string_view(text.c_str(), text.size() + 1), source->text);
 }
 
 TEST(SourceLocationTest, get_file_error) {
@@ -53,7 +53,7 @@ TEST(SourceLocationTest, add_virtual_file) {
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
-  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source.text);
+  EXPECT_EQ(std::string_view(text.c_str(), text.size() + 1), source.text);
 }
 
 TEST(SourceLocationTest, get_source_start) {
@@ -142,7 +142,7 @@ TEST(SourceLocationTest, get_cached_virtual_file) {
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
-  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source->text);
+  EXPECT_EQ(std::string_view(text.c_str(), text.size() + 1), source->text);
 }
 
 TEST(SourceLocationTest, ignore_file_system) {

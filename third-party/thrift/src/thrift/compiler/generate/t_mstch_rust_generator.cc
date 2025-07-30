@@ -18,6 +18,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 #include <boost/algorithm/string/classification.hpp>
@@ -1201,7 +1202,7 @@ class rust_mstch_function : public mstch_function {
   mstch::node rust_returns_by_name() {
     auto returns = std::vector<std::string>();
     auto add_return =
-        [&](fmt::string_view name, fmt::string_view type, int id) {
+        [&](std::string_view name, std::string_view type, int id) {
           returns.push_back(fmt::format(
               "::fbthrift::Field::new(\"{}\", ::fbthrift::TType::{}, {})",
               name,

@@ -1,7 +1,7 @@
-f basic-1.php
-f basic-2.php
-f basic-3.php
-f basic-4.php
-f prod/foo.inc.php
-f prod/internal_prod/zap.inc.php
+f [fromPackageV2] basic-1.php
+f [fromPackageV2] basic-2.php
+f [fromPackageV2] basic-3.php
+f [fromPackageV2] basic-4.php
+f [fromPackageV2] prod/foo.inc.php
+f [fromPackageV2] prod/internal_prod/zap.inc.php
 I am in prod/internal_prod/

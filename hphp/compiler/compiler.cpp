@@ -1346,16 +1346,25 @@ bool process(CompilerOptions &po) {
   };
 
   // Emit a group of files that were parsed remotely
+  // The EmitPass specifies which phase of EmitAll has invoked the callback:
+  // - IncludeDirFiles is the initial pass in which files in the include dirs are scanned
+  // - SymbolRefsOnDemandFiles is the pass in which the files in exclude dirs referenced
+  //   by SymbolRefs are included in the build
+  // - PackageV2RulesOnly is the pass where only the PackageV2 rule are applied
   auto const emitRemoteUnit = [&] (
       const std::vector<std::filesystem::path>& rpaths,
-      bool forceInclusion
+      EmitPass emitPass
   ) -> coro::Task<Package::EmitCallBackResult> {
     Package::ParseMetaVec parseMetas;
+    std::vector<FileInBuildReason> reasons;
     Package::ParseMetaItemsToSkipSet itemsToSkip;
 
-    auto const shouldIncludeInBuild = [&] (const Package::ParseMeta& p) {
-      if (Cfg::Eval::ActiveDeployment.empty() || forceInclusion) return true;
-      if (Cfg::Eval::PackageV2) {
+    auto const buildMode = packageV2BuildMode();
+    assertx((Cfg::Eval::PackageV2 && buildMode != PackageV2BuildMode::packageV2Disabled) ||
+            (!Cfg::Eval::PackageV2 && buildMode == PackageV2BuildMode::packageV2Disabled));
+
+    auto isIncludedByPackageV2 = [&](const Package::ParseMeta& p) {
+      if (isPackageV2Enabled(buildMode) && !Cfg::Eval::ActiveDeployment.empty()) {
         // emit should never be invoked on files excluded from the build
         // with --exclude-file or --exclude-pattern
         auto file = p.m_filepath->toCppString();
@@ -1364,7 +1373,7 @@ bool process(CompilerOptions &po) {
 
         if (p.m_packageOverride) {
           auto const& packageInfo =
-            RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
+           RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
           auto const activeDeployment =
             packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
           return ((activeDeployment->second).m_packages.contains(p.m_packageOverride->data()));
@@ -1377,11 +1386,55 @@ bool process(CompilerOptions &po) {
             return it.second;
           }
         }
-        return false;
       }
+      return false;
+    };
+
+    auto const includeInBuildReason = [&] (const Package::ParseMeta& p) {
+      if (Cfg::Eval::ActiveDeployment.empty()) {
+        if (emitPass == EmitPass::SymbolRefsOnDemandFiles) {
+          return FileInBuildReason::fromSymbolRefs;
+        } else {
+          return FileInBuildReason::fromIncludeDir;
+        }
+      }
+
+      if (Cfg::Eval::PackageV2) {
+        assertx(!(Cfg::Eval::ActiveDeployment.empty()));
+        auto const includedByPackageV2 = isIncludedByPackageV2(p);
+        if (emitPass == EmitPass::SymbolRefsOnDemandFiles)  {
+          if (includedByPackageV2) {
+            return FileInBuildReason::fromSymbolRefsAndPackageV2;
+          } else {
+            return FileInBuildReason::fromSymbolRefs;
+          }
+        }
+        if (includedByPackageV2) {
+          return FileInBuildReason::fromPackageV2;
+        } else if (emitPass == EmitPass::PackageV2RulesOnly) {
+          return FileInBuildReason::notIncluded;
+        } else {
+          return FileInBuildReason::fromIncludeDir;
+        }
+      }
+
+      // PackagesV1 legacy code
+      // Remark: files included both by PackageV1 and SymbolRefs are
+      // tagged `fromSymbolRefs` only
+      assertx(!Cfg::Eval::PackageV2);
+
       // If the unit defines any modules, then it is always included
-      if (!p.m_definitions.m_modules.empty()) return true;
-      return p.m_module_use && moduleInDeployment.contains(p.m_module_use);
+      if (!p.m_definitions.m_modules.empty()) {
+        return FileInBuildReason::fromPackageV1;
+      }
+      if (emitPass == EmitPass::SymbolRefsOnDemandFiles) {
+        return FileInBuildReason::fromSymbolRefs;
+      }
+      if (Cfg::Eval::ActiveDeployment.empty() ||
+          (p.m_module_use && moduleInDeployment.contains(p.m_module_use))) {
+        return FileInBuildReason::fromPackageV1;
+      }
+      return FileInBuildReason::notIncluded;
     };
 
     if (Cfg::Eval::UseHHBBC) {
@@ -1396,13 +1449,20 @@ bool process(CompilerOptions &po) {
           Package::ParseMeta bad;
           bad.m_abort = folly::sformat("Unknown include file: {}\n", rpath.native());
           parseMetas.emplace_back(std::move(bad));
+          reasons.emplace_back(FileInBuildReason::unknownFile);
           continue;
         }
         auto& pf = it->second;
         parseMetas.emplace_back(std::move(pf->parseMeta));
         auto& p = parseMetas.back();
-        if (!p.m_filepath) continue;
-        if (!shouldIncludeInBuild(p)) {
+        if (!p.m_filepath) {
+          Logger::FVerbose("A ParseMeta has an undefined filepath, including it in the repo build by default");
+          reasons.emplace_back(FileInBuildReason::noFilepath);
+          continue;
+        }
+        auto const isIncludedReason = includeInBuildReason(p);
+        reasons.emplace_back(isIncludedReason);
+        if (isIncludedReason == FileInBuildReason::notIncluded) {
           Logger::FVerbose("Dropping {} from the repo build because module {} is "
                            "not part of {} deployment",
                            p.m_filepath,
@@ -1419,8 +1479,9 @@ bool process(CompilerOptions &po) {
           hhbbcInputs->add(std::move(e.first), std::move(e.second));
         }
       }
-      co_return std::make_pair(std::move(parseMetas),
-                               std::move(itemsToSkip));
+      co_return Package::EmitCallBackResult{std::move(parseMetas),
+                                            std::move(reasons),
+                                            std::move(itemsToSkip)};
     }
 
     // Otherwise, retrieve ParseMeta and load unit-emitters from a normal
@@ -1436,11 +1497,21 @@ bool process(CompilerOptions &po) {
         Package::ParseMeta bad;
         bad.m_abort = folly::sformat("Unknown include file: {}", rpath.native());
         parseMetas.emplace_back(std::move(bad));
+        reasons.emplace_back(FileInBuildReason::unknownFile);
         continue;
       }
       auto& pf = it->second;
-      auto& p = pf->parseMeta;
-      if (!shouldIncludeInBuild(p)) {
+      parseMetas.emplace_back(std::move(pf->parseMeta));
+      auto& p = parseMetas.back();
+      if (!p.m_filepath) {
+          Logger::FVerbose("A ParseMeta has an undefined filepath, including it in the repo build by default");
+        reasons.emplace_back(FileInBuildReason::noFilepath);
+        ueRefs.emplace_back(std::move(*pf->ueRef));
+        continue;
+      }
+      auto const isIncludedReason = includeInBuildReason(p);
+      reasons.emplace_back(isIncludedReason);
+      if (isIncludedReason == FileInBuildReason::notIncluded) {
         Logger::FVerbose("Dropping {} from the repo build because module {} is "
                          "not part of {} deployment",
                          p.m_filepath,
@@ -1449,19 +1520,19 @@ bool process(CompilerOptions &po) {
         itemsToSkip.insert(i);
         continue;
       }
-      parseMetas.emplace_back(std::move(pf->parseMeta));
       ueRefs.emplace_back(std::move(*pf->ueRef));
     }
 
-    always_assert(parseMetas.size() == ueRefs.size());
+    always_assert(parseMetas.size() == ueRefs.size() + itemsToSkip.size());
     auto ueWrappers = co_await client->load(std::move(ueRefs));
 
     for (auto& wrapper : ueWrappers) {
       if (!wrapper.m_ue) continue;
       emitUnit(std::move(wrapper.m_ue));
     }
-    co_return std::make_pair(std::move(parseMetas),
-                             std::move(itemsToSkip));
+    co_return Package::EmitCallBackResult(std::move(parseMetas),
+                                          std::move(reasons),
+                                          std::move(itemsToSkip));
   };
 
   {

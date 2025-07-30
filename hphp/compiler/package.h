@@ -23,6 +23,8 @@
 #include <thread>
 #include <vector>
 
+#include "hphp/compiler/option.h"
+
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/configs/unit-cache-generated.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -50,6 +52,59 @@ struct SymbolRefEdge {
   const StringData* sym;
   const StringData* from;
   const StringData* to;
+};
+
+enum class PackageV2BuildMode {
+  symbolRefsOnly,
+  packagesOnly,
+  packagesAndSymbolRefs,
+  packageV2Disabled
+};
+
+inline PackageV2BuildMode packageV2BuildMode() {
+  if (!Cfg::Eval::PackageV2) {
+    return PackageV2BuildMode::packageV2Disabled;
+  } else if (Cfg::Eval::ActiveDeployment.empty()) {
+    return PackageV2BuildMode::symbolRefsOnly;
+  } else if (Option::ForceEnableSymbolRefs) {
+    return PackageV2BuildMode::packagesAndSymbolRefs;
+  } else {
+    return PackageV2BuildMode::packagesOnly;
+  }
+}
+
+inline bool isSymbolRefsEnabled (PackageV2BuildMode mode) {
+  return
+    mode == PackageV2BuildMode::symbolRefsOnly ||
+    mode == PackageV2BuildMode::packagesAndSymbolRefs;
+}
+
+inline bool isPackageV2Enabled (PackageV2BuildMode mode) {
+  return
+    mode == PackageV2BuildMode::packagesOnly ||
+    mode == PackageV2BuildMode::packagesAndSymbolRefs;
+}
+
+enum class EmitPass {
+  IncludeDirFiles,
+  SymbolRefsOnDemandFiles,
+  PackageV2RulesOnly,
+};
+
+enum class FileInBuildReason {
+  notIncluded,
+  fromIncludeDir,
+  fromSymbolRefs,
+  fromPackageV1,
+  fromPackageV2,
+  fromSymbolRefsAndPackageV2,
+  noFilepath,
+  unknownFile,
+};
+
+struct FileInBuildInfo {
+  StringData* m_file;
+  FileInBuildReason m_reason;
 };
 
 struct Package {
@@ -276,9 +331,13 @@ struct Package {
 
   using LocalCallback = std::function<folly::coro::Task<void>(UEVec)>;
   using ParseMetaItemsToSkipSet = hphp_fast_set<size_t>;
-  using EmitCallBackResult = std::pair<ParseMetaVec, ParseMetaItemsToSkipSet>;
+  struct EmitCallBackResult {
+    ParseMetaVec parseMetas;
+    std::vector<FileInBuildReason> reasons;
+    ParseMetaItemsToSkipSet itemsToSkip;
+  };
   using EmitCallback = std::function<
-    folly::coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&, bool)
+    folly::coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&, EmitPass)
   >;
   folly::coro::Task<bool> emit(const UnitIndex&,
                                const EmitCallback&,
@@ -313,7 +372,7 @@ private:
 
   struct EmitInfo {
     OndemandInfo m_ondemand;
-    std::vector<StringData *> m_files_in_build;
+    std::vector<FileInBuildInfo> m_files_in_build;
   };
 
   // Partition all files specified for this package into groups.
@@ -342,16 +401,20 @@ private:
   void resolveDecls(const UnitIndex&, const FileMetaVec&,
       const std::vector<ParseMeta>&, std::vector<FileData>&, size_t attempts);
 
+  void logBuildInfo(std::vector<SymbolRefEdge>&, std::vector<FileInBuildInfo>&,
+                    const Package::EmitInfo&, bool, bool);
   folly::coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
                                   const std::filesystem::path&,
                                   const std::filesystem::path&);
   folly::coro::Task<void> emitAllPackageV2(const EmitCallback&, const UnitIndex&,
                                            const std::filesystem::path&,
                                            const std::filesystem::path&);
+
+
   folly::coro::Task<EmitInfo>
-  emitGroups(Groups, const EmitCallback&, const UnitIndex&, bool, bool);
+  emitGroups(Groups, const EmitCallback&, const UnitIndex&, const EmitPass, bool);
   folly::coro::Task<EmitInfo>
-  emitGroup(Group, const EmitCallback&, const UnitIndex&, bool, bool);
+  emitGroup(Group, const EmitCallback&, const UnitIndex&, const EmitPass, bool);
 
   void resolveOnDemand(OndemandInfo&, const StringData* fromFile,
       const SymbolRefs&, const UnitIndex&, bool report = false);

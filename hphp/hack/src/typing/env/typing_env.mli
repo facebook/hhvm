@@ -12,18 +12,77 @@ open Typing_defs
 module Cls = Folded_class
 module TPEnv = Type_parameter_env
 
-type 'a class_or_typedef_result =
-      'a Decl_enforceability.class_or_typedef_result =
-  | ClassResult of 'a
-  | TypedefResult of Typing_defs.typedef_type
+(* Expose the subset of Typing_env that is safe to use
+   * in tast checks: that is, anything that depends only
+   * on the tast and providers (not mutable or visitor state).
+*)
+module Expose_to_tast_env : sig
+  type env
+
+  type 'a class_or_typedef_result =
+        'a Decl_enforceability.class_or_typedef_result =
+    | ClassResult of 'a
+    | TypedefResult of Typing_defs.typedef_type
+
+  (** Get class declaration from the appropriate backend and add dependency. *)
+  val get_class : env -> type_key -> class_decl Decl_entry.t
+
+  val get_enum : env -> type_key -> class_decl Decl_entry.t
+
+  val inside_expr_tree : env -> Aast_defs.class_name -> env
+
+  val get_tcopt : env -> TypecheckerOptions.t
+
+  val get_self_ty : env -> locl_ty option
+
+  val get_self_id : env -> string option
+
+  val get_parent_id : env -> string option
+
+  val is_in_expr_tree : env -> bool
+
+  val is_enum_class : env -> type_key -> bool
+
+  (** Get class constant declaration from the appropriate backend and add dependency. *)
+  val get_const : env -> class_decl -> string -> class_const option
+
+  (** Get class constants declaration from the appropriate backend and add dependency. *)
+  val consts : env -> class_decl -> (string * class_const) list
+
+  (** Get static member declaration of a class from the appropriate backend and add dependency. *)
+  val get_static_member :
+    bool -> env -> class_decl -> string -> class_elt option
+
+  val is_enum : env -> type_key -> bool
+
+  (** Get function declaration from the appropriate backend and add dependency. *)
+  val get_fun :
+    env -> Decl_provider.fun_key -> Decl_provider.fun_decl Decl_entry.t
+
+  val is_typedef : env -> type_key -> bool
+
+  (** Get type alias declaration from the appropriate backend and add dependency. *)
+  val get_typedef : env -> type_key -> typedef_decl Decl_entry.t
+
+  val get_class_or_typedef :
+    env -> type_key -> Folded_class.t class_or_typedef_result Decl_entry.t
+
+  val get_class_or_typedef_tparams : env -> type_key -> decl_tparam list
+
+  (** Get type constant declaration from the appropriate backend and add dependency. *)
+  val get_typeconst : env -> class_decl -> string -> typeconst_type option
+
+  (** Get global constant declaration from the appropriate backend and add dependency. *)
+  val get_gconst : env -> gconst_key -> gconst_decl option
+end
+
+include module type of Expose_to_tast_env with type env := Typing_env_types.env
 
 val simplify_unions_ref : (env -> locl_ty -> env * locl_ty) ref
 
 val show_env : env -> string
 
 val pp_env : Format.formatter -> env -> unit
-
-val get_tcopt : env -> TypecheckerOptions.t
 
 val map_tcopt : env -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> env
 
@@ -113,8 +172,6 @@ val expand_type : env -> locl_ty -> env * locl_ty
 
 val expand_internal_type : env -> internal_type -> env * internal_type
 
-val is_typedef : env -> type_key -> bool
-
 val should_expand_type_alias :
   env ->
   visibility_behavior:visibility_behavior ->
@@ -124,49 +181,13 @@ val should_expand_type_alias :
 
 val is_typedef_visible : env -> name:string -> typedef_type -> bool
 
-val get_enum : env -> type_key -> class_decl Decl_entry.t
-
-val is_enum : env -> type_key -> bool
-
-val is_enum_class : env -> type_key -> bool
-
 val get_enum_constraint : env -> type_key -> decl_ty option Decl_entry.t
 
 val env_with_method_droot_member : env -> string -> static:bool -> env
 
 val env_with_constructor_droot_member : env -> env
 
-(** Get class declaration from the appropriate backend and add dependency. *)
-val get_class : env -> type_key -> class_decl Decl_entry.t
-
 val add_parent_dep : env -> skip_constructor_dep:bool -> string -> unit
-
-(** Get function declaration from the appropriate backend and add dependency. *)
-val get_fun :
-  env -> Decl_provider.fun_key -> Decl_provider.fun_decl Decl_entry.t
-
-(** Get type alias declaration from the appropriate backend and add dependency. *)
-val get_typedef : env -> type_key -> typedef_decl Decl_entry.t
-
-val get_class_or_typedef :
-  env -> type_key -> Folded_class.t class_or_typedef_result Decl_entry.t
-
-val get_class_or_typedef_tparams : env -> type_key -> decl_tparam list
-
-(** Get class constant declaration from the appropriate backend and add dependency. *)
-val get_const : env -> class_decl -> string -> class_const option
-
-(** Get class constants declaration from the appropriate backend and add dependency. *)
-val consts : env -> class_decl -> (string * class_const) list
-
-(** Get type constant declaration from the appropriate backend and add dependency. *)
-val get_typeconst : env -> class_decl -> string -> typeconst_type option
-
-(** Get global constant declaration from the appropriate backend and add dependency. *)
-val get_gconst : env -> gconst_key -> gconst_decl option
-
-(** Get static member declaration of a class from the appropriate backend and add dependency. *)
-val get_static_member : bool -> env -> class_decl -> string -> class_elt option
 
 val most_similar : string -> 'a list -> ('a -> string) -> 'a option
 
@@ -220,25 +241,15 @@ val with_outside_expr_tree :
   (env -> Aast.class_name option -> env * 'a * 'b) ->
   env * 'a * 'b * (Pos.t * locl_ty) Local_id.Map.t option
 
-val inside_expr_tree : env -> Aast_defs.class_name -> env
-
 val outside_expr_tree : env -> macro_variables:Aast_defs.lid list option -> env
-
-val is_in_expr_tree : env -> bool
 
 val is_static : env -> bool
 
 val get_val_kind : env -> Typing_defs.val_kind
 
-val get_self_ty : env -> locl_ty option
-
 val get_self_class_type : env -> (pos_id * exact * locl_ty list) option
 
-val get_self_id : env -> string option
-
 val get_self_class : env -> class_decl Decl_entry.t
-
-val get_parent_id : env -> string option
 
 val get_parent_ty : env -> decl_ty option
 

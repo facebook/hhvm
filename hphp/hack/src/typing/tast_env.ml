@@ -10,10 +10,6 @@
 open Hh_prelude
 open Aast
 
-type class_or_typedef_result =
-  | ClassResult of Decl_provider.class_decl
-  | TypedefResult of Typing_defs.typedef_type
-
 (** {!Tast_env.env} is just an alias to {!Typing_env.env}, and the functions we
     provide for it are largely just aliases to functions that take a
     {!Typing_env.env}.
@@ -28,6 +24,12 @@ type class_or_typedef_result =
 type env = Typing_env_types.env
 
 type t = env
+
+include Typing_env
+
+type class_or_typedef_result =
+  | ClassResult of Decl_provider.class_decl
+  | TypedefResult of Typing_defs.typedef_type
 
 exception Not_in_class
 
@@ -63,18 +65,10 @@ let ty_to_json env ?show_like_ty ty =
 
 let json_to_locl_ty = Typing_json.to_locl_ty
 
-let get_self_id = Typing_env.get_self_id
-
-let get_self_ty = Typing_env.get_self_ty
-
-let get_parent_id = Typing_env.get_parent_id
-
 let get_self_ty_exn env =
   match get_self_ty env with
   | Some self_ty -> self_ty
   | None -> raise Not_in_class
-
-let get_class = Typing_env.get_class
 
 let get_class_or_typedef env x : class_or_typedef_result Decl_entry.t =
   match Typing_env.get_class_or_typedef env x with
@@ -83,23 +77,7 @@ let get_class_or_typedef env x : class_or_typedef_result Decl_entry.t =
   | DoesNotExist -> DoesNotExist
   | NotYetAvailable -> NotYetAvailable
 
-let is_in_expr_tree = Typing_env.is_in_expr_tree
-
-let inside_expr_tree = Typing_env.inside_expr_tree
-
 let outside_expr_tree = Typing_env.outside_expr_tree ~macro_variables:None
-
-let is_static = Typing_env.is_static
-
-let is_strict = Typing_env.is_strict
-
-let get_mode = Typing_env.get_mode
-
-let get_tcopt = Typing_env.get_tcopt
-
-let get_ctx = Typing_env.get_ctx
-
-let expand_type = Typing_env.expand_type
 
 let strip_dynamic env ty = snd (Typing_dynamic_utils.strip_dynamic env ty)
 
@@ -139,20 +117,10 @@ let get_underlying_function_type env ty =
   let (_, opt_ft) = Typing_utils.get_underlying_function_type env ty in
   opt_ft
 
-let set_static = Typing_env.set_static
-
-let set_val_kind = Typing_env.set_val_kind
-
 let set_inside_constructor env =
   { env with Typing_env_types.inside_constructor = true }
 
 let get_inside_constructor env = env.Typing_env_types.inside_constructor
-
-let get_val_kind = Typing_env.get_val_kind
-
-let get_file = Typing_env.get_file
-
-let get_deps_mode = Typing_env.get_deps_mode
 
 let fully_expand = Typing_expand.fully_expand
 
@@ -254,12 +222,6 @@ let localize_no_subst env ~ignore_errors dty =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, lty)
 
-let get_upper_bounds = Typing_env.get_upper_bounds
-
-let fresh_type = Typing_env.fresh_type
-
-let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
-
 let simplify_unions env ty = Typing_union.simplify_unions env ty
 
 let as_bounds_to_non_intersection_type env tys =
@@ -280,12 +242,6 @@ let simplify_intersections env ty =
   Typing_intersection.simplify_intersections env ty
 
 let union_list env r tyl = Typing_union.union_list env r tyl
-
-let get_reified = Typing_env.get_reified
-
-let get_enforceable = Typing_env.get_enforceable
-
-let get_newable = Typing_env.get_newable
 
 let assert_subtype p reason env ty_have ty_expect on_error =
   let (env, ty_err_opt) =
@@ -416,24 +372,10 @@ let tast_env_as_typing_env env = env
 
 let is_xhp_child = Typing_xhp.is_xhp_child
 
-let get_enum = Typing_env.get_enum
-
-let is_typedef = Typing_env.is_typedef
-
-let get_typedef = Typing_env.get_typedef
-
-let is_typedef_visible = Typing_env.is_typedef_visible
-
-let is_enum = Typing_env.is_enum
-
-let get_fun = Typing_env.get_fun
-
 let set_allow_wildcards env =
   { env with Typing_env_types.allow_wildcards = true }
 
 let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
-
-let is_enum_class env c = Typing_env.is_enum_class env c
 
 let extract_from_fun_tast_info env extractor default_value =
   let fun_tast_info = env.Typing_env_types.fun_tast_info in
@@ -450,20 +392,10 @@ let fun_has_implicit_return (env : t) =
 let fun_has_readonly (env : t) =
   extract_from_fun_tast_info env (fun info -> info.has_readonly) false
 
-let get_const env cls name = Typing_env.get_const env cls name
-
-let consts env cls = Typing_env.consts env cls
-
-let get_static_member = Typing_env.get_static_member
-
 let fill_in_pos_filename_if_in_current_decl =
   Typing_env.fill_in_pos_filename_if_in_current_decl
 
-let is_hhi = Typing_env.is_hhi
-
 let get_check_status env : check_status = env.Typing_env_types.checked
-
-let get_current_decl_and_file = Typing_env.get_current_decl_and_file
 
 let derive_instantiation env =
   Derive_type_instantiation.derive_instantiation env

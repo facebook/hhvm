@@ -13,6 +13,17 @@ type t = env
 
 exception Not_in_class
 
+(*
+* All+only functions in Typing_env that are safe in tasts checks
+* should hereby be available as Tast_env.get_class, Tast_env.get_typedef, etc.
+*
+* See comment in typing_env.mli Expose_to_tast_env on when+how to add things
+*)
+include
+  module type of Typing_env.Expose_to_tast_env
+    (* forget that Tast_env.env = Typing_env_types.env *)
+    with type env := env
+
 type class_or_typedef_result =
   | ClassResult of Decl_provider.class_decl
   | TypedefResult of Typing_defs.typedef_type
@@ -56,46 +67,14 @@ val json_to_locl_ty :
   Hh_json.json ->
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 
-(** Return the name of the enclosing class definition.
-    When not in a class definition, return {!None}. *)
-val get_self_id : env -> string option
-
-(** Return the type of the enclosing class definition.
-    When not in a class definition, return {!None}. *)
-val get_self_ty : env -> Tast.ty option
-
 (** Return the type of the enclosing class definition.
     When not in a class definition, raise {!Not_in_class}. *)
 val get_self_ty_exn : env -> Tast.ty
 
-(** Return the name of the parent of the enclosing class definition.
-    When not in a class definition or no parent exists, return {!None}. *)
-val get_parent_id : env -> string option
-
-(** Return the info of the given class from the typing heap. *)
-val get_class :
-  env -> Decl_provider.type_key -> Decl_provider.class_decl Decl_entry.t
-
 val get_class_or_typedef :
   env -> Decl_provider.type_key -> class_or_typedef_result Decl_entry.t
 
-val is_in_expr_tree : env -> bool
-
-val inside_expr_tree : env -> Tast.class_name -> env
-
 val outside_expr_tree : env -> env
-
-(** Return {true} when in the definition of a static property or method. *)
-val is_static : env -> bool
-
-(** Return {true} if the containing file was checked in strict mode. *)
-val is_strict : env -> bool
-
-(** Return the mode of the containing file *)
-val get_mode : env -> FileInfo.mode
-
-(** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
-val get_tcopt : env -> TypecheckerOptions.t
 
 (** Return the {!Provider_context.t} with which this TAST was checked. *)
 val get_ctx : env -> Provider_context.t
@@ -328,46 +307,15 @@ val tast_env_as_typing_env : env -> Typing_env_types.env
 (** Verify that an XHP body expression is legal. *)
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool * Typing_error.t option
 
-val get_enum :
-  env -> Decl_provider.type_key -> Decl_provider.class_decl Decl_entry.t
-
-val is_typedef : env -> Decl_provider.type_key -> bool
-
-val is_typedef_visible : env -> name:string -> Typing_defs.typedef_type -> bool
-
-val get_typedef :
-  env -> Decl_provider.type_key -> Decl_provider.typedef_decl Decl_entry.t
-
 val is_enum : env -> Decl_provider.type_key -> bool
-
-val get_fun :
-  env -> Decl_provider.fun_key -> Decl_provider.fun_decl Decl_entry.t
 
 val set_allow_wildcards : env -> env
 
 val get_allow_wildcards : env -> bool
 
-(*val is_enum_class : env -> Decl_provider.type_key -> bool*)
-
-val is_enum_class : env -> string -> bool
-
 val fun_has_implicit_return : env -> bool
 
 val fun_has_readonly : env -> bool
-
-val get_const :
-  env -> Decl_provider.class_decl -> string -> Typing_defs.class_const option
-
-val consts :
-  env -> Decl_provider.class_decl -> (string * Typing_defs.class_const) list
-
-(** Get static member declaration of a class from the appropriate backend and add dependency. *)
-val get_static_member :
-  bool ->
-  env ->
-  Decl_provider.class_decl ->
-  string ->
-  Typing_defs.class_elt option
 
 (** Check that the position is in the current decl and if it is, resolve
     it with the current file. *)

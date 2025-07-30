@@ -338,7 +338,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     });
 
     def.property("resolves_to_complex_return?", [](const t_type& type) {
-      return is_complex_return(&type);
+      return is_complex_return(type.get_true_type());
     });
 
     def.property("cpp_type", [&](const t_type& type) {
@@ -456,15 +456,18 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
     auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
+    def.property("cpp_name", [](const t_service& service) {
+      return service.is_interaction() ? service.name()
+                                      : cpp2::get_name(&service);
+    });
+
     def.property(
         "cpp_requires_method_decorator?", [](const t_service& service) {
           return service.has_structured_annotation(
               apache::thrift::compiler::kCppGenerateServiceMethodDecorator);
         });
 
-    def.property("qualified_name", [](const t_service& service) {
-      return cpp2::get_service_qualified_name(service);
-    });
+    def.property("qualified_name", &cpp2::get_service_qualified_name);
 
     return std::move(def).make();
   }
@@ -969,8 +972,6 @@ class cpp_mstch_service : public mstch_service {
             {"service:oneways?", &cpp_mstch_service::has_oneway},
             {"service:cpp_includes", &cpp_mstch_service::cpp_includes},
             {"service:metadata_name", &cpp_mstch_service::metadata_name},
-            {"service:cpp_name", &cpp_mstch_service::cpp_name},
-            {"service:qualified_name", &cpp_mstch_service::qualified_name},
             {"service:parent_service_cpp_name",
              &cpp_mstch_service::parent_service_cpp_name},
             {"service:parent_service_qualified_name",
@@ -1038,13 +1039,6 @@ class cpp_mstch_service : public mstch_service {
   }
   mstch::node metadata_name() {
     return service_->program()->name() + "_" + service_->name();
-  }
-  mstch::node cpp_name() {
-    return service_->is_interaction() ? service_->name()
-                                      : cpp2::get_name(service_);
-  }
-  mstch::node qualified_name() {
-    return cpp2::get_service_qualified_name(*service_);
   }
   mstch::node parent_service_cpp_name() {
     return cpp2::get_name(parent_service());
@@ -1219,16 +1213,12 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::resolves_to_container_or_struct},
             {"type:resolves_to_container_or_enum?",
              &cpp_mstch_type::resolves_to_container_or_enum},
-            {"type:resolves_to_complex_return?",
-             &cpp_mstch_type::resolves_to_complex_return},
             {"type:resolves_to_fixed_size?",
              &cpp_mstch_type::resolves_to_fixed_size},
             {"type:resolves_to_enum?", &cpp_mstch_type::resolves_to_enum},
             {"type:transitively_refers_to_struct?",
              &cpp_mstch_type::transitively_refers_to_struct},
-            {"type:cpp_name", &cpp_mstch_type::cpp_name},
             {"type:cpp_fullname", &cpp_mstch_type::cpp_fullname},
-            {"type:cpp_type", &cpp_mstch_type::cpp_type},
             {"type:cpp_standard_type", &cpp_mstch_type::cpp_standard_type},
             {"type:cpp_adapter", &cpp_mstch_type::cpp_adapter},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
@@ -1269,9 +1259,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node resolves_to_container_or_enum() {
     return resolved_type_->is<t_container>() || resolved_type_->is<t_enum>();
   }
-  mstch::node resolves_to_complex_return() {
-    return is_complex_return(resolved_type_);
-  }
   mstch::node resolves_to_fixed_size() {
     return resolved_type_->is_bool() || resolved_type_->is_byte() ||
         resolved_type_->is_any_int() || resolved_type_->is<t_enum>() ||
@@ -1311,13 +1298,9 @@ class cpp_mstch_type : public mstch_type {
     }
     return false;
   }
-  mstch::node cpp_name() { return cpp2::get_name(type_); }
   mstch::node cpp_fullname() {
     return cpp_context_->resolver().get_namespaced_name(
         *type_->program(), *type_);
-  }
-  mstch::node cpp_type() {
-    return cpp_context_->resolver().get_native_type(*type_);
   }
   mstch::node cpp_standard_type() {
     return cpp_context_->resolver().get_standard_type(*type_);
@@ -1398,7 +1381,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::is_directly_adapted},
             {"struct:dependent_direct_adapter?",
              &cpp_mstch_struct::dependent_direct_adapter},
-            {"struct:cpp_name", &cpp_mstch_struct::cpp_name},
             {"struct:cpp_fullname", &cpp_mstch_struct::cpp_fullname},
             {"struct:cpp_methods", &cpp_mstch_struct::cpp_methods},
             {"struct:cpp_declare_hash", &cpp_mstch_struct::cpp_declare_hash},
@@ -1518,7 +1500,6 @@ class cpp_mstch_struct : public mstch_struct {
     }
     return false;
   }
-  mstch::node cpp_name() { return cpp2::get_name(struct_); }
   mstch::node cpp_fullname() {
     return cpp_context_->resolver().get_underlying_namespaced_name(*struct_);
   }
@@ -1965,7 +1946,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:ordinal", &cpp_mstch_field::ordinal},
             {"field:has_isset?", &cpp_mstch_field::has_isset},
             {"field:isset_index", &cpp_mstch_field::isset_index},
-            {"field:cpp_name", &cpp_mstch_field::cpp_name},
             {"field:cpp_type", &cpp_mstch_field::cpp_type},
             {"field:cpp_storage_name", &cpp_mstch_field::cpp_storage_name},
             {"field:cpp_storage_type", &cpp_mstch_field::cpp_storage_type},
@@ -2042,7 +2022,6 @@ class cpp_mstch_field : public mstch_field {
     assert(field_context_);
     return field_context_->isset_index;
   }
-  mstch::node cpp_name() { return cpp2::get_name(field_); }
   mstch::node cpp_type() {
     assert(field_context_->strct);
     return cpp_context_->resolver().get_native_type(
@@ -2356,7 +2335,6 @@ class cpp_mstch_const : public mstch_const {
         this,
         {
             {"constant:enum_value", &cpp_mstch_const::enum_value},
-            {"constant:cpp_name", &cpp_mstch_const::cpp_name},
             {"constant:cpp_adapter", &cpp_mstch_const::cpp_adapter},
             {"constant:cpp_type", &cpp_mstch_const::cpp_type},
             {"constant:cpp_runtime_annotation?",
@@ -2380,7 +2358,6 @@ class cpp_mstch_const : public mstch_const {
     }
     return mstch::node();
   }
-  mstch::node cpp_name() { return cpp2::get_name(field_); }
   mstch::node cpp_runtime_annotation() {
     return is_runtime_annotation(*const_->type());
   }

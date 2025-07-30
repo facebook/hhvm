@@ -82,6 +82,13 @@ void for_each_chunk(const lines_t& lines, std::size_t chunk_size, Func func) {
     auto distance = std::min(
         chunk_size, static_cast<std::size_t>(std::distance(begin, end)));
     std::advance(chunk_end, distance);
+    // We will run into trouble if the line starts with punctuation, as it will
+    // be interpreted as part of the raw string delimiter. Skip forward to a
+    // line that starts with a space or is empty to avoid this.
+    while (chunk_end != end && !chunk_end->empty() &&
+           chunk_end->front() != ' ') {
+      ++chunk_end;
+    }
     func(begin, chunk_end);
     begin = chunk_end;
   }

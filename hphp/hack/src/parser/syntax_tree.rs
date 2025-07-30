@@ -79,7 +79,7 @@ where
         'r: 'arena,
     {
         for c in node.iter_children() {
-            let width = node.full_width();
+            let width = c.full_width();
             if position < width {
                 Self::parentage_(c, position, acc);
                 break;

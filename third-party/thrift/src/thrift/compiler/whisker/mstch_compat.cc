@@ -48,8 +48,8 @@ namespace {
  */
 class mstch_array_proxy final : public array {
  public:
-  explicit mstch_array_proxy(mstch_array&& array)
-      : proxied_(std::move(array)) {}
+  explicit mstch_array_proxy(mstch_array&& array, diagnostics_engine& diags)
+      : proxied_(std::move(array)), diags_(diags) {}
 
  private:
   std::size_t size() const override { return proxied_.size(); }
@@ -60,7 +60,7 @@ class mstch_array_proxy final : public array {
     if (converted_.size() == 0) {
       converted_.reserve(proxied_.size());
       for (auto& node : proxied_) {
-        converted_.emplace_back(from_mstch(std::move(node)));
+        converted_.emplace_back(from_mstch(std::move(node), diags_));
       }
     }
     return converted_[index];
@@ -73,6 +73,7 @@ class mstch_array_proxy final : public array {
 
   mutable mstch_array proxied_;
   mutable std::vector<object> converted_;
+  diagnostics_engine& diags_;
 };
 
 /**
@@ -84,7 +85,8 @@ class mstch_map_proxy final
     : public map,
       public std::enable_shared_from_this<mstch_map_proxy> {
  public:
-  explicit mstch_map_proxy(mstch_map&& map) : proxied_(std::move(map)) {}
+  explicit mstch_map_proxy(mstch_map&& map, diagnostics_engine& diags)
+      : proxied_(std::move(map)), diags_(diags) {}
 
  private:
   std::optional<object> lookup_property(std::string_view id) const override {
@@ -93,7 +95,7 @@ class mstch_map_proxy final
     }
     if (auto property = proxied_.find(id); property != proxied_.end()) {
       auto [result, inserted] = converted_.insert(
-          {std::string(id), from_mstch(std::move(property->second))});
+          {std::string(id), from_mstch(std::move(property->second), diags_)});
       assert(inserted);
       return result->second;
     }
@@ -115,6 +117,7 @@ class mstch_map_proxy final
 
   mutable mstch_map proxied_;
   mutable std::map<std::string, object, std::less<>> converted_;
+  diagnostics_engine& diags_;
 };
 
 /**
@@ -127,18 +130,20 @@ class mstch_object_proxy
     : public map,
       public std::enable_shared_from_this<mstch_object_proxy> {
  public:
-  explicit mstch_object_proxy(std::shared_ptr<mstch_object>&& obj)
-      : proxied_(std::move(obj)) {}
+  explicit mstch_object_proxy(
+      std::shared_ptr<mstch_object>&& obj, diagnostics_engine& diags)
+      : proxied_(std::move(obj)), diags_(diags) {}
 
   std::optional<object> lookup_property(std::string_view id) const override {
     if (!proxied_->has(id)) {
-      return std::nullopt;
+      return lookup_property_through_self(id);
     }
 
     return detail::variant_match(
         proxied_->at(id),
         [&](const mstch_node& node) -> object {
-          object::ptr converted = manage_owned<object>(from_mstch(node));
+          object::ptr converted =
+              manage_owned<object>(from_mstch(node, diags_));
           return manage_derived(shared_from_this(), std::move(converted));
         },
         [](const object& o) -> object { return o; });
@@ -163,11 +168,83 @@ class mstch_object_proxy
 
  private:
   std::shared_ptr<mstch_object> proxied_;
+  diagnostics_engine& diags_;
+
+  // For a lookup of the form "foo:bar", returns a pair of ["foo:self", "bar"]
+  // Returns nullopt if property can't be split to a self lookup, or is already
+  // a self lookup.
+  // Otherwise returns a pair of the self property and the nested property name.
+  std::optional<std::pair<std::string, std::string_view>>
+  get_self_property_name(const std::string_view& id) const {
+    if (id.ends_with(":self")) {
+      // Already a self lookup that was tried - don't recurse
+      return std::nullopt;
+    }
+
+    const size_t delimiter_pos = id.find_last_of(':');
+    if (delimiter_pos == std::string::npos) {
+      return std::nullopt;
+    }
+
+    return std::make_optional(std::make_pair(
+        fmt::format("{}:self", id.substr(0, delimiter_pos)),
+        id.substr(delimiter_pos + 1)));
+  }
+
+  std::optional<object> lookup_property_through_self(
+      std::string_view id) const {
+    const std::optional<std::pair<std::string, std::string_view>>
+        self_property = get_self_property_name(id);
+    if (!self_property.has_value() || !proxied_->has(self_property->first)) {
+      return std::nullopt;
+    }
+
+    const mstch_object::lookup_result self_value =
+        proxied_->at(self_property->first);
+    const object* self_whisker_obj = std::get_if<object>(&self_value);
+    if (self_whisker_obj == nullptr) {
+      return std::nullopt;
+    }
+
+    return self_whisker_obj->visit(
+        [&](const map::ptr& m) -> std::optional<object> {
+          return m->lookup_property(self_property->second);
+        },
+        [&](const native_handle<>& h) -> std::optional<object> {
+          // Recurse through the prototype chain until the first matching
+          // descriptor is found. This is similar to JavaScript:
+          // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
+          prototype<>::ptr proto = h.proto();
+          while (proto != nullptr) {
+            if (const whisker::prototype<>::descriptor* descriptor =
+                    proto->find_descriptor(self_property->second)) {
+              return detail::variant_match(
+                  *descriptor,
+                  [&](const prototype<>::property& prop)
+                      -> std::optional<object> {
+                    return prop.function->invoke(native_function::context{
+                        {} /* identifier location */,
+                        diags_,
+                        *self_whisker_obj,
+                        {} /* positional arguments */,
+                        {} /* named arguments */,
+                    });
+                  },
+                  [&](const prototype<>::fixed_object& fixed)
+                      -> std::optional<object> { return fixed.value; });
+            }
+            proto = proto->parent();
+          }
+          return std::nullopt;
+        },
+        // Default - no property found
+        [](auto const&) -> std::optional<object> { return std::nullopt; });
+  }
 };
 
 } // namespace
 
-object from_mstch(mstch_node node) {
+object from_mstch(mstch_node node, diagnostics_engine& diags) {
   return detail::variant_match(
       static_cast<mstch_node::base&&>(node),
       [](std::nullptr_t) { return w::null; },
@@ -175,14 +252,14 @@ object from_mstch(mstch_node node) {
       [](int value) { return w::i64(value); },
       [](double value) { return w::f64(value); },
       [](bool value) { return w::boolean(value); },
-      [](std::shared_ptr<mstch_object>&& mstch_obj) -> object {
-        return w::make_map<mstch_object_proxy>(std::move(mstch_obj));
+      [&](std::shared_ptr<mstch_object>&& mstch_obj) -> object {
+        return w::make_map<mstch_object_proxy>(std::move(mstch_obj), diags);
       },
-      [](mstch_map&& map) -> object {
-        return w::make_map<mstch_map_proxy>(std::move(map));
+      [&](mstch_map&& map) -> object {
+        return w::make_map<mstch_map_proxy>(std::move(map), diags);
       },
-      [](mstch_array&& array) -> object {
-        return w::make_array<mstch_array_proxy>(std::move(array));
+      [&](mstch_array&& array) -> object {
+        return w::make_array<mstch_array_proxy>(std::move(array), diags);
       });
 }
 

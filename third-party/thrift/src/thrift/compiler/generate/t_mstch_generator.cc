@@ -427,7 +427,9 @@ t_mstch_generator::strictness_options t_mstch_generator::strictness() const {
 
 std::string t_mstch_generator::render(
     const std::string& template_name, const mstch::node& context) {
-  return render(template_name, whisker::from_mstch(context));
+  return render(
+      template_name,
+      whisker::from_mstch(context, render_state().diagnostic_engine));
 }
 
 void t_mstch_generator::render_to_file(

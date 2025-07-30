@@ -66,7 +66,7 @@ TEST_F(MstchCompatTest, basic) {
        3,
        true,
        mstch_map({{"key", mstch_array({"nested"})}})}};
-  auto converted = from_mstch(arr);
+  auto converted = from_mstch(arr, diags());
 
   EXPECT_EQ(
       to_string(converted),
@@ -80,14 +80,14 @@ TEST_F(MstchCompatTest, basic) {
       "      ╰─ [0] 'nested'\n");
 
   // Value equality
-  EXPECT_EQ(from_mstch(arr), from_mstch(arr));
+  EXPECT_EQ(from_mstch(arr, diags()), from_mstch(arr, diags()));
 }
 
 TEST_F(MstchCompatTest, map_lookups) {
   mstch_map m(
       {{"key", mstch_map({{"nested", 1}, {"bool", true}, {"float", 2.0}})},
        {"key2", nullptr}});
-  auto converted = from_mstch(std::move(m));
+  auto converted = from_mstch(std::move(m), diags());
 
   EXPECT_EQ(
       to_string(converted),
@@ -119,7 +119,7 @@ TEST_F(MstchCompatTest, array_iteration) {
       {{"key", mstch_array({"nested", 1, true, nullptr, 2.0})},
        {"outer",
         mstch_array({mstch_map({{"inner", mstch_array({1, 2, 3})}})})}});
-  auto converted = from_mstch(m);
+  auto converted = from_mstch(m, diags());
 
   EXPECT_EQ(
       to_string(converted),
@@ -244,7 +244,7 @@ TEST_F(MstchCompatTest, mstch_object) {
     }
   };
   auto mstch_obj = apache::thrift::mstch::make_shared_node<object_impl>();
-  auto converted = from_mstch(mstch_obj);
+  auto converted = from_mstch(mstch_obj, diags());
 
   {
     auto ctx = eval_context::with_root_scope(diags(), converted);
@@ -333,6 +333,95 @@ TEST_F(MstchCompatTest, mstch_object) {
           testing::HasSubstr("'error'"),
           testing::HasSubstr("'copy'"),
           testing::HasSubstr("'w_i64'")));
+}
+
+TEST_F(MstchCompatTest, fallback_through_self) {
+  struct t_mock_node {
+    std::string bar;
+    std::string baz;
+  };
+
+  static whisker::dsl::prototype_builder<whisker::native_handle<t_mock_node>>
+      prototype_builder;
+  prototype_builder.property(
+      "bar", [](const t_mock_node& self) { return self.bar; });
+  prototype_builder.property(
+      "baz", [](const t_mock_node& self) { return self.baz; });
+  prototype_builder.property("throws", [](const t_mock_node&) -> std::string {
+    throw eval_error("do not call me");
+  });
+
+  static std::shared_ptr<const whisker::prototype<t_mock_node>>
+      mock_node_prototype = std::move(prototype_builder).make();
+
+  class mstch_mock_node : public mstch_object,
+                          public std::enable_shared_from_this<mstch_mock_node> {
+   public:
+    mstch_mock_node() {
+      register_methods(
+          this,
+          {
+              {"foo:bar", &mstch_mock_node::bar},
+              {"foo:self", &mstch_mock_node::self_handle},
+          });
+    }
+
+   private:
+    std::shared_ptr<t_mock_node> mock_node_{
+        std::make_shared<t_mock_node>("proto_bar", "proto_baz")};
+
+    whisker::native_handle<> self_handle() {
+      return native_handle<t_mock_node>(mock_node_, mock_node_prototype);
+    }
+
+    std::string bar() { return "mstch_bar"; }
+  };
+
+  auto mstch_obj = apache::thrift::mstch::make_shared_node<mstch_mock_node>();
+  auto converted = from_mstch(mstch_obj, diags());
+
+  {
+    auto result = render("{{foo:bar}} {{foo:self.bar}} {{foo:baz}}", converted);
+    EXPECT_EQ(*result, "mstch_bar proto_bar proto_baz");
+  }
+  {
+    // Not resolvable through self, error message should reflect original scope
+    auto result = render("{{foo:non_existent}}", converted);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Name 'foo:non_existent' was not found in the current scope.\n"
+            "Tried to search through the following scopes:\n"
+            "#0 mstch::object\n"
+            "├─ 'foo:bar' → ...\n"
+            "╰─ 'foo:self' → ...\n"
+            "\n"
+            "#1 <global scope> (size=0)\n",
+            path_to_file,
+            1)));
+  }
+  {
+    // Resolvable through self, but property function throws an exception
+    // Error message should reflect original scope
+    auto result = render("{{foo:throws}}", converted);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Name 'foo:throws' was not found in the current scope.\n"
+            "Cause: do not call me\n"
+            "Tried to search through the following scopes:\n"
+            "#0 mstch::object\n"
+            "├─ 'foo:bar' → ...\n"
+            "╰─ 'foo:self' → ...\n"
+            "\n"
+            "#1 <global scope> (size=0)\n",
+            path_to_file,
+            1)));
+  }
 }
 
 } // namespace whisker

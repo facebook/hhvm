@@ -282,6 +282,6 @@ using mstch_node = apache::thrift::mstch::node;
  * lazily marshaled. In other words, the eager marshaling only applies to values
  * in the object tree at depth 0.
  */
-object from_mstch(mstch_node);
+object from_mstch(mstch_node, diagnostics_engine&);
 
 } // namespace whisker

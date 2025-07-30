@@ -2356,8 +2356,8 @@ i32_9314 = int
 list_i32_9187 = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 map_i32_i32_9565 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 map_i32_string_1261 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string)
-set_i32_7070 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-set_i32_7194 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
+set_i32_7070 = _fbthrift_python_mutable_containers.MutableSetTypeFactory(_fbthrift_python_types.typeinfo_i32)
+set_i32_7194 = _fbthrift_python_mutable_containers.MutableSetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 string_5252 = str
 
 

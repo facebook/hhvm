@@ -31,6 +31,7 @@ import itertools
 
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
+    MutableSetTypeInfo,
     MutableStructTypeInfo,
 )
 from thrift.python.mutable_types cimport _ThriftContainerWrapper
@@ -228,6 +229,21 @@ MutableSequence.register(MutableList)
 
 
 @_cython__final
+cdef class MutableSetTypeFactory:
+    cdef TypeInfoBase value_typeinfo
+    def __init__(self, value_typeinfo):
+        self.value_typeinfo = value_typeinfo
+
+    def __call__(self, values=None):
+        if values is None:
+            return MutableSet(self.value_typeinfo, set())
+
+        set_typeinfo = MutableSetTypeInfo(self.value_typeinfo)
+        internal_data = set_typeinfo.to_internal_data(values)
+        return MutableSet(self.value_typeinfo, internal_data)
+
+
+@_cython__final
 cdef class MutableSet:
     """
     A mutable container used to represent a Thrift mutable set. It implements
@@ -340,6 +356,9 @@ cdef class MutableSet:
 
         return MutableSet(self._val_typeinfo, type_checked_set)
 
+    def __rand__(MutableSet self, other):
+        return self & other
+
     def __iand__(MutableSet self, other):
         if self._is_same_type_of_set(other):
             self._set_data &= (<MutableSet>other)._set_data
@@ -363,6 +382,9 @@ cdef class MutableSet:
             result_set.add(value)
 
         return result_set
+
+    def __ror__(MutableSet self, other):
+        return self | other
 
     def __ior__(MutableSet self, other):
         if self._is_same_type_of_set(other):
@@ -411,6 +433,9 @@ cdef class MutableSet:
 
         other = MutableSet._from_iterable(self._val_typeinfo, set(), other)
         return (self - other) | (other - self)
+
+    def __rxor__(MutableSet self, other):
+        return self ^ other
 
     def __ixor__(MutableSet self, other):
         if self._is_same_type_of_set(other):

@@ -20,7 +20,10 @@ import unittest
 
 from typing import Iterable
 
+from python_test.sets.thrift_mutable_types import SetI32
+
 from thrift.python.mutable_containers import MutableSet
+from thrift.python.mutable_types import to_thrift_set
 
 from thrift.python.types import typeinfo_i32
 
@@ -517,3 +520,32 @@ class MutableSetTest(unittest.TestCase):
             "'>' not supported between instances of '.*.MutableSet' and 'list'",
         ):
             _ = mutable_set_1 > [1, 2]
+
+
+class MutableSetTypedefTest(unittest.TestCase):
+    TYPE_ERROR_MESSAGE = (
+        "Expected values to be an instance of Thrift mutable set with matching "
+        r"element type, or the result of `to_thrift_set\(\)`, but got type "
+        r"<class 'set'>."
+    )
+
+    def test_set_i32(self) -> None:
+        """
+        typedef set<i32> SetI32
+        """
+        # Mutable container typedef should be initialized with the same mutable
+        # container type, or it should be wrapped with `to_thrift_set()`.
+        # Otherwise, it will result in both runtime and Pyre errors.
+        with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
+            # pyre-ignore[6]: Intentional for test
+            _ = SetI32({1, 2, 3})
+
+        # Initialize with `to_thrift_set()` and verify that the initial
+        # Python set `s` and the MutableSet `seti32` are separate sets.
+        s = {1, 2, 3}
+        seti32: MutableSet[int] = SetI32(to_thrift_set(s))
+        self.assertEqual({1, 2, 3}, seti32)
+
+        s.remove(1)
+        self.assertEqual({2, 3}, s)
+        self.assertEqual({1, 2, 3}, seti32)

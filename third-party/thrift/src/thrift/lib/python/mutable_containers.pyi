@@ -47,6 +47,14 @@ from thrift.python.mutable_types import (
 T = TypeVar("T")
 
 class MutableList(MutableSequence[T]):
+    ###########################################################################
+    # Please avoid directly initializing mutable Thrift containers, such as
+    # using `l = MutableList(...)`.
+    # The __init__ overloads in the stub file are intended to support generated
+    # code and Thrift typedef "magic".
+    # These are implementation details, and the overloads and the meaning of
+    # their arguments may change.
+    ###########################################################################
     @overload
     def __init__(
         self,
@@ -161,11 +169,22 @@ class MutableList(MutableSequence[T]):
     def __contains__(self, value: object) -> bool: ...
 
 class MutableSet(MutableSetAbc[T]):
+    ###########################################################################
+    # Please avoid directly initializing mutable Thrift containers, such as
+    # using `s = MutableSet(...)`.
+    # The __init__ overloads in the stub file are intended to support generated
+    # code and Thrift typedef "magic".
+    # These are implementation details, and the overloads and the meaning of
+    # their arguments may change.
+    ###########################################################################
+    @overload
     def __init__(
         self,
         typeinfo: object,
         set_data: typing.Set[object],
     ) -> None: ...
+    @overload
+    def __init__(self, init_data: MutableSet[T] | _ThriftSetWrapper) -> None: ...
     def __len__(self) -> int: ...
     def __contains__(self, x: object) -> bool: ...
     def __iter__(self) -> ValueIterator[T]: ...

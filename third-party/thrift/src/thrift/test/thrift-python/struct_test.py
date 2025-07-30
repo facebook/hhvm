@@ -1311,9 +1311,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertIsInstance(result, MutableSet)
         self.assertEqual({"2", "3"}, result)
 
-        # `__rand__() Not implemented yet` (right hand side is MutableSet)
-        with self.assertRaisesRegex(TypeError, r"unsupported operand type\(s\) for \&"):
-            result = {"2", "3", "4"} & set1
+        # `__rand__()
+        rresult = {"2", "3", "4"} & set1
+
+        self.assertEqual(result, rresult)
 
         # `__or__()` (both sides are MutableSet)
         result = set1 | other_set
@@ -1329,9 +1330,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertIsInstance(result, MutableSet)
         self.assertEqual({"1", "2", "3", "4"}, result)
 
-        # `__ror__() Not implemented yet` (right hand side is MutableSet)
-        with self.assertRaisesRegex(TypeError, r"unsupported operand type\(s\) for \|"):
-            result = {"2", "3", "4"} | set1
+        # `__ror__()
+        rresult = {"2", "3", "4"} | set1
+
+        self.assertEqual(result, rresult)
 
         # `MutableSet` instances are not hashable
         with self.assertRaisesRegex(

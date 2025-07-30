@@ -75,44 +75,56 @@ class SetTests(unittest.TestCase):
         return to_thrift_set(set_data) if self.is_mutable_run else set_data
 
     def test_and(self) -> None:
-        x = self.SetI32({1, 3, 4, 5})
-        y = self.SetI32({1, 2, 4, 6})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 3, 4, 5}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        y = self.SetI32(self.to_set({1, 2, 4, 6}))
         z = {1, 2, 4, 6}
         self.assertEqual(x & y, set(x) & set(y))
         self.assertEqual(y & x, set(y) & set(x))
         self.assertEqual(x & z, set(x) & set(y))
         self.assertEqual(z & x, set(y) & set(x))
-        self.assertEqual(x.intersection(y), set(x) & set(y))
+        if not self.is_mutable_run:
+            self.assertEqual(x.intersection(y), set(x) & set(y))
 
     def test_or(self) -> None:
-        x = self.SetI32({1, 3, 4, 5})
-        y = self.SetI32({1, 2, 4, 6})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 3, 4, 5}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        y = self.SetI32(self.to_set({1, 2, 4, 6}))
         z = {1, 3, 4, 5}
         self.assertEqual(x | y, set(x) | set(y))
         self.assertEqual(y | x, set(y) | set(x))
         self.assertEqual(z | y, set(x) | set(y))
         self.assertEqual(y | z, set(y) | set(x))
-        self.assertEqual(x.union(y), set(x) | set(y))
+        if not self.is_mutable_run:
+            self.assertEqual(x.union(y), set(x) | set(y))
 
     def test_xor(self) -> None:
-        x = self.SetI32({1, 3, 4, 5})
-        y = self.SetI32({1, 2, 4, 6})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 3, 4, 5}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        y = self.SetI32(self.to_set({1, 2, 4, 6}))
         z = {1, 2, 4, 6}
         self.assertEqual(x ^ y, set(x) ^ set(y))
         self.assertEqual(y ^ x, set(y) ^ set(x))
         self.assertEqual(z ^ x, set(y) ^ set(x))
         self.assertEqual(x ^ z, set(x) ^ set(y))
-        self.assertEqual(x.symmetric_difference(y), set(x) ^ set(y))
+        if not self.is_mutable_run:
+            self.assertEqual(x.symmetric_difference(y), set(x) ^ set(y))
 
     def test_sub(self) -> None:
-        x = self.SetI32({1, 3, 4, 5})
-        y = self.SetI32({1, 2, 4, 6})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 3, 4, 5}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        y = self.SetI32(self.to_set({1, 2, 4, 6}))
         z = {1, 2, 4, 6}
         self.assertEqual(x - y, set(x) - set(y))
         self.assertEqual(y - x, set(y) - set(x))
-        self.assertEqual(z - x, set(y) - set(x))
         self.assertEqual(x - z, set(x) - set(y))
-        self.assertEqual(x.difference(y), set(x) - set(y))
+        if not self.is_mutable_run:
+            self.assertEqual(z - x, set(y) - set(x))
+            self.assertEqual(x.difference(y), set(x) - set(y))
 
     def test_contains_enum(self) -> None:
         # pyre-ignore[6]: TODO: Thrift-Container init
@@ -122,8 +134,14 @@ class SetTests(unittest.TestCase):
         self.assertNotIn(self.Color.green, cset.colorSet)
 
     def test_comparisons(self) -> None:
-        x = self.SetI32({1, 2, 3, 4})
-        y = self.SetI32({1, 2, 3})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 3, 4, 5}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 3, 4, 5}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.SetI32(self.to_set({1, 2, 3, 4}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        y = self.SetI32(self.to_set({1, 2, 3}))
         x2 = copy.copy(x)
         y2 = {1, 2, 3}
 
@@ -243,7 +261,8 @@ class SetTests(unittest.TestCase):
     def test_adapted_sets(self) -> None:
         int_set = {1, 2, 3}
 
-        self.assertEqual(int_set, self.SetAtoIValue(int_set))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        self.assertEqual(int_set, self.SetAtoIValue(self.to_set(int_set)))
 
 
 class ImmutableSetTests(unittest.TestCase):

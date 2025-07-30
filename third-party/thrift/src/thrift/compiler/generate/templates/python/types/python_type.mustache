@@ -41,7 +41,12 @@ in a different thrift file, or defined in the same thrift file.
   }}){{!
 }}{{/type:list?}}{{!
 }}{{#type:set?}}{{!
+}}{{#program:generate_immutable_types}}{{!
   }}_fbthrift_python_types.SetTypeFactory({{!
+}}{{/program:generate_immutable_types}}{{!
+}}{{#program:generate_mutable_types}}{{!
+  }}_fbthrift_python_mutable_containers.MutableSetTypeFactory({{!
+}}{{/program:generate_mutable_types}}{{!
     }}{{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}{{!
   }}){{!
 }}{{/type:set?}}{{!

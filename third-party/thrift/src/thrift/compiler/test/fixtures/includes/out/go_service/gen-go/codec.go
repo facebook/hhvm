@@ -12,9 +12,9 @@ import (
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
+// (needed to ensure safety because of naive import list construction)
 var _ = module.GoUnusedProtection__
 var _ = includes.GoUnusedProtection__
-// (needed to ensure safety because of naive import list construction)
 var _ = thrift.VOID
 
 // Premade codec specs

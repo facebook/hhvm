@@ -37,8 +37,8 @@ import (
     {{/program:import_metadata_package?}}
 )
 
-{{> common/unused_imports_protection}}
 // (needed to ensure safety because of naive import list construction)
+{{> common/unused_imports_protection}}
 var _ = thrift.VOID
 var _ = maps.Copy[map[int]int, map[int]int]
 {{#program:import_metadata_package?}}

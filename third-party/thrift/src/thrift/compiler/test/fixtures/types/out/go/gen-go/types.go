@@ -13,8 +13,8 @@ import (
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-var _ = included.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
+var _ = included.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID

@@ -34,8 +34,8 @@ import (
     {{/program:gen_metadata?}}
 )
 
-{{> common/unused_imports_protection}}
 // (needed to ensure safety because of naive import list construction)
+{{> common/unused_imports_protection}}
 var _ = context.Background
 var _ = errors.New
 var _ = fmt.Printf

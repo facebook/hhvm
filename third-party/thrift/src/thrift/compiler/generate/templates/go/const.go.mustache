@@ -24,8 +24,8 @@ import (
     thrift "{{program:thrift_lib_import}}"
 )
 
-{{> common/unused_imports_protection}}
 // (needed to ensure safety because of naive import list construction)
+{{> common/unused_imports_protection}}
 var _ = thrift.VOID
 
 var GoUnusedProtection__ int

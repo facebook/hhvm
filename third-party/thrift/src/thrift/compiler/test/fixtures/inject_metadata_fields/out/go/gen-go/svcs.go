@@ -17,8 +17,8 @@ import (
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
-var _ = foo.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
+var _ = foo.GoUnusedProtection__
 var _ = context.Background
 var _ = errors.New
 var _ = fmt.Printf

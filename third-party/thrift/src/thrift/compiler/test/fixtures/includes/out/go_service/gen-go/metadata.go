@@ -14,9 +14,9 @@ import (
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
+// (needed to ensure safety because of naive import list construction)
 var _ = module.GoUnusedProtection__
 var _ = includes.GoUnusedProtection__
-// (needed to ensure safety because of naive import list construction)
 var _ = thrift.VOID
 var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__

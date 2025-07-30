@@ -66,7 +66,10 @@ inline NamedGroup parse(folly::StringPiece s) {
        NamedGroup::x25519_kyber512_experimental},
       {"X25519MLKEM512_FB", NamedGroup::X25519MLKEM512_FB},
       {"X25519MLKEM768", NamedGroup::X25519MLKEM768},
-      {"secp256r1_kyber768_draft00", NamedGroup::secp256r1_kyber768_draft00}};
+      {"secp256r1_kyber768_draft00", NamedGroup::secp256r1_kyber768_draft00},
+      {"MLKEM512", NamedGroup::MLKEM512},
+      {"MLKEM768", NamedGroup::MLKEM768},
+      {"MLKEM1024", NamedGroup::MLKEM1024}};
 
   auto location = stringToGroups.find(s);
   if (location != stringToGroups.end()) {

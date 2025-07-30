@@ -46,13 +46,11 @@ enum class type_kind { abstract, immutable, mutable_ };
 
 class python_generator_context {
  public:
-  static python_generator_context create(const t_program* program) {
-    return {program, false, type_kind::abstract};
-  }
-
-  static python_generator_context create_patch(const t_program* program) {
-    return {program, true, type_kind::immutable};
-  }
+  python_generator_context(
+      const t_program* program, bool is_patch_file, type_kind type_kind)
+      : program_(program),
+        is_patch_file_(is_patch_file),
+        type_kind_(type_kind) {}
 
   python_generator_context(python_generator_context&&) = default;
   python_generator_context& operator=(python_generator_context&&) = default;
@@ -105,12 +103,6 @@ class python_generator_context {
   }
 
  private:
-  python_generator_context(
-      const t_program* program, bool is_patch_file, type_kind type_kind)
-      : program_(program),
-        is_patch_file_(is_patch_file),
-        type_kind_(type_kind) {}
-
   const t_program* program_;
   bool enable_abstract_types_ = false;
   bool is_patch_file_ = false;
@@ -934,7 +926,6 @@ class python_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:py_name", &python_mstch_struct::py_name},
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
             {"struct:exception_message?",
@@ -952,8 +943,6 @@ class python_mstch_struct : public mstch_struct {
              &python_mstch_struct::disable_field_caching},
         });
   }
-
-  mstch::node py_name() { return python::get_py3_name(*struct_); }
 
   mstch::node fields_ordered_by_id() {
     std::vector<const t_field*> fields = struct_->fields().copy();
@@ -1019,6 +1008,8 @@ class python_mstch_field : public mstch_field {
     register_methods(
         this,
         {
+            // TODO: Whisker migration of field:py_name requires support to get
+            // a back-reference to the parent struct in Whisker
             {"field:py_name", &python_mstch_field::py_name},
             {"field:tablebased_qualifier",
              &python_mstch_field::tablebased_qualifier},
@@ -1041,6 +1032,8 @@ class python_mstch_field : public mstch_field {
   mstch::node py_name() {
     if (boost::algorithm::starts_with(py_name_, "__") &&
         !boost::algorithm::ends_with(py_name_, "__")) {
+      // TODO: Whisker migration of field:py_name requires support to get a
+      // back-reference to the parent struct in Whisker
       auto class_name = field_context_->strct->name();
       boost::algorithm::trim_left_if(class_name, boost::is_any_of("_"));
       if (class_name.empty()) {
@@ -1118,21 +1111,6 @@ class python_mstch_enum : public mstch_enum {
     return enum_->has_unstructured_annotation("py3.flags") ||
         enum_->has_structured_annotation(kPythonFlagsUri);
   }
-};
-
-class python_mstch_enum_value : public mstch_enum_value {
- public:
-  python_mstch_enum_value(
-      const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum_value:py_name", &python_mstch_enum_value::py_name},
-        });
-  }
-
-  mstch::node py_name() { return python::get_py3_name(*enum_value_); }
 };
 
 // Generator-specific validator that enforces "name" and "value" are not used
@@ -1228,9 +1206,40 @@ std::filesystem::path program_to_path(const t_program& prog) {
   return fmt::format("{}", fmt::join(package, "/"));
 }
 
-class t_mstch_python_generator : public t_mstch_generator {
+// Shared base class for Python and Python Patch generator, to provide common
+// Whisker prototype extensions.
+class t_mstch_python_prototypes_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
+
+  void process_options(
+      const std::map<std::string, std::string>& options) override {
+    t_mstch_generator::process_options(options);
+    python_context_ =
+        std::make_shared<python_generator_context>(initialize_context());
+  }
+
+ protected:
+  std::shared_ptr<python_generator_context> python_context_;
+
+  // Set up context for the active generator
+  virtual python_generator_context initialize_context() = 0;
+
+  prototype<t_named>::ptr make_prototype_for_named(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_named(proto);
+    auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
+
+    def.property("py_name", &python::get_py3_name<t_named>);
+
+    return std::move(def).make();
+  }
+};
+
+class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
+ public:
+  using t_mstch_python_prototypes_generator::
+      t_mstch_python_prototypes_generator;
 
   whisker_options render_options() const override {
     whisker_options opts;
@@ -1239,13 +1248,6 @@ class t_mstch_python_generator : public t_mstch_generator {
         "field:type",
     };
     return opts;
-  }
-
-  void process_options(
-      const std::map<std::string, std::string>& options) override {
-    t_mstch_generator::process_options(options);
-    python_context_ = std::make_shared<python_generator_context>(
-        python_generator_context::create(program_));
   }
 
   std::string template_prefix() const override { return "python"; }
@@ -1298,7 +1300,10 @@ class t_mstch_python_generator : public t_mstch_generator {
   void generate_clients();
   void generate_services();
 
-  std::shared_ptr<python_generator_context> python_context_;
+  python_generator_context initialize_context() override {
+    return {program_, false, type_kind::abstract};
+  }
+
   std::filesystem::path generate_root_path_;
 };
 
@@ -1525,7 +1530,6 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_struct>();
   mstch_context_.add<python_mstch_field>();
   mstch_context_.add<python_mstch_enum>();
-  mstch_context_.add<python_mstch_enum_value>();
   mstch_context_.add<python_mstch_const>();
   mstch_context_.add<python_mstch_const_value>();
   mstch_context_.add<python_mstch_deprecated_annotation>();
@@ -1639,9 +1643,10 @@ void t_mstch_python_generator::generate_services() {
       generate_root_path_);
 }
 
-class t_python_patch_generator : public t_mstch_generator {
+class t_python_patch_generator : public t_mstch_python_prototypes_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_mstch_python_prototypes_generator::
+      t_mstch_python_prototypes_generator;
 
   whisker_options render_options() const override {
     whisker_options opts;
@@ -1650,13 +1655,6 @@ class t_python_patch_generator : public t_mstch_generator {
         "field:type",
     };
     return opts;
-  }
-
-  void process_options(
-      const std::map<std::string, std::string>& options) override {
-    t_mstch_generator::process_options(options);
-    python_context_ = std::make_shared<python_generator_context>(
-        python_generator_context::create_patch(program_));
   }
 
   std::string template_prefix() const override { return "patch"; }
@@ -1675,9 +1673,12 @@ class t_python_patch_generator : public t_mstch_generator {
         program_to_path(*get_program()) / program->name() / "thrift_patch.py");
   }
 
- private:
-  std::shared_ptr<python_generator_context> python_context_;
+ protected:
+  python_generator_context initialize_context() override {
+    return {program_, true, type_kind::immutable};
+  }
 
+ private:
   void set_mstch_factories() {
     mstch_context_.add<python_mstch_program>(python_context_);
     mstch_context_.add<python_mstch_struct>();

@@ -26,46 +26,58 @@ namespace apache::thrift::compiler::go {
 // the return value is stored (if function call is not void).
 const std::string DEFAULT_RETVAL_FIELD_NAME = "success";
 
-// keywords
+// Keywords
 // https://go.dev/ref/spec#Keywords
 static const std::set<std::string> go_keywords = {
-    "break",  "case",   "chan",        "const", "continue", "default", "defer",
-    "else",   "error",  "fallthrough", "for",   "func",     "go",      "goto",
-    "if",     "import", "interface",   "map",   "package",  "range",   "return",
-    "select", "struct", "switch",      "type",  "var",
+    "break",  "case",        "chan", "const",   "continue", "default", "defer",
+    "else",   "fallthrough", "for",  "func",    "go",       "goto",    "if",
+    "import", "interface",   "map",  "package", "range",    "return",  "select",
+    "struct", "switch",      "type", "var",
 };
-// types
-// https://go.dev/ref/spec#Types
-static const std::set<std::string> go_types = {
-    "complex128",
-    "complex64",
-    "float32",
-    "float64",
-    "int",
-    "int16",
-    "int32",
-    "int64",
-    "int8",
-    "rune",
-    "uint",
-    "uint16",
-    "uint32",
-    "uint64",
-    "uintptr",
-    "uint8",
-};
-// predelcared identifiers
+// Predeclared types
 // https://go.dev/ref/spec#Predeclared_identifiers
-static const std::set<std::string> go_predeclared = {
-    "any",   "append", "cap",     "close", "complex", "copy", "delete",
-    "false", "imag",   "iota",    "len",   "make",    "new",  "nil",
-    "panic", "print",  "println", "real",  "recover", "true",
+static const std::set<std::string> go_predeclared_types = {
+    "any",    "bool",    "byte",    "comparable", "complex64", "complex128",
+    "error",  "float32", "float64", "int",        "int8",      "int16",
+    "int32",  "int64",   "rune",    "string",     "uint",      "uint8",
+    "uint16", "uint32",  "uint64",  "uintptr",
+};
+// Predelcared functions
+// https://go.dev/ref/spec#Predeclared_identifiers
+static const std::set<std::string> go_predeclared_funcs = {
+    "append",
+    "cap",
+    "clear",
+    "close",
+    "complex",
+    "copy",
+    "delete",
+    "imag",
+    "len",
+    "make",
+    "max",
+    "min",
+    "new",
+    "panic",
+    "print",
+    "println",
+    "real",
+    "recover",
+};
+// Predelcared misc (constants, zero value)
+// https://go.dev/ref/spec#Predeclared_identifiers
+static const std::set<std::string> go_predeclared_misc = {
+    "true",
+    "false",
+    "iota",
+    "nil",
 };
 static const std::set<std::string> go_reserved_words = []() {
   std::set<std::string> set;
   set.insert(go_keywords.cbegin(), go_keywords.cend());
-  set.insert(go_types.cbegin(), go_types.cend());
-  set.insert(go_predeclared.cbegin(), go_predeclared.cend());
+  set.insert(go_predeclared_types.cbegin(), go_predeclared_types.cend());
+  set.insert(go_predeclared_funcs.cbegin(), go_predeclared_funcs.cend());
+  set.insert(go_predeclared_misc.cbegin(), go_predeclared_misc.cend());
   return set;
 }();
 

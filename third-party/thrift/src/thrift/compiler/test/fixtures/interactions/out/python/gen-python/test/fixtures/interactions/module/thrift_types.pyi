@@ -156,7 +156,7 @@ class _fbthrift_MyService_serialize_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_serialize_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_MyService_serialize_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -232,7 +232,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -306,7 +306,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -446,7 +446,7 @@ class _fbthrift_Factories_serialize_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Factories_serialize_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_Factories_serialize_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -522,7 +522,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -596,7 +596,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -722,7 +722,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -796,7 +796,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -922,7 +922,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...

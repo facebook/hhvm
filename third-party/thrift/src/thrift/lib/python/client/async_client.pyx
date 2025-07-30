@@ -194,8 +194,6 @@ cdef class AsyncClient:
             return future
         else:
             userdata = (future, response_cls, protocol, rpc_options, is_mutable_types)
-            rpc_kind = RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE if isinstance(
-                response_cls, tuple) else RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE
             bridgeSemiFutureWith[cOmniClientResponseWithHeaders](
                 self._executor,
                 deref(self._omni_client).semifuture_send(
@@ -206,7 +204,7 @@ cdef class AsyncClient:
                     self._persistent_headers,
                     cmove(c_rpc_options),
                     self._executor,
-                    rpc_kind,
+                    _get_rpc_kind(response_cls),
                 ),
                 _async_client_send_request_callback,
                 <PyObject *> userdata,
@@ -247,14 +245,15 @@ cdef void _async_client_send_request_callback(
         ))
         return
     response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))
-    py_stream = None
+    py_sink_or_stream = None
     if isinstance(response_cls, tuple):
-        response_cls, stream_cls = response_cls
-        py_stream = ClientBufferedStream._fbthrift_create(
-            cmove(resp.stream),
-            stream_cls,
-            protocol,
-        )
+        response_cls, streaming_elem_cls = response_cls
+        if streaming_elem_cls._fbthrift__rpc_kind == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE:
+            py_sink_or_stream = ClientBufferedStream._fbthrift_create(
+                cmove(resp.stream),
+                streaming_elem_cls,
+                protocol,
+            )
     try:
         py_resp = (
             deserialize(response_cls, response_iobuf, protocol=protocol)
@@ -262,7 +261,9 @@ cdef void _async_client_send_request_callback(
             else deserialize_mutable(response_cls, response_iobuf, protocol=protocol)
         )
         
-        pyfuture.set_result(py_resp if py_stream is None else (py_resp, py_stream))
+        pyfuture.set_result(
+            py_resp if py_sink_or_stream is None else (py_resp, py_sink_or_stream)
+        )
     except Exception as e:
         pyfuture.set_exception(ProtocolError(
             ProtocolErrorType.UNKNOWN,
@@ -281,3 +282,10 @@ cdef void _interaction_client_callback(cFollyTry[unique_ptr[cOmniInteractionClie
     else:
         client._omni_client = unique_ptr[cOmniClient](<cOmniClient*>result.value().release())
         future.set_result(None)
+
+cdef inline RpcKind _get_rpc_kind(object response_cls):
+    if isinstance(response_cls, tuple):
+        # second element of tuple is sink or stream generated class
+        return response_cls[1]._fbthrift__rpc_kind
+    else:
+        return RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE

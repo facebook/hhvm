@@ -11,6 +11,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 from abc import ABCMeta as _fbthrift_ABCMeta
 import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_abstract_types
+from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
@@ -219,7 +220,8 @@ class _fbthrift_MyService_serialize_result(metaclass=_fbthrift_python_mutable_ty
     )
 
 
-class _fbthrift_MyService_serialize_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyService_serialize_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -282,7 +284,8 @@ class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_mutable
     )
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -334,7 +337,8 @@ class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_mut
     )
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -434,7 +438,8 @@ class _fbthrift_Factories_serialize_result(metaclass=_fbthrift_python_mutable_ty
     )
 
 
-class _fbthrift_Factories_serialize_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_Factories_serialize_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -497,7 +502,8 @@ class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_mutable
     )
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -549,7 +555,8 @@ class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_mut
     )
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -636,7 +643,8 @@ class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_mutable
     )
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -688,7 +696,8 @@ class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_mut
     )
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -785,7 +794,8 @@ class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_mutable
     )
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -917,19 +927,19 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_MyService_interactFast_result,
     _fbthrift_MyService_serialize_args,
     _fbthrift_MyService_serialize_result,
-    _fbthrift_MyService_serialize_result_stream,
+    _fbthrift_MyService_serialize_result_stream_elem,
     _fbthrift_MyInteraction_frobnicate_args,
     _fbthrift_MyInteraction_frobnicate_result,
     _fbthrift_MyInteraction_ping_args,
     _fbthrift_MyInteraction_truthify_args,
     _fbthrift_MyInteraction_truthify_result,
-    _fbthrift_MyInteraction_truthify_result_stream,
+    _fbthrift_MyInteraction_truthify_result_stream_elem,
     _fbthrift_MyInteractionFast_frobnicate_args,
     _fbthrift_MyInteractionFast_frobnicate_result,
     _fbthrift_MyInteractionFast_ping_args,
     _fbthrift_MyInteractionFast_truthify_args,
     _fbthrift_MyInteractionFast_truthify_result,
-    _fbthrift_MyInteractionFast_truthify_result_stream,
+    _fbthrift_MyInteractionFast_truthify_result_stream_elem,
     _fbthrift_SerialInteraction_frobnicate_args,
     _fbthrift_SerialInteraction_frobnicate_result,
     _fbthrift_Factories_foo_args,
@@ -940,19 +950,19 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_Factories_interactFast_result,
     _fbthrift_Factories_serialize_args,
     _fbthrift_Factories_serialize_result,
-    _fbthrift_Factories_serialize_result_stream,
+    _fbthrift_Factories_serialize_result_stream_elem,
     _fbthrift_MyInteraction_frobnicate_args,
     _fbthrift_MyInteraction_frobnicate_result,
     _fbthrift_MyInteraction_ping_args,
     _fbthrift_MyInteraction_truthify_args,
     _fbthrift_MyInteraction_truthify_result,
-    _fbthrift_MyInteraction_truthify_result_stream,
+    _fbthrift_MyInteraction_truthify_result_stream_elem,
     _fbthrift_MyInteractionFast_frobnicate_args,
     _fbthrift_MyInteractionFast_frobnicate_result,
     _fbthrift_MyInteractionFast_ping_args,
     _fbthrift_MyInteractionFast_truthify_args,
     _fbthrift_MyInteractionFast_truthify_result,
-    _fbthrift_MyInteractionFast_truthify_result_stream,
+    _fbthrift_MyInteractionFast_truthify_result_stream_elem,
     _fbthrift_SerialInteraction_frobnicate_args,
     _fbthrift_SerialInteraction_frobnicate_result,
     _fbthrift_Perform_foo_args,
@@ -962,13 +972,13 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_MyInteraction_ping_args,
     _fbthrift_MyInteraction_truthify_args,
     _fbthrift_MyInteraction_truthify_result,
-    _fbthrift_MyInteraction_truthify_result_stream,
+    _fbthrift_MyInteraction_truthify_result_stream_elem,
     _fbthrift_MyInteractionFast_frobnicate_args,
     _fbthrift_MyInteractionFast_frobnicate_result,
     _fbthrift_MyInteractionFast_ping_args,
     _fbthrift_MyInteractionFast_truthify_args,
     _fbthrift_MyInteractionFast_truthify_result,
-    _fbthrift_MyInteractionFast_truthify_result_stream,
+    _fbthrift_MyInteractionFast_truthify_result_stream_elem,
     _fbthrift_SerialInteraction_frobnicate_args,
     _fbthrift_SerialInteraction_frobnicate_result,
     _fbthrift_InteractWithShared_do_some_similar_things_args,
@@ -978,7 +988,7 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_MyInteraction_ping_args,
     _fbthrift_MyInteraction_truthify_args,
     _fbthrift_MyInteraction_truthify_result,
-    _fbthrift_MyInteraction_truthify_result_stream,
+    _fbthrift_MyInteraction_truthify_result_stream_elem,
     _fbthrift_SharedInteraction_init_args,
     _fbthrift_SharedInteraction_init_result,
     _fbthrift_SharedInteraction_do_something_args,

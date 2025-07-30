@@ -86,7 +86,7 @@ class _fbthrift_PubSubStreamingService_returnstream_result(_fbthrift_python_type
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_returnstream_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_returnstream_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -126,7 +126,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result(_fbthrift_python_type
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_streamthrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_streamthrows_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
     e: _typing.Final[_fbthrift_FooStreamEx]
 
     def __init__(
@@ -170,7 +170,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(_fbthrift_python_typ
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_servicethrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_servicethrows_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -214,7 +214,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(_fbthrift_python_ty
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_servicethrows2_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -256,7 +256,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result(_fbthrift_python_types.
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_boththrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_boththrows_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
     e: _typing.Final[_fbthrift_FooStreamEx]
 
     def __init__(
@@ -298,7 +298,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(_fbt
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
     e: _typing.Final[_fbthrift_FooStreamEx]
 
     def __init__(
@@ -342,7 +342,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(_fb
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -384,7 +384,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(_fbthr
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
     e: _typing.Final[_fbthrift_FooStreamEx]
 
     def __init__(
@@ -428,7 +428,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result(_fbthrift_python_
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
+class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream_elem(_fbthrift_python_types._fbthrift_ResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...

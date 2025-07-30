@@ -63,7 +63,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base 
 {{#function:stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_stream({{!
+class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem({{!
 }}{{#program:generate_mutable_types}}_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult{{/program:generate_mutable_types}}{{!
 }}{{#program:generate_immutable_types}}_fbthrift_python_types._fbthrift_ResponseStreamResult{{/program:generate_immutable_types}}{{!
 }}[{{#function:stream_elem_type}}{{> types/pep484_type }}{{/function:stream_elem_type}}]):
@@ -78,6 +78,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream({{!
         }}{{/function:stream_exceptions}}
     ) -> None: ...
 
+    {{! TODO: is this actually needed to enable typing? Delete if not. }}
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[

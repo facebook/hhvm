@@ -166,7 +166,7 @@ class _fbthrift_MyService_serialize_result(_fbthrift_python_mutable_types.Mutabl
         ]]]: ...
 
 
-class _fbthrift_MyService_serialize_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.int]):
+class _fbthrift_MyService_serialize_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -242,7 +242,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.Mut
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -316,7 +316,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_mutable_types
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -456,7 +456,7 @@ class _fbthrift_Factories_serialize_result(_fbthrift_python_mutable_types.Mutabl
         ]]]: ...
 
 
-class _fbthrift_Factories_serialize_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.int]):
+class _fbthrift_Factories_serialize_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.int]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.int] = ...
@@ -532,7 +532,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.Mut
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -606,7 +606,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_mutable_types
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -732,7 +732,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.Mut
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -806,7 +806,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_mutable_types
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...
@@ -932,7 +932,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.Mut
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
+class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult[builtins.bool]):
 
     def __init__(
         self, *, success: _typing.Optional[builtins.bool] = ...

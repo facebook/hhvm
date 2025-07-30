@@ -11,6 +11,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
+from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
@@ -203,7 +204,8 @@ class _fbthrift_PubSubStreamingService_returnstream_result(metaclass=_fbthrift_p
     )
 
 
-class _fbthrift_PubSubStreamingService_returnstream_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_returnstream_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -239,7 +241,8 @@ class _fbthrift_PubSubStreamingService_streamthrows_result(metaclass=_fbthrift_p
     )
 
 
-class _fbthrift_PubSubStreamingService_streamthrows_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_streamthrows_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -297,7 +300,8 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_
     )
 
 
-class _fbthrift_PubSubStreamingService_servicethrows_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_servicethrows_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -355,7 +359,8 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift
     )
 
 
-class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_servicethrows2_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -402,7 +407,8 @@ class _fbthrift_PubSubStreamingService_boththrows_result(metaclass=_fbthrift_pyt
     )
 
 
-class _fbthrift_PubSubStreamingService_boththrows_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_boththrows_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -459,7 +465,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(meta
     )
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -527,7 +534,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
     )
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -584,7 +592,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
     )
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -642,7 +651,8 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result(metaclass=_fbthri
     )
 
 
-class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -661,29 +671,29 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream(metaclass=
 _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_PubSubStreamingService_returnstream_args,
     _fbthrift_PubSubStreamingService_returnstream_result,
-    _fbthrift_PubSubStreamingService_returnstream_result_stream,
+    _fbthrift_PubSubStreamingService_returnstream_result_stream_elem,
     _fbthrift_PubSubStreamingService_streamthrows_args,
     _fbthrift_PubSubStreamingService_streamthrows_result,
-    _fbthrift_PubSubStreamingService_streamthrows_result_stream,
+    _fbthrift_PubSubStreamingService_streamthrows_result_stream_elem,
     _fbthrift_PubSubStreamingService_servicethrows_args,
     _fbthrift_PubSubStreamingService_servicethrows_result,
-    _fbthrift_PubSubStreamingService_servicethrows_result_stream,
+    _fbthrift_PubSubStreamingService_servicethrows_result_stream_elem,
     _fbthrift_PubSubStreamingService_servicethrows2_args,
     _fbthrift_PubSubStreamingService_servicethrows2_result,
-    _fbthrift_PubSubStreamingService_servicethrows2_result_stream,
+    _fbthrift_PubSubStreamingService_servicethrows2_result_stream_elem,
     _fbthrift_PubSubStreamingService_boththrows_args,
     _fbthrift_PubSubStreamingService_boththrows_result,
-    _fbthrift_PubSubStreamingService_boththrows_result_stream,
+    _fbthrift_PubSubStreamingService_boththrows_result_stream_elem,
     _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args,
     _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result,
-    _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream,
+    _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream_elem,
     _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args,
     _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result,
-    _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream,
+    _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream_elem,
     _fbthrift_PubSubStreamingService_responseandstreamboththrows_args,
     _fbthrift_PubSubStreamingService_responseandstreamboththrows_result,
-    _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream,
+    _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream_elem,
     _fbthrift_PubSubStreamingService_returnstreamFast_args,
     _fbthrift_PubSubStreamingService_returnstreamFast_result,
-    _fbthrift_PubSubStreamingService_returnstreamFast_result_stream,
+    _fbthrift_PubSubStreamingService_returnstreamFast_result_stream_elem,
 )

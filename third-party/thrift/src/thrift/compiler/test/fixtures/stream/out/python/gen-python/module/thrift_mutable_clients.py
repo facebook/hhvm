@@ -75,7 +75,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_args(
                     i32_from=i32_from,
                     i32_to=i32_to,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -95,7 +95,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "streamthrows",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -115,7 +115,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "servicethrows",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -138,7 +138,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "servicethrows2",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -164,7 +164,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "boththrows",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -187,7 +187,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "responseandstreamstreamthrows",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -213,7 +213,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "responseandstreamservicethrows",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -242,7 +242,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 "responseandstreamboththrows",
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_args(
                     foo=foo,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,
@@ -273,7 +273,7 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_args(
                     i32_from=i32_from,
                     i32_to=i32_to,),
-                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_result_stream),
+                (_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_result, _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_result_stream_elem),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PubSubStreamingService",
                 rpc_options=rpc_options,

@@ -1414,7 +1414,11 @@ bool process(CompilerOptions &po) {
           }
         }
         if (includedByPackageV2) {
-          return FileInBuildReason::fromPackageV2;
+          if (emitPass == EmitPass::IncludeDirFiles) {
+            return FileInBuildReason::fromSymbolRefsAndPackageV2;
+          } else {
+            return FileInBuildReason::fromPackageV2;
+          }
         } else if (emitPass == EmitPass::PackageV2RulesOnly) {
           return FileInBuildReason::notIncluded;
         } else {

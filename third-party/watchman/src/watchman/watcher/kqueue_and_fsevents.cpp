@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#if HAVE_FSEVENTS && defined(HAVE_KQUEUE)
+
 #include <folly/Synchronized.h>
 #include <condition_variable>
 #include <mutex>
@@ -17,7 +19,6 @@
 #include "watchman/watchman_cmd.h"
 #include "watchman/watchman_file.h"
 
-#if HAVE_FSEVENTS && defined(HAVE_KQUEUE)
 namespace watchman {
 
 class PendingEventsCond {

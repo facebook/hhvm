@@ -8,12 +8,12 @@
 /* TODO:
  * This watcher fails with the scm tests */
 
+#ifdef HAVE_PORT_CREATE
+
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <memory>
 #include "watchman/InMemoryView.h"
-
-#ifdef HAVE_PORT_CREATE
 
 #define WATCHMAN_PORT_EVENTS FILE_MODIFIED | FILE_ATTRIB | FILE_NOFOLLOW
 

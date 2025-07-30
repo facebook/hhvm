@@ -18,17 +18,18 @@ namespace server {
 
 class CertManager : public CertManagerBase {
  public:
+  virtual ~CertManager() = default;
   /**
    * Select a cert given a client supplied SNI value, server
    * supportedSigSchemes, client peerSigSchemes, and client peerExtensions
    *
    * Will ignore peerSigSchemes if no matching certificate is found.
    */
-  CertMatch getCert(
+  virtual CertMatch getCert(
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,
-      const std::vector<Extension>& peerExtensions) const override;
+      const std::vector<Extension>& peerExtensions) const;
 
   /**
    * Return a certificate with the a primary identity exactly matching identity.

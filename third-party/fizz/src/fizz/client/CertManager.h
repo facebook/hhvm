@@ -17,15 +17,16 @@ namespace client {
 
 class CertManager : public CertManagerBase {
  public:
+  virtual ~CertManager() = default;
   /**
    * Select a cert given the servers sig schemes, our own supported sig schemes
    * and peer extensions. The sni value is ignored
    */
-  CertMatch getCert(
+  virtual CertMatch getCert(
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,
-      const std::vector<Extension>& peerExtensions) const override;
+      const std::vector<Extension>& peerExtensions) const;
 
   /*
    * This will add the cert to the internal map, and will not override existing

@@ -25,6 +25,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type MyRoot interface {
     DoRoot(ctx context.Context) (error)
 }

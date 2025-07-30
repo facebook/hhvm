@@ -25,6 +25,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type Raiser interface {
     DoBland(ctx context.Context) (error)
     DoRaise(ctx context.Context) (error)

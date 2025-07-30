@@ -29,6 +29,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type MyService interface {
     Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)

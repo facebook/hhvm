@@ -25,6 +25,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type NestedContainers interface {
     MapList(ctx context.Context, foo map[int32][]int32) (error)
     MapSet(ctx context.Context, foo map[int32][]int32) (error)

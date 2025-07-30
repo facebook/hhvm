@@ -27,6 +27,289 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+type MyInteraction interface {
+    Frobnicate(ctx context.Context) (int32, error)
+    Ping(ctx context.Context) (error)
+}
+
+type MyInteractionClientInterface interface {
+    io.Closer
+    Frobnicate(ctx context.Context) (int32, error)
+    Ping(ctx context.Context) (error)
+    Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
+}
+
+type MyInteractionClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ MyInteractionClientInterface = (*MyInteractionClient)(nil)
+
+func NewMyInteractionChannelClient(channel thrift.RequestChannel) *MyInteractionClient {
+    return &MyInteractionClient{
+        ch: channel,
+    }
+}
+
+func (c *MyInteractionClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *MyInteractionClient) Frobnicate(ctx context.Context) (int32, error) {
+    fbthriftReq := &reqMyInteractionFrobnicate{
+    }
+    fbthriftResp := newRespMyInteractionFrobnicate()
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "frobnicate", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return 0, fbthriftEx
+    }
+    return fbthriftResp.GetSuccess(), nil
+}
+
+func (c *MyInteractionClient) Ping(ctx context.Context) (error) {
+    fbthriftReq := &reqMyInteractionPing{
+    }
+    return c.ch.SendRequestNoResponse(ctx, "ping", fbthriftReq)
+}
+
+func (c *MyInteractionClient) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
+    // Must be a cancellable context to prevent goroutine leaks
+    if ctx.Done() == nil {
+		return nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
+
+    fbthriftReq := &reqMyInteractionTruthify{
+    }
+    fbthriftResp := newRespMyInteractionTruthify()
+
+    fbthriftErrChan := make(chan error, 1)
+    fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
+
+    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
+        fbthriftStreamValue := newStreamMyInteractionTruthify()
+        fbthriftSpecErr := fbthriftStreamValue.Read(d)
+        if fbthriftSpecErr != nil {
+            return fbthriftSpecErr
+        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
+            return fbthriftStreamEx
+        }
+        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
+        return nil
+    }
+    fbthriftOnStreamErrorFn := func(err error) {
+        fbthriftErrChan <- err
+        close(fbthriftElemChan)
+        close(fbthriftErrChan)
+    }
+    fbthriftOnStreamCompleteFn := func() {
+        close(fbthriftElemChan)
+        close(fbthriftErrChan)
+    }
+
+    fbthriftErr := c.ch.SendRequestStream(
+        fbthriftStreamCtx,
+        "truthify",
+        fbthriftReq,
+        fbthriftResp,
+        fbthriftOnStreamNextFn,
+        fbthriftOnStreamErrorFn,
+        fbthriftOnStreamCompleteFn,
+    )
+    if fbthriftErr != nil {
+        fbthriftStreamCancel()
+        return nil, nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        fbthriftStreamCancel()
+        return nil, nil, fbthriftEx
+    }
+    return fbthriftElemChan, fbthriftErrChan, nil
+}
+
+
+type MyInteractionFast interface {
+    Frobnicate(ctx context.Context) (int32, error)
+    Ping(ctx context.Context) (error)
+}
+
+type MyInteractionFastClientInterface interface {
+    io.Closer
+    Frobnicate(ctx context.Context) (int32, error)
+    Ping(ctx context.Context) (error)
+    Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
+}
+
+type MyInteractionFastClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ MyInteractionFastClientInterface = (*MyInteractionFastClient)(nil)
+
+func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) *MyInteractionFastClient {
+    return &MyInteractionFastClient{
+        ch: channel,
+    }
+}
+
+func (c *MyInteractionFastClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *MyInteractionFastClient) Frobnicate(ctx context.Context) (int32, error) {
+    fbthriftReq := &reqMyInteractionFastFrobnicate{
+    }
+    fbthriftResp := newRespMyInteractionFastFrobnicate()
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "frobnicate", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return 0, fbthriftEx
+    }
+    return fbthriftResp.GetSuccess(), nil
+}
+
+func (c *MyInteractionFastClient) Ping(ctx context.Context) (error) {
+    fbthriftReq := &reqMyInteractionFastPing{
+    }
+    return c.ch.SendRequestNoResponse(ctx, "ping", fbthriftReq)
+}
+
+func (c *MyInteractionFastClient) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
+    // Must be a cancellable context to prevent goroutine leaks
+    if ctx.Done() == nil {
+		return nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
+
+    fbthriftReq := &reqMyInteractionFastTruthify{
+    }
+    fbthriftResp := newRespMyInteractionFastTruthify()
+
+    fbthriftErrChan := make(chan error, 1)
+    fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
+
+    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
+        fbthriftStreamValue := newStreamMyInteractionFastTruthify()
+        fbthriftSpecErr := fbthriftStreamValue.Read(d)
+        if fbthriftSpecErr != nil {
+            return fbthriftSpecErr
+        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
+            return fbthriftStreamEx
+        }
+        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
+        return nil
+    }
+    fbthriftOnStreamErrorFn := func(err error) {
+        fbthriftErrChan <- err
+        close(fbthriftElemChan)
+        close(fbthriftErrChan)
+    }
+    fbthriftOnStreamCompleteFn := func() {
+        close(fbthriftElemChan)
+        close(fbthriftErrChan)
+    }
+
+    fbthriftErr := c.ch.SendRequestStream(
+        fbthriftStreamCtx,
+        "truthify",
+        fbthriftReq,
+        fbthriftResp,
+        fbthriftOnStreamNextFn,
+        fbthriftOnStreamErrorFn,
+        fbthriftOnStreamCompleteFn,
+    )
+    if fbthriftErr != nil {
+        fbthriftStreamCancel()
+        return nil, nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        fbthriftStreamCancel()
+        return nil, nil, fbthriftEx
+    }
+    return fbthriftElemChan, fbthriftErrChan, nil
+}
+
+
+type SerialInteraction interface {
+    Frobnicate(ctx context.Context) (error)
+}
+
+type SerialInteractionClientInterface interface {
+    io.Closer
+    Frobnicate(ctx context.Context) (error)
+}
+
+type SerialInteractionClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ SerialInteractionClientInterface = (*SerialInteractionClient)(nil)
+
+func NewSerialInteractionChannelClient(channel thrift.RequestChannel) *SerialInteractionClient {
+    return &SerialInteractionClient{
+        ch: channel,
+    }
+}
+
+func (c *SerialInteractionClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *SerialInteractionClient) Frobnicate(ctx context.Context) (error) {
+    fbthriftReq := &reqSerialInteractionFrobnicate{
+    }
+    fbthriftResp := newRespSerialInteractionFrobnicate()
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "frobnicate", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
+    }
+    return nil
+}
+
+
+type BoxedInteraction interface {
+    GetABox(ctx context.Context) (*ShouldBeBoxed, error)
+}
+
+type BoxedInteractionClientInterface interface {
+    io.Closer
+    GetABox(ctx context.Context) (*ShouldBeBoxed, error)
+}
+
+type BoxedInteractionClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ BoxedInteractionClientInterface = (*BoxedInteractionClient)(nil)
+
+func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) *BoxedInteractionClient {
+    return &BoxedInteractionClient{
+        ch: channel,
+    }
+}
+
+func (c *BoxedInteractionClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *BoxedInteractionClient) GetABox(ctx context.Context) (*ShouldBeBoxed, error) {
+    fbthriftReq := &reqBoxedInteractionGetABox{
+    }
+    fbthriftResp := newRespBoxedInteractionGetABox()
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getABox", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
+    }
+    return fbthriftResp.GetSuccess(), nil
+}
+
+
+
 type MyService interface {
     Foo(ctx context.Context) (error)
 }

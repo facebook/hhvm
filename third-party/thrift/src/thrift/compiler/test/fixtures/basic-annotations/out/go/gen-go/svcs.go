@@ -25,6 +25,46 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+type BadInteraction interface {
+    Foo(ctx context.Context) (error)
+}
+
+type BadInteractionClientInterface interface {
+    io.Closer
+    Foo(ctx context.Context) (error)
+}
+
+type BadInteractionClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ BadInteractionClientInterface = (*BadInteractionClient)(nil)
+
+func NewBadInteractionChannelClient(channel thrift.RequestChannel) *BadInteractionClient {
+    return &BadInteractionClient{
+        ch: channel,
+    }
+}
+
+func (c *BadInteractionClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *BadInteractionClient) Foo(ctx context.Context) (error) {
+    fbthriftReq := &reqBadInteractionFoo{
+    }
+    fbthriftResp := newRespBadInteractionFoo()
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
+    }
+    return nil
+}
+
+
+
 type MyService interface {
     Ping(ctx context.Context) (error)
     GetRandomData(ctx context.Context) (string, error)

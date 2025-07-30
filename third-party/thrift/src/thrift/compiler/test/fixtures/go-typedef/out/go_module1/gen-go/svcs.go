@@ -29,6 +29,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type Finder interface {
     ByPlate(ctx context.Context, plate Plate) (*Automobile, error)
     AliasByPlate(ctx context.Context, plate Plate) (*Car, error)

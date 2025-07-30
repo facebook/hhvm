@@ -25,6 +25,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type Service interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }

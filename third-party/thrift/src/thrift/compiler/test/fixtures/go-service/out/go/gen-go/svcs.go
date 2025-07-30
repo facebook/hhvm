@@ -25,6 +25,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type GetEntity interface {
     GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
     GetBool(ctx context.Context) (bool, error)

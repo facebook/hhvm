@@ -27,6 +27,7 @@ var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
+
 type ExtendTestService interface {
     // Inherited/extended service
     test0.HsTestService

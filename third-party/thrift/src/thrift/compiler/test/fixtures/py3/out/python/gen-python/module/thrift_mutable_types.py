@@ -1240,7 +1240,7 @@ CustomString = str
 CustomBinary = bytes
 CustomList = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomSet = _fbthrift_python_mutable_containers.MutableSetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+CustomMap = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 CustomStruct = _fbthrift_SimpleStruct
 AdaptedBool = bool
 AdaptedInteger = int
@@ -1249,7 +1249,7 @@ AdaptedString = str
 AdaptedBinary = bytes
 AdaptedList = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedSet = _fbthrift_python_mutable_containers.MutableSetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+AdaptedMap = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 AdaptedStruct = _fbthrift_SimpleStruct
 
 

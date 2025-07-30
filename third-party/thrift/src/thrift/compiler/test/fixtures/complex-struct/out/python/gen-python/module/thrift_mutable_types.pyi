@@ -1299,11 +1299,11 @@ constEnumUnion: _fbthrift_MyUnion = ...
 
 stringTypedef = builtins.str
 longTypeDef = builtins.int
-mapTypedef = _typing.Dict[builtins.int, builtins.str]
+mapTypedef = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]
 listTypedef = _fbthrift_python_mutable_containers.MutableList[builtins.float]
 floatTypedef = builtins.float
-FMap = _typing.Dict[builtins.int, builtins.int]
+FMap = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]
 binary_4918 = builtins.bytes
 i32_1194 = builtins.int
-map_i32_FMap_6797 = _typing.Dict[builtins.int, _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]]
-map_i64_string_5732 = _typing.Dict[builtins.int, builtins.str]
+map_i32_FMap_6797 = _fbthrift_python_mutable_containers.MutableMap[builtins.int, _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]]
+map_i64_string_5732 = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]

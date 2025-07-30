@@ -2394,11 +2394,11 @@ constEnumUnion = MyUnion(myEnum=MyEnum.MyValue2)
 
 stringTypedef = str
 longTypeDef = int
-mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
+mapTypedef = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
 listTypedef = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_double)
 floatTypedef = float
-FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
+FMap = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
 binary_4918 = bytes
 i32_1194 = int
-map_i32_FMap_6797 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
-map_i64_string_5732 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)
+map_i32_FMap_6797 = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
+map_i64_string_5732 = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)

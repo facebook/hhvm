@@ -519,4 +519,4 @@ I2B_REF: _typing.Mapping[builtins.int, builtins.bool] = ...
 MyCompany = _fbthrift_Company
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
-MyMapIdentifier = _typing.Dict[builtins.str, builtins.str]
+MyMapIdentifier = _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str]

@@ -51,7 +51,12 @@ in a different thrift file, or defined in the same thrift file.
   }}){{!
 }}{{/type:set?}}{{!
 }}{{#type:map?}}{{!
+}}{{#program:generate_immutable_types}}{{!
   }}_fbthrift_python_types.MapTypeFactory({{!
+}}{{/program:generate_immutable_types}}{{!
+}}{{#program:generate_mutable_types}}{{!
+  }}_fbthrift_python_mutable_containers.MutableMapTypeFactory({{!
+}}{{/program:generate_mutable_types}}{{!
     }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
     }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}){{!
 }}{{/type:map?}}{{!

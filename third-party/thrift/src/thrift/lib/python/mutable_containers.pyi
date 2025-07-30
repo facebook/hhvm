@@ -230,12 +230,23 @@ class SupportsKeysAndGetItem(Protocol[K, V]):
     def __getitem__(self, k: K) -> V: ...
 
 class MutableMap(MutableMapping[K, V]):
+    ###########################################################################
+    # Please avoid directly initializing mutable Thrift containers, such as
+    # using `l = MutableList(...)`.
+    # The __init__ overloads in the stub file are intended to support generated
+    # code and Thrift typedef "magic".
+    # These are implementation details, and the overloads and the meaning of
+    # their arguments may change.
+    ###########################################################################
+    @overload
     def __init__(
         self,
         key_typeinfo: object,
         val_typeinfo: object,
         map_data: Mapping[object, object],
     ) -> None: ...
+    @overload
+    def __init__(self, init_data: MutableMap[K, V] | _ThriftMapWrapper) -> None: ...
     def __len__(self) -> int: ...
     def __getitem__(self, key: K) -> V: ...
     def __iter__(self) -> ValueIterator[K]: ...

@@ -33,6 +33,7 @@ from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
     MutableSetTypeInfo,
     MutableStructTypeInfo,
+    MutableMapTypeInfo,
 )
 from thrift.python.mutable_types cimport _ThriftContainerWrapper
 from thrift.python.types cimport (
@@ -548,6 +549,23 @@ cdef class ValueIterator:
 
     def __iter__(self):
         return self
+
+
+@_cython__final
+cdef class MutableMapTypeFactory:
+    cdef TypeInfoBase key_typeinfo
+    cdef TypeInfoBase value_typeinfo
+    def __init__(self, key_typeinfo, value_typeinfo):
+        self.key_typeinfo = key_typeinfo
+        self.value_typeinfo = value_typeinfo
+
+    def __call__(self, values=None):
+        if values is None:
+            return MutableMap(self.key_typeinfo, self.value_typeinfo, {})
+
+        map_typeinfo = MutableMapTypeInfo(self.key_typeinfo, self.value_typeinfo)
+        internal_data = map_typeinfo.to_internal_data(values)
+        return MutableMap(self.key_typeinfo, self.value_typeinfo, internal_data)
 
 
 @_cython__final

@@ -21,6 +21,8 @@ import unittest
 
 from typing import cast, ItemsView, Iterator, KeysView, Optional, ValuesView
 
+from python_test.maps.thrift_mutable_types import StrIntMap
+
 from thrift.python.mutable_containers import (
     MapItemsView,
     MapKeysView,
@@ -904,3 +906,32 @@ class MutableMapTest(unittest.TestCase):
                 self.assertEqual(x, 97)
             case _:
                 self.fail("shouldn't happen")
+
+
+class MutableMapTypedefTest(unittest.TestCase):
+    TYPE_ERROR_MESSAGE = (
+        "Expected values to be an instance of Thrift mutable map with matching "
+        r"key type and value type, or the result of `to_thrift_map\(\)`, but "
+        "got type <class 'dict'>."
+    )
+
+    def test_str_int_map(self) -> None:
+        """
+        typedef map<i32> StrIntMap
+        """
+        # Mutable container typedef should be initialized with the same mutable
+        # container type, or it should be wrapped with `to_thrift_map()`.
+        # Otherwise, it will result in both runtime and Pyre errors.
+        with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
+            # pyre-ignore[6]: Intentional for test
+            _ = StrIntMap({"a": 1, "b": 2})
+
+        # Initialize with `to_thrift_map()` and verify that the initial
+        # Python map `m` and the MutableMap `strintmap` are separate maps.
+        m = {"a": 1, "b": 2}
+        str_int_map: MutableMap[str, int] = StrIntMap(to_thrift_map(m))
+        self.assertEqual({"a": 1, "b": 2}, str_int_map)
+
+        m["a"] = 11
+        self.assertEqual({"a": 11, "b": 2}, m)
+        self.assertEqual({"a": 1, "b": 2}, str_int_map)

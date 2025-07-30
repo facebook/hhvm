@@ -866,4 +866,4 @@ I2B_REF = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthr
 MyCompany = _fbthrift_Company
 MyStringIdentifier = str
 MyIntIdentifier = int
-MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)
+MyMapIdentifier = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)

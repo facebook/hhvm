@@ -86,13 +86,8 @@ StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponseError(
   ew.handle(
       [&](RocketException& ex) {
         if (ex.hasErrorData()) {
-          if (client_.getServerVersion() >= 8) {
-            clientCallback_->onFinalResponseError(
-                thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
-          } else {
-            clientCallback_->onFinalResponseError(
-                thrift::detail::EncodedError(ex.moveErrorData()));
-          }
+          clientCallback_->onFinalResponseError(
+              thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
         } else {
           clientCallback_->onFinalResponseError(std::move(ew));
         }

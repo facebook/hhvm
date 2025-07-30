@@ -28,7 +28,7 @@ namespace wangle {
 
 using namespace folly;
 
-typedef Pipeline<IOBufQueue&, std::string> ServicePipeline;
+using ServicePipeline = Pipeline<IOBufQueue&, std::string>;
 
 class SimpleDecode : public ByteToByteDecoder {
  public:

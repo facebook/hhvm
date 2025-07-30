@@ -28,7 +28,7 @@ namespace wangle {
 template <typename Req, typename Resp = Req>
 class SerialServerDispatcher : public HandlerAdapter<Req, Resp> {
  public:
-  typedef typename HandlerAdapter<Req, Resp>::Context Context;
+  using Context = typename HandlerAdapter<Req, Resp>::Context;
 
   explicit SerialServerDispatcher(Service<Req, Resp>* service)
       : service_(service) {}
@@ -49,7 +49,7 @@ class SerialServerDispatcher : public HandlerAdapter<Req, Resp> {
 template <typename Req, typename Resp = Req>
 class PipelinedServerDispatcher : public HandlerAdapter<Req, Resp> {
  public:
-  typedef typename HandlerAdapter<Req, Resp>::Context Context;
+  using Context = typename HandlerAdapter<Req, Resp>::Context;
 
   explicit PipelinedServerDispatcher(Service<Req, Resp>* service)
       : service_(service) {}
@@ -90,7 +90,7 @@ class PipelinedServerDispatcher : public HandlerAdapter<Req, Resp> {
 template <typename Req, typename Resp = Req>
 class MultiplexServerDispatcher : public HandlerAdapter<Req, Resp> {
  public:
-  typedef typename HandlerAdapter<Req, Resp>::Context Context;
+  using Context = typename HandlerAdapter<Req, Resp>::Context;
 
   explicit MultiplexServerDispatcher(Service<Req, Resp>* service)
       : service_(service) {}

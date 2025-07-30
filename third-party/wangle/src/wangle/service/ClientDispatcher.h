@@ -25,7 +25,7 @@ template <typename Pipeline, typename Req, typename Resp = Req>
 class ClientDispatcherBase : public HandlerAdapter<Resp, Req>,
                              public Service<Req, Resp> {
  public:
-  typedef typename HandlerAdapter<Resp, Req>::Context Context;
+  using Context = typename HandlerAdapter<Resp, Req>::Context;
 
   ~ClientDispatcherBase() override {
     if (pipeline_) {
@@ -69,7 +69,7 @@ template <typename Pipeline, typename Req, typename Resp = Req>
 class SerialClientDispatcher
     : public ClientDispatcherBase<Pipeline, Req, Resp> {
  public:
-  typedef typename HandlerAdapter<Resp, Req>::Context Context;
+  using Context = typename HandlerAdapter<Resp, Req>::Context;
 
   void read(Context*, Resp in) override {
     DCHECK(p_);
@@ -100,7 +100,7 @@ template <typename Pipeline, typename Req, typename Resp = Req>
 class PipelinedClientDispatcher
     : public ClientDispatcherBase<Pipeline, Req, Resp> {
  public:
-  typedef typename HandlerAdapter<Resp, Req>::Context Context;
+  using Context = typename HandlerAdapter<Resp, Req>::Context;
 
   void read(Context*, Resp in) override {
     DCHECK(p_.size() >= 1);

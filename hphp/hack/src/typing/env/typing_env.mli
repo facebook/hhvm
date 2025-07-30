@@ -49,6 +49,9 @@ module Expose_to_tast_env : sig
   (** Get class constants declaration from the appropriate backend and add dependency. *)
   val consts : env -> class_decl -> (string * class_const) list
 
+  (** Get class member declaration from the appropriate backend and add dependency. *)
+  val get_member : bool -> env -> class_decl -> string -> class_elt option
+
   (** Get static member declaration of a class from the appropriate backend and add dependency. *)
   val get_static_member :
     bool -> env -> class_decl -> string -> class_elt option
@@ -74,6 +77,13 @@ module Expose_to_tast_env : sig
 
   (** Get global constant declaration from the appropriate backend and add dependency. *)
   val get_gconst : env -> gconst_key -> gconst_decl option
+
+  (** Get class constructor declaration from the appropriate backend and add dependency. *)
+  val get_construct : env -> class_decl -> class_elt option * consistent_kind
+
+  val get_self_class : env -> class_decl Decl_entry.t
+
+  val get_parent_class : env -> class_decl Decl_entry.t
 end
 
 include module type of Expose_to_tast_env with type env := Typing_env_types.env
@@ -194,14 +204,8 @@ val most_similar : string -> 'a list -> ('a -> string) -> 'a option
 val suggest_static_member :
   bool -> class_decl -> string -> (Pos_or_decl.t * string) option
 
-(** Get class member declaration from the appropriate backend and add dependency. *)
-val get_member : bool -> env -> class_decl -> string -> class_elt option
-
 val suggest_member :
   bool -> class_decl -> string -> (Pos_or_decl.t * string) option
-
-(** Get class constructor declaration from the appropriate backend and add dependency. *)
-val get_construct : env -> class_decl -> class_elt option * consistent_kind
 
 val get_return : env -> Typing_env_return_info.t
 
@@ -249,11 +253,7 @@ val get_val_kind : env -> Typing_defs.val_kind
 
 val get_self_class_type : env -> (pos_id * exact * locl_ty list) option
 
-val get_self_class : env -> class_decl Decl_entry.t
-
 val get_parent_ty : env -> decl_ty option
-
-val get_parent_class : env -> class_decl Decl_entry.t
 
 val get_fn_kind : env -> Ast_defs.fun_kind
 

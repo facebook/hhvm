@@ -66,8 +66,8 @@ let log_info_to_file_internal level (info : info) : unit =
 
 let log_info_to_file env (info : info) : unit =
   let log_level_opt =
-    Tast_env.tast_env_as_typing_env env
-    |> Typing_env.get_tcopt
+    env
+    |> Tast_env.get_tcopt
     |> TypecheckerOptions.log_levels
     |> SMap.find_opt "tany"
   in

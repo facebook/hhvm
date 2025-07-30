@@ -148,12 +148,7 @@ class mstch_go_program : public mstch_program {
         data_.thrift_metadata_types, *context_.type_factory);
   }
   mstch::node req_resp_structs() {
-    std::vector<const t_struct*> req_resp_structs;
-    for (const auto& pair : data_.service_to_req_resp_structs) {
-      req_resp_structs.insert(
-          req_resp_structs.end(), pair.second.begin(), pair.second.end());
-    }
-    return make_mstch_array(req_resp_structs, *context_.struct_factory);
+    return make_mstch_array(data_.req_resp_structs, *context_.struct_factory);
   }
 
  private:
@@ -825,7 +820,7 @@ void t_mstch_go_generator::generate_program() {
   data_.set_current_program(program);
   data_.compute_go_package_aliases();
   data_.compute_struct_to_field_names();
-  data_.compute_service_to_req_resp_structs();
+  data_.compute_req_resp_structs();
   data_.compute_thrift_metadata_types();
 
   if (auto thrift_lib_import = get_option("thrift_import")) {

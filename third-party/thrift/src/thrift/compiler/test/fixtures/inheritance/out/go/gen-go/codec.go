@@ -26,10 +26,10 @@ var (
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyLeafDoLeaf =
+    premadeStructSpec_reqMyRootDoRoot =
         &thrift.StructSpec{
-            Name:                 "reqMyLeafDoLeaf",
-            ScopedName:           "module.reqMyLeafDoLeaf",
+            Name:                 "reqMyRootDoRoot",
+            ScopedName:           "module.reqMyRootDoRoot",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
@@ -39,10 +39,10 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
-    premadeStructSpec_respMyLeafDoLeaf =
+    premadeStructSpec_respMyRootDoRoot =
         &thrift.StructSpec{
-            Name:                 "respMyLeafDoLeaf",
-            ScopedName:           "module.respMyLeafDoLeaf",
+            Name:                 "respMyRootDoRoot",
+            ScopedName:           "module.respMyRootDoRoot",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
@@ -78,10 +78,10 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
-    premadeStructSpec_reqMyRootDoRoot =
+    premadeStructSpec_reqMyLeafDoLeaf =
         &thrift.StructSpec{
-            Name:                 "reqMyRootDoRoot",
-            ScopedName:           "module.reqMyRootDoRoot",
+            Name:                 "reqMyLeafDoLeaf",
+            ScopedName:           "module.reqMyLeafDoLeaf",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{
@@ -91,10 +91,10 @@ var (
             FieldSpecNameToIndex: map[string]int{
             },
         }
-    premadeStructSpec_respMyRootDoRoot =
+    premadeStructSpec_respMyLeafDoLeaf =
         &thrift.StructSpec{
-            Name:                 "respMyRootDoRoot",
-            ScopedName:           "module.respMyRootDoRoot",
+            Name:                 "respMyLeafDoLeaf",
+            ScopedName:           "module.respMyLeafDoLeaf",
             IsUnion:              false,
             IsException:          false,
             FieldSpecs:           []thrift.FieldSpec{

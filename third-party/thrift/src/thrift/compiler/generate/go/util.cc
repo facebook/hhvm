@@ -130,12 +130,15 @@ void codegen_data::compute_struct_to_field_names() {
   }
 }
 
-void codegen_data::compute_service_to_req_resp_structs() {
+void codegen_data::compute_req_resp_structs() {
   for (auto service : current_program_->services()) {
-    std::vector<const t_struct*> req_resp_structs =
+    std::vector<const t_struct*> service_req_resp_structs =
         go::get_service_req_resp_structs(service);
-    service_to_req_resp_structs[service->name()] = req_resp_structs;
-    for (auto struct_ : req_resp_structs) {
+    req_resp_structs.insert(
+        req_resp_structs.end(),
+        service_req_resp_structs.begin(),
+        service_req_resp_structs.end());
+    for (auto struct_ : service_req_resp_structs) {
       req_resp_struct_names.insert(struct_->name());
       struct_to_field_names[struct_->name()] =
           go::get_struct_go_field_names(struct_);

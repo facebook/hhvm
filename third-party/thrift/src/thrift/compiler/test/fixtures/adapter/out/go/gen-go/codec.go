@@ -2317,6 +2317,76 @@ var (
                 "field": 0,
             },
         }
+    premadeStructSpec_reqServiceFunc =
+        &thrift.StructSpec{
+            Name:                 "reqServiceFunc",
+            ScopedName:           "module.reqServiceFunc",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "arg1",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_StringWithAdapter_7208,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "arg2",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_StringWithCppAdapter,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   3,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "arg3",
+                    ReflectIndex:         2,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_Foo,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+                3: 2,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "arg1": 0,
+                "arg2": 1,
+                "arg3": 2,
+            },
+        }
+    premadeStructSpec_respServiceFunc =
+        &thrift.StructSpec{
+            Name:                 "respServiceFunc",
+            ScopedName:           "module.respServiceFunc",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_MyI32_4873,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
     premadeStructSpec_reqAdapterServiceCount =
         &thrift.StructSpec{
             Name:                 "reqAdapterServiceCount",
@@ -2392,76 +2462,6 @@ var (
                     ReflectIndex:         0,
                     IsOptional:           true,
                     ValueTypeSpec:        premadeCodecTypeSpec_module_HeapAllocated,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                0: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "success": 0,
-            },
-        }
-    premadeStructSpec_reqServiceFunc =
-        &thrift.StructSpec{
-            Name:                 "reqServiceFunc",
-            ScopedName:           "module.reqServiceFunc",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   1,
-                    WireType:             thrift.STRING,
-                    Name:                 "arg1",
-                    ReflectIndex:         0,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_StringWithAdapter_7208,
-                    MustBeSetToSerialize: false,
-                },
-                {
-                    ID:                   2,
-                    WireType:             thrift.STRING,
-                    Name:                 "arg2",
-                    ReflectIndex:         1,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_StringWithCppAdapter,
-                    MustBeSetToSerialize: false,
-                },
-                {
-                    ID:                   3,
-                    WireType:             thrift.STRUCT,
-                    Name:                 "arg3",
-                    ReflectIndex:         2,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_Foo,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                1: 0,
-                2: 1,
-                3: 2,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "arg1": 0,
-                "arg2": 1,
-                "arg3": 2,
-            },
-        }
-    premadeStructSpec_respServiceFunc =
-        &thrift.StructSpec{
-            Name:                 "respServiceFunc",
-            ScopedName:           "module.respServiceFunc",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   0,
-                    WireType:             thrift.I32,
-                    Name:                 "success",
-                    ReflectIndex:         0,
-                    IsOptional:           true,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_MyI32_4873,
                     MustBeSetToSerialize: true,
                 },
             },

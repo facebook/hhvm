@@ -81,8 +81,21 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
     async def test_basic(self) -> None:
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
-                sum = await client.add(1, 2)
-                self.assertEqual(3, sum)
+                sum_ = await client.add(1, 2)
+                self.assertEqual(3, sum_)
+
+    async def test_basic_no_context_manager(self) -> None:
+        # If immediately calling method from `get_client`, we used to segfault.
+        # Now we raise RuntimeError.
+        # We could `await self._connect_future`, but this encourages bad behavior
+        # like storing clients, which could lead to exit handlers not running
+        # or a stored client becoming invalid after used in async context manager
+        async with server_in_event_loop() as addr:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "TestService.add: AsyncClient request channel not ready; async context manager is required",
+            ):
+                await get_client(TestService, host=addr.ip, port=addr.port).add(1, 2)
 
     async def test_client_type_and_protocol(self) -> None:
         async with server_in_event_loop() as addr:

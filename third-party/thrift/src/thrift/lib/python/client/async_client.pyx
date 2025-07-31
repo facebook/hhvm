@@ -131,6 +131,12 @@ cdef class AsyncClient:
         # Required because the python async model means that we can't have an async function that returns a future
         if interaction_position == InteractionMethodPosition.Factory and created_interaction is not None:
             await asyncio.shield(created_interaction._connect_future)
+        if not self._omni_client:
+            raise RuntimeError(
+                f"{service_name}.{function_name}: AsyncClient request channel "
+                "not ready; async context manager is required:"
+                "\n\t`async with ... as client:`",
+            )
         return await self._send_request_inner(
                 service_name,
                 function_name,

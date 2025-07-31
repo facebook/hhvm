@@ -14,3 +14,4 @@ DECLARE_int64(async_mysql_connect_tcp_timeout_micros);
 DECLARE_int64(async_mysql_connect_timeout_micros);
 DECLARE_int64(async_mysql_max_connect_timeout_micros);
 DECLARE_int64(async_mysql_timeout_micros);
+DECLARE_uint32(async_mysql_max_fetch_retries_on_socket_readable);

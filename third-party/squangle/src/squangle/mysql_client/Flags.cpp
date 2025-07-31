@@ -32,3 +32,8 @@ DEFINE_int64(
     3 * 1000 * 1000,
 #endif
     "The maximum connect timeout, to protect customers from themselves");
+
+DEFINE_uint32(
+    async_mysql_max_fetch_retries_on_socket_readable,
+    100,
+    "The maximum number of times we're allowed to retry a fetch if the connection socket is readable");

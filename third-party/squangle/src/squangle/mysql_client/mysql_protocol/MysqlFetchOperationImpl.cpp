@@ -6,11 +6,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"
+#include <linux/sockios.h>
+#include <sys/ioctl.h>
+
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/Flags.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
 
 namespace {
@@ -62,6 +66,16 @@ void MysqlFetchOperationImpl::specializedRunImpl() {
   }
 }
 
+namespace {
+bool isSocketReadable(const folly::NetworkSocket& fd) {
+  size_t size = 0;
+  if (ioctl(fd.toFd(), SIOCINQ, &size) != -1) {
+    return size > 0;
+  }
+  return false;
+}
+} // namespace
+
 void MysqlFetchOperationImpl::actionable() {
   DCHECK(isInEventBaseThread());
   DCHECK(getActiveFetchAction() != FetchAction::WaitForConsumer);
@@ -75,8 +89,13 @@ void MysqlFetchOperationImpl::actionable() {
   const auto* mysql_conn = getMysqlConnection();
 
   // Add the socket to the FetchOperation so that we can wait on alerts
-  changeHandlerFD(
-      folly::NetworkSocket::fromFd(mysql_conn->getSocketDescriptor()));
+  const auto fd =
+      folly::NetworkSocket::fromFd(mysql_conn->getSocketDescriptor());
+  changeHandlerFD(fd);
+
+  // Track remaining fetch retries when socket is readable
+  auto remainingSocketReadableRetries =
+      FLAGS_async_mysql_max_fetch_retries_on_socket_readable;
 
   // This loop runs the fetch actions required to successfully execute query,
   // request next results, fetch results, identify errors and complete operation
@@ -181,6 +200,15 @@ void MysqlFetchOperationImpl::actionable() {
 
       // When the query finished, `slurp` returns true, but there are no rows.
       if (!slurp()) {
+        // If the socket has readable data available, retry immediately
+        // instead of waiting for the event loop to notify us the
+        // socket is actionable. This avoids the overhead of event
+        // registration/deregistration when data is already buffered and ready
+        // to be read.
+        if (remainingSocketReadableRetries-- > 0 &&
+            !hasOpElapsed(getTimeout()) && isSocketReadable(fd)) {
+          continue;
+        }
         waitForActionable();
         break;
       }

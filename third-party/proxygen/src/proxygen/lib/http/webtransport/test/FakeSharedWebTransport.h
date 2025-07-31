@@ -46,7 +46,8 @@ class FakeStreamHandle
           folly::make_exception_wrapper<WebTransport::Exception>(*writeErr_);
       return folly::makeFuture<WebTransport::StreamData>(exwrapper);
     } else if (!buf_.empty() || fin_) {
-      return folly::makeFuture(WebTransport::StreamData({buf_.move(), fin_}));
+      return folly::makeFuture(WebTransport::StreamData(
+          {buf_.move(), fin_ && inflightBuf_.empty()}));
     } else {
       // need a new promise
       auto [promise, future] =
@@ -67,14 +68,26 @@ class FakeStreamHandle
     immediateDelivery_ = immediateDelivery;
   }
 
-  void deliverInflightData() {
-    buf_.append(inflightBuf_.move());
-    for (auto& [offset, deliveryCallbacks] : offsetToDeliveryCallback_) {
-      for (auto& deliveryCallback : deliveryCallbacks) {
-        deliveryCallback->onByteEvent(getID(), offset);
-      }
+  void deliverInflightData(size_t bytes = std::numeric_limits<size_t>::max()) {
+    CHECK_GT(bytes, 0);
+    auto buf = inflightBuf_.splitAtMost(bytes);
+    dataDelivered_ += buf->computeChainDataLength();
+    buf_.append(std::move(buf));
+    if (promise_) {
+      promise_->setValue(WebTransport::StreamData(
+          {buf_.move(), fin_ && inflightBuf_.empty()}));
+      promise_.reset();
     }
-    offsetToDeliveryCallback_.clear();
+    for (auto it = offsetToDeliveryCallback_.begin();
+         it != offsetToDeliveryCallback_.end();) {
+      if (it->first > dataDelivered_) {
+        break;
+      }
+      for (auto& deliveryCallback : it->second) {
+        deliveryCallback->onByteEvent(getID(), it->first);
+      }
+      it = offsetToDeliveryCallback_.erase(it);
+    }
   }
 
   using WriteStreamDataRet =
@@ -83,10 +96,12 @@ class FakeStreamHandle
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
       WebTransport::ByteEventCallback* deliveryCallback) override {
+    auto length = data->computeChainDataLength();
     if (data) {
-      dataWritten_ += data->computeChainDataLength();
+      dataWritten_ += length;
     }
     if (immediateDelivery_) {
+      dataDelivered_ += length;
       buf_.append(std::move(data));
     } else {
       inflightBuf_.append(std::move(data));
@@ -143,6 +158,7 @@ class FakeStreamHandle
   folly::Optional<folly::Promise<WebTransport::StreamData>> promise_;
   folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
   uint32_t dataWritten_{0};
+  uint32_t dataDelivered_{0};
   bool fin_{false};
   folly::Optional<std::tuple<uint8_t, uint64_t, bool>> pri;
   folly::Optional<uint32_t> writeErr_;

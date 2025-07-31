@@ -304,6 +304,11 @@ struct BlobEncoder {
     encodeUnorderedSet(set, c, extra...);
   }
 
+  template<typename H, typename E, typename A>
+  void encode(const folly::F14FastSet<std::string, H, E, A>& set) {
+    encodeUnorderedSet(set, std::less<std::string>());
+  }
+
   template<typename T, typename H, typename E, typename A, typename C,
            typename... Extra>
   void encode(const folly::F14FastSet<T, H, E, A>& set, const C& c,
@@ -785,6 +790,12 @@ struct BlobDecoder {
               const Extra&... extra) {
     decodeSetContainer(set, extra...);
   }
+
+  template<typename H, typename E, typename A>
+  void decode(folly::F14FastSet<std::string, H, E, A>& set) {
+    decodeSetContainer(set);
+  }
+
 
   template<typename V,
            typename C, typename A,

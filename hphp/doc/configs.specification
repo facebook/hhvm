@@ -619,7 +619,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Should the runtime emit notices whenever a builtin is called dynamically?
 
-- std::set<std::string> Eval.RenamableFunctions = {}, UNKNOWN, globaldata
+- hphp_fast_string_set Eval.RenamableFunctions = {}, UNKNOWN, globaldata
 
 - std::set<std::string> Eval.NonInterceptableFunctions = {}, UNKNOWN, globaldata
 

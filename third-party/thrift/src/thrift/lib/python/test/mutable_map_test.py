@@ -923,12 +923,13 @@ class MutableMapTypedefTest(unittest.TestCase):
         # container type, or it should be wrapped with `to_thrift_map()`.
         # Otherwise, it will result in both runtime and Pyre errors.
         with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
-            # pyre-ignore[6]: Intentional for test
+            # pyre-fixme[20]: Argument `map_data` expected.
             _ = StrIntMap({"a": 1, "b": 2})
 
         # Initialize with `to_thrift_map()` and verify that the initial
         # Python map `m` and the MutableMap `strintmap` are separate maps.
         m = {"a": 1, "b": 2}
+        # pyre-fixme[20]: Argument `map_data` expected.
         str_int_map: MutableMap[str, int] = StrIntMap(to_thrift_map(m))
         self.assertEqual({"a": 1, "b": 2}, str_int_map)
 

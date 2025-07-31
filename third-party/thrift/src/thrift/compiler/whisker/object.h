@@ -1045,7 +1045,11 @@ class basic_prototype : public prototype<T> {
     if (auto found = descriptors_.find(name); found != descriptors_.end()) {
       return &found->second;
     }
-    return nullptr;
+
+    // Recurse through the prototype chain until the first matching descriptor
+    // is found. This is similar to JavaScript:
+    //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
+    return parent_ == nullptr ? nullptr : parent_->find_descriptor(name);
   }
 
   std::set<std::string> keys() const override {

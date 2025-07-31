@@ -211,29 +211,22 @@ class mstch_object_proxy
           return m->lookup_property(self_property->second);
         },
         [&](const native_handle<>& h) -> std::optional<object> {
-          // Recurse through the prototype chain until the first matching
-          // descriptor is found. This is similar to JavaScript:
-          // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
-          prototype<>::ptr proto = h.proto();
-          while (proto != nullptr) {
-            if (const whisker::prototype<>::descriptor* descriptor =
-                    proto->find_descriptor(self_property->second)) {
-              return detail::variant_match(
-                  *descriptor,
-                  [&](const prototype<>::property& prop)
-                      -> std::optional<object> {
-                    return prop.function->invoke(native_function::context{
-                        {} /* identifier location */,
-                        diags_,
-                        *self_whisker_obj,
-                        {} /* positional arguments */,
-                        {} /* named arguments */,
-                    });
-                  },
-                  [&](const prototype<>::fixed_object& fixed)
-                      -> std::optional<object> { return fixed.value; });
-            }
-            proto = proto->parent();
+          if (const whisker::prototype<>::descriptor* descriptor =
+                  h.proto()->find_descriptor(self_property->second)) {
+            return detail::variant_match(
+                *descriptor,
+                [&](const prototype<>::property& prop)
+                    -> std::optional<object> {
+                  return prop.function->invoke(native_function::context{
+                      {} /* identifier location */,
+                      diags_,
+                      *self_whisker_obj,
+                      {} /* positional arguments */,
+                      {} /* named arguments */,
+                  });
+                },
+                [&](const prototype<>::fixed_object& fixed)
+                    -> std::optional<object> { return fixed.value; });
           }
           return std::nullopt;
         },

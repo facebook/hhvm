@@ -129,9 +129,11 @@ struct CodeReuseBlock {
 TransLoc TransRange::loc() const {
   TransLoc loc;
   loc.setMainStart(main.begin());
-  loc.setColdStart(cold.begin() - sizeof(uint32_t));
-  loc.setFrozenStart(frozen.begin() - sizeof(uint32_t));
+  loc.setColdStart(cold.begin());
+  loc.setFrozenStart(frozen.begin());
   loc.setMainSize(main.size());
+  loc.setColdSize(cold.size());
+  loc.setFrozenSize(frozen.size());
 
   assertx(loc.coldCodeSize() == cold.size());
   assertx(loc.frozenCodeSize() == frozen.size());

@@ -45,9 +45,6 @@ struct TransLocMaker {
     coldStart = cache.cold().frontier();
     frozenStart = cache.frozen().frontier();
     dataStart = cache.data().frontier();
-
-    cache.cold().dword(0);
-    if (&cache.cold() != &cache.frozen()) cache.frozen().dword(0);
   }
 
   TcaRange dataRange() const {
@@ -78,13 +75,11 @@ struct TransLocMaker {
     // In those cases we must ensure the ranges are still valid (their end is
     // after their beginning).
     auto coldEnd = cache.cold().frontier();
-    if (coldEnd == coldStart) coldEnd += sizeof(uint32_t);
     auto frozenEnd = cache.frozen().frontier();
-    if (frozenEnd == frozenStart) frozenEnd += sizeof(uint32_t);
     auto const range = TransRange{
       {mainStart, cache.main().frontier()},
-      {coldStart + sizeof(uint32_t), coldEnd},
-      {frozenStart + sizeof(uint32_t), frozenEnd},
+      {coldStart, coldEnd},
+      {frozenStart, frozenEnd},
       {dataStart, cache.data().frontier()}
     };
     cache.main().setFrontier(mainStart);
@@ -98,8 +93,8 @@ struct TransLocMaker {
     assertx(!empty() && mainEnd && coldEnd && frozenEnd && dataEnd);
     return TransRange{
       {mainStart, mainEnd},
-      {coldStart + sizeof(uint32_t), coldEnd},
-      {frozenStart + sizeof(uint32_t), frozenEnd},
+      {coldStart, coldEnd},
+      {frozenStart, frozenEnd},
       {dataStart, dataEnd}
     };
   }
@@ -109,16 +104,10 @@ struct TransLocMaker {
    * returns a TransRange representing the translation.
    */
   TransRange markEnd() {
-    uint32_t* coldSize   = (uint32_t*)cache.cold().toDestAddress(coldStart);
-    uint32_t* frozenSize = (uint32_t*)cache.frozen().toDestAddress(frozenStart);
-    *coldSize   = cache  .cold().frontier() - coldStart;
-    *frozenSize = cache.frozen().frontier() - frozenStart;
-
     mainEnd = cache.main().frontier();
     coldEnd = cache.cold().frontier();
     frozenEnd = cache.frozen().frontier();
     dataEnd = cache.data().frontier();
-
     return range();
   }
 

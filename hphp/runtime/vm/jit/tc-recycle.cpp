@@ -275,6 +275,9 @@ void clearTransLocMaps(TransLoc loc) {
  * extending length bytes. Use info as the name of the associated CodeBlock.
  */
 void clearRange(TCA start, size_t len, const char* info) {
+  if (len == 0) {
+    return;
+  }
   CodeBlock cb;
   cb.init(start, len, info);
 

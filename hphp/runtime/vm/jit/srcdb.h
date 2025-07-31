@@ -117,6 +117,17 @@ struct TransLoc {
     m_mainLen = (uint32_t)size;
   }
 
+  void setColdSize(size_t size) {
+    assertx(size < std::numeric_limits<uint32_t>::max());
+    m_coldLen = (uint32_t)size;
+  }
+
+  void setFrozenSize(size_t size) {
+    assertx(size < std::numeric_limits<uint32_t>::max());
+    m_frozenLen = (uint32_t)size;
+  }
+
+
   bool contains(TCA loc) {
     return (mainStart() <= loc && loc < mainEnd()) ||
       (coldStart() <= loc && loc < coldEnd()) ||
@@ -132,23 +143,23 @@ struct TransLoc {
   TCA coldStart() const;
   TCA frozenStart() const;
 
-  TCA coldCodeStart()   const { return coldStart()   + sizeof(uint32_t); }
-  TCA frozenCodeStart() const { return frozenStart() + sizeof(uint32_t); }
+  TCA coldCodeStart()   const { return coldStart(); }
+  TCA frozenCodeStart() const { return frozenStart(); }
 
-  uint32_t coldCodeSize()   const { return coldSize()   - sizeof(uint32_t); }
-  uint32_t frozenCodeSize() const { return frozenSize() - sizeof(uint32_t); }
+  uint32_t coldCodeSize()   const { return coldSize(); }
+  uint32_t frozenCodeSize() const { return frozenSize(); }
 
   TCA mainEnd()   const { return mainStart() + m_mainLen; }
-  TCA coldEnd()   const { return coldStart() + coldSize(); }
-  TCA frozenEnd() const { return frozenStart() + frozenSize(); }
+  TCA coldEnd()   const { return coldStart() + m_coldLen; }
+  TCA frozenEnd() const { return frozenStart() + m_frozenLen; }
 
   uint32_t mainSize()   const { return m_mainLen; }
-  uint32_t coldSize()   const { return *(uint32_t*)coldStart(); }
-  uint32_t frozenSize() const { return *(uint32_t*)frozenStart(); }
+  uint32_t coldSize()   const { return m_coldLen; }
+  uint32_t frozenSize() const { return m_frozenLen; }
 
   bool empty() const {
-    return m_mainOff == kDefaultOff && m_mainLen == 0 &&
-      m_coldOff == kDefaultOff && m_frozenOff == kDefaultOff;
+    return m_mainOff == kDefaultOff && m_mainLen == 0 && m_coldLen == 0 &&
+      m_frozenLen == 0 && m_coldOff == kDefaultOff && m_frozenOff == kDefaultOff;
   }
 
 private:
@@ -156,13 +167,16 @@ private:
 
   uint32_t m_mainOff {kDefaultOff};
   uint32_t m_mainLen {0};
+  uint32_t m_coldLen {0};
+  uint32_t m_frozenLen {0};
+
 
   uint32_t m_coldOff   {kDefaultOff};
   uint32_t m_frozenOff {kDefaultOff};
 };
 
 // Prevent unintentional growth of the SrcDB
-static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
+static_assert(sizeof(TransLoc) == 24, "Don't add fields to TransLoc");
 
 /*
  * SrcRec: record of translator output for a given source location.

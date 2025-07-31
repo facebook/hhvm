@@ -52,6 +52,9 @@ void* DataBlock::allocInner(size_t len) {
 }
 
 void DataBlock::free(void* vaddr, size_t len) {
+  if (len == 0) {
+    return;
+  }
   auto addr = static_cast<void*>(((char*)vaddr - (char*)m_destBase) + m_base);
 
   assert(len < std::numeric_limits<uint32_t>::max() &&

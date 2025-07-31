@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
 
@@ -176,7 +177,7 @@ class mstch_object_proxy
   // Otherwise returns a pair of the self property and the nested property name.
   std::optional<std::pair<std::string, std::string_view>>
   get_self_property_name(const std::string_view& id) const {
-    if (id.ends_with(":self")) {
+    if (boost::algorithm::ends_with(id, ":self")) {
       // Already a self lookup that was tried - don't recurse
       return std::nullopt;
     }

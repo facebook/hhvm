@@ -154,9 +154,12 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
 }
 
 std::string mangle_program_path(
-    const t_program* program, const std::string& root_module_prefix) {
-  std::string prefix = root_module_prefix.empty() ? std::string("_fbthrift")
-                                                  : root_module_prefix;
+    const t_program* program,
+    const std::optional<std::string>& root_module_prefix) {
+  std::string prefix =
+      !root_module_prefix.has_value() || root_module_prefix.value().empty()
+      ? std::string("_fbthrift")
+      : root_module_prefix.value();
   boost::algorithm::replace_all(prefix, ".", "__");
   return get_py3_namespace_with_name_and_prefix(program, prefix, "__");
 }
@@ -266,7 +269,6 @@ class python_mstch_program : public mstch_program {
             {"program:safe_patch?", &python_mstch_program::safe_patch},
             {"program:safe_patch_module_path",
              &python_mstch_program::safe_patch_module_path},
-            {"program:module_mangle", &python_mstch_program::module_mangle},
             {"program:py_deprecated_module_path",
              &python_mstch_program::py_deprecated_module_path},
             {"program:py_asyncio_module_path",
@@ -353,10 +355,6 @@ class python_mstch_program : public mstch_program {
     // Change the namespace from "path.to.file" to "path.to.gen_safe_patch_file"
     auto pos = ns.rfind('.');
     return ns.substr(0, pos + 1) + "gen_safe_patch_" + ns.substr(pos + 1);
-  }
-
-  mstch::node module_mangle() {
-    return mangle_program_path(program_, get_option("root_module_prefix"));
   }
 
   mstch::node py_deprecated_module_path() {
@@ -612,7 +610,6 @@ class python_mstch_service : public mstch_service {
         this,
         {
             {"service:module_path", &python_mstch_service::module_path},
-            {"service:module_mangle", &python_mstch_service::module_mangle},
             {"service:program_name", &python_mstch_service::program_name},
             {"service:supported_functions",
              &python_mstch_service::supported_functions},
@@ -625,11 +622,6 @@ class python_mstch_service : public mstch_service {
 
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
-        service_->program(), get_option("root_module_prefix"));
-  }
-
-  mstch::node module_mangle() {
-    return mangle_program_path(
         service_->program(), get_option("root_module_prefix"));
   }
 
@@ -801,8 +793,6 @@ class python_mstch_type : public mstch_type {
 
             {"type:module_name",
              {with_no_caching, &python_mstch_type::module_name}},
-            {"type:module_mangle",
-             {with_no_caching, &python_mstch_type::module_mangle}},
             {"type:patch_module_path",
              {with_no_caching, &python_mstch_type::patch_module_path}},
             {"type:need_module_path?",
@@ -817,13 +807,6 @@ class python_mstch_type : public mstch_type {
                python_context_->get_type_program(*type_),
                get_option("root_module_prefix"))
         .append(fmt::format(".{}", python_context_->types_import_path()));
-  }
-
-  mstch::node module_mangle() {
-    return mangle_program_path(
-               python_context_->get_type_program(*type_),
-               get_option("root_module_prefix"))
-        .append(fmt::format("__{}", python_context_->types_import_path()));
   }
 
   mstch::node patch_module_path() {
@@ -1239,6 +1222,46 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
 
     def.property("py_name", &python::get_py3_name<t_named>);
+
+    return std::move(def).make();
+  }
+
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
+
+    def.property("module_mangle", [&](const t_program& self) {
+      return mangle_program_path(&self, get_option("root_module_prefix"));
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_service>::ptr make_prototype_for_service(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_service(proto);
+    auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
+
+    def.property("module_mangle", [&](const t_service& self) {
+      return mangle_program_path(
+          self.program(), get_option("root_module_prefix"));
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
+
+    def.property("module_mangle", [&](const t_type& self) {
+      return mangle_program_path(
+                 python_context_->get_type_program(self),
+                 get_option("root_module_prefix"))
+          .append(fmt::format("__{}", python_context_->types_import_path()));
+    });
 
     return std::move(def).make();
   }

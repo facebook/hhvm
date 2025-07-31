@@ -272,10 +272,10 @@ namespace detail {
 {{#program:split_enums}}
 const ::apache::thrift::detail::TypeInfo TypeToInfo<
     apache::thrift::type_class::enumeration,
-    ::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::typeInfo = {
+    ::{{program:qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
   /* .type */ apache::thrift::protocol::TType::T_I32,
-  /* .get */ get<std::int32_t, ::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>,
-  /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}, std::int32_t>),
+  /* .get */ get<std::int32_t, ::{{program:qualified_namespace}}::{{enum:cpp_name}}>,
+  /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, std::int32_t>),
   /* .typeExt */ nullptr,
 };
 {{/program:split_enums}}

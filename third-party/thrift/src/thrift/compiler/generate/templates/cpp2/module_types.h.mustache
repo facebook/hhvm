@@ -103,7 +103,7 @@ using ::apache::thrift::detail::operator>=;
 {{#program:structs_and_typedefs}}
 {{^is_struct?}}
 {{> common/typedef_docblock }}
-using {{typedef:name}} = {{typedef:self.cpp_type}};
+using {{typedef:name}} = {{typedef:cpp_type}};
 {{/is_struct?}}
 {{#is_struct?}}
 
@@ -406,7 +406,7 @@ struct TypeToInfo<
   template <>
     struct TypeToInfo<
         ::apache::thrift::type_class::enumeration,
-        ::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {
+        ::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
     static const ::apache::thrift::detail::TypeInfo typeInfo;
   };
 {{/program:enums}}

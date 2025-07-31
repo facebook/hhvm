@@ -17,18 +17,18 @@
 }}
 #if FOLLY_HAS_COROUTINES
 {{#function:sink?}}
-folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:self.cpp_name}}({{> service_common/function_param_list_client}}) {
+folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:cpp_name}}({{> service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
-  co_return co_await co_{{function:self.cpp_name}}(rpcOptions{{function:comma}}{{> service_common/param_list}});
+  co_return co_await co_{{function:cpp_name}}(rpcOptions{{function:comma}}{{> service_common/param_list}});
 }
-folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:self.cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
+folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
   const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
   const bool cancellable = cancelToken.canBeCancelled();
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto [ctx, header] = {{function:self.cpp_name}}Ctx(&rpcOptions);
+  auto [ctx, header] = {{function:cpp_name}}Ctx(&rpcOptions);
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
@@ -42,7 +42,7 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
     ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
-  fbthrift_serialize_and_send_{{function:self.cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
+  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -60,12 +60,12 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctx));
 {{^function:creates_interaction?}}
-  co_return recv_{{function:self.cpp_name}}(returnState);
+  co_return recv_{{function:cpp_name}}(returnState);
 {{/function:creates_interaction?}}
 {{#function:creates_interaction?}}
   co_return std::make_pair(
     std::move(interactionHandle),
-    recv_{{function:self.cpp_name}}(returnState)
+    recv_{{function:cpp_name}}(returnState)
   );
 {{/function:creates_interaction?}}
 }

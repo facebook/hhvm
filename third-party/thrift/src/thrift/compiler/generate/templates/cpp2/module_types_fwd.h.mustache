@@ -29,7 +29,7 @@
 // BEGIN forward_declare_enums
 namespace {{program:qualified_namespace}} {
 {{#program:enums}}
-enum {{^enum:self.cpp_is_unscoped}}class {{/enum:self.cpp_is_unscoped}}{{enum:self.cpp_name}}{{#enum:self.cpp_enum_type}} : {{enum:self.cpp_enum_type}}{{/enum:self.cpp_enum_type}};
+enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}};
 {{/program:enums}}
 } // namespace {{program:qualified_namespace}}
 // END forward_declare_enums

@@ -46,9 +46,9 @@
 {{#service:interactions?}}
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-{{/service:interactions?}}{{#service:self.cpp_requires_method_decorator?}}
+{{/service:interactions?}}{{#service:cpp_requires_method_decorator?}}
 #include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
-{{/service:self.cpp_requires_method_decorator?}}
+{{/service:cpp_requires_method_decorator?}}
 
 namespace folly {
   class IOBuf;

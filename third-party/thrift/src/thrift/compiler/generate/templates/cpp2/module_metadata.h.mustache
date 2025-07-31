@@ -40,14 +40,14 @@ namespace md {
 {{#program:enums}}
 {{^program:no_metadata?}}
 template <>
-class EnumMetadata<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {
+class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 {{/program:no_metadata?}}
 {{#program:no_metadata?}}
 template <>
-class EnumMetadata<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>
+class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;
@@ -103,7 +103,7 @@ class ServiceMetadata<::{{> service_common/service_class_name}}> {
   friend class ServiceMetadata;
 
 {{#service:functions}}{{^function:starts_interaction?}}
-  static void gen_{{function:self.cpp_name}}(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_{{function:cpp_name}}(ThriftMetadata& metadata, ThriftService& context);
 {{/function:starts_interaction?}}{{/service:functions}}
 };
 {{/program:no_metadata?}}

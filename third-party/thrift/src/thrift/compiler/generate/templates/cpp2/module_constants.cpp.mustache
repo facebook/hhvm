@@ -75,10 +75,10 @@ namespace {{program:name}}_constants {
 }
 ::folly::Range<const ::std::string_view*> {{program:schema_name}}_uris() {
 {{#if program:schema_includes_const?}}
-  static const ::std::array<::std::string_view, {{(array.len program:self.uris)}}> uris = {
-    {{#program:self.uris}}
+  static const ::std::array<::std::string_view, {{(array.len program:uris)}}> uris = {
+    {{#program:uris}}
     "{{ . }}",
-    {{/program:self.uris}}
+    {{/program:uris}}
   };
   return ::folly::range(uris);
 {{#else}}

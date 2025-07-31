@@ -38,14 +38,14 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 {{#program:enums}}
-void EnumMetadata<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::gen(ThriftMetadata& metadata) {
+void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("{{program:name}}.{{enum:name}}", ::apache::thrift::metadata::ThriftEnum{});
   if (!res.second) {
     return;
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name() = "{{program:name}}.{{enum:name}}";
-  using EnumTraits = TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>;
+  using EnumTraits = TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
@@ -128,7 +128,7 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{/program:structs}}
 {{#program:services}}
 {{#service:functions}}{{^function:starts_interaction?}}
-void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:self.cpp_name}}([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}}([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "{{function:name}}";
 {{#function:return_type}}
@@ -177,7 +177,7 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
 {{#service:functions?}}
   static const ThriftFunctionGenerator functions[] = {
 {{#service:functions}}{{^function:starts_interaction?}}
-    ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:self.cpp_name}},
+    ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}},
 {{/function:starts_interaction?}}{{/service:functions}}
   };
   for (auto& function_gen : functions) {

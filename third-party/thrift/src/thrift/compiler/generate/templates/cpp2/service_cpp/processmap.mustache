@@ -25,17 +25,17 @@ const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncPr
 const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncProcessor::kOwnProcessMap_ {
 {{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
   {"{{function:name}}",
-    {&{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:self.cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:self.cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
-     &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:self.cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:self.cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+    {&{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 {{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
 {{#service:interactions}}{{#service:functions}}{{#function:return_type}}
   {"{{service:name}}.{{function:name}}",
-    {&{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{service:cpp_name}}_{{function:self.cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{service:cpp_name}}_{{function:self.cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
-     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{service:cpp_name}}_{{function:self.cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{service:cpp_name}}_{{function:self.cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+    {&{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 {{/function:return_type}}{{/service:functions}}{{/service:interactions}}
 };
 {{/service:functions?}}

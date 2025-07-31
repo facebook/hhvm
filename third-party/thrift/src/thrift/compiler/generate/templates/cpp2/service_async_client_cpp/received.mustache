@@ -15,25 +15,25 @@
   limitations under the License.
 
 }}{{^function:sync_returns_by_outparam?}}
-{{> types/return_type_client_no_handle}} {{> service_common/client_class_name}}::recv_{{function:self.cpp_name}}(::apache::thrift::ClientReceiveState& state) {
-{{^function:self.cpp_recv_arg?}}
-  auto ew = recv_wrapped_{{function:self.cpp_name}}(state);
-{{/function:self.cpp_recv_arg?}}
-{{#function:self.cpp_recv_arg?}}
+{{> types/return_type_client_no_handle}} {{> service_common/client_class_name}}::recv_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
+{{^function:cpp_recv_arg?}}
+  auto ew = recv_wrapped_{{function:cpp_name}}(state);
+{{/function:cpp_recv_arg?}}
+{{#function:cpp_recv_arg?}}
   {{> types/return_type_client_no_handle}} _return;
-  auto ew = recv_wrapped_{{function:self.cpp_name}}(_return, state);
-{{/function:self.cpp_recv_arg?}}
+  auto ew = recv_wrapped_{{function:cpp_name}}(_return, state);
+{{/function:cpp_recv_arg?}}
 {{/function:sync_returns_by_outparam?}}
 {{#function:sync_returns_by_outparam?}}
-void {{> service_common/client_class_name}}::recv_{{function:self.cpp_name}}({{function:self.cpp_return_type}}& _return, ::apache::thrift::ClientReceiveState& state) {
-  auto ew = recv_wrapped_{{function:self.cpp_name}}(_return, state);
+void {{> service_common/client_class_name}}::recv_{{function:cpp_name}}({{function:cpp_return_type}}& _return, ::apache::thrift::ClientReceiveState& state) {
+  auto ew = recv_wrapped_{{function:cpp_name}}(_return, state);
 {{/function:sync_returns_by_outparam?}}
   if (ew) {
     ew.throw_exception();
   }
 {{^function:sync_returns_by_outparam?}}
-{{#function:self.cpp_recv_arg?}}
+{{#function:cpp_recv_arg?}}
   return _return;
-{{/function:self.cpp_recv_arg?}}
+{{/function:cpp_recv_arg?}}
 {{/function:sync_returns_by_outparam?}}
 }

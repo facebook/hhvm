@@ -20,14 +20,14 @@
 
 }}{{#type:resolves_to_complex_return?}}{{!
 }}{{#function:stack_arguments?}}{{!
-  }}{{function:self.cpp_return_type}}{{!
+  }}{{function:cpp_return_type}}{{!
 }}{{/function:stack_arguments?}}{{!
 }}{{^function:stack_arguments?}}{{!
   }}std::unique_ptr<{{type:cpp_type}}>{{!
 }}{{/function:stack_arguments?}}{{!
 }}{{/type:resolves_to_complex_return?}}{{!
 }}{{^type:resolves_to_complex_return?}}{{!
-  }}{{function:self.cpp_return_type}}{{!
+  }}{{function:cpp_return_type}}{{!
 }}{{/type:resolves_to_complex_return?}}{{!
 
 }}{{#function:creates_interaction?}}{{!

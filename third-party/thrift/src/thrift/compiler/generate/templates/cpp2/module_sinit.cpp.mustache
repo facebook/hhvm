@@ -61,7 +61,7 @@ struct StaticInit {
       "{{program:schema_name}}",
       {{program:name}}_constants::{{program:schema_name}}_includes(),
       "{{program:autogen_path}}",
-      {{program:self.definition_key.buffer}},
+      {{program:definition_key.buffer}},
       {{program:name}}_constants::{{program:schema_name}}_uris()
     );
     {{/program:has_schema?}}

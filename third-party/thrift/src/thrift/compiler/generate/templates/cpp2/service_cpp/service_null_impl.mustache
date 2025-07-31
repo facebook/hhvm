@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}{{^function:creates_interaction?}}{{^function:eb}}{{^function:stream?}}
-{{> service_common/sync_function_return_type_server}} {{service:cpp_name}}SvNull::{{function:self.cpp_name}}({{> service_common/sync_function_return_param_server}}{{> service_common/function_param_list_server_commented_out}}) { {{!
+{{> service_common/sync_function_return_type_server}} {{service:cpp_name}}SvNull::{{function:cpp_name}}({{> service_common/sync_function_return_param_server}}{{> service_common/function_param_list_server_commented_out}}) { {{!
 }}{{#type:resolves_to_complex_return?}} }{{/type:resolves_to_complex_return?}}
 {{^type:resolves_to_complex_return?}}
 {{#type:enum?}}
@@ -27,9 +27,9 @@
 {{#function:sink?}}
   return {};
 {{/function:sink?}}
-{{#function:self.cpp_recv_arg?}}{{^type:enum?}}{{^function:stream?}}{{^function:sink?}}
+{{#function:cpp_recv_arg?}}{{^type:enum?}}{{^function:stream?}}{{^function:sink?}}
   return 0;
-{{/function:sink?}}{{/function:stream?}}{{/type:enum?}}{{/function:self.cpp_recv_arg?}}
+{{/function:sink?}}{{/function:stream?}}{{/type:enum?}}{{/function:cpp_recv_arg?}}
 }
 {{/type:resolves_to_complex_return?}}
 

@@ -31,7 +31,7 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/serv
 {{#program:has_schema?}}
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
   ret->schema = ::apache::thrift::schema::detail::mergeSchemas(::{{service:qualified_namespace}}::{{program:name}}_constants::{{program:schema_name}}_includes());
-  ret->definitions = { {"{{service:self.definition_key.buffer}}", {{service:self.definition_key.length}}} };
+  ret->definitions = { {"{{service:definition_key.buffer}}", {{service:definition_key.length}}} };
   return ret;
 {{/program:has_schema?}}
 {{^program:has_schema?}}

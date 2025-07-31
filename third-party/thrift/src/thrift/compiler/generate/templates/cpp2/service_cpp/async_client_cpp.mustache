@@ -31,8 +31,8 @@ namespace {{service:qualified_namespace}} {
 {{> service_async_client_cpp/future_functions}}
 
 {{#function:legacy_client_methods?}}{{^function:stream?}}
-void apache::thrift::Client<{{service:qualified_name}}>::{{function:self.cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{function:comma}}{{> service_common/function_param_list_client}}) {
-  {{function:self.cpp_name}}(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)){{function:comma}}{{> service_common/param_list}});
+void apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{function:comma}}{{> service_common/function_param_list_client}}) {
+  {{function:cpp_name}}(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)){{function:comma}}{{> service_common/param_list}});
 }
 {{/function:stream?}}{{/function:legacy_client_methods?}}
 {{/function:sink?}}
@@ -52,7 +52,7 @@ void apache::thrift::Client<{{service:qualified_name}}>::{{function:self.cpp_nam
 
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
-apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{type:name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:self.cpp_name}}() {
+apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{type:name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}() {
   return {{type:name}}(channel_, "{{type:name}}", interceptors_);
 }
 {{/function:starts_interaction?}}

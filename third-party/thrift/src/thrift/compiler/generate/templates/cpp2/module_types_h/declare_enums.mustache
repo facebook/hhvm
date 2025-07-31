@@ -20,30 +20,30 @@ namespace {{program:qualified_namespace}} {
 {{#program:enums}}
 
 {{> common/enum_docblock }}
-enum {{^enum:self.cpp_is_unscoped}}class {{/enum:self.cpp_is_unscoped}}{{enum:self.cpp_name}}{{#enum:self.cpp_enum_type}} : {{enum:self.cpp_enum_type}}{{/enum:self.cpp_enum_type}} {
+enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}} {
 {{#enum:values}}
-  {{enum_value:self.cpp_name}} = {{enum_value:value}},
+  {{enum_value:cpp_name}} = {{enum_value:value}},
 {{/enum:values}}
 };
-{{#enum:self.cpp_declare_bitwise_ops}}
+{{#enum:cpp_declare_bitwise_ops}}
 {{> module_types_h/enum_bitwise_ops}}
-{{/enum:self.cpp_declare_bitwise_ops}}
+{{/enum:cpp_declare_bitwise_ops}}
 {{/program:enums}}
 
 } // namespace {{program:qualified_namespace}}
 
 {{#program:enums}}
-template<> struct std::hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> :
-  ::apache::thrift::detail::enum_hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {};
+template<> struct std::hash<::{{program:qualified_namespace}}::{{enum:cpp_name}}> :
+  ::apache::thrift::detail::enum_hash<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {};
 {{/program:enums}}
 
 namespace apache::thrift {
 {{#program:enums}}
 
-template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {
-  using type = ::{{program:qualified_namespace}}::{{enum:self.cpp_name}};
+template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
+  using type = ::{{program:qualified_namespace}}::{{enum:cpp_name}};
 
-  static constexpr std::size_t const size = {{(array.len enum:self.values)}};
+  static constexpr std::size_t const size = {{(array.len enum:values)}};
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
   static const std::string_view __fbthrift_module_name_internal_do_not_use;
@@ -52,7 +52,7 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cp
   static bool findValue(std::string_view name, type* out) noexcept;
 
   FOLLY_ERASE static std::string_view typeName() noexcept {
-    return "{{enum:self.name}}";
+    return "{{enum:name}}";
   }
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
@@ -70,10 +70,10 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cp
     (void)findName(value, &ret);
     return ret.data();
   }
-  {{#if (not (array.empty? enum:self.values))}}
-  static constexpr type min() { return type::{{enum:self.cpp_min}}; }
-  static constexpr type max() { return type::{{enum:self.cpp_max}}; }
-  {{/if (not (array.empty? enum:self.values))}}
+  {{#if (not (array.empty? enum:values))}}
+  static constexpr type min() { return type::{{enum:cpp_min}}; }
+  static constexpr type max() { return type::{{enum:cpp_max}}; }
+  {{/if (not (array.empty? enum:values))}}
 };
 {{/program:enums}}
 

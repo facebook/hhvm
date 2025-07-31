@@ -14,35 +14,35 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}inline constexpr {{enum:self.cpp_name}} operator&({{enum:self.cpp_name}} a, {{enum:self.cpp_name}} b) {
-  using E = {{enum:self.cpp_name}};
+}}inline constexpr {{enum:cpp_name}} operator&({{enum:cpp_name}} a, {{enum:cpp_name}} b) {
+  using E = {{enum:cpp_name}};
   using U = std::underlying_type_t<E>;
   return static_cast<E>(static_cast<U>(a) & static_cast<U>(b));
 }
-inline constexpr {{enum:self.cpp_name}}& operator&=({{enum:self.cpp_name}}& a, {{enum:self.cpp_name}} b) {
+inline constexpr {{enum:cpp_name}}& operator&=({{enum:cpp_name}}& a, {{enum:cpp_name}} b) {
   return a = a & b;
 }
 
-inline constexpr {{enum:self.cpp_name}} operator|({{enum:self.cpp_name}} a, {{enum:self.cpp_name}} b) {
-  using E = {{enum:self.cpp_name}};
+inline constexpr {{enum:cpp_name}} operator|({{enum:cpp_name}} a, {{enum:cpp_name}} b) {
+  using E = {{enum:cpp_name}};
   using U = std::underlying_type_t<E>;
   return static_cast<E>(static_cast<U>(a) | static_cast<U>(b));
 }
-inline constexpr {{enum:self.cpp_name}}& operator|=({{enum:self.cpp_name}}& a, {{enum:self.cpp_name}} b) {
+inline constexpr {{enum:cpp_name}}& operator|=({{enum:cpp_name}}& a, {{enum:cpp_name}} b) {
   return a = a | b;
 }
 
-inline constexpr {{enum:self.cpp_name}} operator^({{enum:self.cpp_name}} a, {{enum:self.cpp_name}} b) {
-  using E = {{enum:self.cpp_name}};
+inline constexpr {{enum:cpp_name}} operator^({{enum:cpp_name}} a, {{enum:cpp_name}} b) {
+  using E = {{enum:cpp_name}};
   using U = std::underlying_type_t<E>;
   return static_cast<E>(static_cast<U>(a) ^ static_cast<U>(b));
 }
-inline constexpr {{enum:self.cpp_name}}& operator^=({{enum:self.cpp_name}}& a, {{enum:self.cpp_name}} b) {
+inline constexpr {{enum:cpp_name}}& operator^=({{enum:cpp_name}}& a, {{enum:cpp_name}} b) {
   return a = a ^ b;
 }
 
-inline constexpr {{enum:self.cpp_name}} operator~({{enum:self.cpp_name}} a) {
-  using E = {{enum:self.cpp_name}};
+inline constexpr {{enum:cpp_name}} operator~({{enum:cpp_name}} a) {
+  using E = {{enum:cpp_name}};
   using U = std::underlying_type_t<E>;
   return static_cast<E>(~static_cast<U>(a));
 }

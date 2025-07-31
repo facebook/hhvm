@@ -26,7 +26,7 @@ class {{service:cpp_name}}AsyncProcessor;
 } // namespace {{service:qualified_namespace}}
 
 namespace apache::thrift {
-{{#if service:self.cpp_requires_method_decorator?}}
+{{#if service:cpp_requires_method_decorator?}}
 
 // ServiceMethodDecorator is only supported for coroutines
 #if FOLLY_HAS_COROUTINES
@@ -35,7 +35,7 @@ namespace apache::thrift {
 
 #endif // FOLLY_HAS_COROUTINES
 
-{{/if service:self.cpp_requires_method_decorator?}}
+{{/if service:cpp_requires_method_decorator?}}
 template <>
 class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public ::{{service:qualified_namespace}}::{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

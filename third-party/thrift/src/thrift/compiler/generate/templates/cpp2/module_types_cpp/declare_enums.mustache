@@ -15,29 +15,29 @@
   limitations under the License.
 
 }}{{#program:split_enums}}
-{{#let empty_enum? = (array.empty? enum:self.values)}}
+{{#let empty_enum? = (array.empty? enum:values)}}
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::{{program:qualified_namespace}}::{{enum:self.cpp_name}} const*> const TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::values = {{!
+const std::string_view TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::{{program:qualified_namespace}}::{{enum:cpp_name}} const*> const TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::values = {{!
   }}{{#if empty_enum?}}{{!
     }}{};{{!
   }}{{#else}}{{!
-    }}folly::range(TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::values);{{!
+    }}folly::range(TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::values);{{!
   }}{{/if empty_enum?}}
-folly::Range<std::string_view const*> const TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::names = {{!
+folly::Range<std::string_view const*> const TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::names = {{!
   }}{{#if empty_enum?}}{{!
     }}{};{{!
   }}{{#else}}{{!
-    }}folly::range(TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::names);{{!
+    }}folly::range(TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::names);{{!
   }}{{/if empty_enum?}}
 
-bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 

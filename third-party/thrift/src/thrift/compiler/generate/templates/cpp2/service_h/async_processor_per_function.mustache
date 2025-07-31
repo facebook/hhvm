@@ -21,25 +21,25 @@
   void executeRequest_{{function:prefixed_name}}(apache::thrift::ServerRequest&& serverRequest);
 {{^function:oneway?}}
   template <class ProtocolIn_, class ProtocolOut_>
-{{^function:self.cpp_recv_arg?}}
+{{^function:cpp_recv_arg?}}
   static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx);
-{{/function:self.cpp_recv_arg?}}
-{{#function:self.cpp_recv_arg?}}
+{{/function:cpp_recv_arg?}}
+{{#function:cpp_recv_arg?}}
   {{^function:stream?}}{{^function:sink?}}
-  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:self.cpp_return_type}} const& _return);
+  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}} const& _return);
   {{/function:sink?}}{{/function:stream?}}
   {{#function:stream?}}
-  static apache::thrift::ResponseAndServerStreamFactory return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, {{function:self.cpp_return_type}}&& _return);
+  static apache::thrift::ResponseAndServerStreamFactory return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, {{function:cpp_return_type}}&& _return);
   {{/function:stream?}}
   {{#function:sink?}}
-  static std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:self.cpp_return_type}}&& _return, folly::Executor::KeepAlive<> executor);
+  static std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}}&& _return, folly::Executor::KeepAlive<> executor);
   {{/function:sink?}}
-{{/function:self.cpp_recv_arg?}}
+{{/function:cpp_recv_arg?}}
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_{{function:prefixed_name}}(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
-  std::unique_ptr<apache::thrift::Tile> {{function:self.cpp_name}}() {
-    return iface_->{{function:self.cpp_name}}();
+  std::unique_ptr<apache::thrift::Tile> {{function:cpp_name}}() {
+    return iface_->{{function:cpp_name}}();
   }
 {{/function:starts_interaction?}}{{/function:return_type}}

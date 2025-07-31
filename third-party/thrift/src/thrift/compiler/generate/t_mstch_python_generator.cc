@@ -300,6 +300,8 @@ class python_mstch_program : public mstch_program {
               &python_mstch_program::generate_immutable_types}},
             {"program:enable_abstract_types?",
              {with_no_caching, &python_mstch_program::enable_abstract_types}},
+            {"program:has_streaming_types?",
+             &python_mstch_program::has_streaming_types},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -403,6 +405,17 @@ class python_mstch_program : public mstch_program {
 
   mstch::node enable_abstract_types() {
     return python_context_->enable_abstract_types();
+  }
+
+  mstch::node has_streaming_types() {
+    for (const auto& service : program_->services()) {
+      for (const auto& function : service->functions()) {
+        if (function.stream()) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
  protected:

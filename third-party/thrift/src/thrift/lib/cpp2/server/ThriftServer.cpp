@@ -866,6 +866,7 @@ void ThriftServer::setupThreadManagerImpl() {
 
     // Ensure that either the thread manager or resource pools exist.
     if (!useResourcePools()) {
+      THRIFT_SERVER_EVENT(serviceNeedsResourcePoolsMigration).log(*this);
       DCHECK(resourcePoolSet().empty());
       // We always need a threadmanager for cpp2.
       auto explanation = fmt::format(

@@ -19,9 +19,12 @@
 
 {{#program:constants}}
 
-{{#constant:has_adapter?}}_fbthrift_unadapted_{{/constant:has_adapter?}}{{constant:name}} = {{#constant:generated?}} # @fbthrift_strip_from_fixtures
-{{/constant:generated?}}{{#constant:value}}{{> types/constant_value}}{{/constant:value}}{{#constant:generated?}}
-# @fbthrift_strip_from_fixtures{{/constant:generated?}}
+{{#constant:has_adapter?}}_fbthrift_unadapted_{{/constant:has_adapter?}}{{constant:name}} = {{#constant:generated?}} (
+# @fbthrift_strip_from_fixtures
+{{/constant:generated?}}{{#constant:value}}
+{{> types/constant_value}}{{/constant:value}}{{#constant:generated?}}
+# @fbthrift_strip_from_fixtures
+){{/constant:generated?}}
 {{#constant:has_adapter?}}
 {{constant:name}} = {{constant:adapter_name}}.from_thrift(
     _fbthrift_unadapted_{{constant:name}},

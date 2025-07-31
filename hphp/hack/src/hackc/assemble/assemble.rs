@@ -286,8 +286,13 @@ fn assemble_file_attributes(
     token_iter: &mut Lexer<'_>,
     file_attributes: &mut Vec<Attribute>,
 ) -> Result<()> {
-    parse!(token_iter, ".file_attributes" "[" <attrs:assemble_user_attr(),*> "]" ";");
-    file_attributes.extend(attrs);
+    token_iter.expect_str(Token::is_decl, ".file_attributes")?;
+    token_iter.expect(Token::is_open_bracket)?;
+    while !token_iter.peek_is(Token::is_close_bracket) {
+        file_attributes.push(assemble_user_attr(token_iter)?);
+    }
+    token_iter.expect(Token::is_close_bracket)?;
+    token_iter.expect(Token::is_semicolon)?;
     Ok(())
 }
 

@@ -423,8 +423,9 @@ string t_js_generator::render_const_value(
             "type error: " + type->name() + " has no field " +
             v_iter->first->get_string());
       }
-      if (v_iter != val.begin())
+      if (v_iter != val.begin()) {
         out << ",";
+      }
       out << render_const_value(&t_primitive_type::t_string(), v_iter->first);
       out << " : ";
       out << render_const_value(field_type, v_iter->second);
@@ -439,8 +440,9 @@ string t_js_generator::render_const_value(
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      if (v_iter != val.begin())
+      if (v_iter != val.begin()) {
         out << "," << endl;
+      }
 
       out << render_const_value(ktype, v_iter->first);
 
@@ -460,8 +462,9 @@ string t_js_generator::render_const_value(
     const vector<t_const_value*>& val = value->get_list();
     vector<t_const_value*>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      if (v_iter != val.begin())
+      if (v_iter != val.begin()) {
         out << ",";
+      }
       out << render_const_value(etype, *v_iter);
     }
     out << "]";
@@ -1446,8 +1449,9 @@ void t_js_generator::generate_serialize_field(
     string name = tfield->name();
 
     // Hack for when prefix is defined (always a hash ref)
-    if (!prefix.empty())
+    if (!prefix.empty()) {
       name = prefix + tfield->name();
+    }
 
     indent(out) << "output.";
 

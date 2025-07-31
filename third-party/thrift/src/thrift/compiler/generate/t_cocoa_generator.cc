@@ -2746,12 +2746,14 @@ void t_cocoa_generator::print_const_value(
   indent(out);
   if (type->is<t_primitive_type>()) {
     std::string v2 = render_const_value(out, type, value);
-    if (defval)
+    if (defval) {
       out << type_name(type) << " ";
+    }
     out << name << " = " << v2 << ";" << std::endl << std::endl;
   } else if (type->is<t_enum>()) {
-    if (defval)
+    if (defval) {
       out << type_name(type) << " ";
+    }
     out << name << " = " << render_const_value(out, type, value) << ";"
         << std::endl
         << std::endl;

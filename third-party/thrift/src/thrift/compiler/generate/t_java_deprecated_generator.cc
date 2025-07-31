@@ -1897,8 +1897,9 @@ void t_java_deprecated_generator::generate_generic_field_getters_setters(
     const std::string& field_name = field->name();
     std::string cap_name = get_cap_name(field_name);
 
-    if (type->is<t_list>() || type->is<t_map>() || type->is<t_set>())
+    if (type->is<t_list>() || type->is<t_map>() || type->is<t_set>()) {
       needs_suppress_warnings = true;
+    }
 
     indent_up();
     generate_reflection_setters(setter_stream, type, field_name, cap_name);
@@ -4150,8 +4151,9 @@ bool t_java_deprecated_generator::struct_has_naked_binary_fields(
   vector<t_field*>::const_iterator m_iter;
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-    if (type_has_naked_binary((*m_iter)->get_type()))
+    if (type_has_naked_binary((*m_iter)->get_type())) {
       return true;
+    }
   }
 
   return false;

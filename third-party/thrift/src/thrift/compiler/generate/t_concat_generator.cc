@@ -107,8 +107,9 @@ void t_concat_generator::generate_docstring_comment(
     const string& line_prefix,
     const string& contents,
     const string& comment_end) {
-  if (comment_start != "")
+  if (comment_start != "") {
     indent(out) << comment_start;
+  }
   stringstream docs(contents, ios_base::in);
   while (!docs.eof()) {
     char line[1024];
@@ -117,8 +118,9 @@ void t_concat_generator::generate_docstring_comment(
       indent(out) << line_prefix << line << std::endl;
     }
   }
-  if (comment_end != "")
+  if (comment_end != "") {
     indent(out) << comment_end;
+  }
 }
 
 std::string t_concat_generator::generate_structural_id(

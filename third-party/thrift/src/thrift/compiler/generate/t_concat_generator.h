@@ -275,8 +275,9 @@ class t_concat_generator : public t_generator {
     std::ostringstream out;
     bool underscore = false;
 
-    if (capitalize_first)
+    if (capitalize_first) {
       in = capitalize(in);
+    }
 
     for (size_t i = 0; i < in.size(); i++) {
       if (in[i] == '_') {

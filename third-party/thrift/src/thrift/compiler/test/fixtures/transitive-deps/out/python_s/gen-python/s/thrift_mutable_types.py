@@ -11,6 +11,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 from abc import ABCMeta as _fbthrift_ABCMeta
 import s.thrift_abstract_types as _fbthrift_abstract_types
+from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers

@@ -25,7 +25,7 @@ def read_file(path):
 
 def write_file(path, content):
     if d := os.path.dirname(path):
-        os.makedirs(d)
+        os.makedirs(d, exist_ok=True)
     with open(path, "w") as f:
         f.write(content)
 

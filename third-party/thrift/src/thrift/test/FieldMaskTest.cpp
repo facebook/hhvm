@@ -276,7 +276,7 @@ TEST(FieldMaskTest, IsNoneMapMask) {
 }
 
 TEST(FieldMaskTest, IsAllTypeMask) {
-  auto allTypeMask = [] {
+  auto createAllTypeMask = [] {
     Mask m;
     m.excludes_type().emplace();
     return m;
@@ -288,10 +288,10 @@ TEST(FieldMaskTest, IsAllTypeMask) {
     return m;
   };
 
-  EXPECT_TRUE((MaskRef{allTypeMask(), false}).isAllTypeMask());
+  EXPECT_TRUE((MaskRef{createAllTypeMask(), false}).isAllTypeMask());
   EXPECT_TRUE((MaskRef{noneTypeMask(), true}).isAllTypeMask());
   EXPECT_FALSE((MaskRef{noneTypeMask(), false}).isAllTypeMask());
-  EXPECT_FALSE((MaskRef{allTypeMask(), true}).isAllTypeMask());
+  EXPECT_FALSE((MaskRef{createAllTypeMask(), true}).isAllTypeMask());
   {
     Mask m;
     m.excludes().emplace()[5] = noneMask();
@@ -319,7 +319,7 @@ TEST(FieldMaskTest, IsAllTypeMask) {
 }
 
 TEST(FieldMaskTest, IsNoneTypeMask) {
-  auto allTypeMask = [] {
+  auto createAllTypeMask = [] {
     Mask m;
     m.excludes_type().emplace();
     return m;
@@ -332,8 +332,8 @@ TEST(FieldMaskTest, IsNoneTypeMask) {
   };
 
   EXPECT_TRUE((MaskRef{noneTypeMask(), false}).isNoneTypeMask());
-  EXPECT_TRUE((MaskRef{allTypeMask(), true}).isNoneTypeMask());
-  EXPECT_FALSE((MaskRef{allTypeMask(), false}).isNoneTypeMask());
+  EXPECT_TRUE((MaskRef{createAllTypeMask(), true}).isNoneTypeMask());
+  EXPECT_FALSE((MaskRef{createAllTypeMask(), false}).isNoneTypeMask());
   EXPECT_FALSE((MaskRef{noneTypeMask(), true}).isNoneTypeMask());
   {
     Mask m;

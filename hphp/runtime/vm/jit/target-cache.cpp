@@ -303,7 +303,6 @@ handleStaticCall(const Class* cls, const StringData* name,
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);
   auto const callCtx = MemberLookupContext(ctx, callerFunc);
-  auto const& packageInfo = g_context->getPackageInfo();
   if (!rds::isHandleInit(mceHandle, rds::NormalTag{})) {
     // If the low bit is set in mcePrime, we have not yet smashed the immediate
     // into the TC, or the value was not cacheable.
@@ -316,7 +315,7 @@ handleStaticCall(const Class* cls, const StringData* name,
         return func;
       }
       if (Cfg::Eval::EnforceDeployment &&
-          packageInfo.violatesDeploymentBoundary(*func)) {
+          g_context->getPackageInfo().violatesDeploymentBoundary(*func)) {
         // If we raised an exception, do not cache/smash the func.
         return func;
       }
@@ -352,7 +351,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       return func;
     }
     if (Cfg::Eval::EnforceDeployment &&
-        packageInfo.violatesDeploymentBoundary(*cls)) {
+        g_context->getPackageInfo().violatesDeploymentBoundary(*cls)) {
       // If we raised an exception, do not cache the func.
       return func;
     }

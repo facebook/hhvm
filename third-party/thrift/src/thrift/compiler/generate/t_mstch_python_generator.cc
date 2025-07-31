@@ -57,6 +57,13 @@ class python_generator_context {
 
   const t_program* program() const noexcept { return program_; }
 
+  const t_program* get_type_program(const t_type& type) const {
+    if (const t_program* p = type.program()) {
+      return p;
+    }
+    return program();
+  }
+
   void reset(
       const types_file_kind& types_file_kind,
       const type_kind& type_kind) noexcept {
@@ -807,38 +814,46 @@ class python_mstch_type : public mstch_type {
 
   mstch::node module_name() {
     return get_py3_namespace_with_name_and_prefix(
-               get_type_program(), get_option("root_module_prefix"))
+               python_context_->get_type_program(*type_),
+               get_option("root_module_prefix"))
         .append(fmt::format(".{}", python_context_->types_import_path()));
   }
 
   mstch::node module_mangle() {
     return mangle_program_path(
-               get_type_program(), get_option("root_module_prefix"))
+               python_context_->get_type_program(*type_),
+               get_option("root_module_prefix"))
         .append(fmt::format("__{}", python_context_->types_import_path()));
   }
 
   mstch::node patch_module_path() {
     return get_py3_namespace_with_name_and_prefix(
-               get_type_program(), get_option("root_module_prefix"))
+               python_context_->get_type_program(*type_),
+               get_option("root_module_prefix"))
         .append(".thrift_patch");
   }
 
-  mstch::node program_name() { return get_type_program()->name(); }
+  mstch::node program_name() {
+    return python_context_->get_type_program(*type_)->name();
+  }
 
   mstch::node metadata_path() {
     if (type_->is<t_enum>()) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_type_program(), get_option("root_module_prefix")) +
+                 python_context_->get_type_program(*type_),
+                 get_option("root_module_prefix")) +
           ".thrift_enums";
     }
     return get_py3_namespace_with_name_and_prefix(
-               get_type_program(), get_option("root_module_prefix")) +
+               python_context_->get_type_program(*type_),
+               get_option("root_module_prefix")) +
         ".thrift_metadata";
   }
 
   mstch::node py3_namespace() {
     std::ostringstream ss;
-    for (const auto& path : get_py3_namespace(get_type_program())) {
+    for (const auto& path :
+         get_py3_namespace(python_context_->get_type_program(*type_))) {
       ss << path << ".";
     }
     return ss.str();
@@ -875,13 +890,6 @@ class python_mstch_type : public mstch_type {
   }
 
  protected:
-  const t_program* get_type_program() const {
-    if (const t_program* p = type_->program()) {
-      return p;
-    }
-    return python_context_->program();
-  }
-
   bool is_type_defined_in_the_current_program() {
     if (const t_program* prog = type_->program()) {
       if (prog != python_context_->program()) {

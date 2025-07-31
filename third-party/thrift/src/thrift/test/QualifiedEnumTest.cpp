@@ -24,14 +24,14 @@ using namespace apache::thrift;
 using namespace cpp2;
 
 TEST(QualifiedEnums, Defaults) {
-  MyQualifiedStruct empty;
+  MyQualifiedStruct emptyStruct;
 
   BinaryProtocolWriter protWriter;
   size_t bufSize =
-      Cpp2Ops<MyQualifiedStruct>::serializedSize(&protWriter, &empty);
+      Cpp2Ops<MyQualifiedStruct>::serializedSize(&protWriter, &emptyStruct);
   folly::IOBufQueue queue;
   protWriter.setOutput(&queue, bufSize);
-  Cpp2Ops<MyQualifiedStruct>::write(&protWriter, &empty);
+  Cpp2Ops<MyQualifiedStruct>::write(&protWriter, &emptyStruct);
 
   auto buf = queue.move();
   BinaryProtocolReader protReader;

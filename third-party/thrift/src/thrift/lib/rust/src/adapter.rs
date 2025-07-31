@@ -16,7 +16,10 @@
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt::Debug;
+use std::hash::Hash;
 use std::marker::PhantomData;
 
 use crate::metadata::ThriftAnnotations;
@@ -408,6 +411,148 @@ where
                 )
             })
             .collect::<Self::AdaptedType>()
+    }
+}
+
+impl<KA, KV> ThriftAdapter for HashMap<KA, KV>
+where
+    KA: ThriftAdapter,
+    KV: ThriftAdapter,
+    KA::StandardType: Eq + Hash,
+    KA::AdaptedType: Eq + Hash,
+{
+    type StandardType = HashMap<KA::StandardType, KV::StandardType>;
+    type AdaptedType = HashMap<KA::AdaptedType, KV::AdaptedType>;
+
+    type Error = anyhow::Error;
+
+    #[inline]
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|(key, val)| {
+                Ok((
+                    KA::from_thrift(key).map_err(Into::<anyhow::Error>::into)?,
+                    KV::from_thrift(val).map_err(Into::<anyhow::Error>::into)?,
+                ))
+            })
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        value
+            .iter()
+            .map(|(key, val)| (KA::to_thrift(key), KV::to_thrift(val)))
+            .collect::<Self::StandardType>()
+    }
+
+    #[inline]
+    fn from_thrift_field<T: ThriftAnnotations>(
+        value: Self::StandardType,
+        field_id: i16,
+    ) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|(key, val)| {
+                Ok((
+                    KA::from_thrift_field::<T>(key, field_id)
+                        .map_err(Into::<anyhow::Error>::into)?,
+                    KV::from_thrift_field::<T>(val, field_id)
+                        .map_err(Into::<anyhow::Error>::into)?,
+                ))
+            })
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift_field<T: ThriftAnnotations>(
+        value: &Self::AdaptedType,
+        field_id: i16,
+    ) -> Self::StandardType {
+        value
+            .iter()
+            .map(|(key, val)| {
+                (
+                    KA::to_thrift_field::<T>(key, field_id),
+                    KV::to_thrift_field::<T>(val, field_id),
+                )
+            })
+            .collect::<Self::StandardType>()
+    }
+
+    #[inline]
+    fn from_thrift_default<T: ThriftAnnotations>(
+        value: Self::StandardType,
+        field_id: i16,
+    ) -> Self::AdaptedType {
+        value
+            .into_iter()
+            .map(|(key, val)| {
+                (
+                    KA::from_thrift_default::<T>(key, field_id),
+                    KV::from_thrift_default::<T>(val, field_id),
+                )
+            })
+            .collect::<Self::AdaptedType>()
+    }
+}
+
+impl<A> ThriftAdapter for HashSet<A>
+where
+    A: ThriftAdapter,
+    A::StandardType: Eq + Hash,
+    A::AdaptedType: Eq + Hash,
+{
+    type StandardType = HashSet<A::StandardType>;
+    type AdaptedType = HashSet<A::AdaptedType>;
+
+    type Error = A::Error;
+
+    #[inline]
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift(elem))
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        value.iter().map(|elem| A::to_thrift(elem)).collect()
+    }
+
+    #[inline]
+    fn from_thrift_field<T: ThriftAnnotations>(
+        value: Self::StandardType,
+        field_id: i16,
+    ) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift_field::<T>(elem, field_id))
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift_field<T: ThriftAnnotations>(
+        value: &Self::AdaptedType,
+        field_id: i16,
+    ) -> Self::StandardType {
+        value
+            .iter()
+            .map(|elem| A::to_thrift_field::<T>(elem, field_id))
+            .collect()
+    }
+
+    #[inline]
+    fn from_thrift_default<T: ThriftAnnotations>(
+        value: Self::StandardType,
+        field_id: i16,
+    ) -> Self::AdaptedType {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift_default::<T>(elem, field_id))
+            .collect()
     }
 }
 

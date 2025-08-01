@@ -18,11 +18,6 @@ package com.facebook.thrift.util.resources;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.capForkJoinThreads;
 import static reactor.core.Exceptions.unwrap;
 
-import com.google.common.base.Preconditions;
-import io.netty.util.internal.PlatformDependent;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 import org.slf4j.LoggerFactory;
 import reactor.core.Disposable;
 import reactor.core.Exceptions;
@@ -49,38 +43,6 @@ import reactor.util.Loggers;
 public final class ForkJoinPoolScheduler implements ThriftScheduler {
   private static final org.slf4j.Logger LOGGER =
       LoggerFactory.getLogger(ForkJoinPoolScheduler.class);
-  private static MethodHandle FORK_JOIN_POOL_CONSTRUCTOR;
-  private static final int JAVA_VERSION = PlatformDependent.javaVersion();
-
-  static {
-    if (JAVA_VERSION >= 11) {
-      try {
-        // Java 11+ advanced constructor: ForkJoinPool(int parallelism, ForkJoinWorkerThreadFactory
-        // factory, UncaughtExceptionHandler handler, boolean asyncMode, int corePoolSize, int
-        // maximumPoolSize, int minimumRunnable, Predicate<? super ForkJoinPool> saturate, long
-        // keepAliveTime, TimeUnit unit)
-        FORK_JOIN_POOL_CONSTRUCTOR =
-            MethodHandles.lookup()
-                .findConstructor(
-                    ForkJoinPool.class,
-                    MethodType.methodType(
-                        void.class,
-                        int.class,
-                        ForkJoinPool.ForkJoinWorkerThreadFactory.class,
-                        Thread.UncaughtExceptionHandler.class,
-                        boolean.class,
-                        int.class,
-                        int.class,
-                        int.class,
-                        Predicate.class,
-                        long.class,
-                        TimeUnit.class));
-      } catch (NoSuchMethodException | IllegalAccessException e) {
-        LOGGER.error(
-            "An error occurred while trying to get the Java 11+ ForkJoinPool constructor", e);
-      }
-    }
-  }
 
   private ForkJoinPoolSchedulerStats stats;
 
@@ -170,39 +132,9 @@ public final class ForkJoinPoolScheduler implements ThriftScheduler {
     this.stats = new ForkJoinPoolSchedulerStats(name);
     this.scheduler = scheduler;
     this.disposeScheduler = disposeScheduler;
-
-    /*
-     * Java 11 introduced an advance constructor for the ForkJoinPool that allows us to configure the
-     * max pool size. We want to use this constructor and set maximumPoolSize = parallelism to avoid threads
-     * expanding to MAX_CAP = 0x7fff. This has been seen in some corner cases where tasks block and the
-     * thread pool is expanded up to 32767 or 0x7fff threads. This causes hosts to become effectively
-     * unresponsive. This can be removed once Java 8 is deprecated.
-     */
-    if (JAVA_VERSION >= 11 && capForkJoinThreads) {
-      Preconditions.checkNotNull(
-          FORK_JOIN_POOL_CONSTRUCTOR,
-          "Unable to determine ForkJoinPool constructor for Java version " + JAVA_VERSION);
-
-      try {
-        this.pool =
-            (ForkJoinPool)
-                FORK_JOIN_POOL_CONSTRUCTOR.invokeExact(
-                    parallelism, // parallelism
-                    workerThreadFactory, // factory
-                    (Thread.UncaughtExceptionHandler) this::uncaughtException, // handler
-                    true, // asyncMode
-                    0, // corePoolSize
-                    parallelism, // maximumPoolSize
-                    1, // minimumRunnable
-                    (Predicate<? super ForkJoinPool>) null, // saturate
-                    60L, // keepAliveTime
-                    TimeUnit.SECONDS); // unit
-      } catch (Throwable e) {
-        throw new RuntimeException("Failed to create ForkJoinPool using MH.invokeExact()", e);
-      }
-    } else {
-      this.pool = new ForkJoinPool(parallelism, workerThreadFactory, this::uncaughtException, true);
-    }
+    this.pool =
+        ForkJoinPoolFactory.create(
+            parallelism, workerThreadFactory, this::uncaughtException, capForkJoinThreads);
   }
 
   public Map<String, Long> getStats() {

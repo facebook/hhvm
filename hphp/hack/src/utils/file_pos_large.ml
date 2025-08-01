@@ -24,8 +24,6 @@ let pp fmt pos =
 
 let show pos = Format.asprintf "%a" pp pos
 
-let compare : t -> t -> int = compare
-
 let dummy = { pos_lnum = 0; pos_bol = 0; pos_offset = -1 }
 
 let is_dummy = equal dummy

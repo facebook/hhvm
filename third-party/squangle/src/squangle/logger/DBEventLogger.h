@@ -91,7 +91,7 @@ class EnumHelper {
   }
 };
 
-typedef std::chrono::duration<uint64_t, std::micro> Duration;
+using Duration = std::chrono::duration<uint64_t, std::micro>;
 
 class SquangleLoggingData {
  public:
@@ -255,7 +255,7 @@ class DBLoggerBase {
   const std::string api_name_;
 };
 
-typedef DBLoggerBase<SquangleLoggingData> SquangleLoggerBase;
+using SquangleLoggerBase = DBLoggerBase<SquangleLoggingData>;
 // This is a simple version of the base logger as an example for other versions.
 class DBSimpleLogger : public SquangleLoggerBase {
  public:

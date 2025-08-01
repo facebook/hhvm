@@ -1013,6 +1013,8 @@ std::unique_ptr<t_program_bundle> parse_ast(
       full_root_path,
       already_parsed ? already_parsed->root_program() : nullptr);
   root_prog->set_use_global_resolution(params.use_global_resolution);
+  root_prog->set_typedef_uri_requires_annotation(
+      params.typedef_uri_requires_annotation);
   auto programs =
       std::make_unique<t_program_bundle>(std::move(root_prog), already_parsed);
   assert(
@@ -1107,6 +1109,8 @@ std::unique_ptr<t_program_bundle> parse_ast(
             std::make_unique<t_program>(*resolved_path, *full_path, &parent);
         program = included_program.get();
         program->set_use_global_resolution(params.use_global_resolution);
+        program->set_typedef_uri_requires_annotation(
+            params.typedef_uri_requires_annotation);
         program->global_scope()->add_program(*program);
         programs->add_program(std::move(included_program));
         try {

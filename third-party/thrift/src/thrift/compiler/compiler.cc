@@ -89,6 +89,9 @@ Options:
               Allow negative enum vals (DEPRECATED)
   --allow-64bit-consts
               Do not print warnings about using 64-bit constants
+  --typedef-uri-requires-annotation=true|false
+              Disable URI support for typedefs without the
+              @thrift.AllowLegacyTypedefUri annotation.
 
   --gen STR   Generate code with a dynamically-registered generator.
               STR has the form language[:key1=val1[,key2,[key3=val3]]].
@@ -729,6 +732,10 @@ std::string parse_args(
       // no-op
     } else if (flag == "allow-64bit-consts") {
       pparams.allow_64bit_consts = true;
+    } else if (flag == "typedef-uri-requires-annotation=true") {
+      pparams.typedef_uri_requires_annotation = true;
+    } else if (flag == "typedef-uri-requires-annotation=false") {
+      pparams.typedef_uri_requires_annotation = false;
     } else if (flag == "record-genfiles") {
       const std::string* arg = consume_arg("genfile file specification");
       if (arg == nullptr) {
@@ -933,6 +940,9 @@ void record_invocation_params(
   parse_params_metric.add(
       "allow_missing_includes=" +
       std::to_string(pparams.allow_missing_includes));
+  parse_params_metric.add(
+      "typedef_uri_requires_annotation=" +
+      std::to_string(pparams.typedef_uri_requires_annotation));
   parse_params_metric.add(
       "use_legacy_type_ref_resolution=" +
       std::to_string(pparams.use_legacy_type_ref_resolution));

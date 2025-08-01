@@ -204,3 +204,97 @@ TEST(ParserTest, struct_annotation) {
   ASSERT_EQ(m[0].first->get_string(), "name");
   ASSERT_EQ(m[0].second->get_string(), "Foo");
 }
+
+TEST(ParserTest, typedef_uri_requires_annotation) {
+  source_manager source_mgr;
+  source_mgr.add_virtual_file("test.thrift", R"(
+    package "meta.com/thrift/test"
+
+    include "thrift/annotation/thrift.thrift"
+
+    struct MyStruct {}
+
+    typedef MyStruct MyTypedef
+
+    @thrift.AllowLegacyTypedefUri
+    typedef MyStruct MyLegacyTypedef
+
+    @thrift.Uri{value="meta.com/thrift/test_explicit/ExplicitTypedef"}
+    typedef MyStruct MyExplicitTypedef
+
+    @thrift.AllowLegacyTypedefUri
+    @thrift.Uri{value="meta.com/thrift/test_explicit/ExplicitLegacyTypedef"}
+    typedef MyStruct MyExplicitLegacyTypedef
+  )");
+  diagnostics_engine diags(source_mgr, [](const diagnostic&) {});
+
+  parsing_params params;
+  params.typedef_uri_requires_annotation = false;
+  if (char* includes = std::getenv("IMPLICIT_INCLUDES")) {
+    params.incl_searchpath.emplace_back(includes);
+  }
+
+  const auto expect_name_and_uri = [](const t_type* type,
+                                      const std::string_view name,
+                                      const std::string& uri) {
+    EXPECT_EQ(name, type->get_scoped_name());
+    EXPECT_EQ(uri, type->uri());
+  };
+
+  // Parse with enforcement disabled
+  std::unique_ptr<t_program_bundle> enforce_off =
+      parse_ast(source_mgr, diags, "test.thrift", params);
+  EXPECT_FALSE(diags.has_errors());
+
+  expect_name_and_uri(
+      enforce_off->root_program()->structs_and_unions()[0],
+      "test.MyStruct",
+      "meta.com/thrift/test/MyStruct");
+
+  expect_name_and_uri(
+      enforce_off->root_program()->typedefs()[0],
+      "test.MyTypedef",
+      "meta.com/thrift/test/MyTypedef");
+
+  expect_name_and_uri(
+      enforce_off->root_program()->typedefs()[1],
+      "test.MyLegacyTypedef",
+      "meta.com/thrift/test/MyLegacyTypedef");
+
+  expect_name_and_uri(
+      enforce_off->root_program()->typedefs()[2],
+      "test.MyExplicitTypedef",
+      "meta.com/thrift/test_explicit/ExplicitTypedef");
+
+  expect_name_and_uri(
+      enforce_off->root_program()->typedefs()[3],
+      "test.MyExplicitLegacyTypedef",
+      "meta.com/thrift/test_explicit/ExplicitLegacyTypedef");
+
+  // Parse with enforcement enabled
+  params.typedef_uri_requires_annotation = true;
+  std::unique_ptr<t_program_bundle> enforce_on =
+      parse_ast(source_mgr, diags, "test.thrift", params);
+  EXPECT_FALSE(diags.has_errors());
+
+  expect_name_and_uri(
+      enforce_on->root_program()->structs_and_unions()[0],
+      "test.MyStruct",
+      "meta.com/thrift/test/MyStruct");
+
+  expect_name_and_uri(
+      enforce_on->root_program()->typedefs()[0], "test.MyTypedef", "");
+
+  expect_name_and_uri(
+      enforce_on->root_program()->typedefs()[1],
+      "test.MyLegacyTypedef",
+      "meta.com/thrift/test/MyLegacyTypedef");
+
+  expect_name_and_uri(
+      enforce_on->root_program()->typedefs()[2], "test.MyExplicitTypedef", "");
+
+  expect_name_and_uri(
+      enforce_on->root_program()->typedefs()[3],
+      "test.MyExplicitLegacyTypedef",
+      "meta.com/thrift/test_explicit/ExplicitLegacyTypedef");
+}

@@ -102,12 +102,12 @@ inline std::pair<std::string, uint16_t> hostPortFromString(
 
 // Argument handler function
 
-typedef std::function<void(const std::string&)> FizzCommandArgHandler;
+using FizzCommandArgHandler = std::function<void(const std::string&)>;
 struct FizzCommandArgHandlerInfo {
   bool hasVariable;
   FizzCommandArgHandler handler;
 };
-typedef std::map<std::string, FizzCommandArgHandlerInfo> FizzArgHandlerMap;
+using FizzArgHandlerMap = std::map<std::string, FizzCommandArgHandlerInfo>;
 
 int parseArguments(
     std::vector<std::string> argv,

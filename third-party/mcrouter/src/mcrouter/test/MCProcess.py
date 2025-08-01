@@ -165,7 +165,7 @@ class MCProcess(ProcessBase):
         # memcached could take little longer to initialize
         if memcached:
             time.sleep(3)
-        self.max_retries = max_retries
+        self.max_retries = 20 if max_retries is None else max_retries
         self.deletes = 0
         self.others = 0
         self.socket = None
@@ -224,13 +224,15 @@ class MCProcess(ProcessBase):
                 self.connect()
                 break
             except Exception as e:
-                print(f"Caught exception while connect. errno: {e.errno}")
+                retry_count += 1
+                print(
+                    f"Cannot connect (errno: {e.errno}). Retry {retry_count} of {self.max_retries}."
+                )
                 self.disconnect()
                 if not self.is_alive():
                     print("Process exited unexpectedly!")
                     self.terminate()  # This will print logs as well
                     raise
-                retry_count += 1
                 # If we defined a retry count, retry until that's exceeded.
                 if not self.max_retries or retry_count < self.max_retries:
                     time.sleep(1)

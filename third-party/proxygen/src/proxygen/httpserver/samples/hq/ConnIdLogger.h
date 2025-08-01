@@ -45,7 +45,7 @@ struct ConnIdLogSink : google::LogSink {
       return;
     }
     std::vector<folly::StringPiece> cids;
-    folly::split(",", post, cids);
+    folly::split(',', post, cids);
     for (const auto& cidSp : cids) {
       if (!std::all_of(cidSp.begin(), cidSp.end(), [](char c) {
             return std::isalnum(c);

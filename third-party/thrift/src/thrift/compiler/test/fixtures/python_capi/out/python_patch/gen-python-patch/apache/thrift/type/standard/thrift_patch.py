@@ -107,6 +107,8 @@ class TypeUriPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: TypeUriPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class TypeNamePatch(
@@ -347,4 +349,6 @@ class TypeNamePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: TypeNamePatch) -> None:
+        self._patch.merge(other._patch)
 

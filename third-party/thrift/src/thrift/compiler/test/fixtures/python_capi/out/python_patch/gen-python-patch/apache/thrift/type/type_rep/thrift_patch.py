@@ -110,6 +110,8 @@ class ProtocolUnionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ProtocolUnionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class TypeStructPatch(
@@ -155,6 +157,8 @@ class TypeStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: TypeStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class CompressedProtocolStructPatch(
@@ -200,6 +204,8 @@ class CompressedProtocolStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: CompressedProtocolStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class CompressionSpecStructPatch(
@@ -258,4 +264,6 @@ class CompressionSpecStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: CompressionSpecStructPatch) -> None:
+        self._patch.merge(other._patch)
 

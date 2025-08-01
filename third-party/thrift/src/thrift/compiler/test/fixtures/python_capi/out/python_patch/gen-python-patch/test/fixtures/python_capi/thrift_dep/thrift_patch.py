@@ -81,6 +81,8 @@ class DepStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: DepStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SomeErrorPatch(
@@ -113,4 +115,6 @@ class SomeErrorPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SomeErrorPatch) -> None:
+        self._patch.merge(other._patch)
 

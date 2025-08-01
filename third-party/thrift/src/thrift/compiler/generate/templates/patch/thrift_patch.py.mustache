@@ -100,5 +100,7 @@ class {{struct:py_name}}Patch(
         return patch
     {{/if (not program:safe_patch?)}}
 
+    def merge(self, other: {{struct:py_name}}Patch) -> None:
+        self._patch.merge(other._patch)
 
 {{/program:structs}}

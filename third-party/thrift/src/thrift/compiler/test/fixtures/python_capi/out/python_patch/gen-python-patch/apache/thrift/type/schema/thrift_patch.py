@@ -79,6 +79,8 @@ class AnnotationPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: AnnotationPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class StructuredAnnotationPatch(
@@ -126,6 +128,8 @@ class StructuredAnnotationPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: StructuredAnnotationPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class DecodedUriPatch(
@@ -212,6 +216,8 @@ class DecodedUriPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: DecodedUriPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class DefinitionAttrsPatch(
@@ -341,6 +347,8 @@ class DefinitionAttrsPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: DefinitionAttrsPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SourceRangePatch(
@@ -425,6 +433,8 @@ class SourceRangePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SourceRangePatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class DocBlockPatch(
@@ -470,6 +480,8 @@ class DocBlockPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: DocBlockPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class InterfaceRefPatch(
@@ -502,6 +514,8 @@ class InterfaceRefPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: InterfaceRefPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class EnumValuePatch(
@@ -547,6 +561,8 @@ class EnumValuePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: EnumValuePatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class EnumPatch(
@@ -592,6 +608,8 @@ class EnumPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: EnumPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class FieldPatch(
@@ -676,6 +694,8 @@ class FieldPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: FieldPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class StructPatch(
@@ -721,6 +741,8 @@ class StructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: StructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class UnionPatch(
@@ -766,6 +788,8 @@ class UnionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: UnionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ExceptionPatch(
@@ -850,6 +874,8 @@ class ExceptionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ExceptionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ParamlistPatch(
@@ -882,6 +908,8 @@ class ParamlistPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ParamlistPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class StreamPatch(
@@ -927,6 +955,8 @@ class StreamPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: StreamPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SinkPatch(
@@ -998,6 +1028,8 @@ class SinkPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SinkPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class InteractionPatch(
@@ -1043,6 +1075,8 @@ class InteractionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: InteractionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ReturnTypePatch(
@@ -1114,6 +1148,8 @@ class ReturnTypePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ReturnTypePatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class FunctionPatch(
@@ -1237,6 +1273,8 @@ class FunctionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: FunctionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ServicePatch(
@@ -1295,6 +1333,8 @@ class ServicePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ServicePatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ConstPatch(
@@ -1353,6 +1393,8 @@ class ConstPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ConstPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class TypedefPatch(
@@ -1398,6 +1440,8 @@ class TypedefPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: TypedefPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class DefinitionPatch(
@@ -1521,6 +1565,8 @@ class DefinitionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: DefinitionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ProgramPatch(
@@ -1648,6 +1694,8 @@ class ProgramPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ProgramPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SchemaPatch(
@@ -1777,6 +1825,8 @@ class SchemaPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SchemaPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SourceInfoPatch(
@@ -1839,6 +1889,8 @@ class SourceInfoPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SourceInfoPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class IdentifierRefPatch(
@@ -1897,6 +1949,8 @@ class IdentifierRefPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: IdentifierRefPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class IncludeRefPatch(
@@ -1942,4 +1996,6 @@ class IncludeRefPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: IncludeRefPatch) -> None:
+        self._patch.merge(other._patch)
 

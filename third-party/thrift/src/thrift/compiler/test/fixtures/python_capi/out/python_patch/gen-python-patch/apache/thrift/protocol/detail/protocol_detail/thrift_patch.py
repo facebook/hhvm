@@ -83,6 +83,8 @@ class ObjectPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ObjectPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ValuePatch(
@@ -273,4 +275,6 @@ class ValuePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ValuePatch) -> None:
+        self._patch.merge(other._patch)
 

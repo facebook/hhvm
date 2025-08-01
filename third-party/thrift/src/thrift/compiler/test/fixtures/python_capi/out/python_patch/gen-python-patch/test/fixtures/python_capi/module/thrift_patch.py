@@ -167,6 +167,8 @@ class MyStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MyDataItemPatch(
@@ -199,6 +201,8 @@ class MyDataItemPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyDataItemPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class TransitiveDoublerPatch(
@@ -218,6 +222,8 @@ class TransitiveDoublerPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: TransitiveDoublerPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class DoubledPairPatch(
@@ -263,6 +269,8 @@ class DoubledPairPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: DoubledPairPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class StringPairPatch(
@@ -308,6 +316,8 @@ class StringPairPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: StringPairPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class EmptyStructPatch(
@@ -327,6 +337,8 @@ class EmptyStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: EmptyStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class PrimitiveStructPatch(
@@ -554,6 +566,8 @@ class PrimitiveStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: PrimitiveStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class AdaptedFieldsPatch(
@@ -625,6 +639,8 @@ class AdaptedFieldsPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: AdaptedFieldsPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ListStructPatch(
@@ -761,6 +777,8 @@ class ListStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ListStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SetStructPatch(
@@ -871,6 +889,8 @@ class SetStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SetStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MapStructPatch(
@@ -1038,6 +1058,8 @@ class MapStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MapStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ComposeStructPatch(
@@ -1187,6 +1209,8 @@ class ComposeStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ComposeStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class OnionPatch(
@@ -1299,6 +1323,8 @@ class OnionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: OnionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SomeBinaryPatch(
@@ -1357,4 +1383,6 @@ class SomeBinaryPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SomeBinaryPatch) -> None:
+        self._patch.merge(other._patch)
 

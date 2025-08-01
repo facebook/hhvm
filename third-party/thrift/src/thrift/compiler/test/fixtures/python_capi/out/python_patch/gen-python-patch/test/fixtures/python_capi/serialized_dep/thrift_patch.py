@@ -107,6 +107,8 @@ class SerializedStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SerializedStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SerializedUnionPatch(
@@ -152,6 +154,8 @@ class SerializedUnionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SerializedUnionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class SerializedErrorPatch(
@@ -210,6 +214,8 @@ class SerializedErrorPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: SerializedErrorPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MarshalStructPatch(
@@ -281,6 +287,8 @@ class MarshalStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MarshalStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MarshalUnionPatch(
@@ -326,6 +334,8 @@ class MarshalUnionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MarshalUnionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MarshalErrorPatch(
@@ -384,4 +394,6 @@ class MarshalErrorPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MarshalErrorPatch) -> None:
+        self._patch.merge(other._patch)
 

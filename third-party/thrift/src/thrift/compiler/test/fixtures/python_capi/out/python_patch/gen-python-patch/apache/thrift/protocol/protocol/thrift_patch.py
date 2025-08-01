@@ -107,6 +107,8 @@ class MaskedDataPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MaskedDataPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class EncodedValuePatch(
@@ -152,6 +154,8 @@ class EncodedValuePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: EncodedValuePatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MaskedProtocolDataPatch(
@@ -223,4 +227,6 @@ class MaskedProtocolDataPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MaskedProtocolDataPatch) -> None:
+        self._patch.merge(other._patch)
 

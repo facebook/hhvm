@@ -172,6 +172,8 @@ class MyStructPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyStructPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ContainersPatch(
@@ -232,6 +234,8 @@ class ContainersPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ContainersPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MyDataItemPatch(
@@ -251,6 +255,8 @@ class MyDataItemPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyDataItemPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MyUnionPatch(
@@ -322,6 +328,8 @@ class MyUnionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyUnionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MyExceptionPatch(
@@ -393,6 +401,8 @@ class MyExceptionPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyExceptionPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class MyExceptionWithMessagePatch(
@@ -464,6 +474,8 @@ class MyExceptionWithMessagePatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: MyExceptionWithMessagePatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class ReservedKeywordPatch(
@@ -496,6 +508,8 @@ class ReservedKeywordPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: ReservedKeywordPatch) -> None:
+        self._patch.merge(other._patch)
 
 
 class UnionToBeRenamedPatch(
@@ -528,4 +542,6 @@ class UnionToBeRenamedPatch(
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
+    def merge(self, other: UnionToBeRenamedPatch) -> None:
+        self._patch.merge(other._patch)
 

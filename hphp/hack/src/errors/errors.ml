@@ -41,6 +41,8 @@ type per_file_errors = error list
 
 type t = error list Relative_path.Map.t [@@deriving eq, show]
 
+type severity = User_error.severity
+
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc -> f path v acc)
 

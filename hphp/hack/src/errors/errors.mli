@@ -26,6 +26,8 @@ type per_file_errors
 (** The type of collections of errors *)
 type t [@@deriving eq, show]
 
+type severity = User_error.severity
+
 val iter : t -> f:(error -> unit) -> unit
 
 module Error : sig

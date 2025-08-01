@@ -408,6 +408,48 @@
           "column" : 43
         }
       }
+    },
+    "MigrationBlockingAllowInheritance" : {
+      "lineno" : 220,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 220,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 221,
+          "column" : 44
+        }
+      }
+    },
+    "MigrationBlockingLegacyJSONSerialization" : {
+      "lineno" : 229,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Union" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 229,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 230,
+          "column" : 51
+        }
+      }
     }
   }
 }

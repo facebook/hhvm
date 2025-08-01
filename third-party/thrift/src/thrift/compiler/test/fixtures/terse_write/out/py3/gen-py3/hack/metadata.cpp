@@ -25,6 +25,8 @@ namespace hack {
   ::apache::thrift::detail::md::StructMetadata<StructAsTrait>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ModuleInternal>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GenerateClientMethodsWithHeaders>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<MigrationBlockingAllowInheritance>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<MigrationBlockingLegacyJSONSerialization>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

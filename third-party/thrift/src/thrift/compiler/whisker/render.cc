@@ -524,7 +524,8 @@ class virtual_machine {
               [&](ast::variable_lookup::this_ref) -> source_range {
                 return variable_lookup.loc;
               },
-              [&](const std::vector<ast::identifier>& chain) -> source_range {
+              [&](const std::vector<ast::variable_component>& chain)
+                  -> source_range {
                 // Move to the start of the identifier that failed to resolve
                 return chain[err.success_path().size()].loc;
               });
@@ -719,10 +720,11 @@ class virtual_machine {
     std::map<ast::identifier, object, ast::identifier::compare_by_name>
         captures;
     for (const ast::identifier& capture : partial_block.captures) {
-      object captured_object =
-          lookup_variable(
-              ast::variable_lookup{capture.loc, std::vector{capture}})
-              .found;
+      ast::variable_lookup capture_lookup{
+          capture.loc,
+          std::vector{ast::variable_component{
+              capture.loc, std::nullopt /* prototype */, capture}}};
+      object captured_object = lookup_variable(capture_lookup).found;
       captures.emplace(std::pair{capture, std::move(captured_object)});
     }
 

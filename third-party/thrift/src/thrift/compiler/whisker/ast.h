@@ -170,7 +170,31 @@ struct identifier {
 };
 
 /**
- * A "path" of identifiers that represent a lookup of a variable where each
+ * A single component in a variable lookup path. A single component represents
+ * either a raw identifier lookup ("foo"), or an explicit prototype lookup
+ * ("my_obj:foo").
+ */
+struct variable_component {
+  source_range loc;
+  std::optional<identifier> prototype;
+  identifier property;
+
+  /**
+   * Determines if two identifiers are syntactically equivalent, excluding
+   * their location in source code.
+   */
+  friend bool operator==(
+      const variable_component& lhs, const variable_component& rhs) {
+    return lhs.prototype == rhs.prototype && lhs.property == rhs.property;
+  }
+  // Remove in C++20 which introduces comparison operator synthesis
+  WHISKER_DEFINE_OPERATOR_INEQUALITY(variable_component)
+
+  std::string as_string() const;
+};
+
+/**
+ * A "path" of components that represent a lookup of a variable where each
  * chain component is separated by a dot. This is a subset of Mustache's
  * variables:
  *   https://mustache.github.io/mustache.5.html#Variables
@@ -183,7 +207,7 @@ struct variable_lookup {
     friend bool operator==(const this_ref&, const this_ref&) { return true; }
     WHISKER_DEFINE_OPERATOR_INEQUALITY(this_ref)
   };
-  std::variant<this_ref, std::vector<identifier>> chain;
+  std::variant<this_ref, std::vector<variable_component>> chain;
 
   /**
    * Determines if two variable lookups are syntactically equivalent, excluding

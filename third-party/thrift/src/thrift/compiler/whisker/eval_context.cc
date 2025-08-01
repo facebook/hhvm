@@ -166,7 +166,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
       [&](ast::variable_lookup::this_ref) -> result {
         return lookup_result::without_parent(stack_.back().this_ref());
       },
-      [&](const std::vector<ast::identifier>& path) -> result {
+      [&](const std::vector<ast::variable_component>& path) -> result {
         const auto make_searched_scopes = [&]() -> std::vector<object> {
           std::vector<object> result;
           result.reserve(stack_.size());
@@ -179,7 +179,8 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
           return result;
         };
 
-        using component_iterator = std::vector<ast::identifier>::const_iterator;
+        using component_iterator =
+            std::vector<ast::variable_component>::const_iterator;
         const auto make_success_path =
             [](component_iterator begin,
                component_iterator end) -> std::vector<std::string> {
@@ -189,7 +190,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
               begin,
               end,
               std::back_inserter(result),
-              [](const auto& component) { return component.name; });
+              [](const auto& component) { return component.as_string(); });
           return result;
         };
 
@@ -197,13 +198,14 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
         // Crawl up through the scope stack since names can be shadowed.
         for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
           try {
-            if (auto result = scope->lookup_property(diags_, path.front())) {
+            if (auto result =
+                    scope->lookup_property(diags_, path.front().property)) {
               current = result;
               break;
             }
           } catch (const eval_error& err) {
             return unexpected(eval_scope_lookup_error(
-                path.front().name,
+                path.front().property.name,
                 make_searched_scopes(),
                 err.what() /* cause */));
           }
@@ -211,7 +213,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
 
         if (!current.has_value()) {
           return unexpected(eval_scope_lookup_error(
-              path.front().name, make_searched_scopes()));
+              path.front().property.name, make_searched_scopes()));
         }
         object parent = whisker::make::null;
 
@@ -219,12 +221,12 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
              ++component) {
           try {
             std::optional<object> next =
-                find_property(diags_, *current, *component);
+                find_property(diags_, *current, component->property);
             if (!next.has_value()) {
               return unexpected(eval_property_lookup_error(
                   *current, /* missing_from */
                   make_success_path(path.begin(), component),
-                  component->name /* missing_name */));
+                  component->property.name /* missing_name */));
             }
             parent = *current;
             current = next;
@@ -232,7 +234,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
             return unexpected(eval_property_lookup_error(
                 *current, /* missing_from */
                 make_success_path(path.begin(), component),
-                component->name /* missing_name */,
+                component->property.name /* missing_name */,
                 err.what() /* cause */));
           }
         }

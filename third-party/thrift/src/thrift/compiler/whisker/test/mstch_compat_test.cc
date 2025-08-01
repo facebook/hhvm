@@ -28,9 +28,11 @@ namespace w = whisker::make;
 namespace whisker {
 
 namespace {
-ast::identifier make_identifier_from_string(std::string name) {
+ast::variable_component make_variable_component_from_string(std::string name) {
   // The source range is not important for testing here
-  return ast::identifier{source_range(), std::move(name)};
+  ast::identifier property{source_range(), std::move(name)};
+  return ast::variable_component{
+      source_range(), std::nullopt /* prototype */, std::move(property)};
 }
 
 template <typename... Components>
@@ -39,8 +41,8 @@ ast::variable_lookup path(Components&&... components) {
     return ast::variable_lookup{
         source_range(), ast::variable_lookup::this_ref()};
   } else {
-    std::vector<ast::identifier> chain = {
-        make_identifier_from_string(
+    std::vector<ast::variable_component> chain = {
+        make_variable_component_from_string(
             std::string(std::forward<Components>(components)))...,
     };
     return ast::variable_lookup{source_range(), std::move(chain)};

@@ -227,6 +227,17 @@ T make_textual_node(const token& t) {
 ast::identifier make_identifier(const token& t) {
   return make_textual_node<ast::identifier, tok::identifier>(t);
 }
+ast::variable_component make_variable_component(
+    const token* prototype, const token& property) {
+  return ast::variable_component{
+      source_range{
+          prototype != nullptr ? prototype->range.begin : property.range.begin,
+          property.range.end,
+      },
+      prototype != nullptr ? std::optional{make_identifier(*prototype)}
+                           : std::nullopt,
+      make_identifier(property)};
+}
 ast::path_component make_path_component(const token& t) {
   return make_textual_node<ast::path_component, tok::path_component>(t);
 }
@@ -1065,12 +1076,14 @@ class parser {
     if (first_id.kind != tok::identifier) {
       return no_parse_result();
     }
-    std::vector<ast::identifier> path;
-    path.emplace_back(make_identifier(first_id));
+    std::vector<ast::variable_component> path;
+    path.emplace_back(
+        make_variable_component(nullptr /* prototype */, first_id));
 
     while (try_consume_token(&scan, tok::dot)) {
       if (const token* id_part = try_consume_token(&scan, tok::identifier)) {
-        path.emplace_back(make_identifier(*id_part));
+        path.emplace_back(
+            make_variable_component(nullptr /* prototype */, *id_part));
       } else {
         report_fatal_expected(scan, "identifier in variable-lookup");
       }

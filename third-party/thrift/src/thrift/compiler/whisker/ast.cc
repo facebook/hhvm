@@ -51,14 +51,20 @@ std::string text::joined() const {
   return result;
 }
 
+std::string variable_component::as_string() const {
+  return prototype.has_value()
+      ? fmt::format("{}:{}", prototype->name, property.name)
+      : property.name;
+}
+
 std::string variable_lookup::chain_string() const {
   return detail::variant_match(
       chain,
       [](this_ref) -> std::string { return "this"; },
-      [](const std::vector<identifier>& ids) -> std::string {
+      [](const std::vector<variable_component>& ids) -> std::string {
         return to_joined_string(
-            ids, '.', [](const identifier& id) -> const std::string& {
-              return id.name;
+            ids, '.', [](const variable_component& id) -> std::string {
+              return id.as_string();
             });
       });
 }

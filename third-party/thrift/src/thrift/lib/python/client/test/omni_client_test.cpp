@@ -100,8 +100,8 @@ class TestServiceHandler
   }
 
   ResponseAndSinkConsumer<SimpleResponse, EmptyChunk, SimpleResponse> dumbSink(
-      std::unique_ptr<EmptyRequest> request) override {
-    (void)request;
+      std::unique_ptr<std::string> hi) override {
+    EXPECT_EQ(*hi, "hi");
     SinkConsumer<EmptyChunk, SimpleResponse> consumer{
         [&](folly::coro::AsyncGenerator<EmptyChunk&&> gen)
             -> folly::coro::Task<SimpleResponse> {
@@ -113,6 +113,29 @@ class TestServiceHandler
     SimpleResponse response;
     response.value() = "initial";
     return {std::move(response), std::move(consumer)};
+  }
+
+  SinkConsumer<folly::IOBuf, folly::IOBuf> countSinkPyBuf(
+      int from, int to) override {
+    EXPECT_EQ(from, 'a');
+    EXPECT_EQ(to, 'd');
+    SinkConsumer<folly::IOBuf, folly::IOBuf> consumer{
+        [from, to](folly::coro::AsyncGenerator<folly::IOBuf&&> gen)
+            -> folly::coro::Task<folly::IOBuf> {
+          int expected = from;
+          std::string uploads;
+          while (auto iobuf_chunk = co_await gen.next()) {
+            StreamChunk chunk;
+            folly::IOBuf buf_copy = *iobuf_chunk;
+            CompactSerializer::deserialize<StreamChunk>(&buf_copy, chunk);
+            int c = *chunk.value();
+            EXPECT_EQ(c, expected++);
+            uploads += std::to_string(*chunk.value());
+          }
+          EXPECT_EQ(expected, to);
+          co_return std::move(*IOBuf::fromString(uploads));
+        }};
+    return consumer;
   }
 };
 
@@ -288,6 +311,32 @@ class OmniClientTest : public ::testing::Test {
         });
   }
 
+  template <class S = CompactSerializer, class Request>
+  void testSendSink(
+      const std::string& service,
+      const std::string& function,
+      const Request& req,
+      const std::string& expected,
+      folly::Function<folly::coro::Task<folly::IOBuf>(
+          OmniClientResponseWithHeaders&&)> onResponse) {
+    connectToServer<S>(
+        [&](OmniClient& client) mutable -> folly::coro::Task<void> {
+          std::string args = S::template serialize<std::string>(req);
+          auto data = apache::thrift::MethodMetadata::Data(
+              function, apache::thrift::FunctionQualifier::Unspecified);
+          auto resp = co_await onResponse(co_await client.semifuture_send(
+              service,
+              function,
+              args,
+              std::move(data),
+              {},
+              {},
+              co_await folly::coro::co_current_executor,
+              RpcKind::SINK));
+          EXPECT_EQ(resp.template to<std::string>(), expected);
+        });
+  }
+
  protected:
   std::unique_ptr<ThriftServer> server_;
   folly::EventBase* eb_ = folly::EventBaseManager::get()->getEventBase();
@@ -359,6 +408,7 @@ TEST_F(OmniClientTest, ReadHeaderTest) {
 
 TEST_F(OmniClientTest, SinkRequestTest) {
   EmptyRequest request;
+  request.hi() = "hi";
   SimpleResponse response;
   response.value() = "initial";
   testSend("TestService", "dumbSink", request, response, RpcKind::SINK);
@@ -439,5 +489,42 @@ TEST_F(OmniClientTest, StreamSumAndNumsExceptionTest) {
             std::string{"my_magic_arithmetic_exception"});
         auto gen = std::move(*resp.stream).toAsyncGenerator();
         EXPECT_FALSE(co_await gen.next());
+      });
+}
+
+folly::coro::AsyncGenerator<StreamChunk&&> chunkGenerator(int from, int to) {
+  int i = from;
+  while (i < to) {
+    StreamChunk chunk;
+    chunk.value() = i++;
+    co_yield std::move(chunk);
+  }
+}
+
+template <typename S = CompactSerializer>
+folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> chunkBufGenerator(
+    NumsRequest request) {
+  auto gen = chunkGenerator(*request.f(), *request.t());
+  while (auto chunk = co_await gen.next()) {
+    folly::IOBufQueue queue;
+    S::serialize(*chunk, &queue);
+    co_yield queue.move();
+  }
+}
+
+TEST_F(OmniClientTest, CountSinkTest) {
+  NumsRequest request;
+  request.f() = 'a';
+  request.t() = 'd';
+  std::string expected_final = "979899";
+  testSendSink<CompactSerializer, NumsRequest>(
+      "TestService",
+      "countSinkPyBuf",
+      request,
+      expected_final,
+      [request](OmniClientResponseWithHeaders&& resp)
+          -> folly::coro::Task<folly::IOBuf> {
+        auto sink = std::move(*resp.sink);
+        co_return co_await sink.sink(chunkBufGenerator(request));
       });
 }

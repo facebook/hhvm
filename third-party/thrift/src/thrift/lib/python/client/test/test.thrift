@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 namespace cpp2 apache.thrift.python.test
 namespace py thrift.py.test
 namespace py3 thrift.python
@@ -41,14 +43,23 @@ service TestService {
   i64, stream<SimpleResponse> sumAndNums(1: i32 f, 2: i32 t) throws (
     1: ArithmeticException ee,
   );
-  SimpleResponse, sink<EmptyChunk, SimpleResponse> dumbSink(
-    1: EmptyRequest request,
+  SimpleResponse, sink<EmptyChunk, SimpleResponse> dumbSink(1: string hi);
+
+  // Note the Python sink client serializes payloads, and the Python server
+  // deserializes them before giving them to the handler. But in this test,
+  // the OmniClient is serializing, but the C++ server doesn't have the deserialize
+  // logic, so we have to manually simulate the deserialization inside the handler.
+  sink<PyBuffer, PyBuffer> countSinkPyBuf(1: i32 from, 2: i32 to) throws (
+    1: ArithmeticException e,
   );
 }
 
 service EchoService extends TestService {
   string echo(1: string input);
 }
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary PyBuffer
 
 //
 // The following structures are defined to mimic the anonymous argument structs
@@ -60,13 +71,19 @@ struct AddRequest {
   2: i32 num2;
 }
 
-struct EmptyRequest {}
+struct EmptyRequest {
+  1: string hi;
+}
 
 struct SimpleResponse {
   1: string value;
 }
 
 struct EmptyChunk {}
+
+struct StreamChunk {
+  1: i32 value;
+}
 
 struct ReadHeaderRequest {
   1: string key;

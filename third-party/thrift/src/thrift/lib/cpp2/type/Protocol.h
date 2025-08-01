@@ -111,6 +111,10 @@ class Protocol : public detail::Wrap<ProtocolUnion, union_t<ProtocolUnion>> {
 // Raises std::invalid_argument on failure.
 void validateProtocol(const Protocol& protocol);
 
+// FIXME(T232815335): Need a dummy (unused) variable to fix the exports trie
+// generation bug of LLD for Mach-O
+inline const void* kDummy = &kDummy;
+
 FOLLY_PUSH_WARNING
 FOLLY_CLANG_DISABLE_WARNING("-Wglobal-constructors")
 inline const Protocol kNoProtocol = {};

@@ -73,13 +73,6 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
     }
   }
 
-  // Try breaking into hphpd, if attached.
-  if (Cfg::Debugger::EnableHphpd) {
-    VMRegAnchor _;
-    Debugger::InterruptVMHook(HardBreakPoint);
-    return true;
-  }
-
   TRACE(5, "out hphp_debug_break()\n");
   return false;
 }

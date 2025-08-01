@@ -1,58 +1,42 @@
 Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-break %s/break2.php:7
-Breakpoint 1 set on line 7 of %s/break2.php
-But won't break until file %s/break2.php has been loaded.
+break slow/debugger/break2.php:7
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break foo2()
-Breakpoint 2 set upon entering foo2()
-But won't break until function foo2 has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break cls2::pubObj()
-Breakpoint 3 set upon entering cls2::pubObj()
-But won't break until class cls2 has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break cls2::pubCls()
-Breakpoint 4 set upon entering cls2::pubCls()
-But won't break until class cls2 has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break list
-  1%tALWAYS    on line 7 of %s/break2.php (unbound)
-  2%tALWAYS    upon entering foo2() (unbound)
-  3%tALWAYS    upon entering cls2::pubObj() (unbound)
-  4%tALWAYS    upon entering cls2::pubCls() (unbound)
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
 break2.php loaded
 Program %s/break2.php exited normally.
 @ foo2('test_break6')
-Breakpoint 2 reached at foo2() on line 6 of %s/break2.php
-   5 function foo2($x) {
-   6*  $y = $x.'_suffix';
-   7   error_log($y);
-
+test_break6_suffix
 break list
-  1%tALWAYS    on line 7 of %s/break2.php
-  2%tALWAYS    upon entering foo2()
-  3%tALWAYS    upon entering cls2::pubObj()
-  4%tALWAYS    upon entering cls2::pubCls()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
-Breakpoint 1 reached at foo2() on line 7 of %s/break2.php
-   6   $y = $x.'_suffix';
-   7*  error_log($y);
-   8 }
-
+Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
 @ $break6=new cls2()
+Hit fatal : Failure to resolve undefined class cls2
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 @ $break6->pubObj('test_break6')
-Breakpoint 3 reached at cls2::pubObj() on line 12 of %s/break2.php
-  11   public function pubObj($x) {
-  12*    error_log("pubObj2:".$x);
-  13   }
-
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: break6' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
 continue
-pubObj2:test_break6
+break2.php loaded
+Program %s/break2.php exited normally.
 @ cls2::pubCls('test_break6')
-Breakpoint 4 reached at cls2::pubCls() on line 15 of %s/break2.php
-  14   public static function pubCls($x) {
-  15*    error_log("pubCls2:".$x);
-  16   }
-
-break clear all
-All breakpoints are cleared.
-continue
 pubCls2:test_break6
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+continue
+Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
 quit

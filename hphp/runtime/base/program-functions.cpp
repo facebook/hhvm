@@ -1724,7 +1724,7 @@ static int execute_program_impl(int argc, char** argv) {
 #endif
 
   // reuse -h for help command if possible
-  if (vm.count("help") || (vm.count("debug-host") && (po.mode != ExecutionMode::DEBUG || po.mode == ExecutionMode::NOTEBOOK))) {
+  if (vm.count("help") || (vm.count("debug-host") && (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::NOTEBOOK))) {
     cout << desc << "\n";
     return 0;
   }

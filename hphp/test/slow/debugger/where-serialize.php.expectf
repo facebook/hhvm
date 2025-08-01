@@ -1,21 +1,14 @@
 Program %s/where-serialize.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break bar()
-Breakpoint 1 set upon entering bar()
-But won't break until function bar has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
-Breakpoint 1 reached at bar() on line 22 of %s/where-serialize.php
-  21 function bar($b) {
-  22*  var_dump($b);
-  23 }
-
+object(Thing) (1) {
+  ["foo"]=>
+  int(1)
+}
+Program %s/where-serialize.php exited normally.
 where
 #0   ()
-    at %s/where-serialize.php:22
-#1  bar (Thing Object
-(
-    [foo] => 1
-)
-)
-    at %s/where-serialize.php:27
-#2  entrypoint_whereserialize ()
+    at :1
+#1  include ("")
 quit

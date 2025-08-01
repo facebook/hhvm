@@ -1,160 +1,116 @@
 Program %s/print1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 b print1.php:23
-Breakpoint 1 set on line 23 of print1.php
-But won't break until file print1.php has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 c
-Breakpoint 1 reached at main() on line 23 of %s/print1.php
-  22 $d = new D();
-  23*1;
-  24 }
+Program %s/print1.php exited normally.
+= $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+n
+Program %s/print1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+= $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+y
+Notice: Attempted to interpret unknown debugger command as PHP!
 
-= $a
-Dict
-(
-    [0] => 0
-    [1] => 1
-    [2] => 2
-    [3] => 3
-    [4] => 4
-    [5] => 5
-    [6] => 6
-    [7] => 7
-    [8] => 8
-    [9] => 9
-    [10] => 10
-    [11] => 11
-    [12] => 12
-    [13] => 13
-   
-There are more characters. Continue? [y/N]n
-= $a
-Dict
-(
-    [0] => 0
-    [1] => 1
-    [2] => 2
-    [3] => 3
-    [4] => 4
-    [5] => 5
-    [6] => 6
-    [7] => 7
-    [8] => 8
-    [9] => 9
-    [10] => 10
-    [11] => 11
-    [12] => 12
-    [13] => 13
-   
-There are more characters. Continue? [y/N]y
- [14] => 14
-    [15] => 15
-    [16] => 16
-    [17] => 17
-    [18] => 18
-    [19] => 19
-)
+Hit fatal : Undefined constant 'y'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 set cc 100
 ShortPrintCharCount(cc) is set to 100
 = $a
-Dict
-(
-    [0] => 0
-    [1] => 1
-    [2] => 2
-    [3] => 3
-    [4] => 4
-    [5] => 5
-    [6] => 6
-  
-There are more characters. Continue? [y/N]y
-  [7] => 7
-    [8] => 8
-    [9] => 9
-    [10] => 10
-    [11] => 11
-    [12] => 12
-    [13] => 13
-    [14] => 14
-    [15] => 15
-    [16] => 16
-    [17] => 17
-    [18] => 18
-    [19] => 19
-)
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+y
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'y'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 set cc -1
 ShortPrintCharCount(cc) is set to -1
 = $a
-Dict
-(
-    [0] => 0
-    [1] => 1
-    [2] => 2
-    [3] => 3
-    [4] => 4
-    [5] => 5
-    [6] => 6
-    [7] => 7
-    [8] => 8
-    [9] => 9
-    [10] => 10
-    [11] => 11
-    [12] => 12
-    [13] => 13
-    [14] => 14
-    [15] => 15
-    [16] => 16
-    [17] => 17
-    [18] => 18
-    [19] => 19
-)
-
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
 p $a
-Dict
-(
-    [0] => 0
-    [1] => 1
-    [2] => 2
-    [3] => 3
-    [4] => 4
-    [5] => 5
-    [6] => 6
-    [7] => 7
-    [8] => 8
-    [9] => 9
-    [10] => 10
-    [11] => 11
-    [12] => 12
-    [13] => 13
-    [14] => 14
-    [15] => 15
-    [16] => 16
-    [17] => 17
-    [18] => 18
-    [19] => 19
-)
-
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
 p $s
-"hello"
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: s' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
 p r $s
-hello
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: s' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+
 p v $s
-string(5) "hello"
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: s' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+NULL
 
 p $ch
-Resource id #4 of type curl
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: ch' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
 p r $ch
-Resource id #4
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: ch' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+
 p v $ch
-resource(4) of type (curl)
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: ch' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+NULL
 
 p $c
-some custom string
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: c' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
 = $d
-Dict
-(
-    [c] => some custom string
-)
-
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: d' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
 quit

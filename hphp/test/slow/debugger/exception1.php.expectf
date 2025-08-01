@@ -3,28 +3,28 @@ exception MyException
 Breakpoint 1 set right before throwing MyException
 But note that class MyException has yet been loaded.
 break list
-  1%tALWAYS    right before throwing MyException (unbound)
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
 Program %s/exception1.php exited normally.
 exception NotAnException
 Breakpoint 2 not set right before throwing NotAnException
 Because class NotAnException is not an exception.
 break list
-  1%tALWAYS    right before throwing MyException
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 exception Exception
-Breakpoint 1 set right before throwing Exception
+Breakpoint 2 set right before throwing Exception
 break list
-  1%tALWAYS    right before throwing Exception
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @ throw_exception()
-Breakpoint 1 reached: Throwing Exception at throw_exception() on line 11 of %s/exception1.php
+Breakpoint 2 reached: Throwing Exception at throw_exception() on line 11 of %s/exception1.php
   10   function throw_exception() {
   11*    throw new Exception();
   12   }
 
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:11
 Stack trace:
@@ -33,15 +33,20 @@ Stack trace:
 #2 (): include()
 #3 {main}
 exception MyException
-Breakpoint 1 set right before throwing MyException
+Breakpoint was already set previously.
 @ throw_myexception()
 Breakpoint 1 reached: Throwing MyException at throw_myexception() on line 15 of %s/exception1.php
   14   function throw_myexception() {
   15*    throw new MyException();
   16   }
 
+Breakpoint 2 reached: Throwing MyException at throw_myexception() on line 15 of %s/exception1.php
+  14   function throw_myexception() {
+  15*    throw new MyException();
+  16   }
+
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit a php exception : exception 'MyException' with message '' in %s/exception1.php:15
 Stack trace:
@@ -50,33 +55,33 @@ Stack trace:
 #2 (): include()
 #3 {main}
 exception error
-Breakpoint 1 set right after an error
+Breakpoint 3 set right after an error
 @ error_undefined_class()
-Breakpoint 1 reached: An error occurred at error_undefined_class() on line 19 of %s/exception1.php
+Breakpoint 3 reached: An error occurred at error_undefined_class() on line 19 of %s/exception1.php
   18   function error_undefined_class() {
   19*    $x = new NoSuchClass();
   20   }
 
 Error Message: Failure to resolve undefined class NoSuchClass
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit fatal : Failure to resolve undefined class NoSuchClass
-    #0 at %s/exception1.php:19]
+    #0 at [%s/exception1.php:19]
     #1 error_undefined_class(), called at [:1]
     #2 include(), called at [:1]
     #3 include(), called at [:0]
 
 exception Exception
-Breakpoint 1 set right before throwing Exception
+Breakpoint was already set previously.
 @ \Outer\throw_exception()
-Breakpoint 1 reached: Throwing Exception at Outer\throw_exception() on line 29 of %s/exception1.php
+Breakpoint 2 reached: Throwing Exception at Outer\throw_exception() on line 29 of %s/exception1.php
   28   function throw_exception() {
   29*    throw new \Exception();
   30   }
 
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:29
 Stack trace:
@@ -85,15 +90,20 @@ Stack trace:
 #2 (): include()
 #3 {main}
 exception \Outer\MyException
-Breakpoint 1 set right before throwing Outer\MyException
+Breakpoint 4 set right before throwing Outer\MyException
 @ Outer\throw_myexception()
-Breakpoint 1 reached: Throwing Outer\MyException at Outer\throw_myexception() on line 33 of %s/exception1.php
+Breakpoint 2 reached: Throwing Outer\MyException at Outer\throw_myexception() on line 33 of %s/exception1.php
+  32   function throw_myexception() {
+  33*    throw new MyException();
+  34   }
+
+Breakpoint 4 reached: Throwing Outer\MyException at Outer\throw_myexception() on line 33 of %s/exception1.php
   32   function throw_myexception() {
   33*    throw new MyException();
   34   }
 
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit a php exception : exception 'Outer\MyException' with message '' in %s/exception1.php:33
 Stack trace:
@@ -102,33 +112,33 @@ Stack trace:
 #2 (): include()
 #3 {main}
 exception error
-Breakpoint 1 set right after an error
+Breakpoint was already set previously.
 @ \Outer\error_undefined_class()
-Breakpoint 1 reached: An error occurred at Outer\error_undefined_class() on line 37 of %s/exception1.php
+Breakpoint 3 reached: An error occurred at Outer\error_undefined_class() on line 37 of %s/exception1.php
   36   function error_undefined_class() {
   37*    $x = new NoSuchClass();
   38   }
 
 Error Message: Failure to resolve undefined class Outer\NoSuchClass
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit fatal : Failure to resolve undefined class Outer\NoSuchClass
-    #0 at %s/exception1.php:37]
+    #0 at [%s/exception1.php:37]
     #1 Outer\error_undefined_class(), called at [:1]
     #2 include(), called at [:1]
     #3 include(), called at [:0]
 
 exception Exception
-Breakpoint 1 set right before throwing Exception
+Breakpoint was already set previously.
 @ \Outer\Inner\throw_exception()
-Breakpoint 1 reached: Throwing Exception at Outer\Inner\throw_exception() on line 47 of %s/exception1.php
+Breakpoint 2 reached: Throwing Exception at Outer\Inner\throw_exception() on line 47 of %s/exception1.php
   46   function throw_exception() {
   47*    throw new \Exception();
   48   }
 
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:47
 Stack trace:
@@ -137,15 +147,20 @@ Stack trace:
 #2 (): include()
 #3 {main}
 exception Outer\Inner\MyException
-Breakpoint 1 set right before throwing Outer\Inner\MyException
+Breakpoint 5 set right before throwing Outer\Inner\MyException
 @ Outer\Inner\throw_myexception()
-Breakpoint 1 reached: Throwing Outer\Inner\MyException at Outer\Inner\throw_myexception() on line 51 of %s/exception1.php
+Breakpoint 2 reached: Throwing Outer\Inner\MyException at Outer\Inner\throw_myexception() on line 51 of %s/exception1.php
+  50   function throw_myexception() {
+  51*    throw new MyException();
+  52   }
+
+Breakpoint 5 reached: Throwing Outer\Inner\MyException at Outer\Inner\throw_myexception() on line 51 of %s/exception1.php
   50   function throw_myexception() {
   51*    throw new MyException();
   52   }
 
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit a php exception : exception 'Outer\Inner\MyException' with message '' in %s/exception1.php:51
 Stack trace:
@@ -154,19 +169,19 @@ Stack trace:
 #2 (): include()
 #3 {main}
 exception error
-Breakpoint 1 set right after an error
+Breakpoint was already set previously.
 @ \Outer\Inner\error_undefined_class()
-Breakpoint 1 reached: An error occurred at Outer\Inner\error_undefined_class() on line 55 of %s/exception1.php
+Breakpoint 3 reached: An error occurred at Outer\Inner\error_undefined_class() on line 55 of %s/exception1.php
   54   function error_undefined_class() {
   55*    $x = new NoSuchClass();
   56   }
 
 Error Message: Failure to resolve undefined class Outer\Inner\NoSuchClass
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
 Hit fatal : Failure to resolve undefined class Outer\Inner\NoSuchClass
-    #0 at %s/exception1.php:55]
+    #0 at [%s/exception1.php:55]
     #1 Outer\Inner\error_undefined_class(), called at [:1]
     #2 include(), called at [:1]
     #3 include(), called at [:0]

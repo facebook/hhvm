@@ -1,12 +1,8 @@
 Program %s/error_bad_cmd_type_send.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break error_bad_cmd_type_send.php:3
-Breakpoint 1 set on line 3 of error_bad_cmd_type_send.php
-But won't break until file error_bad_cmd_type_send.php has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
-Breakpoint 1 reached at main() on line 3 of %s/error_bad_cmd_type_send.php
-   2 <<__EntryPoint>> function main() {
-   3*  error_log('error_bad_cmd_type_send.php loaded');
-   4 }
-
+error_bad_cmd_type_send.php loaded
+Program %s/error_bad_cmd_type_send.php exited normally.
 internaltesting badcmdtypesend
 Executing internal test...

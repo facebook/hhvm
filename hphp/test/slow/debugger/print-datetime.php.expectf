@@ -8,19 +8,15 @@ DateTime Object
 )
 
 =function () { return 4; };
-"Closure%s"
+"Closure\$include"
 p new DateTime('@'.time(), new DateTimeZone('UTC'))
 DateTime Object
 (
-    [date] => "%s"
+    [date] => "%d-%d-%d %d:%d:%d.%d"
     [timezone_type] => 1
     [timezone] => "+00:00"
 )
 
 c
-Break at entrypoint_printdatetime() on line 4 of %s/print-datetime.php
-   3 function entrypoint_printdatetime(): void {
-   4*  hphpd_break();
-   5 }
-
+Program %s/print-datetime.php exited normally.
 quit

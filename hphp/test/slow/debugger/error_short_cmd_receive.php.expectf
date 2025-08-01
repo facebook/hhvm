@@ -1,13 +1,9 @@
 Program %s/error_short_cmd_receive.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break error_short_cmd_receive.php:5
-Breakpoint 1 set on line 5 of error_short_cmd_receive.php
-But won't break until file error_short_cmd_receive.php has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
-Breakpoint 1 reached at entrypoint_error_short_cmd_receive() on line 5 of %s/error_short_cmd_receive.php
-   4 
-   5*  error_log('error_short_cmd_receive.php loaded');
-   6 }
-
+error_short_cmd_receive.php loaded
+Program %s/error_short_cmd_receive.php exited normally.
 internaltesting shortcmdreceive
 Executing internal test...
 DebuggerCommand::recv(): a socket error has happened

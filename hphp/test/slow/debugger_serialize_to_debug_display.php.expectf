@@ -2,15 +2,15 @@
 string(48) "O:1:"C":1:{s:18:"__PHP_DebugDisplay";s:3:"lol";}"
 ==== D ====
 
-Warning: D::__toDebugDisplay() threw PHP exception of class Exception with message 'lol' in %s/test/slow/debugger_serialize_to_debug_display.php on line 22
+Warning: D::__toDebugDisplay() threw PHP exception of class Exception with message 'lol' in %s/%s_serialize_to_debug_display.php on line 22
 string(12) "O:1:"D":0:{}"
 ==== E ====
 
-Warning: E::__toDebugDisplay() threw PHP exception of class Error with message 'err' in %s/test/slow/debugger_serialize_to_debug_display.php on line 22
+Warning: E::__toDebugDisplay() threw PHP exception of class Error with message 'err' in %s/%s_serialize_to_debug_display.php on line 22
 string(12) "O:1:"E":0:{}"
 ==== F ====
 
 Warning: F::__toDebugDisplay() threw C++ exception: request has exceeded memory limit %d of %d used
- in %s/test/slow/debugger_serialize_to_debug_display.php on line 22
+ in %s/%s_serialize_to_debug_display.php on line 22
 
-Fatal error: request has exceeded memory limit %d of %d used in %s/test/slow/debugger_serialize_to_debug_display.php on line 22
+Fatal error: request has exceeded memory limit %d of %d used in %s/%s_serialize_to_debug_display.php on line 22

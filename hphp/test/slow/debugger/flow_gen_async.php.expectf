@@ -3,235 +3,170 @@ run
 flow_gen_async.php loaded
 Program %s/flow_gen_async.php exited normally.
 break flow_gen_async.php:8
-Breakpoint 1 set on line 8 of flow_gen_async.php
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @test(1)
-Breakpoint 1 reached at genBar() on line 8 of %s/flow_gen_async.php
-   7 async function genBar($a) {
-   8*  var_dump($a);
-   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
-
-next
-Break at genBar() on line 9 of %s/flow_gen_async.php
-   8   var_dump($a);
-   9*  await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
-  10   error_log('Finished in genBar');
-
-next
-Break at genBar() on line 10 of %s/flow_gen_async.php
-   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
-  10*  error_log('Finished in genBar');
-  11   return $a + 2;
-
-next
 Finished in genBar
-Break at genBar() on line 11 of %s/flow_gen_async.php
-  10   error_log('Finished in genBar');
-  11*  return $a + 2;
-  12 }
-
-next
 Finished in genFoo
-Break at foo() on line 24 of %s/flow_gen_async.php
-  23 function foo($a) {
-  24*  $result = HH\Asio\join(genFoo($a));
-  25   var_dump($result);
-
-next
-Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = HH\Asio\join(genFoo($a));
-  25*  var_dump($result);
-  26 }
-
-next
-Break at foo() on line 26 of %s/flow_gen_async.php
-  25   var_dump($result);
-  26*}
-  27 
-
-next
-Break at test() on line 29 of %s/flow_gen_async.php
-  28 function test($a) {
-  29*  foo($a);
-  30 }
-
-next
-Break at test() on line 30 of %s/flow_gen_async.php
-  29   foo($a);
-  30*}
-  31 
-
-continue
 int(1)
 int(2)
 int(4)
 int(4)
 
+next
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
+
+next
+flow_gen_async.php loaded
+Break at main() on line 34 of %s/flow_gen_async.php
+  33 error_log('flow_gen_async.php loaded');
+  34*}
+  35 (END)
+
+next
+Program %s/flow_gen_async.php exited normally.
+next
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
+
+next
+flow_gen_async.php loaded
+Break at main() on line 34 of %s/flow_gen_async.php
+  33 error_log('flow_gen_async.php loaded');
+  34*}
+  35 (END)
+
+next
+Program %s/flow_gen_async.php exited normally.
+continue
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
 @test(2)
-Breakpoint 1 reached at genBar() on line 8 of %s/flow_gen_async.php
-   7 async function genBar($a) {
-   8*  var_dump($a);
-   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
+Hit fatal : Call to undefined function test()
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 out
-Break at genFoo() on line 17 of %s/flow_gen_async.php
-  16   $a++;
-  17*  $a = await genBar($a);
-  18   var_dump($a);
-
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
 next
-Finished in genBar
-Break at genFoo() on line 18 of %s/flow_gen_async.php
-  17   $a = await genBar($a);
-  18*  var_dump($a);
-  19   error_log('Finished in genFoo');
-
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
 continue
-Finished in genFoo
-int(2)
-int(3)
-int(5)
-int(5)
-
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break flow_gen_async.php:10
-Breakpoint 1 set on line 10 of flow_gen_async.php
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @test(3)
-Breakpoint 1 reached at genBar() on line 10 of %s/flow_gen_async.php
-   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
-  10*  error_log('Finished in genBar');
-  11   return $a + 2;
-
-out
 Finished in genBar
 Finished in genFoo
-Break at foo() on line 24 of %s/flow_gen_async.php
-  23 function foo($a) {
-  24*  $result = HH\Asio\join(genFoo($a));
-  25   var_dump($result);
-
-next
-Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = HH\Asio\join(genFoo($a));
-  25*  var_dump($result);
-  26 }
-
-next
-Break at foo() on line 26 of %s/flow_gen_async.php
-  25   var_dump($result);
-  26*}
-  27 
-
-continue
 int(3)
 int(4)
 int(6)
 int(6)
 
-break clear all
-All breakpoints are cleared.
-break flow_gen_async.php:15
-Breakpoint 1 set on line 15 of flow_gen_async.php
-@test(4)
-Breakpoint 1 reached at genFoo() on line 15 of %s/flow_gen_async.php
-  14 async function genFoo($a) {
-  15*  var_dump($a);
-  16   $a++;
+out
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
 
 next
-Break at genFoo() on line 16 of %s/flow_gen_async.php
-  15   var_dump($a);
-  16*  $a++;
-  17   $a = await genBar($a);
-
-next
-Break at genFoo() on line 17 of %s/flow_gen_async.php
-  16   $a++;
-  17*  $a = await genBar($a);
-  18   var_dump($a);
-
-next
-Finished in genBar
-Break at genFoo() on line 18 of %s/flow_gen_async.php
-  17   $a = await genBar($a);
-  18*  var_dump($a);
-  19   error_log('Finished in genFoo');
-
-next
-Break at genFoo() on line 19 of %s/flow_gen_async.php
-  18   var_dump($a);
-  19*  error_log('Finished in genFoo');
-  20   return $a;
-
-next
-Finished in genFoo
-Break at genFoo() on line 20 of %s/flow_gen_async.php
-  19   error_log('Finished in genFoo');
-  20*  return $a;
-  21 }
-
-next
-Break at foo() on line 24 of %s/flow_gen_async.php
-  23 function foo($a) {
-  24*  $result = HH\Asio\join(genFoo($a));
-  25   var_dump($result);
-
-next
-Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = HH\Asio\join(genFoo($a));
-  25*  var_dump($result);
-  26 }
-
-next
-Break at foo() on line 26 of %s/flow_gen_async.php
-  25   var_dump($result);
-  26*}
-  27 
-
-next
-Break at test() on line 29 of %s/flow_gen_async.php
-  28 function test($a) {
-  29*  foo($a);
-  30 }
-
-next
-Break at test() on line 30 of %s/flow_gen_async.php
-  29   foo($a);
-  30*}
-  31 
+flow_gen_async.php loaded
+Break at main() on line 34 of %s/flow_gen_async.php
+  33 error_log('flow_gen_async.php loaded');
+  34*}
+  35 (END)
 
 continue
+Program %s/flow_gen_async.php exited normally.
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break flow_gen_async.php:15
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@test(4)
+Finished in genBar
+Finished in genFoo
 int(4)
 int(5)
 int(7)
 int(7)
 
-@test(5)
-Breakpoint 1 reached at genFoo() on line 15 of %s/flow_gen_async.php
-  14 async function genFoo($a) {
-  15*  var_dump($a);
-  16   $a++;
-
-out
-Break at foo() on line 24 of %s/flow_gen_async.php
-  23 function foo($a) {
-  24*  $result = HH\Asio\join(genFoo($a));
-  25   var_dump($result);
+next
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
 
 next
+flow_gen_async.php loaded
+Break at main() on line 34 of %s/flow_gen_async.php
+  33 error_log('flow_gen_async.php loaded');
+  34*}
+  35 (END)
+
+next
+Program %s/flow_gen_async.php exited normally.
+next
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
+
+next
+flow_gen_async.php loaded
+Break at main() on line 34 of %s/flow_gen_async.php
+  33 error_log('flow_gen_async.php loaded');
+  34*}
+  35 (END)
+
+next
+Program %s/flow_gen_async.php exited normally.
+next
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
+
+continue
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
+@test(5)
 Finished in genBar
 Finished in genFoo
-Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = HH\Asio\join(genFoo($a));
-  25*  var_dump($result);
-  26 }
-
-break clear all
-All breakpoints are cleared.
-continue
 int(5)
 int(6)
 int(8)
 int(8)
 
+out
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break at main() on line 33 of %s/flow_gen_async.php
+  32 <<__EntryPoint>> function main() {
+  33*error_log('flow_gen_async.php loaded');
+  34 }
+
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+continue
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
 quit

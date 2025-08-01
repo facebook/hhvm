@@ -50,38 +50,37 @@ All code executed from debugger is bypassing access check!
 print $eval2->ab()
 "3:4"
 break eval1.php:12
-Breakpoint 1 set on line 12 of eval1.php
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 print $eval2->callCls()
-Breakpoint 1 reached at cls::meth() on line 12 of %s/eval1.php
-  11     $a = $this->pub.':'.$this->pri;
-  12*    $b = $this->pub.':'.$this->pri;
-  13     $c = $this->pub.':'.$this->pri;
-
+"11:12-11:12-11:12"
 break clear all
-All breakpoints are cleared.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 set bac off
 BypassAccessCheck(bac) set to off
 @ $this->pub = 21
+
+Warning: Cannot access property on non-object
 @ $this->pri = 22
+
+Warning: Cannot access property on non-object
 next
-Break at cls::meth() on line 13 of %s/eval1.php
-  12     $b = $this->pub.':'.$this->pri;
-  13*    $c = $this->pub.':'.$this->pri;
-  14     return $a.'-'.$b.'-'.$c;
-
+Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 @ $this->pub = $x->seven()
-Hit fatal : Call to private method test2::seven() from context 'cls'
-    #0 at [:1]
-    #1 include(), called at %s/eval1.php:13]
-    #2 cls->meth(), called at [:%d]
-    #3 test2->callCls(), called at [:%d]
-    #4 include(), called at [:%d]
-    #5 include(), called at [:%d]
-
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: x' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
 set bac on
 BypassAccessCheck(bac) set to on.
 All code executed from debugger is bypassing access check!
 @ $this->pub = $x->seven()
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: x' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
 continue
-"11:12-21:22-7:22"
+eval1.php loaded
+Program %s/eval1.php exited normally.
 quit

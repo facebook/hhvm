@@ -1,0 +1,14 @@
+Program fbcode/hphp/test/quick/debugger/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break :fb:my:thing::doIt()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+continue
+break4.php loaded
+Program fbcode/hphp/test/quick/debugger/break4.php exited normally.
+@ :fb:my:thing::doIt()
+doing my thing
+
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+continue
+Program fbcode/hphp/test/quick/debugger/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
+quit

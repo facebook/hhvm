@@ -1,16 +1,12 @@
 Program %s/break.php loaded. Type '[r]un' or '[c]ontinue' to go.
 continue
+Program %s/break.php exited normally.
+n
+Program %s/break.php loaded. Type '[r]un' or '[c]ontinue' to go.
+n
 Break at entrypoint_break() on line 5 of %s/break.php
    4 
    5*  hphpd_break();
    6 }
 
-n
-Break at entrypoint_break() on line 6 of %s/break.php
-   5   hphpd_break();
-   6*}
-   7 (END)
-
-n
-Program %s/break.php exited normally.
 quit

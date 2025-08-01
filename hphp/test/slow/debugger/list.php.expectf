@@ -1,8 +1,8 @@
 Program %s/list.php loaded. Type '[r]un' or '[c]ontinue' to go.
 br SplMaxHeap::insert()
-Breakpoint 1 set upon entering SplMaxHeap::insert()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
-Breakpoint 1 reached at SplHeap::insert() on line %d of /:ext_core.php
+Program %s/list.php exited normally.
 list myfunc
    3 function myfunc($a, $b) {
    4   error_log($a.$b);

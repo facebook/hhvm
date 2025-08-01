@@ -14,11 +14,6 @@ class cls {
   public static function pubCls($x) {
     error_log("pubCls:".$x);
   }
-  public function pubHardBreak($x) {
-    error_log("pubHardBreak:".$x);
-    hphpd_break();
-    error_log("pubHardBreak:done");
-  }
 }
 
 class derived extends cls {

@@ -1,30 +1,12 @@
 Program %s/printThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break printThis.php:5
-Breakpoint 1 set on line 5 of printThis.php
-But won't break until file printThis.php has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
-Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
-   4   function method() {
-   5*    $other = $this;
-   6   }
-
+Program %s/printThis.php exited normally.
 print $this
-Foo Object
-(
-    [prop] => "Hello\n"
-)
-
+1
 continue
-Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
-   4   function method() {
-   5*    $other = $this;
-   6   }
-
+Program %s/printThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
 print $this
-Foo Object
-(
-    [prop] => "Hello\n"
-    [prop2] => "\tThere"
-)
-
+1
 quit

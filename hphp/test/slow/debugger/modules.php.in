@@ -1,5 +1,5 @@
-include "hphp/test/slow/debugger/modules.php.inc";
-include "hphp/test/slow/debugger/modules.php.inc2";
+include "%s/modules.php.inc";
+include "%s/modules.php.inc2";
 =new Foo();
 =fooFun();
 $x = new Foo();

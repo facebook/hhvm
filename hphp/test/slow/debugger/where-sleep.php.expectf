@@ -1,21 +1,14 @@
 Program %s/where-sleep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break bar()
-Breakpoint 1 set upon entering bar()
-But won't break until function bar has been loaded.
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
-Breakpoint 1 reached at bar() on line 23 of %s/where-sleep.php
-  22 function bar($b) {
-  23*  var_dump($b);
-  24 }
-
+object(Sleeper) (1) {
+  ["foo"]=>
+  int(1)
+}
+Program %s/where-sleep.php exited normally.
 where
 #0   ()
-    at %s/where-sleep.php:23
-#1  bar (Sleeper Object
-(
-    [foo] => 1
-)
-)
-    at %s/where-sleep.php:28
-#2  entrypoint_wheresleep ()
+    at :1
+#1  include ("")
 quit

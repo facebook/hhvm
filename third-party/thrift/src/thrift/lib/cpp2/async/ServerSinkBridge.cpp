@@ -26,9 +26,9 @@ namespace apache::thrift::detail {
 // Explicitly instantiate the base of ServerSinkBridge
 template class TwoWayBridge<
     ServerSinkBridge,
-    ClientMessage,
+    std::variant<folly::Try<StreamPayload>, uint64_t>,
     CoroConsumer,
-    ServerMessage,
+    folly::Try<StreamPayload>,
     ServerSinkBridge>;
 
 ServerSinkBridge::ServerSinkBridge(

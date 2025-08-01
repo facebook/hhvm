@@ -22,10 +22,10 @@ namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientSinkBridge
 template class TwoWayBridge<
-    ClientSinkConsumer,
-    ClientMessage,
+    QueueConsumer,
+    std::variant<folly::Try<StreamPayload>, uint64_t>,
     ClientSinkBridge,
-    ServerMessage,
+    folly::Try<StreamPayload>,
     ClientSinkBridge>;
 
 void ClientSinkBridge::ClientDeleter::operator()(ClientSinkBridge* ptr) {
@@ -53,11 +53,11 @@ void ClientSinkBridge::close() {
   Ptr(this);
 }
 
-bool ClientSinkBridge::wait(ClientSinkConsumer* consumer) {
+bool ClientSinkBridge::wait(QueueConsumer* consumer) {
   return clientWait(consumer);
 }
 
-void ClientSinkBridge::push(ServerMessage&& value) {
+void ClientSinkBridge::push(folly::Try<StreamPayload>&& value) {
   clientPush(std::move(value));
 }
 

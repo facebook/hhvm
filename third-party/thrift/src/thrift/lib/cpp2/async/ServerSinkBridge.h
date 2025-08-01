@@ -24,7 +24,7 @@
 #include <folly/coro/Baton.h>
 #include <folly/coro/Task.h>
 
-#include <thrift/lib/cpp2/async/SinkBridgeUtil.h>
+#include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 #endif
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
@@ -54,16 +54,16 @@ class ServerSinkBridge;
 // This template explicitly instantiated in ServerSinkBridge.cpp
 extern template class TwoWayBridge<
     ServerSinkBridge,
-    ClientMessage,
+    std::variant<folly::Try<StreamPayload>, uint64_t>,
     CoroConsumer,
-    ServerMessage,
+    folly::Try<StreamPayload>,
     ServerSinkBridge>;
 
 class ServerSinkBridge : public TwoWayBridge<
                              ServerSinkBridge,
-                             ClientMessage,
+                             std::variant<folly::Try<StreamPayload>, uint64_t>,
                              CoroConsumer,
-                             ServerMessage,
+                             folly::Try<StreamPayload>,
                              ServerSinkBridge>,
                          public SinkServerCallback {
  public:
@@ -86,7 +86,6 @@ class ServerSinkBridge : public TwoWayBridge<
   // start should be called on threadmanager's thread
   folly::coro::Task<void> start();
 
-  // TwoWayBridge consumer
   void consume();
 
   void canceled() {}

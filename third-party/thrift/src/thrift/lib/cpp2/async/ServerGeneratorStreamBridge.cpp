@@ -22,7 +22,7 @@ namespace apache::thrift::detail {
 template class TwoWayBridge<
     ServerGeneratorStreamBridge,
     folly::Try<StreamPayload>,
-    ServerStreamConsumer,
+    QueueConsumer,
     int64_t,
     ServerGeneratorStreamBridge>;
 
@@ -56,7 +56,7 @@ void ServerGeneratorStreamBridge::canceled() {
   Ptr(this);
 }
 
-bool ServerGeneratorStreamBridge::wait(ServerStreamConsumer* consumer) {
+bool ServerGeneratorStreamBridge::wait(QueueConsumer* consumer) {
   return serverWait(consumer);
 }
 

@@ -20,7 +20,7 @@ namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientStreamBridge
 template class TwoWayBridge<
-    ClientStreamConsumer,
+    QueueConsumer,
     folly::Try<StreamPayload>,
     ClientStreamBridge,
     int64_t,
@@ -41,7 +41,7 @@ StreamClientCallback* ClientStreamBridge::create(
   return new ClientStreamBridge(callback);
 }
 
-bool ClientStreamBridge::wait(ClientStreamConsumer* consumer) {
+bool ClientStreamBridge::wait(QueueConsumer* consumer) {
   return clientWait(consumer);
 }
 

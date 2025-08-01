@@ -21,6 +21,15 @@
 #include <folly/coro/AsyncScope.h>
 
 namespace apache::thrift::detail::test {
+class ReadyCallback final : public QueueConsumer {
+ public:
+  void consume() override { baton.post(); }
+  void canceled() override { LOG(WARNING) << "Server stream is cancelled"; }
+
+  void wait() { baton.wait(); }
+
+  folly::Baton<> baton;
+};
 
 ServerStream<int32_t> TestStreamGeneratorService::range(
     int32_t from, int32_t to) {
@@ -351,7 +360,7 @@ class TestProducerCallback
 
   // returns true iff stream was cancelled by client
   bool updateCreditsOrCancel() {
-    ServerStreamConsumerBaton<folly::Baton<>> consumer;
+    ReadyCallback consumer;
     if (stream_->wait(&consumer)) {
       consumer.baton.wait();
     }

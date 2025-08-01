@@ -20,6 +20,7 @@
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
+#include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 
 namespace apache::thrift {
 
@@ -35,25 +36,18 @@ struct BufferOptions {
 
 namespace detail {
 
-class ClientStreamConsumer {
- public:
-  virtual ~ClientStreamConsumer() = default;
-  virtual void consume() = 0;
-  virtual void canceled() = 0;
-};
-
 class ClientStreamBridge;
 
 // This template explicitly instantiated in ClientStreamBridge.cpp
 extern template class TwoWayBridge<
-    ClientStreamConsumer,
+    QueueConsumer,
     folly::Try<StreamPayload>,
     ClientStreamBridge,
     int64_t,
     ClientStreamBridge>;
 
 class ClientStreamBridge : public TwoWayBridge<
-                               ClientStreamConsumer,
+                               QueueConsumer,
                                folly::Try<StreamPayload>,
                                ClientStreamBridge,
                                int64_t,
@@ -71,7 +65,7 @@ class ClientStreamBridge : public TwoWayBridge<
 
   static StreamClientCallback* create(FirstResponseCallback* callback);
 
-  bool wait(ClientStreamConsumer* consumer);
+  bool wait(QueueConsumer* consumer);
 
   ClientQueue getMessages();
 

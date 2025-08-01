@@ -25,26 +25,12 @@
 #include <thrift/lib/cpp2/async/ServerStreamDetail.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
+#include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 
 namespace apache::thrift::detail {
 namespace test {
 class TestProducerCallback;
 }
-
-class ServerStreamConsumer {
- public:
-  virtual ~ServerStreamConsumer() = default;
-  virtual void consume() = 0;
-  virtual void canceled() = 0;
-};
-
-template <typename Baton>
-class ServerStreamConsumerBaton final : public ServerStreamConsumer {
- public:
-  void consume() override { baton.post(); }
-  void canceled() override { LOG(WARNING) << "Server stream is cancelled"; }
-  Baton baton;
-};
 
 struct StreamControl {
   enum Code : int32_t { CANCEL = -1, PAUSE = -2, RESUME = -3 };
@@ -56,14 +42,14 @@ class ServerGeneratorStreamBridge;
 extern template class TwoWayBridge<
     ServerGeneratorStreamBridge,
     folly::Try<StreamPayload>,
-    ServerStreamConsumer,
+    QueueConsumer,
     int64_t,
     ServerGeneratorStreamBridge>;
 
 class ServerGeneratorStreamBridge : public TwoWayBridge<
                                         ServerGeneratorStreamBridge,
                                         folly::Try<StreamPayload>,
-                                        ServerStreamConsumer,
+                                        QueueConsumer,
                                         int64_t,
                                         ServerGeneratorStreamBridge>,
                                     private StreamServerCallback {
@@ -109,7 +95,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 
   ServerQueue getMessages();
 
-  bool wait(ServerStreamConsumer* consumer);
+  bool wait(QueueConsumer* consumer);
 
   void publish(folly::Try<StreamPayload>&& payload);
 

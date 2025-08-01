@@ -22,9 +22,9 @@
 #include <folly/coro/Baton.h>
 #include <folly/coro/Task.h>
 
-#include <thrift/lib/cpp2/async/SinkBridgeUtil.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
+#include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
 namespace apache::thrift::detail {
@@ -33,17 +33,17 @@ class ClientSinkBridge;
 
 // Instantiated in ClientSinkBridge.cpp
 extern template class TwoWayBridge<
-    ClientSinkConsumer,
-    ClientMessage,
+    QueueConsumer,
+    std::variant<folly::Try<StreamPayload>, uint64_t>,
     ClientSinkBridge,
-    ServerMessage,
+    folly::Try<StreamPayload>,
     ClientSinkBridge>;
 
 class ClientSinkBridge : public TwoWayBridge<
-                             ClientSinkConsumer,
-                             ClientMessage,
+                             QueueConsumer,
+                             std::variant<folly::Try<StreamPayload>, uint64_t>,
                              ClientSinkBridge,
-                             ServerMessage,
+                             folly::Try<StreamPayload>,
                              ClientSinkBridge>,
                          public SinkClientCallback {
  public:
@@ -60,9 +60,9 @@ class ClientSinkBridge : public TwoWayBridge<
 
   void close();
 
-  bool wait(ClientSinkConsumer* consumer);
+  bool wait(QueueConsumer* consumer);
 
-  void push(ServerMessage&& value);
+  void push(folly::Try<StreamPayload>&& value);
 
   ClientQueue getMessages();
 

@@ -27,7 +27,16 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
     TileStreamGuard interaction,
     ContextStack::UniquePtr contextStack) {
-  using ReadyCallback = ServerStreamConsumerBaton<folly::coro::Baton>;
+  class ReadyCallback final : public QueueConsumer {
+   public:
+    void consume() override { baton.post(); }
+    void canceled() override { LOG(WARNING) << "Server stream is cancelled"; }
+
+    folly::coro::Task<void> wait() { co_await baton; }
+
+    folly::coro::Baton baton;
+  };
+
   bool pauseStream = false;
   int64_t credits = 0;
   SCOPE_EXIT {

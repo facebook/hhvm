@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <variant>
-
 #include <folly/Portability.h>
 #include <folly/coro/Baton.h>
 #include <folly/coro/Task.h>
@@ -26,17 +24,22 @@
 
 namespace apache::thrift::detail {
 
-using ClientMessage = std::variant<folly::Try<StreamPayload>, uint64_t>;
-using ServerMessage = folly::Try<StreamPayload>;
-
-class ClientSinkConsumer {
+class QueueConsumer {
  public:
-  virtual ~ClientSinkConsumer() = default;
+  virtual ~QueueConsumer() = default;
   virtual void consume() = 0;
   virtual void canceled() = 0;
 };
+
+// Legacy type aliases for backward compatibility, can be removed in the next
+// step
+using ClientSinkConsumer = QueueConsumer;
+using ClientStreamConsumer = QueueConsumer;
+using ServerStreamConsumer = QueueConsumer;
+
 #if FOLLY_HAS_COROUTINES
-class CoroConsumer final : public ClientSinkConsumer {
+
+class CoroConsumer final : public QueueConsumer {
  public:
   void consume() override { baton_.post(); }
 
@@ -48,4 +51,5 @@ class CoroConsumer final : public ClientSinkConsumer {
   folly::coro::Baton baton_;
 };
 #endif
+
 } // namespace apache::thrift::detail

@@ -54,6 +54,29 @@ class VerifyPessimisationOptions(Enum):
         return self.value
 
 
+def should_auto_update() -> bool:
+    """True iff UPDATE environment variable is set to 'always' (case insensitive)."""
+    # Check for UPDATE environment variable with case insensitive key matching
+    update_value = None
+    for key, value in os.environ.items():
+        if key.lower() == "update":
+            update_value = value.lower()
+            break
+
+    if update_value is None:
+        return False
+
+    if update_value == "always":
+        return True
+    elif update_value == "":
+        return False
+    else:
+        print(
+            f"Warning: Invalid UPDATE value '{update_value}'. Valid values are 'always' or unset (case insensitive)."
+        )
+        return False
+
+
 """
 Per-test flags passed to test executable. Expected to be in a file with
 same name as test, but with .flags extension.
@@ -555,45 +578,32 @@ def report_failures(
         if dump_on_failure:
             dump_failures(failures)
         fnames = [failure.test_case.file_path for failure in failures]
+
+        # Check if UPDATE environment variable is set to 'always'
+        if should_auto_update():
+            print("UPDATE=always detected. Automatically updating snapshots...")
+            execute_snapshot_update(
+                failures,
+                out_extension,
+                expect_extension,
+                fallback_expect_extension,
+                verify_pessimisation,
+                no_copy,
+            )
+            return
+
         print("To review the failures, use the following command: ")
 
-        first_test_file = os.path.realpath(failures[0].test_case.file_path)
-        out_dir: str  # for Pyre
-        (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
-
-        # Get a full path to 'review.sh' so this command be run
-        # regardless of your current directory.
-        review_script = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "review.sh"
+        # Build and print the review command
+        review_command = build_review_command(
+            failures,
+            out_extension,
+            expect_extension,
+            fallback_expect_extension,
+            verify_pessimisation,
+            no_copy,
         )
-        if not os.path.isfile(review_script):
-            review_script = "./hphp/hack/test/review.sh"
-
-        def fname_map_var(f: str) -> str:
-            return "hphp/hack/" + os.path.relpath(f, out_dir)
-
-        env_vars = []
-        if out_extension != DEFAULT_OUT_EXT:
-            env_vars.append("OUT_EXT=%s" % out_extension)
-        if expect_extension != DEFAULT_EXP_EXT:
-            env_vars.append("EXP_EXT=%s" % expect_extension)
-        if fallback_expect_extension is not None:
-            env_vars.append("FALLBACK_EXP_EXT=%s " % fallback_expect_extension)
-        if verify_pessimisation != VerifyPessimisationOptions.no:
-            env_vars.append("VERIFY_PESSIMISATION=true")
-        if no_copy:
-            env_vars.append("UPDATE=never")
-
-        env_vars.extend(["SOURCE_ROOT=%s" % exp_dir, "OUTPUT_ROOT=%s" % out_dir])
-
-        print(
-            "%s %s %s"
-            % (
-                " ".join(env_vars),
-                review_script,
-                " ".join(map(fname_map_var, fnames)),
-            )
-        )
+        print(review_command)
 
         # If more than 75% of files have changed, we're probably doing
         # a transformation to all the .exp files.
@@ -602,6 +612,124 @@ def report_failures(
                 "\nJust want to update all the %s files? Use UPDATE=always with the above command."
                 % expect_extension
             )
+
+
+def build_review_command_parts(
+    failures: List[Result],
+    out_extension: str,
+    expect_extension: str,
+    fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions,
+    no_copy: bool,
+    update_mode: Optional[str] = None,
+) -> Tuple[Dict[str, str], List[str]]:
+    """
+    Build the environment variables and command arguments for the review script.
+    Returns (env_vars_dict, command_args_list).
+    """
+    first_test_file = os.path.realpath(failures[0].test_case.file_path)
+    out_dir: str  # for Pyre
+    (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
+
+    # Get a full path to 'review.sh' so this command be run
+    # regardless of your current directory.
+    review_script = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "review.sh"
+    )
+    if not os.path.isfile(review_script):
+        review_script = "./hphp/hack/test/review.sh"
+
+    def fname_map_var(f: str) -> str:
+        return "hphp/hack/" + os.path.relpath(f, out_dir)
+
+    env_vars = {}
+    if out_extension != DEFAULT_OUT_EXT:
+        env_vars["OUT_EXT"] = out_extension
+    if expect_extension != DEFAULT_EXP_EXT:
+        env_vars["EXP_EXT"] = expect_extension
+    if fallback_expect_extension is not None:
+        env_vars["FALLBACK_EXP_EXT"] = fallback_expect_extension
+    if verify_pessimisation != VerifyPessimisationOptions.no:
+        env_vars["VERIFY_PESSIMISATION"] = "true"
+    if no_copy:
+        env_vars["UPDATE"] = "never"
+    if update_mode is not None:
+        env_vars["UPDATE"] = update_mode
+
+    env_vars["SOURCE_ROOT"] = exp_dir
+    env_vars["OUTPUT_ROOT"] = out_dir
+
+    fnames = [failure.test_case.file_path for failure in failures]
+    command_args = [review_script] + [fname_map_var(f) for f in fnames]
+
+    return (env_vars, command_args)
+
+
+def build_review_command(
+    failures: List[Result],
+    out_extension: str,
+    expect_extension: str,
+    fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions,
+    no_copy: bool,
+) -> str:
+    """
+    Build the review command string that can be used to update snapshots.
+    """
+    env_vars, command_args = build_review_command_parts(
+        failures,
+        out_extension,
+        expect_extension,
+        fallback_expect_extension,
+        verify_pessimisation,
+        no_copy,
+    )
+
+    # Format as shell command string for display
+    env_str = " ".join(f"{k}={shlex.quote(v)}" for k, v in env_vars.items())
+    cmd_str = " ".join(shlex.quote(arg) for arg in command_args)
+    return f"{env_str} {cmd_str}"
+
+
+def execute_snapshot_update(
+    failures: List[Result],
+    out_extension: str,
+    expect_extension: str,
+    fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions,
+    no_copy: bool,
+) -> None:
+    """
+    Execute the snapshot update by running the review script with UPDATE=always.
+    """
+    # Build the command parts with UPDATE=always
+    env_vars, command_args = build_review_command_parts(
+        failures,
+        out_extension,
+        expect_extension,
+        fallback_expect_extension,
+        verify_pessimisation,
+        no_copy,
+        update_mode="always",
+    )
+
+    env = os.environ.copy()
+    env.update(env_vars)
+
+    try:
+        result = subprocess.run(
+            command_args, env=env, capture_output=True, text=True, cwd=os.getcwd()
+        )
+        if result.returncode != 0:
+            print(
+                f"Warning: Snapshot update command failed with return code {result.returncode}"
+            )
+            if result.stderr:
+                print(f"Error output: {result.stderr}")
+        else:
+            print(f"Successfully updated {len(failures)} snapshot files.")
+    except Exception as e:
+        print(f"Error executing snapshot update: {e}")
 
 
 def dump_failures(failures: List[Result]) -> None:

@@ -16,8 +16,6 @@
 
 include "thrift/annotation/hack.thrift"
 
-@hack.MigrationBlockingAllowInheritance
-@hack.MigrationBlockingLegacyJSONSerialization
 union Primitive {
   @hack.Adapter{name = '\\TimestampToTimeAdapter'}
   1: i64 i64_;

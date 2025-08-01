@@ -1,2 +1,1 @@
-strict: hack:strict_unions=1 src/module.thrift
-non_protected: hack: src/module.thrift
+hack: hack:strict_unions=1 src/module.thrift

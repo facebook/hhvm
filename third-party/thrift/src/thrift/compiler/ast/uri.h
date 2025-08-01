@@ -186,10 +186,6 @@ inline constexpr auto kHackModuleInternalUri =
     "facebook.com/thrift/annotation/hack/ModuleInternal";
 inline constexpr auto kHackGenerateClientMethodsWithHeaders =
     "facebook.com/thrift/annotation/hack/GenerateClientMethodsWithHeaders";
-inline constexpr auto kHackMigrationBlockingAllowInheritance =
-    "facebook.com/thrift/annotation/hack/MigrationBlockingAllowInheritance";
-inline constexpr auto kHackMigrationBlockingLegacyJSONSerialization =
-    "facebook.com/thrift/annotation/hack/MigrationBlockingLegacyJSONSerialization";
 
 // Go:
 inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";

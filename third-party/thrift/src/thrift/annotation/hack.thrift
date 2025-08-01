@@ -210,21 +210,3 @@ struct ModuleInternal {}
 @scope.Service
 @scope.Function
 struct GenerateClientMethodsWithHeaders {}
-
-/**
- * Generated Hack types are being changed to `final` by default.
- *
- * For existing thrift types that are inherited from and cannot be easily migrated,
- * use this annotation to make the generated class non-final.
- */
-@scope.Structured
-struct MigrationBlockingAllowInheritance {}
-
-/**
- * Hack Unions without the `protected` compiler option may rely on `fb_json_serialize` for JSON serialization.
- * Adding this annotation will implement the JSONSerializable Hack interface allowing `fb_json_serialize` to continue being used.
- *
- * Note: This should only be used for migration purposes. Use `JSONThriftSerializer` instead.
- */
-@scope.Union
-struct MigrationBlockingLegacyJSONSerialization {}

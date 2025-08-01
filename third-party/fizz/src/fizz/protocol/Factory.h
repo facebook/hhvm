@@ -93,6 +93,11 @@ class Factory {
       CertificateEntry certEntry,
       bool /*leaf*/) const = 0;
 
+  virtual std::unique_ptr<Cert> makePeerCertFromTicket(
+      CertificateEntry certEntry) const {
+    return makePeerCert(std::move(certEntry), true);
+  }
+
   /**
    * Should not be overridden *unless* for testing.
    */

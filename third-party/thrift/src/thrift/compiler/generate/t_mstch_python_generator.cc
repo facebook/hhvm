@@ -410,7 +410,7 @@ class python_mstch_program : public mstch_program {
   mstch::node has_streaming_types() {
     auto any_streaming_fns = [](const t_service* service) {
       for (const auto& function : service->functions()) {
-        if (function.stream()) {
+        if (function.stream() || function.interaction()) {
           return true;
         }
       }

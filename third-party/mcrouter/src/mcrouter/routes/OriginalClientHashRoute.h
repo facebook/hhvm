@@ -7,9 +7,10 @@
 
 #pragma once
 
-#include <folly/hash/Hash.h>
 #include <memory>
 #include <string>
+
+#include <folly/hash/SpookyHashV2.h>
 
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/McrouterFiberContext.h"
@@ -26,6 +27,14 @@ struct dynamic;
 namespace facebook {
 namespace memcache {
 namespace mcrouter {
+
+struct StableHasher {
+  constexpr size_t operator()(folly::StringPiece sp) const {
+    constexpr uint64_t kSeed = 0;
+    return static_cast<size_t>(
+        folly::hash::SpookyHashV2::Hash64(sp.begin(), sp.size(), kSeed));
+  }
+};
 
 /**
  * Use userIpAddress to hash request among children
@@ -57,7 +66,7 @@ class OriginalClientHashRoute {
 
     if (auto ip = req.getSourceIpAddr()) {
       return t(
-          *children_[(folly::Hash()(ip->str()) + offset_) % children_.size()],
+          *children_[(StableHasher()(ip->str()) + offset_) % children_.size()],
           req);
     }
     return false;
@@ -69,7 +78,7 @@ class OriginalClientHashRoute {
     assert(children_.size() > 1);
 
     if (auto ip = req.getSourceIpAddr()) {
-      return children_[(folly::Hash()(ip->str()) + offset_) % children_.size()]
+      return children_[(StableHasher()(ip->str()) + offset_) % children_.size()]
           ->route(req);
     } else {
       return createReply<Request>(

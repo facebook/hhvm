@@ -48,6 +48,7 @@ class HelloRequest : public carbon::RequestCommon, public hellogoodbye::thrift::
 
   static constexpr size_t typeId = 65;
   static constexpr const char* name = "hello";
+  static constexpr const char* idlName = "HelloGoodbye";
 
   HelloRequest() = default;
   HelloRequest(const HelloRequest&) = default;
@@ -91,6 +92,7 @@ class GoodbyeRequest : public carbon::RequestCommon, public hellogoodbye::thrift
 
   static constexpr size_t typeId = 67;
   static constexpr const char* name = "goodbye";
+  static constexpr const char* idlName = "HelloGoodbye";
 
   GoodbyeRequest() = default;
   GoodbyeRequest(const GoodbyeRequest&) = default;

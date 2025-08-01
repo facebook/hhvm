@@ -43,6 +43,7 @@ class McVersionRequest : public carbon::RequestCommon, public facebook::memcache
 
   static constexpr size_t typeId = 25;
   static constexpr const char* name = "version";
+  static constexpr const char* idlName = "Common";
 
   McVersionRequest() = default;
   McVersionRequest(const McVersionRequest&) = default;
@@ -86,6 +87,7 @@ class McStatsRequest : public carbon::RequestCommon, public facebook::memcache::
 
   static constexpr size_t typeId = 33;
   static constexpr const char* name = "stats";
+  static constexpr const char* idlName = "Common";
 
   McStatsRequest() = default;
   McStatsRequest(const McStatsRequest&) = default;
@@ -129,6 +131,7 @@ class McShutdownRequest : public carbon::RequestCommon, public facebook::memcach
 
   static constexpr size_t typeId = 35;
   static constexpr const char* name = "shutdown";
+  static constexpr const char* idlName = "Common";
 
   McShutdownRequest() = default;
   McShutdownRequest(const McShutdownRequest&) = default;
@@ -172,6 +175,7 @@ class McQuitRequest : public carbon::RequestCommon, public facebook::memcache::t
 
   static constexpr size_t typeId = 37;
   static constexpr const char* name = "quit";
+  static constexpr const char* idlName = "Common";
 
   McQuitRequest() = default;
   McQuitRequest(const McQuitRequest&) = default;
@@ -215,6 +219,7 @@ class McExecRequest : public carbon::RequestCommon, public facebook::memcache::t
 
   static constexpr size_t typeId = 39;
   static constexpr const char* name = "exec";
+  static constexpr const char* idlName = "Common";
 
   McExecRequest() = default;
   McExecRequest(const McExecRequest&) = default;
@@ -258,6 +263,7 @@ class GoAwayAcknowledgement : public carbon::RequestCommon, public facebook::mem
 
   static constexpr size_t typeId = 41;
   static constexpr const char* name = "goaway";
+  static constexpr const char* idlName = "Common";
 
   GoAwayAcknowledgement() = default;
   GoAwayAcknowledgement(const GoAwayAcknowledgement&) = default;

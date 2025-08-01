@@ -49,6 +49,7 @@ class McGetRequest : public carbon::RequestCommon, public facebook::memcache::th
 
   static constexpr size_t typeId = 1;
   static constexpr const char* name = "get";
+  static constexpr const char* idlName = "Memcache";
 
   McGetRequest() = default;
   McGetRequest(const McGetRequest&) = default;
@@ -92,6 +93,7 @@ class McSetRequest : public carbon::RequestCommon, public facebook::memcache::th
 
   static constexpr size_t typeId = 3;
   static constexpr const char* name = "set";
+  static constexpr const char* idlName = "Memcache";
 
   McSetRequest() = default;
   McSetRequest(const McSetRequest&) = default;
@@ -135,6 +137,7 @@ class McDeleteRequest : public carbon::RequestCommon, public facebook::memcache:
 
   static constexpr size_t typeId = 5;
   static constexpr const char* name = "delete";
+  static constexpr const char* idlName = "Memcache";
 
   McDeleteRequest() = default;
   McDeleteRequest(const McDeleteRequest&) = default;
@@ -178,6 +181,7 @@ class McLeaseGetRequest : public carbon::RequestCommon, public facebook::memcach
 
   static constexpr size_t typeId = 7;
   static constexpr const char* name = "lease-get";
+  static constexpr const char* idlName = "Memcache";
 
   McLeaseGetRequest() = default;
   McLeaseGetRequest(const McLeaseGetRequest&) = default;
@@ -221,6 +225,7 @@ class McLeaseSetRequest : public carbon::RequestCommon, public facebook::memcach
 
   static constexpr size_t typeId = 9;
   static constexpr const char* name = "lease-set";
+  static constexpr const char* idlName = "Memcache";
 
   McLeaseSetRequest() = default;
   McLeaseSetRequest(const McLeaseSetRequest&) = default;
@@ -264,6 +269,7 @@ class McAddRequest : public carbon::RequestCommon, public facebook::memcache::th
 
   static constexpr size_t typeId = 11;
   static constexpr const char* name = "add";
+  static constexpr const char* idlName = "Memcache";
 
   McAddRequest() = default;
   McAddRequest(const McAddRequest&) = default;
@@ -307,6 +313,7 @@ class McReplaceRequest : public carbon::RequestCommon, public facebook::memcache
 
   static constexpr size_t typeId = 13;
   static constexpr const char* name = "replace";
+  static constexpr const char* idlName = "Memcache";
 
   McReplaceRequest() = default;
   McReplaceRequest(const McReplaceRequest&) = default;
@@ -350,6 +357,7 @@ class McGetsRequest : public carbon::RequestCommon, public facebook::memcache::t
 
   static constexpr size_t typeId = 15;
   static constexpr const char* name = "gets";
+  static constexpr const char* idlName = "Memcache";
 
   McGetsRequest() = default;
   McGetsRequest(const McGetsRequest&) = default;
@@ -393,6 +401,7 @@ class McCasRequest : public carbon::RequestCommon, public facebook::memcache::th
 
   static constexpr size_t typeId = 17;
   static constexpr const char* name = "cas";
+  static constexpr const char* idlName = "Memcache";
 
   McCasRequest() = default;
   McCasRequest(const McCasRequest&) = default;
@@ -436,6 +445,7 @@ class McIncrRequest : public carbon::RequestCommon, public facebook::memcache::t
 
   static constexpr size_t typeId = 19;
   static constexpr const char* name = "incr";
+  static constexpr const char* idlName = "Memcache";
 
   McIncrRequest() = default;
   McIncrRequest(const McIncrRequest&) = default;
@@ -479,6 +489,7 @@ class McDecrRequest : public carbon::RequestCommon, public facebook::memcache::t
 
   static constexpr size_t typeId = 21;
   static constexpr const char* name = "decr";
+  static constexpr const char* idlName = "Memcache";
 
   McDecrRequest() = default;
   McDecrRequest(const McDecrRequest&) = default;
@@ -522,6 +533,7 @@ class McMetagetRequest : public carbon::RequestCommon, public facebook::memcache
 
   static constexpr size_t typeId = 23;
   static constexpr const char* name = "metaget";
+  static constexpr const char* idlName = "Memcache";
 
   McMetagetRequest() = default;
   McMetagetRequest(const McMetagetRequest&) = default;
@@ -565,6 +577,7 @@ class McAppendRequest : public carbon::RequestCommon, public facebook::memcache:
 
   static constexpr size_t typeId = 27;
   static constexpr const char* name = "append";
+  static constexpr const char* idlName = "Memcache";
 
   McAppendRequest() = default;
   McAppendRequest(const McAppendRequest&) = default;
@@ -608,6 +621,7 @@ class McPrependRequest : public carbon::RequestCommon, public facebook::memcache
 
   static constexpr size_t typeId = 29;
   static constexpr const char* name = "prepend";
+  static constexpr const char* idlName = "Memcache";
 
   McPrependRequest() = default;
   McPrependRequest(const McPrependRequest&) = default;
@@ -651,6 +665,7 @@ class McTouchRequest : public carbon::RequestCommon, public facebook::memcache::
 
   static constexpr size_t typeId = 31;
   static constexpr const char* name = "touch";
+  static constexpr const char* idlName = "Memcache";
 
   McTouchRequest() = default;
   McTouchRequest(const McTouchRequest&) = default;
@@ -694,6 +709,7 @@ class McFlushReRequest : public carbon::RequestCommon, public facebook::memcache
 
   static constexpr size_t typeId = 41;
   static constexpr const char* name = "flushre";
+  static constexpr const char* idlName = "Memcache";
 
   McFlushReRequest() = default;
   McFlushReRequest(const McFlushReRequest&) = default;
@@ -737,6 +753,7 @@ class McFlushAllRequest : public carbon::RequestCommon, public facebook::memcach
 
   static constexpr size_t typeId = 43;
   static constexpr const char* name = "flushall";
+  static constexpr const char* idlName = "Memcache";
 
   McFlushAllRequest() = default;
   McFlushAllRequest(const McFlushAllRequest&) = default;
@@ -780,6 +797,7 @@ class McGatRequest : public carbon::RequestCommon, public facebook::memcache::th
 
   static constexpr size_t typeId = 45;
   static constexpr const char* name = "gat";
+  static constexpr const char* idlName = "Memcache";
 
   McGatRequest() = default;
   McGatRequest(const McGatRequest&) = default;
@@ -823,6 +841,7 @@ class McGatsRequest : public carbon::RequestCommon, public facebook::memcache::t
 
   static constexpr size_t typeId = 47;
   static constexpr const char* name = "gats";
+  static constexpr const char* idlName = "Memcache";
 
   McGatsRequest() = default;
   McGatsRequest(const McGatsRequest&) = default;

@@ -57,6 +57,7 @@ class ThriftTestRequest : public carbon::RequestCommon, public carbon::test::thr
 
   static constexpr size_t typeId = 67;
   static constexpr const char* name = "test";
+  static constexpr const char* idlName = "CarbonThriftTest";
 
   ThriftTestRequest() = default;
   ThriftTestRequest(const ThriftTestRequest&) = default;
@@ -100,6 +101,7 @@ class DummyThriftRequest : public carbon::RequestCommon, public carbon::test::th
 
   static constexpr size_t typeId = 65;
   static constexpr const char* name = "thrift_test";
+  static constexpr const char* idlName = "CarbonThriftTest";
 
   DummyThriftRequest() = default;
   DummyThriftRequest(const DummyThriftRequest&) = default;
@@ -143,6 +145,7 @@ class CustomRequest : public carbon::RequestCommon, public carbon::test::thrift:
 
   static constexpr size_t typeId = 69;
   static constexpr const char* name = "customRequest";
+  static constexpr const char* idlName = "CarbonThriftTest";
 
   CustomRequest() = default;
   CustomRequest(const CustomRequest&) = default;

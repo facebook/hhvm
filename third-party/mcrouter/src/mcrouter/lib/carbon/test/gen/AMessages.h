@@ -49,6 +49,7 @@ class TestARequest : public carbon::RequestCommon, public carbon::test::A::thrif
 
   static constexpr size_t typeId = 69;
   static constexpr const char* name = "testA";
+  static constexpr const char* idlName = "A";
 
   TestARequest() = default;
   TestARequest(const TestARequest&) = default;

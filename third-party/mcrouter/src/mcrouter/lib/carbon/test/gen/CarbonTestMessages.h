@@ -48,6 +48,7 @@ class TestRequest : public carbon::RequestCommon, public carbon::test::thrift::T
 
   static constexpr size_t typeId = 69;
   static constexpr const char* name = "test";
+  static constexpr const char* idlName = "CarbonTest";
 
   TestRequest() = default;
   TestRequest(const TestRequest&) = default;
@@ -91,6 +92,7 @@ class TestRequestStringKey : public carbon::RequestCommon, public carbon::test::
 
   static constexpr size_t typeId = 71;
   static constexpr const char* name = "testStringKey";
+  static constexpr const char* idlName = "CarbonTest";
 
   TestRequestStringKey() = default;
   TestRequestStringKey(const TestRequestStringKey&) = default;

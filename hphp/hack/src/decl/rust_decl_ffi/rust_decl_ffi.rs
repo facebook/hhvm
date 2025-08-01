@@ -96,6 +96,20 @@ impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashes {
 }
 
 ocaml_ffi_arena_result! {
+        fn hh_parse_decls_ffi_obr<'a>(
+        arena: &'a Bump,
+        opts: DeclParserOptions,
+        filename: RelativePath,
+        text: UnsafeOcamlPtr,
+    ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
+        // SAFETY: Borrow the contents of the source file from the value on the
+        // OCaml heap rather than copying it over. This is safe as long as we
+        // don't call into OCaml within this function scope.
+        let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
+        let text = bytes_from_ocamlrep(text_value).expect("expected string");
+        direct_decl_parser::parse_decls_for_typechecking_obr(&opts, filename, text, arena)
+    }
+
     fn hh_parse_and_hash_decls_ffi_obr<'a>(
         arena: &'a Bump,
         opts: DeclParserOptions,

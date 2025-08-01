@@ -19,9 +19,7 @@
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 TEST(PatchTest, BoolPatch) {
   BoolPatch patch;
@@ -150,6 +148,4 @@ TEST(PatchTest, BinaryPatch) {
   test::expectPatch(clearPatch, {makeIOBuf("hi")}, makeIOBuf(""));
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

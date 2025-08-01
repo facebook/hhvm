@@ -20,8 +20,7 @@
 
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace test {
 
@@ -41,8 +40,7 @@ struct MyString {
 
 } // namespace test
 
-namespace detail {
-namespace pm {
+namespace detail::pm {
 
 template <>
 struct protocol_methods<type_class::integral, test::MyInt> {
@@ -92,7 +90,6 @@ struct protocol_methods<type_class::string, test::MyString> {
   }
 };
 
-} // namespace pm
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace detail::pm
+
+} // namespace apache::thrift

@@ -27,7 +27,6 @@
 #include <folly/portability/Sockets.h>
 #include <folly/portability/Unistd.h>
 
-#include <thrift/lib/cpp/thrift_config.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp/util/PausableTimer.h>
 

@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 
 #include <fmt/core.h>
-#include <folly/GLog.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 
 namespace apache::thrift {

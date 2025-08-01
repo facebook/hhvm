@@ -22,13 +22,11 @@
 #include <utility>
 
 #include <folly/io/Cursor.h>
-#include <thrift/lib/cpp/EventHandlerBase.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/gen/client_cpp.h>
-#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RocketUpgradeAsyncClient.h>
 
 THRIFT_FLAG_DEFINE_int64(raw_client_rocket_upgrade_timeout_ms, 2000);

@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 
-#include <folly/Overload.h>
-
 namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientSinkBridge

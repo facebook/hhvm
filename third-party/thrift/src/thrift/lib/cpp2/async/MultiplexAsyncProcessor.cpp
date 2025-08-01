@@ -19,7 +19,6 @@
 #include <optional>
 #include <string_view>
 
-#include <folly/GLog.h>
 #include <folly/Overload.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>

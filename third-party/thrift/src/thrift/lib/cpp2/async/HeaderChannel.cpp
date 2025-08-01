@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/async/HeaderChannel.h>
 
-#include <thrift/lib/cpp2/async/RequestChannel.h>
-
 namespace apache::thrift {
 
 using apache::thrift::transport::THeader;

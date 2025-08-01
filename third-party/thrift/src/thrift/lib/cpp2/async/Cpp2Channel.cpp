@@ -18,7 +18,6 @@
 
 #include <glog/logging.h>
 
-#include <folly/String.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>

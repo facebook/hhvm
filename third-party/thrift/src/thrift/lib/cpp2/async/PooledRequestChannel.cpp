@@ -18,8 +18,6 @@
 
 #include <thrift/lib/cpp2/async/FutureRequest.h>
 
-#include <folly/futures/Future.h>
-
 namespace apache::thrift {
 namespace {
 struct InteractionState {

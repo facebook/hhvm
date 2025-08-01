@@ -18,7 +18,6 @@
 
 #include <fmt/core.h>
 #include <folly/Conv.h>
-#include <folly/ExceptionString.h>
 #include <folly/MapUtil.h>
 #include <folly/String.h>
 #include <folly/Utility.h>

@@ -16,7 +16,6 @@
 
 #include <thrift/lib/thrift/detail/protocol.h>
 
-#include <folly/Hash.h>
 #include <folly/Indestructible.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_detail_types.h>

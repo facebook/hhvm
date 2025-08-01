@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/protocol/Object.h>
 
-#include <thrift/lib/cpp/util/EnumUtils.h>
-
 namespace apache::thrift::protocol {
 
 bool isIntrinsicDefault(const Value& value) {

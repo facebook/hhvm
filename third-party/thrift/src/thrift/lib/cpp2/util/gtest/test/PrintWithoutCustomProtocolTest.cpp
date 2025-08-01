@@ -23,8 +23,6 @@
 #include <gtest/gtest.h>
 
 // portability/GTest must be imported before any other gtest header
-#include <gmock/gmock.h>
-#include <gtest/gtest-spi.h>
 
 // Bring the function into the thrift type namespace
 namespace apache::thrift::test {

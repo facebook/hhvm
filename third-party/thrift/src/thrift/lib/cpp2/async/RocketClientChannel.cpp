@@ -24,9 +24,7 @@
 #include <folly/Memory.h>
 #include <folly/Range.h>
 #include <folly/Try.h>
-#include <folly/compression/Compression.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 

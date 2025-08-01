@@ -19,7 +19,6 @@
 #include <gtest/gtest.h>
 #include <folly/Benchmark.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/init/Init.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>

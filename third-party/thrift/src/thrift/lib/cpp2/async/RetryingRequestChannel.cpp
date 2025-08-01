@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/async/RetryingRequestChannel.h>
 
-#include <folly/io/async/AsyncSocketException.h>
-
 namespace apache::thrift {
 
 class RetryingRequestChannel::RequestCallbackBase {

@@ -7,7 +7,6 @@
  */
 
 #include <folly/Benchmark.h>
-#include <folly/Range.h>
 #include <proxygen/lib/http/session/HTTP2PriorityQueue.h>
 
 using namespace proxygen;

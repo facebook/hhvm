@@ -426,6 +426,40 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 210
+      },
+      "MigrationBlockingAllowInheritance" : {
+        "name" : "MigrationBlockingAllowInheritance",
+        "structured_annotations": {
+          "scope.Structured" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Generated Hack types are being changed to `final` by default.\n\nFor existing thrift types that are inherited from and cannot be easily migrated,\nuse this annotation to make the generated class non-final.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 220
+      },
+      "MigrationBlockingLegacyJSONSerialization" : {
+        "name" : "MigrationBlockingLegacyJSONSerialization",
+        "structured_annotations": {
+          "scope.Union" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Hack Unions without the `protected` compiler option may rely on `fb_json_serialize` for JSON serialization.\nAdding this annotation will implement the JSONSerializable Hack interface allowing `fb_json_serialize` to continue being used.\n\nNote: This should only be used for migration purposes. Use `JSONThriftSerializer` instead.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 229
       }
   },
   "source_path" : "thrift/annotation/hack",

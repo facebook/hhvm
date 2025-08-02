@@ -635,10 +635,15 @@ class prototype_builder {
   template <
       typename Parent,
       std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
-  explicit prototype_builder(prototype_ptr<Parent> parent)
-      : parent_(std::move(parent)) {
+  explicit prototype_builder(
+      prototype_ptr<Parent> parent, const std::string_view& name = "")
+      : parent_(std::move(parent)), name_(name) {
     assert(parent_ != nullptr);
   }
+
+  explicit prototype_builder(const std::string_view& name)
+      : parent_(nullptr), name_(name) {}
+
   prototype_builder() = default;
 
   /**
@@ -686,14 +691,31 @@ class prototype_builder {
    */
   result make() && {
     return std::make_shared<basic_prototype<self_type>>(
-        std::move(descriptors_), std::move(parent_));
+        std::move(descriptors_), std::move(parent_), std::move(name_));
   }
 
+  // Define a prototype which extends from a parent prototype of a super type.
+  // To extend the functionality of a prototype for the same type, use
+  // `patches`.
   template <
       typename Parent,
-      std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
-  static prototype_builder extends(prototype_ptr<Parent> parent) {
-    return prototype_builder{std::move(parent)};
+      std::enable_if_t<
+          (std::is_base_of_v<Parent, self_type> &&
+           !std::is_same_v<Parent, self_type>),
+          int> = 0>
+  static prototype_builder extends(
+      prototype_ptr<Parent> parent, const std::string_view& name = "") {
+    return prototype_builder{std::move(parent), name};
+  }
+
+  // Define a prototype which extends from a parent prototype of the same type.
+  // This will return an extension builder which accepts the name (if any) of
+  // the parent.
+  static prototype_builder patches(prototype_ptr<self_type> parent) {
+    const std::string_view name = parent->name();
+    auto builder = prototype_builder{std::move(parent), name};
+
+    return builder;
   }
 
  private:
@@ -707,6 +729,17 @@ class prototype_builder {
 
   prototype<>::ptr parent_;
   prototype<>::descriptors_map descriptors_;
+
+  /**
+   * Optional explicit name.
+   * The name can be used in contexts like loops which implicitly change the
+   * scope from the parent object to the looped type. By using an explicit name
+   * for the prototype, the type of the template variable can be explicitly
+   * specified for readability and as an assertion of the type being operated
+   * on. Names can also be used to explicitly access parent prototype members
+   * on child objects.
+   */
+  std::string_view name_;
 };
 
 /**

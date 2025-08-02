@@ -318,9 +318,11 @@ std::string native_function::describe_type() const {
 }
 
 /* static */ prototype<>::ptr prototype<>::from(
-    descriptors_map descriptors, prototype::ptr parent) {
+    descriptors_map descriptors,
+    prototype::ptr parent,
+    const std::string_view& name) {
   return std::make_shared<basic_prototype<>>(
-      std::move(descriptors), std::move(parent));
+      std::move(descriptors), std::move(parent), name);
 }
 
 std::string detail::describe_native_handle_for_type(

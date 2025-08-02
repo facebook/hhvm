@@ -1008,12 +1008,18 @@ class prototype<void> {
    */
   virtual const ptr& parent() const = 0;
 
+  /**
+   * Returns the name for this prototype, if one is registered.
+   */
+  virtual const std::string_view& name() const = 0;
+
   using descriptors_map = std::map<std::string, descriptor, std::less<>>;
   /**
    * Creates a prototype from the provided map of descriptors and
    * (optionally) a parent.
    */
-  static ptr from(descriptors_map, ptr parent = nullptr);
+  static ptr from(
+      descriptors_map, ptr parent = nullptr, const std::string_view& name = "");
 };
 
 /**
@@ -1062,13 +1068,20 @@ class basic_prototype : public prototype<T> {
 
   const prototype<>::ptr& parent() const override { return parent_; }
 
+  const std::string_view& name() const override { return name_; }
+
   basic_prototype(
-      prototype<>::descriptors_map descriptors, prototype<>::ptr parent)
-      : descriptors_(std::move(descriptors)), parent_(std::move(parent)) {}
+      prototype<>::descriptors_map descriptors,
+      prototype<>::ptr parent,
+      const std::string_view& name)
+      : descriptors_(std::move(descriptors)),
+        parent_(std::move(parent)),
+        name_(name) {}
 
  private:
   prototype<>::descriptors_map descriptors_;
   prototype<>::ptr parent_;
+  std::string_view name_;
 };
 
 template <typename T>
@@ -1415,6 +1428,9 @@ class prototype_database {
       }
       const prototype<>::ptr& parent() const final {
         return this->resolve()->parent();
+      }
+      const std::string_view& name() const final {
+        return this->resolve()->name();
       }
 
      private:

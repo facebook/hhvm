@@ -312,7 +312,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
-    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_program>::patches(base);
     def.property(
         "cpp_qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
     return std::move(def).make();
@@ -321,7 +321,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
-    auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_named>::patches(base);
     def.property("cpp_name", [](const t_named& named) {
       return cpp2::get_name(&named);
     });
@@ -331,7 +331,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_type>::ptr make_prototype_for_type(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
-    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_type>::patches(base);
 
     def.property("cpp_qualified_underlying_name", [this](const t_type& type) {
       return cpp_context_->resolver().get_underlying_namespaced_name(type);
@@ -351,7 +351,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_typedef>::ptr make_prototype_for_typedef(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_typedef(proto);
-    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_typedef>::patches(base);
 
     def.property("cpp_type", [&](const t_typedef& t) {
       return cpp_context_->resolver().get_underlying_type_name(t);
@@ -363,7 +363,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_enum>::ptr make_prototype_for_enum(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_enum(proto);
-    auto def = whisker::dsl::prototype_builder<h_enum>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_enum>::patches(base);
 
     def.property("cpp_min", [](const t_enum& e) -> whisker::object {
       auto values = e.values();
@@ -436,7 +436,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_function>::ptr make_prototype_for_function(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
-    auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_function>::patches(base);
 
     def.property("cpp_return_type", [&](const t_function& f) -> std::string {
       return cpp_context_->resolver().get_return_type(f);
@@ -454,7 +454,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   prototype<t_service>::ptr make_prototype_for_service(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
-    auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
+    auto def = whisker::dsl::prototype_builder<h_service>::patches(base);
 
     def.property("cpp_name", [](const t_service& service) {
       return service.is_interaction() ? service.name()

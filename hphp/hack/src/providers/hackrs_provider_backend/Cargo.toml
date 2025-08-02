@@ -32,7 +32,7 @@ oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 pos = { version = "0.0.0", path = "../../hackrs/pos/cargo/pos" }
 rust_provider_backend_ffi = { version = "0.0.0", path = "../cargo/rust_provider_backend_ffi" }
 rust_provider_backend_ffi_trait = { version = "0.0.0", path = "../cargo/rust_provider_backend_ffi_trait" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 shallow_decl_provider = { version = "0.0.0", path = "../../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }
 shm_store = { version = "0.0.0", path = "../../shmffi/cargo/shm_store" }
 ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }

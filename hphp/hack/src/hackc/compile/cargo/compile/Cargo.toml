@@ -32,6 +32,6 @@ print_expr = { version = "0.0.0", path = "../../../print_expr" }
 profile_rust = { version = "0.0.0", path = "../../../../utils/perf/cargo/profile" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
 rewrite_program = { version = "0.0.0", path = "../rewrite_program" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
 thiserror = "2.0.12"

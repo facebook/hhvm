@@ -23,6 +23,6 @@ intern = { version = "0.1.0", path = "../../../../utils/intern" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 triomphe = "0.1.11"
 write_bytes = { version = "0.0.0", path = "../../../../utils/write_bytes/write_bytes" }

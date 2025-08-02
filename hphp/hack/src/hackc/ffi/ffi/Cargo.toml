@@ -11,5 +11,5 @@ license = "MIT"
 path = "../lib.rs"
 
 [dependencies]
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 triomphe = "0.1.11"

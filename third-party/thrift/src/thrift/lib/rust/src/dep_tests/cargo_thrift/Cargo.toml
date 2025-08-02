@@ -22,7 +22,7 @@ fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"
 rust = { version = "0.0.1+unstable", path = "../../../annotation/rust" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_derive = "1.0.185"
 thiserror = "2.0.12"
 thrift = { version = "0.0.1+unstable", path = "../../../annotation/thrift" }

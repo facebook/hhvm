@@ -22,7 +22,7 @@ proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
 quote = "1.0.29"
 regex = "1.11.1"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = "2.0.12"
 

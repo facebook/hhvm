@@ -28,7 +28,7 @@ oxidized = { version = "0.0.0", path = "../oxidized" }
 rc_pos = { version = "0.0.0", path = "../utils/rust/pos" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml_attr" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

@@ -34,7 +34,7 @@ rc_pos = { version = "0.0.0", path = "../utils/rust/pos" }
 regex = "1.11.1"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml_attr" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "unbounded_depth"] }
 strum = { version = "0.27.1", features = ["derive"] }
 thiserror = "2.0.12"

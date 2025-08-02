@@ -27,6 +27,42 @@ namespace whisker {
 
 namespace {
 
+/**
+ * A class representing the bag of properties at the global scope (even before
+ * the root scope).
+ *
+ * This is a bespoke implementation primarily for debugging purposes.
+ */
+class global_scope_object : public map {
+ public:
+  explicit global_scope_object(map::raw properties)
+      : properties_(std::move(properties)) {}
+
+  std::optional<object> lookup_property(
+      std::string_view identifier) const override {
+    if (auto property = properties_.find(identifier);
+        property != properties_.end()) {
+      return property->second;
+    }
+    return std::nullopt;
+  }
+
+  void print_to(tree_printer::scope& scope, const object_print_options& options)
+      const override {
+    scope.print("<global scope> (size={})", properties_.size());
+    for (const auto& [key, value] : properties_) {
+      whisker::print_to(value, scope.make_child("'{}' → ", key), options);
+    }
+  }
+
+ private:
+  map::raw properties_;
+};
+
+} // namespace
+
+namespace detail {
+
 std::optional<object> find_property(
     diagnostics_engine& diags,
     const object& self,
@@ -65,46 +101,14 @@ std::optional<object> find_property(
       });
 }
 
-/**
- * A class representing the bag of properties at the global scope (even before
- * the root scope).
- *
- * This is a bespoke implementation primarily for debugging purposes.
- */
-class global_scope_object : public map {
- public:
-  explicit global_scope_object(map::raw properties)
-      : properties_(std::move(properties)) {}
-
-  std::optional<object> lookup_property(
-      std::string_view identifier) const override {
-    if (auto property = properties_.find(identifier);
-        property != properties_.end()) {
-      return property->second;
-    }
-    return std::nullopt;
-  }
-
-  void print_to(tree_printer::scope& scope, const object_print_options& options)
-      const override {
-    scope.print("<global scope> (size={})", properties_.size());
-    for (const auto& [key, value] : properties_) {
-      whisker::print_to(value, scope.make_child("'{}' → ", key), options);
-    }
-  }
-
- private:
-  map::raw properties_;
-};
-
-} // namespace
+} // namespace detail
 
 std::optional<object> eval_context::lexical_scope::lookup_property(
     diagnostics_engine& diags, const ast::identifier& identifier) {
   if (auto local = locals_.find(identifier.name); local != locals_.end()) {
     return local->second;
   }
-  return find_property(diags, this_ref_, identifier);
+  return detail::find_property(diags, this_ref_, identifier);
 }
 
 eval_context::eval_context(diagnostics_engine& diags, object globals)
@@ -221,7 +225,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
              ++component) {
           try {
             std::optional<object> next =
-                find_property(diags_, *current, component->property);
+                detail::find_property(diags_, *current, component->property);
             if (!next.has_value()) {
               return unexpected(eval_property_lookup_error(
                   *current, /* missing_from */

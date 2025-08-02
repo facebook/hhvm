@@ -16,6 +16,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/eval_context.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
 
 #include <cassert>
@@ -202,37 +203,14 @@ class mstch_object_proxy
 
     const mstch_object::lookup_result self_value =
         proxied_->at(self_property->first);
-    const object* self_whisker_obj = std::get_if<object>(&self_value);
-    if (self_whisker_obj == nullptr) {
-      return std::nullopt;
+    if (const object* self_whisker_obj = std::get_if<object>(&self_value)) {
+      return detail::find_property(
+          diags_,
+          *self_whisker_obj,
+          ast::identifier{source_range{}, std::string(self_property->second)});
     }
 
-    return self_whisker_obj->visit(
-        [&](const map::ptr& m) -> std::optional<object> {
-          return m->lookup_property(self_property->second);
-        },
-        [&](const native_handle<>& h) -> std::optional<object> {
-          if (const whisker::prototype<>::descriptor* descriptor =
-                  h.proto()->find_descriptor(self_property->second)) {
-            return detail::variant_match(
-                *descriptor,
-                [&](const prototype<>::property& prop)
-                    -> std::optional<object> {
-                  return prop.function->invoke(native_function::context{
-                      {} /* identifier location */,
-                      diags_,
-                      *self_whisker_obj,
-                      {} /* positional arguments */,
-                      {} /* named arguments */,
-                  });
-                },
-                [&](const prototype<>::fixed_object& fixed)
-                    -> std::optional<object> { return fixed.value; });
-          }
-          return std::nullopt;
-        },
-        // Default - no property found
-        [](auto const&) -> std::optional<object> { return std::nullopt; });
+    return std::nullopt;
   }
 };
 

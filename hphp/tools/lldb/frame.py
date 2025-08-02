@@ -338,7 +338,7 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
     line_table_size = sizeof.sizeof(line_table)
     assert line_table_size is not None
     for i in range(line_table_size):
-        line_entry = idx.at(line_table, i)
+        line_entry = idx.at(line_table, i, False)
 
         if line_entry is None:
             break

@@ -20,13 +20,14 @@ except ModuleNotFoundError:
 def at(
     ptr: lldb.SBValue,
     idx: typing.Union[int, lldb.SBValue],
+    treat_as_array: bool = True,
 ) -> typing.Optional[lldb.SBValue]:
     """Access ptr[idx]"""
 
     if isinstance(idx, lldb.SBValue):
         idx = idx.unsigned
 
-    val = ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
+    val = ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, treat_as_array)
 
     utils.debug_print(
         f"idx.at(ptr={ptr} ({ptr.type.name}), idx={idx}) = {val.unsigned} (0x{val.unsigned:x}) (error={val.GetError()})"

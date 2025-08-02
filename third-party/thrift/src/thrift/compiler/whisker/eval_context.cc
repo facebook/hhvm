@@ -66,7 +66,7 @@ namespace detail {
 std::optional<object> find_property(
     diagnostics_engine& diags,
     const object& self,
-    const ast::identifier& identifier) {
+    const ast::variable_component& component) {
   using result = std::optional<object>;
   return self.visit(
       [](null) -> result { return std::nullopt; },
@@ -76,17 +76,22 @@ std::optional<object> find_property(
       [](boolean) -> result { return std::nullopt; },
       [](const array::ptr&) -> result { return std::nullopt; },
       [&](const map::ptr& m) -> result {
-        return m->lookup_property(identifier.name);
+        // A map doesn't have a prototype, so we treat the lookup as just a
+        // simple string key.
+        // Specifically for the case of mstch_compat, mstch_object_proxy is in
+        // fact a Whisker map, so this also provides backwards compatibility for
+        // legacy mstch properties which have colons in the name.
+        return m->lookup_property(component.as_string());
       },
       [](const native_function::ptr&) -> result { return std::nullopt; },
       [&](const native_handle<>& h) -> result {
         if (const auto* descriptor =
-                h.proto()->find_descriptor(identifier.name)) {
+                h.proto()->find_descriptor(component.property.name)) {
           return detail::variant_match(
               *descriptor,
               [&](const prototype<>::property& prop) -> object {
                 return prop.function->invoke(native_function::context{
-                    identifier.loc,
+                    component.loc,
                     diags,
                     self,
                     {} /* positional arguments */,
@@ -104,11 +109,12 @@ std::optional<object> find_property(
 } // namespace detail
 
 std::optional<object> eval_context::lexical_scope::lookup_property(
-    diagnostics_engine& diags, const ast::identifier& identifier) {
-  if (auto local = locals_.find(identifier.name); local != locals_.end()) {
+    diagnostics_engine& diags, const ast::variable_component& component) {
+  if (auto local = locals_.find(component.as_string());
+      local != locals_.end()) {
     return local->second;
   }
-  return detail::find_property(diags, this_ref_, identifier);
+  return detail::find_property(diags, this_ref_, component);
 }
 
 eval_context::eval_context(diagnostics_engine& diags, object globals)
@@ -194,7 +200,9 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
               begin,
               end,
               std::back_inserter(result),
-              [](const auto& component) { return component.as_string(); });
+              [](const auto& component) {
+                return std::string{component.as_string()};
+              });
           return result;
         };
 
@@ -202,8 +210,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
         // Crawl up through the scope stack since names can be shadowed.
         for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
           try {
-            if (auto result =
-                    scope->lookup_property(diags_, path.front().property)) {
+            if (auto result = scope->lookup_property(diags_, path.front())) {
               current = result;
               break;
             }
@@ -225,7 +232,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
              ++component) {
           try {
             std::optional<object> next =
-                detail::find_property(diags_, *current, component->property);
+                detail::find_property(diags_, *current, *component);
             if (!next.has_value()) {
               return unexpected(eval_property_lookup_error(
                   *current, /* missing_from */

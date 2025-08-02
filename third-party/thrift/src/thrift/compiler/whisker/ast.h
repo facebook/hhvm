@@ -179,6 +179,14 @@ struct variable_component {
   std::optional<identifier> prototype;
   identifier property;
 
+  variable_component() = delete;
+
+  // Explicit constructor to ensure string representation is initialized
+  variable_component(
+      source_range loc,
+      std::optional<identifier> prototype,
+      identifier property);
+
   /**
    * Determines if two identifiers are syntactically equivalent, excluding
    * their location in source code.
@@ -190,7 +198,17 @@ struct variable_component {
   // Remove in C++20 which introduces comparison operator synthesis
   WHISKER_DEFINE_OPERATOR_INEQUALITY(variable_component)
 
-  std::string as_string() const;
+  /**
+   * Returns a source-identical string representation of this variable
+   * component.
+   * For a prototype-qualified lookup, it takes the form "prototype:property".
+   * For a raw identifier lookup, it is just "property".
+   */
+  const std::string_view as_string() const;
+
+ private:
+  // Store string representation to avoid regenerating repeatedly
+  std::string as_string_;
 };
 
 /**

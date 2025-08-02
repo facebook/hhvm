@@ -207,7 +207,11 @@ class mstch_object_proxy
       return detail::find_property(
           diags_,
           *self_whisker_obj,
-          ast::identifier{source_range{}, std::string(self_property->second)});
+          ast::variable_component{
+              source_range{},
+              std::nullopt /* prototype */,
+              ast::identifier{
+                  source_range{}, std::string(self_property->second)}});
     }
 
     return std::nullopt;

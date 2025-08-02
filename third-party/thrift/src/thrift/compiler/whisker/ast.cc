@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <iterator>
+#include <sstream>
 
 namespace whisker::ast {
 
@@ -32,12 +33,12 @@ template <typename T, typename ToStringFunc>
 std::string to_joined_string(
     const std::vector<T>& parts, char separator, ToStringFunc&& to_string) {
   assert(!parts.empty());
-  std::string result = to_string(parts.front());
+  std::ostringstream result;
+  result << to_string(parts.front());
   for (auto part = std::next(parts.begin()); part != parts.end(); ++part) {
-    result += separator;
-    result += to_string(*part);
+    result << separator << to_string(*part);
   }
-  return result;
+  return result.str();
 }
 
 } // namespace
@@ -51,10 +52,20 @@ std::string text::joined() const {
   return result;
 }
 
-std::string variable_component::as_string() const {
-  return prototype.has_value()
+variable_component::variable_component(
+    source_range loc_,
+    std::optional<identifier> prototype_,
+    identifier property_)
+    : loc(loc_),
+      prototype(std::move(prototype_)),
+      property(std::move(property_)) {
+  as_string_ = prototype.has_value()
       ? fmt::format("{}:{}", prototype->name, property.name)
       : property.name;
+}
+
+const std::string_view variable_component::as_string() const {
+  return as_string_;
 }
 
 std::string variable_lookup::chain_string() const {
@@ -63,7 +74,9 @@ std::string variable_lookup::chain_string() const {
       [](this_ref) -> std::string { return "this"; },
       [](const std::vector<variable_component>& ids) -> std::string {
         return to_joined_string(
-            ids, '.', [](const variable_component& id) -> std::string {
+            ids,
+            '.',
+            [](const variable_component& id) -> const std::string_view {
               return id.as_string();
             });
       });

@@ -149,7 +149,7 @@ namespace detail {
 std::optional<object> find_property(
     diagnostics_engine& diags,
     const object& self,
-    const ast::identifier& identifier);
+    const ast::variable_component& component);
 
 } // namespace detail
 
@@ -337,7 +337,7 @@ class eval_context {
      *     throws
      */
     std::optional<object> lookup_property(
-        diagnostics_engine& diags, const ast::identifier& identifier);
+        diagnostics_engine& diags, const ast::variable_component& component);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
     using locals_map = std::map<std::string, object, std::less<>>;

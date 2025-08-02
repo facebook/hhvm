@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import *
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -15,7 +15,7 @@ class TestLogicalRoutingPolicies(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
 
     def test_different_cluster(self):
         mcrouter = self.add_mcrouter(

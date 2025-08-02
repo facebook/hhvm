@@ -8,7 +8,7 @@
 
 from datetime import datetime
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -18,7 +18,7 @@ class TestLatencyInjectionRoute(McrouterTestCase):
     config_latency_total = "./mcrouter/test/test_latency_injection_total.json"
 
     def setUp(self) -> None:
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
 
         self.mcrouter_latency_before = self.add_mcrouter(self.config_latency_before)
         self.mcrouter_latency_after = self.add_mcrouter(self.config_latency_after)

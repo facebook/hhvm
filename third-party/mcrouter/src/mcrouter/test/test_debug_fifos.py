@@ -9,7 +9,7 @@
 import os
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -18,7 +18,7 @@ class TestDebugFifos(McrouterTestCase):
     extra_args = ["--proxy-threads=1"]
 
     def setUp(self):
-        self.add_server(Memcached())
+        self.add_server(MockMemcached())
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def get_fifo(self, substr):

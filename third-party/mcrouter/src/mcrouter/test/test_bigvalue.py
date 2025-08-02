@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 MC_MSG_FLAG_BIG_VALUE = 0x8000
@@ -25,7 +25,7 @@ class TestBigvalue(McrouterTestCase):
     ]
 
     def setUp(self):
-        self.add_server(Memcached())
+        self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)

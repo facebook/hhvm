@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -15,7 +15,7 @@ class TestMemcacheRouter(McrouterTestCase):
     extra_args = ["--carbon-router-name", "Memcache"]
 
     def setUp(self) -> None:
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_basic(self) -> None:

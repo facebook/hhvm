@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -17,8 +17,8 @@ class TestWarmup(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_sanity(self):

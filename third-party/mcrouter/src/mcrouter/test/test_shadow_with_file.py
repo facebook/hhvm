@@ -8,7 +8,7 @@
 
 from time import sleep
 
-from mcrouter.test.MCProcess import Mcrouter, Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -16,9 +16,9 @@ class TestShadowWithFile(McrouterTestCase):
     config = "./mcrouter/test/test_shadow_with_file.json"
 
     def setUp(self):
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
-        self.mc_shadow = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc_shadow = self.add_server(MockMemcached())
         self.port_map = {}
         self.extra_args = [
             "--config-params",

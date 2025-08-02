@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -19,7 +19,7 @@ class TestShardSplits(McrouterTestCase):
 
     def setUp(self):
         for _ in range(3):
-            self.add_server(Memcached())
+            self.add_server(MockMemcached())
 
     def test_shard_splits_basic(self):
         mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)

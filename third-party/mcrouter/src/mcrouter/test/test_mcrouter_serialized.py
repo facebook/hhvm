@@ -9,7 +9,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import ConnectionErrorServer, SleepServer
 
@@ -26,10 +26,10 @@ class TestMigratedPoolsFailover(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.a_new = self.add_server(Memcached())
-        self.a_old = self.add_server(Memcached())
-        self.b_new = self.add_server(Memcached())
-        self.b_old = self.add_server(Memcached())
+        self.a_new = self.add_server(MockMemcached())
+        self.a_old = self.add_server(MockMemcached())
+        self.b_new = self.add_server(MockMemcached())
+        self.b_old = self.add_server(MockMemcached())
 
     def get_mcrouter(self, start_time):
         return self.add_mcrouter(
@@ -92,7 +92,7 @@ class TestSamePoolFailover(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.add_server(Memcached(), 12345)
+        self.add_server(MockMemcached(), 12345)
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -112,8 +112,8 @@ class TestGetFailover(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.gut = self.add_server(Memcached())
-        self.wildcard = self.add_server(Memcached())
+        self.gut = self.add_server(MockMemcached())
+        self.wildcard = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -159,8 +159,8 @@ class TestLeaseGetFailover(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.gut = self.add_server(Memcached())
-        self.wildcard = self.add_server(Memcached())
+        self.gut = self.add_server(MockMemcached())
+        self.wildcard = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -203,8 +203,8 @@ class TestMetaGetFailover(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.gut = self.add_server(Memcached())
-        self.wildcard = self.add_server(Memcached())
+        self.gut = self.add_server(MockMemcached())
+        self.wildcard = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -242,7 +242,7 @@ class TestFailoverWithLimit(McrouterTestCase):
     config = "./mcrouter/test/test_failover_limit.json"
 
     def setUp(self):
-        self.gut = self.add_server(Memcached())
+        self.gut = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config)
@@ -270,7 +270,7 @@ class TestFailoverWithLimitWithTKO(McrouterTestCase):
     def setUp(self):
         self.gutA = self.add_server(ConnectionErrorServer())
         self.gutB = self.add_server(ConnectionErrorServer())
-        self.gutC = self.add_server(Memcached())
+        self.gutC = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -296,7 +296,7 @@ class TestFailoverWithLimitWithErrors(McrouterTestCase):
     def setUp(self):
         self.gutA = self.add_server(SleepServer())
         self.gutB = self.add_server(SleepServer())
-        self.gutC = self.add_server(Memcached())
+        self.gutC = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -332,7 +332,7 @@ class TestFailoverWithLimitWithTKOAndErrors(McrouterTestCase):
     def setUp(self):
         self.gutA = self.add_server(SleepServer())
         self.gutB = self.add_server(ConnectionErrorServer())
-        self.gutC = self.add_server(Memcached())
+        self.gutC = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)

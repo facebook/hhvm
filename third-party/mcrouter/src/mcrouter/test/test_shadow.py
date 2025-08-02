@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -18,13 +18,13 @@ class TestShadow(McrouterTestCase):
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json
-        self.mc_foo_0 = self.add_server(Memcached())
-        self.mc_foo_1 = self.add_server(Memcached())
-        self.mc_bar_0 = self.add_server(Memcached())
-        self.mc_bar_1 = self.add_server(Memcached())
-        self.mc_foo_shadow = self.add_server(Memcached())
-        self.mc_foo_shadow_specific_keys = self.add_server(Memcached())
-        self.mc_bar_shadow = self.add_server(Memcached())
+        self.mc_foo_0 = self.add_server(MockMemcached())
+        self.mc_foo_1 = self.add_server(MockMemcached())
+        self.mc_bar_0 = self.add_server(MockMemcached())
+        self.mc_bar_1 = self.add_server(MockMemcached())
+        self.mc_foo_shadow = self.add_server(MockMemcached())
+        self.mc_foo_shadow_specific_keys = self.add_server(MockMemcached())
+        self.mc_bar_shadow = self.add_server(MockMemcached())
 
     def get_mcrouter(self, more_extra_args=()):
         extra_args = list(more_extra_args)

@@ -10,7 +10,7 @@
 import time
 from threading import Thread
 
-from mcrouter.test.MCProcess import Mcrouter, McrouterClient, Memcached
+from mcrouter.test.MCProcess import Mcrouter, McrouterClient, MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -21,7 +21,7 @@ class TestMcrouterBasicBase(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
 
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]
@@ -234,7 +234,7 @@ class TestMcrouterInvalidRouteBase(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
 
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]
@@ -293,8 +293,8 @@ class TestMcrouterBasic2(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]
@@ -357,9 +357,9 @@ class TestBasicAllSyncBase(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(self.make_memcached())
-        self.mc2 = self.add_server(self.make_memcached())
-        self.mc3 = self.add_server(self.make_memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc3 = self.add_server(MockMemcached())
 
 
 class TestBasicAllSync(TestBasicAllSyncBase):
@@ -488,9 +488,9 @@ class TestBasicAllFirst(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
-        self.mc3 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc3 = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -514,10 +514,10 @@ class TestBasicAllMajority(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
-        self.mc3 = self.add_server(Memcached())
-        self.mc4 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc3 = self.add_server(MockMemcached())
+        self.mc4 = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -591,8 +591,8 @@ class TestBasicFailover(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -655,8 +655,8 @@ class TestBasicFailoverOverride(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -691,10 +691,10 @@ class TestBasicFailoverLeastFailures(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
-        self.mc3 = self.add_server(Memcached())
-        self.mc4 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc3 = self.add_server(MockMemcached())
+        self.mc4 = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -723,8 +723,8 @@ class TestMcrouterBasicL1L2(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.l1 = self.add_server(Memcached())
-        self.l2 = self.add_server(Memcached())
+        self.l1 = self.add_server(MockMemcached())
+        self.l2 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, config):
         return self.add_mcrouter(config, extra_args=self.extra_args)
@@ -858,10 +858,10 @@ class TestMcrouterBasicL1MultipleL2SizeSplit(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.l1 = self.add_server(Memcached())
-        self.l2_1 = self.add_server(Memcached())
-        self.l2_2 = self.add_server(Memcached())
-        self.l2_3 = self.add_server(Memcached())
+        self.l1 = self.add_server(MockMemcached())
+        self.l2_1 = self.add_server(MockMemcached())
+        self.l2_2 = self.add_server(MockMemcached())
+        self.l2_3 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, config):
         return self.add_mcrouter(config, extra_args=self.extra_args)
@@ -899,8 +899,8 @@ class TestMcrouterBasicL1L2SizeSplit(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.l1 = self.add_server(Memcached())
-        self.l2 = self.add_server(Memcached())
+        self.l1 = self.add_server(MockMemcached())
+        self.l2 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, config):
         return self.add_mcrouter(config, extra_args=self.extra_args)
@@ -1123,7 +1123,7 @@ class TestMcrouterPortOverride(McrouterTestCase):
     config = "./mcrouter/test/mcrouter_test_portoverride.json"
 
     def test_portoverride(self):
-        mc = self.add_server(Memcached())
+        mc = self.add_server(MockMemcached())
         self.port_map = {}
         extra_args = ["--config-params", f"PORT:{mc.getport()}"]
         mcr = self.add_mcrouter(self.config, extra_args=extra_args)

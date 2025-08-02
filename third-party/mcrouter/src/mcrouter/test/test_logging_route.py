@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -16,7 +16,7 @@ class TestLoggingRoute(McrouterTestCase):
     extra_args = ["--retain-source-ip", "--enable-logging-route"]
 
     def setUp(self):
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
         self.mcrouter_mc = self.add_mcrouter(
             self.config_mc, extra_args=self.extra_args, bg_mcrouter=True
         )

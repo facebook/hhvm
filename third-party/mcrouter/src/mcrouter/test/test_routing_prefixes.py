@@ -9,7 +9,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -21,7 +21,7 @@ class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
         # The order here must corresponds to the order of hosts in the .json
         self.allhosts = []
         for _ in range(0, 4):
-            self.allhosts.append(self.add_server(Memcached()))
+            self.allhosts.append(self.add_server(MockMemcached()))
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
@@ -66,10 +66,10 @@ class TestFallbackRouting(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.aa = self.add_server(Memcached())
-        self.ab = self.add_server(Memcached())
-        self.ba = self.add_server(Memcached())
-        self.bb = self.add_server(Memcached())
+        self.aa = self.add_server(MockMemcached())
+        self.ab = self.add_server(MockMemcached())
+        self.ba = self.add_server(MockMemcached())
+        self.bb = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
@@ -102,10 +102,10 @@ class TestCustomRoutingPrefixes(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.aa = self.add_server(Memcached())
-        self.ab = self.add_server(Memcached())
-        self.ba = self.add_server(Memcached())
-        self.bb = self.add_server(Memcached())
+        self.aa = self.add_server(MockMemcached())
+        self.ab = self.add_server(MockMemcached())
+        self.ba = self.add_server(MockMemcached())
+        self.bb = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)

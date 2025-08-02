@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -16,7 +16,7 @@ class TestAllowGetsOnly(McrouterTestCase):
     config = "./mcrouter/test/mcrouter_test_basic_1_1_1.json"
 
     def setUp(self):
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
         extra_args = ["--allow-only-gets"]
         self.mcr = self.add_mcrouter(self.config, extra_args=extra_args)
 

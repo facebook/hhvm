@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -16,11 +16,11 @@ class TestBucketizedPoolRoute(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
-        self.mc3 = self.add_server(Memcached())
-        self.mc4 = self.add_server(Memcached())
-        self.mc5 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc3 = self.add_server(MockMemcached())
+        self.mc4 = self.add_server(MockMemcached())
+        self.mc5 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]
@@ -47,11 +47,11 @@ class TestNonBucketizedPoolRoute(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
-        self.mc3 = self.add_server(Memcached())
-        self.mc4 = self.add_server(Memcached())
-        self.mc5 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
+        self.mc3 = self.add_server(MockMemcached())
+        self.mc4 = self.add_server(MockMemcached())
+        self.mc5 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]

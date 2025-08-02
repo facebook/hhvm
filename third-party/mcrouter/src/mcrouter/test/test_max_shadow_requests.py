@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import MockServer
 
@@ -41,7 +41,7 @@ class TestServerStatsOutstandingRequests(McrouterTestCase):
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json
-        self.add_server(Memcached())
+        self.add_server(MockMemcached())
         self.timeoutServer = TimeoutServer("test", 0.5)
         self.add_server(self.timeoutServer)
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)

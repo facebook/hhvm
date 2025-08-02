@@ -9,7 +9,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import ConnectionErrorServer, SleepServer
 
@@ -20,8 +20,8 @@ class TestDevNull(McrouterTestCase):
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json
-        self.mc_good = self.add_server(Memcached())
-        self.mc_wild = self.add_server(Memcached())
+        self.mc_good = self.add_server(MockMemcached())
+        self.mc_wild = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
@@ -50,7 +50,7 @@ class TestDuplicateServers(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.wildcard = self.add_server(Memcached(), 12345)
+        self.wildcard = self.add_server(MockMemcached(), 12345)
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
@@ -74,7 +74,7 @@ class TestDuplicateServersDiffTimeouts(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.wildcard = self.add_server(Memcached(), 12345)
+        self.wildcard = self.add_server(MockMemcached(), 12345)
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
@@ -102,9 +102,9 @@ class TestPoolServerErrors(McrouterTestCase):
     config = "./mcrouter/test/test_pool_server_errors.json"
 
     def setUp(self):
-        self.mc1 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
         # mc2 is ErrorRoute
-        self.mc3 = self.add_server(Memcached())
+        self.mc3 = self.add_server(MockMemcached())
 
     def test_pool_server_errors(self):
         mcr = self.add_mcrouter(self.config, "/a/a/")

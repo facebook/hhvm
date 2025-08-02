@@ -9,7 +9,7 @@
 import tempfile
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -61,7 +61,7 @@ class TestConstShardHash(McrouterTestCase):
     config = "./mcrouter/test/test_config_params.json"
 
     def test_config_params(self):
-        mc = self.add_server(Memcached())
+        mc = self.add_server(MockMemcached())
         self.port_map = {}
         extra_args = ["--config-params", f"PORT:{mc.getport()},POOL:A"]
         mcrouter = self.add_mcrouter(self.config, extra_args=extra_args)

@@ -7,6 +7,7 @@
 # pyre-unsafe
 
 
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -15,7 +16,7 @@ class TestNoReplyBase(McrouterTestCase):
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config)

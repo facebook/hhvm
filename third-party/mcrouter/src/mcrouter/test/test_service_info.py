@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -14,8 +14,8 @@ class TestServiceInfo(McrouterTestCase):
     config = "./mcrouter/test/test_service_info.json"
 
     def setUp(self):
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
         self.mcrouter = self.add_mcrouter(self.config)
 
     def test_route_format(self):

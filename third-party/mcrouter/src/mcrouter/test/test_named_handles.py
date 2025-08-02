@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -16,8 +16,8 @@ class TestLargeObj(McrouterTestCase):
     config_unknown = "./mcrouter/test/test_unknown_name_handle.json"
 
     def setUp(self):
-        self.mc1 = self.add_server(Memcached())
-        self.mc2 = self.add_server(Memcached())
+        self.mc1 = self.add_server(MockMemcached())
+        self.mc2 = self.add_server(MockMemcached())
 
     def test_named_handles_list(self):
         mcrouter = self.add_mcrouter(self.config_list)

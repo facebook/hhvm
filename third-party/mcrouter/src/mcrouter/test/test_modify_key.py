@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -17,7 +17,7 @@ class TestModifyKey(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
         self.mcr = self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_modify_key(self):

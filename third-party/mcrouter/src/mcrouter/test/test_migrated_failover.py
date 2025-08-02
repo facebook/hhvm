@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -18,10 +18,10 @@ class TestMigratedFailover(McrouterTestCase):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_migrated_failover(self):
-        self.add_server(Memcached())  # "old" pool, ignored
-        mc_a = self.add_server(Memcached())
-        self.add_server(Memcached())  # "old" pool, ignored
-        mc_b = self.add_server(Memcached())
+        self.add_server(MockMemcached())  # "old" pool, ignored
+        mc_a = self.add_server(MockMemcached())
+        self.add_server(MockMemcached())  # "old" pool, ignored
+        mc_b = self.add_server(MockMemcached())
 
         mc_a.set("key", "a")
         mc_b.set("key", "b")

@@ -11,7 +11,7 @@ import re
 import socket
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import (
     ConnectionErrorServer,
@@ -302,38 +302,38 @@ class TestMcrouterGeneratedErrors(McrouterTestCase):
 
     # mcrouter generated: bad key
     def test_bad_key_set(self):
-        mcrouter = self.getMcrouter(Memcached())
+        mcrouter = self.getMcrouter(MockMemcached())
         cmd = "set test.key" + ("x" * 10000) + " 0 0 3\r\nabc\r\n"
         res = mcrouter.issue_command(cmd)
         self.assertEqual("CLIENT_ERROR bad key\r\n", res)
 
     def test_bad_key_get(self):
-        mcrouter = self.getMcrouter(Memcached())
+        mcrouter = self.getMcrouter(MockMemcached())
         cmd = "get test.key" + ("x" * 10000) + "\r\n"
         res = mcrouter.issue_command(cmd)
         self.assertEqual("CLIENT_ERROR bad key\r\n", res)
 
     def test_bad_key_delete(self):
-        mcrouter = self.getMcrouter(Memcached())
+        mcrouter = self.getMcrouter(MockMemcached())
         cmd = "delete test.key" + ("x" * 10000) + "\r\n"
         res = mcrouter.issue_command(cmd)
         self.assertEqual("CLIENT_ERROR bad key\r\n", res)
 
     def test_bad_key_append(self):
-        mcrouter = self.getMcrouter(Memcached())
+        mcrouter = self.getMcrouter(MockMemcached())
         cmd = "append test.key" + ("x" * 10000) + " 0 0 3\r\nabc\r\n"
         res = mcrouter.issue_command(cmd)
         self.assertEqual("CLIENT_ERROR bad key\r\n", res)
 
     def test_bad_key_prepend(self):
-        mcrouter = self.getMcrouter(Memcached())
+        mcrouter = self.getMcrouter(MockMemcached())
         cmd = "prepend test.key" + ("x" * 10000) + " 0 0 3\r\nabc\r\n"
         res = mcrouter.issue_command(cmd)
         self.assertEqual("CLIENT_ERROR bad key\r\n", res)
 
     # mcrouter generated: remote error
     def test_remote_error_command_not_supported(self):
-        mcrouter = self.getMcrouter(Memcached())
+        mcrouter = self.getMcrouter(MockMemcached())
         cmd = "flush_all\r\n"
         res = mcrouter.issue_command(cmd)
         self.assertEqual("SERVER_ERROR Command disabled\r\n", res)

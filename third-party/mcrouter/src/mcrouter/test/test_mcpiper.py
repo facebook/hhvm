@@ -9,7 +9,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import BaseDirectory, Mcpiper, Memcached
+from mcrouter.test.MCProcess import BaseDirectory, Mcpiper, MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -27,7 +27,7 @@ class TestMcpiper(McrouterTestCase):
     ]
 
     def setUp(self):
-        self.memcached = self.add_server(Memcached())
+        self.memcached = self.add_server(MockMemcached())
         self.mcrouter_ascii = self.add_mcrouter(
             self.mcrouter_ascii_config,
             extra_args=self.mcrouter_ascii_extra_args,

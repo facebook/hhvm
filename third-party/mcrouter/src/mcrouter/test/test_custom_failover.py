@@ -7,7 +7,7 @@
 # pyre-unsafe
 
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import CustomErrorServer
 
@@ -18,7 +18,7 @@ class TestCustomFailover(McrouterTestCase):
 
     def setUp(self):
         self.mc1 = self.add_server(CustomErrorServer())
-        self.mc2 = self.add_server(Memcached())
+        self.mc2 = self.add_server(MockMemcached())
         self.mcr = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_failover(self):
@@ -39,7 +39,7 @@ class TestCustomFailoverOverride(McrouterTestCase):
 
     def setUp(self):
         self.mc1 = self.add_server(CustomErrorServer())
-        self.mc2 = self.add_server(Memcached())
+        self.mc2 = self.add_server(MockMemcached())
 
         self.mcr = self.add_mcrouter(self.config, extra_args=self.extra_args)
 

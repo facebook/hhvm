@@ -13,6 +13,8 @@ import threading
 import time
 from string import Template
 
+from mcrouter.test.MCProcess import MockMemcached
+
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -153,7 +155,7 @@ class TestCarbonLookasideRouteBasic(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix, self.ttl, self.mc.getport()
         )
@@ -214,7 +216,7 @@ class TestCarbonLookasideRouteExpiry(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix, self.ttl, self.mc.getport()
         )
@@ -253,7 +255,7 @@ class TestCarbonLookasideRouteNoExpiry(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix, self.ttl, self.mc.getport()
         )
@@ -291,7 +293,7 @@ class TestCarbonLookasideRouteLeases(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix, self.ttl, self.mc.getport(), "true", 10, 10
         )
@@ -352,7 +354,7 @@ class TestCarbonLookasideRouteLeasesHotMiss(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix, self.ttl, self.mc.getport(), "true", 10, 3, 0, 5000
         )
@@ -411,7 +413,7 @@ class TestCarbonLookasideRouteExpiryMsTTLBase(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix,
             self.ttl,
@@ -451,7 +453,7 @@ class TestCarbonLookasideRouteExpiryMsTTL(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.mc = self.add_server(self.make_memcached())
+        self.mc = self.add_server(MockMemcached())
         self.tmpConfig = CarbonLookasideTmpConfig(
             self.prefix,
             self.ttl,

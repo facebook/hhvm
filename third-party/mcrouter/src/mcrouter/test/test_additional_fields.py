@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -14,7 +14,7 @@ class TestAdditionalFields(McrouterTestCase):
     config = "./mcrouter/test/test_basic_caret.json"
 
     def setUp(self):
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
         self.mcrouter = self.add_mcrouter(self.config)
 
     def test_basic(self):

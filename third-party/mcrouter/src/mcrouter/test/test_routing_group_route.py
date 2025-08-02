@@ -6,7 +6,7 @@
 # pyre-unsafe
 
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -15,10 +15,10 @@ class TestRoutingGroupRoute(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.memcached_get = self.add_server(Memcached())
-        self.memcached_set = self.add_server(Memcached())
-        self.memcached_delete = self.add_server(Memcached())
-        self.memcached_arithmetic = self.add_server(Memcached())
+        self.memcached_get = self.add_server(MockMemcached())
+        self.memcached_set = self.add_server(MockMemcached())
+        self.memcached_delete = self.add_server(MockMemcached())
+        self.memcached_arithmetic = self.add_server(MockMemcached())
 
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
@@ -54,8 +54,8 @@ class TestRoutingGroupRouteIncomplete(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.memcached_A = self.add_server(Memcached())
-        self.memcached_B = self.add_server(Memcached())
+        self.memcached_A = self.add_server(MockMemcached())
+        self.memcached_B = self.add_server(MockMemcached())
 
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 

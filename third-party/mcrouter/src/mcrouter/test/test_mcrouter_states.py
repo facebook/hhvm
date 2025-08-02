@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import McrouterClient, Memcached
+from mcrouter.test.MCProcess import McrouterClient, MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -21,7 +21,7 @@ class TestMcrouterStates(McrouterTestCase):
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
 
     def get_mcrouter(self, additional_args=()):
         extra_args = list(additional_args)

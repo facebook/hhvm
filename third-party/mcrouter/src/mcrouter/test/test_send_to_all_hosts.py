@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -15,9 +15,9 @@ class TestSendToAllHosts(McrouterTestCase):
     extra_args = []
 
     def setUp(self):
-        self.cacheA = self.add_server(Memcached())
-        self.cacheB1 = self.add_server(Memcached())
-        self.cacheB2 = self.add_server(Memcached())
+        self.cacheA = self.add_server(MockMemcached())
+        self.cacheB1 = self.add_server(MockMemcached())
+        self.cacheB2 = self.add_server(MockMemcached())
 
         self.cacheA.set("ccw", "cacheA")
         self.cacheB1.set("ccw", "cacheB1")

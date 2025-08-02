@@ -6,7 +6,7 @@
 
 # pyre-unsafe
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -15,8 +15,8 @@ class TestConstShardHash(McrouterTestCase):
     extra_args = []
 
     def test_const_shard_hash(self):
-        mc1 = self.add_server(Memcached())
-        mc2 = self.add_server(Memcached())
+        mc1 = self.add_server(MockMemcached())
+        mc2 = self.add_server(MockMemcached())
         mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
         key = "foo:0:test"

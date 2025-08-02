@@ -8,7 +8,7 @@
 
 import time
 
-from mcrouter.test.MCProcess import Memcached
+from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -16,7 +16,7 @@ class TestModifyExptime(McrouterTestCase):
     config = "./mcrouter/test/test_modify_exptime.json"
 
     def setUp(self):
-        self.mc = self.add_server(Memcached())
+        self.mc = self.add_server(MockMemcached())
         self.mcr = self.add_mcrouter(self.config)
 
     def test_modify_negative_exptime(self):

@@ -7,7 +7,7 @@
 # pyre-unsafe
 
 
-from mcrouter.test.MCProcess import McrouterClients, Memcached
+from mcrouter.test.MCProcess import McrouterClients, MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -21,7 +21,7 @@ class TestLeasePairing(McrouterTestCase):
 
         self.memcacheds = []
         for _ in range(num_memcached):
-            self.memcacheds.append(self.add_server(Memcached()))
+            self.memcacheds.append(self.add_server(MockMemcached()))
 
         self.mcrouter = self.add_mcrouter(config, extra_args=extra_args)
         self.clients = McrouterClients(self.mcrouter.port, 2)

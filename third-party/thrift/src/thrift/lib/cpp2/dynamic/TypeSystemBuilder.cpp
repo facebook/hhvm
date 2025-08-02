@@ -135,14 +135,14 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
               fmt::format("Definition for uri '{}' was not found", uri));
         },
         [&](const TypeId::List& list) -> TypeRef {
-          return TypeRef(TypeRef::List(typeOf(list.elementType())));
+          return TypeSystem::ListOf(typeOf(list.elementType()));
         },
         [&](const TypeId::Set& set) -> TypeRef {
-          return TypeRef(TypeRef::Set(typeOf(set.elementType())));
+          return TypeSystem::SetOf(typeOf(set.elementType()));
         },
         [&](const TypeId::Map& map) -> TypeRef {
-          return TypeRef(
-              TypeRef::Map(typeOf(map.keyType()), typeOf(map.valueType())));
+          return TypeSystem::MapOf(
+              typeOf(map.keyType()), typeOf(map.valueType()));
         },
         [](const auto& primitive) -> TypeRef { return TypeRef(primitive); });
   }

@@ -912,23 +912,23 @@ class TypeSystemFacade final : public type_system::TypeSystem {
         [](const Primitive& primitive) {
           switch (primitive) {
             case Primitive::BOOL:
-              return type_system::TypeRef{type_system::TypeRef::Bool{}};
+              return type_system::TypeSystem::Bool();
             case Primitive::BYTE:
-              return type_system::TypeRef{type_system::TypeRef::Byte{}};
+              return type_system::TypeSystem::Byte();
             case Primitive::I16:
-              return type_system::TypeRef{type_system::TypeRef::I16{}};
+              return type_system::TypeSystem::I16();
             case Primitive::I32:
-              return type_system::TypeRef{type_system::TypeRef::I32{}};
+              return type_system::TypeSystem::I32();
             case Primitive::I64:
-              return type_system::TypeRef{type_system::TypeRef::I64{}};
+              return type_system::TypeSystem::I64();
             case Primitive::FLOAT:
-              return type_system::TypeRef{type_system::TypeRef::Float{}};
+              return type_system::TypeSystem::Float();
             case Primitive::DOUBLE:
-              return type_system::TypeRef{type_system::TypeRef::Double{}};
+              return type_system::TypeSystem::Double();
             case Primitive::STRING:
-              return type_system::TypeRef{type_system::TypeRef::String{}};
+              return type_system::TypeSystem::String();
             case Primitive::BINARY:
-              return type_system::TypeRef{type_system::TypeRef::Binary{}};
+              return type_system::TypeSystem::Binary();
           }
         },
         [&](const StructNode& s) {
@@ -952,16 +952,14 @@ class TypeSystemFacade final : public type_system::TypeSystem {
               "Typedefs should have been resolved by trueType call");
         },
         [&](const List& l) {
-          return type_system::TypeRef{
-              type_system::TypeRef::List{convertType(l.elementType())}};
+          return type_system::TypeSystem::ListOf(convertType(l.elementType()));
         },
         [&](const Set& s) {
-          return type_system::TypeRef{
-              type_system::TypeRef::Set{convertType(s.elementType())}};
+          return type_system::TypeSystem::SetOf(convertType(s.elementType()));
         },
         [&](const Map& m) {
-          return type_system::TypeRef{type_system::TypeRef::Map{
-              convertType(m.keyType()), convertType(m.valueType())}};
+          return type_system::TypeSystem::MapOf(
+              convertType(m.keyType()), convertType(m.valueType()));
         });
   }
 

@@ -200,7 +200,7 @@ class TypeSystem {
    * Resolves an arbitrary TypeId ito a TypeRef.
    *
    * Throws:
-   *   - InvalidTypeError if the TypeId references user-defined tyeps that are
+   *   - InvalidTypeError if the TypeId references user-defined types that are
    *     not defined in the type system.
    */
   TypeRef resolveTypeId(const TypeId& typeId) const;
@@ -218,6 +218,71 @@ class TypeSystem {
    * serializable.
    */
   virtual std::optional<folly::F14FastSet<Uri>> getKnownUris() const = 0;
+
+  /**
+   * Creates a TypeRef for the `bool` type — either true or false.
+   */
+  static TypeRef Bool() noexcept;
+  /**
+   * Creates a TypeRef for the `byte` type — 8-bit signed integer.
+   */
+  static TypeRef Byte() noexcept;
+  /**
+   * Creates a TypeRef for the `i16` type — 16-bit signed integer.
+   */
+  static TypeRef I16() noexcept;
+  /**
+   * Creates a TypeRef for the `i32` type — 32-bit signed integer.
+   */
+  static TypeRef I32() noexcept;
+  /**
+   * Creates a TypeRef for the `i64` type — 64-bit signed integer.
+   */
+  static TypeRef I64() noexcept;
+  /**
+   * Creates a TypeRef for the `float` type — IEEE 754 binary32.
+   */
+  static TypeRef Float() noexcept;
+  /**
+   * Creates a TypeRef for the `double` type — IEEE 754 binary64.
+   */
+  static TypeRef Double() noexcept;
+  /**
+   * Creates a TypeRef for the `string` type — UTF-8 encoded bytes.
+   */
+  static TypeRef String() noexcept;
+  /**
+   * Creates a TypeRef for the `binary` type — a sequence of bytes.
+   */
+  static TypeRef Binary() noexcept;
+  /**
+   * Creates a TypeRef for the `any` type — a type-erased Thrift value.
+   */
+  static TypeRef Any() noexcept;
+
+  /**
+   * Creates a TypeRef for a `list` type.
+   * The provided element type must from the same type system.
+   */
+  TypeRef ListOf(TypeRef elementType) const;
+  /**
+   * Creates a TypeRef for a `set` type.
+   * The provided element type must from the same type system.
+   */
+  TypeRef SetOf(TypeRef elementType) const;
+  /**
+   * Creates a TypeRef for a `list` type.
+   * The provided key and value types must from the same type system.
+   */
+  TypeRef MapOf(TypeRef keyType, TypeRef valueType) const;
+
+  /**
+   * Creates a TypeRef for a user-defined type.
+   *
+   * Throws:
+   *   - InvalidTypeError if the type is not defined in the type system.
+   */
+  TypeRef UserDefined(UriView) const;
 };
 
 /**
@@ -996,6 +1061,62 @@ template <typename K, typename V>
 }
 
 } // namespace detail
+
+/* static */ inline TypeRef TypeSystem::Bool() noexcept {
+  return TypeRef(TypeRef::Bool());
+}
+
+/* static */ inline TypeRef TypeSystem::Byte() noexcept {
+  return TypeRef(TypeRef::Byte());
+}
+
+/* static */ inline TypeRef TypeSystem::I16() noexcept {
+  return TypeRef(TypeRef::I16());
+}
+
+/* static */ inline TypeRef TypeSystem::I32() noexcept {
+  return TypeRef(TypeRef::I32());
+}
+
+/* static */ inline TypeRef TypeSystem::I64() noexcept {
+  return TypeRef(TypeRef::I64());
+}
+
+/* static */ inline TypeRef TypeSystem::Float() noexcept {
+  return TypeRef(TypeRef::Float());
+}
+
+/* static */ inline TypeRef TypeSystem::Double() noexcept {
+  return TypeRef(TypeRef::Double());
+}
+
+/* static */ inline TypeRef TypeSystem::String() noexcept {
+  return TypeRef(TypeRef::String());
+}
+
+/* static */ inline TypeRef TypeSystem::Binary() noexcept {
+  return TypeRef(TypeRef::Binary());
+}
+
+/* static */ inline TypeRef TypeSystem::Any() noexcept {
+  return TypeRef(TypeRef::Any());
+}
+
+inline TypeRef TypeSystem::ListOf(TypeRef elementType) const {
+  return TypeRef(TypeRef::List::of(std::move(elementType)));
+}
+
+inline TypeRef TypeSystem::SetOf(TypeRef elementType) const {
+  return TypeRef(TypeRef::Set::of(std::move(elementType)));
+}
+
+inline TypeRef TypeSystem::MapOf(TypeRef keyType, TypeRef valueType) const {
+  return TypeRef(TypeRef::Map::of(std::move(keyType), std::move(valueType)));
+}
+
+inline TypeRef TypeSystem::UserDefined(UriView uri) const {
+  return TypeRef::fromDefinition(this->getUserDefinedTypeOrThrow(uri));
+}
 
 } // namespace apache::thrift::type_system
 

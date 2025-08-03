@@ -35,7 +35,7 @@ Object HHVM_METHOD(
   // Make sure event is abandoned, in case of an error
   auto guard = folly::makeGuard([=] { event->abandon(); });
 
-  class ReadyCallback : public apache::thrift::detail::ClientSinkConsumer {
+  class ReadyCallback : public apache::thrift::detail::QueueConsumer {
    public:
     explicit ReadyCallback(
         HPHP::thrift::TClientSink* sink,
@@ -164,7 +164,7 @@ Object HHVM_METHOD(TClientBufferedStream, genNext) {
     return Object{event->getWaitHandle()};
   }
 
-  class ReadyCallback : public apache::thrift::detail::ClientStreamConsumer {
+  class ReadyCallback : public apache::thrift::detail::QueueConsumer {
    public:
     explicit ReadyCallback(
         HPHP::thrift::TClientBufferedStream* stream,

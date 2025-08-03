@@ -31,12 +31,6 @@ class QueueConsumer {
   virtual void canceled() = 0;
 };
 
-// Legacy type aliases for backward compatibility, can be removed in the next
-// step
-using ClientSinkConsumer = QueueConsumer;
-using ClientStreamConsumer = QueueConsumer;
-using ServerStreamConsumer = QueueConsumer;
-
 #if FOLLY_HAS_COROUTINES
 
 class CoroConsumer final : public QueueConsumer {

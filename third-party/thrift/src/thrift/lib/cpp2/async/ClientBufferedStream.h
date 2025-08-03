@@ -63,7 +63,7 @@ class ClientBufferedStream {
     size_t payloadDataSize = 0;
 
     apache::thrift::detail::ClientStreamBridge::ClientQueue queue;
-    class ReadyCallback : public apache::thrift::detail::ClientStreamConsumer {
+    class ReadyCallback : public apache::thrift::detail::QueueConsumer {
      public:
       void consume() override { baton.post(); }
 
@@ -207,7 +207,7 @@ class ClientBufferedStream {
     };
 
     apache::thrift::detail::ClientStreamBridge::ClientQueue queue;
-    class ReadyCallback : public apache::thrift::detail::ClientStreamConsumer {
+    class ReadyCallback : public apache::thrift::detail::QueueConsumer {
      public:
       void consume() override { baton.post(); }
 
@@ -361,7 +361,7 @@ class ClientBufferedStream {
     };
 
     apache::thrift::detail::ClientStreamBridge::ClientQueueWithTailPtr queue;
-    class ReadyCallback : public apache::thrift::detail::ClientStreamConsumer {
+    class ReadyCallback : public apache::thrift::detail::QueueConsumer {
      public:
       void consume() override { baton.post(); }
 
@@ -489,7 +489,7 @@ class ClientBufferedStream {
   // to the new execution frame in consume(). If wait() returns false its
   // argument is not released and the caller frees it as normal. If wait() is
   // interrupted by cancel() the memory is freed in canceled()
-  class Continuation : public apache::thrift::detail::ClientStreamConsumer {
+  class Continuation : public apache::thrift::detail::QueueConsumer {
    public:
     Continuation(
         folly::Executor::KeepAlive<> e,

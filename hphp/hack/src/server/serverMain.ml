@@ -212,12 +212,27 @@ let query_notifier
       (false, updates)
   in
   let (updates_stale, raw_updates) = unpack_updates raw_updates in
+  let stop_pumping_on_empty_updates =
+    let open ServerLocalConfig in
+    let open ServerLocalConfig.EdenfsFileWatcher in
+    (* TODO(T226505256) When using Edenfs_watcher, we currently have a Watchman-based workaround
+       in place to support deferring changes while meerkat is running. However, this workaround has
+       the side-effect that ServerNotifier.maybe_changes_available may still return true after
+       ServerNotifier.get_changes_{sync,async} was called (and nothing happened on disk in
+       after the call to ServerNotifier.get_changes_{sync,async}).
+       Thus, when Edenfs_watcher is enabled, we allow terminating pump_async_updates if we get an
+       empty raw_updates set from ServerNotifier.get_changes_async. *)
+    genv.local_config.edenfs_file_watcher.enabled
+  in
   let rec pump_async_updates acc acc_clock =
     match ServerNotifier.maybe_changes_available genv.notifier with
     | Some true ->
       let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
       let (_, raw_updates) = unpack_updates changes in
-      pump_async_updates (SSet.union acc raw_updates) clock
+      if stop_pumping_on_empty_updates && SSet.is_empty raw_updates then
+        (acc, clock)
+      else
+        pump_async_updates (SSet.union acc raw_updates) clock
     | _ -> (acc, acc_clock)
   in
   let (raw_updates, clock) = pump_async_updates raw_updates clock in

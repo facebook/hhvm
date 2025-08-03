@@ -1005,4 +1005,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       autocomplete_sort_text = options.autocomplete_sort_text;
       warnings_default_all = options.warnings_default_all;
       edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;
+      edenfs_file_watcher_sync_queries_obey_deferral =
+        options.edenfs_file_watcher.sync_queries_obey_deferral;
     }

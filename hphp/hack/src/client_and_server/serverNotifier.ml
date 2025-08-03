@@ -442,8 +442,13 @@ let get_changes_sync (t : t) : SSet.t * clock option =
         root
         local_config;
 
+      let sync_queries_obey_deferral =
+        local_config.ServerLocalConfig.edenfs_file_watcher
+          .sync_queries_obey_deferral
+      in
+
       (* TODO(T226505256) Workaround for deferring changes while Meerkat is running *)
-      if MeerkatTracker.is_meerkat_running () then (
+      if sync_queries_obey_deferral && MeerkatTracker.is_meerkat_running () then (
         (* This is here to slow down the interrupt mechanism while we are deferring changes:
            Edenfs_watcher itself is unaware of the deferral and will write to the notification
            file descriptor if it sees changes.

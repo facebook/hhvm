@@ -129,4 +129,7 @@ type rollout_flags = {
       (** POC: @catg - whether the client shows warnings by default. *)
   edenfs_file_watcher_enabled: bool;
       (** POC: @frankemrich - if true, use Edenfs_watcher to power ServerNotifier (= file watching in server) *)
+  edenfs_file_watcher_sync_queries_obey_deferral: bool;
+      (** POC: @frankemrich -  If false, ServerNotifier.get_changes_sync backed by Edenfs_watcher will return
+          file changes even when we are currently deferring changes (e.g. because meerkat is running). *)
 }

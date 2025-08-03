@@ -86,6 +86,10 @@ module EdenfsFileWatcher = struct
     enabled: bool;
     debug_logging: bool;
     timeout_secs: int;  (** Timeout, in seconds *)
+    sync_queries_obey_deferral: bool;
+        (** If false, ServerNotifier.get_changes_sync backed by Edenfs_watcher will return
+            file changes even when we are currently deferring changes (e.g. because meerkat is
+            running). *)
     throttle_time_ms: int;
         (** Value of throttle_time_ms parameter passed to Eden's stream_changes_since API.
             This means that this is the minimum period (in milliseconds) between each time
@@ -98,6 +102,7 @@ module EdenfsFileWatcher = struct
       enabled = false;
       timeout_secs = 60;
       throttle_time_ms = 50;
+      sync_queries_obey_deferral = true;
     }
 
   let load ~current_version ~default config =
@@ -121,13 +126,26 @@ module EdenfsFileWatcher = struct
         ~default:default.timeout_secs
         config
     in
+    let sync_queries_obey_deferral =
+      bool_if_min_version
+        "edenfs_file_watcher_sync_queries_obey_deferral"
+        ~default:default.sync_queries_obey_deferral
+        ~current_version
+        config
+    in
     let throttle_time_ms =
       int_
         "edenfs_file_watcher_throttle_time_ms"
         ~default:default.throttle_time_ms
         config
     in
-    { debug_logging; enabled; timeout_secs; throttle_time_ms }
+    {
+      debug_logging;
+      enabled;
+      timeout_secs;
+      sync_queries_obey_deferral;
+      throttle_time_ms;
+    }
 end
 
 (** Allows to typecheck only a certain quantile of the workload. *)

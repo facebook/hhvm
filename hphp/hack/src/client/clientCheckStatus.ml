@@ -492,12 +492,22 @@ let watchman_get_raw_updates_since
 
 let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
   let watch_spec = FilesToIgnore.server_watch_spec in
-  let { ServerLocalConfig.EdenfsFileWatcher.debug_logging; throttle_time_ms; _ }
-      =
+  let {
+    ServerLocalConfig.EdenfsFileWatcher.debug_logging;
+    timeout_secs;
+    throttle_time_ms;
+    _;
+  } =
     local_config.ServerLocalConfig.edenfs_file_watcher
   in
   let settings =
-    { Edenfs_watcher_types.root; watch_spec; debug_logging; throttle_time_ms }
+    {
+      Edenfs_watcher_types.root;
+      watch_spec;
+      debug_logging;
+      timeout_secs;
+      throttle_time_ms;
+    }
   in
   let translate_changes list = function
     | Edenfs_watcher_types.FileChanges file_changes

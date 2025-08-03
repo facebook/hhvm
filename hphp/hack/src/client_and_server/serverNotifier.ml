@@ -169,13 +169,20 @@ let init
     let watch_spec = FilesToIgnore.server_watch_spec in
     let {
       ServerLocalConfig.EdenfsFileWatcher.debug_logging;
+      timeout_secs;
       throttle_time_ms;
       _;
     } =
       local_config.edenfs_file_watcher
     in
     let init_settings =
-      { Edenfs_watcher_types.root; watch_spec; debug_logging; throttle_time_ms }
+      {
+        Edenfs_watcher_types.root;
+        watch_spec;
+        debug_logging;
+        timeout_secs;
+        throttle_time_ms;
+      }
     in
     match Edenfs_watcher.init init_settings with
     | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->

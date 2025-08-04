@@ -10,13 +10,12 @@ import os
 import time
 import unittest
 
-from mcrouter.test.MCProcess import Mcrouter, Memcached, MockMemcached
+from mcrouter.test.MCProcess import Mcrouter, MockMemcached
 
 
 class McrouterTestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.use_mock_mc = False
 
     def ensureClassVariables(self):
         if "open_servers" not in self.__dict__:
@@ -49,6 +48,9 @@ class McrouterTestCase(unittest.TestCase):
             if retries < 0:
                 return False
             time.sleep(interval)
+
+    def memcached_args(self, unused_tmp_dir):
+        return []
 
     def add_server(self, server, logical_port=None, sr_routing=False):
         self.ensureClassVariables()
@@ -112,7 +114,7 @@ class McrouterTestCase(unittest.TestCase):
         return mcrouter
 
     def make_memcached(self):
-        return MockMemcached() if self.use_mock_mc else Memcached()
+        return MockMemcached()
 
     def get_open_ports(self):
         self.ensureClassVariables()

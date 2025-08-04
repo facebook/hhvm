@@ -154,17 +154,12 @@ class MCProcess(ProcessBase):
             self.addr = ("localhost", port)
             self.port = port
             self.addr_family = socket.AF_INET
-        memcached = False
-        if cmd is not None and "memcached" in cmd[0]:
-            memcached = True
 
         if base_dir is None:
             base_dir = BaseDirectory("MCProcess")
 
         ProcessBase.__init__(self, cmd, base_dir, junk_fill, pass_fds=pass_fds)
-        # memcached could take little longer to initialize
-        if memcached:
-            time.sleep(3)
+
         self.max_retries = 20 if max_retries is None else max_retries
         self.deletes = 0
         self.others = 0
@@ -1020,92 +1015,6 @@ class MockMemcachedDual(MCProcess):
 
     def getport(self):
         return self.thriftPort if self.mcrouterUseThrift else self.asyncPort
-
-
-class Memcached(MCProcess):
-    ssl_port = None
-
-    def __init__(self, port=None, ssl_port=None, extra_args=None):
-        args = [McrouterGlobals.binPath("prodmc")]
-        listen_sock = None
-        pass_fds = []
-
-        # if mockmc is used here, we initialize the same way as MockMemcached
-        if McrouterGlobals.binPath("mockmc") == args[0]:
-            if port is None:
-                listen_sock = create_listen_socket()
-                port = listen_sock.getsockname()[1]
-                listen_sock_fd = listen_sock.fileno()
-                args.extend(["-t", str(listen_sock_fd)])
-                pass_fds.append(listen_sock_fd)
-            else:
-                args.extend(["-P", str(port)])
-
-            MCProcess.__init__(self, args, port, pass_fds=pass_fds)
-
-            if listen_sock is not None:
-                listen_sock.close()
-        else:
-            args.extend(
-                [
-                    "-A",
-                    "-g",
-                    "-t",
-                    "1",
-                    "--enable_hash_aliases",
-                    "--enable_unchecked_l1_sentinel_reads",
-                    "--items_reaper_interval_secs=1",
-                    "--ini_hashpower=16",
-                    "--num_listening_sockets=1",
-                ]
-            )
-            if extra_args:
-                args.extend(extra_args)
-            if port is None:
-                listen_sock = create_listen_socket()
-                port = listen_sock.getsockname()[1]
-                listen_sock_fd = listen_sock.fileno()
-                args.extend(["--listen_sock_fd", str(listen_sock_fd)])
-                pass_fds.append(listen_sock_fd)
-            else:
-                args.extend(["-p", str(port)])
-
-            # Create a listen thrift socket to avoid port collision.
-            # Not used in actual ASCII tests
-            thrift_listen_sock = create_listen_socket()
-            thrift_listen_sock_fd = thrift_listen_sock.fileno()
-            args.extend(["--thrift_listen_sock_fd", str(thrift_listen_sock_fd)])
-            pass_fds.append(thrift_listen_sock_fd)
-            thrift_port = thrift_listen_sock.getsockname()[1]
-
-            if ssl_port:
-                self.ssl_port = ssl_port
-                args.extend(["--ssl_port", str(self.ssl_port)])
-
-            MCProcess.__init__(
-                self, args, port, pass_fds=pass_fds, thriftPort=thrift_port
-            )
-
-            thrift_listen_sock.close()
-
-            if listen_sock is not None:
-                listen_sock.close()
-
-            # delay here until the server goes up
-            self.ensure_connected()
-            tries = 10
-            s = self.stats()
-            while (not s or len(s) == 0) and tries > 0:
-                # Note, we need to reconnect, because it's possible the
-                # server is still going to process previous requests.
-                self.ensure_connected()
-                s = self.stats()
-                time.sleep(0.5)
-                tries -= 1
-            self.disconnect()
-
-    def getsslport(self):
-        return self.ssl_port
 
 
 class Mcpiper(ProcessBase):

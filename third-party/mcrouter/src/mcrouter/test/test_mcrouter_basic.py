@@ -165,7 +165,6 @@ class TestMcrouterBasic(TestMcrouterBasicBase):
 class TestMcrouterBasicTouch(TestMcrouterBasicBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.use_mock_mc = True
 
     def test_basic_touch(self):
         mcr = self.get_mcrouter()
@@ -271,7 +270,6 @@ class TestMcrouterInvalidRoute(TestMcrouterInvalidRouteBase):
 class TestMcrouterInvalidRouteAppendPrepend(TestMcrouterInvalidRouteBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.use_mock_mc = True
 
     def test_basic_invalid_route(self):
         mcr = self.get_mcrouter()
@@ -402,7 +400,6 @@ class TestBasicAllSync(TestBasicAllSyncBase):
 class TestBasicAllSyncAppendPrependTouch(TestBasicAllSyncBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.use_mock_mc = True
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)

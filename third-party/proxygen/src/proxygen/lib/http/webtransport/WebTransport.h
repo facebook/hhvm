@@ -11,6 +11,7 @@
 #include <folly/CancellationToken.h>
 #include <folly/Expected.h>
 #include <folly/Optional.h>
+#include <folly/SocketAddress.h>
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
 #include <quic/api/QuicCallbacks.h>
@@ -273,6 +274,10 @@ class WebTransport {
   // Sends the buffer as a datagram
   virtual folly::Expected<folly::Unit, ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> datagram) = 0;
+
+  // Get the local and peer socket addresses
+  virtual const folly::SocketAddress& getLocalAddress() const = 0;
+  virtual const folly::SocketAddress& getPeerAddress() const = 0;
 
   // Close the WebTransport session, with an optional error
   //

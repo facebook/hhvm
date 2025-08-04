@@ -120,6 +120,14 @@ class QuicWebTransport
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> /*datagram*/) override;
 
+  const folly::SocketAddress& getLocalAddress() const override {
+    return quicSocket_->getLocalAddress();
+  }
+
+  const folly::SocketAddress& getPeerAddress() const override {
+    return quicSocket_->getPeerAddress();
+  }
+
   bool usesEncodedApplicationErrorCodes() override {
     return false;
   }

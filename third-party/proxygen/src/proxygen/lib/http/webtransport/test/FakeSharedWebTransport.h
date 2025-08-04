@@ -196,6 +196,13 @@ class FakeSharedWebTransport : public WebTransport {
     writeHandles.clear();
     readHandles.clear();
   }
+  const folly::SocketAddress& getPeerAddress() const override {
+    return peerAddress_;
+  }
+
+  const folly::SocketAddress& getLocalAddress() const override {
+    return localAddress_;
+  }
 
   void setPeer(FakeSharedWebTransport* peer) {
     peer_ = peer;
@@ -335,6 +342,8 @@ class FakeSharedWebTransport : public WebTransport {
   uint64_t nextUniStreamId_{2};
   FakeSharedWebTransport* peer_{nullptr};
   WebTransportHandler* peerHandler_{nullptr};
+  folly::SocketAddress peerAddress_{"0.0.0.0", 123};
+  folly::SocketAddress localAddress_{"0.0.0.0", 456};
 };
 
 } // namespace proxygen::test

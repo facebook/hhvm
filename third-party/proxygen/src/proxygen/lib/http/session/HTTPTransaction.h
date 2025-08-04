@@ -570,9 +570,9 @@ class HTTPTransaction
 
     virtual void notifyEgressBodyBuffered(int64_t bytes) noexcept = 0;
 
-    virtual const folly::SocketAddress& getLocalAddress() const noexcept = 0;
+    const folly::SocketAddress& getLocalAddress() const noexcept override = 0;
 
-    virtual const folly::SocketAddress& getPeerAddress() const noexcept = 0;
+    const folly::SocketAddress& getPeerAddress() const noexcept override = 0;
 
     [[nodiscard]] virtual std::chrono::seconds getLatestIdleTime() const = 0;
 

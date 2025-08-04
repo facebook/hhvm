@@ -68,6 +68,9 @@ class WebTransportImpl : public WebTransport {
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> /*datagram*/) = 0;
 
+    virtual const folly::SocketAddress& getLocalAddress() const = 0;
+    virtual const folly::SocketAddress& getPeerAddress() const = 0;
+
     virtual bool usesEncodedApplicationErrorCodes() = 0;
   };
 
@@ -165,6 +168,14 @@ class WebTransportImpl : public WebTransport {
       return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
     }
     return folly::unit;
+  }
+
+  const folly::SocketAddress& getLocalAddress() const override {
+    return tp_.getLocalAddress();
+  }
+
+  const folly::SocketAddress& getPeerAddress() const override {
+    return tp_.getPeerAddress();
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(

@@ -98,6 +98,8 @@ class MockWebTransport : public WebTransport {
   MOCK_METHOD(GenericApiRet, setPriority, (uint64_t, uint8_t, uint32_t, bool));
   MOCK_METHOD(GenericApiRet, stopSending, (uint64_t, uint32_t));
   MOCK_METHOD(GenericApiRet, sendDatagram, (std::unique_ptr<folly::IOBuf>));
+  MOCK_METHOD((const folly::SocketAddress&), getLocalAddress, (), (const));
+  MOCK_METHOD((const folly::SocketAddress&), getPeerAddress, (), (const));
   MOCK_METHOD(GenericApiRet, closeSession, (folly::Optional<uint32_t>));
   MOCK_METHOD((folly::Expected<folly::SemiFuture<folly::Unit>,
                                WebTransport::ErrorCode>),

@@ -140,6 +140,11 @@ enum EdenErrorType {
   * parent that is not the current parent. errorCode will not be set.
   */
   OUT_OF_DATE_PARENT = 8,
+  /**
+  * The requested attribute is not available for the given file. errorCode will
+  * be set to ENOENT.
+  */
+  ATTRIBUTE_UNAVAILABLE = 9,
 }
 
 exception EdenError {

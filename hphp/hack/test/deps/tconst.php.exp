@@ -1,3 +1,7 @@
+Const Bar::TInner -> Type Bar
+Const Foo::TInner -> Type Foo
+Const M::TInner -> Type M
+Const N::TInner -> Type N
 Constructor Foo -> Type Bar
 Constructor M -> Type N
 Extends Foo -> Type Bar

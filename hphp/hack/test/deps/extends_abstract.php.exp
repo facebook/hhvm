@@ -1,3 +1,5 @@
+Const A::TInner -> Type A
+Const B::TInner -> Type B
 Constructor A -> Type B
 Extends A -> Type B
 Type A -> Type B

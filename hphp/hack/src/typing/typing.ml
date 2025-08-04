@@ -371,8 +371,7 @@ let unbound_name env (pos, name) e =
     expr_error env pos e
   else
     let class_exists =
-      let ctx = Env.get_ctx env in
-      let decl = Decl_provider.get_class ctx name in
+      let decl = Typing_env.get_class env name in
       match decl with
       | Decl_entry.NotYetAvailable
       | Decl_entry.DoesNotExist ->
@@ -1179,7 +1178,7 @@ let check_class_get
          * Abstract methods from interfaces are fine: we'll check
          * in the child class that we actually have an
          * implementation. *)
-        (match Decl_provider.get_class (Env.get_ctx env) ce.ce_origin with
+        (match Typing_env.get_class env ce.ce_origin with
         | Decl_entry.Found meth_cls when Ast_defs.is_c_trait (Cls.kind meth_cls)
           ->
           Typing_error_utils.add_typing_error
@@ -1246,7 +1245,7 @@ let check_class_get
            let is_concrete =
              let is_non_abstract = not (Cls.abstract class_) in
              let is_final_non_consistent_construct =
-               match snd @@ Cls.construct class_ with
+               match snd @@ Typing_env.get_construct env class_ with
                | FinalClass -> true
                | Inconsistent
                | ConsistentConstruct ->
@@ -5430,7 +5429,10 @@ end = struct
       let should_forget_fakes_acc =
         should_forget_fakes_acc || should_forget_fakes
       in
-      (if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent
+      (if
+       equal_consistent_kind
+         (snd (Typing_env.get_construct env class_info))
+         Inconsistent
       then
         match cid_ with
         | CIstatic ->
@@ -5453,7 +5455,7 @@ end = struct
       match cid_ with
       | CIparent ->
         let (env, ctor_fty) =
-          match fst (Cls.construct class_info) with
+          match fst (Typing_env.get_construct env class_info) with
           | Some ({ ce_type = (lazy ty); _ } as ce) ->
             let ety_env =
               {
@@ -5740,7 +5742,7 @@ end = struct
                 primary @@ Primary.Parent_undefined { pos; trait_reqs });
             default
           | Some (Found (c, parent_ty)) ->
-            (match Cls.construct c with
+            (match Typing_env.get_construct env c with
             | (_, Inconsistent) ->
               Typing_error_utils.add_typing_error
                 ~env

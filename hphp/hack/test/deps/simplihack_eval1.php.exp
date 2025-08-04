@@ -1,4 +1,12 @@
+Const A::TInner -> Type A
 Const ClassConstant::F -> Type ClassConstant
+Const ClassConstant::TInner -> Type ClassConstant
+Const ClassField::TInner -> Type ClassField
+Const ClassGeneric::TInner -> Type ClassGeneric
+Const Clazz::TInner -> Type Clazz
+Const FunctionParam::TInner -> Type FunctionParam
+Const Method::TInner -> Type Method
+Const TypeConstant::TInner -> Type TypeConstant
 File |simplihack_eval1.php--a.php -> Fun func,
                                      Fun functionParam,
                                      Module Mod,

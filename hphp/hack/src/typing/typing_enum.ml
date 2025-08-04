@@ -51,7 +51,8 @@ let member_type env member_ce =
              ~add_like:false
              (Cls.enum_type tc)
              Option.(
-               Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
+               Typing_env.get_typeconst env tc Naming_special_names.FB.tInner
+               >>= fun t ->
                (* TODO(T88552052) This code was taking the default of abstract
                 * type constants as a value *)
                match t.ttc_kind with
@@ -255,7 +256,8 @@ let enum_class_check
       ~add_like
       (Cls.enum_type tc)
       Option.(
-        Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
+        Typing_env.get_typeconst env tc Naming_special_names.FB.tInner
+        >>= fun t ->
         (* TODO(T88552052) This code was taking the default of abstract
          * type constants as a value *)
         match t.ttc_kind with

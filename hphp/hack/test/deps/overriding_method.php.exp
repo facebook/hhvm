@@ -1,3 +1,5 @@
+Const B::TInner -> Type B
+Const C::TInner -> Type C
 Constructor B -> Type C
 Extends B -> Type C
 Fun f1 -> Fun f2

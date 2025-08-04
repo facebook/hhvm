@@ -29,8 +29,8 @@ struct
 
   let get_class ctx x = Env.get_class ctx x |> Decl_entry.to_option
 
-  let get_typeconst_type _ cls name =
-    match Cls.get_typeconst cls name with
+  let get_typeconst_type env cls name =
+    match Typing_env.get_typeconst env cls name with
     | None -> None
     | Some tc ->
       (match tc.ttc_kind with

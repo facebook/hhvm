@@ -1510,7 +1510,16 @@ module Full = struct
       match (occurrence, get_node x) with
       | ({ type_ = Class class_type_id; name; _ }, _) ->
         let keyword =
-          match Decl_provider.get_class env.decl_env.Decl_env.ctx name with
+          match
+            Decl_provider.get_class
+              ?tracing_info:env.tracing_info
+              env.decl_env.Decl_env.ctx
+              name
+            [@alert "-dependencies"]
+            (* effectively inlined the definition of Typing_env.get_class here
+             * to avoid a circular dependency between build targets
+             *)
+          with
           | Decl_entry.Found decl ->
             (match Cls.kind decl with
             | Ast_defs.Cclass _ -> "class"

@@ -1,3 +1,5 @@
+Const C::TInner -> Type C
+Const Compare::TInner -> Type Compare
 Extends Compare -> Type C
 Method C::content -> Type C
 Method Compare::eq -> Type C

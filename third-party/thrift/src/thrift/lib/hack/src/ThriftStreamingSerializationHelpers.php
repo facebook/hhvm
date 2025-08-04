@@ -69,11 +69,23 @@ final abstract class ThriftStreamingSerializationHelpers {
           ->exception($result, 'Thrift streaming handler threw an exception');
       } else {
         if ($result is ThriftSyncStructWithResult) {
-          /* HH_FIXME[4110] Implicit pessimisation */
-          $result->success = $payload;
+          $result = HH\FIXME\UNSAFE_CAST<
+            IResultThriftStruct,
+            HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+          >($result, 'FIXME[4110] Implicit pessimisation');
+          $result->success = HH\FIXME\UNSAFE_CAST<?TStreamType, ?nothing>(
+            $payload,
+            'FIXME[4110] Implicit pessimisation',
+          );
         } else if ($result is ThriftAsyncStructWithResult) {
-          /* HH_FIXME[4110] Implicit pessimisation */
-          $result->success = $payload;
+          $result = HH\FIXME\UNSAFE_CAST<
+            IResultThriftStruct,
+            HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+          >($result, 'FIXME[4110] Implicit pessimisation');
+          $result->success = HH\FIXME\UNSAFE_CAST<?TStreamType, ?nothing>(
+            $payload,
+            'FIXME[4110] Implicit pessimisation',
+          );
         }
       }
       $use_accelearted_serialization =

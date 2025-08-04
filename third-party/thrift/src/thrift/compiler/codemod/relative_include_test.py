@@ -76,7 +76,7 @@ class RelativeIncludeTest(unittest.TestCase):
 
     def test_configerator_replace(self):
         write_file(
-            "source/other.thrift",
+            "source/path/other.thrift",
             textwrap.dedent(
                 """\
                 struct MyStruct {}
@@ -84,29 +84,53 @@ class RelativeIncludeTest(unittest.TestCase):
             ),
         )
         write_file(
-            "source/root.thrift",
+            "source/path/relative.thrift",
             textwrap.dedent(
                 """\
-                include "other.thrift"
+                struct MyStruct2 {}
+                """
+            ),
+        )
+        write_file(
+            "source/path/a/other2.thrift",
+            textwrap.dedent(
+                """\
+                struct MyStruct23 {}
+                """
+            ),
+        )
+        write_file(
+            "source/path/root.thrift",
+            textwrap.dedent(
+                """\
+                include "relative.thrift"
+                include "path/other.thrift"
+                include "path/a/other2.thrift"
 
                 struct MyStruct {
                   1: other.MyStruct field;
+                  2: relative.MyStruct2 field2;
+                  3: other2.MyStruct3 field3;
                 }
                 """
             ),
         )
 
         binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "source/root.thrift")
+        run_binary(binary, "source/path/root.thrift")
 
         self.assertEqual(
-            read_file("source/root.thrift"),
+            read_file("source/path/root.thrift"),
             textwrap.dedent(
                 """\
-                include "other.thrift"
+                include "path/relative.thrift"
+                include "path/other.thrift"
+                include "path/a/other2.thrift"
 
                 struct MyStruct {
                   1: other.MyStruct field;
+                  2: relative.MyStruct2 field2;
+                  3: other2.MyStruct3 field3;
                 }
                 """
             ),

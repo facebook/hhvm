@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <set>
+#include <string>
+
 #include <fmt/core.h>
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_program.h>
@@ -57,32 +61,41 @@ class CodemodRelativeInclude final {
       return false;
     }
 
-    std::set<std::string> heuristic = {// WWW
-                                       "cf/",
-                                       "cfa/",
-                                       "cfdsi/",
-                                       "cfgk/",
-                                       "cfmeta/",
-                                       "cfsitevars/",
-                                       "fbcode/",
-                                       "fbsource/",
-                                       "igsrv/",
-                                       // fbcode
-                                       "arvr/",
-                                       "fbandroid/",
-                                       "fbobjc/",
-                                       "xplat/",
-                                       // bundled
-                                       "thrift/annotation/"};
-    if (std::find_if(heuristic.begin(), heuristic.end(), [&](const auto& root) {
-          return include.raw_path().starts_with(root);
-        }) != heuristic.end()) {
+    std::set<std::string> raw_path_heuristic = {// WWW
+                                                "cf/",
+                                                "cfa/",
+                                                "cfdsi/",
+                                                "cfgk/",
+                                                "cfmeta/",
+                                                "cfsitevars/",
+                                                "fbcode/",
+                                                "fbsource/",
+                                                "igsrv/",
+                                                // fbcode
+                                                "arvr/",
+                                                "fbandroid/",
+                                                "fbobjc/",
+                                                "xplat/",
+                                                // bundled
+                                                "thrift/annotation/"};
+    if (std::any_of(
+            raw_path_heuristic.begin(),
+            raw_path_heuristic.end(),
+            [&](const auto& root) {
+              return include.raw_path().starts_with(root);
+            })) {
       return false;
     }
 
+    // Already relative to configerator/source
+    if (program.full_path().starts_with("source/") &&
+        program.full_path().substr(7) == include.raw_path()) {
+      return false;
+    }
     if (program.full_path().find("/instagram-server/") != std::string::npos) {
       return false;
     }
+
     auto parent_path = std::filesystem::path{program_.path()}.parent_path();
     if (parent_path.is_relative()) {
       auto resolved_path =

@@ -7500,7 +7500,7 @@ end = struct
               ~did_unpack
               ~is_variadic_or_splat:(Option.is_some variadic_or_splat_param)
               env
-              expr_pos
+              (Pos.btw id_pos expr_pos)
               pos_def
               ft
               arity

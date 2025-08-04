@@ -135,3 +135,65 @@ class RelativeIncludeTest(unittest.TestCase):
                 """
             ),
         )
+
+    def test_fbcode_replace(self):
+        write_file(
+            "fbcode/path/other.thrift",
+            textwrap.dedent(
+                """\
+                struct MyStruct {}
+                """
+            ),
+        )
+        write_file(
+            "fbcode/path/relative.thrift",
+            textwrap.dedent(
+                """\
+                struct MyStruct2 {}
+                """
+            ),
+        )
+        write_file(
+            "fbcode/path/a/other2.thrift",
+            textwrap.dedent(
+                """\
+                struct MyStruct23 {}
+                """
+            ),
+        )
+        write_file(
+            "fbcode/path/root.thrift",
+            textwrap.dedent(
+                """\
+                include "relative.thrift"
+                include "path/other.thrift"
+                include "path/a/other2.thrift"
+
+                struct MyStruct {
+                  1: other.MyStruct field;
+                  2: relative.MyStruct2 field2;
+                  3: other2.MyStruct3 field3;
+                }
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "fbcode/path/root.thrift")
+
+        self.assertEqual(
+            read_file("fbcode/path/root.thrift"),
+            textwrap.dedent(
+                """\
+                include "path/relative.thrift"
+                include "path/other.thrift"
+                include "path/a/other2.thrift"
+
+                struct MyStruct {
+                  1: other.MyStruct field;
+                  2: relative.MyStruct2 field2;
+                  3: other2.MyStruct3 field3;
+                }
+                """
+            ),
+        )

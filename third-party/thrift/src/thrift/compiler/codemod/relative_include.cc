@@ -113,11 +113,16 @@ class CodemodRelativeInclude final {
       auto resolved_path =
           (parent_path / include.raw_path()).lexically_normal();
 
-      // Configerator codemods are ran from configerator repo root, strip away
-      // source.
-      if (!resolved_path.empty() &&
-          resolved_path.begin()->string() == "source") {
-        resolved_path = resolved_path.lexically_relative("source");
+      // Codemods are ran from the repo root, strip away "source" for
+      // configerator, "fbcode" for fbcode, and "xplat" for xplat.
+      if (!resolved_path.empty()) {
+        if (resolved_path.begin()->string() == "source") {
+          resolved_path = resolved_path.lexically_relative("source");
+        } else if (resolved_path.begin()->string() == "fbcode") {
+          resolved_path = resolved_path.lexically_relative("fbcode");
+        } else if (resolved_path.begin()->string() == "xplat") {
+          resolved_path = resolved_path.lexically_relative("xplat");
+        }
       }
 
       file_manager_.add(

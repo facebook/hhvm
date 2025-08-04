@@ -860,7 +860,7 @@ class TypeSystemFacade final : public type_system::TypeSystem {
       TSDefinition& tsDef = cache_.at(sgDef);
       auto makeFields = [&](const auto& s) {
         bool isUnion = std::is_same_v<decltype(s), UnionNode const&>;
-        std::vector<type_system::FieldNode> fields;
+        std::vector<type_system::FieldDefinition> fields;
         fields.reserve(s.fields().size());
         for (const auto& field : s.fields()) {
           fields.emplace_back(

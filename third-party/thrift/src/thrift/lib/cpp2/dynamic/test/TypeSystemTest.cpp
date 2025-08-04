@@ -122,11 +122,11 @@ TEST(TypeSystemTest, NestedStructs) {
       typeSystem->getUserDefinedTypeOrThrow(outerStructUri);
   EXPECT_EQ(outerDef.uri(), outerStructUri);
   EXPECT_EQ(outerDef.asStruct().fields().size(), 1);
-  const FieldNode& innerField = outerDef.asStruct().fields()[0];
+  const FieldDefinition& innerField = outerDef.asStruct().fields()[0];
   EXPECT_EQ(innerField.identity(), def::Identity(1, "innerStruct"));
   EXPECT_EQ(innerField.presence(), def::Optional);
   EXPECT_EQ(innerField.type().asStruct().fields().size(), 1);
-  const FieldNode& field1 = innerField.type().asStruct().fields()[0];
+  const FieldDefinition& field1 = innerField.type().asStruct().fields()[0];
   EXPECT_EQ(field1.identity(), def::Identity(1, "field1"));
   EXPECT_EQ(field1.presence(), def::Optional);
   EXPECT_EQ(field1.type().id(), TypeIds::I32);
@@ -167,7 +167,7 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
       typeSystem->getUserDefinedTypeOrThrow(recursiveStructUri);
   EXPECT_EQ(structDef.uri(), recursiveStructUri);
   EXPECT_EQ(structDef.asStruct().fields().size(), 1);
-  const FieldNode& structField = structDef.asStruct().fields()[0];
+  const FieldDefinition& structField = structDef.asStruct().fields()[0];
   EXPECT_EQ(structField.identity(), def::Identity(1, "self"));
   EXPECT_EQ(structField.presence(), def::Optional);
   EXPECT_EQ(
@@ -179,7 +179,7 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
       typeSystem->getUserDefinedTypeOrThrow(recursiveUnionUri);
   EXPECT_EQ(unionDef.uri(), recursiveUnionUri);
   EXPECT_EQ(unionDef.asUnion().fields().size(), 1);
-  const FieldNode& unionField = unionDef.asUnion().fields()[0];
+  const FieldDefinition& unionField = unionDef.asUnion().fields()[0];
   EXPECT_EQ(unionField.identity(), def::Identity(1, "self"));
   EXPECT_EQ(unionField.presence(), def::Optional);
   EXPECT_EQ(
@@ -235,13 +235,13 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/MyStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 2);
   {
-    const FieldNode& field1 = def.asStruct().fields()[0];
+    const FieldDefinition& field1 = def.asStruct().fields()[0];
     EXPECT_EQ(field1.identity(), def::Identity(1, "field1"));
     EXPECT_EQ(field1.presence(), def::Optional);
     EXPECT_EQ(field1.type().id(), TypeIds::I32);
   }
   {
-    const FieldNode& field2 = def.asStruct().fields()[1];
+    const FieldDefinition& field2 = def.asStruct().fields()[1];
     EXPECT_EQ(field2.identity(), def::Identity(2, "field2"));
     EXPECT_EQ(field2.presence(), def::AlwaysPresent);
     EXPECT_EQ(field2.type().id(), TypeIds::uri("meta.com/thrift/test/MyUnion"));
@@ -250,13 +250,13 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
       const UnionNode& otherUnion = typeRef.asUnion();
       EXPECT_EQ(otherUnion.fields().size(), 2);
       {
-        const FieldNode& int64 = otherUnion.fields()[0];
+        const FieldDefinition& int64 = otherUnion.fields()[0];
         EXPECT_EQ(int64.identity(), def::Identity(1, "int64"));
         EXPECT_EQ(int64.presence(), def::Optional);
         EXPECT_EQ(int64.type().id(), TypeIds::I64);
       }
       {
-        const FieldNode& myStruct = otherUnion.fields()[1];
+        const FieldDefinition& myStruct = otherUnion.fields()[1];
         EXPECT_EQ(myStruct.identity(), def::Identity(2, "myStruct"));
         EXPECT_EQ(myStruct.presence(), def::Optional);
         EXPECT_EQ(
@@ -297,14 +297,14 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/StructWithDefaults");
   EXPECT_EQ(def.asStruct().fields().size(), 2);
 
-  const FieldNode& fieldWithDefault = def.asStruct().fields()[0];
+  const FieldDefinition& fieldWithDefault = def.asStruct().fields()[0];
   EXPECT_EQ(fieldWithDefault.identity(), def::Identity(1, "fieldWithDefault"));
   EXPECT_EQ(fieldWithDefault.presence(), def::Optional);
   EXPECT_EQ(fieldWithDefault.type().id(), TypeIds::I32);
   EXPECT_NE(fieldWithDefault.customDefault(), nullptr);
   EXPECT_EQ(fieldWithDefault.customDefault()->asInt32(), 42);
 
-  const FieldNode& fieldWithoutDefault = def.asStruct().fields()[1];
+  const FieldDefinition& fieldWithoutDefault = def.asStruct().fields()[1];
   EXPECT_EQ(
       fieldWithoutDefault.identity(), def::Identity(2, "fieldWithoutDefault"));
   EXPECT_EQ(fieldWithoutDefault.presence(), def::Optional);
@@ -590,7 +590,7 @@ TEST(TypeSystemTest, ListTypeRef) {
       Uri("meta.com/thrift/test/ListStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/ListStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
-  const FieldNode& listField = def.asStruct().fields()[0];
+  const FieldDefinition& listField = def.asStruct().fields()[0];
   EXPECT_EQ(listField.identity(), def::Identity(1, "listField"));
   EXPECT_EQ(listField.presence(), def::Optional);
   EXPECT_TRUE(listField.type().isList());
@@ -618,7 +618,7 @@ TEST(TypeSystemTest, SetTypeRef) {
       Uri("meta.com/thrift/test/SetStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/SetStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
-  const FieldNode& setField = def.asStruct().fields()[0];
+  const FieldDefinition& setField = def.asStruct().fields()[0];
   EXPECT_EQ(setField.identity(), def::Identity(1, "setField"));
   EXPECT_EQ(setField.presence(), def::Optional);
   EXPECT_TRUE(setField.type().isSet());
@@ -646,7 +646,7 @@ TEST(TypeSystemTest, MapTypeRef) {
       Uri("meta.com/thrift/test/MapStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/MapStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
-  const FieldNode& mapField = def.asStruct().fields()[0];
+  const FieldDefinition& mapField = def.asStruct().fields()[0];
   EXPECT_EQ(mapField.identity(), def::Identity(1, "mapField"));
   EXPECT_EQ(mapField.presence(), def::Optional);
   EXPECT_TRUE(mapField.type().isMap());
@@ -734,14 +734,14 @@ TEST(TypeSystemTest, ComplexTypeReferences) {
   EXPECT_EQ(complexDef.uri(), "meta.com/thrift/test/ComplexStruct");
   EXPECT_EQ(complexDef.asStruct().fields().size(), 2);
 
-  const FieldNode& listField = complexDef.asStruct().fields()[0];
+  const FieldDefinition& listField = complexDef.asStruct().fields()[0];
   EXPECT_EQ(listField.identity(), def::Identity(1, "listOfStructs"));
   EXPECT_EQ(listField.presence(), def::Optional);
   EXPECT_TRUE(listField.type().isList());
   EXPECT_EQ(
       listField.type().asList().elementType().asStruct().fields().size(), 1);
 
-  const FieldNode& mapField = complexDef.asStruct().fields()[1];
+  const FieldDefinition& mapField = complexDef.asStruct().fields()[1];
   EXPECT_EQ(mapField.identity(), def::Identity(2, "mapOfUnions"));
   EXPECT_EQ(mapField.presence(), def::Optional);
   EXPECT_TRUE(mapField.type().isMap());
@@ -774,7 +774,7 @@ TEST(TypeSystemTest, NestedContainers) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/NestedContainerStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 2);
 
-  const FieldNode& listOfMapsField = def.asStruct().fields()[0];
+  const FieldDefinition& listOfMapsField = def.asStruct().fields()[0];
   EXPECT_EQ(listOfMapsField.identity(), def::Identity(1, "listOfMaps"));
   EXPECT_EQ(listOfMapsField.presence(), def::Optional);
   EXPECT_TRUE(listOfMapsField.type().isList());
@@ -786,7 +786,7 @@ TEST(TypeSystemTest, NestedContainers) {
       listOfMapsField.type().asList().elementType().asMap().valueType().id(),
       TypeIds::I32);
 
-  const FieldNode& setOfListsField = def.asStruct().fields()[1];
+  const FieldDefinition& setOfListsField = def.asStruct().fields()[1];
   EXPECT_EQ(setOfListsField.identity(), def::Identity(2, "setOfLists"));
   EXPECT_EQ(setOfListsField.presence(), def::Optional);
   EXPECT_TRUE(setOfListsField.type().isSet());
@@ -816,7 +816,7 @@ TEST(TypeSystemTest, StructWithNegativeFieldId) {
       Uri("meta.com/thrift/test/NegativeFieldId"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/NegativeFieldId");
   EXPECT_EQ(def.asStruct().fields().size(), 1);
-  const FieldNode& negativeFieldId = def.asStruct().fields()[0];
+  const FieldDefinition& negativeFieldId = def.asStruct().fields()[0];
   EXPECT_EQ(negativeFieldId.identity().id(), FieldId(-1));
   EXPECT_EQ(negativeFieldId.identity().name(), "negativeFieldId");
   EXPECT_EQ(negativeFieldId.presence(), def::AlwaysPresent);
@@ -1125,13 +1125,13 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemLookupByDefinition) {
   auto typeSystem = std::move(builder).build();
   const auto& sym = dynamic_cast<const SourceIndexedTypeSystem&>(*typeSystem);
 
-  const StructNode& structWithI32FieldNode =
+  const StructNode& structWithI32FieldDefinition =
       sym.getUserDefinedTypeBySourceIdentifier(
              {"file://foo/bar.thrift", "StructWithI32Field"})
           ->asStruct();
   EXPECT_EQ(
       sym.getSourceIdentiferForUserDefinedType(
-             DefinitionRef(&structWithI32FieldNode))
+             DefinitionRef(&structWithI32FieldDefinition))
           .value(),
       (SourceIdentifier{"file://foo/bar.thrift", "StructWithI32Field"}));
 
@@ -1142,12 +1142,12 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemLookupByDefinition) {
           .value(),
       (SourceIdentifier{"file://foo/bar.thrift", "Enum"}));
 
-  const UnionNode& unionWithI32FieldNode =
+  const UnionNode& unionWithI32FieldDefinition =
       sym.getUserDefinedType("meta.com/thrift/test/UnionWithI32Field")
           ->asUnion();
   EXPECT_EQ(
       sym.getSourceIdentiferForUserDefinedType(
-          DefinitionRef(&unionWithI32FieldNode)),
+          DefinitionRef(&unionWithI32FieldDefinition)),
       std::nullopt);
 }
 

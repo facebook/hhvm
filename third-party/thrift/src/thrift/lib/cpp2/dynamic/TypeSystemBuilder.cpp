@@ -200,8 +200,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
       };
 
   const auto makeFields = [&](std::vector<SerializableFieldDefinition> fields)
-      -> std::vector<FieldNode> {
-    std::vector<FieldNode> result;
+      -> std::vector<FieldDefinition> {
+    std::vector<FieldDefinition> result;
     result.reserve(fields.size());
     for (auto& field : fields) {
       result.emplace_back(

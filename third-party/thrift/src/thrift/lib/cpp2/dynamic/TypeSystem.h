@@ -148,9 +148,6 @@
 // DefinitionRef objects may be copied and moved freely. However, they are
 // invalidated if the underlying TypeSystem is destroyed.
 //
-// NOTE — FieldNode can only existing as members of StructNode and UnionNode.
-// They are not concrete nodes in their own right, since they are not types.
-//
 // ────────────────────────────────────────────────────────────────────────────
 // Virtual Nodes
 // ────────────────────────────────────────────────────────────────────────────
@@ -184,8 +181,8 @@
 // OpaqueAliasNode:
 //   Represents a Thrift opaque alias definition.
 //
-// FieldNode:
-//   Represents a Thrift struct or union field. Not a "node" in the type graph.
+// FieldDefinition:
+//   Represents a Thrift struct or union field.
 //
 // DefinitionRef:
 //   A reference to a concrete node.
@@ -837,9 +834,9 @@ static_assert(std::is_copy_assignable_v<TypeRef>);
 static_assert(std::is_move_constructible_v<TypeRef>);
 static_assert(std::is_move_assignable_v<TypeRef>);
 
-class FieldNode final : folly::MoveOnly {
+class FieldDefinition final : folly::MoveOnly {
  public:
-  FieldNode(
+  FieldDefinition(
       FieldIdentity identity,
       PresenceQualifier presence,
       TypeRef type,
@@ -923,7 +920,7 @@ class DefinitionNode {
 
 class StructuredNode : public DefinitionNode {
  public:
-  folly::span<const FieldNode> fields() const noexcept { return fields_; }
+  folly::span<const FieldDefinition> fields() const noexcept { return fields_; }
   bool isSealed() const noexcept { return isSealed_; }
 
   /**
@@ -932,14 +929,14 @@ class StructuredNode : public DefinitionNode {
    * Throws:
    *   - std::out_of_range if the field ID is not present.
    */
-  const FieldNode& at(FieldId id) const { return at(fieldHandleFor(id)); }
+  const FieldDefinition& at(FieldId id) const { return at(fieldHandleFor(id)); }
   /**
    * Looks up a field by name.
    *
    * Throws:
    *   - std::out_of_range if the field ID is not present.
    */
-  const FieldNode& at(std::string_view name) const {
+  const FieldDefinition& at(std::string_view name) const {
     return at(fieldHandleFor(name));
   }
   /**
@@ -953,7 +950,7 @@ class StructuredNode : public DefinitionNode {
    * Throws:
    *   - std::out_of_range if the field handle is invalid or out of range.
    */
-  const FieldNode& at(FastFieldHandle handle) const {
+  const FieldDefinition& at(FastFieldHandle handle) const {
     if (!handle.valid() || handle.ordinal > fields_.size()) {
       folly::throw_exception<std::out_of_range>(
           fmt::format("invalid field handle: {}", handle.ordinal));
@@ -995,7 +992,7 @@ class StructuredNode : public DefinitionNode {
   }
 
  protected:
-  std::vector<FieldNode> fields_;
+  std::vector<FieldDefinition> fields_;
   folly::F14FastMap<FieldId, FastFieldHandle> fieldHandleById_;
   folly::F14FastMap<std::string_view, FastFieldHandle> fieldHandleByName_;
   bool isSealed_;
@@ -1003,7 +1000,7 @@ class StructuredNode : public DefinitionNode {
 
   StructuredNode(
       Uri uri,
-      std::vector<FieldNode> fields,
+      std::vector<FieldDefinition> fields,
       bool isSealed,
       AnnotationsMap annotations);
 };
@@ -1011,13 +1008,19 @@ class StructuredNode : public DefinitionNode {
 class StructNode final : folly::MoveOnly, public StructuredNode {
  public:
   StructNode(
-      Uri, std::vector<FieldNode>, bool isSealed, AnnotationsMap annotations);
+      Uri,
+      std::vector<FieldDefinition>,
+      bool isSealed,
+      AnnotationsMap annotations);
 };
 
 class UnionNode final : folly::MoveOnly, public StructuredNode {
  public:
   UnionNode(
-      Uri, std::vector<FieldNode>, bool isSealed, AnnotationsMap annotations);
+      Uri,
+      std::vector<FieldDefinition>,
+      bool isSealed,
+      AnnotationsMap annotations);
 };
 
 class EnumNode final : folly::MoveOnly, public DefinitionNode {

@@ -27,7 +27,7 @@ namespace apache::thrift::type_system {
 
 StructuredNode::StructuredNode(
     Uri uri,
-    std::vector<FieldNode> fields,
+    std::vector<FieldDefinition> fields,
     bool isSealed,
     AnnotationsMap annotations)
     : DefinitionNode(std::move(uri)),
@@ -35,7 +35,7 @@ StructuredNode::StructuredNode(
       isSealed_(isSealed),
       annotations_(std::move(annotations)) {
   std::uint16_t ordinal = 1;
-  for (const FieldNode& field : fields_) {
+  for (const FieldDefinition& field : fields_) {
     bool emplaced =
         fieldHandleById_
             .emplace(field.identity().id(), FastFieldHandle{ordinal})
@@ -61,7 +61,7 @@ StructuredNode::StructuredNode(
 
 StructNode::StructNode(
     Uri uri,
-    std::vector<FieldNode> fields,
+    std::vector<FieldDefinition> fields,
     bool isSealed,
     AnnotationsMap annotations)
     : StructuredNode(
@@ -70,12 +70,12 @@ StructNode::StructNode(
 
 UnionNode::UnionNode(
     Uri uri,
-    std::vector<FieldNode> fields,
+    std::vector<FieldDefinition> fields,
     bool isSealed,
     AnnotationsMap annotations)
     : StructuredNode(
           std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
-  for (const FieldNode& field : this->fields()) {
+  for (const FieldDefinition& field : this->fields()) {
     if (field.presence() != PresenceQualifier::OPTIONAL_) {
       folly::throw_exception<InvalidTypeError>(fmt::format(
           "field {} must be optional in a Union", field.identity()));

@@ -390,6 +390,16 @@ enum FileAttributes {
    * directories, this hash is blake3 hash of all the directory's descendents.
    */
   DIGEST_HASH = 64,
+
+  /**
+   * Returns the mtime of a file.
+   */
+  MTIME = 128,
+
+  /**
+   * Returns the mode of a file.
+   */
+  MODE = 256,
 /* NEXT_ATTR = 2^x */
 }
 
@@ -479,6 +489,16 @@ union DigestHashOrError {
   2: EdenError error;
 }
 
+union MtimeOrError {
+  1: TimeSpec mtime;
+  2: EdenError error;
+}
+
+union ModeOrError {
+  1: i32 mode;
+  2: EdenError error;
+}
+
 /**
  * Subset of attributes for a single file returned by getAttributesFromFiles()
  *
@@ -494,6 +514,8 @@ struct FileAttributeDataV2 {
   5: optional Blake3OrError blake3;
   6: optional DigestSizeOrError digestSize;
   7: optional DigestHashOrError digestHash;
+  8: optional MtimeOrError mtime;
+  9: optional ModeOrError mode;
 }
 
 /**

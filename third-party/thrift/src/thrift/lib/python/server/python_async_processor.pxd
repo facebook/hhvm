@@ -35,9 +35,6 @@ from folly.executor cimport cAsyncioExecutor
 ctypedef PyObject* PyObjPtr
 
 
-cdef extern from "thrift/lib/python/streaming/PythonUserException.h" namespace "::apache::thrift::python":
-    cdef cppclass cPythonUserException "::apache::thrift::python::PythonUserException"(cException):
-        cPythonUserException(string, string, unique_ptr[cIOBuf] buf) except +
 
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::apache::thrift::python":
     cdef cppclass cPythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
@@ -62,6 +59,3 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
 
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server)
-
-cdef class PythonUserException(Exception):
-    cdef unique_ptr[cPythonUserException] _cpp_obj

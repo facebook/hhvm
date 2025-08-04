@@ -56,6 +56,10 @@ from thrift.py3.stream cimport (
 )
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.protocol cimport Protocol
+from thrift.python.streaming.python_user_exception cimport (
+    cPythonUserException,
+    PythonUserException,
+)
 
 cdef class Promise_Optional_IOBuf(Promise_Py):
     cdef cFollyPromise[optional[unique_ptr[cIOBuf]]]* cPromise
@@ -118,10 +122,6 @@ cdef void genNextValue(object generator, cFollyPromise[optional[unique_ptr[cIOBu
             __promise
         )
     )
-
-cdef class PythonUserException(Exception):
-    def __init__(self, type_: str, reason: str, buf: IOBuf) -> None:
-        self._cpp_obj = make_unique[cPythonUserException](<string>type_.encode('UTF-8'), <string>reason.encode('UTF-8'), cmove(buf._ours))
 
 cdef class Promise_Py:
     cdef error_ta(Promise_Py self, cTApplicationException err):

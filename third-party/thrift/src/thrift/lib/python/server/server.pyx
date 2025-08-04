@@ -30,7 +30,7 @@ from thrift.python.server_impl.request_context import (
     SocketAddress,
     get_context,
 )
-from thrift.python.server_impl.python_async_processor import (
+from thrift.python.streaming.python_user_exception import (
     PythonUserException,
 )
 from thrift.python.server_impl.interceptor.server_module import PythonServerModule

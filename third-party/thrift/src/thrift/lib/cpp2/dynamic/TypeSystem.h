@@ -41,6 +41,158 @@
 #include <variant>
 #include <vector>
 
+// TypeSystem.h
+// ────────────────────────────────────────────────────────────────────────────
+// A C++ interface encapsulating a Thrift type system (as described by the
+// Object Model)
+//
+// A Thrift type system is a collection of types, where each type, and all the
+// types it refers to, are fully defined within the same type system.
+//
+// A valid type system must, therefore, include:
+//   - All primitive types (i32, string, etc.)
+//   - All instantiable container types (list, set, map)
+//   - For every included structured type (struct, union):
+//       - all types referenced in the structured type's fields
+//   - For every included opaque alias type:
+//       - the underlying target type
+//
+// clang-format off
+//                                             ┌─────────────┐
+//     ┌──────────────────────────────────────▶│ Thrift Type │◀───────────────────────────────────┐
+//     │                                       └─────────────┘                                    │
+//     │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                  │                                           │
+//     ││    User-defined Types     │                 │                                           │
+//     │                                              ▼                                           │
+//     ││ ┌──────────┐              │              ┌ ─ ─ ┐           ┌─────────┐                  │
+//     │  │   Enum   │◀────────────────────┬─────── oneof ──────────▶│Container│                  │
+//     ││ └──────────┘              │      │       └ ─ ─ ┘           └─────────┘    ┌──────────┐  │
+//     │                                   │          │                   │     ┌──▶│   List   │  │
+//     ││                           │      │          │                   │     │   ├──────────┘  │
+//     │  ┌──────────────┐                 │          │                   │     │     Element  │──┤
+//     ││ │ Opaque Alias │◀─────────┼──────┤          ▼                   │     │   └ ─ ─ ─ ─ ─   │
+//     │  ├──────────────┘                 │     ┌─────────┐              │     │   ┌──────────┐  │
+//     ├┼─     Target    │          │      │     │Primitive│              ▼     ├──▶│   Set    │  │
+//     │  └ ─ ─ ─ ─ ─ ─ ─                  │     └─────────┘           ┌ ─ ─ ┐  │   ├──────────┘  │
+//     ││                           │      │          │                 oneof ──┤     Element  │──┤
+//     │                                   │          │                └ ─ ─ ┘  │   └ ─ ─ ─ ─ ─   │
+//     ││             ┌────────────┐│      │          ▼                         │   ┌──────────┐  │
+//     │              │ Structured │◀──────┘       ┌ ─ ─ ┐                      └──▶│   Map    │  │
+//     ││             └────────────┘│               oneof ────────────┐             ├──────────┘  │
+//     │                     │                     └ ─ ─ ┘            │                 Key    │──┤
+//     ││                    │      │                 │               │             ├ ─ ─ ─ ─ ─   │
+//     │  ┌──────────┐       │                        │               │                Value   │──┤
+//     ││ │  Struct  │◀┐     │      │                 ▼               │             └ ─ ─ ─ ─ ─   │
+//     │  ├──────────┘ │     ▼           ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─    │                           │
+//     ├┼─   Fields  │ │  ┌ ─ ─ ┐   │     ┌─────┬─────┐┌─────────┐│   │                           │
+//     │  └ ─ ─ ─ ─ ─  ├── oneof         ││Byte │Int32││ Float32 │    │                           │
+//     ││              │  └ ─ ─ ┘   │     ├─────┼─────┤├─────────┤│   │                           │
+//     │  ┌──────────┐ │                 ││Int16│Int64││ Float64 │    │                           │
+//     ││ │  Union   │◀┘            │     └─────┴─────┘└─────────┘│   │             ┌──────────┐  │
+//     │  ├──────────┘                   │┌────┐┌─────────┐┌─────┐    └────────────▶│   Any    │  │
+//     └┼─   Fields  │              │     │Text││ByteArray││Bool ││                 ├──────────┘  │
+//        └ ─ ─ ─ ─ ─                    │└────┘└─────────┘└─────┘                     Value   │──┘
+//      └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘     ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘                 └ ─ ─ ─ ─ ─
+//
+// clang-format on
+//
+// ────────────────────────────────────────────────────────────────────────────
+// TypeSystem Graph
+// ────────────────────────────────────────────────────────────────────────────
+// The TypeSystem abstract class represents a type system as a graph.
+// The nodes of the graph are types, and the edges are references between types.
+//
+// A graph node is one of:
+//   - Concrete — capturing user-defined types.
+//   - Virtual  — capturing primitive and container types
+//
+// For example, given the following IDL...
+//
+//    struct FooStruct {
+//      1: i32 field1;
+//      2: map<string, FooStruct> field2;
+//    }
+//
+// ...the equivalent TypeSystem graph representation would be...
+//                                    ┌ ─ ─ ─ ┐         ┌ ─ ─ ─ ─
+//     ╔═══════════════════╗   ┌─────▶   i32              string │
+//     ║     FooStruct     ║   │      └ ─ ─ ─ ┘         └ ─ ─ ─ ─
+//     ║ ┌───────────────┐ ║   │                             ▲
+//     ║ │ (1, "field1") │─╬───┘                             │
+//     ║ ├───────────────┤ ║                    ┌────────────┘
+//     ║ │ (2, "field2") │─╬───┐                │
+//     ║ └───────────────┘ ║   │                │
+//     ╚══════════════▲════╝   │      ┌ ─ ─ ─ ─ ┴ ─ ─ ─ ─ ─ ─ ─ ─
+//                    │        └─────▶   map<string, FooStruct>  │
+//                    │               └ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─
+//                    │                                  │
+//                    └──────────────────────────────────┘
+// ...where solid boxes are concrete nodes, and dashed boxes are virtual nodes.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Concrete Nodes
+// ────────────────────────────────────────────────────────────────────────────
+// A concrete node represents a user-defined type, so is one of:
+//   - StructNode
+//   - UnionNode
+//   - EnumNode
+//   - OpaqueAliasNode
+//
+// All concrete node objects are owned by the TypeSystem.
+// Furthermore, there is exactly one node object for each user-defined type.
+// That means, two nodes have the same address if and only if they represent the
+// same type.
+//
+// DefinitionRef objects are references to concrete nodes. They are not part of
+// the graph themselves.
+// DefinitionRef objects may be copied and moved freely. However, they are
+// invalidated if the underlying TypeSystem is destroyed.
+//
+// NOTE — FieldNode can only existing as members of StructNode and UnionNode.
+// They are not concrete nodes in their own right, since they are not types.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Virtual Nodes
+// ────────────────────────────────────────────────────────────────────────────
+// A virtual node represents a primitive or container type. They are called
+// "virtual" because they are consistent across all type systems and do not
+// need to be materialized by the TypeSystem implementation.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Edges
+// ────────────────────────────────────────────────────────────────────────────
+// TypeRef objects are references to any node (concrete or virtual). They
+// represent edges in the graph.
+// TypeRef objects may be copied and moved freely. However, they are invalidated
+// if the underlying TypeSystem is destroyed.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Summary of Types
+// ────────────────────────────────────────────────────────────────────────────
+// TypeSystem:
+//   Represents a type system as a graph. Owns all concrete node objects.
+//
+// StructNode:
+//   Represents a Thrift struct definition. Owns all field objects.
+//
+// UnionNode:
+//   Represents a Thrift union definition. Owns all field objects.
+//
+// EnumNode:
+//   Represents a Thrift enum definition.
+//
+// OpaqueAliasNode:
+//   Represents a Thrift opaque alias definition.
+//
+// FieldNode:
+//   Represents a Thrift struct or union field. Not a "node" in the type graph.
+//
+// DefinitionRef:
+//   A reference to a concrete node.
+//
+// TypeRef:
+//   A reference to any node (concrete or virtual).
+
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
 namespace apache::thrift::type_system {

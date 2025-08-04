@@ -87,11 +87,23 @@ class CodemodRelativeInclude final {
       return false;
     }
 
-    // Already relative to configerator/source
-    if (program.full_path().starts_with("source/") &&
-        program.full_path().substr(7) == include.raw_path()) {
+    std::set<std::string> full_path_heuristic = {// configerator
+                                                 "source/",
+                                                 // fbcode
+                                                 "fbcode/",
+                                                 // xplat
+                                                 "xplat/"};
+    if (std::any_of(
+            full_path_heuristic.begin(),
+            full_path_heuristic.end(),
+            [&](const auto& root) {
+              return program.full_path().starts_with(root) &&
+                  program.full_path().substr(root.length()) ==
+                  include.raw_path();
+            })) {
       return false;
     }
+
     if (program.full_path().find("/instagram-server/") != std::string::npos) {
       return false;
     }

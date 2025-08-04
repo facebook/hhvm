@@ -332,7 +332,7 @@ union FileInformationOrError {
 }
 
 /**
- * File Attributes that can be requested with getAttributesFromFiles(). All attributes
+ * File Attributes that can be requested with getAttributesFromFilesV2(). All attributes
  * should be a power of 2. OR the requested attributes together to get a bitmask.
  */
 enum FileAttributes {
@@ -413,29 +413,6 @@ enum AttributesRequestScope {
   TREES = 0,
   FILES = 1,
   TREES_AND_FILES = 2,
-}
-
-/**
- * Subset of attributes for a single file returned by getAttributesFromFiles()
- */
-struct FileAttributeData {
-  1: optional BinaryHash sha1;
-  2: optional i64 fileSize;
-  3: optional SourceControlType type;
-}
-
-/**
- * Attributes for a file or information about error encountered when accessing file attributes.
- * The most likely error will be ENOENT, implying that the file doesn't exist.
- *
- * Some attributes are not available for certain types of files. For example,
- * sha1 and size are not available for directories or symlinks. We use a value
- * or error type for each of those attributes, so that when we can not provide
- * an attribute we can give an explanation for why not.
- */
-union FileAttributeDataOrError {
-  1: FileAttributeData data;
-  2: EdenError error;
 }
 
 /*
@@ -555,7 +532,7 @@ union ModeOrError {
 }
 
 /**
- * Subset of attributes for a single file returned by getAttributesFromFiles()
+ * Subset of attributes for a single file returned by getAttributesFromFilesV2()
  *
  * When an attribute was not requested the field will be a null optional value.
  * If the attribute was requested, but there was an error computing that
@@ -627,7 +604,7 @@ struct SyncBehavior {
 }
 
 /**
- * Parameters for the getAttributesFromFiles() function. By default, results
+ * Parameters for the getAttributesFromFilesV2() function. By default, results
  * for both files and trees will be returned. Clients can request for only one
  * of trees or files by passing in an AttributesRequestScope.
  */
@@ -640,13 +617,10 @@ struct GetAttributesFromFilesParams {
 }
 
 /**
- * Return value for the getAttributesFromFiles() function.
+ * Return value for the getAttributesFromFilesV2() function.
  * The returned list of attributes corresponds to the input list of
  * paths; eg; res[0] holds the information for paths[0].
  */
-struct GetAttributesFromFilesResult {
-  1: list<FileAttributeDataOrError> res;
-}
 struct GetAttributesFromFilesResultV2 {
   1: list<FileAttributeDataOrErrorV2> res;
 }
@@ -2444,36 +2418,17 @@ service EdenService extends fb303_core.BaseService {
    * The result maps the files to attribute results which may be an EdenError
    * or a FileAttributeDataV2 struct.
    *
-   * Unlike the getAttributesFromFiles endpoint, this does not assume that all
-   * the inputs are regular files. This endpoint will attempt to return
-   * attributes for any type of file (directory included) unless instructed
-   * otherwise. Note that some attributes are not currently supported, like
-   * sha1 and size for directories and symlinks. At some point EdenFS may be
-   * able to support such attributes.
+   * This does not assume that all the inputs are regular files. This endpoint
+   * will attempt to return attributes for any type of file (directories
+   * included) unless instructed otherwise. Note that some attributes are not
+   * currently supported, like sha1 and size for directories and symlinks. At
+   * some point EdenFS may be able to support such attributes.
    *
    * Note: may return stale data if synchronizeWorkingCopy isn't called, and if
    * the SyncBehavior specifies a 0 timeout. See the documentation for both of
    * these for more details.
    */
   GetAttributesFromFilesResultV2 getAttributesFromFilesV2(
-    1: GetAttributesFromFilesParams params,
-  ) throws (1: EdenError ex);
-
-  /**
-   * DEPRECATED - prefer getAttributesFromFilesV2. Some parameters are not
-   * supported by this endpoint (namely the request scope param).
-   *
-   * Returns the requested file attributes for the provided list of files.
-   *
-   * This API assumes all the given paths correspond to regular files.
-   * We return EdenErrors instead of attributes for paths that correspond to
-   * directories or symlinks.
-   *
-   * Note: may return stale data if synchronizeWorkingCopy isn't called, and if
-   * the SyncBehavior specify a 0 timeout. see the documentation for both of
-   * these for more details.
-   */
-  GetAttributesFromFilesResult getAttributesFromFiles(
     1: GetAttributesFromFilesParams params,
   ) throws (1: EdenError ex);
 

@@ -427,73 +427,128 @@ struct FileAttributeData {
 /**
  * Attributes for a file or information about error encountered when accessing file attributes.
  * The most likely error will be ENOENT, implying that the file doesn't exist.
+ *
+ * Some attributes are not available for certain types of files. For example,
+ * sha1 and size are not available for directories or symlinks. We use a value
+ * or error type for each of those attributes, so that when we can not provide
+ * an attribute we can give an explanation for why not.
  */
 union FileAttributeDataOrError {
   1: FileAttributeData data;
   2: EdenError error;
 }
 
-/**
- * Some attributes are not available for certain types of files. For example,
- * sha1 and size are not available for directories or symlinks. We use a value
- * or error type for each of those attributes, so that when we can not provide
- * an attribute we can give an explanation for why not.
+/*
+ * Sha1 hash of a file. Errors are returned when this attribute is requested for:
+ *
+ * 1. Symlinks: POSIX_ERROR, EINVAL
+ * 2. Directories: POSIX_ERROR, EISDIR
+ * 3. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
+ * 4. Non-existent files: POSIX_ERROR, ENOENT
  */
 union Sha1OrError {
   1: BinaryHash sha1;
   2: EdenError error;
 }
 
+/*
+ * Blake3 hash of a file. Errors are returned when this attribute is requested for:
+ *
+ * 1. Symlinks: POSIX_ERROR, EINVAL
+ * 2. Directories: POSIX_ERROR, EISDIR
+ * 3. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
+ * 4. Non-existent files: POSIX_ERROR, ENOENT
+ * 5. Files that that lack blake3 hashes: ATTRIBUTES_UNAVAILABLE, ENOENT
+ */
 union Blake3OrError {
   1: BinaryHash blake3;
   2: EdenError error;
 }
 
+/*
+ * Size of a file. Errors are returned when this attribute is requested for:
+ *
+ * 1. Symlinks: POSIX_ERROR, EINVAL
+ * 2. Directories: POSIX_ERROR, EISDIR
+ * 3. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
+ * 5. Non-existent files: POSIX_ERROR, ENOENT
+ */
 union SizeOrError {
   1: i64 size;
   2: EdenError error;
 }
 
+/*
+ * Type that source control assigns to a given file. Errors are returned when this attribute is requested for:
+ *
+ * 1. Non-existent files: POSIX_ERROR, ENOENT
+ *
+ * In addition, this attribute may be nullopt if the file has no source control type.
+ */
 union SourceControlTypeOrError {
   1: SourceControlType sourceControlType;
   2: EdenError error;
 }
 
+/*
+ * Object Id of a file. Errors are returned when this attribute is requested for:
+ *
+ * 1. Non-existent files: POSIX_ERROR, ENOENT
+ *
+ * If the path has been locally written to, it will have no object ID. Therefore,
+ * it's possible for `objectId` to be unset even if there is no error.
+ *
+ * Notably, if path refers to a directory, no object ID will be returned if any
+ * child file or directory has been written to.
+ */
 union ObjectIdOrError {
-  // If the path has been locally written to, it will have no object ID. Therefore,
-  // it's possible for `objectId` to be unset even if there is no error.
-  //
-  // Notably, if path refers to a directory, no object ID will be returned if any
-  // child file or directory has been written to.
   1: ThriftObjectId objectId;
   2: EdenError error;
 }
 
+/*
+ * Digest (content) size of a file or directory. Errors are returned when this attribute is requested for:
+ *
+ * 1. Symlinks: POSIX_ERROR, EINVAL
+ * 2. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
+ * 3. Non-existent files: POSIX_ERROR, ENOENT
+ * 4. Files that that lack digest sizes: ATTRIBUTES_UNAVAILABLE, ENOENT
+ * 5. Materialized (locally modified) directories: ATTRIBUTES_UNAVAILABLE, ENOENT
+ */
 union DigestSizeOrError {
-  // Similar to ObjectIdOrError, it's possible for `digest size` to be unset
-  // even if there is no error.
-  //
-  // Notably, no digest size will be returned if any child file or directory
-  // has been modified.
   1: i64 digestSize;
   2: EdenError error;
 }
 
+/*
+ * Digest (content) hash of a file or directory. Errors are returned when this attribute is requested for:
+ *
+ * 1. Symlinks: POSIX_ERROR, EINVAL
+ * 2. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
+ * 3. Non-existent files: POSIX_ERROR, ENOENT
+ * 4. Files/dirs that that lack digest hashes: ATTRIBUTES_UNAVAILABLE, ENOENT
+ * 5. Materialized (locally modified) directories: ATTRIBUTES_UNAVAILABLE, ENOENT
+ */
 union DigestHashOrError {
-  // Similar to ObjectIdOrError, it's possible for `digest hash` to be unset
-  // even if there is no error.
-  //
-  // Notably, no digest hash will be returned if any child file or directory
-  // has been modified.
   1: BinaryHash digestHash;
   2: EdenError error;
 }
 
+/*
+ * Last modified time of a file or directory. Errors are returned when this attribute is requested for:
+ *
+ * 1. Non-existent files: POSIX_ERROR, ENOENT
+ */
 union MtimeOrError {
   1: TimeSpec mtime;
   2: EdenError error;
 }
 
+/*
+ * Mode bits for a file or directory. Errors are returned when this attribute is requested for:
+ *
+ * 1. Non-existent files: POSIX_ERROR, ENOENT
+ */
 union ModeOrError {
   1: i32 mode;
   2: EdenError error;
@@ -505,6 +560,9 @@ union ModeOrError {
  * When an attribute was not requested the field will be a null optional value.
  * If the attribute was requested, but there was an error computing that
  * specific attribute we will return an Error type for that attribute.
+ *
+ * See the documentation for the individual attribute types for more
+ * (non-exhaustive) information about when certain errors are returned.
  */
 struct FileAttributeDataV2 {
   1: optional Sha1OrError sha1;

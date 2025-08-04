@@ -33,7 +33,9 @@
 
 namespace apache::thrift::python::detail {
 
-template <class Protocol>
+template <
+    class Protocol,
+    apache::thrift::ErrorBlame Blame = apache::thrift::ErrorBlame::SERVER>
 class PythonStreamElementEncoder final
     : public apache::thrift::detail::StreamElementEncoder<
           std::unique_ptr<::folly::IOBuf>> {
@@ -67,8 +69,7 @@ class PythonStreamElementEncoder final
       exceptionMetadataBase.what_utf8() = ex.what();
       apache::thrift::detail::serializeExceptionBody(&prot, &ex);
       apache::thrift::PayloadAppUnknownExceptionMetdata aue;
-      aue.errorClassification().ensure().blame() =
-          apache::thrift::ErrorBlame::SERVER;
+      aue.errorClassification().ensure().blame() = Blame;
       exceptionMetadata.appUnknownException() = std::move(aue);
     }
 
@@ -83,5 +84,9 @@ class PythonStreamElementEncoder final
                 std::move(queue).move(), std::move(streamPayloadMetadata)))));
   }
 };
+
+template <class Protocol>
+using PythonSinkElementEncoder =
+    PythonStreamElementEncoder<Protocol, apache::thrift::ErrorBlame::CLIENT>;
 
 } // namespace apache::thrift::python::detail

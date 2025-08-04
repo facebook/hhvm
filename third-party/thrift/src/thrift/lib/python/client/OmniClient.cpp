@@ -162,14 +162,14 @@ std::unique_ptr<IOBufClientSink> extractClientSink(
     apache::thrift::protocol::PROTOCOL_TYPES protocol) {
   switch (protocol) {
     case apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL: {
-      static python::detail::PythonStreamElementEncoder<
+      static python::detail::PythonSinkElementEncoder<
           apache::thrift::BinaryProtocolWriter>
           encoder;
       return std::make_unique<IOBufClientSink>(
           state.extractSink(), &encoder, decode_stream_element);
     }
     case apache::thrift::protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
-      static python::detail::PythonStreamElementEncoder<
+      static python::detail::PythonSinkElementEncoder<
           apache::thrift::CompactProtocolWriter>
           encoder;
       return std::make_unique<IOBufClientSink>(

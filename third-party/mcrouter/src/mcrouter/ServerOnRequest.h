@@ -109,9 +109,6 @@ class ServerOnRequest {
       apache::thrift::HandlerCallbackPtr<typename Request::reply_type>&&
           callback,
       Request&& req) {
-    if (HasKeyTrait<Request>::value) {
-      req.key_ref()->update();
-    }
     McThriftContext<ReplyT<Request>> ctx =
         McThriftContext<typename Request::reply_type>(std::move(callback));
     send(

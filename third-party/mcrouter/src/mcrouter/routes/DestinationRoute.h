@@ -236,7 +236,8 @@ class DestinationRoute {
     folly::StringPiece strippedRoutingPrefix;
     if (!keepRoutingPrefix_ && !req.key_ref()->routingPrefix().empty()) {
       newReq.emplace(req);
-      newReq->key_ref()->stripRoutingPrefix();
+      newReq->key_ref() = carbon::Keys<folly::IOBuf>::stripRoutingPrefix(
+          std::move(*newReq->key_ref()));
       strippedRoutingPrefix = req.key_ref()->routingPrefix();
     }
     const auto& reqToSend = newReq ? *newReq : req;
@@ -276,7 +277,8 @@ class DestinationRoute {
     folly::StringPiece strippedRoutingPrefix;
     if (!keepRoutingPrefix_ && !req.key_ref()->routingPrefix().empty()) {
       newReq.emplace(req);
-      newReq->key_ref()->stripRoutingPrefix();
+      newReq->key_ref() = carbon::Keys<folly::IOBuf>::stripRoutingPrefix(
+          std::move(*newReq->key_ref()));
       strippedRoutingPrefix = req.key_ref()->routingPrefix();
     }
     maybeAddBucketId(newReq, req);

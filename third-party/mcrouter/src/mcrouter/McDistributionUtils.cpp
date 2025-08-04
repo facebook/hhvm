@@ -42,7 +42,8 @@ FOLLY_NOINLINE bool distributeWriteRequest(
                                                   &message,
                                                   &sourceRegion]() {
     auto finalReq = req;
-    finalReq.key_ref()->stripRoutingPrefix();
+    finalReq.key_ref() = carbon::Keys<folly::IOBuf>::stripRoutingPrefix(
+        std::move(*finalReq.key_ref()));
     auto serialized =
         invalidation::McInvalidationKvPairs::serialize<memcache::McSetRequest>(
             finalReq)
@@ -93,7 +94,8 @@ FOLLY_NOINLINE bool distributeDeleteRequest(
                 req.attributes_ref()->cend()
             ? std::move(addDeleteRequestSource(req, source))
             : req;
-        finalReq.key_ref()->stripRoutingPrefix();
+        finalReq.key_ref() = carbon::Keys<folly::IOBuf>::stripRoutingPrefix(
+            std::move(*finalReq.key_ref()));
         auto serialized = invalidation::McInvalidationKvPairs::serialize<
                               memcache::McDeleteRequest>(finalReq)
                               .template to<std::string>();

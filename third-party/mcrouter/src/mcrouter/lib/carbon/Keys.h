@@ -96,6 +96,13 @@ class Keys {
     return *this;
   }
 
+  // Hack to save some CPU in DestinationRoute. Avoid if possible.
+  static Keys stripRoutingPrefix(Keys&& key) {
+    key.trimStart(key.routingPrefix().size());
+    key.routingPrefix_.reset(key.fullKey().begin(), 0);
+    return key;
+  }
+
   size_t size() const {
     return size(key_);
   }
@@ -134,28 +141,11 @@ class Keys {
     return routingKey_.size() != keyWithoutRoute_.size();
   }
 
-  // Hack to save some CPU in DestinationRoute. Avoid if possible.
-  void stripRoutingPrefix() {
-    trimStart(routingPrefix().size());
-    routingPrefix_.reset(fullKey().begin(), 0);
-  }
-
   // TODO(jmswen) Would be nice not to expose raw storage. Only needed in
   // asciiKey() in McServerSession-inl.h and SerializationTraits specialization.
   const Storage& raw() const {
     return key_;
   }
-
-  // Usage of this method requires user to call `update()` manually on change of
-  // the underlying storage.
-  Storage& rawUnsafe() {
-    return key_;
-  }
-  const Storage& rawUnsafe() const {
-    return key_;
-  }
-
-  void update();
 
   bool reuseLastHash(size_t size, HashFunctionType typeId) const {
     return (
@@ -206,6 +196,8 @@ class Keys {
     return str.size();
   }
 
+  void update();
+
   void trimStart(size_t n) {
     return trimStartImpl(key_, n);
   }
@@ -218,10 +210,8 @@ class Keys {
     s.erase(0, n);
   }
 
- protected:
-  Storage key_;
-
  private:
+  Storage key_;
   folly::StringPiece keyWithoutRoute_;
   folly::StringPiece routingPrefix_;
   folly::StringPiece routingKey_;
@@ -244,11 +234,7 @@ struct KeysAdapter {
 
   template <typename Storage>
   static const Storage& toThrift(const Keys<Storage>& wrapper) {
-    return wrapper.rawUnsafe();
-  }
-  template <typename Storage>
-  static Storage& toThrift(Keys<Storage>& wrapper) {
-    return wrapper.rawUnsafe();
+    return wrapper.raw();
   }
 
   template <typename Storage>
@@ -259,9 +245,9 @@ struct KeysAdapter {
   template <typename Storage>
   static bool equal(const Keys<Storage>& lhs, const Keys<Storage>& rhs) {
     if constexpr (std::is_same_v<Storage, folly::IOBuf>) {
-      return folly::IOBufEqualTo{}(lhs.rawUnsafe(), rhs.rawUnsafe());
+      return folly::IOBufEqualTo{}(lhs.raw(), rhs.raw());
     } else {
-      return lhs.rawUnsafe() == rhs.rawUnsafe();
+      return lhs.raw() == rhs.raw();
     }
   }
 };

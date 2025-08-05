@@ -12,12 +12,9 @@
 
 #include <proxygen/lib/http/stats/TLResponseCodeStats.h>
 
-#include "common/stats/DynamicStats.h"
 #include <proxygen/lib/stats/StatsWrapper.h>
 
 namespace proxygen {
-
-using QuantileStatWrapper = facebook::fb303::detail::QuantileStatWrapper;
 
 /**
  * Connection stats abstract interface.
@@ -88,7 +85,7 @@ class MinimalConnectionStats : public ConnectionStats {
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinute> upstreamLoadShed_;
-  std::optional<QuantileStatWrapper> totalDuration_;
+  std::optional<StatsWrapper::TLHistogram> totalDuration_;
 
   std::optional<StatsWrapper::TLCounter> currConns_;
   std::optional<StatsWrapper::TLTimeseries> newConns_;

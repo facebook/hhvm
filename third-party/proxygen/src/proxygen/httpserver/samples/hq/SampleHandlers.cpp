@@ -343,6 +343,9 @@ void DeviousBatonHandler::onHeadersComplete(
     }
   }
 
+  // Check for query param immediate=1 and store result in bool
+  bool immediate = (msg->getQueryParam("immediate") == "1");
+
   // Send the response to the original get request
   proxygen::HTTPMessage resp;
   resp.setVersionString(getHttpVersion());
@@ -359,7 +362,12 @@ void DeviousBatonHandler::onHeadersComplete(
   txn_->sendHeaders(resp);
 
   if (devious_) {
-    devious_->start();
+    if (immediate) {
+      devious_->start();
+    } else {
+      folly::EventBaseManager::get()->getEventBase()->runInLoop(
+          [this] { devious_->start(); });
+    }
   } else {
     txn_->sendEOM();
     txn_ = nullptr;

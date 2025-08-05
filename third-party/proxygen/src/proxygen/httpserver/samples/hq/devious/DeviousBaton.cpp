@@ -111,6 +111,9 @@ DeviousBaton::onBatonMessageData(BatonMessageState& state,
                                  std::unique_ptr<folly::IOBuf> data,
                                  bool fin) {
   state.bufQueue.append(std::move(data));
+  if (state.bufQueue.empty()) {
+    return folly::unit;
+  }
   folly::io::Cursor cursor(state.bufQueue.front());
   uint64_t consumed = 0;
   bool underflow = false;

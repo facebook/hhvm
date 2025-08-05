@@ -20,5 +20,5 @@ fi
 
 cd "$PKG_DIR/fizz/fizz/" || die "cd fail"
 
-cmake . -G Ninja -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" -DBUILD_TESTS=OFF
+cmake . -G Ninja -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
 cmake --build . && cmake --install .

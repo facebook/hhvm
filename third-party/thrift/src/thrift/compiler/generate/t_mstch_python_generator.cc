@@ -1216,6 +1216,29 @@ void warn_named(sema_context& ctx, const t_named& d) {
 
 } // namespace module_name_collision_validator
 
+void validate_no_dict_as_key(sema_context& ctx, const t_field& f) {
+  auto report_warning = [&ctx](const t_field& f) {
+    ctx.report(
+        f,
+        "python-dict-as-key",
+        diagnostic_level::warning,
+        "Field `{}`: `map` is not a supported key type for `map` or `set` in thrift-python.",
+        f.name());
+  };
+  const t_type* type = f.type()->get_true_type();
+  if (const t_map* map = type->try_as<t_map>()) {
+    const auto* key_type = map->key_type()->get_true_type();
+    if (key_type->try_as<t_map>()) {
+      report_warning(f);
+    }
+  } else if (const t_set* set = type->try_as<t_set>()) {
+    const auto* elem_type = set->elem_type()->get_true_type();
+    if (elem_type->try_as<t_map>()) {
+      report_warning(f);
+    }
+  }
+}
+
 std::filesystem::path program_to_path(const t_program& prog) {
   auto package = get_py3_namespace(&prog);
   return fmt::format("{}", fmt::join(package, "/"));
@@ -1327,6 +1350,7 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
         enum_member_union_field_names_validator::validate_enum);
     validator.add_union_visitor(
         enum_member_union_field_names_validator::validate_union);
+    validator.add_field_visitor(validate_no_dict_as_key);
     if (get_py3_namespace(program_).empty()) {
       validator.add_structured_definition_visitor(
           module_name_collision_validator::validate_named);

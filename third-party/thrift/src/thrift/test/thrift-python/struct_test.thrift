@@ -298,9 +298,6 @@ struct TestStructWithNestedContainers {
   5: list<map<string, set<i32>>> list_map_string_set_i32;
   6: set<list<i32>> set_list_i32;
   7: set<set<i32>> set_set_i32;
-  8: set<map<string, i32>> set_map_string_i32;
-  9: set<map<string, list<i32>>> set_map_string_list_i32;
-  10: set<map<string, set<i32>>> set_map_string_set_i32;
   11: map<i32, list<i32>> map_i32_list_i32;
   12: map<i32, set<i32>> map_i32_set_i32;
   13: map<i32, map<string, i32>> map_i32_map_string_i32;

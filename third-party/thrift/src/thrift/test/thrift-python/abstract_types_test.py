@@ -942,37 +942,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.set_set_i32
         )
 
-        # pyre-ignore[9]: set_map_string_i32_incorrect_type has type
-        #  `incorrect_type`; used as `AbstractSet[Mapping[str, int]]`.
-        set_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
-            test_struct_with_nested_containers_abstract.set_map_string_i32
-        )
-        set_map_string_i32: typing.AbstractSet[typing.Mapping[str, int]] = (  # noqa F841
-            test_struct_with_nested_containers_abstract.set_map_string_i32
-        )
-
-        # pyre-ignore[9]: set_map_string_list_i32_incorrect_type has type
-        #  `incorrect_type`; used as `AbstractSet[Mapping[str, Sequence[int]]]`.
-        set_map_string_list_i32_incorrect_type: incorrect_type = (  # noqa F841
-            test_struct_with_nested_containers_abstract.set_map_string_list_i32
-        )
-        set_map_string_list_i32: typing.AbstractSet[  # noqa F841
-            typing.Mapping[str, typing.Sequence[int]]
-        ] = (  # noqa F841
-            test_struct_with_nested_containers_abstract.set_map_string_list_i32
-        )
-
-        # pyre-ignore[9]: set_map_string_set_i32_incorrect_type has type
-        #  `incorrect_type`; used as `AbstractSet[Mapping[str, AbstractSet[int]]]`.
-        set_map_string_set_i32_incorrect_type: incorrect_type = (  # noqa F841
-            test_struct_with_nested_containers_abstract.set_map_string_set_i32
-        )
-        set_map_string_set_i32: typing.AbstractSet[  # noqa F841
-            typing.Mapping[str, typing.AbstractSet[int]]
-        ] = (  # noqa F841
-            test_struct_with_nested_containers_abstract.set_map_string_set_i32
-        )
-
         # pyre-ignore[9]: map_i32_list_i32_incorrect_type has type `incorrect_type`;
         #  used as `Mapping[int, Sequence[int]]`.
         map_i32_list_i32_incorrect_type: incorrect_type = (  # noqa F841

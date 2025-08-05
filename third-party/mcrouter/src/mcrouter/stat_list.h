@@ -161,21 +161,14 @@ STUI(proxy_queue_full, 0, 1)
 // All MPMC queues between clients and proxies are full
 STUI(proxy_queues_all_full, 0, 1)
 // distribution stats
-STUI(distribution_axon_write_success, 0, 1)
-STUI(distribution_set_axon_write_success, 0, 1)
-STUI(distribution_set_axon_write_fail, 0, 1)
-STUI(distribution_set_local_region_write, 0, 1)
-STUI(distribution_axon_write_failed, 0, 1)
 STUI(distribution_async_spool_failed, 0, 1)
 STUI(distribution_replay_no_source, 0, 1)
 STUI(distribution_replay_xregion_directed, 0, 1)
 STUI(distribution_replay_xregion_directed_no_prefix_error, 0, 1)
 STUI(distribution_replay_xregion_broadcast, 0, 1)
 STUI(distribution_replay_other, 0, 1)
-STUI(distribution_error_on_delete_failure, 0, 1)
 STUI(distribution_load_test_axon_write_success, 0, 1)
 STUI(distribution_load_test_axon_write_failure, 0, 1)
-STUI(srroute_error_on_delete_failure, 0, 1)
 #undef GROUP
 #define GROUP ods_stats | detailed_stats
 STUI(proxy_request_num_outstanding, 0, 1)
@@ -230,6 +223,14 @@ STUI(after_request_latency_injected, 0, 1)
 STUI(before_latency_injected, 0, 1)
 STUI(after_latency_injected, 0, 1)
 STUI(total_latency_injected, 0, 1)
+// distribution stats
+STUI(distribution_axon_write_success, 0, 1)
+STUI(distribution_set_axon_write_success, 0, 1)
+STUI(distribution_set_axon_write_fail, 0, 1)
+STUI(distribution_set_local_region_write, 0, 1)
+STUI(distribution_axon_write_failed, 0, 1)
+STUI(distribution_error_on_delete_failure, 0, 1)
+STUI(srroute_error_on_delete_failure, 0, 1)
 #undef GROUP
 #define GROUP ods_stats | count_stats
 STUI(result_error_count, 0, 1)

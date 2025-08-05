@@ -17,6 +17,7 @@
 #include "mcrouter/config-impl.h"
 #include "mcrouter/lib/PoolContext.h"
 #include "mcrouter/lib/carbon/Result.h"
+#include "mcrouter/lib/network/MessageHelpers.h"
 
 namespace facebook {
 namespace memcache {

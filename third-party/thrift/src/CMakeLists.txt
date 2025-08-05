@@ -94,6 +94,8 @@ option(thriftpy3
   OFF
 )
 
+find_package(folly CONFIG REQUIRED)
+
 # Find required dependencies for the Thrift compiler.
 if (THRIFT_COMPILER_ONLY OR build_all)
   include_directories(${OPENSSL_INCLUDE_DIR})
@@ -107,7 +109,6 @@ endif ()
 if (THRIFT_LIB_ONLY OR build_all)
   find_package(Gflags REQUIRED)
   find_package(Glog REQUIRED)
-  find_package(folly CONFIG REQUIRED)
   find_package(fizz CONFIG REQUIRED)
   find_package(wangle CONFIG REQUIRED)
   find_package(ZLIB REQUIRED)

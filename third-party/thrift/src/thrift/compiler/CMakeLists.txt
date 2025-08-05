@@ -88,6 +88,7 @@ target_link_libraries(
   ${OPENSSL_LIBRARIES}
   Boost::boost
   fmt::fmt
+  Folly::folly
 )
 
 # The base compiler infrastructure library
@@ -104,6 +105,7 @@ target_link_libraries(
   compiler_base
   fmt::fmt
   Boost::boost
+  Folly::folly
   common
   ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
@@ -137,6 +139,7 @@ target_link_libraries(
   compiler_base
   compiler_ast
   fmt::fmt
+  Folly::folly
 )
 
 # The Thrift compiler library.
@@ -155,6 +158,7 @@ target_link_libraries(
   compiler
   compiler_ast
   fmt::fmt
+  Folly::folly
   ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
 
@@ -178,6 +182,7 @@ add_library(
 target_link_libraries(
   whisker
   fmt::fmt
+  Folly::folly
   compiler_base
 )
 

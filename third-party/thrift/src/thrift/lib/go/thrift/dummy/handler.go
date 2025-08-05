@@ -18,6 +18,7 @@ package dummy
 
 import (
 	"context"
+	"time"
 
 	"github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 )
@@ -38,5 +39,10 @@ func (h *DummyHandler) OnewayRPC(ctx context.Context, value string) error {
 	if h.OnewayRPCRequests != nil {
 		h.OnewayRPCRequests <- value
 	}
+	return nil
+}
+
+func (h *DummyHandler) Sleep(ctx context.Context, milliseconds int64) error {
+	time.Sleep(time.Duration(milliseconds) * time.Millisecond)
 	return nil
 }

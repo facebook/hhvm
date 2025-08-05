@@ -1,0 +1,8 @@
+ERROR: File "polymorphism_optimisation_missing.php", line 5, characters 40-43:
+Unbound name: `Nope` (Naming[2049])
+ERROR: File "polymorphism_optimisation_missing.php", line 5, characters 54-57:
+Unbound name: `Nope` (Naming[2049])
+ERROR: File "polymorphism_optimisation_missing.php", line 16, characters 20-23:
+Unbound name: `Nope` (Naming[2049])
+ERROR: File "polymorphism_optimisation_missing.php", line 17, characters 8-11:
+Unbound name: `Nope` (Naming[2049])

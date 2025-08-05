@@ -143,14 +143,16 @@ end = struct
     | Tshape shape_ty ->
       find_shape_ty shape_ty ~var ~update ~is_invariant ~acc ~env
     | Tapply ((_, class_name), tys) -> begin
-      let tparams_opt =
-        Option.map
-          (Decl_entry.to_option (Typing_env.get_class env class_name))
-          ~f:Folded_class.tparams
+      let tparams =
+        match Typing_env.get_class_or_typedef_tparams env class_name with
+        | [] ->
+          (* In the case the class / type def doesn't exist or isn't available
+             we should be conservative and assume all type parameters are
+             invariant *)
+          List.map tys ~f:(fun _ -> Ast_defs.Invariant)
+        | tparams -> List.map tparams ~f:(fun { tp_variance; _ } -> tp_variance)
       in
-
-      Option.value_map tparams_opt ~default:acc ~f:(fun tparams ->
-          find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env)
+      find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env
     end
 
   and find_cr_consts cr_consts ~update ~is_invariant ~acc ~env =
@@ -204,7 +206,7 @@ end = struct
 
   and find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env =
     match (tys, tparams) with
-    | (ty :: tys, Typing_defs.{ tp_variance; _ } :: tparams) ->
+    | (ty :: tys, tp_variance :: tparams) ->
       let acc =
         find ty ~var:(mul var tp_variance) ~is_invariant ~update ~acc ~env
       in

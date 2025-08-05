@@ -41,6 +41,10 @@ public class ThriftClientConfig {
 
   private SocketAddress socksProxy;
 
+  // TEMPORARY Debug flag for adding ChannelDuplexDebug handler to Rsocket Client
+  // Remove after debugging @jbahr 8/5/2025
+  private boolean debugNettyPipeline = false;
+
   // ssl
   private boolean enableJdkSsl = false;
   private boolean sslDisabled;
@@ -175,5 +179,15 @@ public class ThriftClientConfig {
   public ThriftClientConfig setSessionCacheSize(long sessionCacheSize) {
     this.sessionCacheSize = sessionCacheSize;
     return this;
+  }
+
+  @Config("thrift.client.rsocket.debug-netty-pipeline")
+  public ThriftClientConfig setDebugNettyPipeline(boolean debugNettyPipeline) {
+    this.debugNettyPipeline = debugNettyPipeline;
+    return this;
+  }
+
+  public boolean getDebugNettyPipeline() {
+    return debugNettyPipeline;
   }
 }

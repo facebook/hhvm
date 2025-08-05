@@ -16,26 +16,26 @@
 
 }}{{!
 
-  This template defines metadata for a Thrift enum.
+  This template defines metadata for a Thrift const struct.
 
 }}
-&{{program:metadata_qualifier}}ThriftEnum{
-    Name:     "{{enum:scoped_name}}",
-    Elements: map[int32]string{
-        {{#enum:values}}
-        {{enum_value:value}}: "{{enum_value:name}}",
-        {{/enum:values}}
+&{{program:metadata_qualifier}}ThriftConstStruct{
+    {{#constant:type}}
+    {{#type:structured}}
+    Type: &{{program:metadata_qualifier}}ThriftStructType{
+        Name: "{{struct:scoped_name}}",
     },
-    {{#enum:structured_annotations?}}
-    StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
-        {{#enum:structured_annotations}}
-        {{#structured_annotation:const}}
+    {{/type:structured}}
+    {{/constant:type}}
+    Fields: map[string]*{{program:metadata_qualifier}}ThriftConstValue{
+        {{#value:const_struct}}
+        {{#constant:type}}
         {{#constant:value}}
-        {{> metadata/thrift_metadata_const_struct}}
+        "{{constant:name}}":
+            {{> metadata/thrift_metadata_const_value}}
         {{/constant:value}}
-        {{/structured_annotation:const}}
-        {{/enum:structured_annotations}}
+        {{/constant:type}}
+        {{/value:const_struct}}
     },
-    {{/enum:structured_annotations?}}
 },
 {{!newline}}

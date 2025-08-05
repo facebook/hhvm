@@ -75,6 +75,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_i32,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "thrift.SerializeInFieldIdOrder",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                },
             },
         )
     }()

@@ -43,7 +43,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.I32,
-            	ElementTypeSpec: premadeCodecTypeSpec_i32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
     premadeCodecTypeSpec_module_TestStruct = &thrift.TypeSpec{

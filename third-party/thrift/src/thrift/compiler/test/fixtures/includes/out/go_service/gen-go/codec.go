@@ -24,7 +24,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "service.IncludesIncluded",
-            	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
+                UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
             },
     }
     premadeCodecTypeSpec_service_IncludesTransitiveFoo = &thrift.TypeSpec{
@@ -32,7 +32,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "service.IncludesTransitiveFoo",
-            	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
+                UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
             },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{

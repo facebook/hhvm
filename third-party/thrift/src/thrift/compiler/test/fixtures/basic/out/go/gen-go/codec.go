@@ -57,7 +57,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyDataItemAlias",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyDataItem,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyDataItem,
             },
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
@@ -79,7 +79,7 @@ var (
         CodecSetSpec:
             &thrift.CodecSetSpec{
                 ElementWireType: thrift.FLOAT,
-            	ElementTypeSpec: premadeCodecTypeSpec_float,
+                ElementTypeSpec: premadeCodecTypeSpec_float,
             },
     }
     premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
@@ -103,7 +103,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.I32,
-            	ElementTypeSpec: premadeCodecTypeSpec_i32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
     premadeCodecTypeSpec_set_string = &thrift.TypeSpec{
@@ -111,17 +111,17 @@ var (
         CodecSetSpec:
             &thrift.CodecSetSpec{
                 ElementWireType: thrift.STRING,
-            	ElementTypeSpec: premadeCodecTypeSpec_string,
+                ElementTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_map_string_i64 = &thrift.TypeSpec{
         FullName: "map<string, i64>",
         CodecMapSpec:
             &thrift.CodecMapSpec{
-            	KeyTypeSpec:   premadeCodecTypeSpec_string,
-            	ValueTypeSpec: premadeCodecTypeSpec_i64,
+                KeyTypeSpec:   premadeCodecTypeSpec_string,
+                ValueTypeSpec: premadeCodecTypeSpec_i64,
                 KeyWireType:   thrift.STRING,
-            	ValueWireType: thrift.I64,
+                ValueWireType: thrift.I64,
             },
     }
     premadeCodecTypeSpec_module_Containers = &thrift.TypeSpec{
@@ -138,7 +138,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyEnumAlias",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyEnum,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyEnum,
             },
     }
     premadeCodecTypeSpec_module_MyUnion = &thrift.TypeSpec{

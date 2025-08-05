@@ -59,7 +59,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.STRING,
-            	ElementTypeSpec: premadeCodecTypeSpec_string,
+                ElementTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_module_list_string_6884 = &thrift.TypeSpec{
@@ -67,7 +67,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.list_string_6884",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
             },
     }
     premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
@@ -102,7 +102,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AwesomeStruct",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
             },
     }
     premadeCodecTypeSpec_module_FantasticStruct = &thrift.TypeSpec{
@@ -110,7 +110,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.FantasticStruct",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
             },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{

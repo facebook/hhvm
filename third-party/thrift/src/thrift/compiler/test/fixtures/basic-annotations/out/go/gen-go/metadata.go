@@ -63,6 +63,19 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.list_string_6884",
                     UnderlyingType: premadeThriftType_list_string,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Type",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("std::deque<std::string>"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_MyStruct =
@@ -92,6 +105,19 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.AwesomeStruct",
                     UnderlyingType: premadeThriftType_module_MyStruct,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "go.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("IncredibleStruct"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_FantasticStruct =
@@ -100,6 +126,19 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.FantasticStruct",
                     UnderlyingType: premadeThriftType_module_MyStruct,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "go.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("BrilliantStruct"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_void =
@@ -162,6 +201,30 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                 Name:    "module.MyUnion",
                 IsUnion: true,
                 Fields:  []*metadata.ThriftField{
+                },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Adapter",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "name":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("::StaticCast"),
+                                },
+                        },
+                    },
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Name",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "value":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("YourUnion"),
+                                },
+                        },
+                    },
                 },
             },
         )
@@ -227,6 +290,45 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_module_MyUnion,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Name",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "value":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("YourStruct"),
+                                },
+                        },
+                    },
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "hack.Attributes",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "attributes":
+                                &metadata.ThriftConstValue{
+                                    CvList: []*metadata.ThriftConstValue{
+                                        &metadata.ThriftConstValue{
+                                            CvString: thrift.Pointerize("\\SomeClass(\\AnotherClass::class)"),
+                                        },
+                                    },
+                                },
+                        },
+                    },
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Adapter",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "name":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("::StaticCast"),
+                                },
+                        },
+                    },
+                },
             },
         )
     }()
@@ -262,6 +364,30 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
             Name: "module.MyException",
             Fields: []*metadata.ThriftField{
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("YourException"),
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::StaticCast"),
+                            },
+                    },
+                },
+            },
         },
     )
     return fbthriftResults
@@ -276,6 +402,19 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
                 0: "MyValue1",
                 1: "MyValue2",
                 2: "DOMAIN",
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("YourEnum"),
+                            },
+                    },
+                },
             },
         },
     )
@@ -331,6 +470,19 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Type:       premadeThriftType_i64,
                         },
                     },
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "go.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("GoGetDataById"),
+                                    },
+                            },
+                        },
+                    },
                 },
                 &metadata.ThriftFunction{
                     Name:       "putDataById",
@@ -374,6 +526,30 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "doNothing",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "value":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("cppDoNothing"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "go.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("GoDoNothing"),
+                                    },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -386,11 +562,35 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "ping",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.Priority",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "level":
+                                    &metadata.ThriftConstValue{
+                                    },
+                            },
+                        },
+                    },
                 },
                 &metadata.ThriftFunction{
                     Name:       "pong",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.Priority",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "level":
+                                    &metadata.ThriftConstValue{
+                                    },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -404,6 +604,18 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "pang",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.Priority",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "level":
+                                    &metadata.ThriftConstValue{
+                                    },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -418,6 +630,19 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     ReturnType: premadeThriftType_i32,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("GoodService"),
+                            },
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -428,11 +653,37 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "foo",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "go.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("FooStructured"),
+                                    },
+                            },
+                        },
+                    },
                 },
                 &metadata.ThriftFunction{
                     Name:       "bar",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "go.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("BarNonStructured"),
+                                    },
+                            },
+                        },
+                    },
                 },
                 &metadata.ThriftFunction{
                     Name:       "baz",

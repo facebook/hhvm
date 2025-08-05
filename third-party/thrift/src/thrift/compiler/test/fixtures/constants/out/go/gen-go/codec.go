@@ -89,7 +89,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.I32,
-            	ElementTypeSpec: premadeCodecTypeSpec_i32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
     premadeCodecTypeSpec_module_struct2 = &thrift.TypeSpec{
@@ -149,7 +149,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyCompany",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_module_Company,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_Company,
             },
     }
     premadeCodecTypeSpec_module_MyStringIdentifier = &thrift.TypeSpec{
@@ -157,7 +157,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyStringIdentifier",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_module_MyIntIdentifier = &thrift.TypeSpec{
@@ -165,17 +165,17 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyIntIdentifier",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
     premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
         FullName: "map<string, string>",
         CodecMapSpec:
             &thrift.CodecMapSpec{
-            	KeyTypeSpec:   premadeCodecTypeSpec_string,
-            	ValueTypeSpec: premadeCodecTypeSpec_string,
+                KeyTypeSpec:   premadeCodecTypeSpec_string,
+                ValueTypeSpec: premadeCodecTypeSpec_string,
                 KeyWireType:   thrift.STRING,
-            	ValueWireType: thrift.STRING,
+                ValueWireType: thrift.STRING,
             },
     }
     premadeCodecTypeSpec_module_MyMapIdentifier = &thrift.TypeSpec{
@@ -183,7 +183,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyMapIdentifier",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
             },
     }
 )

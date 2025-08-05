@@ -346,6 +346,19 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_i32,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "hack.Name",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "name":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("MyRenamedStruct"),
+                                },
+                        },
+                    },
+                },
             },
         )
     }()
@@ -360,6 +373,19 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Name:       "reserved_field",
                         IsOptional: false,
                         Type:       premadeThriftType_i32,
+                    },
+                },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "hack.Name",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "name":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("MyRenamedUnion"),
+                                },
+                        },
                     },
                 },
             },
@@ -453,6 +479,19 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
                 0: "Value1",
                 1: "Value2",
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "hack.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("RenamedEnum"),
+                            },
+                    },
+                },
+            },
         },
     )
     return fbthriftResults
@@ -468,6 +507,19 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "simple_rpc",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "hack.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("RenamedService"),
+                            },
+                    },
                 },
             },
         },
@@ -486,6 +538,19 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Name:       "int_parameter",
                             IsOptional: false,
                             Type:       premadeThriftType_i32,
+                        },
+                    },
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "hack.Name",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("renamed_rpc"),
+                                    },
+                            },
                         },
                     },
                 },
@@ -600,11 +665,37 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "invalid_return_for_hack",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_set_float,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "hack.SkipCodegen",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "reason":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("Invalid key type"),
+                                    },
+                            },
+                        },
+                    },
                 },
                 &metadata.ThriftFunction{
                     Name:       "rpc_skipped_codegen",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "hack.SkipCodegen",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "reason":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("Skip function deprecation"),
+                                    },
+                            },
+                        },
+                    },
                 },
             },
         },

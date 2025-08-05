@@ -134,6 +134,30 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "terse_write.MyInteger",
                     UnderlyingType: premadeThriftType_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "hack.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("\\Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::my::Adapter"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_terse_write_AdaptedFields =
@@ -394,6 +418,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_terse_write_MyUnion,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "thrift.TerseWrite",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                },
             },
         )
     }()
@@ -612,6 +645,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_terse_write_MyInteger,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "thrift.TerseWrite",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                },
             },
         )
     }()
@@ -629,6 +671,15 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
                     Name:       "msg",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "thrift.TerseWrite",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
                 },
             },
         },

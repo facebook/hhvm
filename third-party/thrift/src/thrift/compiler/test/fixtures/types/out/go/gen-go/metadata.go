@@ -86,6 +86,30 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.set_i32_7194",
                     UnderlyingType: premadeThriftType_set_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Type",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "template":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("folly::sorted_vector_set"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "rust.Type",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("sorted_vector_map::SortedVectorSet"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_map_i32_string =
@@ -102,6 +126,19 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.map_i32_string_1261",
                     UnderlyingType: premadeThriftType_map_i32_string,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "rust.Type",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("sorted_vector_map::SortedVectorMap"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_ContainerStruct =
@@ -484,6 +521,19 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.UintTypedef",
                     UnderlyingType: premadeThriftType_module_IntTypedef,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Type",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("std::uint32_t"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_TypedefStruct =
@@ -660,6 +710,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Name:       "fieldA",
                         IsOptional: false,
                         Type:       premadeThriftType_list_i32,
+                    },
+                },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.EnableCustomTypeOrdering",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
                     },
                 },
             },
@@ -844,6 +903,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_byte,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.MinimizePadding",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                },
             },
         )
     }()
@@ -882,6 +950,29 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Name:       "tiny",
                         IsOptional: false,
                         Type:       premadeThriftType_byte,
+                    },
+                },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "thrift.Experimental",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.MinimizePadding",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "thrift.TerseWrite",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
                     },
                 },
             },
@@ -944,6 +1035,19 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_i64,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Name",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "value":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("Renamed"),
+                                },
+                        },
+                    },
+                },
             },
         )
     }()
@@ -964,6 +1068,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Name:       "list_field",
                         IsOptional: false,
                         Type:       premadeThriftType_module_SomeListOfTypeMap_2468,
+                    },
+                },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.EnableCustomTypeOrdering",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
                     },
                 },
             },
@@ -1062,6 +1175,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_map_i32_module_CompleteMapDep,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.EnableCustomTypeOrdering",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                        },
+                    },
+                },
             },
         )
     }()
@@ -1156,6 +1278,23 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Type:       premadeThriftType_module_AdaptedList,
                     },
                 },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Adapter",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "name":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("IdentityAdapter<detail::AdaptedListDep>"),
+                                },
+                            "adaptedType":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("detail::AdaptedListDep"),
+                                },
+                        },
+                    },
+                },
             },
         )
     }()
@@ -1186,6 +1325,19 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                         Name:       "field",
                         IsOptional: true,
                         Type:       premadeThriftType_i16,
+                    },
+                },
+                StructuredAnnotations: []*metadata.ThriftConstStruct{
+                    &metadata.ThriftConstStruct{
+                        Type: &metadata.ThriftStructType{
+                            Name: "cpp.Adapter",
+                        },
+                        Fields: map[string]*metadata.ThriftConstValue{
+                            "name":
+                                &metadata.ThriftConstValue{
+                                    CvString: thrift.Pointerize("IdentityAdapter<detail::DependentAdaptedListDep>"),
+                                },
+                        },
                     },
                 },
             },

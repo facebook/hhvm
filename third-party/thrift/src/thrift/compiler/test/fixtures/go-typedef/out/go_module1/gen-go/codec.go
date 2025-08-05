@@ -31,7 +31,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Plate",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -46,7 +46,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Year",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
@@ -54,7 +54,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.STRING,
-            	ElementTypeSpec: premadeCodecTypeSpec_string,
+                ElementTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_module1_Drivers = &thrift.TypeSpec{
@@ -62,7 +62,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Drivers",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
             },
     }
     premadeCodecTypeSpec_module1_Accessory = &thrift.TypeSpec{
@@ -70,7 +70,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Accessory",
-            	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
+                UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
             },
     }
     premadeCodecTypeSpec_list_module1_Accessory = &thrift.TypeSpec{
@@ -78,7 +78,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.STRUCT,
-            	ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
+                ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
             },
     }
     premadeCodecTypeSpec_module1_PartName = &thrift.TypeSpec{
@@ -86,17 +86,17 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.PartName",
-            	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
+                UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
             },
     }
     premadeCodecTypeSpec_map_i32_module1_PartName = &thrift.TypeSpec{
         FullName: "map<i32, module1.PartName>",
         CodecMapSpec:
             &thrift.CodecMapSpec{
-            	KeyTypeSpec:   premadeCodecTypeSpec_i32,
-            	ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
+                KeyTypeSpec:   premadeCodecTypeSpec_i32,
+                ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
                 KeyWireType:   thrift.I32,
-            	ValueWireType: thrift.STRUCT,
+                ValueWireType: thrift.STRUCT,
             },
     }
     premadeCodecTypeSpec_module1_Automobile = &thrift.TypeSpec{
@@ -128,10 +128,10 @@ var (
         FullName: "map<module1.MapKey, string>",
         CodecMapSpec:
             &thrift.CodecMapSpec{
-            	KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
-            	ValueTypeSpec: premadeCodecTypeSpec_string,
+                KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
+                ValueTypeSpec: premadeCodecTypeSpec_string,
                 KeyWireType:   thrift.STRUCT,
-            	ValueWireType: thrift.STRING,
+                ValueWireType: thrift.STRING,
             },
     }
     premadeCodecTypeSpec_module1_MapContainer = &thrift.TypeSpec{
@@ -148,7 +148,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Car",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
             },
     }
     premadeCodecTypeSpec_module1_Pair = &thrift.TypeSpec{
@@ -165,7 +165,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.STRUCT,
-            	ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+                ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
             },
     }
     premadeCodecTypeSpec_list_module1_Car = &thrift.TypeSpec{
@@ -173,7 +173,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.STRUCT,
-            	ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
+                ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
             },
     }
     premadeCodecTypeSpec_module1_Collection = &thrift.TypeSpec{
@@ -190,7 +190,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.State",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_module1_Enum = &thrift.TypeSpec{
@@ -198,7 +198,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Enum",
-            	UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
+                UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
             },
     }
 )

@@ -68,7 +68,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.lanyard",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
             },
     }
     premadeCodecTypeSpec_module_number = &thrift.TypeSpec{
@@ -76,7 +76,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.number",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
@@ -91,7 +91,7 @@ var (
         CodecSetSpec:
             &thrift.CodecSetSpec{
                 ElementWireType: thrift.I32,
-            	ElementTypeSpec: premadeCodecTypeSpec_i32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
             },
     }
 )

@@ -73,7 +73,7 @@ var (
         CodecTypedefSpec:
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.PersonID",
-            	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+                UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
             },
     }
     premadeCodecTypeSpec_i16 = &thrift.TypeSpec{
@@ -88,17 +88,17 @@ var (
         CodecSetSpec:
             &thrift.CodecSetSpec{
                 ElementWireType: thrift.I64,
-            	ElementTypeSpec: premadeCodecTypeSpec_module_PersonID,
+                ElementTypeSpec: premadeCodecTypeSpec_module_PersonID,
             },
     }
     premadeCodecTypeSpec_map_module_Animal_string = &thrift.TypeSpec{
         FullName: "map<module.Animal, string>",
         CodecMapSpec:
             &thrift.CodecMapSpec{
-            	KeyTypeSpec:   premadeCodecTypeSpec_module_Animal,
-            	ValueTypeSpec: premadeCodecTypeSpec_string,
+                KeyTypeSpec:   premadeCodecTypeSpec_module_Animal,
+                ValueTypeSpec: premadeCodecTypeSpec_string,
                 KeyWireType:   thrift.I32,
-            	ValueWireType: thrift.STRING,
+                ValueWireType: thrift.STRING,
             },
     }
     premadeCodecTypeSpec_list_module_Vehicle = &thrift.TypeSpec{
@@ -106,7 +106,7 @@ var (
         CodecListSpec:
             &thrift.CodecListSpec{
                 ElementWireType: thrift.STRUCT,
-            	ElementTypeSpec: premadeCodecTypeSpec_module_Vehicle,
+                ElementTypeSpec: premadeCodecTypeSpec_module_Vehicle,
             },
     }
     premadeCodecTypeSpec_module_Person = &thrift.TypeSpec{

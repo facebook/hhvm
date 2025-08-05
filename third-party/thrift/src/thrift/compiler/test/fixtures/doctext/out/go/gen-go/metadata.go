@@ -71,6 +71,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.number",
                     UnderlyingType: premadeThriftType_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "rust.NewType",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_void =

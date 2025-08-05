@@ -34,7 +34,7 @@ void testSimplePutGet(
     const std::vector<K>& keys,
     const std::vector<V>& values) {
   std::string filename = getPersistentCacheFilename();
-  typedef FilePersistentCache<K, V, MutexT> CacheType;
+  using CacheType = FilePersistentCache<K, V, MutexT>;
   size_t cacheCapacity = 10;
   {
     CacheType cache(

@@ -97,8 +97,25 @@ class add_operational_annotations {
   */
   std::pair<bool, bool> check_existing_annotations(
       std::string_view next_content) {
-    bool zone_policy_exists =
-        next_content.find(zone_policy_string) != std::string::npos;
+    // Check for zone policy, but ensure it's not commented out
+    bool zone_policy_exists = false;
+    size_t zone_policy_pos = next_content.find(zone_policy_string);
+    if (zone_policy_pos != std::string::npos) {
+      // Check if this occurrence is commented out
+      size_t line_start = next_content.rfind('\n', zone_policy_pos);
+      if (line_start == std::string::npos) {
+        line_start = 0;
+      } else {
+        line_start++; // Move past the newline character
+      }
+
+      // Check if there's a comment marker (//) before the annotation on the
+      // same line
+      std::string_view line =
+          next_content.substr(line_start, zone_policy_pos - line_start);
+      zone_policy_exists = line.find("//") == std::string::npos;
+    }
+
     bool operational_data_exists =
         next_content.find(ope_category_string) != std::string::npos;
     return {zone_policy_exists, operational_data_exists};

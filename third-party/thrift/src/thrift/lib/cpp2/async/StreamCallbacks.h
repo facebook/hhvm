@@ -394,4 +394,117 @@ struct SinkServerCallbackSendError {
 
 using SinkServerCallbackPtr =
     std::unique_ptr<SinkServerCallback, SinkServerCallbackSendError>;
+
+/**
+ * The BiDi (Bi-Directional streaming) contract is a combination of the sink and
+ * stream contracts.
+ * onFirstResponseError is the only unconditionally terminating method.
+ * Otherwise, after onFirstResponse the contract splits into two streams in
+ * opposite directions each one of which can be independently terminated.
+ */
+struct BiDiChannelState {
+ private:
+  enum class State : uint8_t {
+    AwaitingFirstResponse,
+    StreamAndSinkOpen,
+    OnlyStreamOpen,
+    OnlySinkOpen,
+    Closed
+  } state_;
+
+ public:
+  bool firstResponseSent() const {
+    return state_ != State::AwaitingFirstResponse;
+  }
+  bool streamAlive() const {
+    return state_ != State::OnlySinkOpen && state_ != State::Closed;
+  }
+  bool sinkAlive() const {
+    return state_ != State::OnlyStreamOpen && state_ != State::Closed;
+  }
+
+  BiDiChannelState& markFirstResponseSent() {
+    if (state_ == State::AwaitingFirstResponse) {
+      state_ = State::StreamAndSinkOpen;
+    } else {
+      DCHECK(state_ == State::Closed);
+    }
+    return *this;
+  }
+
+  BiDiChannelState& closeStream() {
+    if (state_ == State::StreamAndSinkOpen) {
+      state_ = State::OnlySinkOpen;
+    } else if (state_ == State::OnlyStreamOpen) {
+      state_ = State::Closed;
+    } else {
+      DCHECK(state_ == State::Closed);
+    }
+    return *this;
+  }
+
+  BiDiChannelState& closeSink() {
+    if (state_ == State::StreamAndSinkOpen) {
+      state_ = State::OnlyStreamOpen;
+    } else if (state_ == State::OnlySinkOpen) {
+      state_ = State::Closed;
+    } else {
+      DCHECK(state_ == State::Closed);
+    }
+    return *this;
+  }
+
+  BiDiChannelState& earlyClose() {
+    DCHECK(state_ == State::AwaitingFirstResponse);
+    state_ = State::Closed;
+    return *this;
+  }
+};
+
+class BiDiClientCallback;
+
+class BiDiServerCallback {
+ public:
+  virtual ~BiDiServerCallback() = default;
+
+  FOLLY_NODISCARD virtual BiDiChannelState onStreamRequestN(uint64_t) = 0;
+  FOLLY_NODISCARD virtual BiDiChannelState onStreamCancel() = 0;
+
+  FOLLY_NODISCARD virtual BiDiChannelState onSinkNext(StreamPayload&&) = 0;
+  FOLLY_NODISCARD virtual BiDiChannelState onSinkError(
+      folly::exception_wrapper) = 0;
+  FOLLY_NODISCARD virtual BiDiChannelState onSinkComplete() = 0;
+
+  virtual void resetClientCallback(BiDiClientCallback&) = 0;
+};
+
+class BiDiClientCallback {
+ public:
+  virtual ~BiDiClientCallback() = default;
+
+  FOLLY_NODISCARD virtual BiDiChannelState onFirstResponse(
+      FirstResponsePayload&&, folly::EventBase*, BiDiServerCallback*) = 0;
+  virtual void onFirstResponseError(folly::exception_wrapper) = 0;
+
+  FOLLY_NODISCARD virtual BiDiChannelState onStreamNext(StreamPayload&&) = 0;
+  FOLLY_NODISCARD virtual BiDiChannelState onStreamError(
+      folly::exception_wrapper) = 0;
+  FOLLY_NODISCARD virtual BiDiChannelState onStreamComplete() = 0;
+
+  FOLLY_NODISCARD virtual BiDiChannelState onSinkRequestN(uint64_t) = 0;
+  FOLLY_NODISCARD virtual BiDiChannelState onSinkCancel() = 0;
+
+  virtual void resetServerCallback(BiDiServerCallback&) = 0;
+};
+
+struct BiDiServerCallbackCancel {
+  void operator()(BiDiServerCallback* biDiServerCallback) noexcept {
+    auto state = biDiServerCallback->onStreamCancel();
+    // This should be handled as an early close.
+    DCHECK(!state.sinkAlive() && !state.streamAlive());
+  }
+};
+
+using BiDiServerCallbackPtr =
+    std::unique_ptr<BiDiServerCallback, BiDiServerCallbackCancel>;
 } // namespace apache::thrift

@@ -173,8 +173,9 @@ constexpr if_not_field_adapter<Adapter, ThriftT, Struct> fromThriftField(
 
 // The type returned by the adapter for the given thrift type of a struct field.
 template <typename Adapter, int16_t FieldId, typename ThriftT, typename Struct>
-using adapted_field_t = decltype(fromThriftField<Adapter, FieldId>(
-    std::declval<ThriftT>(), std::declval<Struct&>()));
+using adapted_field_t =
+    decltype(fromThriftField<Adapter, FieldId, ThriftT, Struct>(
+        std::declval<ThriftT>(), std::declval<Struct&>()));
 
 // The type returned by the adapter for the given adapted type.
 template <typename Adapter, typename AdaptedT>

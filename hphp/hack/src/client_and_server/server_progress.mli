@@ -115,7 +115,7 @@ val try_delete : unit -> unit
   file has been unlinked. Note that a given file descriptor will only ever point
   to a file which monotonically grows.
 
-  The server can have its typecheck interrupted. Some interruptions like watchman
+  The server can have its typecheck interrupted. Some interruptions, like files changed on disk,
   will cause the current typecheck to be cancelled, then a new typecheck started.
   In this case the existing errors file will be unlinked, a new errors file created
   for the new typecheck, and a sentinel will be written into the old file descriptor
@@ -134,8 +134,8 @@ val try_delete : unit -> unit
 
   SEMANTICS OF ERRORS-FILE CONTENTS
 
-  * An errors-file is tied to a particular watchman clock value. It reflects
-    all file-changes that happened prior to the clock. (As to whether it reflects
+  * An errors-file is tied to a particular Watchman or Edenfs_watcher clock value. It
+    reflects all file-changes that happened prior to the clock. (As to whether it reflects
     any file-changes that happened after the clock, that is impossible to tell.)
   * As mentioned above, when the errors-file is complete, it contains the full
     set of errors that hh_server knows about for the project.
@@ -162,8 +162,8 @@ val try_delete : unit -> unit
   and typing_check_service.ml (to make the actual error reports).
   1. When hh_server is launched, it either eventually exits or eventually writes
   an errors.bin file with some clock value that came at or after its launch.
-  2. When files on disk are changed that pass FilesToIgnore.watchman_server_expression_terms
-  and FindUtils.post_watchman_filter, then eventually either a new errors.bin will
+  2. When files on disk are changed that pass FilesToIgnore.watch_spec
+  and FindUtils.post_file_watcher_filter, then eventually either a new errors.bin will
   be written which reflects the clock after those files, or eventually it will terminate.
 
   These invariants imply how the client should connect:

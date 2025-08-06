@@ -21,7 +21,7 @@ type seconds_since_epoch = float
 module RecheckLoopStats = struct
   type t = {
     updates_stale: bool;
-        (** Watchman subscription has gone down, so state of the world after the
+        (** File watcher subscription has gone down, so state of the world after the
           recheck loop may not reflect what is actually on disk. *)
     per_batch_telemetry: Telemetry.t list;
     total_changed_files_count: int;
@@ -321,7 +321,7 @@ type env = {
           and need to be re-parsed *)
   clock: ServerNotifier.clock option;
       (** This is the clock as of when disk_needs_parsing was last updated.
-      None if not using Watchman. *)
+      None if not using Watchman or Edenfs_watcher. *)
   needs_phase2_redecl: Relative_path.Set.t;
       (** Declarations that became invalidated and moved to "old" part of the heap.
           We keep them there to be used in "determining changes" step of recheck.

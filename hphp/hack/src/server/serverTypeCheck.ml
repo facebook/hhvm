@@ -1063,7 +1063,7 @@ let type_check :
   env.{errorl, needs_recheck, disk_needs_parsing} are all persistent values that
   might be adjusted as we go:
   * disk_needs_parsing gets initialized in serverLazyInit, augmented in serverMain both
-    at the start of the loop and during watchman interrupts, and in serverTypeCheck it
+    at the start of the loop and during file watcher interrupts, and in serverTypeCheck it
     gets reset to empty once we have computed files-to-parse and decls-to-refresh from it.
     (files-to-recheck is computed from these two).
   * needs_recheck gets augmented in serverTypeCheck from fanout/stale computation,
@@ -1129,7 +1129,7 @@ let type_check :
   (* If the typecheck completed, them mark the errors-file as complete.
      A "completed" typecheck means (1) all the [env.needs_recheck] files
      were indeed typechecked, i.e. not interrupted and cancelled by an
-     interrupt handler like watchman; (2) watchman interrupt didn't
+     interrupt handler like the file watcher; (2) file watcher interrupt didn't
      insert any [env.disk_needs_parsing] files.
      Because we mark the errors-file as complete, anyone tailing it will
      know that they can finish their tailing.

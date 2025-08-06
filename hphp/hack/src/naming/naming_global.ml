@@ -28,7 +28,7 @@ module GEnv = struct
   Why? We looked for a file in the file heap, but it was deleted
   before we could get it. This occurs with highest probability when we
   have multiple large rebases in quick succession, and the typechecker
-  doesn't get updates from watchman while checking. For now, we restart
+  doesn't get updates from the file watcher while checking. For now, we restart
   gracefully, but in future versions we'll be restarting the server on
   large rebases anyhow, so this is sufficient behavior.
 

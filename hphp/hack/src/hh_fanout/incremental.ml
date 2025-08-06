@@ -59,9 +59,10 @@ lexicographically-orderable by the time ordering. For that reason, it's
 important that the first field in the cursor ID is the
 monotonically-increasing ID.
 
-The choice of `,` as a delimiter is important. Watchman uses `:`, which is
-inappropriate for this goal, because the ASCII value of `,` is less than that
-of all the numerals, while `:` is greater than that of all the numerals.
+The choice of `,` as a delimiter is important. Watchman and Edenfs_watcher use
+`:`, which is inappropriate for this goal, because the ASCII value of `,` is
+less than that of all the numerals, while `:` is greater than that of all the
+numerals.
 
 Using this delimiter ensures that a string like `cursor,1,foo` is less than a
 string like `cursor,10,foo` by the ASCII lexicographical ordering, which is

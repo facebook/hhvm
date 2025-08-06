@@ -20,7 +20,8 @@ type genv = {
   workers: MultiWorker.worker list option;
       (** Early-initialized workers to be used in MultiWorker jobs
           They are initialized early to keep their heaps as empty as possible. *)
-  notifier: ServerNotifier.t;  (** Common abstraction for watchman/dfind *)
+  notifier: ServerNotifier.t;
+      (** Common abstraction for watchman/Edenfs_watcher/dfind *)
   indexer: (string -> bool) -> unit -> string list;
       (** Returns the list of files under .hhconfig, subject to a filter.
       TODO: this indexer should be moved to a member of ServerNotifier,
@@ -138,8 +139,8 @@ type prechecked_files_status =
 module RecheckLoopStats : sig
   type t = {
     updates_stale: bool;
-        (** Watchman subscription has gone down, so state of the world after the
-            recheck loop may not reflect what is actually on disk. *)
+        (** File watcher subscription has gone down, so state of the world after the
+          recheck loop may not reflect what is actually on disk. *)
     per_batch_telemetry: Telemetry.t list;
     total_changed_files_count: int;
         (** Count of files changed on disk and potentially also in the IDE. *)

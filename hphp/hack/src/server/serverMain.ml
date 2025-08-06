@@ -154,20 +154,20 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
 Query for changed files. This is a hard to understand method...
 
 CARE! [query_kind] is hard to understand...
-* [`Sync] -- a watchman sync query, i.e. guarantees to have picked up all updates
+* [`Sync] -- a Watchman/Edenfs_watcher sync query, i.e. guarantees to have picked up all updates
   up to the moment it was invoked. Watchman does this by writing a dummy file
   and waiting until the OS notifies about it; the OS guarantees to send notifications in order.
-* [`Async] -- picks up changes that watchman has pushed over the subscription, but we don't
+* [`Async] -- picks up changes that  Watchman/Edenfs_watcher has pushed so far, but we don't
   do a sync, so therefore there might be changes on disk that watchman will tell us about
   in future.
 * [`Skip] -- CARE! Despite its name, this also behaves much like [`Async].
 
-The return value [may_be_stale] indicates that the most recent watchman event that got pushed
-was not a "sync" to the dummy file. This will never be true for [`Sync] query kind (which deliberately
-waits for the sync), but it might be true or false for [`Async] and [`Skip]. The caller can
-use this as a hint that we don't know whether there are more disk changes.
+The return value [may_be_stale] indicates whether the most recently returned result was not "sync"
+(i.e., guaranateed to include all changes up to that point). This will always be true for [`Sync]
+query kind (which deliberately waits for the sync), but it might be true or false for [`Async] and
+[`Skip]. The caller can use this as a hint that we don't know whether there are more disk changes.
 Personally, I've never actually seen it be true. It's surfaced to the user in clientCheckStatus.ml
-with the message "this may be stale, probably due to watchman being unresponsive". *)
+with the message "this may be stale, probably due to file watcher being unresponsive". *)
 let query_notifier
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -239,15 +239,15 @@ let query_notifier
   let telemetry = Telemetry.duration telemetry ~key:"pumped" ~start_time in
   Program.exit_if_critical_update genv ~raw_updates;
   let updates =
-    FindUtils.post_watchman_filter_from_fully_qualified_raw_updates
+    FindUtils.post_file_watcher_filter_from_fully_qualified_raw_updates
       ~root:(ServerArgs.root genv.options)
       ~raw_updates
   in
   (* CARE! For streaming-errors to work in clientCheckStatus.ml, the test
      which hh_server uses to determine "is there a non-empty set of changes which prompt me
      to start a new check" must be at least as strict as the one in clientCheckStatus.
-     They're identical, in fact, because they both use the same watchman filter
-     (FilesToIgnore.watchman_server_expression_terms) and the same post-watchman-filter. *)
+     They're identical, in fact, because they both use the same file filter
+     (FilesToIgnore.server_watch_spec) and the same post-file-watcher-filter. *)
   let telemetry =
     telemetry
     |> Telemetry.duration ~key:"processed" ~start_time
@@ -303,8 +303,8 @@ let update_stats_after_recheck :
  * then we can process all outstanding changes prior to handling that request.
  * That way the client will get an up-to-date answer.
  *
- * Another reason is to get meaningful logging in case of watchman events.
- * When a rebase occurs, Watchman/dfind takes a while to give us the full list
+ * Another reason is to get meaningful logging in case of file watcher events.
+ * When a rebase occurs, Watchman/dfind/Edenfs_watcher takes a while to give us the full list
  * of updates, and it often comes in batches. To get an accurate measurement
  * of rebase time, we use the heuristic that any changes that come in
  * right after one rechecking round finishes to be part of the same
@@ -327,7 +327,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       hh_client in terminal.
 
      CARE! The [`Skip] option doesn't in fact skip. It will still
-     retrieve queued-up watchman updates.
+     retrieve queued-up file watcher updates.
 
       NB: This also uses synchronous notify on establishing a persistent
       connection. This is harmless, but could maybe be filtered away. *)

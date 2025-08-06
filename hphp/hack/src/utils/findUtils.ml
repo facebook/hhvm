@@ -60,7 +60,7 @@ let file_filter f =
 
 let path_filter f = Relative_path.suffix f |> file_filter
 
-let post_watchman_filter_from_fully_qualified_raw_updates
+let post_file_watcher_filter_from_fully_qualified_raw_updates
     ~(root : Path.t) ~(raw_updates : SSet.t) : Relative_path.Set.t =
   let root = Path.to_string root in
   (* Because of symlinks, we can have updates from files that aren't in

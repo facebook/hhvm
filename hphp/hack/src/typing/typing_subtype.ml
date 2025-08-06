@@ -6213,6 +6213,13 @@ end = struct
       simplify_default ~subtype_env can_index.ci_key tk env
     in
     let simplify_val tv env =
+      let tv =
+        Typing_env.(
+          update_reason env tv ~f:(fun def ->
+              Typing_reason.flow_array_get
+                ~def
+                ~access:(Typing_reason.witness can_index.ci_expr_pos)))
+      in
       simplify_default ~subtype_env tv can_index.ci_val env
     in
     let is_container tk tv env = simplify_key tk env &&& simplify_val tv in

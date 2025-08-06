@@ -1,12 +1,16 @@
 ERROR: File "vector_index_dynamic.php", line 5, characters 3-32:
 hh_expect_equivalent type mismatch (Typing[4452])
-  File "vector_index_dynamic.php", line 3, characters 44-46:
+  File "vector_index_dynamic.php", line 4, characters 8-14:
   Expected `int`
+  File "vector_index_dynamic.php", line 3, characters 44-46:
+    from this definition
   File "vector_index_dynamic.php", line 5, characters 24-27:
   But got `dynamic`
 ERROR: File "vector_index_dynamic.php", line 13, characters 5-34:
 hh_expect_equivalent type mismatch (Typing[4452])
-  File "vector_index_dynamic.php", line 10, characters 46-48:
+  File "vector_index_dynamic.php", line 12, characters 10-22:
   Expected `int`
+  File "vector_index_dynamic.php", line 10, characters 46-48:
+    from this definition
   File "vector_index_dynamic.php", line 13, characters 26-29:
   But got `dynamic`

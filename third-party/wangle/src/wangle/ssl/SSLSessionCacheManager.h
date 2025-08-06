@@ -31,7 +31,7 @@ class SSLStats;
 /**
  * Basic SSL session cache map: Maps session id -> session
  */
-typedef folly::EvictingCacheMap<std::string, SSL_SESSION*> SSLSessionCacheMap;
+using SSLSessionCacheMap = folly::EvictingCacheMap<std::string, SSL_SESSION*>;
 
 /**
  * Holds an SSLSessionCacheMap and associated lock

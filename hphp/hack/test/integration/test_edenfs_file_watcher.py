@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar, List, Optional
 
@@ -27,6 +28,38 @@ from hphp.hack.test.integration.common_tests import CommonTestDriver
 from hphp.hack.test.integration.hh_paths import hh_server
 
 from watchman.integration.lib import WatchmanInstance
+
+
+@dataclass
+class Config:
+    streaming_errors: bool
+    interruptions: bool = True
+    throttle_time_ms: int = 50
+
+    def write_hhconf(self, watchman_socket_path: str, output_folder: str) -> None:
+        streaming_errors = str(self.streaming_errors).lower()
+        throttle_time_ms = str(self.throttle_time_ms)
+        interruptions = str(self.interruptions).lower()
+
+        config = f"""
+min_log_level = Debug
+use_watchman = true
+watchman_debug_logging = false
+watchman_subscribe_v2 = true
+watchman_sync_directory = .hg
+interrupt_on_watchman = {interruptions}
+interrupt_on_client = {interruptions}
+edenfs_file_watcher_enabled = true
+edenfs_file_watcher_throttle_time_ms = {throttle_time_ms}
+watchman_sockname = {watchman_socket_path}
+produce_streaming_errors = {streaming_errors}
+consume_streaming_errors = {streaming_errors}
+"""
+
+        print("Writing config:\n", config)
+        with open(os.path.join(output_folder, "hh.conf"), "w") as f:
+            f.write(config)
+
 
 # Matches the message that is logged by ServerNotifier.get_changes_sync and
 # get_changes_async when it saw a non-zero number of changes. We look at the server log
@@ -44,23 +77,6 @@ SERVER_NOTIFIER_RE = r"ServerNotifier\.get_changes_(sync|async) got (\d+) change
 DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND: bool = (
     os.environ.get("DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND") is not None
 )
-
-
-# Contents of hh.conf used in these tests Currently, enabling the EdenFS file
-# watcher actually runs the old Watchman code under the hood. Thus, we configure
-# Watchman the same way it is in /etc/hh.conf these days.
-def makeWatchmanEdenHhConf(watchman_socket_path: str) -> str:
-    config = """
-use_watchman = true
-watchman_debug_logging = false
-watchman_subscribe_v2 = true
-watchman_sync_directory = .hg
-edenfs_file_watcher_enabled=true
-min_log_level=Debug
-"""
-
-    config = config + f"watchman_sockname={watchman_socket_path}\n"
-    return config
 
 
 def runAndCheckSetupCommand(args: List[str]) -> str:
@@ -198,6 +214,10 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
     clean_slate_commit: ClassVar[str]
 
     @classmethod
+    def getConfig(cls) -> Config:
+        return Config(streaming_errors=False)
+
+    @classmethod
     def setUpClassImpl(
         cls, template_repo: str, repo_subdirectory_path: Optional[str]
     ) -> None:
@@ -240,11 +260,10 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
 
         shutil.copytree(template_repo, template_repo_destination)
 
-        # This file can go wherever, as long as HH_LOCALCONF_PATH points to
+        # The hh.conf file can go wherever, as long as HH_LOCALCONF_PATH points to
         # it. Some other tests expect it to be inside the folder cls.repo_dir.
         # So let's put it in the place that after mounting will end up at cls.repo_dir
-        with open(os.path.join(template_repo_destination, "hh.conf"), "w") as f:
-            f.write(makeWatchmanEdenHhConf(watchman_socket_path))
+        cls.getConfig().write_hhconf(watchman_socket_path, template_repo_destination)
 
         # CommonTestDriver.setUpClass already did this, but we changed the value of repo_dir
         cls.test_env["HH_LOCALCONF_PATH"] = cls.repo_dir
@@ -456,8 +475,18 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         # in cls.repo_dir. Thus, this test is like CommonTests.test_interrupt, but does
         # not to create a .watchmanconfig file.
 
-        with open(os.path.join(self.test_driver.repo_dir, "hh.conf"), "a") as f:
-            f.write("interrupt_on_watchman = true\n" + "interrupt_on_client = true\n")
+        # We cannot run this test with streaming errors enabled:
+        # If a type-check is running, no files have changed since the start of the type-check,
+        # and we invoke `hh check` with streaming errors enabled, it will wait until the
+        # type-check is finished.
+        # That means that we would block forever in start_hh_loop_forever_assert_timeout.
+        config = self.test_driver.getConfig()
+        config.streaming_errors = False
+        config.interruptions = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
 
         self.test_driver.start_hh_server()
         self.test_driver.start_hh_loop_forever_assert_timeout()
@@ -467,73 +496,107 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         self.test_driver.stop_hh_loop_forever()
 
     def test_sync_queries(self) -> None:
-        iterations = 50
+        """Tests that ServerNotifier.get_changes_sync works as expected"""
+
+        iterations = 5
+
+        config = self.test_driver.getConfig()
+        # We want to create a situation where ServerNotifier.get_changes_sync has to
+        # process some actual changes, instead of the background worker having processed
+        # all changes already. We can enforce this by increasing throttle_time_ms: When
+        # making two subsequent changes in the loop below, this means that the
+        # background worker will wait after the first change, and get_changes_sync has
+        # to process the second change itself.
+        config.throttle_time_ms = 1000
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
 
         self.test_driver.start_hh_server()
 
-        # We make some changes, followed by a type-at-pos query (which is sync, in
-        # contrast to ordinary check queries). Note that we always make two changes, to
-        # make sure that we would catch the following, bad scenario: The type-checker
-        # may pick up the first change and perform a re-check (independent from the
-        # following query sent by the client) If the query from the client then comes in
-        # before the file watching service picks up the second change, we may answer the
-        # client's query without having processed the second change at all.
-        # This should not happen with a sync query.
-        for _ in range(iterations):
-            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
-                f.write(
-                    """<?hh
+        for i in range(iterations):
+            for j in range(iterations):
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
 
-            function sync_g(): int {
-                $res = sync_f();
-                return $res;
-            }
-            """
+                    function sync_g(): int {
+                        $res = sync_f();
+                        return $res;
+                    }
+                    """
+                    )
+
+                # Some break between the two changes
+                time.sleep(0.1 * i)
+
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
+
+                    function sync_f(): int {
+                        return 3;
+                    }
+                    """
+                    )
+
+                # Some break between the last change and the query
+                time.sleep(0.1 * j)
+
+                self.test_driver.check_cmd(
+                    ["int"], options=["--type-at-pos", "{root}sync_1.php:5:32"]
                 )
-            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
-                f.write(
-                    """<?hh
+                print("finished iteration")
 
-            function sync_f(): int {
-                return 3;
-            }
-            """
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
+
+                    function sync_g(): string {
+                        $res = sync_f();
+                        return $res;
+                    }
+                    """
+                    )
+                # Some break between the two changes
+                time.sleep(0.1 * i)
+
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
+
+                    function sync_f(): string {
+                        return "123";
+                    }
+                    """
+                    )
+
+                # Some break between the last change and the query
+                time.sleep(0.1 * j)
+                self.test_driver.check_cmd(
+                    ["string"], options=["--type-at-pos", "{root}sync_1.php:5:32"]
                 )
 
-            self.test_driver.check_cmd(
-                ["int"], options=["--type-at-pos", "{root}sync_1.php:5:24"]
-            )
-            print("finished iteration")
+    def change_files_and_check(self, config: Config) -> None:
+        "Not a test itself. Changes files and checks that the changes are picked up immediately."
 
-            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
-                f.write(
-                    """<?hh
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
 
-            function sync_g(): string {
-                $res = sync_f();
-                return $res;
-            }
-            """
-                )
-            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
-                f.write(
-                    """<?hh
-
-            function sync_f(): string {
-                return "123";
-            }
-            """
-                )
-            self.test_driver.check_cmd(
-                ["string"], options=["--type-at-pos", "{root}sync_1.php:5:24"]
-            )
-
-    def test_hh_check_streaming_error_syncness(self) -> None:
-        # Running hh check when streaming erros are enabled involves a synchronous check with the file watcher,
-        # to check if the errors file is up to date (or wait for a newer one otherwise).
-        # This means that we should see changes instantaneously.
-
-        iterations = 50
+        # We run a few iterations, varying the amount of time between the two
+        # changes we make and when we call hh afterwards.
+        iterations = 5
 
         with open(os.path.join(self.test_driver.repo_dir, "hh.conf"), "a") as f:
             f.write(
@@ -543,68 +606,103 @@ class EdenfsWatcherTests(common_tests.CommonTests):
 
         self.test_driver.start_hh_server()
 
-        for _ in range(iterations):
-            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
-                f.write(
-                    """<?hh
+        for i in range(iterations):
+            for j in range(iterations):
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
 
-            function sync_g(): int {
-                return "not an int";
-            }
-            """
-                )
-            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
-                f.write(
-                    """<?hh
+                    function sync_g(): int {
+                        return "not an int";
+                    }
+                    """
+                    )
 
-            function sync_f(): string {
-                return 3;
-            }
-            """
-                )
+                # Some break between the two changes
+                time.sleep(0.1 * i)
 
-            self.test_driver.check_cmd(
-                [
-                    "ERROR: {root}sync_1.php:4:24,35: Invalid return type (Typing[4110])",
-                    "  {root}sync_1.php:3:32,34: Expected `int`",
-                    "  {root}sync_1.php:4:24,35: But got `string`",
-                    "ERROR: {root}sync_2.php:4:24,24: Invalid return type (Typing[4110])",
-                    "  {root}sync_2.php:3:32,37: Expected `string`",
-                    "  {root}sync_2.php:4:24,24: But got `int`",
-                ]
-            )
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
 
-            print("finished iteration")
+                    function sync_f(): string {
+                        return 3;
+                    }
+                    """
+                    )
+                # Some break between the last change and the query
+                time.sleep(0.1 * j)
 
-            with open(os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w") as f:
-                f.write(
-                    """<?hh
-
-            function sync_g(): string {
-                return 3;
-            }
-            """
-                )
-            with open(os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w") as f:
-                f.write(
-                    """<?hh
-
-            function sync_f(): int {
-                return "not an int";
-            }
-            """
+                self.test_driver.check_cmd(
+                    [
+                        "ERROR: {root}sync_1.php:4:32,43: Invalid return type (Typing[4110])",
+                        "  {root}sync_1.php:3:40,42: Expected `int`",
+                        "  {root}sync_1.php:4:32,43: But got `string`",
+                        "ERROR: {root}sync_2.php:4:32,32: Invalid return type (Typing[4110])",
+                        "  {root}sync_2.php:3:40,45: Expected `string`",
+                        "  {root}sync_2.php:4:32,32: But got `int`",
+                    ]
                 )
 
-            self.test_driver.check_cmd(
-                [
-                    "ERROR: {root}sync_1.php:4:24,24: Invalid return type (Typing[4110])",
-                    "  {root}sync_1.php:3:32,37: Expected `string`",
-                    "  {root}sync_1.php:4:24,24: But got `int`",
-                    "ERROR: {root}sync_2.php:4:24,35: Invalid return type (Typing[4110])",
-                    "  {root}sync_2.php:3:32,34: Expected `int`",
-                    "  {root}sync_2.php:4:24,35: But got `string`",
-                ]
-            )
+                print("finished iteration")
+
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_1.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
+
+                    function sync_g(): string {
+                        return 3;
+                    }
+                    """
+                    )
+
+                # Some break between the two changes
+                time.sleep(0.1 * i)
+
+                with open(
+                    os.path.join(self.test_driver.repo_dir, "sync_2.php"), "w"
+                ) as f:
+                    f.write(
+                        """<?hh
+
+                    function sync_f(): int {
+                        return "not an int";
+                    }
+                    """
+                    )
+                # Some break between the last change and the query
+                time.sleep(0.1 * j)
+                self.test_driver.check_cmd(
+                    [
+                        "ERROR: {root}sync_1.php:4:32,32: Invalid return type (Typing[4110])",
+                        "  {root}sync_1.php:3:40,45: Expected `string`",
+                        "  {root}sync_1.php:4:32,32: But got `int`",
+                        "ERROR: {root}sync_2.php:4:32,43: Invalid return type (Typing[4110])",
+                        "  {root}sync_2.php:3:40,42: Expected `int`",
+                        "  {root}sync_2.php:4:32,43: But got `string`",
+                    ]
+                )
+
+    def test_hh_check_syncness_basic(self) -> None:
+        # Just uses the test driver's settings
+        self.change_files_and_check(self.test_driver.getConfig())
+
+    def test_hh_check_syncness_zero_throttle_time(self) -> None:
+        config = self.test_driver.getConfig()
+        config.throttle_time_ms = 0
+        self.change_files_and_check(config)
+
+    def test_hh_check_syncness_no_interruptions(self) -> None:
+        # Good to have at least one test where interrupt_on_* is disabled
+        config = self.test_driver.getConfig()
+        config.interruptions = False
+        self.change_files_and_check(config)
 
     def test_hg_update_basic(self) -> None:
         self.test_driver.start_hh_server()
@@ -985,9 +1083,18 @@ function test_deprecated() : void {
 
 
 class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):
-    "Runs the same tests as EdenfsWatcherTests, but with a testing repo that's not the mount point of the Eden mount"
+    """Runs the same tests as EdenfsWatcherTests, but with a testing repo that's not the mount point of the Eden mount.
+
+    We also make another, orthogonal change compared to EdenfsWatcherTestDriver:
+    We run with streaming errors enabled. This way, we run all tests with and without streaming
+    errors enabled.
+    """
 
     class _Driver(EdenfsWatcherTestDriver):
+        @classmethod
+        def getConfig(cls) -> Config:
+            return Config(streaming_errors=True)
+
         @classmethod
         def setUpClass(cls, template_repo: str) -> None:
             cls.setUpClassImpl(template_repo, "some/sub/folder")

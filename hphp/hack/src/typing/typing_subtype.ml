@@ -6364,18 +6364,7 @@ end = struct
           else
             simplify_val sft_ty env
     in
-    match deref ty_sub with
-    | (_, Tvar _) ->
-      mk_issubtype_prop
-        ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
-        env
-        (LoclType ty_sub)
-        (ConstraintType
-           (mk_constraint_type (reason_super, Tcan_index can_index)))
-    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-      valid env
-    | (_, Tdynamic) ->
+    let got_dynamic env =
       simplify_default
         ~subtype_env
         (MakeType.dynamic reason_super)
@@ -6395,6 +6384,24 @@ end = struct
           (MakeType.dynamic (get_reason ty_sub))
       else
         valid
+    in
+    match deref ty_sub with
+    | (_, Tvar _) ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (ConstraintType
+           (mk_constraint_type (reason_super, Tcan_index can_index)))
+    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+      valid env
+    | (_, Tdynamic) -> got_dynamic env
+    | _
+      when Option.is_some sub_supportdyn
+           && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+           && Tast.is_under_dynamic_assumptions env.checked ->
+      got_dynamic env
     | (r_sub, Tclass ((_, n), _, targs))
       when String.equal n SN.Collections.cConstMap
            || String.equal n SN.Collections.cImmMap

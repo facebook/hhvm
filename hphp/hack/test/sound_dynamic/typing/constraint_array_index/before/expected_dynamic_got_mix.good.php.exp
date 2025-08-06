@@ -1,0 +1,7 @@
+File "expected_dynamic_got_mix.good.php", line 7, characters 5-15:
+  dict<string, mixed>
+File "expected_dynamic_got_mix.good.php", line 8, characters 5-15:
+  dict<arraykey, mixed>
+File "expected_dynamic_got_mix.good.php", line 9, characters 5-15:
+  mixed
+No errors

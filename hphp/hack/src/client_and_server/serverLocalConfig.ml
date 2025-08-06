@@ -211,7 +211,9 @@ type t = {
   use_dummy_informant: bool;  (** See Informant. *)
   informant_min_distance_restart: int;
   use_full_fidelity_parser: bool;
-  interrupt_on_watchman: bool;
+  interrupt_on_file_changes: bool;
+      (** Whether to interrupt an active type-checking job as soon as any relevant files change.
+          Deprecated alias: interrupt_on_watchman *)
   interrupt_on_client: bool;
   trace_parsing: bool;
   prechecked_files: bool;

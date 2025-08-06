@@ -155,10 +155,9 @@ Query for changed files. This is a hard to understand method...
 
 CARE! [query_kind] is hard to understand...
 * [`Sync] -- a Watchman/Edenfs_watcher sync query, i.e. guarantees to have picked up all updates
-  up to the moment it was invoked. Watchman does this by writing a dummy file
-  and waiting until the OS notifies about it; the OS guarantees to send notifications in order.
+  up to the moment it was invoked.
 * [`Async] -- picks up changes that  Watchman/Edenfs_watcher has pushed so far, but we don't
-  do a sync, so therefore there might be changes on disk that watchman will tell us about
+  do a sync, so therefore there might be changes on disk that the file watcher will tell us about
   in future.
 * [`Skip] -- CARE! Despite its name, this also behaves much like [`Async].
 
@@ -738,7 +737,7 @@ let serve_one_iteration genv env client_provider =
 (** This synthesizes a [MultiThreadedCall.Cancel] in the event that we want
 a typecheck cancelled due to files changing on disk. It constructs the
 human-readable [user_message] and also [log_message] appropriately. *)
-let cancel_due_to_watchman
+let cancel_due_to_file_changes
     (updates : Relative_path.Set.t) (clock : ServerNotifier.clock option) :
     MultiThreadedCall.interrupt_result =
   assert (not (Relative_path.Set.is_empty updates));
@@ -765,14 +764,15 @@ let cancel_due_to_watchman
           (List.hd_exn examples);
       log_message =
         Printf.sprintf
-          "watchman interrupt handler at clock %s. %d files changed. [%s]"
+          "file change interrupt handler at clock %s. %d files changed. [%s]"
           (ServerEnv.show_clock clock)
           (Relative_path.Set.cardinal updates)
           (String.concat examples ~sep:",");
       timestamp;
     }
 
-let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
+let file_changes_interrupt_handler genv :
+    env MultiThreadedCall.interrupt_handler =
  fun env ->
   let start_time = Unix.gettimeofday () in
   let (env, updates, clock, updates_stale, _telemetry) =
@@ -783,7 +783,7 @@ let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
   let size = Relative_path.Set.cardinal updates in
   if size > 0 then (
     Hh_logger.log
-      "Interrupted by Watchman message: %d files changed at watchclock %s"
+      "Interrupted by file watcher message: %d files changed at watchclock %s"
       size
       (ServerEnv.show_clock clock);
     ( {
@@ -792,7 +792,7 @@ let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
           Relative_path.Set.union env.disk_needs_parsing updates;
         clock;
       },
-      cancel_due_to_watchman updates clock )
+      cancel_due_to_file_changes updates clock )
   ) else
     (env, MultiThreadedCall.Continue)
 
@@ -814,7 +814,7 @@ let priority_client_interrupt_handler genv client_provider :
   let n_updates = Relative_path.Set.cardinal updates in
   if n_updates > 0 then (
     Hh_logger.log
-      "Interrupted by Watchman sync query: %d files changed at watchclock %s"
+      "Interrupted by file watcher sync query: %d files changed at watchclock %s"
       n_updates
       (ServerEnv.show_clock clock);
     ( {
@@ -823,7 +823,7 @@ let priority_client_interrupt_handler genv client_provider :
           Relative_path.Set.union env.disk_needs_parsing updates;
         clock;
       },
-      cancel_due_to_watchman updates clock )
+      cancel_due_to_file_changes updates clock )
   ) else
     let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
     let select_outcome =
@@ -873,15 +873,18 @@ let setup_interrupts env client_provider =
     env with
     interrupt_handlers =
       (fun genv _env ->
-        let { ServerLocalConfig.interrupt_on_watchman; interrupt_on_client; _ }
-            =
+        let {
+          ServerLocalConfig.interrupt_on_file_changes;
+          interrupt_on_client;
+          _;
+        } =
           genv.local_config
         in
         let handlers = [] in
         let handlers =
           match ServerNotifier.notification_fd genv.notifier with
-          | Some fd when interrupt_on_watchman ->
-            (fd, watchman_interrupt_handler genv) :: handlers
+          | Some fd when interrupt_on_file_changes ->
+            (fd, file_changes_interrupt_handler genv) :: handlers
           | _ -> handlers
         in
         let handlers =

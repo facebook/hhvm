@@ -50,7 +50,7 @@ let default =
     use_dummy_informant = true;
     informant_min_distance_restart = 100;
     use_full_fidelity_parser = true;
-    interrupt_on_watchman = false;
+    interrupt_on_file_changes = false;
     interrupt_on_client = false;
     trace_parsing = false;
     prechecked_files = true;
@@ -391,10 +391,18 @@ let load_
     int_ "shm_cache_size" ~default:default.shm_cache_size config
   in
   let max_workers = int_opt "max_workers" config in
-  let interrupt_on_watchman =
+  (* interrupt_on_watchman is a deprecated alias of interrupt_on_file_changes *)
+  let interrupt_on_file_changes =
     bool_if_min_version
       "interrupt_on_watchman"
-      ~default:default.interrupt_on_watchman
+      ~default:default.interrupt_on_file_changes
+      ~current_version
+      config
+  in
+  let interrupt_on_file_changes =
+    bool_if_min_version
+      "interrupt_on_file_changes"
+      ~default:interrupt_on_file_changes
       ~current_version
       config
   in
@@ -888,7 +896,7 @@ let load_
     use_dummy_informant;
     informant_min_distance_restart;
     use_full_fidelity_parser;
-    interrupt_on_watchman;
+    interrupt_on_file_changes;
     interrupt_on_client;
     trace_parsing;
     prechecked_files;

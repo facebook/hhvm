@@ -32,7 +32,7 @@ class LspTestDriver(common_tests.CommonTestDriver):
                 """
 use_watchman = true
 watchman_subscribe_v2 = true
-interrupt_on_watchman = true
+interrupt_on_file_changes = true
 interrupt_on_client = true
 max_workers = 2
 load_state_natively_v4 = {use_saved_state}

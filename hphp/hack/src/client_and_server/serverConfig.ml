@@ -749,7 +749,7 @@ let update_config_with_ai_options config local_config ai_options =
             local_config.edenfs_file_watcher with
             EdenfsFileWatcher.enabled = false;
           };
-        interrupt_on_watchman = false;
+        interrupt_on_file_changes = false;
         interrupt_on_client = false;
         trace_parsing = false;
       } )

@@ -1412,7 +1412,7 @@ class CommonTests(BarebonesTests):
         with open(os.path.join(self.test_driver.repo_dir, "hh.conf"), "a") as f:
             f.write(
                 "use_watchman = true\n"
-                + "interrupt_on_watchman = true\n"
+                + "interrupt_on_file_changes = true\n"
                 + "interrupt_on_client = true\n"
                 + "watchman_subscribe_v2 = true\n"
             )

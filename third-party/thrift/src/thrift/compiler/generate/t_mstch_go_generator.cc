@@ -551,8 +551,9 @@ class mstch_go_service : public mstch_service {
       const t_service* s,
       mstch_context& ctx,
       mstch_element_position pos,
-      go::codegen_data* data)
-      : mstch_service(s, ctx, pos), data_(*data) {
+      go::codegen_data* data,
+      const t_service* containing_service = nullptr)
+      : mstch_service(s, ctx, pos, containing_service), data_(*data) {
     register_methods(
         this,
         {

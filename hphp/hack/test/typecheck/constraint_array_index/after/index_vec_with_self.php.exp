@@ -1,6 +1,6 @@
 ERROR: File "index_vec_with_self.php", line 4, characters 6-11:
 Invalid argument (Typing[4110])
-  File "index_vec_with_self.php", line 4, characters 6-11:
+  File "index_vec_with_self.php", line 3, characters 16-17:
   Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
   File "index_vec_with_self.php", line 4, characters 6-11:
   But got `vec<int>`

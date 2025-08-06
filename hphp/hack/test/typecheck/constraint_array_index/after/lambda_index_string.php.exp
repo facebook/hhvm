@@ -1,6 +1,6 @@
 ERROR: File "lambda_index_string.php", line 5, characters 6-8:
 Invalid argument (Typing[4110])
-  File "lambda_index_string.php", line 3, characters 8-13:
+  File "lambda_index_string.php", line 4, characters 16-17:
   Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
   File "lambda_index_string.php", line 5, characters 6-8:
   But got `string`

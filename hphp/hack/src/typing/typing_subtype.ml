@@ -6217,8 +6217,7 @@ end = struct
     in
     let is_container tk tv env = simplify_key tk env &&& simplify_val tv in
     let is_vec_like tv env =
-      let pos = get_pos ty_sub in
-      let tk = MakeType.int (Reason.idx_vector_from_decl pos) in
+      let tk = MakeType.int (Reason.idx_vector can_index.ci_array_pos) in
       is_container tk tv env
     in
     let is_dict_like tv env =

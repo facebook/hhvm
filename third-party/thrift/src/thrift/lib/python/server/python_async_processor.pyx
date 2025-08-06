@@ -56,82 +56,16 @@ from thrift.py3.stream cimport (
 )
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.protocol cimport Protocol
+from thrift.python.streaming.py_promise cimport (
+    Promise_Optional_IOBuf,
+    Promise_Py,
+    genNextStreamValue,
+)
 from thrift.python.streaming.python_user_exception cimport (
     cPythonUserException,
     PythonUserException,
 )
 
-cdef class Promise_Optional_IOBuf(Promise_Py):
-    cdef cFollyPromise[optional[unique_ptr[cIOBuf]]]* cPromise
-
-    def __cinit__(self):
-        self.cPromise = new cFollyPromise[optional[unique_ptr[cIOBuf]]](cFollyPromise[optional[unique_ptr[cIOBuf]]].makeEmpty())
-
-    def __dealloc__(self):
-        del self.cPromise
-
-    cdef error_ta(Promise_Optional_IOBuf self, cTApplicationException err):
-        self.cPromise.setException(err)
-
-    cdef error_py(Promise_Optional_IOBuf self, cPythonUserException err):
-        self.cPromise.setException(cmove(err))
-
-    cdef complete(Promise_Optional_IOBuf self, object pyobj):
-        self.cPromise.setValue(cmove((<IOBuf>pyobj)._ours))
-
-    @staticmethod
-    cdef create(cFollyPromise[optional[unique_ptr[cIOBuf]]] cPromise):
-        cdef Promise_Optional_IOBuf inst = Promise_Optional_IOBuf.__new__(Promise_Optional_IOBuf)
-        inst.cPromise[0] = cmove(cPromise)
-        return inst
-
-async def runGenerator(object generator, Promise_Optional_IOBuf promise):
-    try:
-        item = await generator.asend(None)
-    except StopAsyncIteration:
-        promise.cPromise.setValue(optional[unique_ptr[cIOBuf]]())
-    except PythonUserException as pyex:
-        promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
-    except ApplicationError as ex:
-        # If the handler raised an ApplicationError convert it to a C++ one
-        promise.cPromise.setException(cTApplicationException(
-            ex.type.value, ex.message.encode('UTF-8')
-        ))
-    except Exception as ex:
-        print(
-            f"Unexpected error in server stream handler:",
-            file=sys.stderr)
-        traceback.print_exc()
-        promise.error_ta(cTApplicationException(
-            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
-        ))
-    except asyncio.CancelledError as ex:
-        print(f"Coroutine was cancelled in server stream handler:", file=sys.stderr)
-        traceback.print_exc()
-        promise.error_ta(cTApplicationException(
-            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
-        ))
-    else:
-        promise.complete(item)
-
-cdef void genNextValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] cPromise) noexcept:
-    cdef Promise_Optional_IOBuf __promise = Promise_Optional_IOBuf.create(cmove(cPromise))
-    asyncio.get_event_loop().create_task(
-        runGenerator(
-            generator,
-            __promise
-        )
-    )
-
-cdef class Promise_Py:
-    cdef error_ta(Promise_Py self, cTApplicationException err):
-        pass
-
-    cdef error_py(Promise_Py self, cPythonUserException err):
-        pass
-
-    cdef complete(Promise_Py self, object pyobj):
-        pass
 
 ctypedef unique_ptr[cIOBuf] UniqueIOBuf
 ctypedef cResponseAndServerStream[UniqueIOBuf, UniqueIOBuf] StreamResponse
@@ -215,10 +149,10 @@ cdef class ServerStream_IOBuf(ServerStream):
     cdef _fbthrift_create(object stream):
         cdef ServerStream_IOBuf inst = ServerStream_IOBuf.__new__(ServerStream_IOBuf)
         inst.cStream = make_unique[cServerStream[UniqueIOBuf]](
-            createAsyncIteratorFromPyIterator[UniqueIOBuf](
+            createAsyncIteratorFromPyIterator[unique_ptr[cIOBuf]](
                 stream,
                 get_executor(),
-                &genNextValue
+                genNextStreamValue
             )
         )
         return inst

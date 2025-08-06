@@ -26,22 +26,55 @@ namespace apache::thrift::protocol {
 using ::thrift::benchmark::ComplexStruct;
 using Tag = type::struct_t<ComplexStruct>;
 
-const auto obj = asValueStruct<Tag>(create<ComplexStruct>()).as_object();
+const auto staticObj = create<ComplexStruct>();
+const auto serializedObj =
+    BinarySerializer::serialize<folly::IOBufQueue>(staticObj).move();
+const auto obj = asValueStruct<Tag>(staticObj).as_object();
 
-BENCHMARK(Serialization) {
+BENCHMARK(ProtocolSerialization) {
   auto buf = serializeObject<apache::thrift::BinaryProtocolWriter>(obj);
-  BinaryProtocolReader reader;
-  reader.setInput(buf.get());
-  ComplexStruct t;
-  t.read(&reader);
+  folly::doNotOptimizeAway(buf);
 }
 
-BENCHMARK_RELATIVE(ToThriftStruct) {
-  fromObjectStruct<Tag>(obj);
+BENCHMARK_RELATIVE(StaticSerialization) {
+  auto buf = BinarySerializer::serialize<folly::IOBufQueue>(staticObj).move();
+  folly::doNotOptimizeAway(buf);
+}
+
+BENCHMARK(ProtocolDeserialization) {
+  auto val = parseObject<apache::thrift::BinaryProtocolReader>(*serializedObj);
+  folly::doNotOptimizeAway(val);
+}
+
+BENCHMARK_RELATIVE(StaticDeserialization) {
+  auto val = BinarySerializer::deserialize<ComplexStruct>(serializedObj.get());
+  folly::doNotOptimizeAway(val);
+}
+
+BENCHMARK(FromThriftStruct) {
+  auto val = asValueStruct<Tag>(staticObj);
+  folly::doNotOptimizeAway(val);
+}
+
+BENCHMARK(ToThriftStruct) {
+  auto val = fromObjectStruct<Tag>(obj);
+  folly::doNotOptimizeAway(val);
 }
 
 } // namespace apache::thrift::protocol
 
+/**
+buck run @mode/opt //thrift/test/benchmarks:protocol_object_benchmark
+============================================================================
+[...]chmarks/protocol_object_benchmark.cpp     relative  time/iter   iters/s
+============================================================================
+ProtocolSerialization                                     100.33ms      9.97
+StaticSerialization                             151.68%    66.15ms     15.12
+ProtocolDeserialization                                   433.52ms      2.31
+StaticDeserialization                           452.01%    95.91ms     10.43
+FromThriftStruct                                          652.32ms      1.53
+ToThriftStruct                                            128.89ms      7.76
+ */
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
   folly::runBenchmarks();

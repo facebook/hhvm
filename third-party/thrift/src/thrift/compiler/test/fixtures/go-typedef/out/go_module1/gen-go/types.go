@@ -12,6 +12,7 @@ import (
     module0 "module0"
     module2 "module2"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -20,6 +21,7 @@ var _ = module2.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Plate = string
 
@@ -806,6 +808,10 @@ func (x *Automobile) setDefaults() *Automobile {
         SetPartNamesNonCompat(make(map[int32]*CarPartName))
 }
 
+func (x *Automobile) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Automobile
+}
+
 type MapKey struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
     Strval string `thrift:"strval,2" json:"strval" db:"strval"`
@@ -970,6 +976,10 @@ func (x *MapKey) setDefaults() *MapKey {
     return x.
         SetNumNonCompat(0).
         SetStrvalNonCompat("")
+}
+
+func (x *MapKey) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MapKey
 }
 
 type MapContainer struct {
@@ -1143,6 +1153,10 @@ func (x *MapContainer) String() string {
 func (x *MapContainer) setDefaults() *MapContainer {
     return x.
         SetMapvalNonCompat(make(map[MapKey]string))
+}
+
+func (x *MapContainer) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MapContainer
 }
 
 type Pair struct {
@@ -1335,6 +1349,10 @@ func (x *Pair) setDefaults() *Pair {
     return x.
         SetAutomobileNonCompat(NewAutomobile()).
         SetCarNonCompat(NewCar())
+}
+
+func (x *Pair) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Pair
 }
 
 type Collection struct {
@@ -1575,6 +1593,10 @@ func (x *Collection) setDefaults() *Collection {
     return x.
         SetAutomobilesNonCompat(make([]*Automobile, 0)).
         SetCarsNonCompat(make([]*Car, 0))
+}
+
+func (x *Collection) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Collection
 }
 
 type reqFinderByPlate struct {

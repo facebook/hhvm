@@ -52,6 +52,72 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_EmptyStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.EmptyStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+            },
+        }
+    premadeStructMetadata_TestStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.TestStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "unqualified_int_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "unqualified_bool_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_bool,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "unqualified_list_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "unqualified_struct_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_EmptyStruct,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "optional_int_field",
+                    IsOptional: true,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         6,
+                    Name:       "optional_bool_field",
+                    IsOptional: true,
+                    Type:       premadeThriftType_bool,
+                },
+                &metadata.ThriftField{
+                    Id:         7,
+                    Name:       "optional_list_field",
+                    IsOptional: true,
+                    Type:       premadeThriftType_list_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         8,
+                    Name:       "optional_struct_field",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module_EmptyStruct,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["module.EmptyStruct"] = premadeThriftType_module_EmptyStruct
@@ -63,74 +129,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.EmptyStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.TestStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "unqualified_int_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "unqualified_bool_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_bool,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "unqualified_list_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "unqualified_struct_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_EmptyStruct,
-                    },
-                    &metadata.ThriftField{
-                        Id:         5,
-                        Name:       "optional_int_field",
-                        IsOptional: true,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         6,
-                        Name:       "optional_bool_field",
-                        IsOptional: true,
-                        Type:       premadeThriftType_bool,
-                    },
-                    &metadata.ThriftField{
-                        Id:         7,
-                        Name:       "optional_list_field",
-                        IsOptional: true,
-                        Type:       premadeThriftType_list_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         8,
-                        Name:       "optional_struct_field",
-                        IsOptional: true,
-                        Type:       premadeThriftType_module_EmptyStruct,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_EmptyStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_TestStruct)
     return fbthriftResults
 }()
 

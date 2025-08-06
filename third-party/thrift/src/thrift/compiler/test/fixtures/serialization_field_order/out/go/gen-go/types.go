@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Foo struct {
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`
@@ -230,6 +232,10 @@ func (x *Foo) setDefaults() *Foo {
         SetField1NonCompat(0)
 }
 
+func (x *Foo) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Foo
+}
+
 type Foo2 struct {
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`
     Field3 int32 `thrift:"field3,2" json:"field3" db:"field3"`
@@ -441,6 +447,10 @@ func (x *Foo2) setDefaults() *Foo2 {
         SetField2NonCompat(0).
         SetField3NonCompat(0).
         SetField1NonCompat(0)
+}
+
+func (x *Foo2) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Foo2
 }
 
 

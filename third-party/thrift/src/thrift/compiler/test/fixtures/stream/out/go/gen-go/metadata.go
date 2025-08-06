@@ -52,6 +52,28 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_FooStreamEx =
+        &metadata.ThriftException{
+            Name: "module.FooStreamEx",
+            Fields: []*metadata.ThriftField{
+            },
+        }
+    premadeStructMetadata_FooEx =
+        &metadata.ThriftException{
+            Name: "module.FooEx",
+            Fields: []*metadata.ThriftField{
+            },
+        }
+    premadeStructMetadata_FooEx2 =
+        &metadata.ThriftException{
+            Name: "module.FooEx2",
+            Fields: []*metadata.ThriftField{
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["module.FooStreamEx"] = premadeThriftType_module_FooStreamEx
@@ -69,27 +91,9 @@ var structMetadatas = func() []*metadata.ThriftStruct {
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.FooStreamEx",
-            Fields: []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.FooEx",
-            Fields: []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.FooEx2",
-            Fields: []*metadata.ThriftField{
-            },
-        },
-    )
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FooStreamEx)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FooEx)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FooEx2)
     return fbthriftResults
 }()
 

@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Fiery struct {
     Message string `thrift:"message,1,required" json:"message" db:"message"`
@@ -134,6 +136,10 @@ func (x *Fiery) String() string {
 func (x *Fiery) setDefaults() *Fiery {
     return x.
         SetMessageNonCompat("")
+}
+
+func (x *Fiery) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_Fiery
 }
 
 func (x *Fiery) Error() string {
@@ -267,6 +273,10 @@ func (x *Serious) String() string {
 
 func (x *Serious) setDefaults() *Serious {
     return x
+}
+
+func (x *Serious) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_Serious
 }
 
 func (x *Serious) Error() string {
@@ -438,6 +448,10 @@ func (x *ComplexFieldNames) setDefaults() *ComplexFieldNames {
         SetInternalErrorMessageNonCompat("")
 }
 
+func (x *ComplexFieldNames) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_ComplexFieldNames
+}
+
 func (x *ComplexFieldNames) Error() string {
     return x.String()
 }
@@ -605,6 +619,10 @@ func (x *CustomFieldNames) setDefaults() *CustomFieldNames {
     return x.
         SetErrorMessageNonCompat("").
         SetInternalErrorMessageNonCompat("")
+}
+
+func (x *CustomFieldNames) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_CustomFieldNames
 }
 
 func (x *CustomFieldNames) Error() string {
@@ -776,6 +794,10 @@ func (x *ExceptionWithPrimitiveField) setDefaults() *ExceptionWithPrimitiveField
         SetErrorCodeNonCompat(0)
 }
 
+func (x *ExceptionWithPrimitiveField) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_ExceptionWithPrimitiveField
+}
+
 func (x *ExceptionWithPrimitiveField) Error() string {
     return x.String()
 }
@@ -945,6 +967,10 @@ func (x *ExceptionWithStructuredAnnotation) setDefaults() *ExceptionWithStructur
         SetErrorCodeNonCompat(0)
 }
 
+func (x *ExceptionWithStructuredAnnotation) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_ExceptionWithStructuredAnnotation
+}
+
 func (x *ExceptionWithStructuredAnnotation) Error() string {
     return x.String()
 }
@@ -1018,6 +1044,10 @@ func (x *Banal) String() string {
 
 func (x *Banal) setDefaults() *Banal {
     return x
+}
+
+func (x *Banal) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_Banal
 }
 
 func (x *Banal) Error() string {

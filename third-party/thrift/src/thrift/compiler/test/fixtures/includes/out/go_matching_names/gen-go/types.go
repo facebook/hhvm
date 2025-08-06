@@ -11,6 +11,7 @@ import (
 
     includesAlso "IncludesAlso"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -18,6 +19,7 @@ var _ = includesAlso.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type IncludesAlso struct {
     Also *includesAlso.Also `thrift:"also,1" json:"also" db:"also"`
@@ -149,6 +151,10 @@ func (x *IncludesAlso) String() string {
 func (x *IncludesAlso) setDefaults() *IncludesAlso {
     return x.
         SetAlsoNonCompat(includesAlso.NewAlso())
+}
+
+func (x *IncludesAlso) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_IncludesAlso
 }
 
 

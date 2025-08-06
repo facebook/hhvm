@@ -132,6 +132,180 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_ComplexUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.ComplexUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "intValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i64,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "intListValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_i64,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "stringListValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_string,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "stringValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         9,
+                    Name:       "typedefValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_containerTypedef,
+                },
+                &metadata.ThriftField{
+                    Id:         14,
+                    Name:       "stringRef",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_ListUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.ListUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "intListValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_i64,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "stringListValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_string,
+                },
+            },
+        }
+    premadeStructMetadata_DataUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.DataUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "binaryData",
+                    IsOptional: false,
+                    Type:       premadeThriftType_binary,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "stringData",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_Val =
+        &metadata.ThriftStruct{
+            Name:    "module.Val",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "strVal",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "intVal",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         9,
+                    Name:       "typedefValue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_containerTypedef,
+                },
+            },
+        }
+    premadeStructMetadata_ValUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.ValUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "v1",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_Val,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "v2",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_Val,
+                },
+            },
+        }
+    premadeStructMetadata_VirtualComplexUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.VirtualComplexUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "thingOne",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "thingTwo",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_NonCopyableStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.NonCopyableStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "num",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i64,
+                },
+            },
+        }
+    premadeStructMetadata_NonCopyableUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.NonCopyableUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "s",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_NonCopyableStruct,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
@@ -153,200 +327,14 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.ComplexUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "intValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i64,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "intListValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_i64,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "stringListValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         5,
-                        Name:       "stringValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         9,
-                        Name:       "typedefValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_containerTypedef,
-                    },
-                    &metadata.ThriftField{
-                        Id:         14,
-                        Name:       "stringRef",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.ListUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "intListValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_i64,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "stringListValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.DataUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "binaryData",
-                        IsOptional: false,
-                        Type:       premadeThriftType_binary,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "stringData",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Val",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "strVal",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "intVal",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         9,
-                        Name:       "typedefValue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_containerTypedef,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.ValUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "v1",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_Val,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "v2",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_Val,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.VirtualComplexUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "thingOne",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "thingTwo",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.NonCopyableStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "num",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i64,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.NonCopyableUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "s",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_NonCopyableStruct,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ComplexUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ListUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_DataUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Val)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ValUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_VirtualComplexUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_NonCopyableStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_NonCopyableUnion)
     return fbthriftResults
 }()
 

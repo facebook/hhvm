@@ -30,6 +30,23 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_IncludesAlso =
+        &metadata.ThriftStruct{
+            Name:    "matching_names.IncludesAlso",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "also",
+                    IsOptional: false,
+                    Type:       includesAlso.GetMetadataThriftType("IncludesAlso.Also"),
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["matching_names.IncludesAlso"] = premadeThriftType_matching_names_IncludesAlso
@@ -38,22 +55,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "matching_names.IncludesAlso",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "also",
-                        IsOptional: false,
-                        Type:       includesAlso.GetMetadataThriftType("IncludesAlso.Also"),
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_IncludesAlso)
     return fbthriftResults
 }()
 

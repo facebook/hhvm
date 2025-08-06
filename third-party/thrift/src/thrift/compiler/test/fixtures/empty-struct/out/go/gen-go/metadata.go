@@ -35,6 +35,24 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Empty =
+        &metadata.ThriftStruct{
+            Name:    "module.Empty",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+            },
+        }
+    premadeStructMetadata_Nada =
+        &metadata.ThriftStruct{
+            Name:    "module.Nada",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["module.Empty"] = premadeThriftType_module_Empty
@@ -44,26 +62,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Empty",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Nada",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Empty)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Nada)
     return fbthriftResults
 }()
 

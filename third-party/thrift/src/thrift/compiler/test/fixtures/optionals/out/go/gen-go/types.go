@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type PersonID = int64
 
@@ -339,6 +341,10 @@ func (x *Color) setDefaults() *Color {
         SetGreenNonCompat(0.0).
         SetBlueNonCompat(0.0).
         SetAlphaNonCompat(0.0)
+}
+
+func (x *Color) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Color
 }
 
 type Vehicle struct {
@@ -704,6 +710,10 @@ func (x *Vehicle) setDefaults() *Vehicle {
     return x.
         SetColorNonCompat(NewColor()).
         SetHasACNonCompat(false)
+}
+
+func (x *Vehicle) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Vehicle
 }
 
 type Person struct {
@@ -1442,6 +1452,10 @@ func (x *Person) setDefaults() *Person {
     return x.
         SetIdNonCompat(NewPersonID()).
         SetNameNonCompat("")
+}
+
+func (x *Person) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Person
 }
 
 

@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type SetWithAdapter = []string
 
@@ -1418,6 +1420,10 @@ func (x *MyAnnotation) setDefaults() *MyAnnotation {
           )
 }
 
+func (x *MyAnnotation) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyAnnotation
+}
+
 type Foo struct {
     IntField I32_5137 `thrift:"intField,1" json:"intField" db:"intField"`
     OptionalIntField *I32_5137 `thrift:"optionalIntField,2,optional" json:"optionalIntField,omitempty" db:"optionalIntField"`
@@ -2494,6 +2500,10 @@ func (x *Foo) setDefaults() *Foo {
         SetAdaptedListNestedNonCompat(make([][]map[int32]int32, 0))
 }
 
+func (x *Foo) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Foo
+}
+
 type Baz struct {
     IntField *I32_5137 `thrift:"intField,1" json:"intField,omitempty" db:"intField"`
     SetField SetWithAdapter `thrift:"setField,4" json:"setField,omitempty" db:"setField"`
@@ -2883,6 +2893,10 @@ func (x *Baz) String() string {
 
 func (x *Baz) setDefaults() *Baz {
     return x
+}
+
+func (x *Baz) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Baz
 }
 
 type Bar struct {
@@ -3426,6 +3440,10 @@ func (x *Bar) setDefaults() *Bar {
         SetAdaptedStructFieldNonCompat(NewDirectlyAdapted())
 }
 
+func (x *Bar) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Bar
+}
+
 type DirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
@@ -3545,6 +3563,10 @@ func (x *DirectlyAdapted) setDefaults() *DirectlyAdapted {
         SetFieldNonCompat(0)
 }
 
+func (x *DirectlyAdapted) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_DirectlyAdapted
+}
+
 type IndependentDirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
@@ -3662,6 +3684,10 @@ func (x *IndependentDirectlyAdapted) String() string {
 func (x *IndependentDirectlyAdapted) setDefaults() *IndependentDirectlyAdapted {
     return x.
         SetFieldNonCompat(0)
+}
+
+func (x *IndependentDirectlyAdapted) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_IndependentDirectlyAdapted
 }
 
 type StructWithFieldAdapter struct {
@@ -3946,6 +3972,10 @@ func (x *StructWithFieldAdapter) setDefaults() *StructWithFieldAdapter {
         SetSharedFieldNonCompat(0)
 }
 
+func (x *StructWithFieldAdapter) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructWithFieldAdapter
+}
+
 type TerseAdaptedFields struct {
     IntField int32 `thrift:"int_field,1" json:"int_field" db:"int_field"`
     StringField string `thrift:"string_field,2" json:"string_field" db:"string_field"`
@@ -4195,6 +4225,10 @@ func (x *TerseAdaptedFields) setDefaults() *TerseAdaptedFields {
         SetSetFieldNonCompat(make([]int32, 0))
 }
 
+func (x *TerseAdaptedFields) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_TerseAdaptedFields
+}
+
 type B struct {
     A *AdaptedA `thrift:"a,1" json:"a" db:"a"`
 }
@@ -4327,6 +4361,10 @@ func (x *B) setDefaults() *B {
         SetANonCompat(NewAdaptedA())
 }
 
+func (x *B) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_B
+}
+
 type A struct {
 }
 // Compile time interface enforcer
@@ -4397,6 +4435,10 @@ func (x *A) String() string {
 
 func (x *A) setDefaults() *A {
     return x
+}
+
+func (x *A) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_A
 }
 
 type Config struct {
@@ -4516,6 +4558,10 @@ func (x *Config) String() string {
 func (x *Config) setDefaults() *Config {
     return x.
         SetPathNonCompat("")
+}
+
+func (x *Config) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Config
 }
 
 type MyStruct struct {
@@ -4690,6 +4736,10 @@ func (x *MyStruct) setDefaults() *MyStruct {
     return x.
         SetFieldNonCompat(0).
         SetSetStringNonCompat(NewSetWithAdapter())
+}
+
+func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStruct
 }
 
 type AdaptTestStruct struct {
@@ -5251,6 +5301,10 @@ func (x *AdaptTestStruct) setDefaults() *AdaptTestStruct {
         SetDoubleWrappedBoolNonCompat(NewAdaptedBool()).
         SetDoubleWrappedIntegerNonCompat(NewAdaptedInteger()).
         SetBinaryDataNonCompat([]byte(""))
+}
+
+func (x *AdaptTestStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptTestStruct
 }
 
 type AdaptTemplatedTestStruct struct {
@@ -6645,6 +6699,10 @@ func (x *AdaptTemplatedTestStruct) setDefaults() *AdaptTemplatedTestStruct {
         SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
 }
 
+func (x *AdaptTemplatedTestStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptTemplatedTestStruct
+}
+
 type AdaptTemplatedNestedTestStruct struct {
     AdaptedStruct *AdaptTemplatedTestStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
 }
@@ -6775,6 +6833,10 @@ func (x *AdaptTemplatedNestedTestStruct) String() string {
 func (x *AdaptTemplatedNestedTestStruct) setDefaults() *AdaptTemplatedNestedTestStruct {
     return x.
         SetAdaptedStructNonCompat(NewAdaptTemplatedTestStruct())
+}
+
+func (x *AdaptTemplatedNestedTestStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptTemplatedNestedTestStruct
 }
 
 type AdaptTestUnion struct {
@@ -6984,6 +7046,10 @@ func (x *AdaptTestUnion) setDefaults() *AdaptTestUnion {
     return x
 }
 
+func (x *AdaptTestUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptTestUnion
+}
+
 type AdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
@@ -7103,6 +7169,10 @@ func (x *AdaptedStruct) setDefaults() *AdaptedStruct {
         SetDataNonCompat(0)
 }
 
+func (x *AdaptedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptedStruct
+}
+
 type DirectlyAdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
@@ -7220,6 +7290,10 @@ func (x *DirectlyAdaptedStruct) String() string {
 func (x *DirectlyAdaptedStruct) setDefaults() *DirectlyAdaptedStruct {
     return x.
         SetDataNonCompat(0)
+}
+
+func (x *DirectlyAdaptedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_DirectlyAdaptedStruct
 }
 
 type StructFieldAdaptedStruct struct {
@@ -7534,6 +7608,10 @@ func (x *StructFieldAdaptedStruct) setDefaults() *StructFieldAdaptedStruct {
         SetTypedefOfAdaptedNonCompat(NewTypedefOfDirect())
 }
 
+func (x *StructFieldAdaptedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructFieldAdaptedStruct
+}
+
 type CircularAdaptee struct {
     Field *CircularStruct `thrift:"field,1" json:"field" db:"field"`
 }
@@ -7666,6 +7744,10 @@ func (x *CircularAdaptee) setDefaults() *CircularAdaptee {
         SetFieldNonCompat(NewCircularStruct())
 }
 
+func (x *CircularAdaptee) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CircularAdaptee
+}
+
 type CircularStruct struct {
     Field *AdaptedCircularAdaptee `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
@@ -7795,6 +7877,10 @@ func (x *CircularStruct) String() string {
 
 func (x *CircularStruct) setDefaults() *CircularStruct {
     return x
+}
+
+func (x *CircularStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CircularStruct
 }
 
 type ReorderedStruct struct {
@@ -7929,6 +8015,10 @@ func (x *ReorderedStruct) setDefaults() *ReorderedStruct {
         SetReorderedDependentAdaptedNonCompat(NewDeclaredAfterStruct())
 }
 
+func (x *ReorderedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ReorderedStruct
+}
+
 type DeclaredAfterStruct struct {
 }
 // Compile time interface enforcer
@@ -7999,6 +8089,10 @@ func (x *DeclaredAfterStruct) String() string {
 
 func (x *DeclaredAfterStruct) setDefaults() *DeclaredAfterStruct {
     return x
+}
+
+func (x *DeclaredAfterStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_DeclaredAfterStruct
 }
 
 type RenamedStruct struct {
@@ -8120,6 +8214,10 @@ func (x *RenamedStruct) setDefaults() *RenamedStruct {
         SetDataNonCompat(0)
 }
 
+func (x *RenamedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_RenamedStruct
+}
+
 type SameNamespaceStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
@@ -8239,6 +8337,10 @@ func (x *SameNamespaceStruct) setDefaults() *SameNamespaceStruct {
         SetDataNonCompat(0)
 }
 
+func (x *SameNamespaceStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_SameNamespaceStruct
+}
+
 type HeapAllocated struct {
 }
 // Compile time interface enforcer
@@ -8309,6 +8411,10 @@ func (x *HeapAllocated) String() string {
 
 func (x *HeapAllocated) setDefaults() *HeapAllocated {
     return x
+}
+
+func (x *HeapAllocated) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_HeapAllocated
 }
 
 type MoveOnly struct {
@@ -8443,6 +8549,10 @@ func (x *MoveOnly) setDefaults() *MoveOnly {
         SetPtrNonCompat(NewHeapAllocated())
 }
 
+func (x *MoveOnly) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MoveOnly
+}
+
 type AlsoMoveOnly struct {
     Ptr int64 `thrift:"ptr,1" json:"ptr" db:"ptr"`
 }
@@ -8562,6 +8672,10 @@ func (x *AlsoMoveOnly) setDefaults() *AlsoMoveOnly {
         SetPtrNonCompat(0)
 }
 
+func (x *AlsoMoveOnly) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AlsoMoveOnly
+}
+
 type ApplyAdapter struct {
 }
 // Compile time interface enforcer
@@ -8634,6 +8748,10 @@ func (x *ApplyAdapter) setDefaults() *ApplyAdapter {
     return x
 }
 
+func (x *ApplyAdapter) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ApplyAdapter
+}
+
 type TransitiveAdapted struct {
 }
 // Compile time interface enforcer
@@ -8704,6 +8822,10 @@ func (x *TransitiveAdapted) String() string {
 
 func (x *TransitiveAdapted) setDefaults() *TransitiveAdapted {
     return x
+}
+
+func (x *TransitiveAdapted) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_TransitiveAdapted
 }
 
 type CountingStruct struct {
@@ -8953,6 +9075,10 @@ func (x *CountingStruct) setDefaults() *CountingStruct {
     return x
 }
 
+func (x *CountingStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CountingStruct
+}
+
 type Person struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -9070,6 +9196,10 @@ func (x *Person) String() string {
 func (x *Person) setDefaults() *Person {
     return x.
         SetNameNonCompat("")
+}
+
+func (x *Person) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Person
 }
 
 type Person2 struct {
@@ -9191,6 +9321,10 @@ func (x *Person2) setDefaults() *Person2 {
         SetNameNonCompat("")
 }
 
+func (x *Person2) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Person2
+}
+
 type RenamedStructWithStructAdapterAndFieldAdapter struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
@@ -9308,6 +9442,10 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) String() string {
 func (x *RenamedStructWithStructAdapterAndFieldAdapter) setDefaults() *RenamedStructWithStructAdapterAndFieldAdapter {
     return x.
         SetFieldNonCompat(0)
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_RenamedStructWithStructAdapterAndFieldAdapter
 }
 
 type reqServiceFunc struct {

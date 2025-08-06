@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type IncredibleStruct = MyStruct
 
@@ -283,6 +285,10 @@ func (x *MyStructNestedAnnotation) setDefaults() *MyStructNestedAnnotation {
         SetNameNonCompat("")
 }
 
+func (x *MyStructNestedAnnotation) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStructNestedAnnotation
+}
+
 type MyUnion struct {
 }
 // Compile time interface enforcer
@@ -367,6 +373,10 @@ func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
 
+func (x *MyUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyUnion
+}
+
 type MyException struct {
 }
 // Compile time interface enforcer
@@ -437,6 +447,10 @@ func (x *MyException) String() string {
 
 func (x *MyException) setDefaults() *MyException {
     return x
+}
+
+func (x *MyException) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_MyException
 }
 
 func (x *MyException) Error() string {
@@ -959,6 +973,10 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetMyUnionNonCompat(NewMyUnion())
 }
 
+func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStruct
+}
+
 type SecretStruct struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
     Password string `thrift:"password,2" json:"password" db:"password"`
@@ -1123,6 +1141,10 @@ func (x *SecretStruct) setDefaults() *SecretStruct {
     return x.
         SetIdNonCompat(0).
         SetPasswordNonCompat("")
+}
+
+func (x *SecretStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_SecretStruct
 }
 
 type reqMyServicePing struct {

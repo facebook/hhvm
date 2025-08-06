@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type GetEntityRequest struct {
     Id string `thrift:"id,1" json:"id" db:"id"`
@@ -136,6 +138,10 @@ func (x *GetEntityRequest) setDefaults() *GetEntityRequest {
         SetIdNonCompat("")
 }
 
+func (x *GetEntityRequest) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_GetEntityRequest
+}
+
 type GetEntityResponse struct {
     Entity string `thrift:"entity,1" json:"entity" db:"entity"`
 }
@@ -253,6 +259,10 @@ func (x *GetEntityResponse) String() string {
 func (x *GetEntityResponse) setDefaults() *GetEntityResponse {
     return x.
         SetEntityNonCompat("")
+}
+
+func (x *GetEntityResponse) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_GetEntityResponse
 }
 
 type NonComparableStruct struct {
@@ -560,6 +570,10 @@ func (x *NonComparableStruct) setDefaults() *NonComparableStruct {
         SetFooNonCompat("").
         SetBarNonCompat(make([]string, 0)).
         SetBazNonCompat(make(map[*NonComparableStruct]int64))
+}
+
+func (x *NonComparableStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_NonComparableStruct
 }
 
 type reqGetEntityGetEntity struct {

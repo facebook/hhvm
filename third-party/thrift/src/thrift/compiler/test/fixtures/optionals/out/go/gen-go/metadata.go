@@ -104,6 +104,145 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Color =
+        &metadata.ThriftStruct{
+            Name:    "module.Color",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "red",
+                    IsOptional: false,
+                    Type:       premadeThriftType_double,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "green",
+                    IsOptional: false,
+                    Type:       premadeThriftType_double,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "blue",
+                    IsOptional: false,
+                    Type:       premadeThriftType_double,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "alpha",
+                    IsOptional: false,
+                    Type:       premadeThriftType_double,
+                },
+            },
+        }
+    premadeStructMetadata_Vehicle =
+        &metadata.ThriftStruct{
+            Name:    "module.Vehicle",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "color",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_Color,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "licensePlate",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "description",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "name",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "hasAC",
+                    IsOptional: true,
+                    Type:       premadeThriftType_bool,
+                },
+            },
+        }
+    premadeStructMetadata_Person =
+        &metadata.ThriftStruct{
+            Name:    "module.Person",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "id",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_PersonID,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "name",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "age",
+                    IsOptional: true,
+                    Type:       premadeThriftType_i16,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "address",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "favoriteColor",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module_Color,
+                },
+                &metadata.ThriftField{
+                    Id:         6,
+                    Name:       "friends",
+                    IsOptional: true,
+                    Type:       premadeThriftType_set_module_PersonID,
+                },
+                &metadata.ThriftField{
+                    Id:         7,
+                    Name:       "bestFriend",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module_PersonID,
+                },
+                &metadata.ThriftField{
+                    Id:         8,
+                    Name:       "petNames",
+                    IsOptional: true,
+                    Type:       premadeThriftType_map_module_Animal_string,
+                },
+                &metadata.ThriftField{
+                    Id:         9,
+                    Name:       "afraidOfAnimal",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module_Animal,
+                },
+                &metadata.ThriftField{
+                    Id:         10,
+                    Name:       "vehicles",
+                    IsOptional: true,
+                    Type:       premadeThriftType_list_module_Vehicle,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["module.Animal"] = premadeThriftType_module_Animal
@@ -121,150 +260,9 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Color",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "red",
-                        IsOptional: false,
-                        Type:       premadeThriftType_double,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "green",
-                        IsOptional: false,
-                        Type:       premadeThriftType_double,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "blue",
-                        IsOptional: false,
-                        Type:       premadeThriftType_double,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "alpha",
-                        IsOptional: false,
-                        Type:       premadeThriftType_double,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Vehicle",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "color",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_Color,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "licensePlate",
-                        IsOptional: true,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "description",
-                        IsOptional: true,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "name",
-                        IsOptional: true,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         5,
-                        Name:       "hasAC",
-                        IsOptional: true,
-                        Type:       premadeThriftType_bool,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Person",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "id",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_PersonID,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "name",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "age",
-                        IsOptional: true,
-                        Type:       premadeThriftType_i16,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "address",
-                        IsOptional: true,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         5,
-                        Name:       "favoriteColor",
-                        IsOptional: true,
-                        Type:       premadeThriftType_module_Color,
-                    },
-                    &metadata.ThriftField{
-                        Id:         6,
-                        Name:       "friends",
-                        IsOptional: true,
-                        Type:       premadeThriftType_set_module_PersonID,
-                    },
-                    &metadata.ThriftField{
-                        Id:         7,
-                        Name:       "bestFriend",
-                        IsOptional: true,
-                        Type:       premadeThriftType_module_PersonID,
-                    },
-                    &metadata.ThriftField{
-                        Id:         8,
-                        Name:       "petNames",
-                        IsOptional: true,
-                        Type:       premadeThriftType_map_module_Animal_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         9,
-                        Name:       "afraidOfAnimal",
-                        IsOptional: true,
-                        Type:       premadeThriftType_module_Animal,
-                    },
-                    &metadata.ThriftField{
-                        Id:         10,
-                        Name:       "vehicles",
-                        IsOptional: true,
-                        Type:       premadeThriftType_list_module_Vehicle,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Color)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Vehicle)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Person)
     return fbthriftResults
 }()
 

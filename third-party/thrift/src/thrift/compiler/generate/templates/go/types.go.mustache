@@ -24,6 +24,11 @@ import (
     {{program:go_package_alias}} "{{program:go_import_path}}"
     {{/program:thrift_imports}}
     thrift "{{program:thrift_lib_import}}"
+    {{#program:gen_metadata?}}
+    {{#program:import_metadata_package?}}
+    metadata "{{program:thrift_metadata_import}}"
+    {{/program:import_metadata_package?}}
+    {{/program:gen_metadata?}}
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -31,6 +36,11 @@ import (
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+{{#program:gen_metadata?}}
+{{#program:import_metadata_package?}}
+var _ = metadata.GoUnusedProtection__
+{{/program:import_metadata_package?}}
+{{/program:gen_metadata?}}
 
 {{! Typedefs }}
 {{#program:typedefs}}

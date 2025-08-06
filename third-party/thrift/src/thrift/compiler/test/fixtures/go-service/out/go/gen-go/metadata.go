@@ -112,6 +112,61 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_GetEntityRequest =
+        &metadata.ThriftStruct{
+            Name:    "module.GetEntityRequest",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "id",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_GetEntityResponse =
+        &metadata.ThriftStruct{
+            Name:    "module.GetEntityResponse",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "entity",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_NonComparableStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.NonComparableStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "foo",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "bar",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_string,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "baz",
+                    IsOptional: false,
+                    Type:       premadeThriftType_map_module_NonComparableStruct_i64,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
@@ -130,66 +185,9 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.GetEntityRequest",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "id",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.GetEntityResponse",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "entity",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.NonComparableStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "foo",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "bar",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "baz",
-                        IsOptional: false,
-                        Type:       premadeThriftType_map_module_NonComparableStruct_i64,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_GetEntityRequest)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_GetEntityResponse)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_NonComparableStruct)
     return fbthriftResults
 }()
 

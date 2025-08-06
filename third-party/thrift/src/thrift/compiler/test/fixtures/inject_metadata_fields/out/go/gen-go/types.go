@@ -11,6 +11,7 @@ import (
 
     foo "foo"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -18,6 +19,7 @@ var _ = foo.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Fields struct {
     InjectedField string `thrift:"injected_field,100" json:"injected_field" db:"injected_field"`
@@ -138,6 +140,10 @@ func (x *Fields) setDefaults() *Fields {
         SetInjectedFieldNonCompat("")
 }
 
+func (x *Fields) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Fields
+}
+
 type FieldsInjectedToEmptyStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
 }
@@ -255,6 +261,10 @@ func (x *FieldsInjectedToEmptyStruct) String() string {
 func (x *FieldsInjectedToEmptyStruct) setDefaults() *FieldsInjectedToEmptyStruct {
     return x.
         SetInjectedFieldNonCompat("")
+}
+
+func (x *FieldsInjectedToEmptyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_FieldsInjectedToEmptyStruct
 }
 
 type FieldsInjectedToStruct struct {
@@ -421,6 +431,10 @@ func (x *FieldsInjectedToStruct) setDefaults() *FieldsInjectedToStruct {
     return x.
         SetInjectedFieldNonCompat("").
         SetStringFieldNonCompat("")
+}
+
+func (x *FieldsInjectedToStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_FieldsInjectedToStruct
 }
 
 type FieldsInjectedWithIncludedStruct struct {
@@ -703,6 +717,10 @@ func (x *FieldsInjectedWithIncludedStruct) setDefaults() *FieldsInjectedWithIncl
     return x.
         SetInjectedFieldNonCompat("").
         SetStringFieldNonCompat("")
+}
+
+func (x *FieldsInjectedWithIncludedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_FieldsInjectedWithIncludedStruct
 }
 
 

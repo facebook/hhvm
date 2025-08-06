@@ -11,6 +11,7 @@ import (
 
     test0 "my/namespacing/test"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -18,6 +19,7 @@ var _ = test0.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type reqExtendTestServiceCheck struct {
     Struct1 *test0.HsFoo `thrift:"struct1,1" json:"struct1" db:"struct1"`

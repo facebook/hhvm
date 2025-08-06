@@ -432,6 +432,8 @@ class mstch_go_struct : public mstch_struct {
             {"struct:go_public_resp_name",
              &mstch_go_struct::go_public_resp_name},
             {"struct:struct_spec_name", &mstch_go_struct::struct_spec_name},
+            {"struct:struct_metadata_name",
+             &mstch_go_struct::struct_metadata_name},
             {"struct:req_resp?", &mstch_go_struct::is_req_resp_struct},
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
@@ -484,6 +486,9 @@ class mstch_go_struct : public mstch_struct {
   }
   mstch::node struct_spec_name() {
     return "premadeStructSpec_" + struct_->name();
+  }
+  mstch::node struct_metadata_name() {
+    return "premadeStructMetadata_" + struct_->name();
   }
   mstch::node fields_sorted() {
     auto fields_in_id_order = struct_->get_sorted_members();

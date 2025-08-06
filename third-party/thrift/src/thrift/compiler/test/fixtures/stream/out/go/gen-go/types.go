@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type FooStreamEx struct {
 }
@@ -87,6 +89,10 @@ func (x *FooStreamEx) String() string {
 
 func (x *FooStreamEx) setDefaults() *FooStreamEx {
     return x
+}
+
+func (x *FooStreamEx) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_FooStreamEx
 }
 
 func (x *FooStreamEx) Error() string {
@@ -164,6 +170,10 @@ func (x *FooEx) setDefaults() *FooEx {
     return x
 }
 
+func (x *FooEx) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_FooEx
+}
+
 func (x *FooEx) Error() string {
     return x.String()
 }
@@ -237,6 +247,10 @@ func (x *FooEx2) String() string {
 
 func (x *FooEx2) setDefaults() *FooEx2 {
     return x
+}
+
+func (x *FooEx2) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_FooEx2
 }
 
 func (x *FooEx2) Error() string {

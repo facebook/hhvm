@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type ContainerTypedef = map[int16]string
 
@@ -595,6 +597,10 @@ func (x *ComplexUnion) setDefaults() *ComplexUnion {
     return x
 }
 
+func (x *ComplexUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ComplexUnion
+}
+
 type ListUnion struct {
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
     StringListValue []string `thrift:"stringListValue,3" json:"stringListValue,omitempty" db:"stringListValue"`
@@ -857,6 +863,10 @@ func (x *ListUnion) setDefaults() *ListUnion {
     return x
 }
 
+func (x *ListUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ListUnion
+}
+
 type DataUnion struct {
     BinaryData []byte `thrift:"binaryData,1" json:"binaryData,omitempty" db:"binaryData"`
     StringData *string `thrift:"stringData,2" json:"stringData,omitempty" db:"stringData"`
@@ -1060,6 +1070,10 @@ func (x *DataUnion) String() string {
 
 func (x *DataUnion) setDefaults() *DataUnion {
     return x
+}
+
+func (x *DataUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_DataUnion
 }
 
 type Val struct {
@@ -1283,6 +1297,10 @@ func (x *Val) setDefaults() *Val {
         SetTypedefValueNonCompat(NewContainerTypedef())
 }
 
+func (x *Val) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Val
+}
+
 type ValUnion struct {
     V1 *Val `thrift:"v1,1" json:"v1,omitempty" db:"v1"`
     V2 *Val `thrift:"v2,2" json:"v2,omitempty" db:"v2"`
@@ -1491,6 +1509,10 @@ func (x *ValUnion) setDefaults() *ValUnion {
     return x
 }
 
+func (x *ValUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ValUnion
+}
+
 type VirtualComplexUnion struct {
     ThingOne *string `thrift:"thingOne,1" json:"thingOne,omitempty" db:"thingOne"`
     ThingTwo *string `thrift:"thingTwo,2" json:"thingTwo,omitempty" db:"thingTwo"`
@@ -1697,6 +1719,10 @@ func (x *VirtualComplexUnion) setDefaults() *VirtualComplexUnion {
     return x
 }
 
+func (x *VirtualComplexUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_VirtualComplexUnion
+}
+
 type NonCopyableStruct struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
 }
@@ -1814,6 +1840,10 @@ func (x *NonCopyableStruct) String() string {
 func (x *NonCopyableStruct) setDefaults() *NonCopyableStruct {
     return x.
         SetNumNonCompat(0)
+}
+
+func (x *NonCopyableStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_NonCopyableStruct
 }
 
 type NonCopyableUnion struct {
@@ -1960,6 +1990,10 @@ func (x *NonCopyableUnion) String() string {
 
 func (x *NonCopyableUnion) setDefaults() *NonCopyableUnion {
     return x
+}
+
+func (x *NonCopyableUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_NonCopyableUnion
 }
 
 

@@ -96,6 +96,72 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_SomeStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.SomeStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "reasonable",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_Metasyntactic,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "fine",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_Metasyntactic,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "questionable",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_Metasyntactic,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "tags",
+                    IsOptional: false,
+                    Type:       premadeThriftType_set_i32,
+                },
+            },
+        }
+    premadeStructMetadata_MyStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.MyStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "me2_3",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_MyEnum2,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "me3_n3",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_MyEnum3,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "me1_t1",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_MyEnum1,
+                },
+                &metadata.ThriftField{
+                    Id:         6,
+                    Name:       "me1_t2",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_MyEnum1,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["module.Metasyntactic"] = premadeThriftType_module_Metasyntactic
@@ -113,74 +179,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.SomeStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "reasonable",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_Metasyntactic,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "fine",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_Metasyntactic,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "questionable",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_Metasyntactic,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "tags",
-                        IsOptional: false,
-                        Type:       premadeThriftType_set_i32,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.MyStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "me2_3",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_MyEnum2,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "me3_n3",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_MyEnum3,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "me1_t1",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_MyEnum1,
-                    },
-                    &metadata.ThriftField{
-                        Id:         6,
-                        Name:       "me1_t2",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_MyEnum1,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_SomeStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MyStruct)
     return fbthriftResults
 }()
 

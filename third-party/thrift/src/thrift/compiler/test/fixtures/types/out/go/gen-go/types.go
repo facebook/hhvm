@@ -11,6 +11,7 @@ import (
 
     included "included"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -18,6 +19,7 @@ var _ = included.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type TBinary = []byte
 
@@ -699,6 +701,10 @@ func (x *EmptyStruct) setDefaults() *EmptyStruct {
     return x
 }
 
+func (x *EmptyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_empty_struct
+}
+
 type DecoratedStruct struct {
     Field string `thrift:"field,1" json:"field" db:"field"`
 }
@@ -816,6 +822,10 @@ func (x *DecoratedStruct) String() string {
 func (x *DecoratedStruct) setDefaults() *DecoratedStruct {
     return x.
         SetFieldNonCompat("")
+}
+
+func (x *DecoratedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_decorated_struct
 }
 
 type ContainerStruct struct {
@@ -1470,6 +1480,10 @@ func (x *ContainerStruct) setDefaults() *ContainerStruct {
         SetFieldANonCompat(make([]int32, 0))
 }
 
+func (x *ContainerStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ContainerStruct
+}
+
 type CppTypeStruct struct {
     FieldA []int32 `thrift:"fieldA,1" json:"fieldA" db:"fieldA"`
 }
@@ -1625,6 +1639,10 @@ func (x *CppTypeStruct) setDefaults() *CppTypeStruct {
         SetFieldANonCompat(make([]int32, 0))
 }
 
+func (x *CppTypeStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CppTypeStruct
+}
+
 type VirtualStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
 }
@@ -1742,6 +1760,10 @@ func (x *VirtualStruct) String() string {
 func (x *VirtualStruct) setDefaults() *VirtualStruct {
     return x.
         SetMyIntFieldNonCompat(0)
+}
+
+func (x *VirtualStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_VirtualStruct
 }
 
 type MyStructWithForwardRefEnum struct {
@@ -1916,6 +1938,10 @@ func (x *MyStructWithForwardRefEnum) setDefaults() *MyStructWithForwardRefEnum {
           )
 }
 
+func (x *MyStructWithForwardRefEnum) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStructWithForwardRefEnum
+}
+
 type TrivialNumeric struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B bool `thrift:"b,2" json:"b" db:"b"`
@@ -2080,6 +2106,10 @@ func (x *TrivialNumeric) setDefaults() *TrivialNumeric {
     return x.
         SetANonCompat(0).
         SetBNonCompat(false)
+}
+
+func (x *TrivialNumeric) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_TrivialNumeric
 }
 
 type TrivialNestedWithDefault struct {
@@ -2263,6 +2293,10 @@ func (x *TrivialNestedWithDefault) setDefaults() *TrivialNestedWithDefault {
     SetANonCompat(int32(3)).
     SetBNonCompat(true),
           )
+}
+
+func (x *TrivialNestedWithDefault) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_TrivialNestedWithDefault
 }
 
 type ComplexString struct {
@@ -2484,6 +2518,10 @@ func (x *ComplexString) setDefaults() *ComplexString {
         SetBNonCompat(make(map[string]int32))
 }
 
+func (x *ComplexString) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ComplexString
+}
+
 type ComplexNestedWithDefault struct {
     Z string `thrift:"z,1" json:"z" db:"z"`
     N *ComplexString `thrift:"n,2" json:"n" db:"n"`
@@ -2669,6 +2707,10 @@ func (x *ComplexNestedWithDefault) setDefaults() *ComplexNestedWithDefault {
 },
     ),
           )
+}
+
+func (x *ComplexNestedWithDefault) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ComplexNestedWithDefault
 }
 
 type MinPadding struct {
@@ -2980,6 +3022,10 @@ func (x *MinPadding) setDefaults() *MinPadding {
         SetTinyNonCompat(0)
 }
 
+func (x *MinPadding) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MinPadding
+}
+
 type MinPaddingWithCustomType struct {
     Small int8 `thrift:"small,1" json:"small" db:"small"`
     Biggish int32 `thrift:"biggish,2" json:"biggish" db:"biggish"`
@@ -3289,6 +3335,10 @@ func (x *MinPaddingWithCustomType) setDefaults() *MinPaddingWithCustomType {
         SetTinyNonCompat(0)
 }
 
+func (x *MinPaddingWithCustomType) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MinPaddingWithCustomType
+}
+
 type MyStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -3562,6 +3612,10 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetDataNonCompat(NewMyDataItem())
 }
 
+func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStruct
+}
+
 type MyDataItem struct {
 }
 // Compile time interface enforcer
@@ -3632,6 +3686,10 @@ func (x *MyDataItem) String() string {
 
 func (x *MyDataItem) setDefaults() *MyDataItem {
     return x
+}
+
+func (x *MyDataItem) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyDataItem
 }
 
 type Renaming struct {
@@ -3751,6 +3809,10 @@ func (x *Renaming) String() string {
 func (x *Renaming) setDefaults() *Renaming {
     return x.
         SetFooNonCompat(0)
+}
+
+func (x *Renaming) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Renaming
 }
 
 type AnnotatedTypes struct {
@@ -3933,6 +3995,10 @@ func (x *AnnotatedTypes) setDefaults() *AnnotatedTypes {
     return x.
         SetBinaryFieldNonCompat(NewTBinary_8623()).
         SetListFieldNonCompat(NewSomeListOfTypeMap_2468())
+}
+
+func (x *AnnotatedTypes) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AnnotatedTypes
 }
 
 type ForwardUsageRoot struct {
@@ -4125,6 +4191,10 @@ func (x *ForwardUsageRoot) setDefaults() *ForwardUsageRoot {
     return x
 }
 
+func (x *ForwardUsageRoot) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ForwardUsageRoot
+}
+
 type ForwardUsageStruct struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
 }
@@ -4256,6 +4326,10 @@ func (x *ForwardUsageStruct) setDefaults() *ForwardUsageStruct {
     return x
 }
 
+func (x *ForwardUsageStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ForwardUsageStruct
+}
+
 type ForwardUsageByRef struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
 }
@@ -4385,6 +4459,10 @@ func (x *ForwardUsageByRef) String() string {
 
 func (x *ForwardUsageByRef) setDefaults() *ForwardUsageByRef {
     return x
+}
+
+func (x *ForwardUsageByRef) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ForwardUsageByRef
 }
 
 type IncompleteMap struct {
@@ -4563,6 +4641,10 @@ func (x *IncompleteMap) setDefaults() *IncompleteMap {
     return x
 }
 
+func (x *IncompleteMap) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_IncompleteMap
+}
+
 type IncompleteMapDep struct {
 }
 // Compile time interface enforcer
@@ -4633,6 +4715,10 @@ func (x *IncompleteMapDep) String() string {
 
 func (x *IncompleteMapDep) setDefaults() *IncompleteMapDep {
     return x
+}
+
+func (x *IncompleteMapDep) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_IncompleteMapDep
 }
 
 type CompleteMap struct {
@@ -4811,6 +4897,10 @@ func (x *CompleteMap) setDefaults() *CompleteMap {
     return x
 }
 
+func (x *CompleteMap) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CompleteMap
+}
+
 type CompleteMapDep struct {
 }
 // Compile time interface enforcer
@@ -4881,6 +4971,10 @@ func (x *CompleteMapDep) String() string {
 
 func (x *CompleteMapDep) setDefaults() *CompleteMapDep {
     return x
+}
+
+func (x *CompleteMapDep) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CompleteMapDep
 }
 
 type IncompleteList struct {
@@ -5042,6 +5136,10 @@ func (x *IncompleteList) setDefaults() *IncompleteList {
     return x
 }
 
+func (x *IncompleteList) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_IncompleteList
+}
+
 type IncompleteListDep struct {
 }
 // Compile time interface enforcer
@@ -5112,6 +5210,10 @@ func (x *IncompleteListDep) String() string {
 
 func (x *IncompleteListDep) setDefaults() *IncompleteListDep {
     return x
+}
+
+func (x *IncompleteListDep) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_IncompleteListDep
 }
 
 type CompleteList struct {
@@ -5273,6 +5375,10 @@ func (x *CompleteList) setDefaults() *CompleteList {
     return x
 }
 
+func (x *CompleteList) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CompleteList
+}
+
 type CompleteListDep struct {
 }
 // Compile time interface enforcer
@@ -5343,6 +5449,10 @@ func (x *CompleteListDep) String() string {
 
 func (x *CompleteListDep) setDefaults() *CompleteListDep {
     return x
+}
+
+func (x *CompleteListDep) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_CompleteListDep
 }
 
 type AdaptedList struct {
@@ -5504,6 +5614,10 @@ func (x *AdaptedList) setDefaults() *AdaptedList {
     return x
 }
 
+func (x *AdaptedList) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptedList
+}
+
 type AdaptedListDep struct {
     Field *AdaptedList `thrift:"field,1" json:"field" db:"field"`
 }
@@ -5634,6 +5748,10 @@ func (x *AdaptedListDep) String() string {
 func (x *AdaptedListDep) setDefaults() *AdaptedListDep {
     return x.
         SetFieldNonCompat(NewAdaptedList())
+}
+
+func (x *AdaptedListDep) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptedListDep
 }
 
 type DependentAdaptedList struct {
@@ -5795,6 +5913,10 @@ func (x *DependentAdaptedList) setDefaults() *DependentAdaptedList {
     return x
 }
 
+func (x *DependentAdaptedList) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_DependentAdaptedList
+}
+
 type DependentAdaptedListDep struct {
     Field *int16 `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
@@ -5923,6 +6045,10 @@ func (x *DependentAdaptedListDep) String() string {
 
 func (x *DependentAdaptedListDep) setDefaults() *DependentAdaptedListDep {
     return x
+}
+
+func (x *DependentAdaptedListDep) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_DependentAdaptedListDep
 }
 
 type AllocatorAware struct {
@@ -6353,6 +6479,10 @@ func (x *AllocatorAware) setDefaults() *AllocatorAware {
         SetAaSharedNonCompat(NewI32_9314())
 }
 
+func (x *AllocatorAware) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AllocatorAware
+}
+
 type AllocatorAware2 struct {
     NotAContainer int32 `thrift:"not_a_container,1" json:"not_a_container" db:"not_a_container"`
     BoxField *int32 `thrift:"box_field,2,optional" json:"box_field,omitempty" db:"box_field"`
@@ -6528,6 +6658,10 @@ func (x *AllocatorAware2) String() string {
 func (x *AllocatorAware2) setDefaults() *AllocatorAware2 {
     return x.
         SetNotAContainerNonCompat(0)
+}
+
+func (x *AllocatorAware2) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AllocatorAware2
 }
 
 type TypedefStruct struct {
@@ -6745,6 +6879,10 @@ func (x *TypedefStruct) setDefaults() *TypedefStruct {
         SetUintTypedefFieldNonCompat(NewUintTypedef())
 }
 
+func (x *TypedefStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_TypedefStruct
+}
+
 type StructWithDoubleUnderscores struct {
     _Field int32 `thrift:"__field,1" json:"__field" db:"__field"`
 }
@@ -6862,6 +7000,10 @@ func (x *StructWithDoubleUnderscores) String() string {
 func (x *StructWithDoubleUnderscores) setDefaults() *StructWithDoubleUnderscores {
     return x.
         Set_FieldNonCompat(0)
+}
+
+func (x *StructWithDoubleUnderscores) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructWithDoubleUnderscores
 }
 
 type reqSomeServiceBounceMap struct {

@@ -47,6 +47,35 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_CustomException =
+        &metadata.ThriftException{
+            Name: "module.CustomException",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_ShouldBeBoxed =
+        &metadata.ThriftStruct{
+            Name:    "module.ShouldBeBoxed",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "sessionId",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
@@ -58,40 +87,13 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.ShouldBeBoxed",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "sessionId",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ShouldBeBoxed)
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.CustomException",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-            },
-        },
-    )
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_CustomException)
     return fbthriftResults
 }()
 

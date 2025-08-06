@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Accessory struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`
@@ -183,6 +185,10 @@ func (x *Accessory) setDefaults() *Accessory {
         SetNameNonCompat("")
 }
 
+func (x *Accessory) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Accessory
+}
+
 type PartName struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`
     Name string `thrift:"Name,2" json:"Name" db:"Name"`
@@ -347,6 +353,10 @@ func (x *PartName) setDefaults() *PartName {
     return x.
         SetInventoryIdNonCompat(0).
         SetNameNonCompat("")
+}
+
+func (x *PartName) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_PartName
 }
 
 

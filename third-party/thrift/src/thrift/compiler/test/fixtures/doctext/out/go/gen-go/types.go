@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Lanyard = string
 
@@ -218,6 +220,10 @@ func (x *A) String() string {
 func (x *A) setDefaults() *A {
     return x.
         SetUselessFieldNonCompat(0)
+}
+
+func (x *A) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_A
 }
 
 type U struct {
@@ -426,6 +432,10 @@ func (x *U) setDefaults() *U {
     return x
 }
 
+func (x *U) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_U
+}
+
 type Bang struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
 }
@@ -543,6 +553,10 @@ func (x *Bang) String() string {
 func (x *Bang) setDefaults() *Bang {
     return x.
         SetMessageNonCompat("")
+}
+
+func (x *Bang) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_Bang
 }
 
 func (x *Bang) Error() string {

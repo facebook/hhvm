@@ -196,6 +196,129 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Automobile =
+        &metadata.ThriftStruct{
+            Name:    "module1.Automobile",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "plate",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module1_Plate,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "previous_plate",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module1_Plate,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "first_plate",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module1_Plate,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "year",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module1_Year,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "drivers",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module1_Drivers,
+                },
+                &metadata.ThriftField{
+                    Id:         6,
+                    Name:       "Accessories",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_module1_Accessory,
+                },
+                &metadata.ThriftField{
+                    Id:         7,
+                    Name:       "PartNames",
+                    IsOptional: false,
+                    Type:       premadeThriftType_map_i32_module1_PartName,
+                },
+            },
+        }
+    premadeStructMetadata_MapKey =
+        &metadata.ThriftStruct{
+            Name:    "module1.MapKey",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "num",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i64,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "strval",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_MapContainer =
+        &metadata.ThriftStruct{
+            Name:    "module1.MapContainer",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "mapval",
+                    IsOptional: false,
+                    Type:       premadeThriftType_map_module1_MapKey_string,
+                },
+            },
+        }
+    premadeStructMetadata_Pair =
+        &metadata.ThriftStruct{
+            Name:    "module1.Pair",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "automobile",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module1_Automobile,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "car",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module1_Car,
+                },
+            },
+        }
+    premadeStructMetadata_Collection =
+        &metadata.ThriftStruct{
+            Name:    "module1.Collection",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "automobiles",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_module1_Automobile,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "cars",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_module1_Car,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
@@ -219,140 +342,11 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module1.Automobile",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "plate",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module1_Plate,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "previous_plate",
-                        IsOptional: true,
-                        Type:       premadeThriftType_module1_Plate,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "first_plate",
-                        IsOptional: true,
-                        Type:       premadeThriftType_module1_Plate,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "year",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module1_Year,
-                    },
-                    &metadata.ThriftField{
-                        Id:         5,
-                        Name:       "drivers",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module1_Drivers,
-                    },
-                    &metadata.ThriftField{
-                        Id:         6,
-                        Name:       "Accessories",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_module1_Accessory,
-                    },
-                    &metadata.ThriftField{
-                        Id:         7,
-                        Name:       "PartNames",
-                        IsOptional: false,
-                        Type:       premadeThriftType_map_i32_module1_PartName,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module1.MapKey",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "num",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i64,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "strval",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module1.MapContainer",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "mapval",
-                        IsOptional: false,
-                        Type:       premadeThriftType_map_module1_MapKey_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module1.Pair",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "automobile",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module1_Automobile,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "car",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module1_Car,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module1.Collection",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "automobiles",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_module1_Automobile,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "cars",
-                        IsOptional: false,
-                        Type:       premadeThriftType_list_module1_Car,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Automobile)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MapKey)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MapContainer)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Pair)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Collection)
     return fbthriftResults
 }()
 

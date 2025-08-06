@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type MyEnumAlias = MyEnum
 
@@ -702,6 +704,10 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetNoHackCodegenFieldNonCompat("")
 }
 
+func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStruct
+}
+
 type Containers struct {
     I32List []int32 `thrift:"I32List,1" json:"I32List" db:"I32List"`
     StringSet []string `thrift:"StringSet,2" json:"StringSet" db:"StringSet"`
@@ -1040,6 +1046,10 @@ func (x *Containers) setDefaults() *Containers {
         SetStringToI64MapNonCompat(make(map[string]int64))
 }
 
+func (x *Containers) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Containers
+}
+
 type MyDataItem struct {
 }
 // Compile time interface enforcer
@@ -1110,6 +1120,10 @@ func (x *MyDataItem) String() string {
 
 func (x *MyDataItem) setDefaults() *MyDataItem {
     return x
+}
+
+func (x *MyDataItem) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyDataItem
 }
 
 type MyUnion struct {
@@ -1471,6 +1485,10 @@ func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
 
+func (x *MyUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyUnion
+}
+
 type MyException struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -1755,6 +1773,10 @@ func (x *MyException) setDefaults() *MyException {
         SetMyStringFieldNonCompat("").
         SetMyStructNonCompat(NewMyStruct()).
         SetMyUnionNonCompat(NewMyUnion())
+}
+
+func (x *MyException) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_MyException
 }
 
 func (x *MyException) Error() string {
@@ -2046,6 +2068,10 @@ func (x *MyExceptionWithMessage) setDefaults() *MyExceptionWithMessage {
         SetMyUnionNonCompat(NewMyUnion())
 }
 
+func (x *MyExceptionWithMessage) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_MyExceptionWithMessage
+}
+
 func (x *MyExceptionWithMessage) Error() string {
     return x.String()
 }
@@ -2166,6 +2192,10 @@ func (x *ReservedKeyword) String() string {
 func (x *ReservedKeyword) setDefaults() *ReservedKeyword {
     return x.
         SetReservedFieldNonCompat(0)
+}
+
+func (x *ReservedKeyword) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ReservedKeyword
 }
 
 type UnionToBeRenamed struct {
@@ -2311,6 +2341,10 @@ func (x *UnionToBeRenamed) String() string {
 
 func (x *UnionToBeRenamed) setDefaults() *UnionToBeRenamed {
     return x
+}
+
+func (x *UnionToBeRenamed) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_UnionToBeRenamed
 }
 
 type reqFooServiceSimpleRPC struct {

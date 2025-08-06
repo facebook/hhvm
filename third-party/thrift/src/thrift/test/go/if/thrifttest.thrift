@@ -17,6 +17,7 @@
 namespace go thrift.test.go.if.thrifttest
 
 include "thrift/annotation/go.thrift"
+include "thrift/annotation/thrift.thrift"
 
 enum Numberz {
   ONE = 1,
@@ -36,6 +37,7 @@ typedef i64 UserId
 typedef Xtruct XtructDef
 typedef Unionz UnionzDef
 
+@thrift.ReserveIds{ids = [12345]}
 struct Bonk {
   1: string message;
   2: i32 type;

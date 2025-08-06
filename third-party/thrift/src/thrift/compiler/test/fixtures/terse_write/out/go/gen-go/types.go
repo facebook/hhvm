@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type MyInteger = int32
 
@@ -148,6 +150,10 @@ func (x *MyStruct) String() string {
 
 func (x *MyStruct) setDefaults() *MyStruct {
     return x
+}
+
+func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStruct
 }
 
 type MyUnion struct {
@@ -1191,6 +1197,10 @@ func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
 
+func (x *MyUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyUnion
+}
+
 type MyStructWithCustomDefault struct {
     Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
 }
@@ -1308,6 +1318,10 @@ func (x *MyStructWithCustomDefault) String() string {
 func (x *MyStructWithCustomDefault) setDefaults() *MyStructWithCustomDefault {
     return x.
         SetField1NonCompat(int64(1))
+}
+
+func (x *MyStructWithCustomDefault) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_MyStructWithCustomDefault
 }
 
 type StructLevelTerseStruct struct {
@@ -2245,6 +2259,10 @@ func (x *StructLevelTerseStruct) setDefaults() *StructLevelTerseStruct {
         SetMapFieldNonCompat(make(map[int16]int16)).
         SetStructFieldNonCompat(NewMyStruct()).
         SetUnionFieldNonCompat(NewMyUnion())
+}
+
+func (x *StructLevelTerseStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructLevelTerseStruct
 }
 
 type FieldLevelTerseStruct struct {
@@ -4049,6 +4067,10 @@ func (x *FieldLevelTerseStruct) setDefaults() *FieldLevelTerseStruct {
         SetUnionFieldNonCompat(NewMyUnion())
 }
 
+func (x *FieldLevelTerseStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_FieldLevelTerseStruct
+}
+
 type AdaptedFields struct {
     Field1 MyInteger `thrift:"field1,1" json:"field1" db:"field1"`
     Field2 int32 `thrift:"field2,2" json:"field2" db:"field2"`
@@ -4264,6 +4286,10 @@ func (x *AdaptedFields) setDefaults() *AdaptedFields {
         SetField3NonCompat(NewMyInteger())
 }
 
+func (x *AdaptedFields) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_AdaptedFields
+}
+
 type TerseException struct {
     Msg string `thrift:"msg,1" json:"msg" db:"msg"`
 }
@@ -4381,6 +4407,10 @@ func (x *TerseException) String() string {
 func (x *TerseException) setDefaults() *TerseException {
     return x.
         SetMsgNonCompat("")
+}
+
+func (x *TerseException) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_TerseException
 }
 
 func (x *TerseException) Error() string {

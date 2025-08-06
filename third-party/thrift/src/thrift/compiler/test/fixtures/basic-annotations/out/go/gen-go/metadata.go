@@ -158,208 +158,53 @@ var (
         }
 )
 
-var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.MyStructNestedAnnotation"] = premadeThriftType_module_MyStructNestedAnnotation
-    fbthriftThriftTypesMap["module.MyUnion"] = premadeThriftType_module_MyUnion
-    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
-    fbthriftThriftTypesMap["module.list_string_6884"] = premadeThriftType_module_list_string_6884
-    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
-    fbthriftThriftTypesMap["module.SecretStruct"] = premadeThriftType_module_SecretStruct
-    fbthriftThriftTypesMap["module.MyException"] = premadeThriftType_module_MyException
-    fbthriftThriftTypesMap["module.AwesomeStruct"] = premadeThriftType_module_AwesomeStruct
-    fbthriftThriftTypesMap["module.FantasticStruct"] = premadeThriftType_module_FantasticStruct
-    fbthriftThriftTypesMap["void"] = premadeThriftType_void
-    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
-    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
-    return fbthriftThriftTypesMap
-}()
-
-var structMetadatas = func() []*metadata.ThriftStruct {
-    fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.MyStructNestedAnnotation",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "name",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
+// Premade struct metadatas
+var (
+    premadeStructMetadata_MyStructNestedAnnotation =
+        &metadata.ThriftStruct{
+            Name:    "module.MyStructNestedAnnotation",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "name",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_MyUnion =
+        &metadata.ThriftStruct{
+            Name:    "module.MyUnion",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::StaticCast"),
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("YourUnion"),
+                            },
                     },
                 },
             },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.MyUnion",
-                IsUnion: true,
-                Fields:  []*metadata.ThriftField{
-                },
-                StructuredAnnotations: []*metadata.ThriftConstStruct{
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "cpp.Adapter",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "name":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("::StaticCast"),
-                                },
-                        },
-                    },
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "cpp.Name",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "value":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("YourUnion"),
-                                },
-                        },
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.MyStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "abstract",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "major",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i64,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "annotation_with_quote",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         4,
-                        Name:       "class_",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         5,
-                        Name:       "annotation_with_trailing_comma",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         6,
-                        Name:       "empty_annotations",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         7,
-                        Name:       "my_enum",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_MyEnum,
-                    },
-                    &metadata.ThriftField{
-                        Id:         8,
-                        Name:       "cpp_type_annotation",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_list_string_6884,
-                    },
-                    &metadata.ThriftField{
-                        Id:         9,
-                        Name:       "my_union",
-                        IsOptional: false,
-                        Type:       premadeThriftType_module_MyUnion,
-                    },
-                },
-                StructuredAnnotations: []*metadata.ThriftConstStruct{
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "cpp.Name",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "value":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("YourStruct"),
-                                },
-                        },
-                    },
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "hack.Attributes",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "attributes":
-                                &metadata.ThriftConstValue{
-                                    CvList: []*metadata.ThriftConstValue{
-                                        &metadata.ThriftConstValue{
-                                            CvString: thrift.Pointerize("\\SomeClass(\\AnotherClass::class)"),
-                                        },
-                                    },
-                                },
-                        },
-                    },
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "cpp.Adapter",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "name":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("::StaticCast"),
-                                },
-                        },
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.SecretStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "id",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i64,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "password",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    return fbthriftResults
-}()
-
-var exceptionMetadatas = func() []*metadata.ThriftException {
-    fbthriftResults := make([]*metadata.ThriftException, 0)
-    fbthriftResults = append(fbthriftResults,
+        }
+    premadeStructMetadata_MyException =
         &metadata.ThriftException{
             Name: "module.MyException",
             Fields: []*metadata.ThriftField{
@@ -388,8 +233,159 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
                     },
                 },
             },
-        },
-    )
+        }
+    premadeStructMetadata_MyStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.MyStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "abstract",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "major",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i64,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "annotation_with_quote",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "class_",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "annotation_with_trailing_comma",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         6,
+                    Name:       "empty_annotations",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         7,
+                    Name:       "my_enum",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_MyEnum,
+                },
+                &metadata.ThriftField{
+                    Id:         8,
+                    Name:       "cpp_type_annotation",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_list_string_6884,
+                },
+                &metadata.ThriftField{
+                    Id:         9,
+                    Name:       "my_union",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_MyUnion,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("YourStruct"),
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "hack.Attributes",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "attributes":
+                            &metadata.ThriftConstValue{
+                                CvList: []*metadata.ThriftConstValue{
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("\\SomeClass(\\AnotherClass::class)"),
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::StaticCast"),
+                            },
+                    },
+                },
+            },
+        }
+    premadeStructMetadata_SecretStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.SecretStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "id",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i64,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "password",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+)
+
+var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.MyStructNestedAnnotation"] = premadeThriftType_module_MyStructNestedAnnotation
+    fbthriftThriftTypesMap["module.MyUnion"] = premadeThriftType_module_MyUnion
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["module.list_string_6884"] = premadeThriftType_module_list_string_6884
+    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
+    fbthriftThriftTypesMap["module.SecretStruct"] = premadeThriftType_module_SecretStruct
+    fbthriftThriftTypesMap["module.MyException"] = premadeThriftType_module_MyException
+    fbthriftThriftTypesMap["module.AwesomeStruct"] = premadeThriftType_module_AwesomeStruct
+    fbthriftThriftTypesMap["module.FantasticStruct"] = premadeThriftType_module_FantasticStruct
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    return fbthriftThriftTypesMap
+}()
+
+var structMetadatas = func() []*metadata.ThriftStruct {
+    fbthriftResults := make([]*metadata.ThriftStruct, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MyStructNestedAnnotation)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MyUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MyStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_SecretStruct)
+    return fbthriftResults
+}()
+
+var exceptionMetadatas = func() []*metadata.ThriftException {
+    fbthriftResults := make([]*metadata.ThriftException, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MyException)
     return fbthriftResults
 }()
 

@@ -94,3 +94,16 @@ func verifyThriftType(t *testing.T, thriftType *metadata.ThriftType, allMetadata
 		require.Contains(t, allMetadata.GetStructs(), unionName)
 	}
 }
+
+func TestGetThriftStructMetadata(t *testing.T) {
+	value := thrifttest.NewBonk()
+	structMetadata := value.GetThriftStructMetadata()
+	require.Len(t, structMetadata.StructuredAnnotations, 1)
+	annotation := structMetadata.StructuredAnnotations[0]
+	require.Equal(t, "thrift.ReserveIds", annotation.Type.Name)
+	require.Contains(t, annotation.Fields, "ids")
+	require.NotNil(t, annotation.Fields["ids"].CvList)
+	require.Len(t, annotation.Fields["ids"].CvList, 1)
+	require.NotNil(t, annotation.Fields["ids"].CvList[0].CvInteger)
+	require.EqualValues(t, 12345, *annotation.Fields["ids"].CvList[0].CvInteger)
+}

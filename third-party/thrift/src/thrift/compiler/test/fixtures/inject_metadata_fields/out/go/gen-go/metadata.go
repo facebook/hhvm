@@ -56,6 +56,125 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Fields =
+        &metadata.ThriftStruct{
+            Name:    "module.Fields",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         100,
+                    Name:       "injected_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_FieldsInjectedToEmptyStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.FieldsInjectedToEmptyStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         -1100,
+                    Name:       "injected_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "internal.InjectMetadataFields",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "type":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("Fields"),
+                            },
+                    },
+                },
+            },
+        }
+    premadeStructMetadata_FieldsInjectedToStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.FieldsInjectedToStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         -1100,
+                    Name:       "injected_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "string_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "internal.InjectMetadataFields",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "type":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("Fields"),
+                            },
+                    },
+                },
+            },
+        }
+    premadeStructMetadata_FieldsInjectedWithIncludedStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.FieldsInjectedWithIncludedStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         -1102,
+                    Name:       "injected_unstructured_annotation_field",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         -1101,
+                    Name:       "injected_structured_annotation_field",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         -1100,
+                    Name:       "injected_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "string_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "internal.InjectMetadataFields",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "type":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("foo.Fields"),
+                            },
+                    },
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
@@ -68,133 +187,10 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Fields",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         100,
-                        Name:       "injected_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.FieldsInjectedToEmptyStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         -1100,
-                        Name:       "injected_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-                StructuredAnnotations: []*metadata.ThriftConstStruct{
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "internal.InjectMetadataFields",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "type":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("Fields"),
-                                },
-                        },
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.FieldsInjectedToStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         -1100,
-                        Name:       "injected_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "string_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-                StructuredAnnotations: []*metadata.ThriftConstStruct{
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "internal.InjectMetadataFields",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "type":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("Fields"),
-                                },
-                        },
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.FieldsInjectedWithIncludedStruct",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         -1102,
-                        Name:       "injected_unstructured_annotation_field",
-                        IsOptional: true,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         -1101,
-                        Name:       "injected_structured_annotation_field",
-                        IsOptional: true,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         -1100,
-                        Name:       "injected_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "string_field",
-                        IsOptional: false,
-                        Type:       premadeThriftType_string,
-                    },
-                },
-                StructuredAnnotations: []*metadata.ThriftConstStruct{
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "internal.InjectMetadataFields",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                            "type":
-                                &metadata.ThriftConstValue{
-                                    CvString: thrift.Pointerize("foo.Fields"),
-                                },
-                        },
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Fields)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedToEmptyStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedToStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedWithIncludedStruct)
     return fbthriftResults
 }()
 

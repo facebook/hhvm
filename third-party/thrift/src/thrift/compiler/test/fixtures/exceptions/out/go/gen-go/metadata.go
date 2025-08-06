@@ -85,6 +85,112 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Fiery =
+        &metadata.ThriftException{
+            Name: "module.Fiery",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_Serious =
+        &metadata.ThriftException{
+            Name: "module.Serious",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "sonnet",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_ComplexFieldNames =
+        &metadata.ThriftException{
+            Name: "module.ComplexFieldNames",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "error_message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "internal_error_message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_CustomFieldNames =
+        &metadata.ThriftException{
+            Name: "module.CustomFieldNames",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "error_message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "internal_error_message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        }
+    premadeStructMetadata_ExceptionWithPrimitiveField =
+        &metadata.ThriftException{
+            Name: "module.ExceptionWithPrimitiveField",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "message",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "error_code",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+            },
+        }
+    premadeStructMetadata_ExceptionWithStructuredAnnotation =
+        &metadata.ThriftException{
+            Name: "module.ExceptionWithStructuredAnnotation",
+            Fields: []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "message_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "error_code",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+            },
+        }
+    premadeStructMetadata_Banal =
+        &metadata.ThriftException{
+            Name: "module.Banal",
+            Fields: []*metadata.ThriftField{
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
@@ -107,115 +213,13 @@ var structMetadatas = func() []*metadata.ThriftStruct {
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.Fiery",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.Serious",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "sonnet",
-                    IsOptional: true,
-                    Type:       premadeThriftType_string,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.ComplexFieldNames",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "error_message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "internal_error_message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.CustomFieldNames",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "error_message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "internal_error_message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.ExceptionWithPrimitiveField",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "message",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "error_code",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.ExceptionWithStructuredAnnotation",
-            Fields: []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "message_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "error_code",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftException{
-            Name: "module.Banal",
-            Fields: []*metadata.ThriftField{
-            },
-        },
-    )
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Fiery)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Serious)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ComplexFieldNames)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_CustomFieldNames)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ExceptionWithPrimitiveField)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_ExceptionWithStructuredAnnotation)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Banal)
     return fbthriftResults
 }()
 

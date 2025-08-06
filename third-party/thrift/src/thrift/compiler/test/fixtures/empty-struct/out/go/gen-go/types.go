@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type Empty struct {
 }
@@ -87,6 +89,10 @@ func (x *Empty) String() string {
 
 func (x *Empty) setDefaults() *Empty {
     return x
+}
+
+func (x *Empty) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Empty
 }
 
 type Nada struct {
@@ -171,6 +177,10 @@ func (x *Nada) String() string {
 
 func (x *Nada) setDefaults() *Nada {
     return x
+}
+
+func (x *Nada) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_Nada
 }
 
 

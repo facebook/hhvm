@@ -60,6 +60,13 @@
 {{! getStructSpec }}
 {{> types/struct_method_get_spec}}
 {{/struct:use_reflect_codec?}}
+{{#program:gen_metadata?}}
+{{^struct:req_resp?}}
+
+{{! GetThrift(Struct|Exception)Metadata }}
+{{> types/struct_method_get_thrift_metadata}}
+{{/struct:req_resp?}}
+{{/program:gen_metadata?}}
 {{#struct:exception?}}
 
 {{! error }}

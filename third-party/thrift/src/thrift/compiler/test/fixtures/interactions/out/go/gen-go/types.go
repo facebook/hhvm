@@ -11,6 +11,7 @@ import (
 
     shared "shared"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -18,6 +19,7 @@ var _ = shared.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type CustomException struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
@@ -136,6 +138,10 @@ func (x *CustomException) String() string {
 func (x *CustomException) setDefaults() *CustomException {
     return x.
         SetMessageNonCompat("")
+}
+
+func (x *CustomException) GetThriftStructMetadata() *metadata.ThriftException {
+    return premadeStructMetadata_CustomException
 }
 
 func (x *CustomException) Error() string {
@@ -258,6 +264,10 @@ func (x *ShouldBeBoxed) String() string {
 func (x *ShouldBeBoxed) setDefaults() *ShouldBeBoxed {
     return x.
         SetSessionIdNonCompat("")
+}
+
+func (x *ShouldBeBoxed) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_ShouldBeBoxed
 }
 
 type reqMyServiceFoo struct {

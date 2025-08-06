@@ -33,6 +33,23 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Foo =
+        &metadata.ThriftStruct{
+            Name:    "quoted.Foo",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "MyInt",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i64,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
@@ -42,22 +59,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "quoted.Foo",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "MyInt",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i64,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Foo)
     return fbthriftResults
 }()
 

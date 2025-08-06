@@ -40,6 +40,69 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+    premadeStructMetadata_Foo =
+        &metadata.ThriftStruct{
+            Name:    "module.Foo",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "field2",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "field3",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "field1",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "thrift.SerializeInFieldIdOrder",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
+        }
+    premadeStructMetadata_Foo2 =
+        &metadata.ThriftStruct{
+            Name:    "module.Foo2",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "field2",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "field3",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "field1",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+            },
+        }
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
@@ -50,71 +113,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Foo",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "field2",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "field3",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "field1",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                },
-                StructuredAnnotations: []*metadata.ThriftConstStruct{
-                    &metadata.ThriftConstStruct{
-                        Type: &metadata.ThriftStructType{
-                            Name: "thrift.SerializeInFieldIdOrder",
-                        },
-                        Fields: map[string]*metadata.ThriftConstValue{
-                        },
-                    },
-                },
-            },
-        )
-    }()
-    func() {
-        fbthriftResults = append(fbthriftResults,
-            &metadata.ThriftStruct{
-                Name:    "module.Foo2",
-                IsUnion: false,
-                Fields:  []*metadata.ThriftField{
-                    &metadata.ThriftField{
-                        Id:         1,
-                        Name:       "field2",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         2,
-                        Name:       "field3",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                    &metadata.ThriftField{
-                        Id:         3,
-                        Name:       "field1",
-                        IsOptional: false,
-                        Type:       premadeThriftType_i32,
-                    },
-                },
-            },
-        )
-    }()
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Foo)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_Foo2)
     return fbthriftResults
 }()
 

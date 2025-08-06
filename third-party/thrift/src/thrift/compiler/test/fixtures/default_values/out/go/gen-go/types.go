@@ -10,12 +10,14 @@ import (
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
+var _ = metadata.GoUnusedProtection__
 
 type TrivialStruct struct {
     IntValue int32 `thrift:"int_value,1" json:"int_value" db:"int_value"`
@@ -134,6 +136,10 @@ func (x *TrivialStruct) String() string {
 func (x *TrivialStruct) setDefaults() *TrivialStruct {
     return x.
         SetIntValueNonCompat(0)
+}
+
+func (x *TrivialStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_TrivialStruct
 }
 
 type StructWithNoCustomDefaultValues struct {
@@ -537,6 +543,10 @@ func (x *StructWithNoCustomDefaultValues) setDefaults() *StructWithNoCustomDefau
         SetRequiredIntegerNonCompat(0).
         SetUnqualifiedStructNonCompat(NewTrivialStruct()).
         SetRequiredStructNonCompat(NewTrivialStruct())
+}
+
+func (x *StructWithNoCustomDefaultValues) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructWithNoCustomDefaultValues
 }
 
 type StructWithCustomDefaultValues struct {
@@ -951,6 +961,10 @@ func (x *StructWithCustomDefaultValues) setDefaults() *StructWithCustomDefaultVa
               NewTrivialStruct().
     SetIntValueNonCompat(int32(789)),
           )
+}
+
+func (x *StructWithCustomDefaultValues) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructWithCustomDefaultValues
 }
 
 

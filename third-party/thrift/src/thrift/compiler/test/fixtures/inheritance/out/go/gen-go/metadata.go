@@ -26,6 +26,10 @@ var (
         }
 )
 
+// Premade struct metadatas
+var (
+)
+
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["void"] = premadeThriftType_void

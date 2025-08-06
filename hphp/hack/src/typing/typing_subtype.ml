@@ -6175,6 +6175,20 @@ end = struct
           (ConstraintType
              (mk_constraint_type (reason_super, Tcan_index can_index)))
     in
+    let arity_error r name env =
+      invalid
+        ~fail:
+          (Some
+             Typing_error.(
+               primary
+               @@ Primary.Array_get_arity
+                    {
+                      pos = can_index.ci_expr_pos;
+                      name;
+                      decl_pos = Reason.to_pos r;
+                    }))
+        env
+    in
     let mk_prop ~subtype_env ~this_ty ~lhs ~rhs =
       simplify ~subtype_env ~this_ty ~lhs ~rhs
     in
@@ -6375,33 +6389,46 @@ end = struct
           (MakeType.dynamic (get_reason ty_sub))
       else
         valid
-    | (_, Tclass ((_, n), _, [tk; tv]))
+    | (r_sub, Tclass ((_, n), _, targs))
       when String.equal n SN.Collections.cKeyedContainer
            || String.equal n SN.Collections.cImmMap
            || String.equal n SN.Collections.cConstMap
            || String.equal n SN.Collections.cMap
            || String.equal n SN.Collections.cMutableMap
            || String.equal n SN.Collections.cAnyArray ->
-      let (env, tv) = maybe_pessimise_type env tv in
-      is_container tk tv env
-    | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVec ->
-      is_vec_like tv env
-    | (_, Tclass ((_, n), _, [tv]))
+      (match targs with
+      | [tk; tv] ->
+        let (env, tv) = maybe_pessimise_type env tv in
+        is_container tk tv env
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass ((_, n), _, targs)) when String.equal n SN.Collections.cVec
+      ->
+      (match targs with
+      | [tv] -> is_vec_like tv env
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass ((_, n), _, targs))
       when String.equal n SN.Collections.cImmVector
            || String.equal n SN.Collections.cConstVector
            || String.equal n SN.Collections.cVector
            || String.equal n SN.Collections.cMutableVector ->
-      let (env, tv) = maybe_pessimise_type env tv in
-      is_vec_like tv env
+      (match targs with
+      | [tv] ->
+        let (env, tv) = maybe_pessimise_type env tv in
+        is_vec_like tv env
+      | _ -> arity_error r_sub n env)
     (* dict and keyset are covariant in the key type, so subsumption
      * lets you upcast the key type beyond ty2 to arraykey.
      *)
-    | (_, Tclass ((_, n), _, [_; tv])) when String.equal n SN.Collections.cDict
-      ->
-      is_dict_like tv env
-    | (_, Tclass ((_, n), _, [tkv])) when String.equal n SN.Collections.cKeyset
-      ->
-      is_dict_like tkv env
+    | (r_sub, Tclass ((_, n), _, targs))
+      when String.equal n SN.Collections.cDict ->
+      (match targs with
+      | [_; tv] -> is_dict_like tv env
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass ((_, n), _, targs))
+      when String.equal n SN.Collections.cKeyset ->
+      (match targs with
+      | [tkv] -> is_dict_like tkv env
+      | _ -> arity_error r_sub n env)
     | (_, Tvec_or_dict (_, tv)) ->
       let (env, tv) = maybe_pessimise_type env tv in
       is_dict_like tv env

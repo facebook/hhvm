@@ -6396,12 +6396,18 @@ end = struct
       else
         valid
     | (r_sub, Tclass ((_, n), _, targs))
-      when String.equal n SN.Collections.cKeyedContainer
+      when String.equal n SN.Collections.cConstMap
            || String.equal n SN.Collections.cImmMap
-           || String.equal n SN.Collections.cConstMap
-           || String.equal n SN.Collections.cMap
-           || String.equal n SN.Collections.cMutableMap
+           || String.equal n SN.Collections.cKeyedContainer
            || String.equal n SN.Collections.cAnyArray ->
+      (match targs with
+      | [_tk; tv] ->
+        let (env, tv) = maybe_pessimise_type env tv in
+        is_dict_like tv env
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass ((_, n), _, targs))
+      when String.equal n SN.Collections.cMap
+           || String.equal n SN.Collections.cMutableMap ->
       (match targs with
       | [tk; tv] ->
         let (env, tv) = maybe_pessimise_type env tv in

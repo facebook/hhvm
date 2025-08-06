@@ -15,13 +15,11 @@
 
 }}
 type {{service:go_name}} interface {
-    {{#service:extends?}}
     {{#service:extends}}
     // Inherited/extended service
     {{service:go_qualified_name}}
 
     {{/service:extends}}
-    {{/service:extends?}}
     {{#service:functions}}
     {{#function:go_server_supported?}}
     {{> svc/func_signature}}
@@ -32,13 +30,11 @@ type {{service:go_name}} interface {
 
 type {{service:go_name}}ClientInterface interface {
     io.Closer
-    {{#service:extends?}}
     {{#service:extends}}
     // Inherited/extended service
     {{service:go_qualified_name}}ClientInterface
 
     {{/service:extends}}
-    {{/service:extends?}}
     {{#service:functions}}
     {{#function:go_client_supported?}}
     {{> svc/func_signature}}

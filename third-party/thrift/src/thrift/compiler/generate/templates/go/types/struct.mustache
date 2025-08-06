@@ -35,20 +35,18 @@
 {{/if (or struct:resp? struct:stream?)}}
 
 {{! write (serialize) }}
-{{#struct:use_reflect_codec?}}
+{{#if struct:use_reflect_codec?}}
 {{> types/struct_method_write_v2}}
-{{/struct:use_reflect_codec?}}
-{{^struct:use_reflect_codec?}}
+{{#else}}
 {{> types/struct_method_write}}
-{{/struct:use_reflect_codec?}}
+{{/if struct:use_reflect_codec?}}
 
 {{! read (deserialize) }}
-{{#struct:use_reflect_codec?}}
+{{#if struct:use_reflect_codec?}}
 {{> types/struct_method_read_v2}}
-{{/struct:use_reflect_codec?}}
-{{^struct:use_reflect_codec?}}
+{{#else}}
 {{> types/struct_method_read}}
-{{/struct:use_reflect_codec?}}
+{{/if struct:use_reflect_codec?}}
 
 {{! string }}
 {{> types/struct_method_string}}

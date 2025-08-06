@@ -115,14 +115,12 @@ func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch {{#function:exceptions?}}v := {{/function:exceptions?}}result.(type) {
-    {{#function:exceptions?}}
     {{#function:exceptions}}
     case *{{#field:type}}{{> common/type}}{{/field:type}}:
         result = &resp{{service:go_name}}{{function:go_name}}{
             {{field:go_name}}: v,
         }
     {{/function:exceptions}}
-    {{/function:exceptions?}}
     case thrift.ApplicationExceptionIf:
         messageType = thrift.EXCEPTION
     }

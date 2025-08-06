@@ -21,11 +21,9 @@
 }}
 &{{program:metadata_qualifier}}ThriftService{
     Name:      "{{service:scoped_name}}",
-    {{#service:extends?}}
     {{#service:extends}}
     Parent:    thrift.Pointerize("{{service:scoped_name}}"),
     {{/service:extends}}
-    {{/service:extends?}}
     Functions: []*{{program:metadata_qualifier}}ThriftFunction{
         {{#service:functions}}
         {{#function:go_server_supported?}}

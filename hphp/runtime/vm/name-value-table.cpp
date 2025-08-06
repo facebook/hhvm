@@ -66,8 +66,7 @@ void NameValueTable::unset(const StringData* name) {
   if (!elm) return;
   if (elm->m_link.bound()) {
     if (!elm->m_link.isInitNoProfile()) return;
-    tvDecRefGen(elm->m_link.getNoProfile());
-    elm->m_link.markUninit();
+    tvUnset(elm->m_link.getNoProfile());
     return;
   }
   tvUnset(&elm->m_tv);

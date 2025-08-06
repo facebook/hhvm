@@ -580,6 +580,19 @@ class mstch_go_service : public mstch_service {
   go::codegen_data& data_;
 };
 
+class mstch_go_interaction : public mstch_go_service {
+ public:
+  using ast_type = t_interaction;
+
+  mstch_go_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service,
+      go::codegen_data* data)
+      : mstch_go_service(interaction, ctx, pos, data, containing_service) {}
+};
+
 class mstch_go_function : public mstch_function {
  public:
   mstch_go_function(
@@ -865,6 +878,7 @@ void t_mstch_go_generator::generate_program() {
 void t_mstch_go_generator::set_mstch_factories() {
   mstch_context_.add<mstch_go_program>(&data_);
   mstch_context_.add<mstch_go_service>(&data_);
+  mstch_context_.add<mstch_go_interaction>(&data_);
   mstch_context_.add<mstch_go_function>(&data_);
   mstch_context_.add<mstch_go_type>(&data_);
   mstch_context_.add<mstch_go_typedef>(&data_);

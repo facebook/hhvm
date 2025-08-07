@@ -48,10 +48,17 @@ let get_error_list_json
     match error_list with
     | [] -> ([], true)
     | error_list ->
+      let passed =
+        not
+          (List.exists error_list ~f:(fun error ->
+               match error.severity with
+               | Err -> true
+               | Warning -> false))
+      in
       ( List.map
           ~f:(User_error.to_json ~human_formatter ~filename_to_string:Fn.id)
           error_list,
-        false )
+        passed )
   in
   let (properties : (string * Hh_json.json) list) =
     [

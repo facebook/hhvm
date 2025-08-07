@@ -51,6 +51,11 @@
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
+#include <folly/Portability.h>
+
+static_assert(
+    FOLLY_CPLUSPLUS >= 202002L, "Thrift must be built with C++20 or later.");
+
 namespace apache::thrift::compiler {
 namespace {
 

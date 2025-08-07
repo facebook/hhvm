@@ -43,7 +43,6 @@ mstch::map t_mstch_generator::dump(const t_program& program) {
   mstch::map result{
       {"name", program.name()},
       {"path", program.path()},
-      {"includePrefix", program.include_prefix()},
       {"structs", dump_elems(program.structured_definitions())},
       {"enums", dump_elems(program.enums())},
       {"services", dump_elems(program.services())},

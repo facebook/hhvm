@@ -22,7 +22,7 @@ Generated Cpp2 <-> thrift-python converters for Thrift structs
 
 {{#program:structs}}
 {{#first?}}
-cdef extern from "{{program:includePrefix}}gen-cpp2/{{program:name}}_types.h":
+cdef extern from "{{program:include_prefix}}gen-cpp2/{{program:name}}_types.h":
 {{/first?}}
     cdef cppclass c{{struct:py_name}} "{{struct:cpp_name}}":
         c{{struct:py_name}}()
@@ -30,7 +30,7 @@ cdef extern from "{{program:includePrefix}}gen-cpp2/{{program:name}}_types.h":
 
 {{#program:enums}}
 {{#first?}}
-cdef extern from "{{program:includePrefix}}gen-cpp2/{{program:name}}_types.h":
+cdef extern from "{{program:include_prefix}}gen-cpp2/{{program:name}}_types.h":
 {{/first?}}
     cdef cppclass c{{enum:name}} "{{program:cpp_namespaces}}::{{enum:cpp_name}}":
         pass

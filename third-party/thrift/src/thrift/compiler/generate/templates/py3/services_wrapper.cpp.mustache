@@ -28,8 +28,8 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{> common/auto_generated_c}}
 {{^program:auto_migrate?}}
 
-#include <{{program:includePrefix}}gen-py3/{{program:name}}/services_wrapper.h>
-#include <{{program:includePrefix}}gen-py3/{{program:name}}/services_api.h>
+#include <{{program:include_prefix}}gen-py3/{{program:name}}/services_wrapper.h>
+#include <{{program:include_prefix}}gen-py3/{{program:name}}/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
 {{#program:cppNamespaces}}namespace {{value}} {

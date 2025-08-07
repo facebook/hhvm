@@ -25,10 +25,10 @@ created by the thrift compiler for generated cpp2 code.
 
 #pragma once
 {{#program:services}}
-#if __has_include(<{{program:includePrefix}}{{program:cpp_gen_path}}/{{service:name}}.h>)
-#include <{{program:includePrefix}}{{program:cpp_gen_path}}/{{service:name}}.h>
+#if __has_include(<{{program:include_prefix}}{{program:cpp_gen_path}}/{{service:name}}.h>)
+#include <{{program:include_prefix}}{{program:cpp_gen_path}}/{{service:name}}.h>
 #else
-#include <{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h>
+#include <{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h>
 #endif
 {{#service:extends}}
 {{#service:externalProgram?}}

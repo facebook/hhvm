@@ -23,7 +23,7 @@ from thrift.python.common cimport (
     cThriftMetadata as __fbthrift_cThriftMetadata,
 )
 
-cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/metadata.h"{{!
+cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/metadata.h"{{!
 }} :
     cdef cThriftMetadata cGetThriftModuleMetadata "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{program:name}}_getThriftModuleMetadata"()
 {{/program:auto_migrate?}}

@@ -446,7 +446,6 @@ class mstch_program : public mstch_base {
             {"program:self", &mstch_program::self},
             {"program:name", &mstch_program::name},
             {"program:autogen_path", &mstch_program::autogen_path},
-            {"program:includePrefix", &mstch_program::include_prefix},
             {"program:structs", &mstch_program::structs},
             {"program:enums", &mstch_program::enums},
             {"program:services", &mstch_program::services},
@@ -478,7 +477,6 @@ class mstch_program : public mstch_base {
     std::replace(path.begin(), path.end(), '\\', '/');
     return path;
   }
-  mstch::node include_prefix() { return program_->include_prefix(); }
   mstch::node has_enums() { return !program_->enums().empty(); }
   mstch::node has_structs() {
     return !program_->structs_and_unions().empty() ||

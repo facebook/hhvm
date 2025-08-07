@@ -22,7 +22,7 @@ Generated Cpp2 <-> thrift-python converters for Thrift structs
 from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
-cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
+cdef extern from "{{program:include_prefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
     {{! NB: aside from NamespaceTag, this include also required to "inject"
         the Extractor and Constructors into cython cpp }}
     cdef cppclass _fbthrift__NamespaceTag "{{program:capi_module_prefix}}::NamespaceTag"

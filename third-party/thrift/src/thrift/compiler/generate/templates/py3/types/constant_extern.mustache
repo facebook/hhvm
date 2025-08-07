@@ -21,7 +21,7 @@ This is a template for exposing cpp constants in .pxd
 }}
 {{#program:constants}}
 {{#first?}}
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_constants.h"{{!
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_constants.h"{{!
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#constant:type}}

@@ -21,11 +21,11 @@ This is a template for exposing cpp enums in .pxd
 }}
 {{#program:enums}}
 {{#first?}}
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"{{!
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"{{!
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{/first?}}
     cdef cppclass {{> types/c_enum }} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":

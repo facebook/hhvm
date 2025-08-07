@@ -21,15 +21,15 @@ This is a template for exposing cpp structs and unions in .pxd
 }}
 {{#program:filtered_structs}}
 {{#first?}}
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_types_custom_protocol.h"{{!
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types_custom_protocol.h"{{!
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#struct:union?}}

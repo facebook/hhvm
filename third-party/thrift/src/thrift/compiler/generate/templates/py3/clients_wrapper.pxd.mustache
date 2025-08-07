@@ -58,7 +58,7 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients_wrapper as _
 {{/program:includeNamespaces}}
 
 {{#program:services}}
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
     }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
   cdef cppclass c{{service:name}}AsyncClient {{!
     }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
@@ -66,7 +66,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
       pass
 
 {{#service:supportedInteractions}}
-cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
+cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
     }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
   cdef cppclass c{{service:parent_service_name}}AsyncClient_{{service:name}} {{!
     }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
@@ -82,7 +82,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrapper.h"{{!
+cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wrapper.h"{{!
     }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":{{!
     }}{{^program:services}}
   pass{{/program:services}}{{#program:services}}

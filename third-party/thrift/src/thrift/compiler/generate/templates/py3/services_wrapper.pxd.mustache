@@ -28,7 +28,7 @@ from thrift.python.server_impl.async_processor cimport cAsyncProcessorFactory
 from folly cimport cFollyExecutor
 
 
-cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/services_wrapper.h"{{!
+cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/services_wrapper.h"{{!
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{#program:services}}
     shared_ptr[cAsyncProcessorFactory] c{{service:name}}Interface {{!

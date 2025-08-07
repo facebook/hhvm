@@ -53,10 +53,10 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_fields as _fbthrift_types_fields
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as {{> types/current_module_cbindings}}
 
-cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/types.h":
+cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/types.h":
   pass
 {{#program:python_capi_converter?}}
-cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
+cdef extern from "{{program:include_prefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
     cppclass _fbthrift__NamespaceTag "{{program:capi_module_prefix}}::NamespaceTag"
 
 {{/program:python_capi_converter?}}

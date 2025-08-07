@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
 
@@ -25,6 +26,7 @@ struct Foo {
   2: binary field_2;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef Foo AdaptedFoo
 

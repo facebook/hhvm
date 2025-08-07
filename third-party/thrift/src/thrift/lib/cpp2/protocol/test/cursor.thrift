@@ -28,9 +28,11 @@ union Inner {
   1: binary binary_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::CursorSerializationAdapter"}
 typedef Struct StructCursor
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "::apache::thrift::ManagedStringViewWithConversions"}
 typedef string ManagedStringViewField
 
@@ -122,6 +124,7 @@ struct Types {
 }
 
 struct Empty {}
+@thrift.AllowLegacyTypedefUri
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper
 
@@ -135,6 +138,7 @@ struct ReadRemaining {
   3: bool ccc;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.UseCursorSerialization
 typedef ReadRemaining ReadRemainingWrapper
 

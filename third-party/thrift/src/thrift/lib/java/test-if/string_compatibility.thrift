@@ -23,11 +23,14 @@ package "test.dev/thrift/lib/java/test/utf8"
 
 namespace java.swift com.facebook.thrift.test.utf8
 
+@thrift.AllowLegacyTypedefUri
 typedef string str
 
+@thrift.AllowLegacyTypedefUri
 @compat.Strings{onInvalidUtf8 = compat.CodingErrorAction.Report}
 typedef string UTF8StringReport
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
   typeClassName = "java.lang.Long",
@@ -35,9 +38,11 @@ typedef string UTF8StringReport
 @compat.Strings{onInvalidUtf8 = compat.CodingErrorAction.Report}
 typedef string UTF8AdaptedStringReport
 
+@thrift.AllowLegacyTypedefUri
 @compat.Strings{onInvalidUtf8 = compat.CodingErrorAction.Legacy}
 typedef string UTF8String
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
   typeClassName = "java.lang.Long",
@@ -172,12 +177,14 @@ transient exception TestExceptionCompat {
 }
 
 // The following were automatically generated and may benefit from renaming.
+@thrift.AllowLegacyTypedefUri
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"java.swift.binary_string": "1"},
 }
 typedef string string_7069
 
 // The following were automatically generated and may benefit from renaming.
+@thrift.AllowLegacyTypedefUri
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"java.swift.binary_string": "1"},
 }

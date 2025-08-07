@@ -72,49 +72,80 @@ const dependency.IncludedStruct FANCY_CONST = dependency.IncludedStruct{
   },
 };
 
+@thrift.AllowLegacyTypedefUri
 typedef list<i32> I32List
+@thrift.AllowLegacyTypedefUri
 typedef list<list<string>> StrList2D
+@thrift.AllowLegacyTypedefUri
 typedef list<string> StringList
+@thrift.AllowLegacyTypedefUri
 typedef map<string, i64> StrIntMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, string> StrStrMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, I32List> StrI32ListMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, StrI32ListMap> StrStrIntListMapMap
+@thrift.AllowLegacyTypedefUri
 typedef set<I32List> SetI32Lists
+@thrift.AllowLegacyTypedefUri
 typedef set<SetI32Lists> SetSetI32Lists
+@thrift.AllowLegacyTypedefUri
 typedef set<i32> SetI32
+@thrift.AllowLegacyTypedefUri
 typedef bool Bool
+@thrift.AllowLegacyTypedefUri
 typedef i64 TimeStamp
+@thrift.AllowLegacyTypedefUri
 typedef byte Byte
+@thrift.AllowLegacyTypedefUri
 typedef float Float
+@thrift.AllowLegacyTypedefUri
 typedef double Double
+@thrift.AllowLegacyTypedefUri
 typedef list<easy> EasyList
+@thrift.AllowLegacyTypedefUri
 typedef set<easy> EasySet
+@thrift.AllowLegacyTypedefUri
 typedef map<string, easy> StrEasyMap
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "uint32_t"}
 typedef i32 ui32
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::F14FastMap<std::string, folly::fbstring>"}
 typedef map<string, string> F14MapFollyString
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "std::vector<uint32_t>"}
 typedef list<i32> Uint32List
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::FBStringAdapter"}
 @python.Py3EnableCppAdapter
 typedef binary AdaptedBinary
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::FBStringAdapter"}
 @python.Py3EnableCppAdapter
 typedef string AdaptedString
+@thrift.AllowLegacyTypedefUri
 typedef list<AdaptedString> AdaptedStringList
+@thrift.AllowLegacyTypedefUri
 typedef set<AdaptedString> AdaptedStringSet
+@thrift.AllowLegacyTypedefUri
 typedef map<AdaptedString, string> AdaptedStringKeyMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, AdaptedString> AdaptedStringValueMap
+@thrift.AllowLegacyTypedefUri
 typedef map<AdaptedString, AdaptedString> AdaptedStringMap
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::FBVectorAdapter"}
 @python.Py3EnableCppAdapter
 typedef list<i32> AdaptedList
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::F14FastSetAdapter"}
 @python.Py3EnableCppAdapter
 typedef set<i32> AdaptedSet
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::F14FastMapAdapter"}
 @python.Py3EnableCppAdapter
 typedef map<i32, i32> AdaptedMap
@@ -364,16 +395,20 @@ struct NestedStructContainers {
   2: map<string, easy> easy_map;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "std::deque<int>"}
 typedef list<i32> list_typedef
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "std::unordered_set<int>"}
 typedef set<i32> set_typedef
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{
   name = "std::unordered_map<int,
     // comments
     int /* inline comments */>",
 }
 typedef map<i32, i32> map_typedef
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::fbstring"}
 typedef string string_typedef
 
@@ -602,6 +637,7 @@ union Misordered {
   1: string s2;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 

@@ -103,6 +103,7 @@ struct MyStructWithCustomDefault {
   1: i64 field1 = 1;
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ByteToStringTypeAdapter",
   typeClassName = "java.lang.String",
@@ -189,6 +190,7 @@ struct TerseStructSingleField {
   1: i32 int_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
@@ -215,6 +217,7 @@ struct TerseStructWithStructTypeAdapter {
   2: any.LazyAny any_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.DateTypeAdapter",
   typeClassName = "java.util.Date",
@@ -239,43 +242,51 @@ struct TestV1 {
   3: i16 short_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.BooleanToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef bool adaptedBoolean
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ShortToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i16 adaptedShort
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i32 Integer
+@thrift.AllowLegacyTypedefUri
 typedef Integer adaptedInt
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.LongToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef i64 adaptedLong
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary SlicedByteBuf
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.ListToHexTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef list<binary> adaptedBinaryList
 
+@thrift.AllowLegacyTypedefUri
 typedef adaptedInt doubleTypedefInt
 
 @thrift.TerseWrite

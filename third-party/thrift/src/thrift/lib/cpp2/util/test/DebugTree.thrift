@@ -17,6 +17,7 @@
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/any.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/lib/cpp2/type/Any.h"
 
@@ -28,6 +29,7 @@ struct Def {
   1: i32 field;
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef Def MyDef
 
 struct MyData {
@@ -61,6 +63,7 @@ struct MyStruct {
   28: optional map<string, string> optMapVal;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::AnyData>",
 }

@@ -53,12 +53,14 @@ enum TestEnumOpen2 {
   THREE = 3,
 }
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.EnumToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef test_common.TestEnum AdaptedTestEnum
 
+@thrift.AllowLegacyTypedefUri
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.OpenEnumToStringTypeAdapter",
   typeClassName = "java.lang.String",

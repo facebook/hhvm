@@ -252,6 +252,7 @@ void HttpServer::onServerShutdown() {
     Logger::Error("emergency restart: terminating due to lowptr exhaustion!");
     if (StructuredLog::enabled()) {
       auto record = StructuredLogEntry{};
+      record.setInt("uptime", HHVM_FN(server_uptime)());
       record.setInt("low_mapped", alloc::getLowMapped());
       StructuredLog::log("hhvm_emergency_restart", record);
     }

@@ -1,0 +1,32 @@
+dict(4) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(1) {
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(1) "T"
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["case_type"]=>
+  string(19) "HasGenericAndUsesIt"
+}
+dict(4) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(1) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["case_type"]=>
+  string(25) "HasGenericAndDoesNotUseIt"
+}

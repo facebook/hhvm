@@ -696,6 +696,15 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'd' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

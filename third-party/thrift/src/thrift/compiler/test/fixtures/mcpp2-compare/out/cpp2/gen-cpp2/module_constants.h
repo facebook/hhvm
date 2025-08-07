@@ -115,9 +115,9 @@ namespace module_constants {
     return constEnumB_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_9a58f62a41e2535e();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_9a58f62a41e2535e_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_9a58f62a41e2535e_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_294971687470cd98();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_294971687470cd98_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_294971687470cd98_uris();
 
 } // namespace module_constants
 } // namespace some::valid::ns

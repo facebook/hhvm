@@ -1,6 +1,9 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "module",
+  "includes": {
+    "thrift": "thrift/annotation/thrift.thrift"
+  },
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
@@ -13,7 +16,7 @@
         "name" : "EmptyStruct",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 19
+        "lineno" : 21
       },
       "TestStruct" : {
         "name" : "TestStruct",
@@ -22,7 +25,7 @@
             "name" : "unqualified_int_field",
             "default_value" : 0,
             "key" : 1,
-            "lineno" : 22,
+            "lineno" : 24,
             "required" : "opt-in-req-out",
             "type" : "i32"
                   },
@@ -30,7 +33,7 @@
             "name" : "unqualified_bool_field",
             "default_value" : 0,
             "key" : 2,
-            "lineno" : 24,
+            "lineno" : 26,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -38,7 +41,7 @@
             "name" : "unqualified_list_field",
             "default_value" : [],
             "key" : 3,
-            "lineno" : 26,
+            "lineno" : 28,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -49,7 +52,7 @@
             "name" : "unqualified_struct_field",
             "default_value" : {},
             "key" : 4,
-            "lineno" : 28,
+            "lineno" : 30,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -60,44 +63,88 @@
             "name" : "optional_int_field",
             "default_value" : 42,
             "key" : 5,
-            "lineno" : 30,
+            "lineno" : 32,
             "required" : "optional",
             "type" : "i32"
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
+                "type" : {
+              "type" : "struct",
+              "name" : "AllowUnsafeOptionalCustomDefaultValue",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
+          },
           "optional_bool_field" : {
             "name" : "optional_bool_field",
             "default_value" : 1,
             "key" : 6,
-            "lineno" : 32,
+            "lineno" : 35,
             "required" : "optional",
             "type" : "bool"
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
+                "type" : {
+              "type" : "struct",
+              "name" : "AllowUnsafeOptionalCustomDefaultValue",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
+          },
           "optional_list_field" : {
             "name" : "optional_list_field",
             "default_value" : [1,2],
             "key" : 7,
-            "lineno" : 34,
+            "lineno" : 38,
             "required" : "optional",
             "type" : {
       "type" : "list",
       "inner_type" : "i32"
     }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
+                "type" : {
+              "type" : "struct",
+              "name" : "AllowUnsafeOptionalCustomDefaultValue",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
+          },
           "optional_struct_field" : {
             "name" : "optional_struct_field",
             "default_value" : {},
             "key" : 8,
-            "lineno" : 36,
+            "lineno" : 41,
             "required" : "optional",
             "type" : {
       "type" : "struct",
       "name" : "EmptyStruct"
     }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
+                "type" : {
+              "type" : "struct",
+              "name" : "AllowUnsafeOptionalCustomDefaultValue",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 21
+        "lineno" : 23
       }
   },
   "source_path" : "thrift/compiler/test/fixtures/default_values_rectification_before/src/module",

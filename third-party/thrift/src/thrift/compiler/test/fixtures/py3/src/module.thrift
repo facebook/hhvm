@@ -16,6 +16,7 @@
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 py3.simple
 
@@ -72,10 +73,13 @@ struct SimpleStruct {
   @python.Py3Hidden{}
   8: i16 hidden_field;
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   10: optional i32 opt_default_int = 2;
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   11: optional string opt_default_str = "2";
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   12: optional AnEnum opt_default_enum = AnEnum.THREE;
 }
 

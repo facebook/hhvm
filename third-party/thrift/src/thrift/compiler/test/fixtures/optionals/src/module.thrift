@@ -16,6 +16,8 @@
 
 namespace java.swift test.fixtures.optionals
 
+include "thrift/annotation/thrift.thrift"
+
 struct Color {
   1: double red;
   2: double green;
@@ -34,6 +36,7 @@ struct Vehicle {
   2: optional string licensePlate;
   3: optional string description;
   4: optional string name;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   5: optional bool hasAC = false;
 }
 

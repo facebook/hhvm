@@ -688,12 +688,12 @@ unsigned long TestStruct::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -6351212033995931189;
-  static constexpr ::std::string_view definitionKey = {"\x2d\x60\x8b\x88\x79\x46\xff\x6e\x68\xe3\xf7\xf9\x8b\x0b\x74\xdb", 16};
+  static constexpr int64_t programId = 4952383987043382979;
+  static constexpr ::std::string_view definitionKey = {"\x05\x8c\x0f\xc5\x87\xf7\x79\xd6\x17\xf2\xf2\xde\x04\x6d\x86\x47", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -6351212033995931189;
-  static constexpr ::std::string_view definitionKey = {"\x9d\xe7\x5b\x5d\x71\xcc\x3f\xb2\xf7\x7b\xe9\x63\x03\x19\x76\xe6", 16};
+  static constexpr int64_t programId = 4952383987043382979;
+  static constexpr ::std::string_view definitionKey = {"\x36\x26\x78\x6b\x16\x20\x57\x6f\x8e\x2f\xa1\xa4\x95\x48\xb6\xe8", 16};
 };
 } // namespace apache::thrift::detail

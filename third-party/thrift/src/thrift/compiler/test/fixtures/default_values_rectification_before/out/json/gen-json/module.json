@@ -1,9 +1,14 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "module",
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
   "structs" : {
     "EmptyStruct" : {
-      "lineno" : 19,
+      "lineno" : 21,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -11,17 +16,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 19,
+          "line" : 21,
           "column" : 1
         },
         "end" : {
-          "line" : 19,
+          "line" : 21,
           "column" : 22
         }
       }
     },
     "TestStruct" : {
-      "lineno" : 21,
+      "lineno" : 23,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -32,11 +37,11 @@
           "default_value" : 0,
           "source_range" : {
             "begin" : {
-              "line" : 22,
+              "line" : 24,
               "column" : 3
             },
             "end" : {
-              "line" : 22,
+              "line" : 24,
               "column" : 36
             }
           }
@@ -48,11 +53,11 @@
           "default_value" : false,
           "source_range" : {
             "begin" : {
-              "line" : 24,
+              "line" : 26,
               "column" : 3
             },
             "end" : {
-              "line" : 24,
+              "line" : 26,
               "column" : 42
             }
           }
@@ -64,11 +69,11 @@
           "default_value" : [  ],
           "source_range" : {
             "begin" : {
-              "line" : 26,
+              "line" : 28,
               "column" : 3
             },
             "end" : {
-              "line" : 26,
+              "line" : 28,
               "column" : 44
             }
           }
@@ -80,11 +85,11 @@
           "default_value" : {  },
           "source_range" : {
             "begin" : {
-              "line" : 28,
+              "line" : 30,
               "column" : 3
             },
             "end" : {
-              "line" : 28,
+              "line" : 30,
               "column" : 48
             }
           }
@@ -96,11 +101,11 @@
           "default_value" : 42,
           "source_range" : {
             "begin" : {
-              "line" : 30,
+              "line" : 32,
               "column" : 3
             },
             "end" : {
-              "line" : 30,
+              "line" : 33,
               "column" : 43
             }
           }
@@ -112,11 +117,11 @@
           "default_value" : true,
           "source_range" : {
             "begin" : {
-              "line" : 32,
+              "line" : 35,
               "column" : 3
             },
             "end" : {
-              "line" : 32,
+              "line" : 36,
               "column" : 47
             }
           }
@@ -128,11 +133,11 @@
           "default_value" : [ 1, 2 ],
           "source_range" : {
             "begin" : {
-              "line" : 34,
+              "line" : 38,
               "column" : 3
             },
             "end" : {
-              "line" : 34,
+              "line" : 39,
               "column" : 54
             }
           }
@@ -144,11 +149,11 @@
           "default_value" : {  },
           "source_range" : {
             "begin" : {
-              "line" : 36,
+              "line" : 41,
               "column" : 3
             },
             "end" : {
-              "line" : 36,
+              "line" : 42,
               "column" : 54
             }
           }
@@ -156,11 +161,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 21,
+          "line" : 23,
           "column" : 1
         },
         "end" : {
-          "line" : 37,
+          "line" : 43,
           "column" : 2
         }
       }

@@ -16,6 +16,8 @@
 
 package "facebook.com/thrift/compiler/test/fixtures/default_values_rectification"
 
+include "thrift/annotation/thrift.thrift"
+
 struct EmptyStruct {}
 
 struct TestStruct {
@@ -27,11 +29,15 @@ struct TestStruct {
 
   4: EmptyStruct unqualified_struct_field = {};
 
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   5: optional i32 optional_int_field = 42;
 
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   6: optional bool optional_bool_field = true;
 
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   7: optional list<i32> optional_list_field = [1, 2];
 
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   8: optional EmptyStruct optional_struct_field = {};
 }

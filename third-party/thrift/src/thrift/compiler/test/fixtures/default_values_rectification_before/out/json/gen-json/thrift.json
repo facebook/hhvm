@@ -1,0 +1,461 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "thrift",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "enumerations" : {
+    "RpcPriority" : {
+      "lineno" : 222,
+      "constants" : {
+        "HIGH_IMPORTANT" : 0,
+        "HIGH" : 1,
+        "IMPORTANT" : 2,
+        "NORMAL" : 3,
+        "BEST_EFFORT" : 4
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 222,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 228,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "structs" : {
+    "Experimental" : {
+      "lineno" : 37,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 37,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 39,
+          "column" : 23
+        }
+      }
+    },
+    "ReserveIds" : {
+      "lineno" : 58,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "ids" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 62,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 62,
+              "column" : 20
+            }
+          }
+        },
+        "id_ranges" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 72,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 72,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 58,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 73,
+          "column" : 2
+        }
+      }
+    },
+    "RequiresBackwardCompatibility" : {
+      "lineno" : 80,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field_name" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 83,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 83,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 80,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 84,
+          "column" : 2
+        }
+      }
+    },
+    "TerseWrite" : {
+      "lineno" : 103,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 103,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 107,
+          "column" : 21
+        }
+      }
+    },
+    "Box" : {
+      "lineno" : 139,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 139,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 140,
+          "column" : 14
+        }
+      }
+    },
+    "Mixin" : {
+      "lineno" : 146,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 146,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 147,
+          "column" : 16
+        }
+      }
+    },
+    "SerializeInFieldIdOrder" : {
+      "lineno" : 157,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 157,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 159,
+          "column" : 34
+        }
+      }
+    },
+    "BitmaskEnum" : {
+      "lineno" : 165,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 165,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 166,
+          "column" : 22
+        }
+      }
+    },
+    "ExceptionMessage" : {
+      "lineno" : 190,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 190,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 191,
+          "column" : 27
+        }
+      }
+    },
+    "InternBox" : {
+      "lineno" : 197,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 197,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 199,
+          "column" : 20
+        }
+      }
+    },
+    "Serial" : {
+      "lineno" : 204,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 204,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 205,
+          "column" : 17
+        }
+      }
+    },
+    "Uri" : {
+      "lineno" : 210,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "value" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 212,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 212,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 210,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 213,
+          "column" : 2
+        }
+      }
+    },
+    "Priority" : {
+      "lineno" : 218,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "level" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "RpcPriority",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 220,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 220,
+              "column" : 24
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 218,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 221,
+          "column" : 2
+        }
+      }
+    },
+    "DeprecatedUnvalidatedAnnotations" : {
+      "lineno" : 233,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "items" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 235,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 235,
+              "column" : 32
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 233,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 236,
+          "column" : 2
+        }
+      }
+    },
+    "AllowReservedIdentifier" : {
+      "lineno" : 248,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 248,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 249,
+          "column" : 34
+        }
+      }
+    },
+    "AllowReservedFilename" : {
+      "lineno" : 251,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 251,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 252,
+          "column" : 32
+        }
+      }
+    },
+    "RuntimeAnnotation" : {
+      "lineno" : 258,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 258,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 259,
+          "column" : 28
+        }
+      }
+    },
+    "AllowLegacyTypedefUri" : {
+      "lineno" : 284,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 284,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 285,
+          "column" : 32
+        }
+      }
+    },
+    "AllowUnsafeOptionalCustomDefaultValue" : {
+      "lineno" : 309,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 309,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 310,
+          "column" : 48
+        }
+      }
+    }
+  }
+}

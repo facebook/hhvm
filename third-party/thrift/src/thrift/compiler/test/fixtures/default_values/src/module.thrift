@@ -16,6 +16,8 @@
 
 package "facebook.com/thrift/compiler/test/fixtures/default_values"
 
+include "thrift/annotation/thrift.thrift"
+
 struct TrivialStruct {
   1: i32 int_value;
 }
@@ -32,10 +34,12 @@ struct StructWithNoCustomDefaultValues {
 
 struct StructWithCustomDefaultValues {
   1: i32 unqualified_integer = 42;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   2: optional i32 optional_integer = 43;
   3: required i32 required_integer = 44;
 
   4: TrivialStruct unqualified_struct = TrivialStruct{int_value = 123};
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   5: optional TrivialStruct optional_struct = TrivialStruct{int_value = 456};
   6: required TrivialStruct required_struct = TrivialStruct{int_value = 789};
 }

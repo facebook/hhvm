@@ -530,6 +530,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for Vehicle {
             4 => {
             },
             5 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeOptionalCustomDefaultValue {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

@@ -17,6 +17,7 @@
 include "module0.thrift"
 include "module2.thrift"
 include "thrift/annotation/go.thrift"
+include "thrift/annotation/thrift.thrift"
 
 typedef string Plate
 typedef string State
@@ -30,6 +31,7 @@ typedef module2.Enum Enum
 struct Automobile {
   1: Plate plate;
   2: optional Plate previous_plate;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   3: optional Plate first_plate = "0000";
   4: Year year;
   5: Drivers drivers;

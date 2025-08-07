@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
 enum TestEnum {
   UNKNOWN = 0,
   NEW_VALUE = 1,
@@ -32,6 +34,7 @@ struct Foo {
   1: list<string> a;
   2: optional map<string, list<set<i32>>> b;
   3: i64 c = 7;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   4: optional bool d = 0;
   5: string str_value = "hello";
 }

@@ -350,6 +350,42 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'optional_int_field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'optional_bool_field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'optional_list_field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'optional_struct_field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

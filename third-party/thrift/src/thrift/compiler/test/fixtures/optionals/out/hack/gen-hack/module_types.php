@@ -370,6 +370,15 @@ class Vehicle implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'hasAC' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

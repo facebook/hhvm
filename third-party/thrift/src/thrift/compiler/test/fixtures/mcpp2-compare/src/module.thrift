@@ -187,10 +187,12 @@ struct containerStruct {
   202: optional map<string, bool> opt_fieldB;
   3: set<i32> fieldC = [1, 2, 3, 4];
   103: required set<i32> req_fieldC = [1, 2, 3, 4];
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   203: optional set<i32> opt_fieldC = [1, 2, 3, 4];
   4: string fieldD;
   5: string fieldE = "somestring";
   105: required string req_fieldE = "somestring";
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   205: optional string opt_fieldE = "somestring";
   6: list<list<i32>> fieldF = aListOfLists;
   7: map<string, map<string, map<string, i32>>> fieldG;
@@ -209,6 +211,7 @@ struct containerStruct {
   17: MyEnumA fieldQ;
   18: MyEnumA fieldR = MyEnumA.fieldB;
   118: required MyEnumA req_fieldR = MyEnumA.fieldB;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   218: optional MyEnumA opt_fieldR = MyEnumA.fieldB;
   19: MyEnumA fieldS = constEnumA;
   21: list<MyEnumA> fieldT;

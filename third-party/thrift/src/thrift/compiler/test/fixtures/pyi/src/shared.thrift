@@ -49,6 +49,7 @@ typedef list<SimpleStruct> ListOfSimpleStructs
 struct SimpleStruct {
   1: required bool is_on;
   2: required byte tiny_int = 5;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   3: optional i16 small_int = 10;
   4: optional i32 nice_sized_int;
   5: i64 big_int;

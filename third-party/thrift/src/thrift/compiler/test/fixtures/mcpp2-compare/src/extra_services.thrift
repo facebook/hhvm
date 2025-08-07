@@ -29,10 +29,12 @@ struct containerStruct2 {
   202: optional map<string, bool> opt_fieldB;
   3: set<i32> fieldC = [1, 2, 3, 4];
   103: required set<i32> req_fieldC = [1, 2, 3, 4];
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   203: optional set<i32> opt_fieldC = [1, 2, 3, 4];
   4: string fieldD;
   5: string fieldE = "somestring";
   105: required string req_fieldE = "somestring";
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   205: optional string opt_fieldE = "somestring";
 }
 

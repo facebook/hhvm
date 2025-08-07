@@ -672,7 +672,6 @@ class mstch_go_type : public mstch_type {
             {"type:go_comparable?", &mstch_go_type::is_go_comparable},
             {"type:metadata_primitive?", &mstch_go_type::is_metadata_primitive},
             {"type:named?", &mstch_go_type::has_name},
-            {"type:full_name", &mstch_go_type::full_name},
             {"type:metadata_name", &mstch_go_type::metadata_name},
             {"type:metadata_thrift_type_getter",
              &mstch_go_type::metadata_thrift_type_getter},
@@ -690,7 +689,6 @@ class mstch_go_type : public mstch_type {
     return go::is_type_metadata_primitive(real_type);
   }
   mstch::node has_name() { return !type_->name().empty(); }
-  mstch::node full_name() { return type_->get_full_name(); }
   mstch::node metadata_name() { return metadata_name_(); }
   mstch::node codec_type_spec_name() { return codec_type_spec_name_(); }
   mstch::node metadata_thrift_type_getter() {

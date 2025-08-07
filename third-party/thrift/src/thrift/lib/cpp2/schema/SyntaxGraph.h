@@ -1636,6 +1636,11 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
   ProgramNode::IncludesList programs() const;
 
   /**
+   * Find program by name.
+   */
+  const ProgramNode& findProgramByName(std::string_view name) const;
+
+  /**
    * Provides a view of all definitions in the schema as a TypeSystem.
    *
    * This object must be kept alive for the lifetime of the returned object.

@@ -366,6 +366,24 @@ ProgramNode::IncludesList SyntaxGraph::programs() const {
   return resolver_->programs();
 }
 
+const ProgramNode& SyntaxGraph::findProgramByName(std::string_view name) const {
+  const ProgramNode* tmp = nullptr;
+  for (const ProgramNode* program : resolver_->programs()) {
+    if (program->name() == name) {
+      if (tmp != nullptr) {
+        folly::throw_exception<std::runtime_error>(
+            fmt::format("Multiple programs named '{}'", name));
+      }
+      tmp = program;
+    }
+  }
+  if (tmp != nullptr) {
+    return *tmp;
+  }
+  folly::throw_exception<std::out_of_range>(
+      fmt::format("Program not found for name '{}'", name));
+}
+
 namespace detail {
 
 WithAnnotations::WithAnnotations(std::vector<Annotation>&& annotations)

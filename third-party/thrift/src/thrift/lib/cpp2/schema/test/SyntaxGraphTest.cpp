@@ -56,21 +56,6 @@ class ServiceSchemaTest : public testing::Test {
         .value()
         .definitions;
   }
-
-  static folly::not_null<const ProgramNode*> findProgramByName(
-      const SyntaxGraph& graph, std::string_view name) {
-    auto programs = graph.programs();
-    auto program = std::find_if(
-        programs.begin(),
-        programs.end(),
-        [name](folly::not_null<const ProgramNode*> program) {
-          return program->name() == name;
-        });
-    if (program != programs.end()) {
-      return *program;
-    }
-    throw std::logic_error(fmt::format("Program named {} not found", name));
-  }
 };
 
 } // namespace
@@ -80,24 +65,24 @@ TEST_F(ServiceSchemaTest, Programs) {
   auto programs = syntaxGraph.programs();
   EXPECT_EQ(programs.size(), 3);
 
-  auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
-  EXPECT_EQ(mainProgram->definitionsByName().size(), 15);
-  EXPECT_EQ(mainProgram->namespaces().size(), 1);
+  auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
+  EXPECT_EQ(mainProgram.definitionsByName().size(), 15);
+  EXPECT_EQ(mainProgram.namespaces().size(), 1);
   EXPECT_EQ(
-      mainProgram->namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
+      mainProgram.namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
   {
-    ProgramNode::IncludesList includes = mainProgram->includes();
+    ProgramNode::IncludesList includes = mainProgram.includes();
     EXPECT_EQ(includes.size(), 2);
 
     EXPECT_EQ(includes[0]->name(), "scope");
     EXPECT_EQ(includes[1]->name(), "thrift");
 
-    EXPECT_EQ(includes[0], findProgramByName(syntaxGraph, "scope"));
-    EXPECT_EQ(includes[1], findProgramByName(syntaxGraph, "thrift"));
+    EXPECT_EQ(includes[0], &syntaxGraph.findProgramByName("scope"));
+    EXPECT_EQ(includes[1], &syntaxGraph.findProgramByName("thrift"));
   }
 
   EXPECT_THROW(
-      { findProgramByName(syntaxGraph, "syntax_graph_2"); }, std::logic_error);
+      { syntaxGraph.findProgramByName("syntax_graph_2"); }, std::out_of_range);
 }
 
 TEST_F(ServiceSchemaTest, TransitivePrograms) {
@@ -106,22 +91,22 @@ TEST_F(ServiceSchemaTest, TransitivePrograms) {
   auto programs = syntaxGraph.programs();
   EXPECT_EQ(programs.size(), 4);
 
-  auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
   {
-    ProgramNode::IncludesList includes = mainProgram->includes();
+    ProgramNode::IncludesList includes = mainProgram.includes();
     EXPECT_EQ(includes.size(), 2);
-    EXPECT_EQ(includes[0], findProgramByName(syntaxGraph, "scope"));
-    EXPECT_EQ(includes[1], findProgramByName(syntaxGraph, "thrift"));
+    EXPECT_EQ(includes[0], &syntaxGraph.findProgramByName("scope"));
+    EXPECT_EQ(includes[1], &syntaxGraph.findProgramByName("thrift"));
   }
 
-  auto secondProgram = findProgramByName(syntaxGraph, "syntax_graph_2");
-  EXPECT_EQ(secondProgram->definitionsByName().size(), 2);
+  auto& secondProgram = syntaxGraph.findProgramByName("syntax_graph_2");
+  EXPECT_EQ(secondProgram.definitionsByName().size(), 2);
   {
-    ProgramNode::IncludesList includes = secondProgram->includes();
+    ProgramNode::IncludesList includes = secondProgram.includes();
     EXPECT_EQ(includes.size(), 1);
 
     EXPECT_EQ(includes[0]->name(), "syntax_graph");
-    EXPECT_EQ(includes[0], mainProgram);
+    EXPECT_EQ(includes[0], &mainProgram);
   }
 }
 
@@ -131,30 +116,30 @@ TEST_F(ServiceSchemaTest, RawSchemaLifetime) {
     std::optional<type::Schema> schema = schemaFor<test::TestService>();
     auto syntaxGraph = SyntaxGraph::fromSchema(std::move(schema.value()));
     schema.reset();
-    EXPECT_NO_THROW({ findProgramByName(syntaxGraph, "syntax_graph"); });
+    EXPECT_NO_THROW({ syntaxGraph.findProgramByName("syntax_graph"); });
   }
   // copied type::Schema&&
   {
     std::optional<type::Schema> schema = schemaFor<test::TestService>();
     auto syntaxGraph = SyntaxGraph::fromSchema(folly::copy(schema.value()));
     schema.reset();
-    EXPECT_NO_THROW({ findProgramByName(syntaxGraph, "syntax_graph"); });
+    EXPECT_NO_THROW({ syntaxGraph.findProgramByName("syntax_graph"); });
   }
   // const type::Schema&
   {
     const type::Schema& schema = schemaFor<test::TestService>();
     auto syntaxGraph = SyntaxGraph::fromSchema(&schema);
-    EXPECT_NO_THROW({ findProgramByName(syntaxGraph, "syntax_graph"); });
+    EXPECT_NO_THROW({ syntaxGraph.findProgramByName("syntax_graph"); });
   }
 }
 
 TEST_F(ServiceSchemaTest, Enum) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testEnum =
-      program->definitionsByName().at("TestEnum");
-  EXPECT_EQ(&testEnum->program(), program.unwrap());
+      program.definitionsByName().at("TestEnum");
+  EXPECT_EQ(&testEnum->program(), &program);
   EXPECT_EQ(testEnum->kind(), DefinitionNode::Kind::ENUM);
   EXPECT_EQ(testEnum->name(), "TestEnum");
   const EnumNode& e = testEnum->asEnum();
@@ -186,11 +171,11 @@ TEST_F(ServiceSchemaTest, Enum) {
 
 TEST_F(ServiceSchemaTest, Struct) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testStruct =
-      program->definitionsByName().at("TestStruct");
-  EXPECT_EQ(&testStruct->program(), program.unwrap());
+      program.definitionsByName().at("TestStruct");
+  EXPECT_EQ(&testStruct->program(), &program);
   EXPECT_EQ(testStruct->kind(), DefinitionNode::Kind::STRUCT);
   EXPECT_EQ(testStruct->name(), "TestStruct");
   EXPECT_STREQ(testStruct->name().data(), "TestStruct");
@@ -212,7 +197,7 @@ TEST_F(ServiceSchemaTest, Struct) {
   EXPECT_EQ(s.fields()[1].presence(), FieldNode::PresenceQualifier::OPTIONAL_);
   EXPECT_EQ(
       &s.fields()[1].type().asEnum(),
-      &program->definitionsByName().at("TestEnum")->asEnum());
+      &program.definitionsByName().at("TestEnum")->asEnum());
   EXPECT_EQ(s.fields()[1].name(), "field2");
   EXPECT_STREQ(s.fields()[1].name().data(), "field2");
   EXPECT_EQ(s.fields()[1].customDefault(), nullptr);
@@ -232,11 +217,11 @@ TEST_F(ServiceSchemaTest, Struct) {
 
 TEST_F(ServiceSchemaTest, Union) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testUnion =
-      program->definitionsByName().at("TestUnion");
-  EXPECT_EQ(&testUnion->program(), program.unwrap());
+      program.definitionsByName().at("TestUnion");
+  EXPECT_EQ(&testUnion->program(), &program);
   EXPECT_EQ(testUnion->kind(), DefinitionNode::Kind::UNION);
   EXPECT_EQ(testUnion->name(), "TestUnion");
   EXPECT_STREQ(testUnion->name().data(), "TestUnion");
@@ -248,13 +233,13 @@ TEST_F(ServiceSchemaTest, Union) {
   EXPECT_EQ(u.fields()[0].name(), "s");
   EXPECT_EQ(
       &u.fields()[0].type().asStruct(),
-      &program->definitionsByName().at("TestStruct")->asStruct());
+      &program.definitionsByName().at("TestStruct")->asStruct());
 
   EXPECT_EQ(u.fields()[1].id(), FieldId{2});
   EXPECT_EQ(u.fields()[1].name(), "e");
   EXPECT_EQ(
       &u.fields()[1].type().asEnum(),
-      &program->definitionsByName().at("TestEnum")->asEnum());
+      &program.definitionsByName().at("TestEnum")->asEnum());
 
   EXPECT_EQ(
       u.toDebugString(),
@@ -275,22 +260,22 @@ TEST_F(ServiceSchemaTest, Union) {
 
 TEST_F(ServiceSchemaTest, Typedefs) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> listOfTestStructTypedef =
-      program->definitionsByName().at("ListOfTestStruct");
-  EXPECT_EQ(&listOfTestStructTypedef->program(), program.unwrap());
+      program.definitionsByName().at("ListOfTestStruct");
+  EXPECT_EQ(&listOfTestStructTypedef->program(), &program);
   EXPECT_EQ(listOfTestStructTypedef->kind(), DefinitionNode::Kind::TYPEDEF);
   EXPECT_EQ(listOfTestStructTypedef->name(), "ListOfTestStruct");
   const TypedefNode& t = listOfTestStructTypedef->asTypedef();
 
   EXPECT_EQ(
       &t.targetType().asList().elementType().asStruct(),
-      &program->definitionsByName().at("TestStruct")->asStruct());
+      &program.definitionsByName().at("TestStruct")->asStruct());
 
   folly::not_null<const DefinitionNode*> typedefToListOfTestStructTypedef =
-      program->definitionsByName().at("TypedefToListOfTestStruct");
-  EXPECT_EQ(&typedefToListOfTestStructTypedef->program(), program.unwrap());
+      program.definitionsByName().at("TypedefToListOfTestStruct");
+  EXPECT_EQ(&typedefToListOfTestStructTypedef->program(), &program);
   EXPECT_EQ(
       typedefToListOfTestStructTypedef->kind(), DefinitionNode::Kind::TYPEDEF);
   EXPECT_EQ(
@@ -333,11 +318,11 @@ TEST_F(ServiceSchemaTest, Typedefs) {
 
 TEST_F(ServiceSchemaTest, Exception) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testException =
-      program->definitionsByName().at("TestException");
-  EXPECT_EQ(&testException->program(), program.unwrap());
+      program.definitionsByName().at("TestException");
+  EXPECT_EQ(&testException->program(), &program);
   EXPECT_EQ(testException->kind(), DefinitionNode::Kind::EXCEPTION);
   EXPECT_EQ(testException->name(), "TestException");
   const ExceptionNode& e = testException->asException();
@@ -357,18 +342,18 @@ TEST_F(ServiceSchemaTest, Exception) {
 
 TEST_F(ServiceSchemaTest, Constant) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testConst =
-      program->definitionsByName().at("testConst");
-  EXPECT_EQ(&testConst->program(), program.unwrap());
+      program.definitionsByName().at("testConst");
+  EXPECT_EQ(&testConst->program(), &program);
   EXPECT_EQ(testConst->kind(), DefinitionNode::Kind::CONSTANT);
   EXPECT_EQ(testConst->name(), "testConst");
   const ConstantNode& c = testConst->asConstant();
 
   EXPECT_EQ(
       &c.type().asStruct(),
-      &program->definitionsByName().at("TestStruct")->asStruct());
+      &program.definitionsByName().at("TestStruct")->asStruct());
   const auto& value = c.value().as_object();
   EXPECT_EQ(value.at(FieldId{1}).as_i32(), 2);
 
@@ -389,18 +374,18 @@ TEST_F(ServiceSchemaTest, Constant) {
 
 TEST_F(ServiceSchemaTest, NestedConstant) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testNestedConst =
-      program->definitionsByName().at("testNestedConst");
-  EXPECT_EQ(&testNestedConst->program(), program.unwrap());
+      program.definitionsByName().at("testNestedConst");
+  EXPECT_EQ(&testNestedConst->program(), &program);
   EXPECT_EQ(testNestedConst->kind(), DefinitionNode::Kind::CONSTANT);
   EXPECT_EQ(testNestedConst->name(), "testNestedConst");
   const ConstantNode& c = testNestedConst->asConstant();
 
   EXPECT_EQ(
       &c.type().asStruct(),
-      &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
+      &program.definitionsByName().at("TestStructuredAnnotation")->asStruct());
   const auto& value = c.value().as_object();
   EXPECT_EQ(value.at(FieldId{1}).as_i64(), 3);
   EXPECT_TRUE(value.at(FieldId{2}).is_object());
@@ -410,12 +395,12 @@ TEST_F(ServiceSchemaTest, NestedConstant) {
 
 TEST_F(ServiceSchemaTest, Service) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService2>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
-  auto program2 = findProgramByName(syntaxGraph, "syntax_graph_2");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
+  auto& program2 = syntaxGraph.findProgramByName("syntax_graph_2");
 
   folly::not_null<const DefinitionNode*> testService =
-      program->definitionsByName().at("TestService");
-  EXPECT_EQ(&testService->program(), program.unwrap());
+      program.definitionsByName().at("TestService");
+  EXPECT_EQ(&testService->program(), &program);
   EXPECT_EQ(testService->kind(), DefinitionNode::Kind::SERVICE);
   EXPECT_EQ(testService->name(), "TestService");
   const ServiceNode& s = testService->asService();
@@ -436,7 +421,7 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(s.functions()[0].params()[0].type(), TypeRef::of(Primitive::I32));
 
   const InteractionNode& i =
-      program->definitionsByName().at("TestInteraction")->asInteraction();
+      program.definitionsByName().at("TestInteraction")->asInteraction();
 
   EXPECT_EQ(s.functions()[1].name(), "createInteraction");
   EXPECT_EQ(s.functions()[1].response().type(), nullptr);
@@ -459,8 +444,8 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(s.functions()[3].response().sink(), nullptr);
 
   folly::not_null<const DefinitionNode*> testService2 =
-      program2->definitionsByName().at("TestService2");
-  EXPECT_EQ(&testService2->program(), program2.unwrap());
+      program2.definitionsByName().at("TestService2");
+  EXPECT_EQ(&testService2->program(), &program2);
   EXPECT_EQ(testService2->kind(), DefinitionNode::Kind::SERVICE);
   EXPECT_EQ(testService2->name(), "TestService2");
   const ServiceNode& s2 = testService2->asService();
@@ -520,11 +505,11 @@ TEST_F(ServiceSchemaTest, Service) {
 
 TEST_F(ServiceSchemaTest, Interaction) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testInteraction =
-      program->definitionsByName().at("TestInteraction");
-  EXPECT_EQ(&testInteraction->program(), program.unwrap());
+      program.definitionsByName().at("TestInteraction");
+  EXPECT_EQ(&testInteraction->program(), &program);
   EXPECT_EQ(testInteraction->kind(), DefinitionNode::Kind::INTERACTION);
   EXPECT_EQ(testInteraction->name(), "TestInteraction");
   const InteractionNode& i = testInteraction->asInteraction();
@@ -537,7 +522,7 @@ TEST_F(ServiceSchemaTest, Interaction) {
   EXPECT_EQ(i.functions()[0].response().interaction(), nullptr);
 
   const StructNode& testRecursiveStruct =
-      program->definitionsByName().at("TestRecursiveStruct")->asStruct();
+      program.definitionsByName().at("TestRecursiveStruct")->asStruct();
   EXPECT_EQ(i.functions()[0].params().size(), 1);
   EXPECT_EQ(i.functions()[0].params()[0].id(), FieldId{1});
   EXPECT_EQ(i.functions()[0].params()[0].name(), "input");
@@ -582,23 +567,23 @@ void checkAnnotationsOnTestUnion(const UnionNode& node) {
 
 TEST_F(ServiceSchemaTest, StructuredAnnotation) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
   checkAnnotationsOnTestUnion(
-      program->definitionsByName().at("TestUnion")->asUnion());
+      program.definitionsByName().at("TestUnion")->asUnion());
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testException =
-      program->definitionsByName().at("TestException");
+      program.definitionsByName().at("TestException");
 
   const auto& annotations = testException->annotations();
   EXPECT_EQ(annotations.size(), 1);
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
-      &program->definitionsByName()
+      &program.definitionsByName()
            .at("TestStructuredAnnotationWithoutUri")
            ->asStruct());
   EXPECT_EQ(annotations[0].value().size(), 1);
@@ -607,10 +592,10 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   const ServiceNode& testService =
-      program->definitionsByName().at("TestService")->asService();
+      program.definitionsByName().at("TestService")->asService();
   folly::span<const FunctionNode> functions = testService.functions();
   const FunctionNode& foo = *std::find_if(
       functions.begin(), functions.end(), [](const FunctionNode& f) {
@@ -621,35 +606,35 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {
   EXPECT_EQ(annotations.size(), 1);
   EXPECT_EQ(
       &annotations[0].type().asTypedef(),
-      &program->definitionsByName()
+      &program.definitionsByName()
            .at("TypedefToTestStructuredAnnotation")
            ->asTypedef());
   EXPECT_EQ(
       &annotations[0].type().trueType().asStruct(),
-      &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
+      &program.definitionsByName().at("TestStructuredAnnotation")->asStruct());
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationOnField) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   const ExceptionNode& testException =
-      program->definitionsByName().at("TestException")->asException();
+      program.definitionsByName().at("TestException")->asException();
   folly::span<const Annotation> annotations =
       testException.fields()[0].annotations();
   EXPECT_EQ(annotations.size(), 1);
 
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
-      &program->definitionsByName().at("TestStructuredAnnotation")->asStruct());
+      &program.definitionsByName().at("TestStructuredAnnotation")->asStruct());
 }
 
 TEST_F(ServiceSchemaTest, RecursiveStruct) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+  auto& program = syntaxGraph.findProgramByName("syntax_graph");
 
   folly::not_null<const DefinitionNode*> testRecursiveStruct =
-      program->definitionsByName().at("TestRecursiveStruct");
+      program.definitionsByName().at("TestRecursiveStruct");
   const StructNode& s = testRecursiveStruct->asStruct();
 
   EXPECT_EQ(s.fields().size(), 1);
@@ -744,8 +729,8 @@ TEST(SyntaxGraphTest, getNode) {
 
 TEST_F(ServiceSchemaTest, asTypeSystem) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
-  auto def = mainProgram->definitionsByName().at("TestRecursiveStruct");
+  auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
+  auto def = mainProgram.definitionsByName().at("TestRecursiveStruct");
   auto uri = "meta.com/thrift_test/TestRecursiveStruct";
   ASSERT_EQ(def->asStruct().uri(), uri);
 
@@ -778,7 +763,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       type_system::PresenceQualifier::OPTIONAL_);
   const auto& sgUnionNode = syntaxGraph.asSyntaxGraphUnionNode(unionNode);
   EXPECT_EQ(
-      &mainProgram->definitionsByName().at("TestUnion")->asUnion(),
+      &mainProgram.definitionsByName().at("TestUnion")->asUnion(),
       &sgUnionNode);
   checkAnnotationsOnTestUnion(sgUnionNode);
 
@@ -795,7 +780,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(enumNode.values()[2].i32, 2);
   const auto& sgEnumNode = syntaxGraph.asSyntaxGraphEnumNode(enumNode);
   EXPECT_EQ(
-      &mainProgram->definitionsByName().at("TestEnum")->asEnum(), &sgEnumNode);
+      &mainProgram.definitionsByName().at("TestEnum")->asEnum(), &sgEnumNode);
 }
 
 TEST(SyntaxGraphTest, getSchemaMerge) {

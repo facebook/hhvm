@@ -17,6 +17,11 @@ module DICheck = Decl_init_check
 module SN = Naming_special_names
 module Native = Typing_native
 
+(* Suppress the alert because we don't yet have a tast
+ * when we're building the nast, so can't register dependencies yet
+ *)
+[@@@alert "-dependencies"]
+
 module SSetWTop = struct
   type t =
     | Top

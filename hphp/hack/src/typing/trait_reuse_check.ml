@@ -10,15 +10,10 @@
 
 open Hh_prelude
 module Cls = Folded_class
-module Env = Typing_env
 
 let strip_ns = Utils.strip_ns
 
-let get_class env name =
-  Decl_provider.get_class
-    ?tracing_info:(Env.get_tracing_info env)
-    (Env.get_ctx env)
-    name
+let get_class env name = Typing_env.get_class env name
 
 let is_class env name =
   match get_class env name with

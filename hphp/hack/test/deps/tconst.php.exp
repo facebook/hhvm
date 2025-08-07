@@ -1,4 +1,6 @@
+Const Bar::T -> Type Bar
 Const Bar::TInner -> Type Bar
+Const Foo::T -> Type Foo
 Const Foo::TInner -> Type Foo
 Const M::TInner -> Type M
 Const N::TInner -> Type N

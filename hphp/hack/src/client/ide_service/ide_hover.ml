@@ -11,6 +11,9 @@ open Hh_prelude
 open HoverService
 module SN = Naming_special_names
 
+(* Hovering doesn't introduce new dependencies *)
+[@@@alert "-dependencies"]
+
 (** When we get a Class occurrence and a Method occurrence, that means that the
 user is hovering over an invocation of the constructor, and would therefore only
 want to see information about the constructor, rather than getting both the

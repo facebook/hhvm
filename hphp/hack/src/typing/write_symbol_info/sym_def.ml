@@ -10,6 +10,10 @@ module SO = SymbolOccurrence
 open Hh_prelude
 open Option.Monad_infix
 
+(* We don't introduce new dependencies here,
+   * so it's safe to skip dependency tracking *)
+[@@@alert "-dependencies"]
+
 type t =
   | Function of { name: string }
   | Method of {

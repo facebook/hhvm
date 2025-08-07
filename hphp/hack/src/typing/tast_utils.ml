@@ -124,7 +124,7 @@ let rec truthiness env ty =
       (* Classes which implement Traversable but not Container will always be
          truthy when empty. If this Tclass is instead an interface type like
          KeyedTraversable, the value may or may not be truthy when empty. *)
-      match Decl_provider.get_class (Env.get_ctx env) cid with
+      match Tast_env.get_class env cid with
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->
         Unknown
@@ -216,7 +216,7 @@ let rec find_sketchy_types env acc ty =
     then
       acc
     else (
-      match Decl_provider.get_class (Env.get_ctx env) cid with
+      match Tast_env.get_class env cid with
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->
         acc

@@ -13,6 +13,10 @@ open ServerCommandTypes.Find_refs
 open ServerCommandTypes.Done_or_retry
 open Typing_defs
 
+(* We don't introduce new dependencies here,
+   * so it's safe to skip dependency tracking *)
+[@@@alert "-dependencies"]
+
 let parallel_limit = 10
 
 let find_positions_of_classes

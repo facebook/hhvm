@@ -7,6 +7,9 @@
  *
  *)
 
+(* We don't introduce new dependencies here *)
+[@@@alert "-dependencies"]
+
 open Hh_prelude
 
 let get_ancestors_single ctx class_ ~filter =

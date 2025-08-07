@@ -439,7 +439,7 @@ let typeconsts env tcs cls_name =
     match Env.get_class env.tenv (snd cls_name) with
     | Decl_entry.Found cls -> begin
       fun const_sid ->
-        match Folded_class.get_typeconst cls (snd const_sid) with
+        match Typing_env.get_typeconst env.tenv cls (snd const_sid) with
         | Some ttc -> `Found ttc
         | None -> `Missing
     end

@@ -11,6 +11,9 @@ open Hh_prelude
 open ServerEnv
 open ServerRenameTypes
 
+(* Not incremental, so it's safe to skip dependency tracking *)
+[@@@alert "-dependencies"]
+
 let maybe_add_dollar s =
   if not (Char.equal s.[0] '$') then
     "$" ^ s

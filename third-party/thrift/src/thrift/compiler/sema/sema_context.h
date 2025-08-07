@@ -132,7 +132,7 @@ struct sema_params {
 
   // If true, will issue a warning if a default value is explicitly specified
   // for a field, but that value is equal to the intrinsic default value.
-  bool warn_on_redundant_custom_default_values = false;
+  validation_level redundant_custom_default_values = validation_level::none;
 
   bool forbid_unstructured_annotations = false;
 

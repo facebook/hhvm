@@ -117,23 +117,30 @@ Options:
                 unstructured_annotations
                   Forbids all unstructured annotations
 
-                warn_on_redundant_custom_default_values
-                  Issues warnings for struct fields that have custom default
+                redundant_custom_default_values=none|warn|error
+                  Action to take for struct fields that have custom default
                   values equal to the intrinsic default for that type (eg. 0
-                  for integers, false for boolean, etc.)
+                  for integers, false for boolean, etc.).
+                  Default: none
 
                 unnecessary_enable_custom_type_ordering=none|warn|error
                   Action to take if a @cpp.EnableCustomTypeOrdering annotation
                   is found on a type that does not need it.
+                  Default: none
 
                 nonallowed_typedef_with_uri=none|warn|error
                   Action to take on typedef with URI (but without the annotation
                   that explicitly allows it, i.e.
                   @thrift.AllowLegacyTypedefUri).
+                  Default: none
 
                 typedef_explicit_uri=none|warn|error
                   Action to take on typedef with a non-empty explicit URI
                   (specified using the @thrift.Uri annotation).
+                  Default: none
+
+                warn_on_redundant_custom_default_values
+                  DEPRECATED, prefer: redundant_custom_default_values=warn
 
                 forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
                   Struct (and exception) fields with a @cpp.Ref (or
@@ -797,7 +804,8 @@ std::string parse_args(
           continue;
         }
         if (validator == "warn_on_redundant_custom_default_values") {
-          sparams.warn_on_redundant_custom_default_values = true;
+          sparams.redundant_custom_default_values =
+              sema_params::validation_level::warn;
           continue;
         }
         if (validator == "forbid_non_optional_cpp_ref_fields") {
@@ -811,6 +819,13 @@ std::string parse_args(
         }
 
         try {
+          if (parse_extra_validation_with_level(
+                  "redundant_custom_default_values",
+                  validator,
+                  &sparams.redundant_custom_default_values)) {
+            continue;
+          }
+
           if (parse_extra_validation_with_level(
                   "unnecessary_enable_custom_type_ordering",
                   validator,
@@ -932,7 +947,8 @@ void record_invocation_params(
     detail::metrics& metrics) {
   metrics.get(detail::metrics::StringValue::HOSTNAME)
       .set(std::getenv("HOSTNAME") ? std::getenv("HOSTNAME") : "");
-  auto& parse_params_metric =
+
+  detail::event<std::string>& parse_params_metric =
       metrics.get(detail::metrics::EventString::PARSING_PARAMS);
   parse_params_metric.add("strict=" + std::to_string(pparams.strict));
   parse_params_metric.add(
@@ -948,7 +964,8 @@ void record_invocation_params(
       std::to_string(pparams.use_legacy_type_ref_resolution));
   parse_params_metric.add(
       "use_global_resolution=" + std::to_string(pparams.use_global_resolution));
-  auto& gen_params_metric =
+
+  detail::event<std::string>& gen_params_metric =
       metrics.get(detail::metrics::EventString::GEN_PARAMS);
   gen_params_metric.add("gen_recurse=" + std::to_string(gparams.gen_recurse));
   gen_params_metric.add("genfile=" + gparams.genfile);
@@ -957,10 +974,11 @@ void record_invocation_params(
   gen_params_metric.add("skip_gen=" + std::to_string(gparams.skip_gen));
   gen_params_metric.add(
       "inject_schema_const=" + std::to_string(gparams.inject_schema_const));
-  for (const auto& target : gparams.targets) {
+  for (const std::string& target : gparams.targets) {
     gen_params_metric.add("target=" + target);
   }
-  auto& sema_params_metric =
+
+  detail::event<std::string>& sema_params_metric =
       metrics.get(detail::metrics::EventString::SEMA_PARAMS);
   sema_params_metric.add(
       "skip_lowering_annotations=" +
@@ -968,12 +986,18 @@ void record_invocation_params(
   sema_params_metric.add(
       "skip_lowering_cpp_type_annotations=" +
       std::to_string(sparams.skip_lowering_cpp_type_annotations));
+  sema_params_metric.add(fmt::format(
+      "redundant_custom_default_values={}",
+      fmt::underlying(sparams.redundant_custom_default_values)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
-      std::to_string(sparams.warn_on_redundant_custom_default_values));
+      std::to_string(
+          sparams.redundant_custom_default_values ==
+          sema_params::validation_level::warn));
   sema_params_metric.add(
       "forbid_unstructured_annotations=" +
       std::to_string(sparams.forbid_unstructured_annotations));
+
   metrics.get(detail::metrics::StringValue::INPUT_FILENAME).set(input_filename);
 }
 

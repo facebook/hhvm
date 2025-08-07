@@ -2358,6 +2358,48 @@ TEST(Compilertest, custom_default_values) {
       {"--extra-validation", "warn_on_redundant_custom_default_values"});
 }
 
+TEST(Compilertest, redundant_custom_default_values_error) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    union TestUnion {}
+
+    struct TestStruct {}
+
+    exception TestException {}
+
+
+    struct Widget {
+      1: i32 a = 42;
+
+      2: bool b = false;
+        # expected-error@-1: Explicit default value is redundant for (unqualified) field: `b` (in `Widget`).
+
+      3: i32 c = 0;
+        # expected-error@-1: Explicit default value is redundant for (unqualified) field: `c` (in `Widget`).
+
+      6: TestUnion f = {};
+        # expected-error@-1: Explicit default value is redundant for (unqualified) field: `f` (in `Widget`).
+
+      7: TestStruct g = {};
+        # expected-error@-1: Explicit default value is redundant for (unqualified) field: `g` (in `Widget`).
+
+      8: TestException h = {};
+        # expected-error@-1: Explicit default value is redundant for (unqualified) field: `h` (in `Widget`).
+
+      @thrift.TerseWrite
+      9: i32 i = 0;
+        # expected-error@-2: Explicit default value is redundant for (terse) field: `i` (in `Widget`).
+
+      10: optional bool j = false;
+        # expected-error@-1: Explicit default value is redundant for (optional) field: `j` (in `Widget`).
+        # expected-warning@-2: Optional field should not have custom default value: `j` (in `Widget`).
+    }
+  )",
+      {"--extra-validation", "redundant_custom_default_values=error"});
+}
+
 TEST(CompilerTest, cpp_deprecated_terse_write) {
   check_compile(R"(
     include "thrift/annotation/cpp.thrift"

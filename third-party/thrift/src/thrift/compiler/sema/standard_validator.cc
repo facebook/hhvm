@@ -751,6 +751,8 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
   }
   detail::check_duplicate_keys(ctx, field);
 
+  const sema_params& sema_parameters = ctx.sema_parameters();
+
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
 
@@ -766,11 +768,12 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
 
   const t_field_qualifier field_qualifier = field.qualifier();
 
-  if (ctx.sema_parameters().warn_on_redundant_custom_default_values &&
-      detail::is_initializer_default_value(
+  if (detail::is_initializer_default_value(
           field.type().deref(), *field.default_value())) {
-    ctx.warning(
+    ctx.report(
         field,
+        validation_to_diagnostic_level(
+            sema_parameters.redundant_custom_default_values),
         "Explicit default value is redundant for ({}) field: "
         "`{}` (in `{}`).",
         field_qualifier_to_string(field_qualifier),

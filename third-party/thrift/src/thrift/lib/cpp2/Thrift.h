@@ -30,6 +30,9 @@
 #include <memory>
 #include <type_traits>
 
+static_assert(
+    FOLLY_CPLUSPLUS >= 202002L, "Thrift must be built with C++20 or later.");
+
 namespace apache::thrift {
 
 namespace detail {

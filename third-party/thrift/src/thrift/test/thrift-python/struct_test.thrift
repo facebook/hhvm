@@ -17,6 +17,7 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/test/thrift-python/included.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace py3 thrift.test.thrift_python
 
@@ -62,11 +63,13 @@ struct TestStructWithDefaultValues {
   1: i32 unqualified_integer = 42;
 
   // DEPRECATED: optional-qualified fields with default for testing only
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   2: optional i32 optional_integer = 43;
 
   3: TestStruct unqualified_struct = TestStruct{unqualified_string = "hello"};
 
   // DEPRECATED: optional-qualified fields with default for testing only
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   4: optional TestStruct optional_struct = TestStruct{
     unqualified_string = "world",
   };
@@ -80,6 +83,7 @@ struct TestStructWithDefaultValues {
   8: TestEnum unqualified_enum = TestEnum.ARM1;
 
   // DEPRECATED: optional-qualified fields with default for testing only
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   9: optional TestEnum optional_enum = TestEnum.ARM2;
 }
 

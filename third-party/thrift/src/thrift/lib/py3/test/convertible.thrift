@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 convertible
 
@@ -66,8 +67,10 @@ union Union {
 
 struct OptionalDefaultsStruct {
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string sillyString = "default string";
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   2: optional Color sillyColor = Color.RED;
 }
 

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
 struct DefaultValues {
   1: i32 def_reg;
   2: i32 def_val = 12;
   3: required i32 req_reg;
   4: required i32 req_val = 34;
   5: optional i32 opt_reg;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   6: optional i32 opt_val = 56;
   7: optional list<i32> opt_list_reg;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   8: optional list<i32> opt_list_val = [56, 78, 90];
 }

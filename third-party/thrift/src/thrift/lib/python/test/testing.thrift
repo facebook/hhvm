@@ -312,6 +312,7 @@ struct Runtime {
 
 struct mixed {
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string opt_field = "optional";
   3: string unq_field = "unqualified";
   // @lint-ignore THRIFTCHECKS
@@ -324,12 +325,17 @@ struct mixed {
   @python.Name{name = "some_field_"}
   7: optional string some_field;
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   8: optional float opt_float = 1.0;
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   9: optional i32 opt_int = 1;
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   10: optional Color opt_enum = Color.red;
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   11: optional string opt_pointless_default_str = "";
+  @thrift.AllowUnsafeOptionalCustomDefaultValue
   12: optional i64 opt_pointless_default_int = 0;
 }
 

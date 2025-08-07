@@ -139,6 +139,16 @@ Options:
                   (specified using the @thrift.Uri annotation).
                   Default: none
 
+                struct_optional_field_custom_default=none|warn|error
+                  Action to take on optional fields in structs (and exceptions)
+                  that have a custom default value.
+                  Default: warn
+
+                union_field_custom_default=none|warn|error
+                  Action to take on union fields (which are implicitly optional)
+                  that have a custom default value.
+                  Default: warn
+
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
 
@@ -846,6 +856,20 @@ std::string parse_args(
                   &sparams.typedef_explicit_uri)) {
             continue;
           }
+
+          if (parse_extra_validation_with_level(
+                  "struct_optional_field_custom_default",
+                  validator,
+                  &sparams.struct_optional_field_custom_default)) {
+            continue;
+          }
+
+          if (parse_extra_validation_with_level(
+                  "union_field_custom_default",
+                  validator,
+                  &sparams.union_field_custom_default)) {
+            continue;
+          }
         } catch (const std::exception& e) {
           fmt::print(
               stderr,
@@ -989,6 +1013,21 @@ void record_invocation_params(
   sema_params_metric.add(fmt::format(
       "redundant_custom_default_values={}",
       fmt::underlying(sparams.redundant_custom_default_values)));
+  sema_params_metric.add(fmt::format(
+      "unnecessary_enable_custom_type_ordering={}",
+      fmt::underlying(sparams.unnecessary_enable_custom_type_ordering)));
+  sema_params_metric.add(fmt::format(
+      "nonallowed_typedef_with_uri={}",
+      fmt::underlying(sparams.nonallowed_typedef_with_uri)));
+  sema_params_metric.add(fmt::format(
+      "typedef_explicit_uri={}",
+      fmt::underlying(sparams.typedef_explicit_uri)));
+  sema_params_metric.add(fmt::format(
+      "struct_optional_field_custom_default={}",
+      fmt::underlying(sparams.struct_optional_field_custom_default)));
+  sema_params_metric.add(fmt::format(
+      "union_field_custom_default={}",
+      fmt::underlying(sparams.union_field_custom_default)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

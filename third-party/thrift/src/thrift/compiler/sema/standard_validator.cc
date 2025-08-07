@@ -755,10 +755,11 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
 
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
-
   if (parent_node.is<t_union>()) {
-    ctx.warning(
+    ctx.report(
         field,
+        validation_to_diagnostic_level(
+            sema_parameters.union_field_custom_default),
         "Union field is implicitly optional and should not have custom "
         "default value: `{}` (in union `{}`).",
         field.name(),
@@ -783,8 +784,10 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
 
   switch (field_qualifier) {
     case t_field_qualifier::optional:
-      ctx.warning(
+      ctx.report(
           field,
+          validation_to_diagnostic_level(
+              sema_parameters.struct_optional_field_custom_default),
           "Optional field should not have custom default value: "
           "`{}` (in `{}`).",
           field.name(),

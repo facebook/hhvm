@@ -147,6 +147,15 @@ struct sema_params {
 
   // Action to take on a typedef with explicit URI specified using @thrift.Uri.
   validation_level typedef_explicit_uri = validation_level::none;
+
+  // Action to take on optional fields in structs (and exceptions) that have a
+  // custom default value.
+  validation_level struct_optional_field_custom_default =
+      validation_level::warn;
+
+  // Action to take on union fields (which are implicitly optional) that have a
+  // custom default value.
+  validation_level union_field_custom_default = validation_level::warn;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

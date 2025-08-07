@@ -2400,6 +2400,58 @@ TEST(Compilertest, redundant_custom_default_values_error) {
       {"--extra-validation", "redundant_custom_default_values=error"});
 }
 
+TEST(Compilertest, struct_optional_field_custom_defaul_error) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    struct TestStruct {
+      1: optional bool a = false;
+        # expected-error@-1: Optional field should not have custom default value: `a` (in `TestStruct`).
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      2: optional bool b = false;
+        # expected-error@-2: Optional field should not have custom default value: `b` (in `TestStruct`).
+    }
+
+    union TestUnion {
+      1: i32 c = 0;
+        # expected-warning@-1: Union field is implicitly optional and should not have custom default value: `c` (in union `TestUnion`).
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      2: i32 d = 0;
+        # expected-warning@-2: Union field is implicitly optional and should not have custom default value: `d` (in union `TestUnion`).
+    }
+  )",
+      {"--extra-validation", "struct_optional_field_custom_default=error"});
+}
+
+TEST(Compilertest, union_field_custom_default_error) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    struct TestStruct {
+      1: optional bool a = false;
+        # expected-warning@-1: Optional field should not have custom default value: `a` (in `TestStruct`).
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      2: optional bool b = false;
+        # expected-warning@-2: Optional field should not have custom default value: `b` (in `TestStruct`).
+    }
+
+    union TestUnion {
+      1: i32 c = 0;
+        # expected-error@-1: Union field is implicitly optional and should not have custom default value: `c` (in union `TestUnion`).
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      2: i32 d = 0;
+        # expected-error@-2: Union field is implicitly optional and should not have custom default value: `d` (in union `TestUnion`).
+    }
+  )",
+      {"--extra-validation", "union_field_custom_default=error"});
+}
+
 TEST(CompilerTest, cpp_deprecated_terse_write) {
   check_compile(R"(
     include "thrift/annotation/cpp.thrift"

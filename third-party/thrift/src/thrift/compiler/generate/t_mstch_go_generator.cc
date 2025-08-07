@@ -173,7 +173,6 @@ class mstch_go_enum : public mstch_enum {
         {
             {"enum:go_name", &mstch_go_enum::go_name},
             {"enum:go_qualified_name", &mstch_go_enum::go_qualified_name},
-            {"enum:scoped_name", &mstch_go_enum::scoped_name},
         });
   }
 
@@ -183,7 +182,6 @@ class mstch_go_enum : public mstch_enum {
     auto name = go::munge_ident(enum_->name());
     return prefix + name;
   }
-  mstch::node scoped_name() { return enum_->get_scoped_name(); }
 
  private:
   go::codegen_data& data_;
@@ -435,7 +433,6 @@ class mstch_go_struct : public mstch_struct {
             {"struct:req?", &mstch_go_struct::is_req_struct},
             {"struct:stream?", &mstch_go_struct::is_stream_struct},
             {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
-            {"struct:scoped_name", &mstch_go_struct::scoped_name},
             {"struct:use_reflect_codec?",
              &mstch_go_struct::should_use_reflect_codec},
         });
@@ -503,7 +500,6 @@ class mstch_go_struct : public mstch_struct {
     }
     return make_mstch_fields(fields_in_id_order);
   }
-  mstch::node scoped_name() { return struct_->get_scoped_name(); }
   mstch::node should_use_reflect_codec() {
     auto use_reflect_codec_annotation =
         struct_->find_structured_annotation_or_null(kGoUseReflectCodecUri);
@@ -557,7 +553,6 @@ class mstch_go_service : public mstch_service {
             {"service:go_qualified_name", &mstch_go_service::go_qualified_name},
             {"service:go_package_alias_prefix",
              &mstch_go_service::go_package_alias_prefix_},
-            {"service:scoped_name", &mstch_go_service::scoped_name},
         });
   }
 
@@ -570,7 +565,6 @@ class mstch_go_service : public mstch_service {
   mstch::node go_package_alias_prefix_() {
     return data_.go_package_alias_prefix(service_->program());
   }
-  mstch::node scoped_name() { return service_->get_scoped_name(); }
 
  private:
   go::codegen_data& data_;
@@ -778,7 +772,6 @@ class mstch_go_typedef : public mstch_typedef {
             {"typedef:go_qualified_read_func",
              &mstch_go_typedef::go_qualified_read_func},
             {"typedef:defined_kind?", &mstch_go_typedef::is_defined_kind},
-            {"typedef:scoped_name", &mstch_go_typedef::scoped_name},
         });
   }
   mstch::node go_name() { return go_name_(); }
@@ -812,7 +805,6 @@ class mstch_go_typedef : public mstch_typedef {
     //    "real" type or "defined" typedef to ensure code correctness.
     return typedef_->typedef_kind() == t_typedef::kind::defined;
   }
-  mstch::node scoped_name() { return typedef_->get_scoped_name(); }
 
  private:
   go::codegen_data& data_;

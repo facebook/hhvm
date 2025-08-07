@@ -24,11 +24,7 @@
 
 namespace proxygen {
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
-
-CLANG_LAZY_INIT_TEST extern const std::string empty_string;
+extern const std::string empty_string;
 
 /**
  * Return true if the character is linear whitespace, as defined by the LWS

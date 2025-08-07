@@ -54,18 +54,14 @@ enum class HQVersion : uint8_t {
   HQ,        // The real McCoy
 };
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
-
-CLANG_LAZY_INIT_TEST extern const std::string kH3;
-CLANG_LAZY_INIT_TEST extern const std::string kH3AliasV1;
-CLANG_LAZY_INIT_TEST extern const std::string kH3AliasV2;
-CLANG_LAZY_INIT_TEST extern const std::string kHQ;
-CLANG_LAZY_INIT_TEST extern const std::string kH3FBCurrentDraft;
+extern const std::string kH3;
+extern const std::string kH3AliasV1;
+extern const std::string kH3AliasV2;
+extern const std::string kHQ;
+extern const std::string kH3FBCurrentDraft;
 // TODO: Remove these constants, the session no longer negotiates these
-CLANG_LAZY_INIT_TEST extern const std::string kH3CurrentDraft;
-CLANG_LAZY_INIT_TEST extern const std::string kHQCurrentDraft;
+extern const std::string kH3CurrentDraft;
+extern const std::string kHQCurrentDraft;
 
 // Default Priority Node
 extern const proxygen::http2::PriorityUpdate hqDefaultPriority;

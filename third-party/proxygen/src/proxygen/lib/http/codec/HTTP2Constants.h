@@ -42,16 +42,12 @@ extern const uint32_t kMaxAuthenticatorBufSize;
 
 extern const uint32_t kMaxHeaderTableSize;
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
+extern const std::string kConnectionPreface;
 
-CLANG_LAZY_INIT_TEST extern const std::string kConnectionPreface;
-
-CLANG_LAZY_INIT_TEST extern const std::string kProtocolString;
-CLANG_LAZY_INIT_TEST extern const std::string kProtocolDraftString;
-CLANG_LAZY_INIT_TEST extern const std::string kProtocolExperimentalString;
-CLANG_LAZY_INIT_TEST extern const std::string kProtocolCleartextString;
-CLANG_LAZY_INIT_TEST extern const std::string kProtocolSettingsHeader;
+extern const std::string kProtocolString;
+extern const std::string kProtocolDraftString;
+extern const std::string kProtocolExperimentalString;
+extern const std::string kProtocolCleartextString;
+extern const std::string kProtocolSettingsHeader;
 
 } // namespace proxygen::http2

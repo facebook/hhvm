@@ -143,11 +143,7 @@ class TOutput {
   void (*f_)(const char*);
 };
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
-
-CLANG_LAZY_INIT_TEST extern TOutput GlobalOutput;
+extern TOutput GlobalOutput;
 
 /**
  * Base class for all Thrift exceptions.

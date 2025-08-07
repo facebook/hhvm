@@ -31,10 +31,13 @@ namespace py.asyncio apache_thrift_asyncio.field_mask
 namespace go thrift.lib.thrift.field_mask
 namespace py thrift.lib.thrift.field_mask
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "::folly::F14FastMap"}
 typedef map<i16, Mask> FieldIdToMask
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "::folly::F14FastMap"}
 typedef map<i64, Mask> MapIdToMask
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "::folly::F14FastMap"}
 typedef map<string, Mask> MapStringToMask
 
@@ -51,6 +54,7 @@ struct TypeAndMaskEntry {
  * Contract (for unadapted usage): There must be at most one entry for a
  * given type within the list
  */
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::protocol::detail::TypeToMaskAdapter<
       ::apache::thrift::protocol::TypeAndMaskEntry,

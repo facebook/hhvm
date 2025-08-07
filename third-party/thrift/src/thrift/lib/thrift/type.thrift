@@ -46,6 +46,7 @@ namespace py thrift.lib.thrift.type
  * Similar to lib/cpp/protocol/TType.h, but IDL concepts instead of protocol
  * concepts.
  */
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::StaticCastAdapter<::apache::thrift::type::BaseType, ::apache::thrift::type::BaseTypeEnum>",
 }
@@ -96,5 +97,6 @@ typedef type_rep.ProtocolUnion Protocol
 typedef type_rep.TypeStruct Type
 
 /** A list of Types, accessible by `TypeId`. */
+@thrift.AllowLegacyTypedefUri
 @thrift.Experimental // TODO(afuller): Adapt! and use Type directly when supported.
 typedef list<type_rep.TypeStruct> TypeList

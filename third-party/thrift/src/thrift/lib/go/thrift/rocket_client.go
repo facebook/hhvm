@@ -36,6 +36,11 @@ type rocketClient struct {
 
 	// rsocket client state
 	client RSocketClient
+	// Handle containing the cleanup (.Close call) for the 'client' (RSocketClient) above,
+	// for when the enclosing 'rocketClient' object goes out of scope, and in case the user
+	// forgets to explicitly close the client.
+	// This cleanup is VERY IMPORTANT - not cleaning up can lead to Goroutine and FD leaks!
+	clientCleanup runtime.Cleanup
 
 	ioTimeout time.Duration
 
@@ -102,7 +107,10 @@ func newRocketClientFromRsocket(
 	default:
 		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}
-	runtime.SetFinalizer(p, (*rocketClient).Close)
+	p.clientCleanup = runtime.AddCleanup(p,
+		func(underlyingClient RSocketClient) {
+			underlyingClient.Close()
+		}, client)
 	return p, nil
 }
 
@@ -316,8 +324,8 @@ func (p *rocketClient) getResponseHeaders() map[string]string {
 }
 
 func (p *rocketClient) Close() error {
-	// no need for a finalizer anymore
-	runtime.SetFinalizer(p, nil)
+	// no need for the cleanup anymore (idempotent method)
+	p.clientCleanup.Stop()
 	return p.client.Close()
 }
 

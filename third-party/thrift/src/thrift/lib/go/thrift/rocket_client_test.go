@@ -143,7 +143,9 @@ func TestFDRelease(t *testing.T) {
 	}
 
 	// Run GC to ensure it releases the underlying FDs
-	runtime.GC()
+	for range 10 {
+		runtime.GC()
+	}
 	fdCount := getNumFileDesciptors(t)
 
 	// Because we run alongside other tests concurrently - we cannot assert zero.

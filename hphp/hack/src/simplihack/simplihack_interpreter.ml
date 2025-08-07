@@ -237,8 +237,7 @@ module Context = struct
 
     let find ~ctx (pos, name) =
       add_dep ctx Typing_deps.Dep.(Type name);
-      let provider = provider ctx in
-      let cls = Decl_provider.get_class provider name |> Decl_entry.to_option in
+      let cls = Tast_env.get_class ctx.env name |> Decl_entry.to_option in
       match cls with
       | Some cls -> (ctx, cls)
       | None ->
@@ -251,7 +250,8 @@ module Context = struct
 
     let constructor (ctx, cls) =
       add_dep ctx Typing_deps.Dep.(Constructor (Folded_class.name cls));
-      let (constructor, _) = Folded_class.construct cls in
+      let tenv = Tast_env.tast_env_as_typing_env ctx.env in
+      let (constructor, _) = Typing_env.get_construct tenv cls in
       constructor
 
     let methods (ctx, cls) =

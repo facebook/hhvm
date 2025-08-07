@@ -13,6 +13,11 @@ open Typing_defs
 module Cls = Folded_class
 module SN = Naming_special_names
 
+[@@@alert "-dependencies"]
+(* linting is not fanout-aware, so it's safe
+ * to use non-dep-aware functions here
+ *)
+
 let has_override_attribute m =
   List.exists m.m_user_attributes ~f:(fun ua ->
       String.equal (snd ua.ua_name) SN.UserAttributes.uaOverride)

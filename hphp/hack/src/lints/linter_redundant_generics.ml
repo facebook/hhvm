@@ -13,6 +13,11 @@ open Typing_defs
 module Cls = Folded_class
 module SN = Naming_special_names
 
+[@@@alert "-dependencies"]
+(* linting is not fanout-aware, so it's safe
+ * to use non-dep-aware functions here
+ *)
+
 let ft_redundant_tparams env overlapping tparams ty =
   let tracked =
     List.fold_left

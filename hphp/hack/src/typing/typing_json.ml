@@ -7,6 +7,11 @@
  *
  *)
 
+[@@@alert "-dependencies"]
+(* So we don't have to pass in a typing env in order
+   * to print things.
+*)
+
 (*****************************************************************************)
 (* Pretty printing of types *)
 (*****************************************************************************)

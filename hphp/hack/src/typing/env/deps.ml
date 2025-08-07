@@ -10,6 +10,10 @@ open Hh_prelude
 module Cls = Folded_class
 module Dep = Typing_deps.Dep
 
+[@@@alert "-dependencies"]
+(* I assume we don't want to implicitly add
+   * dependencies in our dependency-adding machinery *)
+
 let get_current_decl env =
   Option.map
     env.Typing_env_types.decl_env.Decl_env.droot

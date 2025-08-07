@@ -14,6 +14,11 @@ open Hh_prelude
 open Aast
 module Cls = Folded_class
 
+[@@@alert "-dependencies"]
+(* linting is not fanout-aware, so it's safe
+ * to use non-dep-aware functions here
+ *)
+
 let has_semantic_attribute m =
   List.exists m.m_user_attributes ~f:(fun ua ->
       not (String.is_prefix (snd ua.ua_name) ~prefix:"__"))

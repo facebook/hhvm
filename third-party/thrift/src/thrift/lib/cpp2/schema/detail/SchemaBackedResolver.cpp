@@ -123,6 +123,11 @@ class SchemaIndex {
       folly::F14FastMap<std::string_view, DefinitionKeyRef>;
   DefinitionKeysByUri definitionKeysByUri_;
 
+  // A set of unresolved definition keys collected while updating indexes.
+  // This can be used to detect missing definitions in selective resolver.
+  folly::F14FastSet<DefinitionKeyRef, DefinitionKeyHash, DefinitionKeyEqual>
+      unresolvedDefinitionRefs_;
+
   void updateProgramsById(
       ProgramsById&, const type::Schema&, const DefinitionsByKey&);
   void updateValuesById(ValuesById&, const type::Schema& schema);
@@ -196,9 +201,13 @@ class SchemaIndex {
    * definitions are lazily resolved. This means that it's safe to call
    * typeOf(...) even if the pointed-to type has not been seen yet.
    */
-  TypeRef typeOf(const type::TypeStruct&) const;
-  TypeRef typeOf(const type::Type& type) const {
-    return typeOf(type.toThrift());
+  TypeRef typeOf(const type::TypeStruct&);
+  TypeRef typeOf(const type::Type& type) { return typeOf(type.toThrift()); }
+
+  template <typename T>
+  detail::Lazy<T> createLazyUnresolved(const type::DefinitionKey& key) {
+    unresolvedDefinitionRefs_.insert(key);
+    return typename detail::Lazy<T>::Unresolved(resolver_, key);
   }
 
   Resolver& resolver_;
@@ -210,12 +219,23 @@ class SchemaIndex {
   const DefinitionNode* definitionForUri(std::string_view uri) const;
   ProgramNode::IncludesList programs() const;
 
-  void updateIndices(const type::Schema& schema) {
+  void updateIndices(const type::Schema& schema, bool resolve = false) {
     updateDefinitionsByKey(
         definitionsByKey_, schema, createProgramIdsByDefinitionKey(schema));
     updateProgramsById(programsById_, schema, definitionsByKey_);
     updateValuesById(valuesById_, schema);
     updateDefinitionKeysByUri(definitionKeysByUri_, definitionsByKey_);
+
+    auto unresolved = std::move(unresolvedDefinitionRefs_);
+    if (!resolve) {
+      return;
+    }
+    for (const auto& keyRef : unresolved) {
+      if (!definitionsByKey_.contains(keyRef)) {
+        folly::throw_exception<InvalidSyntaxGraphError>(
+            "There are unresolved definitions.");
+      }
+    }
   }
 };
 
@@ -223,7 +243,7 @@ class FullyResolvedSchemaRefBackedResolver : public SchemaBackedResolver {
  public:
   explicit FullyResolvedSchemaRefBackedResolver(const type::Schema& schema)
       : schema_(schema) {
-    index_->updateIndices(schema_);
+    index_->updateIndices(schema_, true);
   }
 
   const ProgramNode& programOf(const type::ProgramId& id) const override {
@@ -248,7 +268,7 @@ class FullyResolvedSchemaBackedResolver : public SchemaBackedResolver {
  public:
   explicit FullyResolvedSchemaBackedResolver(type::Schema&& schema)
       : schema_(std::move(schema)) {
-    index_->updateIndices(schema_);
+    index_->updateIndices(schema_, true);
   }
 
   const ProgramNode& programOf(const type::ProgramId& id) const override {
@@ -343,7 +363,7 @@ const type::DefinitionKey& SchemaIndex::definitionKeyOf(
   }
 }
 
-TypeRef SchemaIndex::typeOf(const type::TypeStruct& type) const {
+TypeRef SchemaIndex::typeOf(const type::TypeStruct& type) {
   return TypeRef([&]() -> TypeRef::Alternative {
     using T = type::TypeName::Type;
     T t = type.name()->getType();
@@ -367,20 +387,20 @@ TypeRef SchemaIndex::typeOf(const type::TypeStruct& type) const {
       case T::binaryType:
         return Primitive::BINARY;
       case T::enumType:
-        return detail::Lazy<EnumNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->enumType()));
+        return createLazyUnresolved<EnumNode>(
+            definitionKeyOf(*type.name()->enumType()));
       case T::typedefType:
-        return detail::Lazy<TypedefNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->typedefType()));
+        return createLazyUnresolved<TypedefNode>(
+            definitionKeyOf(*type.name()->typedefType()));
       case T::structType:
-        return detail::Lazy<StructNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->structType()));
+        return createLazyUnresolved<StructNode>(
+            definitionKeyOf(*type.name()->structType()));
       case T::unionType:
-        return detail::Lazy<UnionNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->unionType()));
+        return createLazyUnresolved<UnionNode>(
+            definitionKeyOf(*type.name()->unionType()));
       case T::exceptionType:
-        return detail::Lazy<ExceptionNode>::Unresolved(
-            resolver_, definitionKeyOf(*type.name()->exceptionType()));
+        return createLazyUnresolved<ExceptionNode>(
+            definitionKeyOf(*type.name()->exceptionType()));
       case T::listType: {
         const auto& params = *type.params();
         if (params.size() != 1) {
@@ -697,8 +717,8 @@ FunctionNode SchemaIndex::createFunction(
   auto interaction = [&]() -> std::optional<detail::Lazy<InteractionNode>> {
     if (const auto& interactionTypeUri = *function.interactionType()->uri();
         !isEmptyTypeUri(interactionTypeUri)) {
-      return detail::Lazy<InteractionNode>::Unresolved(
-          resolver_, definitionKeyOf(interactionTypeUri));
+      return createLazyUnresolved<InteractionNode>(
+          definitionKeyOf(interactionTypeUri));
     }
     return std::nullopt;
   }();

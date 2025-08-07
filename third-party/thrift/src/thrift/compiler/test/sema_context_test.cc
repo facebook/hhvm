@@ -37,4 +37,23 @@ TEST(sema_params_test, parse_validation_level) {
       ThrowsMessage<std::runtime_error>("Unknown validation level: 'invalid'"));
 }
 
+TEST(sema_params_test, validation_level_to_string) {
+  EXPECT_EQ(
+      "none",
+      sema_params::validation_level_to_string(
+          sema_params::validation_level::none));
+  EXPECT_EQ(
+      "warn",
+      sema_params::validation_level_to_string(
+          sema_params::validation_level::warn));
+  EXPECT_EQ(
+      "error",
+      sema_params::validation_level_to_string(
+          sema_params::validation_level::error));
+  EXPECT_EQ(
+      "<unknown validation_level: 42>",
+      sema_params::validation_level_to_string(
+          static_cast<sema_params::validation_level>(42)));
+}
+
 } // namespace apache::thrift::compiler

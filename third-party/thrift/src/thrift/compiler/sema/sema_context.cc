@@ -35,4 +35,18 @@ sema_params::validation_level sema_params::parse_validation_level(
   throw std::runtime_error(fmt::format("Unknown validation level: '{}'", name));
 }
 
+std::string sema_params::validation_level_to_string(validation_level lvl) {
+  switch (lvl) {
+    case validation_level::none:
+      return "none";
+    case validation_level::warn:
+      return "warn";
+    case validation_level::error:
+      return "error";
+    default:
+      return fmt::format(
+          "<unknown validation_level: {}>", fmt::underlying(lvl));
+  }
+}
+
 } // namespace apache::thrift::compiler

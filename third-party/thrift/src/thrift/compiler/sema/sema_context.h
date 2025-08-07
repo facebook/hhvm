@@ -106,8 +106,25 @@ struct sema_params {
   /**
    * Returns the validation level with the given human readable name, or
    * throws if none exists.
+   *
+   * See also: `validation_level_to_string(...)`.
    */
   static validation_level parse_validation_level(const std::string& name);
+
+  /**
+   * Returns a (human-readable) representation of the given validation level.
+   *
+   * This method is safe to call with any value of the underlying type of
+   * validation_level, but will only return a stable, well-known name if `lvl`
+   * is one of the explicitly declared values of the enum type. In that case,
+   * the returned name will match the input of `parse_validation_level` that
+   * returns the given `lvl`.
+   *
+   * Otherwise, returns human-readable but unspecified representation that is
+   * not guaranteed to be stable across invocations, and will throw if passed
+   * to `parse_validation_level` (eg. "<unknown validation_level: 42>")
+   */
+  static std::string validation_level_to_string(validation_level lvl);
 
   bool skip_lowering_annotations = false;
 

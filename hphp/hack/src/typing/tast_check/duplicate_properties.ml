@@ -30,17 +30,17 @@ let traits c : (Pos.t * string) list =
       | _ -> None)
 
 (* All the properites of class or trait [type name], flattened *)
-let properties ctx (type_name : string) : (string * Typing_defs.class_elt) list
-    =
-  let decl = Decl_provider.get_class ctx type_name in
+let properties (env : Tast_env.env) (type_name : string) :
+    (string * Typing_defs.class_elt) list =
+  let decl = Tast_env.get_class env type_name in
   match decl with
   | Decl_entry.Found decl -> Cls.props decl @ Cls.sprops decl
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     []
 
-let is_trait_name ctx (type_name : string) : bool =
-  let decl = Decl_provider.get_class ctx type_name in
+let is_trait_name (env : Tast_env.env) (type_name : string) : bool =
+  let decl = Tast_env.get_class env type_name in
   match decl with
   | Decl_entry.Found decl -> Ast_defs.is_c_trait (Cls.kind decl)
   | Decl_entry.DoesNotExist
@@ -49,8 +49,8 @@ let is_trait_name ctx (type_name : string) : bool =
 
 (* All the parent classes, used traits, and implemented interfaces of
    [type_name]. This is the flattened inheritance tree. *)
-let all_ancestor_names ctx (type_name : string) : string list =
-  let decl = Decl_provider.get_class ctx type_name in
+let all_ancestor_names (env : Tast_env.env) (type_name : string) : string list =
+  let decl = Tast_env.get_class env type_name in
   match decl with
   | Decl_entry.Found decl -> Folded_class.all_ancestor_names decl
   | Decl_entry.DoesNotExist
@@ -142,9 +142,9 @@ let handler ~as_lint =
       (* for each used trait add the properties defined in the trait, mapped to their origin *)
       List.iter (traits c) ~f:(fun (_, type_name) ->
           let all_trait_ancestors =
-            SSet.of_list (all_trait_ancestors ctx type_name)
+            SSet.of_list (all_trait_ancestors env type_name)
           in
-          List.iter (properties ctx type_name) ~f:(fun (prop_name, prop_elt) ->
+          List.iter (properties env type_name) ~f:(fun (prop_name, prop_elt) ->
               (* but do not add properties that are imported via require extends *)
               if SSet.mem prop_elt.ce_origin all_trait_ancestors then
                 Hashtbl.add_multi

@@ -160,7 +160,7 @@ val has_smethod : t -> string -> bool
 val consts : t -> (string * class_const) list
   [@@alert
     dependencies
-      "Direct use of `consts` will not register a dependency. You probably want to use `Typing_env.get_consts` instead"]
+      "Direct use of `consts` will not register a dependency. You probably want to use `Typing_env.consts` instead"]
 
 val typeconsts : t -> (string * typeconst_type) list
 

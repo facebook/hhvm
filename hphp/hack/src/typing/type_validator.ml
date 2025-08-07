@@ -77,7 +77,7 @@ class virtual type_validator =
               ( Env.get_class env receiver_name |> Decl_entry.to_option
               >>= fun class_ ->
                 let (id_pos, type_const_name) = id in
-                Folded_class.get_typeconst class_ type_const_name
+                Typing_env.get_typeconst env class_ type_const_name
                 >>= fun typeconst ->
                 match
                   Typing_defs.add_type_expansion_check_cycles

@@ -78,7 +78,6 @@ class mstch_go_program : public mstch_program {
             {"program:thirft_source_path",
              &mstch_go_program::thirft_source_path},
             {"program:go_import_path", &mstch_go_program::go_import_path},
-            {"program:docs?", &mstch_go_program::go_has_docs},
             {"program:docs", &mstch_go_program::go_doc_comment},
             {"program:compat?", &mstch_go_program::go_gen_compat},
             {"program:compat_setters?",
@@ -110,7 +109,6 @@ class mstch_go_program : public mstch_program {
     }
   }
   mstch::node thirft_source_path() { return program_->path(); }
-  mstch::node go_has_docs() { return program_->has_doc(); }
   mstch::node go_doc_comment() { return doc_comment(program_); }
   mstch::node go_gen_compat() { return data_.compat; }
   mstch::node go_gen_compat_setters() { return data_.compat_setters; }
@@ -222,14 +220,12 @@ class mstch_go_const : public mstch_const {
         this,
         {
             {"constant:go_name", &mstch_go_const::go_name},
-            {"constant:docs?", &mstch_go_const::go_has_docs},
             {"constant:docs", &mstch_go_const::go_doc_comment},
             {"constant:var?", &mstch_go_const::go_is_var},
             {"constant:go_qualified_name", &mstch_go_const::go_qualified_name},
         });
   }
   mstch::node go_name() { return go::munge_ident(const_->name()); }
-  mstch::node go_has_docs() { return const_->has_doc(); }
   mstch::node go_doc_comment() { return doc_comment(const_); }
 
   // go_var returns true to use a var instead of a const in Go for the thrift

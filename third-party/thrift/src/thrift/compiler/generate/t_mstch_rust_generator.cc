@@ -659,7 +659,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
              &rust_mstch_program::rust_nonstandard_fields},
-            {"program:docs?", &rust_mstch_program::rust_has_docs},
             {"program:docs", &rust_mstch_program::rust_docs},
             {"program:types_include_srcs",
              &rust_mstch_program::rust_types_include_srcs},
@@ -813,7 +812,6 @@ class rust_mstch_program : public mstch_program {
     return make_mstch_fields(
         std::vector<const t_field*>(fields.begin(), fields.end()));
   }
-  mstch::node rust_has_docs() { return program_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(program_); }
   mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
   mstch::node rust_clients_include_srcs() {
@@ -1029,7 +1027,6 @@ class rust_mstch_service : public mstch_service {
          {"service:requestContext?", &rust_mstch_service::rust_request_context},
          {"service:extendedClients",
           &rust_mstch_service::rust_extended_clients},
-         {"service:docs?", &rust_mstch_service::rust_has_doc},
          {"service:docs", &rust_mstch_service::rust_doc},
          {"service:program_name", &rust_mstch_service::program_name}});
   }
@@ -1082,7 +1079,6 @@ class rust_mstch_service : public mstch_service {
   mstch::node program_name() { return service_->program()->name(); }
 
   mstch::node rust_all_exceptions();
-  mstch::node rust_has_doc() { return service_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(service_); }
 
  private:
@@ -1130,7 +1126,6 @@ class rust_mstch_function : public mstch_function {
          {"function:args_by_name", &rust_mstch_function::rust_args_by_name},
          {"function:returns_by_name",
           &rust_mstch_function::rust_returns_by_name},
-         {"function:docs?", &rust_mstch_function::rust_has_doc},
          {"function:docs", &rust_mstch_function::rust_doc},
          {"function:interaction_name",
           &rust_mstch_function::rust_interaction_name},
@@ -1265,7 +1260,6 @@ class rust_mstch_function : public mstch_function {
     return array;
   }
 
-  mstch::node rust_has_doc() { return function_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(function_); }
   mstch::node rust_interaction_name() {
     const auto& interaction = function_->interaction();
@@ -1336,7 +1330,6 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:copy?", &rust_mstch_struct::rust_is_copy},
             {"struct:exhaustive?", &rust_mstch_struct::rust_is_exhaustive},
             {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
-            {"struct:docs?", &rust_mstch_struct::rust_has_doc},
             {"struct:docs", &rust_mstch_struct::rust_doc},
             {"struct:derive", &rust_mstch_struct::rust_derive},
             {"struct:has_exception_message?",
@@ -1391,7 +1384,6 @@ class rust_mstch_struct : public mstch_struct {
     });
     return make_mstch_fields(fields);
   }
-  mstch::node rust_has_doc() { return struct_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(struct_); }
   mstch::node rust_derive() {
     if (auto annotation = find_structured_derive_annotation(*struct_)) {
@@ -1476,12 +1468,10 @@ class rust_mstch_enum_value : public mstch_enum_value {
         this,
         {
             {"enum_value:rust_name", &rust_mstch_enum_value::rust_name},
-            {"enum_value:docs?", &rust_mstch_enum_value::rust_has_doc},
             {"enum_value:docs", &rust_mstch_enum_value::rust_doc},
         });
   }
   mstch::node rust_name() { return named_rust_name(enum_value_); }
-  mstch::node rust_has_doc() { return enum_value_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(enum_value_); }
 };
 
@@ -1500,7 +1490,6 @@ class rust_mstch_enum : public mstch_enum {
             {"enum:package", &rust_mstch_enum::rust_package},
             {"enum:variants_by_name", &rust_mstch_enum::variants_by_name},
             {"enum:variants_by_number", &rust_mstch_enum::variants_by_number},
-            {"enum:docs?", &rust_mstch_enum::rust_has_doc},
             {"enum:docs", &rust_mstch_enum::rust_doc},
             {"enum:serde?", &rust_mstch_enum::rust_serde},
             {"enum:derive", &rust_mstch_enum::rust_derive},
@@ -1557,7 +1546,6 @@ class rust_mstch_enum : public mstch_enum {
     });
     return make_mstch_enum_values(variants);
   }
-  mstch::node rust_has_doc() { return enum_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(enum_); }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *enum_); }
 
@@ -2068,7 +2056,6 @@ class rust_mstch_const : public mstch_const {
             {"constant:rust_name", &rust_mstch_const::rust_name},
             {"constant:lazy?", &rust_mstch_const::rust_lazy},
             {"constant:rust", &rust_mstch_const::rust_typed_value},
-            {"constant:docs?", &rust_mstch_const::rust_has_docs},
             {"constant:docs", &rust_mstch_const::rust_docs},
         });
   }
@@ -2087,7 +2074,6 @@ class rust_mstch_const : public mstch_const {
     return std::make_shared<mstch_rust_value>(
         const_->value(), const_->type(), depth, context_, pos_, options_);
   }
-  mstch::node rust_has_docs() { return const_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(const_); }
 
  private:
@@ -2114,7 +2100,6 @@ class rust_mstch_field : public mstch_field {
             {"field:default", &rust_mstch_field::rust_default},
             {"field:box?", &rust_mstch_field::rust_is_boxed},
             {"field:arc?", &rust_mstch_field::rust_is_arc},
-            {"field:docs?", &rust_mstch_field::rust_has_docs},
             {"field:docs", &rust_mstch_field::rust_docs},
             {"field:type_annotation?", &rust_mstch_field::rust_type_annotation},
             {"field:type_nonstandard?",
@@ -2154,7 +2139,6 @@ class rust_mstch_field : public mstch_field {
   }
   mstch::node rust_is_boxed() { return field_kind(*field_) == FieldKind::Box; }
   mstch::node rust_is_arc() { return field_kind(*field_) == FieldKind::Arc; }
-  mstch::node rust_has_docs() { return field_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(field_); }
   mstch::node has_adapter() {
     return adapter_node(
@@ -2193,7 +2177,6 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:copy?", &rust_mstch_typedef::rust_copy},
             {"typedef:rust_type", &rust_mstch_typedef::rust_type},
             {"typedef:nonstandard?", &rust_mstch_typedef::rust_nonstandard},
-            {"typedef:docs?", &rust_mstch_typedef::rust_has_docs},
             {"typedef:docs", &rust_mstch_typedef::rust_docs},
             {"typedef:serde?", &rust_mstch_typedef::rust_serde},
             {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
@@ -2246,7 +2229,6 @@ class rust_mstch_typedef : public mstch_typedef {
     }
     return rust_type.find("::") != std::string::npos;
   }
-  mstch::node rust_has_docs() { return typedef_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(typedef_); }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *typedef_); }
   mstch::node has_adapter() {

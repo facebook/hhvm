@@ -81,7 +81,6 @@ class json_experimental_program : public mstch_program {
             {"program:namespaces", &json_experimental_program::namespaces},
             {"program:package?", &json_experimental_program::has_package},
             {"program:package", &json_experimental_program::package},
-            {"program:docs?", &json_experimental_program::has_docstring},
             {"program:docstring", &json_experimental_program::get_docstring},
             {"program:normalized_include_prefix",
              &json_experimental_program::include_prefix},
@@ -146,7 +145,6 @@ class json_experimental_program : public mstch_program {
         {"last?", true}});
     return result;
   }
-  mstch::node has_docstring() { return !program_->doc().empty(); }
   mstch::node get_docstring() { return json_quote_ascii(program_->doc()); }
 
   mstch::node include_prefix() {
@@ -172,7 +170,6 @@ class json_experimental_service : public mstch_service {
         this,
         {
             {"service:lineno", &json_experimental_service::get_lineno},
-            {"service:docs?", &json_experimental_service::has_docstring},
             {"service:docstring", &json_experimental_service::get_docstring},
             {"service:path", &json_experimental_service::path},
         });
@@ -180,7 +177,6 @@ class json_experimental_service : public mstch_service {
   mstch::node get_lineno() {
     return compiler::get_lineno(*service_, *data_.sm);
   }
-  mstch::node has_docstring() { return service_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(service_->doc()); }
   mstch::node path() {
     return compiler::get_filepath(*service_, *data_.sm, data_.compiler_path);
@@ -203,14 +199,12 @@ class json_experimental_function : public mstch_function {
         this,
         {
             {"function:lineno", &json_experimental_function::get_lineno},
-            {"function:docs?", &json_experimental_function::has_docstring},
             {"function:docstring", &json_experimental_function::get_docstring},
         });
   }
   mstch::node get_lineno() {
     return compiler::get_lineno(*function_, source_mgr_);
   }
-  mstch::node has_docstring() { return function_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(function_->doc()); }
 
  private:
@@ -229,14 +223,12 @@ class json_experimental_struct : public mstch_struct {
         this,
         {
             {"struct:lineno", &json_experimental_struct::get_lineno},
-            {"struct:docs?", &json_experimental_struct::has_docstring},
             {"struct:docstring", &json_experimental_struct::get_docstring},
         });
   }
   mstch::node get_lineno() {
     return compiler::get_lineno(*struct_, source_mgr_);
   }
-  mstch::node has_docstring() { return struct_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(struct_->doc()); }
 
  private:
@@ -285,14 +277,12 @@ class json_experimental_field : public mstch_field {
         this,
         {
             {"field:lineno", &json_experimental_field::get_lineno},
-            {"field:docs?", &json_experimental_field::has_docstring},
             {"field:docstring", &json_experimental_field::get_docstring},
         });
   }
   mstch::node get_lineno() {
     return compiler::get_lineno(*field_, source_mgr_);
   }
-  mstch::node has_docstring() { return field_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(field_->doc()); }
 
  private:
@@ -311,7 +301,6 @@ class json_experimental_typedef : public mstch_typedef {
         this,
         {
             {"typedef:lineno", &json_experimental_typedef::get_lineno},
-            {"typedef:docs?", &json_experimental_typedef::has_docstring},
             {"typedef:docstring", &json_experimental_typedef::get_docstring},
             {"typedef:exception?", &json_experimental_typedef::is_exception},
         });
@@ -319,7 +308,6 @@ class json_experimental_typedef : public mstch_typedef {
   mstch::node get_lineno() {
     return compiler::get_lineno(*typedef_, source_mgr_);
   }
-  mstch::node has_docstring() { return typedef_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(typedef_->doc()); }
   mstch::node is_exception() { return typedef_->is<t_exception>(); }
 
@@ -340,13 +328,11 @@ class json_experimental_enum : public mstch_enum {
         {
             {"enum:empty?", &json_experimental_enum::is_empty},
             {"enum:lineno", &json_experimental_enum::get_lineno},
-            {"enum:docs?", &json_experimental_enum::has_docstring},
             {"enum:docstring", &json_experimental_enum::get_docstring},
         });
   }
   mstch::node is_empty() { return enum_->get_enum_values().empty(); }
   mstch::node get_lineno() { return compiler::get_lineno(*enum_, source_mgr_); }
-  mstch::node has_docstring() { return enum_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(enum_->doc()); }
 
  private:
@@ -365,7 +351,6 @@ class json_experimental_enum_value : public mstch_enum_value {
         this,
         {
             {"enum_value:lineno", &json_experimental_enum_value::get_lineno},
-            {"enum_value:docs?", &json_experimental_enum_value::has_docstring},
             {"enum_value:docstring",
              &json_experimental_enum_value::get_docstring},
         });
@@ -373,7 +358,6 @@ class json_experimental_enum_value : public mstch_enum_value {
   mstch::node get_lineno() {
     return compiler::get_lineno(*enum_value_, source_mgr_);
   }
-  mstch::node has_docstring() { return enum_value_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(enum_value_->doc()); }
 
  private:

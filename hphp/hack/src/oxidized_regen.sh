@@ -22,23 +22,101 @@ function summary {
     echo -e "\n$BOLD$CYAN==>$WHITE ${1}$RESET"
 }
 
-# Try to get the path of this script relative to fbcode/.
+function run_hh_codegen {
+    local command="$1"
+    shift
+
+    if [ -n "$HH_CODEGEN_PATH" ]; then
+        "$HH_CODEGEN_PATH" \
+            --regen-cmd "$REGEN_COMMAND" \
+            --rustfmt "$RUSTFMT_PATH" \
+            "$command" \
+            "$@"
+    else
+        "${BUILD_AND_RUN}" src/hh_codegen hh_codegen \
+            --regen-cmd "$REGEN_COMMAND" \
+            --rustfmt "$RUSTFMT_PATH" \
+            "$command" \
+            "$@"
+    fi
+}
+
+function run_hh_oxidize {
+    if [ -n "$HH_OXIDIZE_PATH" ]; then
+        "$HH_OXIDIZE_PATH" \
+            --regen-command "$REGEN_COMMAND" \
+            --rustfmt-path "$RUSTFMT_PATH" \
+            "$@"
+    else
+        "${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize \
+            --regen-command "$REGEN_COMMAND" \
+            --rustfmt-path "$RUSTFMT_PATH" \
+            "$@"
+    fi
+}
+
+# Parse command line arguments
+# When this script is run by Buck, Buck dependencies
+# are passed in as command line arguments.
+# This is because Buck doesn't like it when Bucking causes Bucking
+HH_CODEGEN_PATH=""
+HH_OXIDIZE_PATH=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        # optional
+        --hh-codegen=*)
+            HH_CODEGEN_PATH="${1#*=}"
+            shift
+            ;;
+        # optional
+        --hh-oxidize=*)
+            HH_OXIDIZE_PATH="${1#*=}"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+    esac
+done
+
 #set -x # echo every statement in the script
 
-FBCODE_ROOT="$(dirname "${BASH_SOURCE[0]}")/../../.."
+# Try to get the path of this script relative to fbcode
+if [ -n "${BUCK_PROJECT_ROOT:-}" ]; then
+    # Running under Buck - find fbsource root by searching up for .projectid file
+    CURRENT_DIR="$BUCK_PROJECT_ROOT"
+    FBSOURCE_ROOT=""
+
+    while [ "$CURRENT_DIR" != "/" ]; do
+        if [ -f "$CURRENT_DIR/.projectid" ] && [ "$(cat "$CURRENT_DIR/.projectid" 2>/dev/null)" = "fbsource" ]; then
+            FBSOURCE_ROOT="$CURRENT_DIR"
+            break
+        fi
+        CURRENT_DIR="$(dirname "$CURRENT_DIR")"
+    done
+
+    if [ -z "$FBSOURCE_ROOT" ]; then
+        echo "Error: Could not find fbsource root directory" >&2
+        exit 1
+    fi
+
+    FBCODE_ROOT="$FBSOURCE_ROOT/fbcode"
+    RUSTFMT_PATH="$FBSOURCE_ROOT/tools/third-party/rustfmt/rustfmt"
+else
+    # Running directly (without Buck)
+    FBCODE_ROOT="$(dirname "${BASH_SOURCE[0]}")/../../.."
+    RUSTFMT_PATH="${RUSTFMT_PATH:-"$(realpath "$FBCODE_ROOT/../tools/third-party/rustfmt/rustfmt")"}"
+fi
+
 REGEN_COMMAND="$(realpath --relative-to="${FBCODE_ROOT}" "${BASH_SOURCE[0]}")"
 cd "$FBCODE_ROOT"
-
-# rustfmt is committed at fbsource/tools/third-party/rustfmt/rustfmt
-RUSTFMT_PATH="${RUSTFMT_PATH:-"$(realpath ../tools/third-party/rustfmt/rustfmt)"}"
 
 BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
 
 summary "Write oxidized/gen/"
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
+run_hh_oxidize \
   --out-dir hphp/hack/src/oxidized/gen                                        \
-  --regen-command "$REGEN_COMMAND"                                            \
-  --rustfmt-path "$RUSTFMT_PATH"                                              \
   --copy-types-file hphp/hack/src/oxidized/copy_types.txt                      \
   --safe-ints-types-file hphp/hack/src/oxidized/safe_ints_types.txt            \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
@@ -109,56 +187,42 @@ mv hphp/hack/src/oxidized/lib.rs.tmp hphp/hack/src/oxidized/lib.rs
 grep "^pub mod " hphp/hack/src/oxidized/gen/mod.rs | sed 's/^pub mod /pub use r#gen::/' >> hphp/hack/src/oxidized/lib.rs
 
 summary "Write individually-converted oxidized files"
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/deps/fileInfo.ml > hphp/hack/src/deps/rust/file_info.rs
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/utils/core/prim_defs.ml > hphp/hack/src/deps/rust/prim_defs.rs
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/naming/naming_types.ml > hphp/hack/src/naming/rust/naming_types.rs
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/lints/lints_core.ml > hphp/hack/src/utils/lint/lint.rs
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/typing/hh_distc_types.ml > hphp/hack/src/typing/hh_distc_types/hh_distc_types.rs
+run_hh_oxidize hphp/hack/src/deps/fileInfo.ml > hphp/hack/src/deps/rust/file_info.rs
+run_hh_oxidize hphp/hack/src/utils/core/prim_defs.ml > hphp/hack/src/deps/rust/prim_defs.rs
+run_hh_oxidize hphp/hack/src/naming/naming_types.ml > hphp/hack/src/naming/rust/naming_types.rs
+run_hh_oxidize hphp/hack/src/lints/lints_core.ml > hphp/hack/src/utils/lint/lint.rs
+run_hh_oxidize hphp/hack/src/typing/hh_distc_types.ml > hphp/hack/src/typing/hh_distc_types/hh_distc_types.rs
 
 summary "Write oxidized/impl_gen/"
-"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
-  --regen-cmd "$REGEN_COMMAND"                                                \
-  --rustfmt "$RUSTFMT_PATH"                                                   \
-  enum-helpers                                                                \
+run_hh_codegen enum-helpers \
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*|crate::ast_defs" \
-  --input "hphp/hack/src/oxidized/gen/ast_defs.rs|crate::ast_defs::*"         \
-  --output "hphp/hack/src/oxidized/impl_gen/"                                 \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs|crate::ast_defs::*" \
+  --output "hphp/hack/src/oxidized/impl_gen/"
 
 summary "Write oxidized/aast_visitor/"
-"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
-  --regen-cmd "$REGEN_COMMAND"                                                \
-  --rustfmt "$RUSTFMT_PATH"                                                   \
-  visitor                                                                     \
-  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
-  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
-  --output "hphp/hack/src/oxidized/aast_visitor/"                             \
-  --root "Program"                                                            \
+run_hh_codegen visitor \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs" \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs" \
+  --output "hphp/hack/src/oxidized/aast_visitor/" \
+  --root "Program"
 
 summary "Write oxidized/asts"
-"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
-  --regen-cmd "$REGEN_COMMAND"                                                \
-  --rustfmt "$RUSTFMT_PATH"                                                   \
-  asts                                                                        \
-  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
-  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
-  --output "hphp/hack/src/oxidized/asts/"                                     \
-  --root "Program"                                                            \
+run_hh_codegen asts \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs" \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs" \
+  --output "hphp/hack/src/oxidized/asts/" \
+  --root "Program"
 
 summary "Write elab/transform/"
-"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
-  --regen-cmd "$REGEN_COMMAND"                                                \
-  --rustfmt "$RUSTFMT_PATH"                                                   \
-  elab-transform                                                              \
-  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
-  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
-  --output "hphp/hack/src/elab/"                                              \
-  --root "Program"                                                            \
+run_hh_codegen elab-transform \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs" \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs" \
+  --output "hphp/hack/src/elab/" \
+  --root "Program"
 
 summary "Write oxidized_by_ref/gen/"
-"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
+run_hh_oxidize \
   --out-dir hphp/hack/src/oxidized_by_ref/gen                                 \
-  --regen-command "$REGEN_COMMAND"                                            \
-  --rustfmt-path "$RUSTFMT_PATH"                                              \
   --extern-types-file hphp/hack/src/oxidized_by_ref/extern_types.txt          \
   --owned-types-file hphp/hack/src/oxidized_by_ref/owned_types.txt            \
   --copy-types-file hphp/hack/src/oxidized_by_ref/copy_types.txt              \
@@ -199,22 +263,19 @@ mv hphp/hack/src/oxidized_by_ref/lib.rs.tmp hphp/hack/src/oxidized_by_ref/lib.rs
 grep "^pub mod " hphp/hack/src/oxidized_by_ref/gen/mod.rs | sed 's/^pub mod /pub use gen::/' >> hphp/hack/src/oxidized_by_ref/lib.rs
 
 summary "Write oxidized_by_ref/decl_visitor/"
-"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
-  --regen-cmd "$REGEN_COMMAND"                                                \
-  --rustfmt "$RUSTFMT_PATH"                                                   \
-  by-ref-decl-visitor                                                         \
-  --input "hphp/hack/src/oxidized_by_ref/gen/ast_defs.rs"                     \
-  --input "hphp/hack/src/oxidized_by_ref/gen/shallow_decl_defs.rs"            \
-  --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs_core.rs"             \
-  --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs.rs"                  \
-  --input "hphp/hack/src/oxidized_by_ref/gen/typing_reason.rs"                \
-  --input "hphp/hack/src/oxidized_by_ref/gen/xhp_attribute.rs"                \
-  --input "hphp/hack/src/oxidized_by_ref/manual/direct_decl_parser.rs"        \
-  --input "hphp/hack/src/oxidized_by_ref/manual/t_shape_map.rs"               \
-  --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
-  --extern-input "hphp/hack/src/oxidized/gen/typing_defs.rs"                  \
-  --extern-input "hphp/hack/src/oxidized/gen/typing_defs_core.rs"             \
-  --extern-input "hphp/hack/src/oxidized/gen/typing_reason.rs"                \
-  --extern-input "hphp/hack/src/oxidized/gen/xhp_attribute.rs"                \
-  --output "hphp/hack/src/oxidized_by_ref/decl_visitor/"                      \
-  --root "Decls"                                                              \
+run_hh_codegen by-ref-decl-visitor \
+  --input "hphp/hack/src/oxidized_by_ref/gen/ast_defs.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/gen/shallow_decl_defs.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs_core.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/gen/typing_reason.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/gen/xhp_attribute.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/manual/direct_decl_parser.rs" \
+  --input "hphp/hack/src/oxidized_by_ref/manual/t_shape_map.rs" \
+  --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs" \
+  --extern-input "hphp/hack/src/oxidized/gen/typing_defs.rs" \
+  --extern-input "hphp/hack/src/oxidized/gen/typing_defs_core.rs" \
+  --extern-input "hphp/hack/src/oxidized/gen/typing_reason.rs" \
+  --extern-input "hphp/hack/src/oxidized/gen/xhp_attribute.rs" \
+  --output "hphp/hack/src/oxidized_by_ref/decl_visitor/" \
+  --root "Decls"

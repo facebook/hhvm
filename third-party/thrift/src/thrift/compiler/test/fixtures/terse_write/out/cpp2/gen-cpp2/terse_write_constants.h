@@ -14,9 +14,9 @@ namespace facebook::thrift::test::terse_write {
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift"} */
 namespace terse_write_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_4380d0b9f890cad3();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_4380d0b9f890cad3_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_4380d0b9f890cad3_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_1b60768cd8997ee0();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_uris();
 
 } // namespace terse_write_constants
 } // namespace facebook::thrift::test::terse_write

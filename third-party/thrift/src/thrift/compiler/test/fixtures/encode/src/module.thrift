@@ -24,6 +24,7 @@ struct Foo {
   1: i32 field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef Foo AdaptedFoo
 

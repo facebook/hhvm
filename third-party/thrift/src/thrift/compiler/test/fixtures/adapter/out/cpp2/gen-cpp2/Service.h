@@ -70,8 +70,8 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
 namespace detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::Service, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = 7881541235899647069;
-  static constexpr ::std::string_view definitionKey = {"\x76\x0d\xb9\x9c\xbb\xd4\x62\xd0\x5f\xa3\xb9\xcc\x49\x75\xe3\xc7", 16};
+  static constexpr int64_t programId = 1614664268885309625;
+  static constexpr ::std::string_view definitionKey = {"\xde\xec\xa4\xda\x21\x97\x3c\x6f\x66\xfa\x43\x5d\xc5\x83\x7d\xdc", 16};
 };
 }
 } // namespace apache::thrift

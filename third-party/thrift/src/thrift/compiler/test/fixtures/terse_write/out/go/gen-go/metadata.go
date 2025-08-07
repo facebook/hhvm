@@ -137,6 +137,13 @@ var (
                     StructuredAnnotations: []*metadata.ThriftConstStruct{
                         &metadata.ThriftConstStruct{
                             Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
                                 Name: "hack.Adapter",
                             },
                             Fields: map[string]*metadata.ThriftConstValue{

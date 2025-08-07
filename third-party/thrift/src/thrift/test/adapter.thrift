@@ -23,36 +23,47 @@ cpp_include "thrift/lib/cpp2/Adapt.h"
 @thrift.Experimental
 package "apache.org/thrift/test/basic"
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::AdaptTestMsAdapter"}
 typedef i64 DurationMs
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef bool AdaptedBool
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef byte AdaptedByte
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i16 AdaptedShort
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i32 AdaptedInteger
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i64 AdaptedLong
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef double AdaptedDouble
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef string AdaptedString
 
+@thrift.AllowLegacyTypedefUri
 typedef AdaptedBool DoubleTypedefBool
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "::folly::IOBuf"}
 @cpp.Adapter{name = "::apache::thrift::test::CustomProtocolAdapter"}
 typedef binary CustomProtocolType
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>",
 }
@@ -87,6 +98,7 @@ struct MyStruct {
   1: i64 field1;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "std::unordered_set"}
 typedef set<string> UnorderedStrings
 
@@ -127,6 +139,7 @@ enum ThriftAdaptedEnum {
   Zero = 0,
   One = 1,
 }
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>",
 }
@@ -180,6 +193,7 @@ struct AdaptedStruct {
   1: i64 data;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef AdaptedStruct AdaptedTypedef
 
@@ -188,6 +202,7 @@ struct DirectlyAdaptedStruct {
   1: i64 data;
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef DirectlyAdaptedStruct TypedefOfDirect
 
 struct StructFieldAdaptedStruct {
@@ -205,6 +220,7 @@ struct CircularStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
   1: optional AdaptedCircularAdaptee field;
 }
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::test::MemberAccessAdapter",
   adaptedType = "::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>",
@@ -245,6 +261,7 @@ struct ApplyAdapter {}
 @ApplyAdapter
 struct TransitiveAdapted {}
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::CountingAdapter<true, int64_t>"}
 typedef i64 CountingInt
 struct CountingStruct {
@@ -275,8 +292,10 @@ struct EncodeFieldStruct {
   2: i64 num_without_encode;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::EncodeTemplatedTestAdapter"}
 typedef i64 EncodeInt
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i64 NoEncodeInt
 

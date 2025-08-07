@@ -14,13 +14,13 @@ namespace facebook::thrift::test::terse_write {
 namespace terse_write_constants {
 
 
-::std::string_view _fbthrift_schema_4380d0b9f890cad3() {
+::std::string_view _fbthrift_schema_1b60768cd8997ee0() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_4380d0b9f890cad3_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_4380d0b9f890cad3_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_uris() {
   return {};
 }
 

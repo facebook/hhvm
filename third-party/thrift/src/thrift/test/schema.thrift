@@ -16,7 +16,9 @@
 
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
-include "thrift/lib/thrift/patch.thrift" // @nolint used to test depending on this file
+include "thrift/lib/thrift/patch.thrift"
+include "thrift/annotation/thrift.thrift"
+// @nolint used to test depending on this file
 
 package "facebook.com/thrift/test/schema"
 
@@ -79,6 +81,7 @@ service TestService {
   );
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef i32 TD
 struct Typedefs {
   1: TD named;
@@ -86,6 +89,7 @@ struct Typedefs {
   2: i32 unnamed;
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef TD TDTD
 
 @scope.Structured

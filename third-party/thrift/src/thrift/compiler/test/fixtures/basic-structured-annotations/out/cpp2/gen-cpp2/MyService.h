@@ -82,8 +82,8 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
 namespace detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5948438589959711339;
-  static constexpr ::std::string_view definitionKey = {"\x27\xff\xd9\xad\x0f\x94\xc4\x0f\xde\xfe\xa6\x2b\xcd\xf8\x54\x87", 16};
+  static constexpr int64_t programId = 2611009038593588256;
+  static constexpr ::std::string_view definitionKey = {"\xc8\x2a\xeb\x8a\x75\x70\x9a\xe9\x31\x21\x27\x31\x60\xce\xcf\x00", 16};
 };
 }
 } // namespace apache::thrift

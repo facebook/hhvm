@@ -243,9 +243,22 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'arg1' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
         'arg2' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
@@ -406,6 +419,15 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'success' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

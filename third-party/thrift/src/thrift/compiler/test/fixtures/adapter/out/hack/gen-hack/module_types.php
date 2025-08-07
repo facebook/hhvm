@@ -1125,7 +1125,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'optionalIntField' => shape(
           'field' => dict[
@@ -1145,7 +1150,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'intFieldWithDefault' => shape(
           'field' => dict[
@@ -1165,11 +1175,20 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'setField' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
@@ -1190,6 +1209,10 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         'optionalSetField' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
@@ -1225,7 +1248,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'optionalMapField' => shape(
           'field' => dict[
@@ -1245,7 +1273,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'binaryField' => shape(
           'field' => dict[
@@ -1265,11 +1298,20 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'longField' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
@@ -1308,6 +1350,10 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             ),
           ],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
@@ -1322,6 +1368,15 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               shape(
                 "signature" => "MyI64",
                 "color" => \facebook\thrift\test\Color::GREEN,
+              )
+            ),
+          ],
+        ),
+        'doubleAdaptedField' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
               )
             ),
           ],
@@ -2117,11 +2172,20 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'setField' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
@@ -2157,7 +2221,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'binaryField' => shape(
           'field' => dict[
@@ -2177,11 +2246,20 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'longField' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
@@ -2730,7 +2808,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'optionalStructField' => shape(
           'field' => dict[
@@ -2745,7 +2828,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'unionField' => shape(
           'field' => dict[
@@ -2760,7 +2848,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'optionalUnionField' => shape(
           'field' => dict[
@@ -2775,7 +2868,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'adaptedStructField' => shape(
           'field' => dict[],
@@ -3799,6 +3897,10 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
         'a' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
@@ -4180,6 +4282,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         'set_string' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter2",
@@ -4611,6 +4717,10 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         'delay' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdaptTestMsAdapter",
@@ -4621,6 +4731,10 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         'custom' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CustomProtocolAdapter",
@@ -4651,6 +4765,10 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
         'indirectionString' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>",
@@ -4677,6 +4795,10 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
             ),
           ],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -4693,6 +4815,10 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
             ),
           ],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5657,6 +5783,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedBool' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5667,6 +5797,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedByte' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5677,6 +5811,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedShort' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5687,6 +5825,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedInteger' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5697,6 +5839,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedLong' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5707,6 +5853,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedDouble' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5717,6 +5867,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedString' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5757,6 +5911,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedBoolDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5767,6 +5925,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedByteDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5777,6 +5939,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedShortDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5787,6 +5953,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedIntegerDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5797,6 +5967,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedLongDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5807,6 +5981,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedDoubleDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5817,6 +5995,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedStringDefault' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -5827,6 +6009,10 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedEnum' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>",
@@ -5878,6 +6064,15 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
             ),
           ],
           'type' => dict[],
+        ),
+        'doubleTypedefBool' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
       ],
     );
@@ -6418,6 +6613,10 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         'delay' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::AdaptTestMsAdapter",
@@ -6428,6 +6627,10 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         'custom' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CustomProtocolAdapter",
@@ -6914,6 +7117,10 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
         'adaptedTypedef' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
@@ -6927,6 +7134,15 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'typedefOfAdapted' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
               )
             ),
           ],
@@ -7208,6 +7424,10 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
             ),
           ],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::MemberAccessAdapter",
@@ -8357,6 +8577,10 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
         'countingInt' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::CountingAdapter<true, int>",

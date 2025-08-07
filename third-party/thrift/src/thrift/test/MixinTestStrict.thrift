@@ -39,6 +39,7 @@ union Union {
   2: string field6;
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef Mixin3Base Mixin3
 
 struct Foo {

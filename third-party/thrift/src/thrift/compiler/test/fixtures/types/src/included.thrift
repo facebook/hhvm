@@ -17,7 +17,10 @@
 package "apache.org/thrift/fixtures/types"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "std::unordered_map"}
 typedef map<i32, string> SomeMap
+@thrift.AllowLegacyTypedefUri
 typedef list<SomeMap> SomeListOfTypeMap

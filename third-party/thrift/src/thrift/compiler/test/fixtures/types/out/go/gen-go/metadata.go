@@ -89,6 +89,13 @@ var (
                     StructuredAnnotations: []*metadata.ThriftConstStruct{
                         &metadata.ThriftConstStruct{
                             Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
                                 Name: "cpp.Type",
                             },
                             Fields: map[string]*metadata.ThriftConstValue{
@@ -127,6 +134,13 @@ var (
                     Name:           "module.map_i32_string_1261",
                     UnderlyingType: premadeThriftType_map_i32_string,
                     StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
                         &metadata.ThriftConstStruct{
                             Type: &metadata.ThriftStructType{
                                 Name: "rust.Type",
@@ -271,6 +285,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.TBinary",
                     UnderlyingType: premadeThriftType_binary,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_TBinary_8623 =
@@ -279,6 +302,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.TBinary_8623",
                     UnderlyingType: premadeThriftType_module_TBinary,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_SomeListOfTypeMap_2468 =
@@ -287,6 +319,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.SomeListOfTypeMap_2468",
                     UnderlyingType: included.GetMetadataThriftType("included.SomeListOfTypeMap"),
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_AnnotatedTypes =
@@ -451,6 +492,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.list_i32_9187",
                     UnderlyingType: premadeThriftType_list_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_set_i32_7070 =
@@ -459,6 +509,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.set_i32_7070",
                     UnderlyingType: premadeThriftType_set_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_map_i32_i32 =
@@ -475,6 +534,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.map_i32_i32_9565",
                     UnderlyingType: premadeThriftType_map_i32_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_string_5252 =
@@ -483,6 +551,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.string_5252",
                     UnderlyingType: premadeThriftType_string,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_i32_9314 =
@@ -491,6 +568,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.i32_9314",
                     UnderlyingType: premadeThriftType_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_AllocatorAware =
@@ -513,6 +599,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.IntTypedef",
                     UnderlyingType: premadeThriftType_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_UintTypedef =
@@ -522,6 +617,13 @@ var (
                     Name:           "module.UintTypedef",
                     UnderlyingType: premadeThriftType_module_IntTypedef,
                     StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
                         &metadata.ThriftConstStruct{
                             Type: &metadata.ThriftStructType{
                                 Name: "cpp.Type",

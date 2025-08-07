@@ -50,13 +50,16 @@ struct structured_annotation_nested {
   2: structured_annotation_with_default nest;
 }
 
+@thrift.AllowLegacyTypedefUri
 @structured_annotation_with_default
 typedef string annotated_with_default_string
 
+@thrift.AllowLegacyTypedefUri
 @structured_annotation_inline{count = 1}
 @structured_annotation_with_default{name = 'abc'}
 typedef string annotated_inline_string
 
+@thrift.AllowLegacyTypedefUri
 @structured_annotation_inline{count = 2}
 typedef i64 annotated_inline_i64
 

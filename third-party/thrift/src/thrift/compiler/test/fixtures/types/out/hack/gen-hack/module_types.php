@@ -718,6 +718,10 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
         'fieldF' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "template" => "folly::sorted_vector_set",
@@ -743,6 +747,10 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
         'fieldH' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "template" => "std::unordered_map",
@@ -2843,6 +2851,24 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'binary_field' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+        'list_field' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -4866,6 +4892,42 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'aa_list' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+        'aa_set' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+        'aa_map' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+        'aa_string' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
         'aa_unique' => shape(
           'field' => dict[
             '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
@@ -4878,7 +4940,12 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
         'aa_shared' => shape(
           'field' => dict[
@@ -4892,7 +4959,12 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
         ),
       ],
     );
@@ -5284,9 +5356,22 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'IntTypedef_field' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
         'UintTypedef_field' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "std::uint32_t",

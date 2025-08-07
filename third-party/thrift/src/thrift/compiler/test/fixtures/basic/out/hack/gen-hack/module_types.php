@@ -332,6 +332,15 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'MyDataField' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -973,6 +982,15 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'myEnum' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

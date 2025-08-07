@@ -56,6 +56,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.MyDataItemAlias",
                     UnderlyingType: premadeThriftType_module_MyDataItem,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_bool =
@@ -122,6 +131,15 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.MyEnumAlias",
                     UnderlyingType: premadeThriftType_module_MyEnum,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_module_MyUnion =

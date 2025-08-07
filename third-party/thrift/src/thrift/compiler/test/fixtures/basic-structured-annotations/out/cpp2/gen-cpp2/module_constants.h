@@ -17,9 +17,9 @@ namespace module_constants {
   /** Glean {"constant": "MyConst"} */
   ::std::map<::std::string, ::std::string> const& MyConst();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_ad72e69e5d39d595();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_ad72e69e5d39d595_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_ad72e69e5d39d595_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_243c2ae30ab47c20();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_243c2ae30ab47c20_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_243c2ae30ab47c20_uris();
 
 } // namespace module_constants
 } // namespace test::fixtures::basic-structured-annotations

@@ -34,8 +34,10 @@ cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 
 package "thrift.org/test/python_capi"
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "uint64_t"}
 typedef i64 uint64
+@thrift.AllowLegacyTypedefUri
 typedef uint64 ui64
 
 enum MyEnum {
@@ -86,9 +88,12 @@ struct StringPair {
 @cpp.Name{value = "VapidStruct"}
 struct EmptyStruct {}
 
+@thrift.AllowLegacyTypedefUri
 typedef byte signed_byte
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr
 
@@ -145,6 +150,7 @@ struct ListStruct {
   8: list<list<list<signed_byte>>> voxels;
   9: list<IOBufPtr> buf_ptrs;
 } (cpp.noncopyable)
+@thrift.AllowLegacyTypedefUri
 typedef ListStruct ListAlias
 
 @cpp.EnableCustomTypeOrdering

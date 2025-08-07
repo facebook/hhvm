@@ -21,6 +21,7 @@ include "thrift/annotation/thrift.thrift"
 
 package "apache.org/thrift/fixtures/types"
 
+@thrift.AllowLegacyTypedefUri
 typedef binary TBinary
 
 struct empty_struct {}
@@ -232,7 +233,9 @@ struct AllocatorAware2 {
   2: optional i32 box_field;
 } (cpp.allocator = "some_allocator")
 
+@thrift.AllowLegacyTypedefUri
 typedef i32 IntTypedef
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "std::uint32_t"}
 typedef IntTypedef UintTypedef
 
@@ -247,17 +250,26 @@ struct StructWithDoubleUnderscores {
 }
 
 // The following were automatically generated and may benefit from renaming.
+@thrift.AllowLegacyTypedefUri
 typedef included.SomeListOfTypeMap (
   noop_annotation = "1",
 ) SomeListOfTypeMap_2468
+@thrift.AllowLegacyTypedefUri
 typedef TBinary (noop_annotation = "1") TBinary_8623
+@thrift.AllowLegacyTypedefUri
 typedef i32 (cpp.use_allocator = "1") i32_9314
+@thrift.AllowLegacyTypedefUri
 typedef list<i32> (cpp.use_allocator = "1") list_i32_9187
+@thrift.AllowLegacyTypedefUri
 typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_9565
+@thrift.AllowLegacyTypedefUri
 @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
 typedef map<i32, string> map_i32_string_1261
+@thrift.AllowLegacyTypedefUri
 typedef set<i32> (cpp.use_allocator = "1") set_i32_7070
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "folly::sorted_vector_set"}
 @rust.Type{name = "sorted_vector_map::SortedVectorSet"}
 typedef set<i32> set_i32_7194
+@thrift.AllowLegacyTypedefUri
 typedef string (cpp.use_allocator = "1") string_5252

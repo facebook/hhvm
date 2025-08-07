@@ -241,6 +241,10 @@ class MyService_first_result extends \ThriftSyncStructWithResult implements \ITh
         'success' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\test\fixtures\basic-structured-annotations\structured_annotation_inline' => \test\fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 1,

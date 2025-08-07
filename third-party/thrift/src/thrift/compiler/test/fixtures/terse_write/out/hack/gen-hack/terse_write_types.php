@@ -3513,6 +3513,10 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
         'field1' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
@@ -3549,6 +3553,10 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
             ),
           ],
           'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",

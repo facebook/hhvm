@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
@@ -28,15 +29,19 @@ cpp_include "<thrift/test/python_capi/indirection.h>"
 
 package "thrift.biz/test/python_capi"
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "folly::small_vector"}
 typedef list<IOBuf> small_vector_iobuf
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "folly::fbvector"}
 typedef list<string> fbvector_string
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "folly::fbvector"}
 typedef list<fbvector_string> fbvector_fbvector_string
 
@@ -105,11 +110,13 @@ struct TWrapped {
   2: binary fieldB;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::IndirectionAdapter<::thrift::test::python_capi::CppWrapperT>",
 }
 typedef TWrapped CppWrapper
 
+@thrift.AllowLegacyTypedefUri
 typedef list<CppWrapper> ListOfWrapped
 
 // Cannot be marshaled and compile
@@ -117,6 +124,7 @@ struct IndirectionA {
   1: ListOfWrapped lst;
 }
 
+@thrift.AllowLegacyTypedefUri
 @cpp.Type{template = "std::vector"}
 typedef list<CppWrapper> VecOfWrapped
 
@@ -126,6 +134,7 @@ struct IndirectionB {
   1: VecOfWrapped lst;
 } (cpp.noncomparable)
 
+@thrift.AllowLegacyTypedefUri
 typedef ListOfWrapped ListOfWrappedAlias
 
 // Cannot be marshaled and compile

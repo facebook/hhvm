@@ -119,6 +119,7 @@ struct FieldLevelTerseStruct {
   30: MyUnion union_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = '\\Adapter1'}
 @cpp.Adapter{name = "::my::Adapter"}
 typedef i32 MyInteger

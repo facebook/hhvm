@@ -1363,27 +1363,27 @@ unsigned long OpEncodeStruct::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::Foo, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -4581770621346539989;
-  static constexpr ::std::string_view definitionKey = {"\x85\x20\xc8\x12\xbe\xbd\xae\x15\x01\xa5\xe9\xdc\x0c\x0d\x9f\xc8", 16};
+  static constexpr int64_t programId = 8840219393166623658;
+  static constexpr ::std::string_view definitionKey = {"\xd5\x22\x84\x89\x30\xe3\xef\x02\xe3\xbe\x95\x20\x40\x9b\x6c\x6b", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Bar, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -4581770621346539989;
-  static constexpr ::std::string_view definitionKey = {"\x31\x27\x7e\x41\x2b\xd5\x08\x8a\x75\x2b\x4d\x56\x33\x0b\xda\x56", 16};
+  static constexpr int64_t programId = 8840219393166623658;
+  static constexpr ::std::string_view definitionKey = {"\xd5\x95\x63\xd0\xe2\xe0\xdc\xdc\x92\x6b\x79\x33\x02\xbf\x2b\x60", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Baz, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -4581770621346539989;
-  static constexpr ::std::string_view definitionKey = {"\x10\x4c\x4d\xf2\x01\xbf\x39\xa6\x7f\x60\x71\xd9\x12\x73\x91\x42", 16};
+  static constexpr int64_t programId = 8840219393166623658;
+  static constexpr ::std::string_view definitionKey = {"\xb5\x8d\xe8\x52\x3e\x8b\x79\x7f\x48\xc4\x8d\x55\x5e\x92\xe9\x5f", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::OpEncodeStruct, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -4581770621346539989;
-  static constexpr ::std::string_view definitionKey = {"\xd0\xef\x49\xf2\x34\x77\x11\x38\x00\x56\xc4\x8b\x7d\xf6\x14\x8a", 16};
+  static constexpr int64_t programId = 8840219393166623658;
+  static constexpr ::std::string_view definitionKey = {"\x83\x4e\x4b\x71\xa9\x0a\x0a\xac\x20\x1c\xea\x52\x33\x42\x98\x83", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Enum, true> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -4581770621346539989;
-  static constexpr ::std::string_view definitionKey = {"\xa9\x68\xfc\x9e\x80\x4e\xb8\xc3\x81\xda\x19\xe3\x45\x31\x8c\x9f", 16};
+  static constexpr int64_t programId = 8840219393166623658;
+  static constexpr ::std::string_view definitionKey = {"\x49\x39\x8e\x60\xa2\x63\xbb\xc0\xe1\x9b\x7f\x70\xfa\xe2\x46\x9c", 16};
 };
 } // namespace apache::thrift::detail

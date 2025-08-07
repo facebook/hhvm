@@ -735,13 +735,13 @@
           "field1" : {
             "name" : "field1",
             "key" : 1,
-            "lineno" : 128,
+            "lineno" : 129,
             "type" : "i32"
                   },
           "field2" : {
             "name" : "field2",
             "key" : 2,
-            "lineno" : 129,
+            "lineno" : 130,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -766,7 +766,7 @@
           "field3" : {
             "name" : "field3",
             "key" : 3,
-            "lineno" : 132,
+            "lineno" : 133,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -783,7 +783,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 126
+        "lineno" : 127
       },
       "TerseException" : {
         "name" : "TerseException",
@@ -801,7 +801,7 @@
           "msg" : {
             "name" : "msg",
             "key" : 1,
-            "lineno" : 138,
+            "lineno" : 139,
             "type" : "string"
             ,
             "structured_annotations": {
@@ -818,7 +818,7 @@
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 136
+        "lineno" : 137
       }
   },
   "source_path" : "thrift/compiler/test/fixtures/terse_write/src/terse_write",

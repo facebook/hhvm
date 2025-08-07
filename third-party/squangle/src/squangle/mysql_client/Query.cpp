@@ -426,7 +426,7 @@ void Query::appendValue(
     if (type != 's' && type != 'v' && type != 'm') {
       formatStringParseError(querySp, offset, type, "string");
     }
-    auto value = d.asString();
+    const auto& value = d.getString();
     s->reserve(s->size() + value.size() + 4);
     s->push_back('"');
     escapeFunc(s, value);

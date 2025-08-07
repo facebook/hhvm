@@ -21,12 +21,16 @@
 #include <folly/Executor.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/futures/Future.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 
 #if FOLLY_HAS_COROUTINES
 
 namespace apache::thrift::python {
 
-void cancelPythonIterator(PyObject*);
+using IOBufClientSink =
+    apache::thrift::ClientSink<std::unique_ptr<folly::IOBuf>, folly::IOBuf>;
+
+void cancelPythonGenerator(PyObject*);
 
 template <typename TChunk>
 folly::coro::AsyncGenerator<TChunk&&> toAsyncGenerator(
@@ -54,7 +58,7 @@ folly::coro::AsyncGenerator<TChunk&&> toAsyncGenerator(
             co_await folly::coro::co_current_cancellation_token,
             [iter, executor, guard = std::move(innerGuard)]() mutable {
               folly::via(executor, [iter, guard = std::move(guard)] {
-                cancelPythonIterator(iter);
+                cancelPythonGenerator(iter);
               });
             }};
 

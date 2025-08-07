@@ -13,35 +13,46 @@
 # limitations under the License.
 
 from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.optional cimport optional
 
 from folly cimport cFollyExecutor, cFollyPromise
 from folly.async_generator cimport cAsyncGenerator
 from folly.coro cimport cFollyCoroTask
 from folly.iobuf cimport cIOBuf
-from libcpp.optional cimport optional
+from thrift.python.protocol cimport Protocol
 
 cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
-  cdef cppclass cClientSink "::apache::thrift::ClientSink"[TChunk, TFinalResponse]:
-    cClientSink()
-    cFollyCoroTask[TFinalResponse] sink(cAsyncGenerator[TChunk])
 
-  cdef cppclass cResponseAndClientSink "::apache::thrift::ResponseAndClientSink"[TInitResponse, TChunk, TFinalResponse]:
-    TInitResponse response
-    cClientSink[TChunk, TFinalResponse] sink
+    cdef cppclass cResponseAndClientSink "::apache::thrift::ResponseAndClientSink"[TInitResponse, TChunk, TFinalResponse]:
+        TInitResponse response
+        cIOBufClientSink sink
 
 cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrift::python":
-  cAsyncGenerator[TChunk] toAsyncGenerator[TChunk](
-    object,
-    cFollyExecutor*,
-    void(*)(object, cFollyPromise[optional[TChunk]])
-  )
+    cdef cppclass cIOBufClientSink "::apache::thrift::python::IOBufClientSink":
+        cClientSink()
+        cFollyCoroTask[cIOBuf] sink(cAsyncGenerator[unique_ptr[cIOBuf]])
+
+    cAsyncGenerator[TChunk] toAsyncGenerator[TChunk](
+      object,
+      cFollyExecutor*,
+      void(*)(object, cFollyPromise[optional[TChunk]])
+    )
 
 cdef class ClientSink:
-  cdef shared_ptr[cClientSink[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] _cpp_obj
-  @staticmethod
-  cdef create(cClientSink[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]&& client)
+    cdef unique_ptr[cIOBufClientSink] _cpp_obj
+    cdef type _sink_elem_cls
+    cdef type _sink_final_resp_cls
+    cdef Protocol _protocol
+
+    @staticmethod
+    cdef _fbthrift_create(
+        unique_ptr[cIOBufClientSink]&& client_sink,
+        type sink_cls,
+        type sink_final_resp_cls,
+        Protocol protocol,
+    )
 
 cdef class ResponseAndClientSink:
-  pass
+    pass
 
 cdef api void cancelAsyncGenerator(object generator)

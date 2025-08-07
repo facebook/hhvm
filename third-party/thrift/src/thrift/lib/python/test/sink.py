@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 
-from typing import AsyncIterator
+from typing import AsyncGenerator
 from unittest import IsolatedAsyncioTestCase
 
 from thrift.python.streaming.sink import ClientSink
@@ -29,10 +29,14 @@ class SinkTests(IsolatedAsyncioTestCase):
         self.assertIsNotNone(sink)
 
     async def test_create_async_generator(self) -> None:
-        async def iter_alphabet() -> AsyncIterator[str]:
+        async def iter_alphabet() -> AsyncGenerator[str, None]:
             for c in "abcdefghijklmnopqrstuvwxyz":
                 yield c
 
         sink = ClientSink()
-        response = await sink.sink(iter_alphabet())
-        self.assertEqual(response, "pass")
+        # we can't test anything meaningful with the inner cpp ClientSink
+        # default initialized and disconnected from a RequestChannel.
+        with self.assertRaisesRegex(
+            AttributeError, "has no attribute '_fbthrift__sink_elem_handler'"
+        ):
+            await sink.sink(iter_alphabet())

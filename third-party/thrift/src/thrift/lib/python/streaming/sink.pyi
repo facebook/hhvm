@@ -14,7 +14,7 @@
 
 # pyre-strict
 
-from typing import AsyncIterator, Generic, TypeVar
+from typing import AsyncGenerator, Generic, TypeVar
 
 TChunk = TypeVar("TChunk")
 TFinalResponse = TypeVar("TFinalResponse")
@@ -22,5 +22,5 @@ TFinalResponse = TypeVar("TFinalResponse")
 class ClientSink(Generic[TFinalResponse]):
     def __init__(self) -> None: ...
     async def sink(
-        self, iterator: AsyncIterator[TChunk]
+        self, iterator: AsyncGenerator[TChunk, None]
     ) -> Generic[TFinalResponse]: ...

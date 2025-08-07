@@ -34,7 +34,7 @@ void do_import() {
 
 } // namespace
 
-void cancelPythonIterator(PyObject* iter) {
+void cancelPythonGenerator(PyObject* iter) {
   [[maybe_unused]] static bool done = (do_import(), false);
   cancelAsyncGenerator(iter);
 }

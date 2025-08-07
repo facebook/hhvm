@@ -2341,8 +2341,7 @@ TEST(Compilertest, custom_default_values) {
         # expected-warning@-2: Explicit default value is redundant for (terse) field: `i` (in `Widget`).
 
       10: optional bool j = false;
-        # expected-warning@-1: Explicit default value is redundant for (optional) field: `j` (in `Widget`).
-        # expected-warning@-2: Optional field should not have custom default value: `j` (in `Widget`).
+        # expected-warning@-1: Optional field should not have custom default value: `j` (in `Widget`).
     }
 
     union UnionWidget {
@@ -2393,8 +2392,7 @@ TEST(Compilertest, redundant_custom_default_values_error) {
         # expected-error@-2: Explicit default value is redundant for (terse) field: `i` (in `Widget`).
 
       10: optional bool j = false;
-        # expected-error@-1: Explicit default value is redundant for (optional) field: `j` (in `Widget`).
-        # expected-warning@-2: Optional field should not have custom default value: `j` (in `Widget`).
+        # expected-warning@-1: Optional field should not have custom default value: `j` (in `Widget`).
     }
   )",
       {"--extra-validation", "redundant_custom_default_values=error"});
@@ -2411,7 +2409,6 @@ TEST(Compilertest, struct_optional_field_custom_defaul_error) {
 
       @thrift.AllowUnsafeOptionalCustomDefaultValue
       2: optional bool b = false;
-        # expected-error@-2: Optional field should not have custom default value: `b` (in `TestStruct`).
     }
 
     union TestUnion {
@@ -2420,7 +2417,6 @@ TEST(Compilertest, struct_optional_field_custom_defaul_error) {
 
       @thrift.AllowUnsafeOptionalCustomDefaultValue
       2: i32 d = 0;
-        # expected-warning@-2: Union field is implicitly optional and should not have custom default value: `d` (in union `TestUnion`).
     }
   )",
       {"--extra-validation", "struct_optional_field_custom_default=error"});
@@ -2437,7 +2433,6 @@ TEST(Compilertest, union_field_custom_default_error) {
 
       @thrift.AllowUnsafeOptionalCustomDefaultValue
       2: optional bool b = false;
-        # expected-warning@-2: Optional field should not have custom default value: `b` (in `TestStruct`).
     }
 
     union TestUnion {
@@ -2446,7 +2441,6 @@ TEST(Compilertest, union_field_custom_default_error) {
 
       @thrift.AllowUnsafeOptionalCustomDefaultValue
       2: i32 d = 0;
-        # expected-error@-2: Union field is implicitly optional and should not have custom default value: `d` (in union `TestUnion`).
     }
   )",
       {"--extra-validation", "union_field_custom_default=error"});

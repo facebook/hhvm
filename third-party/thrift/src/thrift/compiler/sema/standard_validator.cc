@@ -751,23 +751,45 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
   }
   detail::check_duplicate_keys(ctx, field);
 
-  const sema_params& sema_parameters = ctx.sema_parameters();
+  // A custom default value is specified...
 
+  const sema_params& sema_parameters = ctx.sema_parameters();
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
-  if (parent_node.is<t_union>()) {
-    ctx.report(
-        field,
-        validation_to_diagnostic_level(
-            sema_parameters.union_field_custom_default),
-        "Union field is implicitly optional and should not have custom "
-        "default value: `{}` (in union `{}`).",
-        field.name(),
-        parent_node.name());
+  const t_field_qualifier field_qualifier = field.qualifier();
+  const bool is_union = parent_node.is<t_union>();
+
+  // All union fields are implicitly optional, so handle similarly to struct
+  // optional fields (except for the message).
+  if (is_union || field_qualifier == t_field_qualifier::optional) {
+    // Allow if @thrift.AllowUnsafeOptionalCustomDefaultValue is specified.
+    if (field.has_structured_annotation(
+            kAllowUnsafeOptionalCustomDefaultValueUri)) {
+      return;
+    }
+
+    if (is_union) {
+      ctx.report(
+          field,
+          validation_to_diagnostic_level(
+              sema_parameters.union_field_custom_default),
+          "Union field is implicitly optional and should not have custom "
+          "default value: `{}` (in union `{}`).",
+          field.name(),
+          parent_node.name());
+    } else { // struct or exception
+      ctx.report(
+          field,
+          validation_to_diagnostic_level(
+              sema_parameters.struct_optional_field_custom_default),
+          "Optional field should not have custom default value: "
+          "`{}` (in `{}`).",
+          field.name(),
+          parent_node.name());
+    }
+
     return;
   }
-
-  const t_field_qualifier field_qualifier = field.qualifier();
 
   if (detail::is_initializer_default_value(
           field.type().deref(), *field.default_value())) {
@@ -782,32 +804,17 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
         parent_node.name());
   }
 
-  switch (field_qualifier) {
-    case t_field_qualifier::optional:
-      ctx.report(
-          field,
-          validation_to_diagnostic_level(
-              sema_parameters.struct_optional_field_custom_default),
-          "Optional field should not have custom default value: "
-          "`{}` (in `{}`).",
-          field.name(),
-          parent_node.name());
-      break;
-    case t_field_qualifier::terse: {
-      if (detail::is_initializer_default_value(
-              field.type().deref(), *field.default_value())) {
-        return;
-      }
-      ctx.error(
-          field,
-          "Terse field should not have custom default value: "
-          "`{}` (in `{}`).",
-          field.name(),
-          parent_node.name());
-      break;
+  if (field_qualifier == t_field_qualifier::terse) {
+    if (detail::is_initializer_default_value(
+            field.type().deref(), *field.default_value())) {
+      return;
     }
-    default:
-      break;
+    ctx.error(
+        field,
+        "Terse field should not have custom default value: "
+        "`{}` (in `{}`).",
+        field.name(),
+        parent_node.name());
   }
 }
 

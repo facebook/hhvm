@@ -25,9 +25,9 @@
     {{/struct:structured_annotations}}
     },
     {{/struct:structured_annotations?}}
-    {{#struct:docstring?}}
+    {{#struct:docs?}}
     "docstring" : {{struct:docstring}},
-    {{/struct:docstring?}}
+    {{/struct:docs?}}
     {{#struct:fields?}}
     "fields" : {
       {{#struct:fields}}
@@ -36,9 +36,9 @@
         {{#field:value}}
         "default_value" : {{> const_value}},
         {{/field:value}}
-        {{#field:docstring?}}
+        {{#field:docs?}}
         "docstring" : {{field:docstring}},
-        {{/field:docstring?}}
+        {{/field:docs?}}
         "key" : {{field:key}},
         "lineno" : {{field:lineno}},
         {{#field:required?}}

@@ -81,7 +81,7 @@ class json_experimental_program : public mstch_program {
             {"program:namespaces", &json_experimental_program::namespaces},
             {"program:package?", &json_experimental_program::has_package},
             {"program:package", &json_experimental_program::package},
-            {"program:docstring?", &json_experimental_program::has_docstring},
+            {"program:docs?", &json_experimental_program::has_docstring},
             {"program:docstring", &json_experimental_program::get_docstring},
             {"program:normalized_include_prefix",
              &json_experimental_program::include_prefix},
@@ -172,7 +172,7 @@ class json_experimental_service : public mstch_service {
         this,
         {
             {"service:lineno", &json_experimental_service::get_lineno},
-            {"service:docstring?", &json_experimental_service::has_docstring},
+            {"service:docs?", &json_experimental_service::has_docstring},
             {"service:docstring", &json_experimental_service::get_docstring},
             {"service:path", &json_experimental_service::path},
         });
@@ -203,7 +203,7 @@ class json_experimental_function : public mstch_function {
         this,
         {
             {"function:lineno", &json_experimental_function::get_lineno},
-            {"function:docstring?", &json_experimental_function::has_docstring},
+            {"function:docs?", &json_experimental_function::has_docstring},
             {"function:docstring", &json_experimental_function::get_docstring},
         });
   }
@@ -229,7 +229,7 @@ class json_experimental_struct : public mstch_struct {
         this,
         {
             {"struct:lineno", &json_experimental_struct::get_lineno},
-            {"struct:docstring?", &json_experimental_struct::has_docstring},
+            {"struct:docs?", &json_experimental_struct::has_docstring},
             {"struct:docstring", &json_experimental_struct::get_docstring},
         });
   }
@@ -285,7 +285,7 @@ class json_experimental_field : public mstch_field {
         this,
         {
             {"field:lineno", &json_experimental_field::get_lineno},
-            {"field:docstring?", &json_experimental_field::has_docstring},
+            {"field:docs?", &json_experimental_field::has_docstring},
             {"field:docstring", &json_experimental_field::get_docstring},
         });
   }
@@ -311,7 +311,7 @@ class json_experimental_typedef : public mstch_typedef {
         this,
         {
             {"typedef:lineno", &json_experimental_typedef::get_lineno},
-            {"typedef:docstring?", &json_experimental_typedef::has_docstring},
+            {"typedef:docs?", &json_experimental_typedef::has_docstring},
             {"typedef:docstring", &json_experimental_typedef::get_docstring},
             {"typedef:exception?", &json_experimental_typedef::is_exception},
         });
@@ -340,7 +340,7 @@ class json_experimental_enum : public mstch_enum {
         {
             {"enum:empty?", &json_experimental_enum::is_empty},
             {"enum:lineno", &json_experimental_enum::get_lineno},
-            {"enum:docstring?", &json_experimental_enum::has_docstring},
+            {"enum:docs?", &json_experimental_enum::has_docstring},
             {"enum:docstring", &json_experimental_enum::get_docstring},
         });
   }
@@ -365,8 +365,7 @@ class json_experimental_enum_value : public mstch_enum_value {
         this,
         {
             {"enum_value:lineno", &json_experimental_enum_value::get_lineno},
-            {"enum_value:docstring?",
-             &json_experimental_enum_value::has_docstring},
+            {"enum_value:docs?", &json_experimental_enum_value::has_docstring},
             {"enum_value:docstring",
              &json_experimental_enum_value::get_docstring},
         });
@@ -405,7 +404,7 @@ class json_experimental_const_value : public mstch_const_value {
              &json_experimental_const_value::get_qualified_name},
             {"value:string_value_any",
              &json_experimental_const_value::string_value_any},
-            {"value:docstring?", &json_experimental_const_value::has_docstring},
+            {"value:docs?", &json_experimental_const_value::has_docstring},
             {"value:docstring", &json_experimental_const_value::get_docstring},
         });
   }

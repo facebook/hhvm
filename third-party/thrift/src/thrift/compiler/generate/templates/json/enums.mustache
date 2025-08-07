@@ -23,18 +23,18 @@
       {{#enum:values}}
       "{{enum_value:name}}" : {
         "name" : "{{enum_value:name}}",
-        {{#enum_value:docstring?}}
+        {{#enum_value:docs?}}
         "docstring" : {{enum_value:docstring}},
-        {{/enum_value:docstring?}}
+        {{/enum_value:docs?}}
         "lineno" : {{enum_value:lineno}},
         "value" : {{enum_value:value}}
       }{{^last?}},{{/last?}}
       {{/enum:values}}
     },
     {{/enum:empty?}}
-    {{#enum:docstring?}}
+    {{#enum:docs?}}
     "docstring" : {{enum:docstring}},
-    {{/enum:docstring?}}
+    {{/enum:docs?}}
     "lineno" : {{enum:lineno}}
   }{{^last?}},{{/last?}}
 {{/program:enums}}

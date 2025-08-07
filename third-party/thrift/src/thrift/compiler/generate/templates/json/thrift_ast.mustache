@@ -36,8 +36,8 @@
     "{{key}}": "{{value}}"{{^last?}},{{/last?}}
     {{/program:package}}
   },{{/program:package?}}
-  {{#program:docstring?}}
-  "global_docstring": {{program:docstring}},{{/program:docstring?}}{{!
+  {{#program:docs?}}
+  "global_docstring": {{program:docstring}},{{/program:docs?}}{{!
   }}{{#program:typedefs?}}
   "typedefs": {
     {{#program:typedefs}}
@@ -57,8 +57,8 @@
         "name": "{{constant:name}}",
         "type": "{{value:type_name}}",
         "value": {{value:string_value_any}},{{!
-        }}{{#value:docstring?}}
-        "docstring": {{value:docstring}},{{/value:docstring?}}
+        }}{{#value:docs?}}
+        "docstring": {{value:docstring}},{{/value:docs?}}
         "lineno": {{value:lineno}}
       }{{/constant:value}}{{/constant:type}}{{^last?}},{{/last?}}
       {{/program:constants}}

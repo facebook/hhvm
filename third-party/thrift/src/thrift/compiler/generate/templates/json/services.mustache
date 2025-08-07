@@ -24,17 +24,17 @@
     },{{/service:extends}}{{/service:extends?}}
     "name" : "{{service:name}}",
     "lineno" : {{service:lineno}},
-    {{#service:docstring?}}
+    {{#service:docs?}}
     "docstring" : {{service:docstring}},
-    {{/service:docstring?}}
+    {{/service:docs?}}
     "functions" : {
       {{#service:functions?}}
       {{#service:functions}}
       "{{function:name}}" : {
         "name" : "{{function:name}}",
-        {{#function:docstring?}}
+        {{#function:docs?}}
         "docstring" : {{function:docstring}},
-        {{/function:docstring?}}
+        {{/function:docs?}}
         {{#function:args?}}
         "args" : {
           {{#function:args}}
@@ -44,9 +44,9 @@
             {{#field:value}}
             "default_value" : {{> const_value}},
             {{/field:value}}
-            {{#field:docstring?}}
+            {{#field:docs?}}
             "docstring" : {{field:docstring}},
-            {{/field:docstring?}}
+            {{/field:docs?}}
             "key" : {{field:key}},
             "lineno" : {{field:lineno}},
             {{#field:required?}}

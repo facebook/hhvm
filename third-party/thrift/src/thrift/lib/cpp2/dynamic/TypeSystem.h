@@ -854,6 +854,8 @@ class FieldDefinition final : folly::MoveOnly {
         : nullptr;
   }
 
+  const AnnotationsMap& annotations() const noexcept { return annotations_; }
+
   const SerializableRecord* getAnnotationOrNull(UriView uri) const {
     return folly::get_ptr(annotations_, uri);
   }
@@ -984,6 +986,8 @@ class StructuredNode : public DefinitionNode {
     return FastFieldHandle::invalid();
   }
 
+  const AnnotationsMap& annotations() const noexcept { return annotations_; }
+
   const SerializableRecord* getAnnotationOrNull(UriView uri) const {
     return folly::get_ptr(annotations_, uri);
   }
@@ -1033,12 +1037,15 @@ class EnumNode final : folly::MoveOnly, public DefinitionNode {
     friend bool operator!=(const Value& lhs, const Value& rhs) noexcept {
       return !(lhs == rhs);
     }
+    const AnnotationsMap& annotations() const noexcept { return annotations_; }
     const SerializableRecord* getAnnotationOrNull(UriView uri) const {
       return folly::get_ptr(annotations_, uri);
     }
   };
 
   folly::span<const Value> values() const noexcept { return values_; }
+
+  const AnnotationsMap& annotations() const noexcept { return annotations_; }
 
   const SerializableRecord* getAnnotationOrNull(UriView uri) const {
     return folly::get_ptr(annotations_, uri);
@@ -1058,6 +1065,8 @@ class EnumNode final : folly::MoveOnly, public DefinitionNode {
 class OpaqueAliasNode final : folly::MoveOnly, public DefinitionNode {
  public:
   const TypeRef& targetType() const noexcept { return targetType_; }
+
+  const AnnotationsMap& annotations() const noexcept { return annotations_; }
 
   const SerializableRecord* getAnnotationOrNull(UriView uri) const {
     return folly::get_ptr(annotations_, uri);

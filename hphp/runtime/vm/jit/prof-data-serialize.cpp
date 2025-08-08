@@ -1945,8 +1945,7 @@ void write_typealias(ProfDataSerializer& ser, const TypeAlias* td) {
   write_raw(ser, tdId);
   write_unit(ser, td->unit());
 
-  for (auto const& tc : eachTypeConstraintInUnion(td->value)) {
-    assertx(!tc.isUnresolved() && !tc.isUnion());
+  for (auto const& tc : eachTypeConstraintInUnion(td->preTypeAlias()->value)) {
     auto const ne = tc.anyNamedType();
     if (ne != nullptr) {
       write_raw(ser, true);

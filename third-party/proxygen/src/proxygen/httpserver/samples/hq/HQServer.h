@@ -37,7 +37,7 @@ class HQServer {
            std::unique_ptr<quic::QuicServerTransportFactory> factory);
 
   // Starts the QUIC transport in background thread
-  void start();
+  void start(std::vector<folly::EventBase*> evbs = {});
 
   // Returns the listening address of the server
   // NOTE: can block until the server has started

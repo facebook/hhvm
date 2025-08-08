@@ -267,14 +267,20 @@ HQServer::HQServer(HQServerParams params,
   }
 }
 
-void HQServer::start() {
+void HQServer::start(std::vector<folly::EventBase*> evbs) {
   folly::SocketAddress localAddress;
   if (params_.localAddress) {
     localAddress = *params_.localAddress;
   } else {
     localAddress.setFromLocalPort(params_.port);
   }
-  server_->start(localAddress, params_.serverThreads);
+
+  if (evbs.empty()) {
+    server_->start(localAddress, params_.serverThreads);
+  } else {
+    server_->initialize(localAddress, evbs, true);
+    server_->start();
+  }
 }
 
 const folly::SocketAddress HQServer::getAddress() const {

@@ -9,7 +9,10 @@
 from libcpp.memory cimport make_shared, unique_ptr
 from cython.operator cimport dereference as deref, address
 from libcpp.utility cimport move as cmove
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport (
+    const_pointer_cast,
+    deref_const as __deref_const,
+)
 cimport apache.thrift.fixtures.types.module.thrift_converter as _apache_thrift_fixtures_types_module_thrift_converter
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 

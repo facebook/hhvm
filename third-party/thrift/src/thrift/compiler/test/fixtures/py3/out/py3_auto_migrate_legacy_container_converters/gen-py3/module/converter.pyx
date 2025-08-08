@@ -9,7 +9,10 @@
 from libcpp.memory cimport make_shared, unique_ptr
 from cython.operator cimport dereference as deref, address
 from libcpp.utility cimport move as cmove
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport (
+    const_pointer_cast,
+    deref_const as __deref_const,
+)
 cimport module.thrift_converter as _module_thrift_converter
 
 import module.types as _module_types
@@ -149,7 +152,7 @@ cdef vector[_module_cbindings.cSimpleStruct] List__SimpleStruct__make_instance(o
         for item in items:
             if not isinstance(item, _module_types.SimpleStruct):
                 raise TypeError(f"{item!r} is not of type _module_types.SimpleStruct")
-            c_inst.push_back(_module_thrift_converter.SimpleStruct_convert_to_cpp(item))
+            c_inst.push_back(__deref_const[_module_cbindings.cSimpleStruct](_module_thrift_converter.SimpleStruct_convert_to_cpp(item)))
         return cmove(c_inst)
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
@@ -205,7 +208,7 @@ cdef cmap[string,_module_cbindings.cSimpleStruct] Map__string_SimpleStruct__make
             if not isinstance(item, _module_types.SimpleStruct):
                 raise TypeError(f"{item!r} is not of type _module_types.SimpleStruct")
     
-            c_inst[c_key] = _module_thrift_converter.SimpleStruct_convert_to_cpp(item)
+            c_inst[c_key] = __deref_const[_module_cbindings.cSimpleStruct](_module_thrift_converter.SimpleStruct_convert_to_cpp(item))
         return cmove(c_inst)
 
 cdef cmap[string,cint16_t] Map__string_i16__make_instance(object items) except *:

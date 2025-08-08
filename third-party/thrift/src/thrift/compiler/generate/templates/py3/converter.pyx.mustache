@@ -22,7 +22,10 @@ from libcpp.memory cimport make_shared, unique_ptr
 from cython.operator cimport dereference as deref, address
 from libcpp.utility cimport move as cmove
 {{^program:gen_py3_cython?}}
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport (
+    const_pointer_cast,
+    deref_const as __deref_const,
+)
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
     }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:gen_legacy_container_converters?}}

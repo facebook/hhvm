@@ -13,7 +13,7 @@ use decl_provider::FunDecl;
 use decl_provider::ModuleDecl;
 use decl_provider::Result;
 use decl_provider::TypeDecl;
-use direct_decl_parser::DeclsObr;
+use direct_decl_parser::Decls;
 use hash::HashMap;
 use libc::c_char;
 
@@ -74,7 +74,7 @@ unsafe extern "C" {
 pub struct ExternalDeclProvider<'a> {
     pub provider: *const c_void,
     pub arena: &'a bumpalo::Bump,
-    decls: RefCell<HashMap<Box<[u8]>, &'a DeclsObr<'a>>>,
+    decls: RefCell<HashMap<Box<[u8]>, Decls>>,
 }
 
 impl<'a> ExternalDeclProvider<'a> {
@@ -94,7 +94,7 @@ impl<'a> std::fmt::Debug for ExternalDeclProvider<'a> {
 }
 
 impl<'a> DeclProvider<'a> for ExternalDeclProvider<'a> {
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>> {
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.
             provide_type(self.provider, symbol.as_ptr() as _, symbol.len(), depth)
@@ -102,19 +102,19 @@ impl<'a> DeclProvider<'a> for ExternalDeclProvider<'a> {
         self.find_decl(result, |decls| decl_provider::find_type_decl(decls, symbol))
     }
 
-    fn func_decl(&self, symbol: &str) -> Result<&'a FunDecl<'a>> {
+    fn func_decl(&self, symbol: &str) -> Result<FunDecl> {
         let result = unsafe { provide_func(self.provider, symbol.as_ptr() as _, symbol.len()) };
         self.find_decl(result, |decls| decl_provider::find_func_decl(decls, symbol))
     }
 
-    fn const_decl(&self, symbol: &str) -> Result<&'a ConstDecl<'a>> {
+    fn const_decl(&self, symbol: &str) -> Result<ConstDecl> {
         let result = unsafe { provide_const(self.provider, symbol.as_ptr() as _, symbol.len()) };
         self.find_decl(result, |decls| {
             decl_provider::find_const_decl(decls, symbol)
         })
     }
 
-    fn module_decl(&self, symbol: &str) -> Result<&'a ModuleDecl<'a>> {
+    fn module_decl(&self, symbol: &str) -> Result<ModuleDecl> {
         let result = unsafe { provide_module(self.provider, symbol.as_ptr() as _, symbol.len()) };
         self.find_decl(result, |decls| {
             decl_provider::find_module_decl(decls, symbol)
@@ -128,28 +128,30 @@ impl<'a> ExternalDeclProvider<'a> {
     fn find_decl<T>(
         &self,
         result: ExternalDeclProviderResult,
-        mut find: impl FnMut(&DeclsObr<'a>) -> Result<T>,
+        mut find: impl FnMut(&Decls) -> Result<T>,
     ) -> Result<T> {
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(ptr) => {
                 let holder = unsafe { ptr.as_ref() }.unwrap();
                 match &holder.parsed_file {
-                    ParsedFileHolder::O(_file) => {
-                        panic!("Attempt to use ExternalDeclProvider with Oxidized decl parser")
+                    ParsedFileHolder::O(file) => find(&file.decls),
+                    ParsedFileHolder::Obr(_file, _) => {
+                        panic!(
+                            "Attempt to use ExternalDeclProvider with Oxidized-by-ref decl parser"
+                        )
                     }
-                    ParsedFileHolder::Obr(file, _) => find(&file.decls),
                 }
             }
             ExternalDeclProviderResult::RustVec(p) => {
                 // turn raw pointer back into &Vec<u8>
                 let data = unsafe { p.as_ref().unwrap() };
-                find(self.deser(data)?)
+                find(&self.deser(data)?)
             }
             ExternalDeclProviderResult::CppString(p) => {
                 // turn raw pointer back into &CxxString
                 let data = unsafe { p.as_ref().unwrap() };
-                find(self.deser(data.as_bytes())?)
+                find(&self.deser(data.as_bytes())?)
             }
         }
     }
@@ -157,14 +159,14 @@ impl<'a> ExternalDeclProvider<'a> {
     /// Either deserialize the given data, or access a memoized copy of previously
     /// deserialized decls from identical data. The memo key is a content hash
     /// appended to data at serialization time.
-    fn deser(&self, data: &[u8]) -> Result<&'a DeclsObr<'a>> {
+    fn deser(&self, data: &[u8]) -> Result<Decls> {
         use std::collections::hash_map::Entry::*;
         let content_hash = decl_provider::decls_content_hash(data);
         match self.decls.borrow_mut().entry(content_hash.into()) {
-            Occupied(e) => Ok(*e.get()),
+            Occupied(e) => Ok(e.get().clone()),
             Vacant(e) => {
-                let decls = decl_provider::deserialize_decls_obr(self.arena, data)?;
-                Ok(*e.insert(self.arena.alloc(decls)))
+                let decls = decl_provider::deserialize_decls(data)?;
+                Ok(e.insert(decls).clone())
             }
         }
     }

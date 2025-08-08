@@ -38,7 +38,6 @@ lazy_static = "1.5"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 print_expr = { version = "0.0.0", path = "../../../print_expr" }
 priority-queue = "1.2.2"
 regex = "1.11.1"

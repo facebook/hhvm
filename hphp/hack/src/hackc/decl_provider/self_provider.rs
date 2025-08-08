@@ -5,12 +5,12 @@
 
 use std::sync::Arc;
 
-use direct_decl_parser::DeclsObr;
-use direct_decl_parser::parse_decls_for_bytecode_obr;
+use direct_decl_parser::Decls;
+use direct_decl_parser::parse_decls_for_bytecode;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized_by_ref::shallow_decl_defs::ConstDecl;
-use oxidized_by_ref::shallow_decl_defs::FunDecl;
-use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
+use oxidized::shallow_decl_defs::ConstDecl;
+use oxidized::shallow_decl_defs::FunDecl;
+use oxidized::shallow_decl_defs::ModuleDecl;
 use parser_core_types::source_text::SourceText;
 
 use crate::DeclProvider;
@@ -26,7 +26,7 @@ use crate::TypeDecl;
 /// or similar circumstances.
 pub struct SelfProvider<'d> {
     fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
-    decls: DeclsObr<'d>,
+    decls: Decls,
 }
 
 impl<'d> SelfProvider<'d> {
@@ -34,13 +34,11 @@ impl<'d> SelfProvider<'d> {
         fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
         decl_opts: DeclParserOptions,
         source_text: SourceText<'_>,
-        arena: &'d bumpalo::Bump,
     ) -> Self {
-        let parsed_file = parse_decls_for_bytecode_obr(
+        let parsed_file = parse_decls_for_bytecode(
             &decl_opts,
             source_text.file_path().clone(),
             source_text.text(),
-            arena,
         );
         SelfProvider {
             fallback_decl_provider,
@@ -57,7 +55,6 @@ impl<'d> SelfProvider<'d> {
         fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
         decl_opts: DeclParserOptions,
         source_text: SourceText<'_>,
-        arena: &'d bumpalo::Bump,
     ) -> Option<Arc<dyn DeclProvider<'d> + 'd>> {
         if fallback_decl_provider.is_none() {
             None
@@ -66,7 +63,6 @@ impl<'d> SelfProvider<'d> {
                 fallback_decl_provider,
                 decl_opts,
                 source_text,
-                arena,
             )) as Arc<dyn DeclProvider<'d> + 'd>)
         }
     }
@@ -85,25 +81,25 @@ impl<'d> SelfProvider<'d> {
 }
 
 impl<'d> DeclProvider<'d> for SelfProvider<'d> {
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>> {
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
         self.result_or_else(crate::find_type_decl(&self.decls, symbol), |provider| {
             provider.type_decl(symbol, depth)
         })
     }
 
-    fn func_decl(&self, symbol: &str) -> Result<&'d FunDecl<'d>> {
+    fn func_decl(&self, symbol: &str) -> Result<FunDecl> {
         self.result_or_else(crate::find_func_decl(&self.decls, symbol), |provider| {
             provider.func_decl(symbol)
         })
     }
 
-    fn const_decl(&self, symbol: &str) -> Result<&'d ConstDecl<'d>> {
+    fn const_decl(&self, symbol: &str) -> Result<ConstDecl> {
         self.result_or_else(crate::find_const_decl(&self.decls, symbol), |provider| {
             provider.const_decl(symbol)
         })
     }
 
-    fn module_decl(&self, symbol: &str) -> Result<&'d ModuleDecl<'d>> {
+    fn module_decl(&self, symbol: &str) -> Result<ModuleDecl> {
         self.result_or_else(crate::find_module_decl(&self.decls, symbol), |provider| {
             provider.module_decl(symbol)
         })

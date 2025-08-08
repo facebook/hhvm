@@ -1,1 +1,2 @@
 -vEval.EnableDecl=true
+-vHack.Lang.UseObrDecls=false

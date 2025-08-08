@@ -17,15 +17,15 @@ use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use direct_decl_parser::Decls;
 use direct_decl_parser::DeclsObr;
-use direct_decl_parser::ParsedFileObr;
+use direct_decl_parser::ParsedFile;
 use hash::IndexMap;
 pub use memo_provider::MemoProvider;
-use oxidized_by_ref::shallow_decl_defs::ClassDecl;
-pub use oxidized_by_ref::shallow_decl_defs::ConstDecl;
-use oxidized_by_ref::shallow_decl_defs::Decl;
-pub use oxidized_by_ref::shallow_decl_defs::FunDecl;
-pub use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
-pub use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+use oxidized::shallow_decl_defs::ClassDecl;
+pub use oxidized::shallow_decl_defs::ConstDecl;
+use oxidized::shallow_decl_defs::Decl;
+pub use oxidized::shallow_decl_defs::FunDecl;
+pub use oxidized::shallow_decl_defs::ModuleDecl;
+pub use oxidized::shallow_decl_defs::TypedefDecl;
 pub use self_provider::SelfProvider;
 use sha1::Digest;
 use sha1::Sha1;
@@ -42,10 +42,10 @@ pub enum Error {
     Bincode(#[from] bincode::Error),
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum TypeDecl<'a> {
-    Class(&'a ClassDecl<'a>),
-    Typedef(&'a TypedefDecl<'a>),
+#[derive(Debug, Clone)]
+pub enum TypeDecl {
+    Class(ClassDecl),
+    Typedef(TypedefDecl),
 }
 
 /// DeclProvider is an interface for requesting named decl data required
@@ -93,11 +93,11 @@ pub trait DeclProvider<'d>: std::fmt::Debug {
     /// * `symbol` - the name of the symbol being requested
     /// * `depth` - a hint to the provider about the number of layers of decl
     /// *           request traversed to arrive at this request
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>>;
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl>;
 
-    fn func_decl(&self, symbol: &str) -> Result<&'d FunDecl<'d>>;
-    fn const_decl(&self, symbol: &str) -> Result<&'d ConstDecl<'d>>;
-    fn module_decl(&self, symbol: &str) -> Result<&'d ModuleDecl<'d>>;
+    fn func_decl(&self, symbol: &str) -> Result<FunDecl>;
+    fn const_decl(&self, symbol: &str) -> Result<ConstDecl>;
+    fn module_decl(&self, symbol: &str) -> Result<ModuleDecl>;
 }
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
@@ -167,42 +167,62 @@ pub fn decls_content_hash(data: &[u8]) -> &[u8] {
     split_serialized_decls(data).1
 }
 
-pub fn find_type_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<TypeDecl<'a>> {
+pub fn find_type_decl(decls: &Decls, needle: &str) -> Result<TypeDecl> {
     decls
         .types()
         .find_map(|(name, decl)| match decl {
-            Decl::Class(c) if needle.eq_ignore_ascii_case(name) => Some(TypeDecl::Class(c)),
-            Decl::Typedef(c) if needle.eq_ignore_ascii_case(name) => Some(TypeDecl::Typedef(c)),
+            Decl::Class(c) if needle.eq_ignore_ascii_case(name) => Some(TypeDecl::Class(c.clone())),
+            Decl::Typedef(c) if needle.eq_ignore_ascii_case(name) => {
+                Some(TypeDecl::Typedef(c.clone()))
+            }
             Decl::Class(_) | Decl::Typedef(_) => None,
             Decl::Fun(_) | Decl::Const(_) | Decl::Module(_) => unreachable!(),
         })
         .ok_or(Error::NotFound)
 }
 
-pub fn find_func_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<&'a FunDecl<'a>> {
+pub fn find_func_decl(decls: &Decls, needle: &str) -> Result<FunDecl> {
     decls
         .funs()
-        .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
+        .find_map(|(name, decl)| {
+            if needle == name {
+                Some(decl.clone())
+            } else {
+                None
+            }
+        })
         .ok_or(Error::NotFound)
 }
 
-pub fn find_const_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<&'a ConstDecl<'a>> {
+pub fn find_const_decl(decls: &Decls, needle: &str) -> Result<ConstDecl> {
     decls
         .consts()
-        .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
+        .find_map(|(name, decl)| {
+            if needle == name {
+                Some(decl.clone())
+            } else {
+                None
+            }
+        })
         .ok_or(Error::NotFound)
 }
 
-pub fn find_module_decl<'a>(decls: &DeclsObr<'a>, needle: &str) -> Result<&'a ModuleDecl<'a>> {
+pub fn find_module_decl(decls: &Decls, needle: &str) -> Result<ModuleDecl> {
     decls
         .modules()
-        .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
+        .find_map(|(name, decl)| {
+            if needle == name {
+                Some(decl.clone())
+            } else {
+                None
+            }
+        })
         .ok_or(Error::NotFound)
 }
 
 pub fn serialize_batch_decls(
     w: impl Write,
-    parsed_files: &IndexMap<PathBuf, ParsedFileObr<'_>>,
+    parsed_files: &IndexMap<PathBuf, ParsedFile>,
 ) -> Result<(), bincode::Error> {
     let mut w = BufWriter::new(w);
     bincode::options()
@@ -213,7 +233,7 @@ pub fn serialize_batch_decls(
 pub fn deserialize_batch_decls<'a>(
     r: impl Read,
     arena: &'a bumpalo::Bump,
-) -> Result<IndexMap<PathBuf, ParsedFileObr<'a>>, bincode::Error> {
+) -> Result<IndexMap<PathBuf, ParsedFile>, bincode::Error> {
     let r = BufReader::new(r);
     let mut de = bincode::de::Deserializer::with_reader(r, bincode::options().with_native_endian());
     let de = ArenaDeserializer::new(arena, &mut de);

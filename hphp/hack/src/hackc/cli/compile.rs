@@ -27,7 +27,7 @@ use decl_provider::FunDecl;
 use decl_provider::ModuleDecl;
 use decl_provider::SelfProvider;
 use decl_provider::TypeDecl;
-use direct_decl_parser::DeclsObr;
+use direct_decl_parser::Decls;
 use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hhvm_options::HhvmOptions;
@@ -41,7 +41,7 @@ use parser_core_types::source_text::SourceText;
 use pos::ConstName;
 use pos::FunName;
 use pos::RelativePathCtx;
-use pos::ToOxidizedByRef;
+use pos::ToOxidized;
 use pos::TypeName;
 use rayon::prelude::*;
 use relative_path::Prefix;
@@ -179,12 +179,10 @@ pub(crate) fn process_single_file(
     let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
     let env = native_env(filepath, opts)?;
     let mut output = Vec::new();
-    let decl_arena = bumpalo::Bump::new();
     let decl_provider = SelfProvider::wrap_existing_provider(
         None,
         env.to_decl_parser_options(),
         source_text.clone(),
-        &decl_arena,
     );
     compile::from_text(&mut output, source_text, &env, decl_provider, profile)?;
     if opts.verbosity >= 1 {
@@ -199,14 +197,9 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
         let source_text = std::fs::read(&path)
             .with_context(|| format!("Unable to read file '{}'", path.display()))?;
         let env = hackc_opts.native_env(path)?;
-        let decl_arena = bumpalo::Bump::new();
         let text = SourceText::make(Arc::new(env.filepath.clone()), &source_text);
-        let decl_provider = SelfProvider::wrap_existing_provider(
-            None,
-            env.to_decl_parser_options(),
-            text,
-            &decl_arena,
-        );
+        let decl_provider =
+            SelfProvider::wrap_existing_provider(None, env.to_decl_parser_options(), text);
         let hhas = compile_impl(env, source_text, decl_provider)?;
         w.write_all(&hhas)?;
     }
@@ -245,19 +238,11 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
         // Parse decls
         let decl_opts = hackc_opts.decl_opts();
         let filename = RelativePath::make(Prefix::Root, path.clone());
-        let arena = bumpalo::Bump::new();
-        let parsed_file = direct_decl_parser::parse_decls_for_bytecode_obr(
-            &decl_opts,
-            filename,
-            &source_text,
-            &arena,
-        );
+        let parsed_file =
+            direct_decl_parser::parse_decls_for_bytecode(&decl_opts, filename, &source_text);
         #[allow(clippy::arc_with_non_send_sync)]
-        let provider: Arc<SingleDeclProvider<'_, NReason>> = Arc::new(SingleDeclProvider::make(
-            &arena,
-            parsed_file.decls,
-            hackc_opts,
-        )?);
+        let provider: Arc<SingleDeclProvider<'_, NReason>> =
+            Arc::new(SingleDeclProvider::make(parsed_file.decls, hackc_opts)?);
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, Some(provider.clone()))?;
         if hackc_opts.log_decls_requested {
@@ -303,8 +288,8 @@ pub(crate) fn auto_namespace_map() -> impl Iterator<Item = (String, String)> {
 }
 
 #[derive(Debug)]
-enum DeclsHolder<'a> {
-    ByRef(DeclsObr<'a>),
+enum DeclsHolder {
+    ByRef(Decls),
     Ser(Vec<u8>),
 }
 
@@ -317,17 +302,17 @@ struct Access {
 
 #[derive(Debug)]
 struct SingleDeclProvider<'a, R: Reason> {
-    arena: &'a bumpalo::Bump,
-    decls: DeclsHolder<'a>,
+    decls: DeclsHolder,
     shallow_decl_provider: Option<Arc<dyn ShallowDeclProvider<R>>>,
     type_requests: RefCell<Vec<Access>>,
     func_requests: RefCell<Vec<Access>>,
     const_requests: RefCell<Vec<Access>>,
     module_requests: RefCell<Vec<Access>>,
+    _marker: std::marker::PhantomData<&'a ()>,
 }
 
 impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>, Error> {
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl, Error> {
         let decl = {
             let decl = self.find_decl(|decls| decl_provider::find_type_decl(decls, symbol));
             match (&decl, self.shallow_decl_provider.as_ref()) {
@@ -337,11 +322,11 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
                         shallow_decl_provider.get_type(TypeName::new(symbol))
                     {
                         match type_decl {
-                            shallow_decl_provider::TypeDecl::Class(c) => Ok(
-                                decl_provider::TypeDecl::Class(c.to_oxidized_by_ref(self.arena)),
-                            ),
+                            shallow_decl_provider::TypeDecl::Class(c) => {
+                                Ok(decl_provider::TypeDecl::Class((*c).clone().to_oxidized()))
+                            }
                             shallow_decl_provider::TypeDecl::Typedef(ty) => Ok(
-                                decl_provider::TypeDecl::Typedef(ty.to_oxidized_by_ref(self.arena)),
+                                decl_provider::TypeDecl::Typedef((*ty).clone().to_oxidized()),
                             ),
                         }
                     } else {
@@ -355,7 +340,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
         decl
     }
 
-    fn func_decl(&self, symbol: &str) -> Result<&'a FunDecl<'a>, Error> {
+    fn func_decl(&self, symbol: &str) -> Result<FunDecl, Error> {
         let decl = {
             let decl = self.find_decl(|decls| decl_provider::find_func_decl(decls, symbol));
             match (&decl, self.shallow_decl_provider.as_ref()) {
@@ -363,7 +348,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
                 (Err(Error::NotFound), Some(shallow_decl_provider)) => {
                     if let Ok(Some(fun_decl)) = shallow_decl_provider.get_fun(FunName::new(symbol))
                     {
-                        Ok(fun_decl.to_oxidized_by_ref(self.arena))
+                        Ok((*fun_decl).clone().to_oxidized())
                     } else {
                         decl
                     }
@@ -375,7 +360,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
         decl
     }
 
-    fn const_decl(&self, symbol: &str) -> Result<&'a ConstDecl<'a>, Error> {
+    fn const_decl(&self, symbol: &str) -> Result<ConstDecl, Error> {
         let decl = {
             let decl = self.find_decl(|decls| decl_provider::find_const_decl(decls, symbol));
             match (&decl, self.shallow_decl_provider.as_ref()) {
@@ -384,7 +369,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
                     if let Ok(Some(const_decl)) =
                         shallow_decl_provider.get_const(ConstName::new(symbol))
                     {
-                        Ok(const_decl.to_oxidized_by_ref(self.arena))
+                        Ok((*const_decl).clone().to_oxidized())
                     } else {
                         decl
                     }
@@ -396,7 +381,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
         decl
     }
 
-    fn module_decl(&self, symbol: &str) -> Result<&'a ModuleDecl<'a>, Error> {
+    fn module_decl(&self, symbol: &str) -> Result<ModuleDecl, Error> {
         let decl = self.find_decl(|decls| decl_provider::find_module_decl(decls, symbol));
         // TODO: ShallowDeclProvider doesn't have a get_module equivalent
         Self::record_access(&self.module_requests, symbol, 0, decl.is_ok());
@@ -444,16 +429,11 @@ fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
 }
 
 impl<'a, R: Reason> SingleDeclProvider<'a, R> {
-    fn make(
-        arena: &'a bumpalo::Bump,
-        decls: DeclsObr<'a>,
-        hackc_opts: &crate::Opts,
-    ) -> Result<Self> {
+    fn make(decls: Decls, hackc_opts: &crate::Opts) -> Result<Self> {
         Ok(SingleDeclProvider {
-            arena,
             decls: match hackc_opts.use_serialized_decls {
                 false => DeclsHolder::ByRef(decls),
-                true => DeclsHolder::Ser(decl_provider::serialize_decls_obr(&decls)?),
+                true => DeclsHolder::Ser(decl_provider::serialize_decls(&decls)?),
             },
             shallow_decl_provider: if hackc_opts.naming_table.is_some()
                 && hackc_opts.naming_table_root.is_some()
@@ -468,18 +448,14 @@ impl<'a, R: Reason> SingleDeclProvider<'a, R> {
             func_requests: Default::default(),
             const_requests: Default::default(),
             module_requests: Default::default(),
+            _marker: std::marker::PhantomData,
         })
     }
 
-    fn find_decl<T>(
-        &self,
-        mut find: impl FnMut(&DeclsObr<'a>) -> Result<T, Error>,
-    ) -> Result<T, Error> {
+    fn find_decl<T>(&self, mut find: impl FnMut(&Decls) -> Result<T, Error>) -> Result<T, Error> {
         match &self.decls {
             DeclsHolder::ByRef(decls) => find(decls),
-            DeclsHolder::Ser(data) => {
-                find(&decl_provider::deserialize_decls_obr(self.arena, data)?)
-            }
+            DeclsHolder::Ser(data) => find(&decl_provider::deserialize_decls(data)?),
         }
     }
 

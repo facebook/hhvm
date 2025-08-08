@@ -409,12 +409,10 @@ fn compile_php_file<'a>(
     let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
     let mut env = crate::compile::native_env(filepath, single_file_opts)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
-    let decl_arena = bumpalo::Bump::new();
     let decl_provider = SelfProvider::wrap_existing_provider(
         None,
         env.to_decl_parser_options(),
         source_text.clone(),
-        &decl_arena,
     );
 
     if for_ir {

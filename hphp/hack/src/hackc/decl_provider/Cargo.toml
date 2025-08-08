@@ -17,7 +17,6 @@ bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 direct_decl_parser = { version = "0.0.0", path = "../../parser/api/cargo/direct_decl_parser" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 sha1 = "0.10.5"
 thiserror = "2.0.12"

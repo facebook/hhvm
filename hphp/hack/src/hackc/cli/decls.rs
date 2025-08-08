@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Args;
-use direct_decl_parser::ParsedFileObr;
+use direct_decl_parser::ParsedFile;
 use hash::IndexMap;
 use relative_path::Prefix;
 use relative_path::RelativePath;
@@ -22,14 +22,12 @@ pub(crate) struct Opts {
 pub(crate) fn binary_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
     let filenames = opts.files.gather_input_files()?;
     let dp_opts = hackc_opts.decl_opts();
-    let mut parsed_files: IndexMap<PathBuf, ParsedFileObr<'_>> = Default::default();
-    let arena = bumpalo::Bump::new();
+    let mut parsed_files: IndexMap<PathBuf, ParsedFile> = Default::default();
     for path in filenames {
         // Parse decls
         let text = std::fs::read(&path)?;
         let filename = RelativePath::make(Prefix::Root, path.clone());
-        let parsed_file =
-            direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, filename, &text, &arena);
+        let parsed_file = direct_decl_parser::parse_decls_for_bytecode(&dp_opts, filename, &text);
         parsed_files.insert(path.to_path_buf(), parsed_file);
     }
     let mut data = Vec::new();
@@ -44,10 +42,8 @@ pub(crate) fn json_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
     for path in filenames {
         // Parse decls
         let text = std::fs::read(&path)?;
-        let arena = bumpalo::Bump::new();
         let filename = RelativePath::make(Prefix::Root, path.clone());
-        let parsed_file =
-            direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, filename, &text, &arena);
+        let parsed_file = direct_decl_parser::parse_decls_for_bytecode(&dp_opts, filename, &text);
         serde_json::to_writer_pretty(&mut std::io::stdout(), &parsed_file)?;
     }
     Ok(())

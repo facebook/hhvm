@@ -81,7 +81,7 @@ use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::local_id;
 use oxidized::pos::Pos;
-use oxidized_by_ref::typing_defs;
+use oxidized::typing_defs;
 use regex::Regex;
 use serde_json::json;
 use string_utils::reified::ReifiedTparam;
@@ -2935,12 +2935,12 @@ fn emit_special_function<'a, 'd>(
                         .to_string(),
                         Ok(decl_provider::TypeDecl::Typedef(td)) => json!({
                             "kind": (match td.type_assignment {
-                                typing_defs::TypedefTypeAssignment::SimpleTypeDef((vis, _hint)) => match vis {
+                                typing_defs::TypedefTypeAssignment::SimpleTypeDef(vis, _hint) => match vis {
                                     aast_defs::TypedefVisibility::Transparent => "type",
                                     aast_defs::TypedefVisibility::Opaque => "newtype",
                                     aast_defs::TypedefVisibility::OpaqueModule => "module newtype",
                                 },
-                                typing_defs::TypedefTypeAssignment::CaseType(_) => "case type",
+                                typing_defs::TypedefTypeAssignment::CaseType(_, _) => "case type",
                             })
                         })
                         .to_string(),

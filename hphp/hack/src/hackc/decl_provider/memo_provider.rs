@@ -19,10 +19,10 @@ use crate::TypeDecl;
 /// A DeclProvider that memoizes results of previous queries.
 pub struct MemoProvider<'d> {
     next: Arc<dyn DeclProvider<'d> + 'd>,
-    types: RefCell<HashMap<String, TypeDecl<'d>>>,
-    funcs: RefCell<HashMap<String, &'d FunDecl<'d>>>,
-    consts: RefCell<HashMap<String, &'d ConstDecl<'d>>>,
-    modules: RefCell<HashMap<String, &'d ModuleDecl<'d>>>,
+    types: RefCell<HashMap<String, TypeDecl>>,
+    funcs: RefCell<HashMap<String, FunDecl>>,
+    consts: RefCell<HashMap<String, ConstDecl>>,
+    modules: RefCell<HashMap<String, ModuleDecl>>,
 }
 
 impl<'d> MemoProvider<'d> {
@@ -36,33 +36,37 @@ impl<'d> MemoProvider<'d> {
         }
     }
 
-    fn fetch_or_insert<T: Copy>(
+    fn fetch_or_insert<T: Clone>(
         table: &RefCell<HashMap<String, T>>,
         symbol: &str,
         mut on_miss: impl FnMut() -> Result<T>,
     ) -> Result<T> {
         use std::collections::hash_map::Entry::*;
         match table.borrow_mut().entry(symbol.into()) {
-            Occupied(e) => Ok(*e.get()),
-            Vacant(e) => Ok(*e.insert(on_miss()?)),
+            Occupied(e) => Ok(e.get().clone()),
+            Vacant(e) => {
+                let miss = on_miss()?;
+                e.insert(miss.clone());
+                Ok(miss)
+            }
         }
     }
 }
 
 impl<'d> DeclProvider<'d> for MemoProvider<'d> {
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>> {
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
         Self::fetch_or_insert(&self.types, symbol, || self.next.type_decl(symbol, depth))
     }
 
-    fn func_decl(&self, symbol: &str) -> Result<&'d FunDecl<'d>> {
+    fn func_decl(&self, symbol: &str) -> Result<FunDecl> {
         Self::fetch_or_insert(&self.funcs, symbol, || self.next.func_decl(symbol))
     }
 
-    fn const_decl(&self, symbol: &str) -> Result<&'d ConstDecl<'d>> {
+    fn const_decl(&self, symbol: &str) -> Result<ConstDecl> {
         Self::fetch_or_insert(&self.consts, symbol, || self.next.const_decl(symbol))
     }
 
-    fn module_decl(&self, symbol: &str) -> Result<&'d ModuleDecl<'d>> {
+    fn module_decl(&self, symbol: &str) -> Result<ModuleDecl> {
         Self::fetch_or_insert(&self.modules, symbol, || self.next.module_decl(symbol))
     }
 }

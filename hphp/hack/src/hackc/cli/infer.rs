@@ -137,7 +137,6 @@ fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Un
     let source_text = SourceText::make(Arc::new(filepath.clone()), content);
     let mut env = crate::compile::native_env(filepath, &opts.single_file_opts)?;
     let mut profile = Profile::default();
-    let decl_arena = bumpalo::Bump::new();
 
     // Don't optimize local lifetimes as it can cause us to drop writes that may
     // make testing difficult but does not change the program meaningfully
@@ -157,7 +156,6 @@ fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Un
         None,
         env.to_decl_parser_options(),
         source_text.clone(),
-        &decl_arena,
     );
     let unit = compile::unit_from_text_with_opts(
         source_text,

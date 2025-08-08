@@ -595,7 +595,6 @@ fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>
         external_decl_provider,
         native_env.to_decl_parser_options(),
         text.clone(),
-        &decl_allocator,
     );
 
     let mut output = Vec::new();
@@ -754,7 +753,6 @@ fn compile_unit_from_text(
         external_decl_provider,
         native_env.to_decl_parser_options(),
         text.clone(),
-        &decl_allocator,
     );
 
     compile::unit_from_text(text, &native_env, decl_provider, &mut Default::default())

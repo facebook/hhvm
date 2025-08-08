@@ -1,1 +1,2 @@
 -vRuntime.Eval.EnableDecl=true
+-vRuntime.Hack.Lang.UseObrDecls=false

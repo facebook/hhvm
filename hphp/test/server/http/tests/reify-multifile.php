@@ -7,11 +7,11 @@ function main() :mixed{
   echo "Enabling OptimizeReifiedParamChecks...\n";
   runDefaultSandboxTest(
     3,
-    '-vEval.EnableDecl=1 -vHack.Lang.OptimizeReifiedParamChecks=true',
+    '-vHack.Lang.UseObrDecls=false -vEval.EnableDecl=1 -vHack.Lang.OptimizeReifiedParamChecks=true',
   );
   echo "Enabling ReuseUnitsByHash...\n";
   runDefaultSandboxTest(
     3,
-    '-vEval.EnableDecl=1 -vHack.Lang.OptimizeReifiedParamChecks=true -vEval.ReuseUnitsByHash=1',
+    '-vHack.Lang.UseObrDecls=false -vEval.EnableDecl=1 -vHack.Lang.OptimizeReifiedParamChecks=true -vEval.ReuseUnitsByHash=1',
   );
 }

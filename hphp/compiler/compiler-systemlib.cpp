@@ -186,6 +186,7 @@ bool compile_systemlib(const std::filesystem::path& path, std::string output_dir
   hackc::DeclParserConfig options;
   defaults.flags().initDeclConfig(options);
 
+  options.use_obr_decls=false;
   auto decls = hackc::direct_decl_parse_and_serialize(
     options,
     fname,

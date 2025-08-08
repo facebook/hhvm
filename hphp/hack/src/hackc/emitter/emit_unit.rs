@@ -58,9 +58,9 @@ use hhbc::Unit;
 use oxidized::ast;
 use oxidized::namespace_env;
 use oxidized::pos::Pos;
-use oxidized_by_ref::shallow_decl_defs::DeclConstraintRequirement;
-use oxidized_by_ref::typing_defs;
-use oxidized_by_ref::typing_defs_core::Exact;
+use oxidized::shallow_decl_defs::DeclConstraintRequirement;
+use oxidized::typing_defs;
+use oxidized::typing_defs_core::Exact;
 
 // PUBLIC INTERFACE (ENTRY POINTS)
 
@@ -139,8 +139,8 @@ where
                     .chain(class_decl.req_implements.iter())
                     .chain(class_decl.uses.iter())
                     .for_each(|ty| {
-                        if let Ty_::Tclass(((_, cn), Exact::Exact, _ty_args)) = ty.1 {
-                            let cn = hhbc::intern(*cn);
+                        if let Ty_::Tclass((_, cn), Exact::Exact, _ty_args) = &*ty.1 {
+                            let cn = hhbc::intern(cn);
                             if seen.insert(cn) {
                                 q.push_back((cn, idx + 1))
                             }

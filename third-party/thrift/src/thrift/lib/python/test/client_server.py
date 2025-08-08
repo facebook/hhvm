@@ -21,8 +21,7 @@ from __future__ import annotations
 import asyncio
 import time
 import unittest
-from pathlib import Path
-from typing import Optional, Sequence
+from typing import Sequence
 
 from derived.thrift_clients import DerivedTestingService
 from derived.thrift_services import DerivedTestingServiceInterface
@@ -35,11 +34,12 @@ from testing.thrift_clients import TestingService
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy, SimpleError
 from thrift.lib.python.test.event_handlers.helper import ThrowHelper, ThrowHelperHandler
+from thrift.lib.python.test.test_server import TestServer
 from thrift.py3.server import get_context, SocketAddress
 from thrift.python.client import get_client
 from thrift.python.common import Priority, RpcOptions
 from thrift.python.exceptions import ApplicationError
-from thrift.python.server import ServiceInterface, ThriftServer
+from thrift.python.server import ServiceInterface
 
 
 class Handler(TestingServiceInterface):
@@ -105,31 +105,15 @@ class DerivedHandler(Handler, DerivedTestingServiceInterface):
         return color
 
 
-class TestServer:
-    server: ThriftServer
-    serve_task: asyncio.Task
+def local_server(handler: ServiceInterface | None = None) -> TestServer:
+    if handler is None:
+        handler = Handler()
+    return TestServer(handler=handler, ip="::1")
 
-    def __init__(
-        self,
-        ip: Optional[str] = None,
-        path: Optional["Path"] = None,
-        handler: ServiceInterface = Handler(),  # noqa: B008
-    ) -> None:
-        self.server = ThriftServer(handler, ip=ip, path=path)
-        # pyre-fixme[8]: The initialization below eliminates
-        #                   the pyre[13] error, but results in
-        #                   pyre[4] and pyre[8] errors.
-        #                   __aenter__ sets the required value.
-        self.serve_task = None
 
-    async def __aenter__(self) -> SocketAddress:
-        self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())
-        return await self.server.get_address()
-
-    # pyre-fixme[2]: Parameter must be annotated.
-    async def __aexit__(self, *exc_info) -> None:
-        self.server.stop()
-        await self.serve_task
+def default_server() -> TestServer:
+    # note in this case, port is set to 0
+    return TestServer(handler=Handler())
 
 
 class ClientServerTests(unittest.IsolatedAsyncioTestCase):
@@ -138,7 +122,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     """
 
     async def test_get_context(self) -> None:
-        async with TestServer(ip="::1") as sa:
+        async with local_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -166,7 +150,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             await handler.getName()
 
     async def test_rpc_headers(self) -> None:
-        async with TestServer(ip="::1") as sa:
+        async with local_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -176,7 +160,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertIn("from server", options.read_headers)
 
     async def test_server_localhost(self) -> None:
-        async with TestServer(ip="::1") as sa:
+        async with local_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -187,7 +171,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     await client.takes_a_list([])
 
     async def test_no_client_aexit(self) -> None:
-        async with TestServer() as sa:
+        async with default_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             client = get_client(TestingService, host=ip, port=port)
@@ -202,7 +186,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         This actually handles the case if __aexit__ is not awaited
         """
 
-        async with TestServer() as sa:
+        async with default_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             client = get_client(TestingService, host=ip, port=port)
@@ -218,7 +202,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         This covers if aenter was canceled since those two are the same really
         """
 
-        async with TestServer() as sa:
+        async with default_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             get_client(TestingService, host=ip, port=port)
@@ -230,7 +214,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         This tests calling methods from a derived service
         """
 
-        async with TestServer(handler=DerivedHandler()) as sa:
+        async with local_server(handler=DerivedHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(
@@ -244,7 +228,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_renamed_func(self) -> None:
-        async with TestServer(ip="::1") as sa:
+        async with local_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -303,7 +287,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     cancelledMessage
                 )  # Pretend that this is some await call that gets cancelled
 
-        async with TestServer(handler=CancelHandler(), ip="::1") as sa:
+        async with local_server(handler=CancelHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -324,7 +308,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             async def getName(self) -> str:
                 raise Exception(errMessage)
 
-        async with TestServer(handler=ErrorHandler(), ip="::1") as sa:
+        async with local_server(handler=ErrorHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -336,7 +320,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_request_with_default_rpc_options(self) -> None:
-        async with TestServer(ip="::1") as sa:
+        async with local_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -346,7 +330,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
 
     async def test_request_with_specified_rpc_options(self) -> None:
-        async with TestServer(ip="::1") as sa:
+        async with local_server() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(TestingService, host=ip, port=port) as client:
@@ -360,7 +344,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_client_event_handler_throw(self) -> None:
         for handler in ThrowHelperHandler:
-            async with TestServer(ip="::1") as sa:
+            async with local_server() as sa:
                 ip, port = sa.ip, sa.port
                 self.assertIsNotNone(ip)
                 self.assertIsNotNone(port)
@@ -406,7 +390,7 @@ class ClientStackServerTests(unittest.IsolatedAsyncioTestCase):
     """
 
     async def test_server_localhost(self) -> None:
-        async with TestServer(handler=StackHandler(), ip="::1") as sa:
+        async with local_server(handler=StackHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(StackService, host=ip, port=port) as client:

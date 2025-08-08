@@ -18,7 +18,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import unittest
 from typing import Any, cast, Type
 
@@ -41,9 +40,9 @@ from binary.thrift_types import (
 from folly.iobuf import IOBuf
 
 from parameterized import parameterized
-from thrift.py3.server import SocketAddress
+from thrift.lib.python.test.test_server import TestServer
 from thrift.python.client import get_client
-from thrift.python.server import ServiceInterface, ThriftServer
+from thrift.python.server import ServiceInterface
 
 
 class BinaryTests(unittest.TestCase):
@@ -71,6 +70,10 @@ class BinaryTests(unittest.TestCase):
     ) -> None:
         val = BinaryUnion(iobuf_val=IOBuf(b"mnopqr"))
         self.assertEqual(bytes(val.iobuf_val), b"mnopqr")
+
+
+def local_server(handler: ServiceInterface) -> TestServer:
+    return TestServer(handler=handler, ip="::1")
 
 
 def get_binary_handler_type(
@@ -125,24 +128,6 @@ def get_binary_handler_type(
     return cast(Type[ServiceInterface], BinaryHandler)
 
 
-class TestServer:
-    server: ThriftServer
-    # pyre-fixme[13]: Attribute `serve_task` is never initialized.
-    serve_task: asyncio.Task
-
-    def __init__(self, *, ip: str, handler: ServiceInterface) -> None:
-        self.server = ThriftServer(handler, ip=ip, path=None)
-
-    async def __aenter__(self) -> SocketAddress:
-        self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())
-        return await self.server.get_address()
-
-    # pyre-fixme[2]: Parameter must be annotated.
-    async def __aexit__(self, *exc_info) -> None:
-        self.server.stop()
-        await self.serve_task
-
-
 class ClientBinaryServerTests(unittest.IsolatedAsyncioTestCase):
     @parameterized.expand(
         [
@@ -172,7 +157,7 @@ class ClientBinaryServerTests(unittest.IsolatedAsyncioTestCase):
             BinaryServiceInterface, Binaries, BinaryUnion
         )
         # pyre-ignore[19]: `object.__init__` expects 0 positional arguments
-        async with TestServer(handler=BinaryHandler(self), ip="::1") as sa:
+        async with local_server(handler=BinaryHandler(self)) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
             async with get_client(BinaryService, host=ip, port=port) as client:

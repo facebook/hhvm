@@ -18,19 +18,21 @@
 
 from __future__ import annotations
 
-import asyncio
 import unittest
-from pathlib import Path
-from typing import Optional, Sequence
+from typing import Sequence
 
 from apache.thrift.metadata.thrift_types import ThriftServiceMetadataResponse
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy, SimpleError
-from thrift.py3.server import get_context, SocketAddress
+from thrift.lib.python.test.test_server import TestServer
+from thrift.py3.server import get_context
 from thrift.python.serializer import deserialize, Protocol
-from thrift.python.server import ServiceInterface, ThriftServer
 
 from .metadata_response import get_serialized_cpp_metadata
+
+
+def local_server() -> TestServer:
+    return TestServer(handler=Handler(), ip="::1")
 
 
 class Handler(TestingServiceInterface):
@@ -84,36 +86,13 @@ class Handler(TestingServiceInterface):
         return ret
 
 
-class TestServer:
-    server: ThriftServer
-    # pyre-fixme[13]: Attribute `serve_task` is never initialized.
-    serve_task: asyncio.Task
-
-    def __init__(
-        self,
-        ip: Optional[str] = None,
-        path: Optional["Path"] = None,
-        handler: ServiceInterface = Handler(),  # noqa: B008
-    ) -> None:
-        self.server = ThriftServer(handler, ip=ip, path=path)
-
-    async def __aenter__(self) -> SocketAddress:
-        self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())
-        return await self.server.get_address()
-
-    # pyre-fixme[2]: Parameter must be annotated.
-    async def __aexit__(self, *exc_info) -> None:
-        self.server.stop()
-        await self.serve_task
-
-
 class MetadataResponseTest(unittest.IsolatedAsyncioTestCase):
     """
     These are tests where a client and server talk to each other
     """
 
     async def test_server_localhost(self) -> None:
-        server = TestServer(ip="::1")
+        server = local_server()
         async with server as _:
             metadata_cpp = deserialize(
                 ThriftServiceMetadataResponse,

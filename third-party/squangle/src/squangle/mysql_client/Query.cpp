@@ -20,7 +20,7 @@ namespace facebook::common::mysql_client {
   if (type_ != expected)     \
   throw std::invalid_argument("DataType doesn't match with the call")
 
-typedef std::pair<folly::fbstring, QueryArgument> ArgPair;
+using ArgPair = std::pair<folly::fbstring, QueryArgument>;
 
 // fbstring constructors
 QueryArgument::QueryArgument(folly::StringPiece val)

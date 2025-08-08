@@ -25,9 +25,9 @@ class ConnectOperation;
 class QueryOperation;
 class MultiQueryOperation;
 
-typedef std::shared_ptr<ConnectOperation> ConnectOperation_ptr;
-typedef std::shared_ptr<QueryOperation> QueryOperation_ptr;
-typedef std::shared_ptr<MultiQueryOperation> MultiQueryOperation_ptr;
+using ConnectOperation_ptr = std::shared_ptr<ConnectOperation>;
+using QueryOperation_ptr = std::shared_ptr<QueryOperation>;
+using MultiQueryOperation_ptr = std::shared_ptr<MultiQueryOperation>;
 
 // SemiFuture for ConnectOperation
 FOLLY_NODISCARD folly::SemiFuture<ConnectResult> toSemiFuture(

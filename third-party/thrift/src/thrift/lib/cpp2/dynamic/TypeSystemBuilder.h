@@ -127,8 +127,6 @@ class TypeSystemBuilder {
     static constexpr inline PresenceQualifier AlwaysPresent =
         PresenceQualifier::UNQUALIFIED;
 
-    using Annotations = folly::F14FastMap<Uri, SerializableRecord>;
-
     /**
      * Creates the identity a field for use in a struct or union definition.
      *
@@ -144,7 +142,7 @@ class TypeSystemBuilder {
         PresenceQualifier presence,
         TypeId type,
         std::optional<SerializableRecord> customDefault = std::nullopt,
-        const Annotations& annotations = {});
+        const AnnotationsMap& annotations = {});
 
     /**
      * Defines a Thrift struct, which is a collection of fields.
@@ -152,7 +150,7 @@ class TypeSystemBuilder {
     static SerializableStructDefinition Struct(
         std::vector<SerializableFieldDefinition> fields,
         bool isSealed = false,
-        const Annotations& annotations = {});
+        const AnnotationsMap& annotations = {});
 
     /**
      * Defines a Thrift union, which is a collection of fields. At most one
@@ -161,15 +159,15 @@ class TypeSystemBuilder {
     static SerializableUnionDefinition Union(
         std::vector<SerializableFieldDefinition> fields,
         bool isSealed = false,
-        const Annotations& annotations = {});
+        const AnnotationsMap& annotations = {});
 
     struct EnumValue {
       std::string name;
       std::int32_t value;
-      Annotations annotations;
+      AnnotationsMap annotations;
 
       EnumValue(std::string n, std::int32_t v) : name{std::move(n)}, value{v} {}
-      EnumValue(std::string n, std::int32_t v, Annotations m)
+      EnumValue(std::string n, std::int32_t v, AnnotationsMap m)
           : name{std::move(n)}, value{v}, annotations(std::move(m)) {}
     };
 
@@ -179,7 +177,7 @@ class TypeSystemBuilder {
      */
     static SerializableEnumDefinition Enum(
         const std::vector<EnumValue>& values,
-        const Annotations& annotations = {});
+        const AnnotationsMap& annotations = {});
 
     /**
      * Defines a Thrift opaque alias, which is a distinct user-defined type
@@ -188,7 +186,7 @@ class TypeSystemBuilder {
      * The target type must not be a user-defined type.
      */
     static SerializableOpaqueAliasDefinition OpaqueAlias(
-        TypeId targetType, const Annotations& annotations = {});
+        TypeId targetType, const AnnotationsMap& annotations = {});
 
     /**
      * Optional information about the source IDL files from which a definition

@@ -463,8 +463,7 @@ namespace {
 
 using RawAnnotations = folly::F14FastMap<Uri, SerializableRecordUnion>;
 
-static RawAnnotations toRawAnnotations(
-    const TypeSystemBuilder::DefinitionHelper::Annotations& annotations) {
+static RawAnnotations toRawAnnotations(const AnnotationsMap& annotations) {
   RawAnnotations raw;
   for (const auto& [uri, record] : annotations) {
     raw.emplace(uri, SerializableRecord::toThrift(record));
@@ -485,7 +484,7 @@ TypeSystemBuilder::DefinitionHelper::Field(
     PresenceQualifier presence,
     TypeId type,
     std::optional<SerializableRecord> customDefault,
-    const Annotations& annotations) {
+    const AnnotationsMap& annotations) {
   SerializableFieldDefinition def;
   def.identity() = std::move(identity);
   def.presence() = presence;
@@ -501,7 +500,7 @@ TypeSystemBuilder::DefinitionHelper::Field(
 TypeSystemBuilder::DefinitionHelper::Struct(
     std::vector<SerializableFieldDefinition> fields,
     bool isSealed,
-    const Annotations& annotations) {
+    const AnnotationsMap& annotations) {
   SerializableStructDefinition def;
   def.fields() = fields;
   def.isSealed() = isSealed;
@@ -513,7 +512,7 @@ TypeSystemBuilder::DefinitionHelper::Struct(
 TypeSystemBuilder::DefinitionHelper::Union(
     std::vector<SerializableFieldDefinition> fields,
     bool isSealed,
-    const Annotations& annotations) {
+    const AnnotationsMap& annotations) {
   SerializableUnionDefinition def;
   def.fields() = fields;
   def.isSealed() = isSealed;
@@ -523,7 +522,7 @@ TypeSystemBuilder::DefinitionHelper::Union(
 
 /* static */ SerializableEnumDefinition
 TypeSystemBuilder::DefinitionHelper::Enum(
-    const std::vector<EnumValue>& values, const Annotations& annotations) {
+    const std::vector<EnumValue>& values, const AnnotationsMap& annotations) {
   SerializableEnumDefinition enumDef;
   for (auto& [name, value, enumValueAnnotations] : values) {
     SerializableEnumValueDefinition v;
@@ -538,7 +537,7 @@ TypeSystemBuilder::DefinitionHelper::Enum(
 
 /* static */ SerializableOpaqueAliasDefinition
 TypeSystemBuilder::DefinitionHelper::OpaqueAlias(
-    TypeId targetType, const Annotations& annotations) {
+    TypeId targetType, const AnnotationsMap& annotations) {
   SerializableOpaqueAliasDefinition def;
   def.targetType() = targetType;
   def.annotations() = toRawAnnotations(annotations);

@@ -319,7 +319,7 @@ TEST(TypeSystemTest, Annotations) {
       def::Struct({def::Field(
           def::Identity(1, "field1"), def::Optional, TypeIds::I32)}));
 
-  folly::F14FastMap<Uri, SerializableRecord> annots = {
+  AnnotationsMap annots = {
       {"meta.com/thrift/test/MyAnnot",
        {SerializableRecord::FieldSet(
            {{FieldId(1), SerializableRecord::Int32(42)}})}}};
@@ -412,7 +412,7 @@ TEST(TypeSystemTest, Annotations) {
 TEST(TypeSystemTest, WrongAnnotationTypeUri) {
   TypeSystemBuilder builder;
 
-  folly::F14FastMap<Uri, SerializableRecord> annots = {
+  AnnotationsMap annots = {
       {"meta.com/thrift/test/MyAnnot",
        {SerializableRecord::FieldSet(
            {{FieldId(1), SerializableRecord::Int32(42)}})}}};
@@ -444,7 +444,7 @@ TEST(TypeSystemTest, WrongAnnotationTypeValue) {
   TypeSystemBuilder builder;
 
   // Value is not a FieldSetDatum.
-  folly::F14FastMap<Uri, SerializableRecord> annots = {
+  AnnotationsMap annots = {
       {"meta.com/thrift/test/MyAnnot", {SerializableRecord::Int32(42)}}};
 
   // @MyAnnot{field1=42}
@@ -473,7 +473,7 @@ TEST(TypeSystemTest, WrongAnnotationTypeValue) {
 TEST(TypeSystemTest, MissingAnnotationType) {
   TypeSystemBuilder builder;
 
-  folly::F14FastMap<Uri, SerializableRecord> annots = {
+  AnnotationsMap annots = {
       {"meta.com/thrift/test/MyAnnot",
        {SerializableRecord::FieldSet(
            {{FieldId(1), SerializableRecord::Int32(42)}})}}};

@@ -2,6 +2,7 @@
 // This file is probably not the place you want to edit!
 
 
+#![doc = "Package level doctext."]
 #![recursion_limit = "100000000"]
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::redundant_closure, clippy::type_complexity)]
 

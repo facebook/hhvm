@@ -725,22 +725,22 @@ template <> struct TEnumTraits<::cpp2::U::Type> {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::A, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -2642339036077964808;
-  static constexpr ::std::string_view definitionKey = {"\xcf\x1a\x96\xa6\x3b\x23\xb0\x83\xf0\x11\x23\x41\xa2\x87\x9d\xd6", 16};
+  static constexpr int64_t programId = -8518854100704916787;
+  static constexpr ::std::string_view definitionKey = {"\x63\xdb\x1c\xef\x5b\x23\x37\xa2\xf3\xc0\x91\x9b\x3e\xa6\x9d\xa2", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::U, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -2642339036077964808;
-  static constexpr ::std::string_view definitionKey = {"\x00\x4e\x7a\x90\x82\xa4\x31\x5d\x15\x7c\xd9\xf9\x22\xa6\x06\xdd", 16};
+  static constexpr int64_t programId = -8518854100704916787;
+  static constexpr ::std::string_view definitionKey = {"\x4d\x41\xe8\x49\xae\x0a\x4b\x0b\x58\x54\x9a\xc3\xe5\x20\x8e\xc0", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Bang, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -2642339036077964808;
-  static constexpr ::std::string_view definitionKey = {"\x7d\x12\xf2\x76\x01\xfa\x32\x18\xdc\x74\x08\x66\x80\x7f\xe3\x91", 16};
+  static constexpr int64_t programId = -8518854100704916787;
+  static constexpr ::std::string_view definitionKey = {"\x4e\xea\x18\x23\x07\x73\xd4\x00\x61\x01\x2e\xc0\xc0\x25\x47\xd8", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::B, true> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -2642339036077964808;
-  static constexpr ::std::string_view definitionKey = {"\xfa\xff\x23\xd8\x8b\xe3\x23\xc3\xfd\x16\x8d\x93\x66\x74\xb1\xf1", 16};
+  static constexpr int64_t programId = -8518854100704916787;
+  static constexpr ::std::string_view definitionKey = {"\xda\x97\x15\xc7\xd5\x86\xe5\x87\x97\xe7\xd4\x2f\x68\x01\xf8\x5b", 16};
 };
 } // namespace apache::thrift::detail

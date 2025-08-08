@@ -16,6 +16,9 @@
 }}
 {{> common/auto_generated_go}}
 
+{{#program:docs?}}
+{{program:docs}}
+{{/program:docs?}}
 package {{program:go_pkg_name}}
 
 import (

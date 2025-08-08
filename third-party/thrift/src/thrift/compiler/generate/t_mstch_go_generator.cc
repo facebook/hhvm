@@ -856,9 +856,6 @@ void t_mstch_go_generator::generate_program() {
   if (data_.gen_metadata) {
     render_to_file(prog, "metadata.go", "metadata.go");
   }
-  if (program->has_doc()) {
-    render_to_file(prog, "doc.go", "doc.go");
-  }
 }
 
 void t_mstch_go_generator::set_mstch_factories() {

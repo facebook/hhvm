@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * Package level doctext.
+ */
 include "thrift/annotation/rust.thrift"
 
 /** Constant foo */

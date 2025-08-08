@@ -33,6 +33,10 @@
 
 namespace apache::thrift::python::detail {
 
+folly::Try<folly::IOBuf> decode_stream_element(
+    folly::Try<apache::thrift::StreamPayload>&& payload);
+folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew);
+
 template <
     class Protocol,
     apache::thrift::ErrorBlame Blame = apache::thrift::ErrorBlame::SERVER>

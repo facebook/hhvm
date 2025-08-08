@@ -5,7 +5,6 @@
 
 package terse_write
 
-
 import (
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )

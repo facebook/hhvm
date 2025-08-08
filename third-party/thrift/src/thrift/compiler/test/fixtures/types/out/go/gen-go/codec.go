@@ -5,7 +5,6 @@
 
 package module
 
-
 import (
     included "included"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"

@@ -5,7 +5,6 @@
 
 package module2
 
-
 import (
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )

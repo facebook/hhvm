@@ -5,7 +5,6 @@
 
 package module1
 
-
 import (
     module0 "module0"
     module2 "module2"

@@ -5,7 +5,6 @@
 
 package matching_names
 
-
 import (
     includesAlso "IncludesAlso"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"

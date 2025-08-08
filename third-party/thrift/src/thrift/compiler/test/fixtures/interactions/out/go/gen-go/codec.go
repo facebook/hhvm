@@ -5,7 +5,6 @@
 
 package module
 
-
 import (
     shared "shared"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"

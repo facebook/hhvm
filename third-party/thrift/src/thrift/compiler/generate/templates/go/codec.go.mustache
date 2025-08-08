@@ -22,7 +22,10 @@
     The workaround is to create slice literals (one with keys, one with values),
     create an empty map during runtime and populate that map from the two slices.
 
-}}{{> common/header}}
+}}
+{{> common/auto_generated_go}}
+
+package {{program:go_pkg_name}}
 
 import (
     {{#program:thrift_imports}}

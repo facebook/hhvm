@@ -5213,7 +5213,7 @@ end = struct
       let* dsl_name = dsl_opt in
       let* cls = Env.get_class env dsl_name |> Decl_entry.to_option in
       let* { ce_type = (lazy fun_ty); _ } =
-        Env.get_member true env cls SN.ExpressionTrees.splice
+        Env.get_method env cls SN.ExpressionTrees.splice
       in
       (* Pull the type of third argument to `MyDsl::splice()`.
          If we change the number of arguments this method takes, we might need to
@@ -8882,7 +8882,7 @@ end = struct
       let expr = ((), pos, expr_) in
       unbound_name env class_name expr
     | Decl_entry.Found folded_class -> begin
-      match Env.get_member true env folded_class (snd method_name) with
+      match Env.get_method env folded_class (snd method_name) with
       | None ->
         let () =
           let err = unbound_method class_name method_name folded_class in

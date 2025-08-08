@@ -942,18 +942,22 @@ module M = struct
     in
     suggest_member members mid
 
-  let get_member is_method env (class_ : Cls.t) mid =
+  let get_method env (class_ : Cls.t) mid =
     (* The type of a member is stored separately in the heap. This means that
      * any user of the member also has a dependency on the class where the member
      * originated.
      *)
-    let ce_opt =
-      if is_method then
-        Cls.get_method class_ mid [@alert "-dependencies"]
-      else
-        Cls.get_prop class_ mid [@alert "-dependencies"]
-    in
-    Deps.add_member_dep ~is_method ~is_static:false env class_ mid ce_opt;
+    let ce_opt = (Cls.get_method class_ mid [@alert "-dependencies"]) in
+    Deps.add_member_dep ~is_method:true ~is_static:false env class_ mid ce_opt;
+    ce_opt
+
+  let get_prop env (class_ : Cls.t) mid =
+    (* The type of a member is stored separately in the heap. This means that
+     * any user of the member also has a dependency on the class where the member
+     * originated.
+     *)
+    let ce_opt = (Cls.get_prop class_ mid [@alert "-dependencies"]) in
+    Deps.add_member_dep ~is_method:false ~is_static:false env class_ mid ce_opt;
     ce_opt
 
   let suggest_member is_method class_ mid =

@@ -58,8 +58,8 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     let ce_type =
       let lookup_def c =
         Option.first_some
-          (Env.get_member true env c fname)
-          (Env.get_member true env c "format_wild")
+          (Env.get_method env c fname)
+          (Env.get_method env c "format_wild")
       in
       Env.get_class env className |> Decl_entry.to_option >>= lookup_def
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->

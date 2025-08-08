@@ -126,7 +126,7 @@ val get_typeconst : t -> string -> typeconst_type option
 val get_prop : t -> string -> class_elt option
   [@@alert
     dependencies
-      "Direct use of `get_prop` will not register a dependency. You probably want to use `Typing_env.get_member` instead"]
+      "Direct use of `get_prop` will not register a dependency. You probably want to use `Typing_env.get_prop` instead"]
 
 val get_sprop : t -> string -> class_elt option
   [@@alert
@@ -136,7 +136,7 @@ val get_sprop : t -> string -> class_elt option
 val get_method : t -> string -> class_elt option
   [@@alert
     dependencies
-      "Direct use of `get_method` will not register a dependency. You probably want to use `Typing_env.get_member` instead"]
+      "Direct use of `get_method` will not register a dependency. You probably want to use `Typing_env.get_method` instead"]
 
 val get_smethod : t -> string -> class_elt option
   [@@alert

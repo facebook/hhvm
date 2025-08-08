@@ -827,7 +827,7 @@ let maybe_poison_ancestors
         | Decl_entry.NotYetAvailable ->
           (child_class, child_return_ty)
         | Decl_entry.Found c ->
-          (match Env.get_member true env c member_name with
+          (match Env.get_method env c member_name with
           | None -> (child_class, child_return_ty)
           | Some elt ->
             let (lazy fty) = elt.ce_type in

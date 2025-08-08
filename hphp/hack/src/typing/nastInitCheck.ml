@@ -68,8 +68,7 @@ let lookup_props env class_name props =
           else
             Typing_env.get_class env class_name
             |> Decl_entry.to_option
-            |> Option.bind ~f:(fun cls ->
-                   Typing_env.get_member false env cls name)
+            |> Option.bind ~f:(fun cls -> Typing_env.get_prop env cls name)
             |> Option.bind ~f:(fun ce ->
                    Some (Lazy.force ce.Typing_defs.ce_type))
         in

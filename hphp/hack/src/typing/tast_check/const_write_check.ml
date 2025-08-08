@@ -24,7 +24,7 @@ let check_static_const_prop tenv class_ (pos, id) =
 
 (* Requires id to be a property *)
 let check_const_prop env tenv class_ (pos, id) cty =
-  let cprop = Typing_env.get_member false tenv class_ id in
+  let cprop = Typing_env.get_prop tenv class_ id in
   Option.iter cprop ~f:(fun ce ->
       if get_ce_const ce then
         if

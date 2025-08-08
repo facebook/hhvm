@@ -222,7 +222,12 @@ let sound_dynamic_err_opt args env ((_, id_str) as id) read_context =
   | Decl_entry.Found self_class
     when Cls.get_support_dynamic_type self_class || not (Cls.final self_class)
     ->
-    (match Env.get_member args.is_method env self_class id_str with
+    (match
+       if args.is_method then
+         Env.get_method env self_class id_str
+       else
+         Env.get_prop env self_class id_str
+     with
     | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
       when not args.is_method ->
       if read_context then
@@ -274,7 +279,12 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
       | Decl_entry.NotYetAvailable ->
         default ()
       | Decl_entry.Found class_info ->
-        (match Env.get_member is_method env class_info member_name with
+        (match
+           if is_method then
+             Env.get_method env class_info member_name
+           else
+             Env.get_prop env class_info member_name
+         with
         | Some { ce_origin; _ } ->
           (* If this member was inherited then we obtain the type from which
            * it is inherited as our wider type *)
@@ -534,7 +544,12 @@ and obj_get_concrete_class
       else
         (env, params)
     in
-    let old_member_info = Env.get_member args.is_method env class_info id_str in
+    let old_member_info =
+      if args.is_method then
+        Env.get_method env class_info id_str
+      else
+        Env.get_prop env class_info id_str
+    in
     let self_id = Option.value (Env.get_self_id env) ~default:"" in
     let ancestor_tyargs =
       match Cls.get_ancestor class_info self_id with
@@ -565,7 +580,12 @@ and obj_get_concrete_class
         | Decl_entry.NotYetAvailable ->
           (old_member_info, false)
         | Decl_entry.Found self_class -> begin
-          match Env.get_member args.is_method env self_class id_str with
+          match
+            if args.is_method then
+              Env.get_method env self_class id_str
+            else
+              Env.get_prop env self_class id_str
+          with
           | Some ({ ce_visibility = Vprivate _; _ } as ce) ->
             let ce =
               Decl_instantiate.(

@@ -49,8 +49,11 @@ module Expose_to_tast_env : sig
   (** Get class constants declaration from the appropriate backend and add dependency. *)
   val consts : env -> class_decl -> (string * class_const) list
 
-  (** Get class member declaration from the appropriate backend and add dependency. *)
-  val get_member : bool -> env -> class_decl -> string -> class_elt option
+  (** Get class method declaration from the appropriate backend and add dependency. *)
+  val get_method : env -> class_decl -> string -> class_elt option
+
+  (** Get class property declaration from the appropriate backend and add dependency. *)
+  val get_prop : env -> class_decl -> string -> class_elt option
 
   (** Get static member declaration of a class from the appropriate backend and add dependency. *)
   val get_static_member :

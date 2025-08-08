@@ -8,10 +8,10 @@
 
 #pragma once
 
+#include <folly/Synchronized.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <folly/synchronization/Baton.h>
-#include <atomic>
 #include <memory>
 
 #include "squangle/base/Base.h"
@@ -87,21 +87,11 @@ class PoolOptions {
         exp_policy_(ExpirationPolicy::Age),
         pool_per_instance_{false} {}
 
-  PoolOptions(PoolOptions&& other) noexcept
-      : per_key_limit_(other.per_key_limit_.load()),
-        pool_limit_(other.pool_limit_),
-        idle_timeout_(other.idle_timeout_),
-        age_timeout_(other.age_timeout_),
-        exp_policy_(other.exp_policy_),
-        pool_per_instance_(other.pool_per_instance_) {}
+  PoolOptions(PoolOptions&& other) = default;
+  PoolOptions(const PoolOptions& other) = default;
 
-  PoolOptions(const PoolOptions& other)
-      : per_key_limit_(other.per_key_limit_.load()),
-        pool_limit_(other.pool_limit_),
-        idle_timeout_(other.idle_timeout_),
-        age_timeout_(other.age_timeout_),
-        exp_policy_(other.exp_policy_),
-        pool_per_instance_(other.pool_per_instance_) {}
+  PoolOptions& operator=(const PoolOptions& other) = default;
+  PoolOptions& operator=(PoolOptions&& other) = default;
 
   PoolOptions& setPerKeyLimit(int conn_limit) {
     per_key_limit_ = conn_limit;
@@ -164,31 +154,9 @@ class PoolOptions {
   bool operator!=(const PoolOptions& other) const {
     return !(operator==(other));
   }
-  PoolOptions& operator=(const PoolOptions& other) {
-    if (this != &other) {
-      per_key_limit_.store(other.per_key_limit_.load());
-      pool_limit_ = other.pool_limit_;
-      idle_timeout_ = other.idle_timeout_;
-      age_timeout_ = other.age_timeout_;
-      exp_policy_ = other.exp_policy_;
-      pool_per_instance_ = other.pool_per_instance_;
-    }
-    return *this;
-  }
-  PoolOptions& operator=(PoolOptions&& other) noexcept {
-    if (this != &other) {
-      per_key_limit_.store(other.per_key_limit_.load());
-      pool_limit_ = other.pool_limit_;
-      idle_timeout_ = other.idle_timeout_;
-      age_timeout_ = other.age_timeout_;
-      exp_policy_ = other.exp_policy_;
-      pool_per_instance_ = other.pool_per_instance_;
-    }
-    return *this;
-  }
 
  private:
-  std::atomic<uint64_t> per_key_limit_;
+  uint64_t per_key_limit_;
   uint64_t pool_limit_;
   Duration idle_timeout_;
   Duration age_timeout_;
@@ -301,31 +269,31 @@ class ConnectionPoolBase {
   PoolKeyStats getPoolKeyStats(const PoolKey& key) const;
 
   FOLLY_NODISCARD size_t perKeyLimit() const noexcept {
-    return pool_options_.getPerKeyLimit();
+    return pool_options_.rlock()->getPerKeyLimit();
   }
 
   FOLLY_NODISCARD size_t totalLimit() const noexcept {
-    return pool_options_.getPoolLimit();
+    return pool_options_.rlock()->getPoolLimit();
   }
 
   FOLLY_NODISCARD Duration ageTimeout() const noexcept {
-    return pool_options_.getAgeTimeout();
+    return pool_options_.rlock()->getAgeTimeout();
   }
 
   FOLLY_NODISCARD Duration idleTimeout() const noexcept {
-    return pool_options_.getIdleTimeout();
+    return pool_options_.rlock()->getIdleTimeout();
   }
 
   FOLLY_NODISCARD ExpirationPolicy expirationPolicy() const noexcept {
-    return pool_options_.getExpPolicy();
+    return pool_options_.rlock()->getExpPolicy();
   }
 
   FOLLY_NODISCARD bool poolPerMysqlInstance() const noexcept {
-    return pool_options_.poolPerMysqlInstance();
+    return pool_options_.rlock()->poolPerMysqlInstance();
   }
 
   void setPerKeyLimit(int limit) {
-    pool_options_.setPerKeyLimit(limit);
+    pool_options_.wlock()->setPerKeyLimit(limit);
   }
 
   // Note that unlike the AsyncMysqlClient this similar counter is for open
@@ -409,7 +377,7 @@ class ConnectionPoolBase {
       uint64_t client_conn_limit,
       const Counters& counters) const;
 
-  PoolOptions pool_options_;
+  folly::Synchronized<PoolOptions> pool_options_;
 
   folly::Synchronized<Counters> counters_;
 

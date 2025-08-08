@@ -358,21 +358,35 @@ void noEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
 // Simple escaping of default characters
 void simpleEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
   folly::grow_capacity_by(*dest, value.size());
-  for (char ch : value) {
-    static const std::unordered_map<char, folly::fbstring> replacements = {
-        {'\\', "\\\\"},
-        {'\'', "\\'"},
-        {'\"', "\\\""},
-        {'\0', "\\0"},
-        {'\b', "\\b"},
-        {'\n', "\\n"},
-        {'\r', "\\r"},
-        {'\t', "\\t"},
-    };
-    if (auto it = replacements.find(ch); it != replacements.end()) {
-      dest->append(it->second);
-    } else {
-      dest->push_back(ch);
+  for (const char ch : value) {
+    switch (ch) {
+      case '\\':
+        dest->append("\\\\");
+        break;
+      case '\'':
+        dest->append("\\'");
+        break;
+      case '\"':
+        dest->append("\\\"");
+        break;
+      case '\0':
+        dest->append("\\0");
+        break;
+      case '\b':
+        dest->append("\\b");
+        break;
+      case '\n':
+        dest->append("\\n");
+        break;
+      case '\r':
+        dest->append("\\r");
+        break;
+      case '\t':
+        dest->append("\\t");
+        break;
+      default:
+        dest->push_back(ch);
+        break;
     }
   }
 }

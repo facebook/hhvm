@@ -12,6 +12,8 @@
 #include <folly/Singleton.h>
 #include <folly/hash/Hash.h>
 
+#include "squangle/mysql_client/AsyncMysqlClient.h"
+
 namespace facebook::common::mysql_client {
 
 class AsyncMysqlClientFactory {

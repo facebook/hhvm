@@ -10,11 +10,11 @@
 
 #include <folly/coro/Task.h>
 #include <folly/io/async/EventHandler.h>
+#include <folly/ssl/OpenSSLPtrTypes.h>
+#include <mysql.h> // @manual
 #include <optional>
 
 #include "squangle/base/Base.h"
-#include "squangle/mysql_client/Compression.h"
-#include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
 namespace facebook::common::mysql_client {
 
@@ -43,30 +43,11 @@ class InternalRow {
 
   virtual ~InternalRow() = default;
 
-  virtual folly::StringPiece columnString(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return folly::StringPiece();
-  }
-
-  virtual bool columnBool(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return false;
-  }
-
-  virtual int64_t columnInt64(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return 0;
-  }
-
-  virtual uint64_t columnUInt64(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return 0;
-  }
-
-  virtual double columnDouble(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return 0.0;
-  }
+  virtual folly::StringPiece columnString(size_t /*col*/) const = 0;
+  virtual bool columnBool(size_t /*col*/) const = 0;
+  virtual int64_t columnInt64(size_t /*col*/) const = 0;
+  virtual uint64_t columnUInt64(size_t /*col*/) const = 0;
+  virtual double columnDouble(size_t /*col*/) const = 0;
 
   virtual Type columnType(size_t col) const = 0;
 

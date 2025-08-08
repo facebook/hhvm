@@ -47,7 +47,6 @@
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/DbResult.h"
-#include "squangle/mysql_client/Flags.h"
 
 namespace facebook::common::mysql_client {
 

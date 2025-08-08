@@ -23,9 +23,7 @@
 #pragma once
 
 #include <mutex>
-#include <unordered_map>
 
-// #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/Operation.h"
 
 namespace facebook::common::mysql_client {

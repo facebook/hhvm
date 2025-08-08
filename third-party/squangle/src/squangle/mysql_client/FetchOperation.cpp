@@ -7,7 +7,6 @@
  */
 
 #include "squangle/mysql_client/FetchOperation.h"
-#include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
 
 namespace facebook::common::mysql_client {

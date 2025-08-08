@@ -9,10 +9,7 @@
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/synchronization/Baton.h>
-#include <chrono>
-#include <cstddef>
 #include <memory>
-#include <vector>
 
 #include "squangle/mysql_client/AsyncConnectionPool.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"

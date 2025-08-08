@@ -16,14 +16,13 @@
 
 #include "squangle/base/Base.h"
 #include "squangle/logger/DBEventCounter.h"
-#include "squangle/mysql_client/ChangeUserOperation.h"
+#include "squangle/mysql_client/ChangeUserOperation.h" // IWYU pragma: keep
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/ConnectionHolder.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/PoolKey.h"
 #include "squangle/mysql_client/PoolStorage.h"
-#include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SpecialOperation.h"
 
 // The normal LOG_EVERY_N() macro is not thread safe, so we need to use this
@@ -87,6 +86,14 @@ class PoolOptions {
         age_timeout_(kDefaultMaxAge),
         exp_policy_(ExpirationPolicy::Age),
         pool_per_instance_{false} {}
+
+  PoolOptions(PoolOptions&& other) noexcept
+      : per_key_limit_(other.per_key_limit_.load()),
+        pool_limit_(other.pool_limit_),
+        idle_timeout_(other.idle_timeout_),
+        age_timeout_(other.age_timeout_),
+        exp_policy_(other.exp_policy_),
+        pool_per_instance_(other.pool_per_instance_) {}
 
   PoolOptions(const PoolOptions& other)
       : per_key_limit_(other.per_key_limit_.load()),
@@ -158,6 +165,17 @@ class PoolOptions {
     return !(operator==(other));
   }
   PoolOptions& operator=(const PoolOptions& other) {
+    if (this != &other) {
+      per_key_limit_.store(other.per_key_limit_.load());
+      pool_limit_ = other.pool_limit_;
+      idle_timeout_ = other.idle_timeout_;
+      age_timeout_ = other.age_timeout_;
+      exp_policy_ = other.exp_policy_;
+      pool_per_instance_ = other.pool_per_instance_;
+    }
+    return *this;
+  }
+  PoolOptions& operator=(PoolOptions&& other) noexcept {
     if (this != &other) {
       per_key_limit_.store(other.per_key_limit_.load());
       pool_limit_ = other.pool_limit_;
@@ -255,7 +273,7 @@ class MysqlPooledHolder : public ConnectionHolder {
 class ConnectionPoolBase {
  public:
   explicit ConnectionPoolBase(PoolOptions pool_options)
-      : pool_options_(pool_options) {}
+      : pool_options_(std::move(pool_options)) {}
 
   virtual ~ConnectionPoolBase() {}
 

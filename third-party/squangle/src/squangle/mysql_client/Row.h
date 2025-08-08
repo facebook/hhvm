@@ -17,19 +17,16 @@
 
 #pragma once
 
-#include <vector>
-
 #include <boost/iterator/iterator_facade.hpp>
-#include <glog/logging.h>
-#include <chrono>
-
-#include <re2/re2.h>
-
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
 #include <folly/hash/Hash.h>
 #include <folly/json/dynamic.h>
+#include <glog/logging.h>
+#include <re2/re2.h>
+#include <chrono>
+#include <vector>
 
 #include "squangle/mysql_client/InternalConnection.h"
 #include "squangle/util/StorageRow.h"

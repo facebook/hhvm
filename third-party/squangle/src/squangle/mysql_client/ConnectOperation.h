@@ -9,11 +9,11 @@
 #pragma once
 
 #include <folly/io/async/AsyncTimeout.h>
-#include <chrono>
 
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/mysql_client/ConnectionOptions.h"
 #include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
 namespace facebook::common::mysql_client {
 

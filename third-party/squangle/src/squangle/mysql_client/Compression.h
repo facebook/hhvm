@@ -9,6 +9,8 @@
 #pragma once
 
 #include <mysql.h> // @manual
+#include <optional>
+#include <string>
 
 namespace facebook::common::mysql_client {
 

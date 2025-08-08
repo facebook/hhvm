@@ -8,6 +8,7 @@
 
 #include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
 #include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/Flags.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
 

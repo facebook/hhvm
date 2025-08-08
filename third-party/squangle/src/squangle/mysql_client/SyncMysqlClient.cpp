@@ -9,7 +9,7 @@
 #include <folly/Singleton.h>
 #include <memory>
 
-#include "squangle/mysql_client/ResetOperation.h"
+#include "squangle/mysql_client/ResetOperation.h" // IWYU pragma: keep
 #include "squangle/mysql_client/SyncMysqlClient.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"

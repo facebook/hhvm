@@ -16,7 +16,7 @@
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/ConnectOperation.h"
-#include "squangle/mysql_client/ResetOperation.h"
+#include "squangle/mysql_client/ResetOperation.h" // IWYU pragma: keep
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"

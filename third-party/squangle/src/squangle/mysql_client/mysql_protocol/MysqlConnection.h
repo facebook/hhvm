@@ -13,8 +13,9 @@
 
 #include "squangle/base/Base.h"
 #include "squangle/base/ConnectionKey.h"
-#include "squangle/logger/DBEventLogger.h"
+#include "squangle/mysql_client/Compression.h"
 #include "squangle/mysql_client/InternalConnection.h"
+#include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
 namespace facebook::common::mysql_client::mysql_protocol {
 

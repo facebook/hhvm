@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <chrono>
 #include <memory>
 
 #include "squangle/mysql_client/ConnectOperation.h"

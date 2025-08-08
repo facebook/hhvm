@@ -27,6 +27,22 @@ class MysqlRow : public InternalRow {
     return folly::StringPiece(row_[col], lengths_[col]);
   }
 
+  [[nodiscard]] bool columnBool(size_t /*col*/) const override {
+    throw std::logic_error("columnBool not implemented for MysqlRow");
+  }
+
+  [[nodiscard]] int64_t columnInt64(size_t /*col*/) const override {
+    throw std::logic_error("columnInt64 not implemented for MysqlRow");
+  }
+
+  [[nodiscard]] uint64_t columnUInt64(size_t /*col*/) const override {
+    throw std::logic_error("columnUInt64 not implemented for MysqlRow");
+  }
+
+  [[nodiscard]] double columnDouble(size_t /*col*/) const override {
+    throw std::logic_error("columnDouble not implemented for MysqlRow");
+  }
+
   [[nodiscard]] InternalRow::Type columnType(size_t col) const override {
     DCHECK_LT(col, numCols_);
     if (!row_[col]) {

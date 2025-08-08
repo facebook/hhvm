@@ -7,7 +7,6 @@
  */
 
 #include <folly/Benchmark.h>
-#include <unordered_map>
 #include <vector>
 #include "squangle/mysql_client/Query.h"
 

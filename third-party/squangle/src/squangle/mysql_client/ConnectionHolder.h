@@ -166,7 +166,6 @@ class ConnectionHolder : public InternalConnection {
 
   std::function<void()> getCloseFunction() override {
     // We shouldn't be calling this version
-    DCHECK(false);
     return nullptr;
   }
 

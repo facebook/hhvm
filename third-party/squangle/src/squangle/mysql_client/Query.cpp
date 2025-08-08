@@ -281,7 +281,7 @@ void appendComment(folly::fbstring* s, const QueryArgument& d) {
 
 void appendColumnTableName(folly::fbstring* s, const QueryArgument& d) {
   if (d.isString()) {
-    s->reserve(s->size() + d.getString().size() + 4);
+    folly::grow_capacity_by(*s, d.getString().size() + 4);
     s->push_back('`');
     for (char c : d.getString()) {
       // Toss in an extra ` if we see one.
@@ -357,7 +357,7 @@ void noEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
 
 // Simple escaping of default characters
 void simpleEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
-  dest->reserve(dest->size() + value.size());
+  folly::grow_capacity_by(*dest, value.size());
   for (char ch : value) {
     static const std::unordered_map<char, folly::fbstring> replacements = {
         {'\\', "\\\\"},
@@ -427,7 +427,7 @@ void Query::appendValue(
       formatStringParseError(querySp, offset, type, "string");
     }
     const auto& value = d.getString();
-    s->reserve(s->size() + value.size() + 4);
+    folly::grow_capacity_by(*s, value.size() + 4);
     s->push_back('"');
     escapeFunc(s, value);
     s->push_back('"');

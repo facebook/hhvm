@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <thrift/lib/cpp2/dynamic/detail/TypeSystem.h>
 
 #include <folly/Overload.h>
 #include <folly/container/F14Set.h>
@@ -459,20 +460,6 @@ void TypeSystemBuilder::tryEmplace(Uri uri, DefinitionEntry&& def) {
   }
 }
 
-namespace {
-
-using RawAnnotations = folly::F14FastMap<Uri, SerializableRecordUnion>;
-
-static RawAnnotations toRawAnnotations(const AnnotationsMap& annotations) {
-  RawAnnotations raw;
-  for (const auto& [uri, record] : annotations) {
-    raw.emplace(uri, SerializableRecord::toThrift(record));
-  }
-  return raw;
-}
-
-} // namespace
-
 /* static */ FieldIdentity TypeSystemBuilder::DefinitionHelper::Identity(
     std::int16_t id, std::string_view name) {
   return FieldIdentity{FieldId{id}, std::string(name)};
@@ -492,7 +479,7 @@ TypeSystemBuilder::DefinitionHelper::Field(
   if (customDefault.has_value()) {
     def.customDefaultValue() = SerializableRecord::toThrift(*customDefault);
   }
-  def.annotations() = toRawAnnotations(annotations);
+  def.annotations() = detail::toRawAnnotations(annotations);
   return def;
 }
 
@@ -504,7 +491,7 @@ TypeSystemBuilder::DefinitionHelper::Struct(
   SerializableStructDefinition def;
   def.fields() = fields;
   def.isSealed() = isSealed;
-  def.annotations() = toRawAnnotations(annotations);
+  def.annotations() = detail::toRawAnnotations(annotations);
   return def;
 }
 
@@ -516,7 +503,7 @@ TypeSystemBuilder::DefinitionHelper::Union(
   SerializableUnionDefinition def;
   def.fields() = fields;
   def.isSealed() = isSealed;
-  def.annotations() = toRawAnnotations(annotations);
+  def.annotations() = detail::toRawAnnotations(annotations);
   return def;
 }
 
@@ -528,10 +515,10 @@ TypeSystemBuilder::DefinitionHelper::Enum(
     SerializableEnumValueDefinition v;
     v.name() = name;
     v.datum() = value;
-    v.annotations() = toRawAnnotations(enumValueAnnotations);
+    v.annotations() = detail::toRawAnnotations(enumValueAnnotations);
     enumDef.values()->emplace_back(std::move(v));
   }
-  enumDef.annotations() = toRawAnnotations(annotations);
+  enumDef.annotations() = detail::toRawAnnotations(annotations);
   return enumDef;
 }
 
@@ -540,7 +527,7 @@ TypeSystemBuilder::DefinitionHelper::OpaqueAlias(
     TypeId targetType, const AnnotationsMap& annotations) {
   SerializableOpaqueAliasDefinition def;
   def.targetType() = targetType;
-  def.annotations() = toRawAnnotations(annotations);
+  def.annotations() = detail::toRawAnnotations(annotations);
   return def;
 }
 

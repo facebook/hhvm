@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/TypeId.h>
 #include <thrift/lib/cpp2/dynamic/detail/Traits.h>
+#include <thrift/lib/cpp2/dynamic/detail/TypeSystem.h>
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
 #include <folly/CppAttributes.h>
@@ -499,11 +500,7 @@ class InvalidTypeError : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
-using AnnotationsMap = folly::F14FastMap<
-    Uri,
-    SerializableRecord,
-    detail::UriHeterogeneousHash,
-    std::equal_to<>>;
+using AnnotationsMap = detail::AnnotationsMap;
 
 namespace detail {
 

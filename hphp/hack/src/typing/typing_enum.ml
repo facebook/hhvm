@@ -97,7 +97,8 @@ let enum_check_const ty_exp env cc t =
  * like any, or dynamic. The free status of type parameter is caught during
  * naming (Unbound name), so we only check the kind of type that is used.
  *)
-let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
+let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
+    =
   let sd env =
     (* Allow pessimised enum class types when sound dynamic is enabled *)
     TypecheckerOptions.enable_sound_dynamic (Typing_env.get_tcopt env)
@@ -160,9 +161,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tlabel _
     | Tneg _ ->
       false
-    | Tclass_ptr _ ->
-      (* TODO(T199606542) deprecate static ban on ::class for enums *)
-      false
+    | Tclass_ptr _ -> true
   in
   let (env, ty_err_opt) =
     match ty_interface with
@@ -225,17 +224,7 @@ let check_cyclic_constraint env (p, enum_name) constraint_ty =
 
 (** Check an enum declaration of the form
 
-     enum E : <ty_exp> as <ty_constraint>
-
-  or
-
-     class E extends Enum<ty_exp>
-
-  where the absence of `<ty_constraint>` is assumed to default to arraykey.
-
-  Check that `<ty_exp>` is int or string, and that
-
-    ty_exp <: ty_constraint <: arraykey
+     enum class E : <ty_exp> 
 
   Also that each type constant is of type `ty_exp`. *)
 let enum_class_check
@@ -292,7 +281,7 @@ let enum_class_check
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err2;
       (* Check that ty_exp <: arraykey *)
       let env =
-        enum_check_type
+        enum_class_check_type
           env
           pos
           Reason.URenum_underlying
@@ -311,7 +300,7 @@ let enum_class_check
           in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err1;
           let env =
-            enum_check_type
+            enum_class_check_type
               env
               pos
               Reason.URenum_cstr

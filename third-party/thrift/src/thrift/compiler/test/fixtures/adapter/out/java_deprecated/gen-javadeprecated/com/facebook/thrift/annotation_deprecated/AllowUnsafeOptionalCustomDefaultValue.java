@@ -24,9 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Allows the target field of a structured user-defined type (i.e., struct,
- * union or exception), whose qualifier is `optional`, to have a custom default
- * value specified in IDL.
+ * Allows the target field of a struct or exception, whose qualifier is
+ * `optional`, to have a custom default value specified in IDL.
  * 
  * Use of this annotation is strongly DISCOURAGED, as custom default values for
  * optional fields are both non-sensical and dangerous:
@@ -43,7 +42,8 @@ import com.facebook.thrift.protocol.*;
  * specified.
  * 
  * This annotation MUST NOT be applied to a field whose qualifier is not
- * optional, or that doesn't have a custom default value.
+ * optional, or that doesn't have a custom default value. If applied, the target
+ * field MUST be in a struct or exception (but NOT a union).
  */
 @SuppressWarnings({ "unused", "serial" })
 public class AllowUnsafeOptionalCustomDefaultValue implements TBase, java.io.Serializable, Cloneable, Comparable<AllowUnsafeOptionalCustomDefaultValue> {

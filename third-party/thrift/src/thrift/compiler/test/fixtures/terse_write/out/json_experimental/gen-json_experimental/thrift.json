@@ -503,10 +503,27 @@
             "value" : {}
           }
         },
-        "docstring" : "Allows the target field of a structured user-defined type (i.e., struct,\nunion or exception), whose qualifier is `optional`, to have a custom default\nvalue specified in IDL.\n\nUse of this annotation is strongly DISCOURAGED, as custom default values for\noptional fields are both non-sensical and dangerous:\n  - non-sensical because, by definition, the \"default\" state of an optional\n    field is to have no value (i.e., be \"absent\") - as explicitly specified\n    in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#structured-types).\n  - dangerous because in practice, the runtime behavior of the generated code\n    for optional fields with custom default values is inconsistent (sometimes\n    even for the same programming language!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\noptional fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field whose qualifier is not\noptional, or that doesn't have a custom default value.\n",
+        "docstring" : "Allows the target field of a struct or exception, whose qualifier is\n`optional`, to have a custom default value specified in IDL.\n\nUse of this annotation is strongly DISCOURAGED, as custom default values for\noptional fields are both non-sensical and dangerous:\n  - non-sensical because, by definition, the \"default\" state of an optional\n    field is to have no value (i.e., be \"absent\") - as explicitly specified\n    in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#structured-types).\n  - dangerous because in practice, the runtime behavior of the generated code\n    for optional fields with custom default values is inconsistent (sometimes\n    even for the same programming language!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\noptional fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field whose qualifier is not\noptional, or that doesn't have a custom default value. If applied, the target\nfield MUST be in a struct or exception (but NOT a union).\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 309
+      },
+      "AllowUnsafeUnionFieldCustomDefaultValue" : {
+        "name" : "AllowUnsafeUnionFieldCustomDefaultValue",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the target field of a union to have a custom default value specified\nin IDL.\n\nUse of this annotation is strongly DISCOURAGED, for reasons similar to\n`AllowUnsafeOptionalCustomDefaultValue` above, except that default values\nfor union fields make even less sense (imagine having multiple union fields\nwith custom default values!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\nunoin fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field that doesn't have a custom\ndefault value, or that is not in a union.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 329
       }
   },
   "source_path" : "thrift/annotation/thrift",

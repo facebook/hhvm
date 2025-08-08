@@ -285,9 +285,8 @@ struct RuntimeAnnotation {}
 struct AllowLegacyTypedefUri {}
 
 /**
- * Allows the target field of a structured user-defined type (i.e., struct,
- * union or exception), whose qualifier is `optional`, to have a custom default
- * value specified in IDL.
+ * Allows the target field of a struct or exception, whose qualifier is
+ * `optional`, to have a custom default value specified in IDL.
  *
  * Use of this annotation is strongly DISCOURAGED, as custom default values for
  * optional fields are both non-sensical and dangerous:
@@ -304,7 +303,28 @@ struct AllowLegacyTypedefUri {}
  * specified.
  *
  * This annotation MUST NOT be applied to a field whose qualifier is not
- * optional, or that doesn't have a custom default value.
+ * optional, or that doesn't have a custom default value. If applied, the target
+ * field MUST be in a struct or exception (but NOT a union).
  */
 @scope.Field
 struct AllowUnsafeOptionalCustomDefaultValue {}
+
+/**
+ * Allows the target field of a union to have a custom default value specified
+ * in IDL.
+ *
+ * Use of this annotation is strongly DISCOURAGED, for reasons similar to
+ * `AllowUnsafeOptionalCustomDefaultValue` above, except that default values
+ * for union fields make even less sense (imagine having multiple union fields
+ * with custom default values!).
+ *
+ * This annotation is merely introduced to allow existing use cases to be
+ * grandfathered into the new compiler validation logic, which will reject
+ * unoin fields with custom default values unless this annotation is
+ * specified.
+ *
+ * This annotation MUST NOT be applied to a field that doesn't have a custom
+ * default value, or that is not in a union.
+ */
+@scope.Field
+struct AllowUnsafeUnionFieldCustomDefaultValue {}

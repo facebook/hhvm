@@ -1565,9 +1565,8 @@ class AllowLegacyTypedefUri implements \IThriftSyncStruct, \IThriftStructMetadat
 }
 
 /**
- * Allows the target field of a structured user-defined type (i.e., struct,
- * union or exception), whose qualifier is `optional`, to have a custom default
- * value specified in IDL.
+ * Allows the target field of a struct or exception, whose qualifier is
+ * `optional`, to have a custom default value specified in IDL.
  * 
  * Use of this annotation is strongly DISCOURAGED, as custom default values for
  * optional fields are both non-sensical and dangerous:
@@ -1584,7 +1583,8 @@ class AllowLegacyTypedefUri implements \IThriftSyncStruct, \IThriftStructMetadat
  * specified.
  * 
  * This annotation MUST NOT be applied to a field whose qualifier is not
- * optional, or that doesn't have a custom default value.
+ * optional, or that doesn't have a custom default value. If applied, the target
+ * field MUST be in a struct or exception (but NOT a union).
  *
  * Original thrift struct:-
  * AllowUnsafeOptionalCustomDefaultValue
@@ -1623,6 +1623,84 @@ class AllowUnsafeOptionalCustomDefaultValue implements \IThriftSyncStruct, \IThr
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "thrift.AllowUnsafeOptionalCustomDefaultValue",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Allows the target field of a union to have a custom default value specified
+ * in IDL.
+ * 
+ * Use of this annotation is strongly DISCOURAGED, for reasons similar to
+ * `AllowUnsafeOptionalCustomDefaultValue` above, except that default values
+ * for union fields make even less sense (imagine having multiple union fields
+ * with custom default values!).
+ * 
+ * This annotation is merely introduced to allow existing use cases to be
+ * grandfathered into the new compiler validation logic, which will reject
+ * unoin fields with custom default values unless this annotation is
+ * specified.
+ * 
+ * This annotation MUST NOT be applied to a field that doesn't have a custom
+ * default value, or that is not in a union.
+ *
+ * Original thrift struct:-
+ * AllowUnsafeUnionFieldCustomDefaultValue
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/AllowUnsafeUnionFieldCustomDefaultValue'))>>
+class AllowUnsafeUnionFieldCustomDefaultValue implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowUnsafeUnionFieldCustomDefaultValue';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.AllowUnsafeUnionFieldCustomDefaultValue",
         "is_union" => false,
       )
     );

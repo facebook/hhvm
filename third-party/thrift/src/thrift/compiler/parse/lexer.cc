@@ -175,7 +175,9 @@ const std::unordered_map<std::string_view, tok> keywords = {
 } // namespace
 
 lexer::lexer(
-    source src, diagnostics_engine& diags, doc_comment_handler on_doc_comment)
+    source_view src,
+    diagnostics_engine& diags,
+    doc_comment_handler on_doc_comment)
     : source_(src.text),
       start_(src.start),
       diags_(&diags),

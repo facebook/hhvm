@@ -98,10 +98,13 @@ class resolved_location {
 };
 
 // A view of a source owned by `source_manager`.
-struct source {
+struct source_view final {
   source_location start; // The source start location.
   std::string_view text; // The source text including a terminating '\0'.
 };
+
+// DO_BEFORE(aristidis,20251001): Remove alias when all references are updated.
+using source = source_view;
 
 // A class that abstracts the reading of files from the file system. The
 // backend could read from a real file system, or be an in-memory
@@ -132,11 +135,16 @@ class source_manager {
     std::vector<char> text;
     std::vector<uint_least32_t> line_offsets;
   };
+
   // This is a deque to make sure that file_name is not reallocated when
   // sources_ grows.
   std::deque<source_info> sources_;
 
-  std::map<std::string, source, std::less<>> file_source_map_;
+  /**
+   * Maps the file_name of a source file owned by this source_manager (i.e., in
+   * `sources_`) to its `source_view`.
+   */
+  std::map<std::string, source_view, std::less<>> file_source_map_;
 
   // Maps from filepaths present in the AST to filepaths on disk.
   std::map<std::string, std::string, std::less<>> found_includes_;
@@ -149,7 +157,18 @@ class source_manager {
 
   friend class resolved_location;
 
-  source add_source(std::string_view file_name, std::vector<char> text);
+  /**
+   * Adds the given contents of a source file (with the given name) to this
+   * manager (i.e., to `sources_`).
+   *
+   * @param file_name unique name of the file whose contents are being added.
+   *        Behavior is undefined if this name is not unique.
+   *
+   * @param text file contents. Last element MUST be the NUL character.
+   *
+   * @return a view into the (newly added) content.
+   */
+  source_view add_source(std::string_view file_name, std::vector<char> text);
 
  public:
   // Creates a source_manager with the default (filesystem-based) backend.
@@ -165,18 +184,30 @@ class source_manager {
   source_manager& operator=(source_manager&&) noexcept = default;
   ~source_manager() noexcept = default;
 
-  // Loads a file and returns a source object representing its content.
-  // The file can be a real file (provided by the backend), or a virtual one
-  // previously registered with add_virtual_file.
-  //
-  // Returns an empty optional if opening or reading the file fails. Makes use
-  // of the result of previous calls to find_include_file.
-  std::optional<source> get_file(std::string_view file_name);
+  /**
+   * Returns a view into the contents of a file with the given name.
+   *
+   * The file can be a real file (provided by the backend), or a virtual one
+   * previously registered with `add_virtual_file()`.
+   *
+   * The underlying contents are owned by this manager.
+   *
+   * Returns an empty optional if opening or reading the file fails. Makes use
+   * of the result of previous calls to `find_include_file()`.
+   */
+  std::optional<source_view> get_file(std::string_view file_name);
 
   std::string get_file_path(std::string_view file_name) const;
 
-  // Adds a virtual file with the specified name and content.
-  source add_virtual_file(std::string_view file_name, std::string_view src);
+  /**
+   * Adds a virtual file with the specified name and content.
+   *
+   * @return a view into the (newly added) content.
+   *
+   * @throws if a file with the given name already exists.
+   */
+  source_view add_virtual_file(
+      std::string_view file_name, std::string_view src);
 
   // Returns the start location of a source containing the specified location.
   // It is a member function in case we add clang-like compression of locations.

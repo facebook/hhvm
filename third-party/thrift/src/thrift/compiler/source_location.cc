@@ -133,15 +133,16 @@ class default_source_manager_backend final : public source_manager_backend {
 source_manager::source_manager()
     : backend_(std::make_unique<default_source_manager_backend>()) {}
 
-source source_manager::add_source(
+source_view source_manager::add_source(
     std::string_view file_name, std::vector<char> text) {
   assert(text.back() == '\0');
   std::string_view sv(text.data(), text.size());
   sources_.push_back(source_info{
       std::string(file_name), std::move(text), get_line_offsets(sv)});
-  return {/* .start = */
-          source_location(/* source_id= */ sources_.size(), /** offset= */ 0),
-          /* .text = */ sv};
+  return source_view{
+      /* .start = */
+      source_location(/* source_id= */ sources_.size(), /* offset= */ 0),
+      /* .text = */ sv};
 }
 
 std::string source_manager::get_file_path(std::string_view file_name) const {
@@ -151,7 +152,8 @@ std::string source_manager::get_file_path(std::string_view file_name) const {
   return std::filesystem::absolute(file_name).string();
 }
 
-std::optional<source> source_manager::get_file(std::string_view file_name) {
+std::optional<source_view> source_manager::get_file(
+    std::string_view file_name) {
   if (auto source = file_source_map_.find(file_name);
       source != file_source_map_.end()) {
     return source->second;
@@ -182,7 +184,7 @@ std::optional<source> source_manager::get_file(std::string_view file_name) {
   return source;
 }
 
-source source_manager::add_virtual_file(
+source_view source_manager::add_virtual_file(
     std::string_view file_name, std::string_view src) {
   if (file_source_map_.find(file_name) != file_source_map_.end()) {
     throw std::runtime_error(fmt::format("file already added: {}", file_name));

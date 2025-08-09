@@ -37,7 +37,7 @@ class DiagnosticsEngineTest : public ::testing::Test {
   source_manager source_mgr;
   diagnostic_results results;
   diagnostics_engine diags;
-  source src;
+  source_view src;
 
   DiagnosticsEngineTest()
       : diags(source_mgr, results),

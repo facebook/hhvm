@@ -56,7 +56,7 @@ class FileManagerTest : public ::testing::Test {
   }
 
   source_manager source_manager_;
-  source source_;
+  source_view source_;
   std::unique_ptr<t_program_bundle> program_bundle_;
   std::unique_ptr<file_manager> file_manager_;
 };

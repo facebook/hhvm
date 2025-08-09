@@ -85,7 +85,7 @@ class lexer {
   // on_doc_comment is invoked on a documentation comment such as
   // `/** ... */` or `/// ...`.
   lexer(
-      source src,
+      source_view src,
       diagnostics_engine& diags,
       doc_comment_handler on_doc_comment = ignore_comments);
 

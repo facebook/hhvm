@@ -23,6 +23,6 @@ namespace whisker {
 using source_location = apache::thrift::compiler::source_location;
 using source_range = apache::thrift::compiler::source_range;
 using resolved_location = apache::thrift::compiler::resolved_location;
-using source = apache::thrift::compiler::source;
+using source = apache::thrift::compiler::source_view;
 using source_manager = apache::thrift::compiler::source_manager;
 } // namespace whisker

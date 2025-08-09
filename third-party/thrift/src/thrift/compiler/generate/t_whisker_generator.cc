@@ -570,7 +570,7 @@ class t_whisker_generator::whisker_source_parser
       return &cached->second.value();
     }
 
-    std::optional<source> source_code = src_manager_.get_file(path);
+    std::optional<source_view> source_code = src_manager_.get_file(path);
     if (!source_code.has_value()) {
       return nullptr;
     }

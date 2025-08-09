@@ -433,6 +433,12 @@ class TypeSystem {
    *   - InvalidTypeError if the type is not defined in the type system.
    */
   TypeRef UserDefined(UriView) const;
+
+  /**
+   * Creates SerializbleTypeSystem from this TypeSystem.
+   */
+  SerializableTypeSystem toSerializableTypeSystem(
+      const folly::F14FastSet<Uri>& uris) const;
 };
 
 /**

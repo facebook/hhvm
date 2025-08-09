@@ -74,6 +74,12 @@ TEST(TypeSystemTest, EmptyStruct) {
   EXPECT_EQ(def.asStruct().fields().size(), 0);
 
   expectKnownUris(*typeSystem, {def.uri()});
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& emptyStructDef =
+      *sts.types()["meta.com/thrift/test/EmptyStruct"].definition();
+  EXPECT_EQ(emptyStructDef.structDef()->fields()->size(), 0);
 }
 
 TEST(TypeSystemTest, EmptyUnion) {
@@ -91,6 +97,12 @@ TEST(TypeSystemTest, EmptyUnion) {
   EXPECT_EQ(def.asUnion().fields().size(), 0);
 
   expectKnownUris(*typeSystem, {def.uri()});
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& emptyUnionDef =
+      *sts.types()["meta.com/thrift/test/EmptyUnion"].definition();
+  EXPECT_EQ(emptyUnionDef.unionDef()->fields()->size(), 0);
 }
 
 TEST(TypeSystemTest, NestedStructs) {
@@ -132,6 +144,32 @@ TEST(TypeSystemTest, NestedStructs) {
   EXPECT_EQ(field1.type().id(), TypeIds::I32);
 
   expectKnownUris(*typeSystem, {innerStructUri, outerStructUri});
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 2);
+  auto& innerStructDef = *sts.types()->at(innerStructUri).definition();
+  EXPECT_EQ(innerStructDef.structDef()->fields()->size(), 1);
+  EXPECT_EQ(
+      innerStructDef.structDef()->fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(
+      innerStructDef.structDef()->fields()[0].identity()->name(), "field1");
+  EXPECT_EQ(
+      innerStructDef.structDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(innerStructDef.structDef()->fields()[0].type(), TypeIds::I32);
+  auto& outerStructDef = *sts.types()->at(outerStructUri).definition();
+  EXPECT_EQ(outerStructDef.structDef()->fields()->size(), 1);
+  EXPECT_EQ(
+      outerStructDef.structDef()->fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(
+      outerStructDef.structDef()->fields()[0].identity()->name(),
+      "innerStruct");
+  EXPECT_EQ(
+      outerStructDef.structDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      outerStructDef.structDef()->fields()[0].type(),
+      TypeIds::uri(innerStructUri));
 }
 
 TEST(TypeSystemTest, RecursiveStructAndUnion) {
@@ -187,6 +225,30 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
       std::addressof(unionDef.asUnion()));
 
   expectKnownUris(*typeSystem, {structDef.uri(), unionDef.uri()});
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 2);
+  auto& recursiveStructDef = *sts.types()->at(recursiveStructUri).definition();
+  EXPECT_EQ(recursiveStructDef.structDef()->fields()->size(), 1);
+  EXPECT_EQ(
+      recursiveStructDef.structDef()->fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(
+      recursiveStructDef.structDef()->fields()[0].identity()->name(), "self");
+  EXPECT_EQ(
+      recursiveStructDef.structDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      recursiveStructDef.structDef()->fields()[0].type(),
+      TypeIds::uri(recursiveStructUri));
+  auto& recursiveUnionDef = *sts.types()->at(recursiveUnionUri).definition();
+  EXPECT_EQ(recursiveUnionDef.unionDef()->fields()->size(), 1);
+  EXPECT_EQ(
+      recursiveUnionDef.unionDef()->fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(
+      recursiveUnionDef.unionDef()->fields()[0].identity()->name(), "self");
+  EXPECT_EQ(
+      recursiveUnionDef.unionDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
 }
 
 TEST(TypeSystemTest, IncompleteTypeSystem) {
@@ -269,6 +331,44 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
   expectKnownUris(
       *typeSystem,
       {"meta.com/thrift/test/MyStruct", "meta.com/thrift/test/MyUnion"});
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 2);
+  auto& myStructDef =
+      *sts.types()->at("meta.com/thrift/test/MyStruct").definition();
+  EXPECT_EQ(myStructDef.structDef()->fields()->size(), 2);
+  EXPECT_EQ(myStructDef.structDef()->fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(myStructDef.structDef()->fields()[0].identity()->name(), "field1");
+  EXPECT_EQ(
+      myStructDef.structDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(myStructDef.structDef()->fields()[0].type(), TypeIds::I32);
+  EXPECT_EQ(myStructDef.structDef()->fields()[1].identity()->id(), FieldId{2});
+  EXPECT_EQ(myStructDef.structDef()->fields()[1].identity()->name(), "field2");
+  EXPECT_EQ(
+      myStructDef.structDef()->fields()[1].presence(),
+      PresenceQualifier::UNQUALIFIED);
+  EXPECT_EQ(
+      myStructDef.structDef()->fields()[1].type(),
+      TypeIds::uri("meta.com/thrift/test/MyUnion"));
+
+  auto& myUnionDef =
+      *sts.types()->at("meta.com/thrift/test/MyUnion").definition();
+  EXPECT_EQ(myUnionDef.unionDef()->fields()->size(), 2);
+  EXPECT_EQ(myUnionDef.unionDef()->fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(myUnionDef.unionDef()->fields()[0].identity()->name(), "int64");
+  EXPECT_EQ(
+      myUnionDef.unionDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(myUnionDef.unionDef()->fields()[0].type(), TypeIds::I64);
+  EXPECT_EQ(myUnionDef.unionDef()->fields()[1].identity()->id(), FieldId{2});
+  EXPECT_EQ(myUnionDef.unionDef()->fields()[1].identity()->name(), "myStruct");
+  EXPECT_EQ(
+      myUnionDef.unionDef()->fields()[1].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      myUnionDef.unionDef()->fields()[1].type(),
+      TypeIds::uri("meta.com/thrift/test/MyStruct"));
 }
 
 TEST(TypeSystemTest, CustomDefaultFieldValues) {
@@ -310,6 +410,35 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   EXPECT_EQ(fieldWithoutDefault.presence(), def::Optional);
   EXPECT_EQ(fieldWithoutDefault.type().id(), TypeIds::I64);
   EXPECT_EQ(fieldWithoutDefault.customDefault(), nullptr);
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& structWithDefaultsDef =
+      *sts.types()->at("meta.com/thrift/test/StructWithDefaults").definition();
+  EXPECT_EQ(structWithDefaultsDef.structDef()->fields()->size(), 2);
+  EXPECT_EQ(
+      structWithDefaultsDef.structDef()->fields()[0].identity()->id(),
+      FieldId{1});
+  EXPECT_EQ(
+      structWithDefaultsDef.structDef()->fields()[0].identity()->name(),
+      "fieldWithDefault");
+  EXPECT_EQ(
+      structWithDefaultsDef.structDef()->fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      structWithDefaultsDef.structDef()->fields()[0].type(), TypeIds::I32);
+  EXPECT_EQ(
+      structWithDefaultsDef.structDef()
+          ->fields()[0]
+          .customDefaultValue()
+          ->getType(),
+      SerializableRecordUnion::Type::int32Datum);
+  EXPECT_EQ(
+      structWithDefaultsDef.structDef()
+          ->fields()[0]
+          .customDefaultValue()
+          ->int32Datum(),
+      42);
 }
 
 TEST(TypeSystemTest, Annotations) {
@@ -381,6 +510,11 @@ TEST(TypeSystemTest, Annotations) {
     EXPECT_EQ(annot->asFieldSet().at(FieldId{1}).asInt32(), 42);
   };
 
+  auto checkAnnotSerializabe = [](const auto& node) {
+    const auto& annot = node.annotations()->at("meta.com/thrift/test/MyAnnot");
+    EXPECT_EQ(annot.fieldSetDatum()->at(FieldId{1}).int32Datum(), 42);
+  };
+
   checkAnnot(
       typeSystem
           ->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyStruct"))
@@ -407,6 +541,38 @@ TEST(TypeSystemTest, Annotations) {
       typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyEnum"))
           .asEnum()
           .values()[0]);
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 5);
+  checkAnnotSerializabe(*sts.types()
+                             ->at("meta.com/thrift/test/MyStruct")
+                             .definition()
+                             ->structDef());
+  checkAnnotSerializabe(sts.types()
+                            ->at("meta.com/thrift/test/MyStruct")
+                            .definition()
+                            ->structDef()
+                            ->fields()[0]);
+  checkAnnotSerializabe(*sts.types()
+                             ->at("meta.com/thrift/test/MyUnion")
+                             .definition()
+                             ->unionDef());
+  checkAnnotSerializabe(sts.types()
+                            ->at("meta.com/thrift/test/MyUnion")
+                            .definition()
+                            ->unionDef()
+                            ->fields()[0]);
+  checkAnnotSerializabe(*sts.types()
+                             ->at("meta.com/thrift/test/MyI32")
+                             .definition()
+                             ->opaqueAliasDef());
+  checkAnnotSerializabe(
+      *sts.types()->at("meta.com/thrift/test/MyEnum").definition()->enumDef());
+  checkAnnotSerializabe(sts.types()
+                            ->at("meta.com/thrift/test/MyEnum")
+                            .definition()
+                            ->enumDef()
+                            ->values()[0]);
 }
 
 TEST(TypeSystemTest, WrongAnnotationTypeUri) {
@@ -596,6 +762,18 @@ TEST(TypeSystemTest, ListTypeRef) {
   EXPECT_TRUE(listField.type().isList());
   EXPECT_EQ(listField.type().asList().id(), TypeIds::list(TypeIds::I32));
   EXPECT_EQ(listField.type().id(), TypeRef::List::of(TypeRef::I32()).id());
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& listStructDef = *sts.types()
+                             ->at("meta.com/thrift/test/ListStruct")
+                             .definition()
+                             ->structDef();
+  EXPECT_EQ(listStructDef.fields()->size(), 1);
+  EXPECT_EQ(listStructDef.fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(listStructDef.fields()[0].identity()->name(), "listField");
+  EXPECT_EQ(listStructDef.fields()[0].presence(), PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(listStructDef.fields()[0].type(), TypeIds::list(TypeIds::I32));
 }
 
 TEST(TypeSystemTest, SetTypeRef) {
@@ -624,6 +802,18 @@ TEST(TypeSystemTest, SetTypeRef) {
   EXPECT_TRUE(setField.type().isSet());
   EXPECT_EQ(setField.type().asSet().id(), TypeIds::set(TypeIds::I32));
   EXPECT_EQ(setField.type().id(), TypeRef::Set::of(TypeRef::I32()).id());
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& setStructDef = *sts.types()
+                            ->at("meta.com/thrift/test/SetStruct")
+                            .definition()
+                            ->structDef();
+  EXPECT_EQ(setStructDef.fields()->size(), 1);
+  EXPECT_EQ(setStructDef.fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(setStructDef.fields()[0].identity()->name(), "setField");
+  EXPECT_EQ(setStructDef.fields()[0].presence(), PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(setStructDef.fields()[0].type(), TypeIds::set(TypeIds::I32));
 }
 
 TEST(TypeSystemTest, MapTypeRef) {
@@ -656,6 +846,20 @@ TEST(TypeSystemTest, MapTypeRef) {
   EXPECT_EQ(
       mapField.type().id(),
       TypeRef::Map::of(TypeRef::I32(), TypeRef::String()).id());
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& mapStructDef = *sts.types()
+                            ->at("meta.com/thrift/test/MapStruct")
+                            .definition()
+                            ->structDef();
+  EXPECT_EQ(mapStructDef.fields()->size(), 1);
+  EXPECT_EQ(mapStructDef.fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(mapStructDef.fields()[0].identity()->name(), "mapField");
+  EXPECT_EQ(mapStructDef.fields()[0].presence(), PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      mapStructDef.fields()[0].type(),
+      TypeIds::map(TypeIds::I32, TypeIds::String));
 }
 
 TEST(TypeSystemTest, OpaqueAliasTypeRef) {
@@ -673,6 +877,14 @@ TEST(TypeSystemTest, OpaqueAliasTypeRef) {
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/OpaqueAlias");
   EXPECT_TRUE(def.isOpaqueAlias());
   EXPECT_EQ(def.asOpaqueAlias().targetType().id(), TypeIds::I32);
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& opaqueAliasDef = *sts.types()
+                              ->at("meta.com/thrift/test/OpaqueAlias")
+                              .definition()
+                              ->opaqueAliasDef();
+  EXPECT_EQ(opaqueAliasDef.targetType(), TypeIds::I32);
 }
 
 TEST(TypeSystemTest, EnumTypeRef) {
@@ -695,6 +907,18 @@ TEST(TypeSystemTest, EnumTypeRef) {
   EXPECT_EQ(def.asEnum().values()[0].i32, 1);
   EXPECT_EQ(def.asEnum().values()[1].name, "VALUE2");
   EXPECT_EQ(def.asEnum().values()[1].i32, 2);
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& enumDef = *sts.types()
+                       ->at("meta.com/thrift/test/SimpleEnum")
+                       .definition()
+                       ->enumDef();
+  EXPECT_EQ(enumDef.values()->size(), 2);
+  EXPECT_EQ(enumDef.values()[0].name(), "VALUE1");
+  EXPECT_EQ(enumDef.values()[0].datum(), 1);
+  EXPECT_EQ(enumDef.values()[1].name(), "VALUE2");
+  EXPECT_EQ(enumDef.values()[1].datum(), 2);
 }
 
 TEST(TypeSystemTest, ComplexTypeReferences) {
@@ -747,6 +971,29 @@ TEST(TypeSystemTest, ComplexTypeReferences) {
   EXPECT_TRUE(mapField.type().isMap());
   EXPECT_EQ(mapField.type().asMap().keyType().id(), TypeIds::String);
   EXPECT_EQ(mapField.type().asMap().valueType().asUnion().fields().size(), 1);
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 3);
+  auto& complexStructDef = *sts.types()
+                                ->at("meta.com/thrift/test/ComplexStruct")
+                                .definition()
+                                ->structDef();
+  EXPECT_EQ(complexStructDef.fields()->size(), 2);
+  EXPECT_EQ(complexStructDef.fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(complexStructDef.fields()[0].identity()->name(), "listOfStructs");
+  EXPECT_EQ(
+      complexStructDef.fields()[0].presence(), PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      complexStructDef.fields()[0].type(),
+      TypeIds::list(TypeIds::uri("meta.com/thrift/test/SimpleStruct")));
+  EXPECT_EQ(complexStructDef.fields()[1].identity()->id(), FieldId{2});
+  EXPECT_EQ(complexStructDef.fields()[1].identity()->name(), "mapOfUnions");
+  EXPECT_EQ(
+      complexStructDef.fields()[1].presence(), PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      complexStructDef.fields()[1].type(),
+      TypeIds::map(
+          TypeIds::String, TypeIds::uri("meta.com/thrift/test/SimpleUnion")));
 }
 
 TEST(TypeSystemTest, NestedContainers) {
@@ -794,6 +1041,33 @@ TEST(TypeSystemTest, NestedContainers) {
   EXPECT_EQ(
       setOfListsField.type().asSet().elementType().asList().elementType().id(),
       TypeIds::I64);
+
+  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 1);
+  auto& nestedContainerStructDef =
+      *sts.types()
+           ->at("meta.com/thrift/test/NestedContainerStruct")
+           .definition()
+           ->structDef();
+  EXPECT_EQ(nestedContainerStructDef.fields()->size(), 2);
+  EXPECT_EQ(nestedContainerStructDef.fields()[0].identity()->id(), FieldId{1});
+  EXPECT_EQ(
+      nestedContainerStructDef.fields()[0].identity()->name(), "listOfMaps");
+  EXPECT_EQ(
+      nestedContainerStructDef.fields()[0].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      nestedContainerStructDef.fields()[0].type(),
+      TypeIds::list(TypeIds::map(TypeIds::String, TypeIds::I32)));
+  EXPECT_EQ(nestedContainerStructDef.fields()[1].identity()->id(), FieldId{2});
+  EXPECT_EQ(
+      nestedContainerStructDef.fields()[1].identity()->name(), "setOfLists");
+  EXPECT_EQ(
+      nestedContainerStructDef.fields()[1].presence(),
+      PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(
+      nestedContainerStructDef.fields()[1].type(),
+      TypeIds::set(TypeIds::list(TypeIds::I64)));
 }
 
 TEST(TypeSystemTest, StructWithNegativeFieldId) {

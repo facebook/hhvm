@@ -445,10 +445,83 @@ struct TypeIdResolver {
   }
 };
 
+std::vector<SerializableFieldDefinition> toSerializableField(
+    folly::span<const FieldDefinition> fields) {
+  std::vector<SerializableFieldDefinition> result;
+  result.reserve(fields.size());
+  for (const auto& field : fields) {
+    auto& fieldDef = result.emplace_back();
+    fieldDef.identity() = field.identity();
+    fieldDef.presence() = field.presence();
+    fieldDef.type() = field.type().id();
+    if (const auto* customDefault = field.customDefault()) {
+      fieldDef.customDefaultValue() =
+          SerializableRecord::toThrift(*customDefault);
+    }
+    fieldDef.annotations() = detail::toRawAnnotations(field.annotations());
+  }
+  return result;
+}
+
+SerializableTypeDefinition toSerializableDefinition(DefinitionRef ref) {
+  return ref.visit(
+      [&](const StructNode& node) {
+        SerializableTypeDefinition result;
+        auto& structDef = result.structDef().ensure();
+        structDef.fields() = toSerializableField(node.fields());
+        structDef.isSealed() = node.isSealed();
+        structDef.annotations() = detail::toRawAnnotations(node.annotations());
+        return result;
+      },
+      [&](const UnionNode& node) {
+        SerializableTypeDefinition result;
+        auto& unionDef = result.unionDef().ensure();
+        unionDef.fields() = toSerializableField(node.fields());
+        unionDef.isSealed() = node.isSealed();
+        unionDef.annotations() = detail::toRawAnnotations(node.annotations());
+        return result;
+      },
+      [&](const EnumNode& node) {
+        SerializableTypeDefinition result;
+        auto& enumDef = result.enumDef().ensure();
+        enumDef.values()->reserve(node.values().size());
+        for (const auto& v : node.values()) {
+          auto& enumValue = enumDef.values()->emplace_back();
+          enumValue.name() = v.name;
+          enumValue.datum() = v.i32;
+          enumValue.annotations() = detail::toRawAnnotations(v.annotations());
+        }
+        enumDef.annotations() = detail::toRawAnnotations(node.annotations());
+        return result;
+      },
+      [&](const OpaqueAliasNode& node) {
+        SerializableTypeDefinition result;
+        auto& opaqueAliasDef = result.opaqueAliasDef().ensure();
+        opaqueAliasDef.targetType() = node.targetType().id();
+        opaqueAliasDef.annotations() =
+            detail::toRawAnnotations(node.annotations());
+        return result;
+      });
+}
+
 } // namespace
 
 TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) const {
   return TypeIdResolver{*this}(typeId);
+}
+
+SerializableTypeSystem TypeSystem::toSerializableTypeSystem(
+    const folly::F14FastSet<Uri>& uris) const {
+  SerializableTypeSystem result;
+  for (const auto& uri : uris) {
+    auto def = getUserDefinedTypeOrThrow(uri);
+
+    SerializableTypeDefinitionEntry entry;
+    entry.definition() = toSerializableDefinition(def);
+
+    result.types()->emplace(uri, std::move(entry));
+  }
+  return result;
 }
 
 } // namespace apache::thrift::type_system

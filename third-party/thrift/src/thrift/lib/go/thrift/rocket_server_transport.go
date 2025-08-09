@@ -170,6 +170,8 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 		}
 		if err := r.processHeaderRequest(ctx, headerProtocol, ruCompProcessor); err != nil {
 			r.log("thrift: error processing first header request from %s: %s\n", conn.RemoteAddr(), err)
+			// TODO: jchistyakov to ensure all other if-paths in this function close the connection properly
+			headerProtocol.Close()
 			return
 		}
 		if ruHandler.upgradeInvoked {

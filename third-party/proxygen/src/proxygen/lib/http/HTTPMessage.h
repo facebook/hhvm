@@ -633,6 +633,11 @@ class HTTPMessage {
   const folly::StringPiece getCookie(const std::string& name) const;
 
   /**
+   * Remove the cookie with the specified name.
+   */
+  void removeCookie(const std::string& name);
+
+  /**
    * Print the message out.
    */
   void dumpMessage(int verbosity) const;

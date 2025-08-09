@@ -55,6 +55,68 @@ TEST(HTTPMessage, TestParseCookiesMultipleCookies) {
   EXPECT_EQ(msg.getCookie("Name"), "");
 }
 
+TEST(HTTPMessage, TestRemoveCookie) {
+  HTTPMessage msg;
+
+  // Test removing a cookie that exists
+  msg.getHeaders().set("Cookie",
+                       "id=1256679245; data=0:1234567; session=abc123");
+  EXPECT_EQ(msg.getCookie("id"), "1256679245");
+  EXPECT_EQ(msg.getCookie("data"), "0:1234567");
+  EXPECT_EQ(msg.getCookie("session"), "abc123");
+
+  // Remove middle cookie
+  msg.removeCookie("data");
+  EXPECT_EQ(msg.getCookie("id"), "1256679245");
+  EXPECT_EQ(msg.getCookie("data"), "");
+  EXPECT_EQ(msg.getCookie("session"), "abc123");
+
+  // Verify Cookie header was reconstructed properly
+  const std::string& cookieHeader = msg.getHeaders().getSingleOrEmpty("Cookie");
+  EXPECT_TRUE(cookieHeader.find("id=1256679245") != std::string::npos);
+  EXPECT_TRUE(cookieHeader.find("session=abc123") != std::string::npos);
+  EXPECT_TRUE(cookieHeader.find("data=0:1234567") == std::string::npos);
+
+  // Remove first cookie
+  msg.removeCookie("id");
+  EXPECT_EQ(msg.getCookie("id"), "");
+  EXPECT_EQ(msg.getCookie("session"), "abc123");
+
+  // Remove last remaining cookie - should remove Cookie header entirely
+  msg.removeCookie("session");
+  EXPECT_EQ(msg.getCookie("session"), "");
+  EXPECT_FALSE(msg.getHeaders().exists("Cookie"));
+}
+
+TEST(HTTPMessage, TestRemoveCookieNonExistent) {
+  HTTPMessage msg;
+
+  // Test removing a cookie that doesn't exist
+  msg.getHeaders().set("Cookie", "id=1256679245; data=0:1234567");
+
+  // Try to remove non-existent cookie
+  msg.removeCookie("nonexistent");
+
+  // Original cookies should still be there
+  EXPECT_EQ(msg.getCookie("id"), "1256679245");
+  EXPECT_EQ(msg.getCookie("data"), "0:1234567");
+
+  // Cookie header should be unchanged
+  const std::string& cookieHeader = msg.getHeaders().getSingleOrEmpty("Cookie");
+  EXPECT_TRUE(cookieHeader.find("id=1256679245") != std::string::npos);
+  EXPECT_TRUE(cookieHeader.find("data=0:1234567") != std::string::npos);
+}
+
+TEST(HTTPMessage, TestRemoveCookieEmptyHeader) {
+  HTTPMessage msg;
+
+  // Test removing cookie when no Cookie header exists
+  msg.removeCookie("nonexistent");
+
+  EXPECT_FALSE(msg.getHeaders().exists("Cookie"));
+  EXPECT_EQ(msg.getCookie("nonexistent"), "");
+}
+
 TEST(HTTPMessage, TestParseQueryParamsSimple) {
   HTTPMessage msg;
   string url =

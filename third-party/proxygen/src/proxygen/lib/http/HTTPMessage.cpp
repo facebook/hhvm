@@ -454,6 +454,41 @@ const StringPiece HTTPMessage::getCookie(const string& name) const {
   }
 }
 
+void HTTPMessage::removeCookie(const string& name) {
+  unparseCookies();
+  if (!parsedCookies_) {
+    parseCookies();
+  }
+
+  auto it = cookies_.find(name);
+  if (it == cookies_.end()) {
+    return;
+  }
+
+  // Remove cookie
+  cookies_.erase(it);
+
+  // Reconstruct the Cookie header from remaining cookies
+  if (cookies_.empty()) {
+    // No cookies remaining
+    headers_.remove(HTTP_HEADER_COOKIE);
+  } else {
+    // Build new cookie header value
+    std::vector<std::string> cookieStrings;
+    cookieStrings.reserve(cookies_.size());
+    for (const auto& cookie : cookies_) {
+      cookieStrings.emplace_back(cookie.first.str() + "=" +
+                                 cookie.second.str());
+    }
+
+    // Set the new Cookie header
+    headers_.set(HTTP_HEADER_COOKIE, folly::join("; ", cookieStrings));
+  }
+
+  // Clear parsed cookies
+  unparseCookies();
+}
+
 void HTTPMessage::parseQueryParams() const {
   DCHECK(!parsedQueryParams_);
   const Request& req = request();

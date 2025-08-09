@@ -422,6 +422,11 @@ struct BiDiChannelState {
   bool sinkAlive() const {
     return state_ != State::OnlyStreamOpen && state_ != State::Closed;
   }
+  bool anyAlive() const { return state_ != State::Closed; }
+  bool bothAlive() const {
+    return state_ == State::StreamAndSinkOpen ||
+        state_ == State::AwaitingFirstResponse;
+  }
 
   BiDiChannelState& markFirstResponseSent() {
     if (state_ == State::AwaitingFirstResponse) {
@@ -467,13 +472,12 @@ class BiDiServerCallback {
  public:
   virtual ~BiDiServerCallback() = default;
 
-  FOLLY_NODISCARD virtual BiDiChannelState onStreamRequestN(uint64_t) = 0;
-  FOLLY_NODISCARD virtual BiDiChannelState onStreamCancel() = 0;
+  FOLLY_NODISCARD virtual bool onStreamRequestN(uint64_t) = 0;
+  FOLLY_NODISCARD virtual bool onStreamCancel() = 0;
 
-  FOLLY_NODISCARD virtual BiDiChannelState onSinkNext(StreamPayload&&) = 0;
-  FOLLY_NODISCARD virtual BiDiChannelState onSinkError(
-      folly::exception_wrapper) = 0;
-  FOLLY_NODISCARD virtual BiDiChannelState onSinkComplete() = 0;
+  FOLLY_NODISCARD virtual bool onSinkNext(StreamPayload&&) = 0;
+  FOLLY_NODISCARD virtual bool onSinkError(folly::exception_wrapper) = 0;
+  FOLLY_NODISCARD virtual bool onSinkComplete() = 0;
 
   virtual void resetClientCallback(BiDiClientCallback&) = 0;
 };
@@ -482,26 +486,30 @@ class BiDiClientCallback {
  public:
   virtual ~BiDiClientCallback() = default;
 
-  FOLLY_NODISCARD virtual BiDiChannelState onFirstResponse(
+  FOLLY_NODISCARD virtual bool onFirstResponse(
       FirstResponsePayload&&, folly::EventBase*, BiDiServerCallback*) = 0;
   virtual void onFirstResponseError(folly::exception_wrapper) = 0;
 
-  FOLLY_NODISCARD virtual BiDiChannelState onStreamNext(StreamPayload&&) = 0;
-  FOLLY_NODISCARD virtual BiDiChannelState onStreamError(
-      folly::exception_wrapper) = 0;
-  FOLLY_NODISCARD virtual BiDiChannelState onStreamComplete() = 0;
+  FOLLY_NODISCARD virtual bool onStreamNext(StreamPayload&&) = 0;
+  FOLLY_NODISCARD virtual bool onStreamError(folly::exception_wrapper) = 0;
+  FOLLY_NODISCARD virtual bool onStreamComplete() = 0;
 
-  FOLLY_NODISCARD virtual BiDiChannelState onSinkRequestN(uint64_t) = 0;
-  FOLLY_NODISCARD virtual BiDiChannelState onSinkCancel() = 0;
+  FOLLY_NODISCARD virtual bool onSinkRequestN(uint64_t) = 0;
+  FOLLY_NODISCARD virtual bool onSinkCancel() = 0;
 
   virtual void resetServerCallback(BiDiServerCallback&) = 0;
 };
 
 struct BiDiServerCallbackCancel {
   void operator()(BiDiServerCallback* biDiServerCallback) noexcept {
-    auto state = biDiServerCallback->onStreamCancel();
-    // This should be handled as an early close.
-    DCHECK(!state.sinkAlive() && !state.streamAlive());
+    auto alive = biDiServerCallback->onStreamCancel();
+    if (alive) {
+      TApplicationException ex(
+          TApplicationException::TApplicationExceptionType::INTERRUPTION,
+          "BiDi server callback canceled");
+      alive = biDiServerCallback->onSinkError(std::move(ex));
+    }
+    DCHECK(!alive);
   }
 };
 

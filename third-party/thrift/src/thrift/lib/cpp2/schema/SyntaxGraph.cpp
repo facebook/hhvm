@@ -699,6 +699,106 @@ void SyntaxGraph::printTo(
 }
 
 namespace {
+
+type_system::SerializableRecord toTypeSystemAnnotation(
+    const TypeRef& annotationType, const folly::dynamic& data);
+
+type_system::SerializableRecord toTypeSystemAnnotation(
+    const StructuredNode& node, const folly::dynamic& data) {
+  type_system::SerializableRecord::FieldSet result;
+  for (const auto& [fieldName, fieldData] : data.items()) {
+    const FieldNode& field = node.at(fieldName.asString());
+    result.emplace(field.id(), toTypeSystemAnnotation(field.type(), fieldData));
+  }
+  return type_system::SerializableRecord(std::move(result));
+}
+
+type_system::SerializableRecord toTypeSystemAnnotation(
+    const TypeRef& annotationType, const folly::dynamic& data) {
+  return annotationType.visit(
+      [&](const StructuredNode& node) {
+        return toTypeSystemAnnotation(node, data);
+      },
+      [&](const EnumNode&) {
+        auto result = type_system::SerializableRecord::Int32(
+            static_cast<int32_t>(data.asInt()));
+        return type_system::SerializableRecord{std::move(result)};
+      },
+      [&](const TypedefNode& node) {
+        return toTypeSystemAnnotation(node.targetType(), data);
+      },
+      [&](const List& node) {
+        type_system::SerializableRecord::List l;
+        l.reserve(data.size());
+        for (const auto& element : data) {
+          l.push_back(toTypeSystemAnnotation(node.elementType(), element));
+        }
+        return type_system::SerializableRecord{std::move(l)};
+      },
+      [&](const Set& node) {
+        type_system::SerializableRecord::Set s;
+        s.reserve(data.size());
+        for (const auto& element : data) {
+          s.insert(toTypeSystemAnnotation(node.elementType(), element));
+        }
+        return type_system::SerializableRecord{std::move(s)};
+      },
+      [&](const Map& node) {
+        type_system::SerializableRecord::Map m;
+        m.reserve(data.size());
+        for (const auto& [key, value] : data.items()) {
+          m.emplace(
+              toTypeSystemAnnotation(node.keyType(), key),
+              toTypeSystemAnnotation(node.valueType(), value));
+        }
+        return type_system::SerializableRecord{std::move(m)};
+      },
+      [&](const Primitive& node) -> type_system::SerializableRecord {
+        switch (node) {
+          case Primitive::BOOL:
+            return {type_system::SerializableRecord::Bool(data.asBool())};
+          case Primitive::BYTE:
+            return {type_system::SerializableRecord::Int8(
+                static_cast<int8_t>(data.asInt()))};
+          case Primitive::I16:
+            return {type_system::SerializableRecord::Int16(
+                static_cast<int16_t>(data.asInt()))};
+          case Primitive::I32:
+            return {type_system::SerializableRecord::Int32(
+                static_cast<int32_t>(data.asInt()))};
+          case Primitive::I64:
+            return {type_system::SerializableRecord::Int64(
+                static_cast<int8_t>(data.asInt()))};
+          case Primitive::DOUBLE:
+            return {type_system::SerializableRecord::Float32(
+                static_cast<float>(data.asDouble()))};
+          case Primitive::FLOAT:
+            return {type_system::SerializableRecord::Float64(data.asDouble())};
+            break;
+          case Primitive::STRING:
+            return {type_system::SerializableRecord::Text(data.asString())};
+          case Primitive::BINARY:
+            return {type_system::SerializableRecord::ByteArray(
+                folly::IOBuf::fromString(
+                    std::make_unique<std::string>(data.asString())))};
+        }
+        folly::assume_unreachable();
+      });
+}
+
+type_system::AnnotationsMap toTypeSystemAnnotations(
+    folly::span<const Annotation> annotations) {
+  type_system::AnnotationsMap annotationsMap;
+  annotationsMap.reserve(annotations.size());
+  // TODO(dokwon): only preserve annotations with @thrift.RuntimeAnnotation
+  for (const Annotation& annotation : annotations) {
+    annotationsMap.emplace(
+        annotation.type().asStruct().uri(),
+        toTypeSystemAnnotation(annotation.type(), annotation.value()));
+  }
+  return annotationsMap;
+}
+
 class TypeSystemFacade final : public type_system::TypeSystem {
   // Thrift files (and therefore SyntaxGraph) cannot define opaque alias types.
   // Therefore, they are not necessary for the TypeSystem for SyntaxGraph.
@@ -845,17 +945,17 @@ class TypeSystemFacade final : public type_system::TypeSystem {
             std::vector<type_system::EnumNode::Value> values;
             values.reserve(e.values().size());
             for (const auto& value : e.values()) {
-              // TODO: annotations
               values.emplace_back(type_system::EnumNode::Value{
                   std::string(value.name()),
                   value.i32(),
-                  type_system::AnnotationsMap{}});
+                  toTypeSystemAnnotations(value.annotations())});
             }
-            // TODO: annotations
             auto [entry, _] = cache_.emplace(
                 sgDef,
                 type_system::EnumNode{
-                    type_system::Uri(e.uri()), std::move(values), {}});
+                    type_system::Uri(e.uri()),
+                    std::move(values),
+                    toTypeSystemAnnotations(e.definition().annotations())});
             reverseCache_.emplace(
                 &std::get<type_system::EnumNode>(entry->second), sgDef);
           },
@@ -891,10 +991,7 @@ class TypeSystemFacade final : public type_system::TypeSystem {
               convertType(field.type()),
               // TODO: default value
               std::nullopt,
-              // TODO: annotations
-              type_system::AnnotationsMap{}
-
-          );
+              toTypeSystemAnnotations(field.annotations()));
         }
         return fields;
       };
@@ -904,14 +1001,14 @@ class TypeSystemFacade final : public type_system::TypeSystem {
                 type_system::Uri(s.uri()),
                 makeFields(s),
                 false,
-                type_system::AnnotationsMap{}};
+                toTypeSystemAnnotations(s.definition().annotations())};
           },
           [&](const UnionNode& s) {
             std::get<type_system::UnionNode>(tsDef) = type_system::UnionNode{
                 type_system::Uri(s.uri()),
                 makeFields(s),
                 false,
-                type_system::AnnotationsMap{}};
+                toTypeSystemAnnotations(s.definition().annotations())};
           },
           [](const auto& n) {
             folly::throw_exception<std::logic_error>(fmt::format(

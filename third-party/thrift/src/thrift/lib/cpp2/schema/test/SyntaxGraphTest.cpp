@@ -775,6 +775,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       type_system::PresenceQualifier::OPTIONAL_);
   EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
   EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
+
   EXPECT_EQ(&syntaxGraph.asTypeSystemStructNode(def->asStruct()), &structNode);
   const auto& sgStructNode = syntaxGraph.asSyntaxGraphStructNode(structNode);
   EXPECT_EQ(&sgStructNode, &def->asStruct());
@@ -794,14 +795,34 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       &mainProgram.definitionsByName().at("TestUnion")->asUnion(),
       &sgUnionNode);
   checkAnnotationsOnTestUnion(sgUnionNode);
+  const auto& annot = *unionNode.getAnnotationOrNull(
+      "meta.com/thrift_test/TestStructuredAnnotation");
+  EXPECT_EQ(annot.asFieldSet().at(FieldId{1}).asInt64(), 3);
+  EXPECT_EQ(
+      annot.asFieldSet().at(FieldId{2}).asFieldSet().at(FieldId{1}).asInt64(),
+      4);
 
   uri = "meta.com/thrift_test/TestEnum";
   const type_system::EnumNode& enumNode =
       typeSystem.getUserDefinedTypeOrThrow(uri).asEnum();
   EXPECT_EQ(enumNode.uri(), uri);
+  EXPECT_EQ(
+      enumNode
+          .getAnnotationOrNull("meta.com/thrift_test/TestStructuredAnnotation")
+          ->asFieldSet()
+          .at(FieldId{1})
+          .asInt64(),
+      3);
   EXPECT_EQ(enumNode.values().size(), 3);
   EXPECT_EQ(enumNode.values()[0].name, "UNSET");
   EXPECT_EQ(enumNode.values()[0].i32, 0);
+  EXPECT_EQ(
+      enumNode.values()[0]
+          .getAnnotationOrNull("meta.com/thrift_test/TestStructuredAnnotation")
+          ->asFieldSet()
+          .at(FieldId{1})
+          .asInt64(),
+      4);
   EXPECT_EQ(enumNode.values()[1].name, "VALUE_1");
   EXPECT_EQ(enumNode.values()[1].i32, 1);
   EXPECT_EQ(enumNode.values()[2].name, "VALUE_2");

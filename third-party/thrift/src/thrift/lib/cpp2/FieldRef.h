@@ -1912,6 +1912,12 @@ class union_field_ref {
     return *this;
   }
 
+  FOLLY_ERASE std::optional<std::remove_const_t<value_type>> to_optional()
+      const {
+    using type = std::optional<std::remove_const_t<value_type>>;
+    return has_value() ? type(get_value()) : type();
+  }
+
   FOLLY_ERASE bool has_value() const { return type_ == field_type_; }
 
   FOLLY_ERASE explicit operator bool() const { return has_value(); }

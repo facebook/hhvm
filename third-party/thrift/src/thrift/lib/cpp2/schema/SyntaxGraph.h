@@ -630,6 +630,23 @@ class StructuredNode : detail::WithDefinition, detail::WithUri {
   using detail::WithUri::uri;
   folly::span<const FieldNode> fields() const { return fields_; }
 
+  /**
+   * Looks up a field by ID.
+   *
+   * Throws:
+   *   - std::out_of_range if the field ID is not present.
+   */
+  const FieldNode& at(FieldId id) const { return at(fieldHandleFor(id)); }
+  /**
+   * Looks up a field by name.
+   *
+   * Throws:
+   *   - std::out_of_range if the field ID is not present.
+   */
+  const FieldNode& at(std::string_view name) const {
+    return at(fieldHandleFor(name));
+  }
+
  protected:
   StructuredNode(
       const detail::Resolver& resolver,
@@ -638,10 +655,65 @@ class StructuredNode : detail::WithDefinition, detail::WithUri {
       std::vector<FieldNode> fields)
       : detail::WithDefinition(resolver, definitionKey),
         detail::WithUri(uri),
-        fields_(std::move(fields)) {}
+        fields_(std::move(fields)) {
+    std::uint16_t ordinal = 1;
+    for (const FieldNode& field : fields_) {
+      fieldHandleById_.emplace(
+          field.id(), type_system::FastFieldHandle{ordinal});
+      fieldHandleByName_.emplace(
+          field.name(), type_system::FastFieldHandle{ordinal});
+      ++ordinal;
+    }
+  }
 
  private:
+  /**
+   * Looks up a field by a fast field handle, previously obtained from
+   * fieldHandleFor(...);
+   *
+   * Preconditions:
+   *   - The provided handle was obtained by calling fieldHandleFor(...) on this
+   *     instance.
+   *
+   * Throws:
+   *   - std::out_of_range if the field handle is invalid or out of range.
+   */
+  const FieldNode& at(type_system::FastFieldHandle handle) const {
+    if (!handle.valid() || handle.ordinal > fields_.size()) {
+      folly::throw_exception<std::out_of_range>(
+          fmt::format("invalid field handle: {}", handle.ordinal));
+    }
+    return fields_.at(handle.ordinal - 1);
+  }
+
+  /**
+   * Returns a field handle for the given field ID, if it exists, returning
+   * `FastFieldHandle::invalid()` otherwise.
+   */
+  type_system::FastFieldHandle fieldHandleFor(FieldId id) const noexcept {
+    if (const type_system::FastFieldHandle* handle =
+            folly::get_ptr(fieldHandleById_, id)) {
+      return *handle;
+    }
+    return type_system::FastFieldHandle::invalid();
+  }
+  /**
+   * Returns a field handle for the given field name, if it exists, returning
+   * `FastFieldHandle::invalid()` otherwise.
+   */
+  type_system::FastFieldHandle fieldHandleFor(
+      std::string_view name) const noexcept {
+    if (const type_system::FastFieldHandle* handle =
+            folly::get_ptr(fieldHandleByName_, name)) {
+      return *handle;
+    }
+    return type_system::FastFieldHandle::invalid();
+  }
+
   std::vector<FieldNode> fields_;
+  folly::F14FastMap<FieldId, type_system::FastFieldHandle> fieldHandleById_;
+  folly::F14FastMap<std::string_view, type_system::FastFieldHandle>
+      fieldHandleByName_;
 };
 
 class StructNode final : folly::MoveOnly,

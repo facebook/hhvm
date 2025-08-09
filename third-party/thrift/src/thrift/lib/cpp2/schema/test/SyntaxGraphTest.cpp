@@ -185,22 +185,34 @@ TEST_F(ServiceSchemaTest, Struct) {
 
   EXPECT_EQ(s.fields().size(), 2);
 
-  EXPECT_EQ(s.fields()[0].id(), FieldId{1});
-  EXPECT_EQ(
-      s.fields()[0].presence(), FieldNode::PresenceQualifier::UNQUALIFIED);
-  EXPECT_EQ(s.fields()[0].type().asPrimitive(), Primitive::I32);
-  EXPECT_EQ(s.fields()[0].name(), "field1");
-  EXPECT_STREQ(s.fields()[0].name().data(), "field1");
-  EXPECT_EQ(s.fields()[0].customDefault()->as_i32(), 10);
+  auto checkField1 = [](const auto& field) {
+    EXPECT_EQ(field.id(), FieldId{1});
+    EXPECT_EQ(field.presence(), FieldNode::PresenceQualifier::UNQUALIFIED);
+    EXPECT_EQ(field.type().asPrimitive(), Primitive::I32);
+    EXPECT_EQ(field.name(), "field1");
+    EXPECT_STREQ(field.name().data(), "field1");
+    EXPECT_EQ(field.customDefault()->as_i32(), 10);
+  };
 
-  EXPECT_EQ(s.fields()[1].id(), FieldId{2});
-  EXPECT_EQ(s.fields()[1].presence(), FieldNode::PresenceQualifier::OPTIONAL_);
-  EXPECT_EQ(
-      &s.fields()[1].type().asEnum(),
-      &program.definitionsByName().at("TestEnum")->asEnum());
-  EXPECT_EQ(s.fields()[1].name(), "field2");
-  EXPECT_STREQ(s.fields()[1].name().data(), "field2");
-  EXPECT_EQ(s.fields()[1].customDefault(), nullptr);
+  checkField1(s.at(FieldId{1}));
+  checkField1(s.at("field1"));
+
+  auto checkField2 = [&](const auto& field) {
+    EXPECT_EQ(field.id(), FieldId{2});
+    EXPECT_EQ(field.presence(), FieldNode::PresenceQualifier::OPTIONAL_);
+    EXPECT_EQ(
+        &field.type().asEnum(),
+        &program.definitionsByName().at("TestEnum")->asEnum());
+    EXPECT_EQ(field.name(), "field2");
+    EXPECT_STREQ(field.name().data(), "field2");
+    EXPECT_EQ(field.customDefault(), nullptr);
+  };
+
+  checkField2(s.at(FieldId{2}));
+  checkField2(s.at("field2"));
+
+  EXPECT_THROW(s.at(FieldId{3}), std::out_of_range);
+  EXPECT_THROW(s.at("field3"), std::out_of_range);
 
   EXPECT_EQ(
       s.toDebugString(),
@@ -229,17 +241,33 @@ TEST_F(ServiceSchemaTest, Union) {
 
   EXPECT_EQ(u.fields().size(), 2);
 
-  EXPECT_EQ(u.fields()[0].id(), FieldId{1});
-  EXPECT_EQ(u.fields()[0].name(), "s");
-  EXPECT_EQ(
-      &u.fields()[0].type().asStruct(),
-      &program.definitionsByName().at("TestStruct")->asStruct());
+  auto checkField1 = [&](const auto& field) {
+    EXPECT_EQ(field.id(), FieldId{1});
+    EXPECT_EQ(field.presence(), FieldNode::PresenceQualifier::UNQUALIFIED);
+    EXPECT_EQ(
+        &field.type().asStruct(),
+        &program.definitionsByName().at("TestStruct")->asStruct());
+    EXPECT_EQ(field.name(), "s");
+    EXPECT_STREQ(field.name().data(), "s");
+  };
 
-  EXPECT_EQ(u.fields()[1].id(), FieldId{2});
-  EXPECT_EQ(u.fields()[1].name(), "e");
-  EXPECT_EQ(
-      &u.fields()[1].type().asEnum(),
-      &program.definitionsByName().at("TestEnum")->asEnum());
+  checkField1(u.at(FieldId{1}));
+  checkField1(u.at("s"));
+
+  auto checkField2 = [&](const auto& field) {
+    EXPECT_EQ(field.id(), FieldId{2});
+    EXPECT_EQ(field.presence(), FieldNode::PresenceQualifier::UNQUALIFIED);
+    EXPECT_EQ(
+        &field.type().asEnum(),
+        &program.definitionsByName().at("TestEnum")->asEnum());
+    EXPECT_EQ(field.name(), "e");
+  };
+
+  checkField2(u.at(FieldId{2}));
+  checkField2(u.at("e"));
+
+  EXPECT_THROW(u.at(FieldId{3}), std::out_of_range);
+  EXPECT_THROW(u.at("field3"), std::out_of_range);
 
   EXPECT_EQ(
       u.toDebugString(),

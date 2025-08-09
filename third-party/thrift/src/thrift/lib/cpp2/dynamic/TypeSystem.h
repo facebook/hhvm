@@ -490,6 +490,12 @@ class SourceIndexedTypeSystem : public TypeSystem {
    */
   virtual NameToDefinitionsMap getUserDefinedTypesAtLocation(
       std::string_view location) const = 0;
+
+  /**
+   * Creates SerializbleTypeSystem from this TypeSystem.
+   */
+  SerializableTypeSystem toSerializableTypeSystem(
+      const folly::F14FastSet<Uri>& uris) const;
 };
 
 /**

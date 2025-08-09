@@ -524,6 +524,26 @@ SerializableTypeSystem TypeSystem::toSerializableTypeSystem(
   return result;
 }
 
+SerializableTypeSystem SourceIndexedTypeSystem::toSerializableTypeSystem(
+    const folly::F14FastSet<Uri>& uris) const {
+  SerializableTypeSystem result;
+  for (const auto& uri : uris) {
+    auto def = getUserDefinedTypeOrThrow(uri);
+
+    SerializableTypeDefinitionEntry entry;
+    entry.definition() = toSerializableDefinition(def);
+    auto sourceInfoView = getSourceIdentiferForUserDefinedType(def);
+    if (sourceInfoView.has_value()) {
+      auto& s = entry.sourceInfo().ensure();
+      s.locator() = sourceInfoView->location;
+      s.name() = sourceInfoView->name;
+    };
+    result.types()->emplace(uri, std::move(entry));
+  }
+
+  return result;
+}
+
 } // namespace apache::thrift::type_system
 
 std::size_t std::hash<apache::thrift::type_system::DefinitionRef>::operator()(

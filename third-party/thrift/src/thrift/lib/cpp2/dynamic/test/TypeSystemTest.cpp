@@ -1349,6 +1349,30 @@ TEST(TypeSystemTest, SourceIndexedTypeSystem) {
         &typeSystem->getUserDefinedType("meta.com/thrift/test/OpaqueAlias")
              ->asOpaqueAlias());
   }
+
+  auto sts = sym.toSerializableTypeSystem(*sym.getKnownUris());
+  EXPECT_EQ(sts.types()->size(), 4);
+  auto& structWithI32FieldEntry =
+      sts.types()->at("meta.com/thrift/test/StructWithI32Field");
+  EXPECT_EQ(
+      structWithI32FieldEntry.sourceInfo()->locator(), "file://foo/bar.thrift");
+  EXPECT_EQ(structWithI32FieldEntry.sourceInfo()->name(), "StructWithI32Field");
+
+  auto& enumEntry = sts.types()->at("meta.com/thrift/test/Enum");
+  EXPECT_EQ(enumEntry.sourceInfo()->locator(), "file://foo/bar.thrift");
+  EXPECT_EQ(enumEntry.sourceInfo()->name(), "Enum");
+
+  auto& unionWithI32FieldEntry =
+      sts.types()->at("meta.com/thrift/test/UnionWithI32Field");
+  EXPECT_EQ(
+      unionWithI32FieldEntry.sourceInfo()->locator(),
+      "file://foo/other.thrift");
+  EXPECT_EQ(unionWithI32FieldEntry.sourceInfo()->name(), "UnionWithI32Field");
+
+  auto& opaqueAliasEntry = sts.types()->at("meta.com/thrift/test/OpaqueAlias");
+  EXPECT_EQ(
+      opaqueAliasEntry.sourceInfo()->locator(), "file://foo/other.thrift");
+  EXPECT_EQ(opaqueAliasEntry.sourceInfo()->name(), "OpaqueAlias");
 }
 
 TEST(TypeSystemTest, SourceIndexedTypeSystemWithDuplicateEntries) {

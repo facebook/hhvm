@@ -39,9 +39,9 @@ TEST(AnyRefTest, DocExample1) {
 
 TEST(AnyRefTest, DocExample2) {
   auto foo = [](any_ref in) {
-    if (const auto* i = any_cast<const int>(&in)) {
+    if (any_cast<const int>(&in)) {
       return 1;
-    } else if (const auto* f = any_cast<const float>(&in)) {
+    } else if (any_cast<const float>(&in)) {
       return 2;
     }
     return 3;

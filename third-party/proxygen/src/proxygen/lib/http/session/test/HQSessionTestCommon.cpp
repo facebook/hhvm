@@ -107,7 +107,6 @@ folly::Optional<std::pair<UnidirectionalStreamType, size_t>> parseStreamPreface(
       } else {
         return folly::none;
       }
-      break;
     default:
       break;
   }

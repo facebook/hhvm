@@ -102,4 +102,67 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
         {{/function:stream_exceptions}}
     )
 {{/function:stream?}}
+{{#function:sink?}}
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{> types/struct_metaclass}}):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        {{#function:sink_elem_type}}
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            {{^type:base?}}lambda: {{/type:base?}}{{> types/typeinfo }},  # typeinfo
+            None,  # default value
+            {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
+        ),
+        {{/function:sink_elem_type}}
+        {{#function:sink_exceptions}}
+        _fbthrift_python_types.FieldInfo(
+            {{field:key}},  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "{{field:name}}",  # name
+            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            None,  # default value
+            {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum)
+        ),
+        {{/function:sink_exceptions}}
+    )
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={{> types/struct_metaclass}}):
+    _fbthrift_SPEC = (
+        {{#function:sink_final_response_type}}
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            {{^type:base?}}lambda: {{/type:base?}}{{> types/typeinfo }},  # typeinfo
+            None,  # default value
+            {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
+        ),
+        {{/function:sink_final_response_type}}
+        {{#function:sink_final_response_exceptions}}
+        _fbthrift_python_types.FieldInfo(
+            {{field:key}},  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "{{field:name}}",  # name
+            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            None,  # default value
+            {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum)
+        ),
+        {{/function:sink_final_response_exceptions}}
+    )
+{{/function:sink?}}
 {{/service:supported_functions}}

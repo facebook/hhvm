@@ -245,6 +245,51 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
         ]]]: ...
 
 
+class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
+
+
 class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
 
     def __init__(
@@ -317,6 +362,51 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_t
         _typing.Union[
             builtins.bool,
         ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
 
 
 class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
@@ -535,6 +625,51 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
         ]]]: ...
 
 
+class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
+
+
 class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
 
     def __init__(
@@ -607,6 +742,51 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_t
         _typing.Union[
             builtins.bool,
         ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
 
 
 class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
@@ -735,6 +915,51 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
         ]]]: ...
 
 
+class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
+
+
 class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
 
     def __init__(
@@ -807,6 +1032,51 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_t
         _typing.Union[
             builtins.bool,
         ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteractionFast_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
 
 
 class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
@@ -933,6 +1203,51 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
         _typing.Union[
             builtins.bool,
         ]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_typing.AbstractSet[builtins.int]]
+
+    def __init__(
+        self, *, success: _typing.Optional[_typing.AbstractSet[builtins.int]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _typing.AbstractSet[builtins.int],
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.str]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.str] = ...
+    ) -> None: ...
+
+
+class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[builtins.bytes]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[builtins.bytes] = ...
+    ) -> None: ...
 
 
 class _fbthrift_SharedInteraction_init_args(_fbthrift_python_types.Struct):

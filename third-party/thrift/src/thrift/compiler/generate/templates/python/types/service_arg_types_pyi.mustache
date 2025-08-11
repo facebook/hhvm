@@ -88,4 +88,39 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem({{!
             {{/function:stream_exceptions}}
         ]]]: ...
 {{/function:stream?}}
+{{#function:sink?}}
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem({{> types/struct_base }}):
+    success: _typing.Final[{{#function:sink_elem_type}}{{> types/pep484_type }}{{/function:sink_elem_type}}]
+    {{#function:sink_exceptions}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
+    {{/function:sink_exceptions}}
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[{{#function:sink_elem_type}}{{> types/pep484_type }}{{/function:sink_elem_type}}] = ...{{!
+        }}{{#function:sink_exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}{{/function:sink_exceptions}}
+    ) -> None: ...
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final({{> types/struct_base }}):
+    success: _typing.Final[{{#function:sink_final_response_type}}{{!
+        }}{{> types/pep484_type }}{{/function:sink_final_response_type}}]
+    {{#function:sink_final_response_exceptions}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
+    {{/function:sink_final_response_exceptions}}
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[{{#function:sink_final_response_type}}{{> types/pep484_type }}{{/function:sink_final_response_type}}] = ...{{!
+        }}{{#function:sink_final_response_exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}{{/function:sink_final_response_exceptions}}
+    ) -> None: ...
+{{/function:sink?}}
 {{/service:supported_functions}}

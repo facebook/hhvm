@@ -665,7 +665,7 @@ class python_mstch_service : public mstch_service {
   mstch::node supported_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink() && !func->is_interaction_constructor();
+          return !func->is_interaction_constructor();
         }),
         service_);
   }
@@ -762,13 +762,11 @@ class python_mstch_function : public mstch_function {
   }
 
   mstch::node returns_tuple() {
-    // TOOD add in sinks, etc
-    return (function_->stream() && function_->has_return_type()) ||
+    return (function_->sink_or_stream() && function_->has_return_type()) ||
         (function_->interaction() && !function_->return_type()->is_void());
   }
 
   mstch::node early_client_return() {
-    // TOOD add in sinks, etc
     return !function_->return_type()->is_void();
   }
 

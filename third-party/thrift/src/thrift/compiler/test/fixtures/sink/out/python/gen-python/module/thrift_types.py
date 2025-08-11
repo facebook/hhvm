@@ -480,6 +480,386 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 
 
+class _fbthrift_SinkService_method_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_method_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_method_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_method_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodAndReponse_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodAndReponse_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(InitialResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodAndReponse_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodAndReponse_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(InitialException),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodSinkThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodSinkThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "ex",  # name
+            "ex",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkException1),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodSinkThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodFinalThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodFinalThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodFinalThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodFinalThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "ex",  # name
+            "ex",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkException2),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodBothThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodBothThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodBothThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "ex",  # name
+            "ex",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkException1),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodBothThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "ex",  # name
+            "ex",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkException2),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodFast_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodFast_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SinkService_methodFast_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SinkPayload),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_SinkService_methodFast_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FinalResponse),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
 
 _fbthrift_python_types.fill_specs(
-    )
+    _fbthrift_SinkService_method_args,
+    _fbthrift_SinkService_method_result,
+    _fbthrift_SinkService_method_result_sink_elem,
+    _fbthrift_SinkService_method_result_sink_final,
+    _fbthrift_SinkService_methodAndReponse_args,
+    _fbthrift_SinkService_methodAndReponse_result,
+    _fbthrift_SinkService_methodAndReponse_result_sink_elem,
+    _fbthrift_SinkService_methodAndReponse_result_sink_final,
+    _fbthrift_SinkService_methodThrow_args,
+    _fbthrift_SinkService_methodThrow_result,
+    _fbthrift_SinkService_methodThrow_result_sink_elem,
+    _fbthrift_SinkService_methodThrow_result_sink_final,
+    _fbthrift_SinkService_methodSinkThrow_args,
+    _fbthrift_SinkService_methodSinkThrow_result,
+    _fbthrift_SinkService_methodSinkThrow_result_sink_elem,
+    _fbthrift_SinkService_methodSinkThrow_result_sink_final,
+    _fbthrift_SinkService_methodFinalThrow_args,
+    _fbthrift_SinkService_methodFinalThrow_result,
+    _fbthrift_SinkService_methodFinalThrow_result_sink_elem,
+    _fbthrift_SinkService_methodFinalThrow_result_sink_final,
+    _fbthrift_SinkService_methodBothThrow_args,
+    _fbthrift_SinkService_methodBothThrow_result,
+    _fbthrift_SinkService_methodBothThrow_result_sink_elem,
+    _fbthrift_SinkService_methodBothThrow_result_sink_final,
+    _fbthrift_SinkService_methodFast_args,
+    _fbthrift_SinkService_methodFast_result,
+    _fbthrift_SinkService_methodFast_result_sink_elem,
+    _fbthrift_SinkService_methodFast_result_sink_final,
+)

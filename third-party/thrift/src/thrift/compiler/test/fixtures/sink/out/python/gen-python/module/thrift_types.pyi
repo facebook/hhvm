@@ -137,3 +137,324 @@ class SinkException2(_fbthrift_python_exceptions.GeneratedError, _fbthrift_pytho
     def _to_py3(self) -> "module.types.SinkException2": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.SinkException2": ...  # type: ignore
 _fbthrift_SinkException2 = SinkException2
+
+
+class _fbthrift_SinkService_method_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_method_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_method_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_method_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodAndReponse_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_methodAndReponse_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_InitialResponse]
+
+    def __init__(
+        self, *, success: _typing.Optional[_fbthrift_InitialResponse] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _fbthrift_InitialResponse,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_methodAndReponse_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodAndReponse_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodThrow_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_methodThrow_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+    ex: _typing.Final[_fbthrift_InitialException]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ..., _ex0__ex: _typing.Optional[_fbthrift_InitialException]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+            _fbthrift_InitialException,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_methodThrow_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodThrow_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodSinkThrow_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_methodSinkThrow_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+    ex: _typing.Final[_fbthrift_SinkException1]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ..., ex: _typing.Optional[_fbthrift_SinkException1]=...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodSinkThrow_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodFinalThrow_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_methodFinalThrow_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_methodFinalThrow_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodFinalThrow_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+    ex: _typing.Final[_fbthrift_SinkException2]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ..., ex: _typing.Optional[_fbthrift_SinkException2]=...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodBothThrow_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_methodBothThrow_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_methodBothThrow_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+    ex: _typing.Final[_fbthrift_SinkException1]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ..., ex: _typing.Optional[_fbthrift_SinkException1]=...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodBothThrow_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+    ex: _typing.Final[_fbthrift_SinkException2]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ..., ex: _typing.Optional[_fbthrift_SinkException2]=...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodFast_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SinkService_methodFast_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_SinkService_methodFast_result_sink_elem(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_SinkPayload]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_SinkPayload] = ...
+    ) -> None: ...
+
+
+class _fbthrift_SinkService_methodFast_result_sink_final(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_FinalResponse]
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[_fbthrift_FinalResponse] = ...
+    ) -> None: ...

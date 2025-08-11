@@ -306,6 +306,30 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "MyService",
+                "MyInteraction.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -313,6 +337,8 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -418,6 +444,30 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "MyService",
+                "MyInteractionFast.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -425,6 +475,8 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -783,6 +835,30 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteraction.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -790,6 +866,8 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -895,6 +973,30 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteractionFast.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -902,6 +1004,8 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -1179,6 +1283,30 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteraction.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -1186,6 +1314,8 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -1291,6 +1421,30 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteractionFast.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -1298,6 +1452,8 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -1581,6 +1737,30 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+        async def encode(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[None]:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "MyInteraction.encode",
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
@@ -1588,6 +1768,8 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
     ping = Async.ping
     # pyre-ignore[4]: Missing annotation.
     truthify = Async.truthify
+    # pyre-ignore[4]: Missing annotation.
+    encode = Async.encode
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod

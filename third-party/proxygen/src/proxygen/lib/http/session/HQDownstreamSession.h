@@ -55,7 +55,6 @@ class HQDownstreamSession : public HQSession {
 
   bool isReplaySafe() const override {
     LOG(FATAL) << __func__ << " is an upstream interface";
-    return false;
   }
   // Create a new pushed transaction.
   HTTPTransaction* newPushedTransaction(

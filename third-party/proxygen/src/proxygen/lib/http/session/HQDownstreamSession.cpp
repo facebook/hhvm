@@ -58,7 +58,6 @@ void HQDownstreamSession::setupOnHeadersComplete(HTTPTransaction* txn,
 
 bool HQDownstreamSession::isDetachable(bool) const {
   LOG(FATAL) << __func__ << " is an upstream interface";
-  return false;
 }
 
 void HQDownstreamSession::attachThreadLocals(

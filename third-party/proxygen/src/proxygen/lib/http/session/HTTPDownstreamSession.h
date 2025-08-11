@@ -95,7 +95,6 @@ class HTTPDownstreamSession final : public HTTPSession {
   // Upstream methods.  Can implement when servers support making request
   bool isDetachable(bool) const override {
     LOG(FATAL) << __func__ << " is an upstream interface";
-    return false;
   }
 
   void attachThreadLocals(folly::EventBase*,
@@ -114,22 +113,18 @@ class HTTPDownstreamSession final : public HTTPSession {
 
   HTTPTransaction* newTransaction(HTTPTransaction::Handler*) override {
     LOG(FATAL) << __func__ << " is an upstream interface";
-    return nullptr;
   }
 
   bool isReplaySafe() const override {
     LOG(FATAL) << __func__ << " is an upstream interface";
-    return false;
   }
 
   bool isReusable() const override {
     LOG(FATAL) << __func__ << " is an upstream interface";
-    return false;
   }
 
   bool isClosing() const override {
     LOG(FATAL) << __func__ << " is an upstream interface";
-    return false;
   }
 };
 

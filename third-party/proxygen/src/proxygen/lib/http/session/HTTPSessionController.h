@@ -115,7 +115,6 @@ class HTTPUpstreamSessionController : public HTTPSessionController {
   HTTPTransactionHandler* getRequestHandler(HTTPTransaction& /*txn*/,
                                             HTTPMessage* /*msg*/) final {
     LOG(FATAL) << "Unreachable";
-    return nullptr;
   }
 
   /**
@@ -129,7 +128,6 @@ class HTTPUpstreamSessionController : public HTTPSessionController {
       const HTTPException& /*error*/,
       const folly::SocketAddress& /*localAddress*/) final {
     LOG(FATAL) << "Unreachable";
-    return nullptr;
   }
 
   /**
@@ -139,7 +137,6 @@ class HTTPUpstreamSessionController : public HTTPSessionController {
       HTTPTransaction* /*txn*/,
       const folly::SocketAddress& /*localAddress*/) final {
     LOG(FATAL) << "Unreachable";
-    return nullptr;
   }
 };
 

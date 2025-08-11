@@ -395,7 +395,6 @@ HQSession::createIngressControlStream(quic::StreamId id,
     LOG(FATAL) << "Cannot create ingress control stream without an egress "
                   "stream streamID="
                << id << " sess=" << *this;
-    return nullptr;
   }
 
   if (ctrlStream->ingressCodec_) {
@@ -436,7 +435,6 @@ std::unique_ptr<hq::HQUnidirectionalCodec> HQSession::createControlCodec(
                                                      controlStream);
     default:
       LOG(FATAL) << "Failed to create ingress codec";
-      return nullptr;
   }
 }
 

@@ -6,7 +6,7 @@
  *
  *)
 
-open Core
+open Hh_prelude
 module Sys = Stdlib.Sys
 open Printf
 open Reordered_argument_collections
@@ -28,22 +28,33 @@ let regen_instructions = "
 // To regenerate this file, run:
 //   "
 
-let parse filename =
+let with_lexbuf (filename : string) ~(f : Lexing.lexbuf -> 'a) : 'a =
   let ic = In_channel.create filename in
   let lexbuf = Lexing.from_channel ic in
-  let phrases = Parse.use_file lexbuf in
+  let result = f lexbuf in
   In_channel.close ic;
-  phrases
+  result
+
+let parse (filename : string) : Parsetree.toplevel_phrase list =
+  with_lexbuf filename ~f:Parse.use_file
+
+let parse_mli (filename : string) : Parsetree.signature option =
+  let mli_filename = String.chop_suffix_exn filename ~suffix:".ml" ^ ".mli" in
+  if Sys.file_exists mli_filename then
+    Some (with_lexbuf mli_filename ~f:Parse.interface)
+  else
+    None
 
 let oxidize filename =
   let phrases = parse filename in
+  let mli_signature = parse_mli filename in
   let in_basename = Filename.basename filename in
   let module_name = String.chop_suffix_exn in_basename ~suffix:".ml" in
   let module_name = convert_module_name module_name in
   log "Converting %s" module_name;
   let oxidized_module =
     Utils.with_log_indent (fun () ->
-        Output.with_output_context ~module_name (fun () ->
+        Output.with_output_context ~module_name ~mli_signature (fun () ->
             let _env =
               Convert_toplevel_phrase.(
                 List.fold phrases ~f:toplevel_phrase ~init:Env.empty)

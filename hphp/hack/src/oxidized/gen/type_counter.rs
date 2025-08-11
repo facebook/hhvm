@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<16057a04ba16efa16b93aef27b54b7dd>>
+// @generated SignedSource<<987a50b9c05aa726b87977f604399e79>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -155,6 +155,7 @@ pub struct Count {
     pub value: isize,
 }
 
+/// Summary for one file, only counting like types.
 #[derive(
     Clone,
     Debug,

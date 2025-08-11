@@ -6,7 +6,7 @@
  *
  *)
 
-open Core
+open Hh_prelude
 open Asttypes
 open Longident
 open Parsetree
@@ -474,11 +474,93 @@ let convert_doc_comment doc =
   |> (fun (_, l) -> List.rev l)
   |> String.concat
 
+let rec find_type_in_mli_signature (signature : signature) (type_name : label) :
+    type_declaration option =
+  match signature with
+  | [] -> None
+  | { Parsetree.psig_desc = Psig_type (_, type_decls); _ } :: rest ->
+    (match
+       List.find type_decls ~f:(fun td ->
+           String.equal td.Parsetree.ptype_name.txt type_name)
+     with
+    | Some type_decl -> Some type_decl
+    | None -> find_type_in_mli_signature rest type_name)
+  | _ :: rest -> find_type_in_mli_signature rest type_name
+
+let find_constructor (type_decl : type_declaration) (variant_name : label) :
+    constructor_declaration option =
+  match type_decl.Parsetree.ptype_kind with
+  | Ptype_variant constructors ->
+    List.find constructors ~f:(fun cd ->
+        String.equal cd.Parsetree.pcd_name.txt variant_name)
+  | _ -> None
+
+let find_record_field_in_mli_type_decl mli_type_decl field_name =
+  match mli_type_decl.Parsetree.ptype_kind with
+  | Ptype_record labels ->
+    List.find labels ~f:(fun ld ->
+        String.equal ld.Parsetree.pld_name.txt field_name)
+  | _ -> None
+
 let doc_comment_of_attribute_list attrs =
   attrs
   |> List.find_map ~f:doc_comment_of_attribute
   |> Option.map ~f:convert_doc_comment
   |> Option.value ~default:""
+
+let merge_doc_comments ~(from_ml : string) ~(from_mli : string option) : string
+    =
+  if
+    String.is_empty from_ml
+    || String.(strip (lowercase from_ml) = "/// see .mli")
+  then
+    Option.value from_mli ~default:""
+  else
+    from_ml
+
+let doc_comment_of_attribute_list_mli_aware
+    (attrs : attribute list) (type_name : label) : label =
+  let from_ml = doc_comment_of_attribute_list attrs in
+  let from_mli =
+    let open Option.Let_syntax in
+    let* signature = State.curr_mli_signature () in
+    let+ mli_type_decl = find_type_in_mli_signature signature type_name in
+    doc_comment_of_attribute_list mli_type_decl.ptype_attributes
+  in
+  merge_doc_comments ~from_ml ~from_mli
+
+let doc_comment_of_variant_constructor
+    (attrs : attribute list)
+    ~(original_type_name : label)
+    ~(constructor : label) : label =
+  let from_ml = doc_comment_of_attribute_list attrs in
+  let from_mli =
+    let open Option.Let_syntax in
+    let* signature = State.curr_mli_signature () in
+    let* mli_type_decl =
+      find_type_in_mli_signature signature original_type_name
+    in
+    let+ variant_cd = find_constructor mli_type_decl constructor in
+    doc_comment_of_attribute_list variant_cd.pcd_attributes
+  in
+  merge_doc_comments ~from_ml ~from_mli
+
+let doc_comment_of_record_field
+    (attrs : attribute list) ~(original_type_name : label) ~(field_name : label)
+    : label =
+  let from_ml = doc_comment_of_attribute_list attrs in
+  let from_mli =
+    let open Option.Let_syntax in
+    let* signature = State.curr_mli_signature () in
+    let* mli_type_decl =
+      find_type_in_mli_signature signature original_type_name
+    in
+    let+ field_ld =
+      find_record_field_in_mli_type_decl mli_type_decl field_name
+    in
+    doc_comment_of_attribute_list field_ld.pld_attributes
+  in
+  merge_doc_comments ~from_ml ~from_mli
 
 let ocaml_attr attrs =
   attrs
@@ -506,8 +588,17 @@ let type_params ~safe_ints name params =
   (lifetime, params)
 
 let record_label_declaration
-    ?(pub = false) ?(prefix = "") ~safe_ints (ld : label_declaration) : label =
-  let doc = doc_comment_of_attribute_list ld.pld_attributes in
+    ?(pub = false)
+    ?(prefix = "")
+    ~safe_ints
+    ~original_type_name
+    (ld : label_declaration) : label =
+  let doc =
+    doc_comment_of_record_field
+      ld.pld_attributes
+      ~original_type_name
+      ~field_name:ld.pld_name.txt
+  in
   let attr = ocaml_attr ld.pld_attributes in
   let pub =
     if pub then
@@ -546,9 +637,11 @@ let record_prefix_attr prefix =
   else
     sprintf "#[rust_to_ocaml(prefix = \"%s\")]\n" prefix
 
-let declare_record_arguments ?(pub = false) ~safe_ints ~prefix labels =
+let declare_record_arguments
+    ?(pub = false) ~safe_ints ~prefix ~original_type_name labels =
   labels
-  |> map_and_concat ~f:(record_label_declaration ~safe_ints ~pub ~prefix)
+  |> map_and_concat
+       ~f:(record_label_declaration ~safe_ints ~pub ~prefix ~original_type_name)
   |> sprintf "{\n%s}"
 
 let declare_constructor_arguments ?(box_fields = false) ~safe_ints types :
@@ -604,8 +697,14 @@ let variant_constructor_value cd =
         Some discriminant
       | _ -> None)
 
-let variant_constructor_declaration ?(box_fields = false) ~safe_ints cd =
-  let doc = doc_comment_of_attribute_list cd.pcd_attributes in
+let variant_constructor_declaration
+    ?(box_fields = false) ~safe_ints ~original_type_name cd =
+  let doc =
+    doc_comment_of_variant_constructor
+      cd.pcd_attributes
+      ~original_type_name
+      ~constructor:cd.pcd_name.txt
+  in
   let attr = ocaml_attr cd.pcd_attributes in
   let name = convert_type_name cd.pcd_name.txt in
   let name_attr =
@@ -646,7 +745,7 @@ let variant_constructor_declaration ?(box_fields = false) ~safe_ints cd =
       (record_prefix_attr prefix)
       name_attr
       name
-      (declare_record_arguments ~safe_ints labels ~prefix)
+      (declare_record_arguments ~safe_ints labels ~prefix ~original_type_name)
       value
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
@@ -665,7 +764,7 @@ type enum_kind =
   | Sum_type of { num_variants: int }
   | Not_an_enum
 
-let type_declaration ~mutual_rec ~safe_ints name td =
+let type_declaration ~mutual_rec ~safe_ints ~original_type_name name td =
   let tparam_list =
     match (td.ptype_params, td.ptype_name.txt) with
     (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
@@ -700,7 +799,11 @@ let type_declaration ~mutual_rec ~safe_ints name td =
       in
       sprintf "#[serde(bound(deserialize = \"%s\" ))]" bounds
   in
-  let doc = doc_comment_of_attribute_list td.ptype_attributes in
+  let doc =
+    doc_comment_of_attribute_list_mli_aware
+      td.ptype_attributes
+      original_type_name
+  in
   let attr = ocaml_attr td.ptype_attributes in
   let attr =
     if mutual_rec then
@@ -956,7 +1059,11 @@ let type_declaration ~mutual_rec ~safe_ints name td =
     let ctors =
       map_and_concat
         ctors
-        ~f:(variant_constructor_declaration ~safe_ints ~box_fields)
+        ~f:
+          (variant_constructor_declaration
+             ~safe_ints
+             ~box_fields
+             ~original_type_name)
     in
     sprintf
       "%s enum %s {\n%s}%s\n%s"
@@ -968,7 +1075,14 @@ let type_declaration ~mutual_rec ~safe_ints name td =
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let prefix = find_record_label_prefix labels in
-    let labels = declare_record_arguments ~safe_ints labels ~pub:true ~prefix in
+    let labels =
+      declare_record_arguments
+        ~safe_ints
+        labels
+        ~pub:true
+        ~prefix
+        ~original_type_name
+    in
     sprintf
       "%s struct %s %s%s\n%s"
       (attrs_and_vis
@@ -987,14 +1101,15 @@ let type_declaration ~mutual_rec ~safe_ints name td =
   | (Ptype_open, None) -> raise (Skip_type_decl "Open types not supported")
 
 let type_declaration ?(mutual_rec = false) td =
-  let name = td.ptype_name.txt in
-  let name =
-    if String.equal name "t" then
+  (* We keep the original so we can look up comments in the .mli *)
+  let original_type_name = td.ptype_name.txt in
+  let rust_name =
+    if String.equal original_type_name "t" then
       curr_module_name ()
     else
-      name
+      original_type_name
   in
-  let name = convert_type_name name in
+  let name = convert_type_name rust_name in
   let name = rename name in
   let mod_name = curr_module_name () in
   if denylisted name then
@@ -1008,7 +1123,14 @@ let type_declaration ?(mutual_rec = false) td =
       (try
          let safe_ints = Configuration.safe_ints ~mod_name ~name in
          with_self name (fun () ->
-             add_decl name (type_declaration ~mutual_rec ~safe_ints name td))
+             add_decl
+               name
+               (type_declaration
+                  ~mutual_rec
+                  ~safe_ints
+                  ~original_type_name
+                  name
+                  td))
        with
       | Skip_type_decl reason ->
         log "Not converting type %s::%s: %s" mod_name name reason)

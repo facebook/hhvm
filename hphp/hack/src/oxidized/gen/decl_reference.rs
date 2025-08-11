@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e66086795fe07dbfe4e984bc27523d63>>
+// @generated SignedSource<<bff89b83e36ff31072bbc316eea23a35>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,7 @@ use crate::*;
 pub enum DeclReference {
     GlobalConstant(String),
     Function(String),
+    /// type, interface, trait, typedef, recorddef
     Type(String),
     Module(String),
 }

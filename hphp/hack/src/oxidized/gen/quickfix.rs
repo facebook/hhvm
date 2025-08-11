@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<39f06576facdf6b303a0beb8233d31ad>>
+// @generated SignedSource<<a1502296bb40dc78d4b904ffd368f328>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,6 +18,8 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
+/// How should we indicate to the user that a quickfix is available,
+/// additional to the primary error red-squiggle?
 #[derive(
     Clone,
     Debug,
@@ -36,7 +38,11 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum HintStyle<Pos> {
+    /// Make the quickfix available for the given position, but don't provide
+    /// any visual indication.
     HintStyleSilent(Pos),
+    /// Use the a non-error/non-warning IDE visual clue that a quickfix is
+    /// available for the given position. Example: https://pxl.cl/4x0ZS
     HintStyleHint(Pos),
 }
 
@@ -58,15 +64,14 @@ pub enum HintStyle<Pos> {
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum Edits<Pos> {
+    /// Make a quickfix when all the information about
+    /// edits is already available and does not need to be calculated.
     Eager(Vec<(String, Pos)>),
     /// A quickfix might want to add things to an empty class declaration,
     /// which requires FFP to compute the { position.
     #[rust_to_ocaml(prefix = "classish_end_")]
     #[rust_to_ocaml(name = "Classish_end")]
-    ClassishEnd {
-        new_text: String,
-        name: String,
-    },
+    ClassishEnd { new_text: String, name: String },
 }
 
 #[derive(

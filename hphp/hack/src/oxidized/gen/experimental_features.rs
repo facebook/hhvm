@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ee177bc07cb74fcc5034b64c2aef7c04>>
+// @generated SignedSource<<f5b29c0a3c2d4736993fa6f1e1e6c9fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,15 +45,22 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(u8)]
 pub enum FeatureStatus {
+    /// An Unstable feature can only be enabled if the allow_unstable_features
+    /// parser option is set, or in an .hhi.
     Unstable,
+    /// A Preview feature can always be enabled.
     Preview,
     Migration,
     Deprecated,
+    /// An OngoingRelease feature is always considered enabled.
     OngoingRelease,
 }
 impl TrivialDrop for FeatureStatus {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureStatus);
 
+/// Experimental features are enabled with a file attribute
+/// <<file:__EnableUnstableFeatures('feature_name')>> where the feature name is
+/// one of these construcors written in snake_case.
 #[derive(
     Clone,
     Copy,

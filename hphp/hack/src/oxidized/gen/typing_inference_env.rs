@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1f6f3358eeb2c5c6299c8a5e28c5e7f>>
+// @generated SignedSource<<5589898dae133895d5341f67b49ba15f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -101,6 +101,8 @@ pub struct TyvarInfo {
 
 pub type Tvenv = tvid::map::Map<TyvarInfo>;
 
+/// contains the inference env, containing all the information necessary to
+/// perform type inference.
 #[derive(
     Clone,
     Debug,

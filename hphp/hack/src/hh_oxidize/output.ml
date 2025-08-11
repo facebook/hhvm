@@ -12,8 +12,8 @@ open Oxidized_module
 
 let output = ref Oxidized_module.empty
 
-let with_output_context ~module_name f =
-  State.with_module_name module_name (fun () ->
+let with_output_context ~module_name ~mli_signature f =
+  State.with_module_name module_name ~mli_signature (fun () ->
       output := Oxidized_module.empty;
       let () = f () in
       let oxidized_module = !output in

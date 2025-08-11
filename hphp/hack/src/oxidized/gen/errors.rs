@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<88062700bae19ce091a9bf022c4f9861>>
+// @generated SignedSource<<3b6037d730c3f92bb29222f73f7feecf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -64,8 +64,10 @@ arena_deserializer::impl_deserialize_in_arena!(Format);
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type Error = user_error::UserError<pos::Pos, pos_or_decl::PosOrDecl>;
 
+/// Type representing the errors for a single file.
 pub type PerFileErrors = Vec<Error>;
 
+/// The type of collections of errors
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type Errors = relative_path::map::Map<Vec<Error>>;
 

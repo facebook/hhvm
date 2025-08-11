@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25fea87521478c49dc53a0fc029de81d>>
+// @generated SignedSource<<9653f729c0198dc6f3202d0b147efab2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -64,6 +64,11 @@ pub type CrossPackageDecl<'a> = Option<&'a str>;
 
 pub use oxidized::typing_defs_core::ValKind;
 
+/// The origin of a type is a succinct key that is unique to the
+/// type containing it. Consequently, two types with the same
+/// origin are necessarily identical. Any change to a type with
+/// origin needs to come with a *reset* of its origin. For example,
+/// all type mappers have to reset origins to [Missing_origin].
 #[derive(
     Clone,
     Copy,
@@ -83,8 +88,12 @@ pub use oxidized::typing_defs_core::ValKind;
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TypeOrigin<'a> {
+    /// When we do not have any origin for the type. It is always
+    /// correct to use [Missing_origin]; so when in doubt, use it.
     #[rust_to_ocaml(name = "Missing_origin")]
     MissingOrigin,
+    /// A type with origin [From_alias orig] is equivalent to
+    /// the expansion of the alias [orig].
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "From_alias")]
     #[rust_to_ocaml(inline_tuple)]
@@ -148,6 +157,9 @@ pub struct PosByteString<'a>(
 impl<'a> TrivialDrop for PosByteString<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
 
+/// This is similar to Aast.shape_field_name, but contains Pos_or_decl.t
+/// instead of Pos.t. Aast.shape_field_name is used in shape expressions,
+/// while this is used in shape types.
 #[derive(
     Clone,
     Copy,
@@ -329,6 +341,10 @@ arena_deserializer::impl_deserialize_in_arena!(WhereConstraint<'arena>);
 
 pub use oxidized::typing_defs_core::Enforcement;
 
+/// Because Tfun is currently used as both a decl and locl ty, without this,
+/// the HH\Contexts\defaults alias must be stored in shared memory for a
+/// decl Tfun record. We can eliminate this if the majority of usages end up
+/// explicit or if we separate decl and locl Tfuns.
 #[derive(
     Clone,
     Copy,
@@ -348,6 +364,7 @@ pub use oxidized::typing_defs_core::Enforcement;
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }), map)")]
 #[repr(C, u8)]
 pub enum Capability<'a> {
+    /// Should not be used for lambda inference
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -458,6 +475,7 @@ pub struct FunType<'a> {
 impl<'a> TrivialDrop for FunType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
 
+/// = Reason.t * 'phase ty_
 #[derive(
     Clone,
     Debug,
@@ -609,6 +627,12 @@ pub struct TuplePredicate<'a> {
 impl<'a> TrivialDrop for TuplePredicate<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TuplePredicate<'arena>);
 
+/// Represents the predicate of a type switch, i.e. in the expression
+/// ```
+///      if ($x is Bool) { ... } else { ... }
+/// ```
+///
+/// The predicate would be `is Bool`
 #[derive(
     Clone,
     Copy,

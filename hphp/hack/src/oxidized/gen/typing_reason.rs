@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da2147b82df6370e3378ed5517816a6f>>
+// @generated SignedSource<<77df6f3e5eff4b2dd0c77f5681736536>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -76,6 +76,7 @@ pub enum ExprDepTypeReason {
     ERpu(String),
 }
 
+/// Reason for pessimising this return or property type
 #[derive(
     Clone,
     Copy,

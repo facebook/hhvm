@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a3e1b9a0479404bf2f7ab6d49c2ef735>>
+// @generated SignedSource<<f9be37592fe60eec494390c0c2dd324d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -82,6 +82,11 @@ pub enum ValKind {
 impl TrivialDrop for ValKind {}
 arena_deserializer::impl_deserialize_in_arena!(ValKind);
 
+/// The origin of a type is a succinct key that is unique to the
+/// type containing it. Consequently, two types with the same
+/// origin are necessarily identical. Any change to a type with
+/// origin needs to come with a *reset* of its origin. For example,
+/// all type mappers have to reset origins to [Missing_origin].
 #[derive(
     Clone,
     Debug,
@@ -100,8 +105,12 @@ arena_deserializer::impl_deserialize_in_arena!(ValKind);
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TypeOrigin {
+    /// When we do not have any origin for the type. It is always
+    /// correct to use [Missing_origin]; so when in doubt, use it.
     #[rust_to_ocaml(name = "Missing_origin")]
     MissingOrigin,
+    /// A type with origin [From_alias orig] is equivalent to
+    /// the expansion of the alias [orig].
     #[rust_to_ocaml(name = "From_alias")]
     FromAlias(String, Option<pos_or_decl::PosOrDecl>),
 }
@@ -147,6 +156,9 @@ pub type TByteString = String;
 #[repr(C)]
 pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
 
+/// This is similar to Aast.shape_field_name, but contains Pos_or_decl.t
+/// instead of Pos.t. Aast.shape_field_name is used in shape expressions,
+/// while this is used in shape types.
 #[derive(
     Clone,
     Debug,
@@ -370,12 +382,18 @@ pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 #[rust_to_ocaml(attr = "deriving (eq, hash, show, ord)")]
 #[repr(u8)]
 pub enum Enforcement {
+    /// The consumer doesn't enforce the type at runtime
     Unenforced,
+    /// The consumer enforces the type at runtime
     Enforced,
 }
 impl TrivialDrop for Enforcement {}
 arena_deserializer::impl_deserialize_in_arena!(Enforcement);
 
+/// Because Tfun is currently used as both a decl and locl ty, without this,
+/// the HH\Contexts\defaults alias must be stored in shared memory for a
+/// decl Tfun record. We can eliminate this if the majority of usages end up
+/// explicit or if we separate decl and locl Tfuns.
 #[derive(
     Clone,
     Debug,
@@ -394,6 +412,7 @@ arena_deserializer::impl_deserialize_in_arena!(Enforcement);
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }), map)")]
 #[repr(C, u8)]
 pub enum Capability {
+    /// Should not be used for lambda inference
     CapDefaults(pos_or_decl::PosOrDecl),
     CapTy(Ty),
 }
@@ -483,6 +502,7 @@ pub struct FunType {
     pub instantiated: bool,
 }
 
+/// = Reason.t * 'phase ty_
 #[derive(
     Clone,
     Debug,
@@ -615,6 +635,12 @@ pub struct TuplePredicate {
     pub tp_required: Vec<TypePredicate>,
 }
 
+/// Represents the predicate of a type switch, i.e. in the expression
+/// ```
+///      if ($x is Bool) { ... } else { ... }
+/// ```
+///
+/// The predicate would be `is Bool`
 #[derive(
     Clone,
     Debug,
@@ -1238,6 +1264,8 @@ pub struct HasTypeMember {
 pub enum ConstraintType_ {
     #[rust_to_ocaml(name = "Thas_member")]
     ThasMember(HasMember),
+    /// [Thas_type_member('T',lo,hi)] is a supertype of all concrete class
+    /// types that have a type member [::T] satisfying [lo <: T <: hi]
     #[rust_to_ocaml(name = "Thas_type_member")]
     ThasTypeMember(HasTypeMember),
     /// Check if the given type has a class constant that is compatible with [ty]
@@ -1249,6 +1277,15 @@ pub enum ConstraintType_ {
     TcanTraverse(CanTraverse),
     /// The type of container destructuring via list() or splat `...`
     Tdestructure(Destructure),
+    /// The type of a value we want to decompose based on a runtime type test.
+    /// In the expression:
+    /// ```
+    ///          if ($x is P) { ... } else { ... }
+    /// ```
+    ///
+    /// The term `$x` must satisfy the constraint type_switch(P, T_true, T_false), where
+    /// T_true is the type of `$x` if the predicate is true and T_false is the
+    /// type of `$x` if the predicate is false
     #[rust_to_ocaml(name = "Ttype_switch")]
     TtypeSwitch {
         predicate: TypePredicate,

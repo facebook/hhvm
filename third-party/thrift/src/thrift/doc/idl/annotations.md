@@ -130,8 +130,13 @@ Thrift annotations provide language-agnostic functionality.
 
 ### C++ annotations
 
-```thrift file=annotation/cpp.thrift start=start
-```
+<details>
+  <summary>cpp.thrift</summary>
+
+  ```thrift file=annotation/cpp.thrift start=start
+  ```
+
+</details>
 
 #### Deprecated functionality
 
@@ -206,13 +211,23 @@ This is a structure size optimization. The naive implementation of `get_allocato
 
 ### Hack annotations
 
-```thrift file=annotation/hack.thrift start=start
-```
+<details>
+  <summary>hack.thrift</summary>
+
+  ```thrift file=annotation/hack.thrift start=start
+  ```
+
+</details>
 
 ### Python annotations
 
-```thrift file=annotation/python.thrift start=start
-```
+<details>
+  <summary>python.thrift</summary>
+
+  ```thrift file=annotation/python.thrift start=start
+  ```
+
+</details>
 
 <FbInternalOnly>
 

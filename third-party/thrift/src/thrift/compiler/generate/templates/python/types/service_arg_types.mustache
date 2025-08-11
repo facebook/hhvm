@@ -135,6 +135,33 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
         {{/function:sink_exceptions}}
     )
 
+    @classmethod
+    async def _fbthrift__sink_elem_handler(
+        cls,
+        sink_agen: _typing_AsyncGenerator[{{!
+            }}{{#function:sink_elem_type}}{{> types/pep484_type}}{{!
+            }}{{/function:sink_elem_type}}, None],
+        protocol: _fbthrift__Protocol,
+    ) -> _typing_AsyncGenerator[_fbthrift_iobuf, None]:
+        {{#function:sink_exceptions?}}
+        try:
+            async for item in sink_agen:
+                yield serialize_iobuf(cls(success=item), protocol)
+        {{#function:sink_exceptions}}{{#field:type}}
+        except {{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
+                }}{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}} as e:
+            return_struct = cls({{field:py_name}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = _fbthrift__PythonUserException("{{type:module_name}}.{{type:name}}", str(e), buf)
+            raise exp
+        {{/field:type}}
+        {{/function:sink_exceptions}}
+        {{/function:sink_exceptions?}}
+        {{^function:sink_exceptions?}}
+        async for item in sink_agen:
+            yield serialize_iobuf(cls(success=item), protocol)
+        {{/function:sink_exceptions?}}
+
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={{> types/struct_metaclass}}):
     _fbthrift_SPEC = (

@@ -34,6 +34,9 @@ import {{program:module_path}}.thrift_abstract_types as _fbthrift_abstract_types
 {{#program:has_streaming_types?}}
 from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
 {{/program:has_streaming_types?}}
+{{#program:has_sink_functions?}}
+{{> types/sink_imports }}
+{{/program:has_sink_functions?}}
 import {{program:base_library_package}}.types as _fbthrift_python_types
 {{#program:generate_immutable_types}}
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions

@@ -254,6 +254,22 @@ bool field_has_invariant_type(const t_field* field) {
       field->get_type());
 }
 
+bool service_has_any_streaming_types(const t_service* service) {
+  return std::any_of(
+      service->functions().begin(),
+      service->functions().end(),
+      [](const auto& fn_iter) -> bool {
+        return fn_iter.sink_or_stream() || fn_iter.interaction();
+      });
+}
+
+bool service_has_any_sink_types(const t_service* service) {
+  return std::any_of(
+      service->functions().begin(),
+      service->functions().end(),
+      [](const auto& fn_iter) -> bool { return fn_iter.sink(); });
+}
+
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
@@ -302,6 +318,8 @@ class python_mstch_program : public mstch_program {
              {with_no_caching, &python_mstch_program::enable_abstract_types}},
             {"program:has_streaming_types?",
              &python_mstch_program::has_streaming_types},
+            {"program:has_sink_functions?",
+             &python_mstch_program::has_sink_types},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -408,25 +426,25 @@ class python_mstch_program : public mstch_program {
   }
 
   mstch::node has_streaming_types() {
-    auto any_streaming_fns = [](const t_service* service) {
-      for (const auto& function : service->functions()) {
-        if (function.stream() || function.interaction()) {
-          return true;
-        }
-      }
-      return false;
-    };
-    for (const auto* service : program_->services()) {
-      if (any_streaming_fns(service)) {
-        return true;
-      }
-    }
-    for (const auto* service : program_->interactions()) {
-      if (any_streaming_fns(service)) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(
+               program_->services().begin(),
+               program_->services().end(),
+               service_has_any_streaming_types) ||
+        std::any_of(
+               program_->interactions().begin(),
+               program_->interactions().end(),
+               service_has_any_streaming_types);
+  }
+
+  mstch::node has_sink_types() {
+    return std::any_of(
+               program_->services().begin(),
+               program_->services().end(),
+               service_has_any_sink_types) ||
+        std::any_of(
+               program_->interactions().begin(),
+               program_->interactions().end(),
+               service_has_any_sink_types);
   }
 
  protected:

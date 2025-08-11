@@ -8,7 +8,7 @@
   },
   "structs" : {
     "Name" : {
-      "lineno" : 29,
+      "lineno" : 31,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -24,11 +24,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 34,
+              "line" : 36,
               "column" : 3
             },
             "end" : {
-              "line" : 34,
+              "line" : 36,
               "column" : 18
             }
           }
@@ -36,17 +36,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 29,
+          "line" : 31,
           "column" : 1
         },
         "end" : {
-          "line" : 35,
+          "line" : 37,
           "column" : 2
         }
       }
     },
     "Tag" : {
-      "lineno" : 38,
+      "lineno" : 40,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -60,11 +60,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 41,
+              "line" : 43,
               "column" : 3
             },
             "end" : {
-              "line" : 41,
+              "line" : 43,
               "column" : 17
             }
           }
@@ -72,17 +72,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 38,
+          "line" : 40,
           "column" : 1
         },
         "end" : {
-          "line" : 42,
+          "line" : 44,
           "column" : 2
         }
       }
     },
     "MinimizePadding" : {
-      "lineno" : 72,
+      "lineno" : 74,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -93,17 +93,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 72,
+          "line" : 74,
           "column" : 1
         },
         "end" : {
-          "line" : 73,
+          "line" : 75,
           "column" : 26
         }
       }
     },
     "UseReflectCodec" : {
-      "lineno" : 85,
+      "lineno" : 87,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -114,11 +114,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 85,
+          "line" : 87,
           "column" : 1
         },
         "end" : {
-          "line" : 86,
+          "line" : 88,
           "column" : 26
         }
       }

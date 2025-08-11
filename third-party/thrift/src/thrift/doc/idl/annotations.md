@@ -237,6 +237,16 @@ See [Adapters](/features/adapters.md) for more detail about `@python.Adapter`.
 
 See their [list of annotations](https://www.internalfb.com/intern/wiki/Rust-at-facebook/Thrift/IDL_Annotations/).
 
+### Go annotations
+
+<details>
+  <summary>go.thrift</summary>
+
+  ```thrift file=annotation/go.thrift start=start
+  ```
+
+</details>
+
 </FbInternalOnly>
 
 ## Consumption in languages

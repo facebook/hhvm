@@ -25,6 +25,8 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.go
 namespace go thrift.annotation.go
 namespace py thrift.annotation.go
 
+// start
+
 // Annotation for overriding Go names (e.g. to avoid codegen name conflicts).
 @scope.Field
 @scope.Function

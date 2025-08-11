@@ -17,7 +17,7 @@ class LookupCommandTestCase(base.TestHHVMBinary):
         self.run_until_breakpoint("lookupObjMethod")
         _, output = self.run_commands(["lookup func 0"])
         self.assertRegex(
-            output.strip(), r"\(HPHP::Func \*\) (m_s|\$\d+) = (NULL|nullptr)"
+            output.strip(), r"\(HPHP::Func \*\) (m_s|\$\d+|\[\d+\]) = (NULL|nullptr)"
         )
 
 

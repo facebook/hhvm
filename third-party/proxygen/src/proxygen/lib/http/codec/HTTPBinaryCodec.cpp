@@ -536,7 +536,6 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
 
       default:
         CHECK(false);
-        break;
     }
     parsedTot += parsed;
   }

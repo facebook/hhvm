@@ -973,6 +973,5 @@ const char* getFrameTypeString(FrameType type) {
       return "Unknown";
   }
   LOG(FATAL) << "Unreachable";
-  return "";
 }
 } // namespace proxygen::http2

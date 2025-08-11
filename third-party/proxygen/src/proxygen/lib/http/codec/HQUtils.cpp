@@ -102,7 +102,6 @@ folly::Optional<hq::SettingId> httpToHqSettingsId(proxygen::SettingsId id) {
     default:
       return folly::none; // this setting has no meaning in HQ
   }
-  return folly::none;
 }
 
 folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id) {

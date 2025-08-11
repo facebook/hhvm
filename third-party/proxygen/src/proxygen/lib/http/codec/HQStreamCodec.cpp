@@ -360,7 +360,6 @@ size_t HQStreamCodec::generateBodyImpl(folly::IOBufQueue& writeBuf,
     return *result;
   }
   LOG(FATAL) << "frame exceeded 2^62-1 limit";
-  return 0;
 }
 
 size_t HQStreamCodec::generateBody(folly::IOBufQueue& writeBuf,

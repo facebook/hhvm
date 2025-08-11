@@ -442,7 +442,6 @@ const char* getFrameTypeString(FrameType type) {
       return "Unknown";
   }
   LOG(FATAL) << "Unreachable";
-  return "";
 }
 
 std::ostream& operator<<(std::ostream& os, FrameType type) {

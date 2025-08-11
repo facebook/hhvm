@@ -2980,6 +2980,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             | TokenKind::Internal
             | TokenKind::Global
             | TokenKind::Optional
+            | TokenKind::Named
             | TokenKind::Nameof => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::Attribute
             | TokenKind::Await
@@ -3870,6 +3871,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         visibility: Self::Output,
         optional: Self::Output,
         inout: Self::Output,
+        _named: Self::Output, // TODO(named_parameters): use
         readonly: Self::Output,
         pre_ellipsis: Self::Output,
         hint: Self::Output,

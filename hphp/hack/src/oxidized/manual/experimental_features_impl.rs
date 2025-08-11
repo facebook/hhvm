@@ -58,6 +58,7 @@ impl FeatureName {
             PolymorphicLambda => OngoingRelease,
             ExpressionTreeCoalesceOperator => Preview,
             ExpressionTreeNullsafeObjGet => Preview,
+            NamedParameters => Unstable,
         }
     }
 

@@ -604,6 +604,7 @@ pub struct ParameterDeclarationChildren<'a, T, V> {
     pub visibility: Syntax<'a, T, V>,
     pub optional: Syntax<'a, T, V>,
     pub call_convention: Syntax<'a, T, V>,
+    pub named: Syntax<'a, T, V>,
     pub readonly: Syntax<'a, T, V>,
     pub pre_ellipsis: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,

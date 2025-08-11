@@ -83,6 +83,7 @@ type t =
   | Match
   | Mixed
   | Module
+  | Named
   | Nameof
   | Namespace
   | New
@@ -296,6 +297,7 @@ let from_string keyword ~only_reserved =
   | "match" when not only_reserved -> Some Match
   | "mixed" when not only_reserved -> Some Mixed
   | "module" -> Some Module
+  | "named" -> Some Named
   | "nameof" -> Some Nameof
   | "namespace" -> Some Namespace
   | "new" -> Some New
@@ -484,6 +486,7 @@ let to_string kind =
   | Match -> "match"
   | Mixed -> "mixed"
   | Module -> "module"
+  | Named -> "named"
   | Nameof -> "nameof"
   | Namespace -> "namespace"
   | New -> "new"

@@ -455,6 +455,7 @@ struct
         parameter_visibility: t;
         parameter_optional: t;
         parameter_call_convention: t;
+        parameter_named: t;
         parameter_readonly: t;
         parameter_pre_ellipsis: t;
         parameter_type: t;

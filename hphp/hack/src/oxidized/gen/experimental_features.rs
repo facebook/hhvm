@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f5b29c0a3c2d4736993fa6f1e1e6c9fe>>
+// @generated SignedSource<<6764e7501a5647cc123fe14a806273ed>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -128,6 +128,7 @@ pub enum FeatureName {
     PolymorphicLambda,
     ExpressionTreeCoalesceOperator,
     ExpressionTreeNullsafeObjGet,
+    NamedParameters,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

@@ -364,6 +364,7 @@
                           },
                           "parameter_optional":{"kind":"missing"},
                           "parameter_call_convention":{"kind":"missing"},
+                          "parameter_named":{"kind":"missing"},
                           "parameter_readonly":{"kind":"missing"},
                           "parameter_pre_ellipsis":{"kind":"missing"},
                           "parameter_type":{
@@ -707,6 +708,7 @@
                           "parameter_visibility":{"kind":"missing"},
                           "parameter_optional":{"kind":"missing"},
                           "parameter_call_convention":{"kind":"missing"},
+                          "parameter_named":{"kind":"missing"},
                           "parameter_readonly":{"kind":"missing"},
                           "parameter_pre_ellipsis":{"kind":"missing"},
                           "parameter_type":{

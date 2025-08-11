@@ -1676,6 +1676,7 @@ where
         //   attribute-specification-opt \
         //   call-convention-opt \
         //   mutability-opt \
+        //   named-opt \
         //   type-specifier  variable-name \
         //   default-argument-specifier-opt
         //
@@ -1692,6 +1693,7 @@ where
         let visibility = self.parse_visibility_modifier_opt();
         let optional = self.parse_optional_opt();
         let callconv = self.parse_call_convention_opt();
+        let named = self.parse_named_modifier_opt();
         let readonly = self.parse_readonly_opt();
         let ellipsis1 = self.parse_ellipsis_opt();
         let token = self.peek_token();
@@ -1732,6 +1734,7 @@ where
             visibility,
             optional,
             callconv,
+            named,
             readonly,
             pre_ellipsis,
             type_specifier,
@@ -1802,6 +1805,20 @@ where
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Optional => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_named_modifier_opt(&mut self) -> S::Output {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
+            TokenKind::Named => {
                 let token = self.next_token();
                 self.sc_mut().make_token(token)
             }

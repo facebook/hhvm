@@ -973,6 +973,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parameter_visibility = visibility;
           parameter_optional = optional;
           parameter_call_convention = callconv;
+          parameter_named = named;
           parameter_readonly = readonly;
           parameter_pre_ellipsis = pre_ellipsis;
           parameter_type = param_type;
@@ -991,6 +992,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present optional space;
           t env callconv;
           when_present callconv space;
+          t env named;
+          when_present named space;
           t env readonly;
           when_present readonly space;
           t env pre_ellipsis;

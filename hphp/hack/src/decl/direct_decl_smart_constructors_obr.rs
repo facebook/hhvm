@@ -3192,6 +3192,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::Internal
             | TokenKind::Global
             | TokenKind::Optional
+            | TokenKind::Named
             | TokenKind::Nameof => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::Attribute
             | TokenKind::Await
@@ -4072,6 +4073,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         visibility: Self::Output,
         optional: Self::Output,
         inout: Self::Output,
+        _named: Self::Output,
         readonly: Self::Output,
         pre_ellipsis: Self::Output,
         hint: Self::Output,

@@ -5345,6 +5345,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn param_default_decl_errors(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
+            if !x.named.is_missing() {
+                self.check_can_use_feature(node, &FeatureName::NamedParameters);
+            }
             if self.env.parser_options.const_default_lambda_args {
                 match self.env.context.active_callable {
                     Some(node) => match node.children {

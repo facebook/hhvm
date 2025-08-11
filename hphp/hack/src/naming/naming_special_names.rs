@@ -1137,6 +1137,7 @@ pub mod unstable_features {
     pub const EXPRESSION_TREES: &str = "expression_trees";
     pub const MODULE_REFERENCES: &str = "module_references";
     pub const PACKAGE: &str = "package";
+    pub const NAMED_PARAMETERS: &str = "named_parameters";
 }
 
 pub mod regex {

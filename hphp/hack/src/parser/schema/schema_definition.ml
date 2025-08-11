@@ -724,6 +724,7 @@ let schema : schema_node list =
           ("visibility", ZeroOrOne Token);
           ("optional", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
+          ("named", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
           (* This is for type splats e.g. ...Targs $x *)
           ("pre_ellipsis", ZeroOrOne Token);

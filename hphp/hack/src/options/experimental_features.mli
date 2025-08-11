@@ -67,6 +67,7 @@ type feature_name =
   | PolymorphicLambda
   | ExpressionTreeCoalesceOperator
   | ExpressionTreeNullsafeObjGet
+  | NamedParameters
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

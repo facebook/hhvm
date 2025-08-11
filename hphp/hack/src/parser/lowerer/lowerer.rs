@@ -4132,6 +4132,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             visibility,
             optional,
             call_convention,
+            named: _, // TODO(named_parameters): use
             readonly,
             pre_ellipsis,
             type_,

@@ -73,6 +73,7 @@ type feature_name =
   | PolymorphicLambda
   | ExpressionTreeCoalesceOperator
   | ExpressionTreeNullsafeObjGet
+  | NamedParameters
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -122,6 +123,7 @@ let feature_name_map =
       ("polymorphic_lambda", PolymorphicLambda);
       ("expression_tree_coalesce_operator", ExpressionTreeCoalesceOperator);
       ("expression_tree_nullsafe_obj_get", ExpressionTreeNullsafeObjGet);
+      ("named_parameters", NamedParameters);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

@@ -95,6 +95,7 @@ let handle :
     let ctx = Provider_utils.ctx_from_server_env env in
     let (errors, tasts) =
       ServerStatusSingle.go
+        genv.ServerEnv.workers
         file_names
         ctx
         ~error_filter:

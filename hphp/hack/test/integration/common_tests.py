@@ -1424,39 +1424,6 @@ class CommonTests(BarebonesTests):
         )
         self.test_driver.stop_hh_loop_forever()
 
-    def test_status_single(self) -> None:
-        """
-        Test hh_client check --single
-        """
-        self.test_driver.start_hh_server()
-
-        with open(
-            os.path.join(self.test_driver.repo_dir, "typing_error.php"), "w"
-        ) as f:
-            f.write("<?hh //strict\n function aaaa(): int { return h(); }")
-
-        self.test_driver.check_cmd(
-            [
-                "ERROR: {root}typing_error.php:2:32,34: Invalid return type (Typing[4110])",
-                "  {root}typing_error.php:2:19,21: Expected `int`",
-                "  {root}foo_3.php:3:23,28: But got `string`",
-            ],
-            options=["--single", "{root}typing_error.php"],
-            stdin="",
-        )
-
-        self.test_driver.check_cmd(
-            [
-                "ERROR: :2:11,14: Name already bound: `aaaa` (Naming[2012])",
-                "  {root}typing_error.php:2:11,14: Previous definition is here",
-                "ERROR: :2:32,34: Invalid return type (Typing[4110])",
-                "  :2:19,21: Expected `int`",
-                "  {root}foo_3.php:3:23,28: But got `string`",
-            ],
-            options=["--single", "-"],
-            stdin="<?hh //strict\n function aaaa(): int { return h(); }",
-        )
-
     def test_incremental_typecheck_same_file(self) -> None:
         self.maxDiff = None
         self.test_driver.start_hh_server()

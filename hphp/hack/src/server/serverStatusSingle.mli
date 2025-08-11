@@ -8,6 +8,7 @@
  *)
 
 val go :
+  MultiWorker.worker list option ->
   ServerCommandTypes.file_input list ->
   Provider_context.t ->
   error_filter:Tast_provider.ErrorFilter.t ->

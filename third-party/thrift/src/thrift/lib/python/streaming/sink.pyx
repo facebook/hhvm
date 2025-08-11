@@ -37,8 +37,8 @@ cdef class ClientSink:
     @staticmethod
     cdef _fbthrift_create(
         unique_ptr[cIOBufClientSink]&& client_sink,
-        type sink_elem_cls,
-        type sink_final_resp_cls,
+        sink_elem_cls,
+        sink_final_resp_cls,
         Protocol protocol,
     ):
         inst = <ClientSink>ClientSink.__new__(ClientSink)
@@ -60,6 +60,7 @@ cdef class ClientSink:
 
         handled_agen = self._sink_elem_cls._fbthrift__sink_elem_handler(
             agen,
+            self._protocol,
         )
         bridgeCoroTaskWithCancellation[cIOBuf](
             get_executor(),
@@ -71,7 +72,7 @@ cdef class ClientSink:
                 )
             ),
             sink_final_resp_callback,
-            <PyObject *>fut,
+            <PyObject *>user_data,
             cancellation_source.getToken(),
         )
         try:
@@ -113,7 +114,6 @@ cdef void sink_final_resp_callback(
 
         # This is the expected result for void return
         future.set_result(None)
-
 
     except Exception as ex:
         future.set_exception(ex)

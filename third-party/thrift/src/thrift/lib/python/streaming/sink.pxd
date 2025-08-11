@@ -40,15 +40,15 @@ cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrif
 
 cdef class ClientSink:
     cdef unique_ptr[cIOBufClientSink] _cpp_obj
-    cdef type _sink_elem_cls
-    cdef type _sink_final_resp_cls
+    cdef _sink_elem_cls
+    cdef _sink_final_resp_cls
     cdef Protocol _protocol
 
     @staticmethod
     cdef _fbthrift_create(
         unique_ptr[cIOBufClientSink]&& client_sink,
-        type sink_cls,
-        type sink_final_resp_cls,
+        sink_cls,
+        sink_final_resp_cls,
         Protocol protocol,
     )
 

@@ -36,6 +36,7 @@ from thrift.python.mutable_serializer import (
     serialize_iobuf as serialize_iobuf_mutable,
     deserialize as deserialize_mutable,
 )
+from thrift.python.streaming.sink cimport ClientSink
 from thrift.python.streaming.stream cimport ClientBufferedStream
 from thrift.python.common cimport cRpcOptions, RpcOptions
 
@@ -253,11 +254,20 @@ cdef void _async_client_send_request_callback(
     response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))
     py_sink_or_stream = None
     if isinstance(response_cls, tuple):
-        response_cls, streaming_elem_cls = response_cls
+        response_cls, streaming_elem_cls, *final_resp_cls = response_cls
         if streaming_elem_cls._fbthrift__rpc_kind == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE:
+            # Note: final_resp_cls is empty [] because stream doesn't have final response
             py_sink_or_stream = ClientBufferedStream._fbthrift_create(
                 cmove(resp.stream),
                 streaming_elem_cls,
+                protocol,
+            )
+        elif streaming_elem_cls._fbthrift__rpc_kind == RpcKind.SINK:
+            assert len(final_resp_cls) == 1
+            py_sink_or_stream = ClientSink._fbthrift_create(
+                cmove(resp.sink),
+                streaming_elem_cls,
+                final_resp_cls[0],
                 protocol,
             )
     try:

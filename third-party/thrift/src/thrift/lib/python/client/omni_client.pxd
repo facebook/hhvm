@@ -23,6 +23,7 @@ from libcpp.unordered_map cimport unordered_map
 from libcpp.pair cimport pair
 from thrift.python.client.request_channel cimport cRequestChannel_ptr, cRequestChannel, cTProcessorEventHandler
 from thrift.python.common cimport cRpcOptions
+from thrift.python.streaming.sink cimport cIOBufClientSink
 
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
@@ -63,9 +64,6 @@ cdef extern from "folly/container/F14Map.h" namespace "folly":
 
 cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::apache::thrift::python::client":
     cdef cppclass cIOBufClientBufferedStream "::apache::thrift::python::client::IOBufClientBufferedStream":
-        pass
-
-    cdef cppclass cIOBufClientSink "::apache::thrift::python::client::IOBufClientSink":
         pass
 
     cdef cppclass cOmniClientResponseWithHeaders "::apache::thrift::python::client::OmniClientResponseWithHeaders":

@@ -138,7 +138,7 @@ pub trait ProviderBackendFfi {
     }
 
     /// Write the given decls to shallow decl stores.
-    fn add_shallow_decls(&self, _decls: &[&(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)]) {
+    fn add_shallow_decls(&self, _decls: Vec<(String, oxidized::shallow_decl_defs::Decl)>) {
         unimplemented!("ProviderBackendFfi::add_shallow_decls: {UNIMPLEMENTED_MESSAGE}")
     }
 

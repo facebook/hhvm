@@ -1250,7 +1250,7 @@ dependencies = [
 name = "decl_provider_rust"
 version = "0.0.0"
 dependencies = [
- "oxidized_by_ref",
+ "oxidized",
 ]
 
 [[package]]

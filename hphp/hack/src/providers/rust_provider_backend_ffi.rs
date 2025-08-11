@@ -12,9 +12,7 @@ use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_custom::Custom;
-use ocamlrep_ocamlpool::Bump;
 use ocamlrep_ocamlpool::ocaml_ffi;
-use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized::naming_types;
 use pos::RelativePath;
 pub use rust_provider_backend_ffi_trait::ProviderBackendFfi;
@@ -98,11 +96,10 @@ ocaml_ffi! {
 
 // Decl_provider ////////////////////////////////////////////////////////////
 
-ocaml_ffi_with_arena! {
-    fn hh_rust_provider_backend_add_shallow_decls<'a>(
-        arena: &'a Bump,
+ocaml_ffi! {
+    fn hh_rust_provider_backend_add_shallow_decls(
         backend: UnsafeOcamlPtr,
-        decls: &[&(&'a str, oxidized_by_ref::shallow_decl_defs::Decl<'a>)],
+        decls: Vec<(String, oxidized::shallow_decl_defs::Decl)>,
     ) {
         let backend = unsafe { get_backend(backend) };
         backend.add_shallow_decls(decls);

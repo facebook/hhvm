@@ -11,4 +11,4 @@ license = "MIT"
 path = "../../decl_provider.rs"
 
 [dependencies]
-oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }
+oxidized = { version = "0.0.0", path = "../../../oxidized" }

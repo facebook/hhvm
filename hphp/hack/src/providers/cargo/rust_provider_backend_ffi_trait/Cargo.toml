@@ -21,7 +21,6 @@ naming_provider = { version = "0.0.0", path = "../../../hackrs/naming_provider/c
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }
 pos = { version = "0.0.0", path = "../../../hackrs/pos/cargo/pos" }
 rust_provider_backend_api = { version = "0.0.0", path = "../rust_provider_backend_api" }
 ty = { version = "0.0.0", path = "../../../hackrs/ty/cargo/ty" }

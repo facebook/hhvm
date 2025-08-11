@@ -179,12 +179,9 @@ impl HhServerProviderBackend {
     }
     /// Directly add the given decls to the shallow decl store (without removing
     /// php_stdlib decls, deduping, or removing naming conflict losers).
-    fn add_decls(
-        &self,
-        decls: &[&(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)],
-    ) -> Result<()> {
+    fn add_decls(&self, decls: Vec<(String, oxidized::shallow_decl_defs::Decl)>) -> Result<()> {
         self.shallow_decl_store
-            .add_decls(decls.iter().copied().map(Into::into))
+            .add_decls(decls.into_iter().map(Into::into))
     }
 }
 
@@ -263,7 +260,7 @@ impl rust_provider_backend_ffi::ProviderBackendFfi for HhServerProviderBackend {
         self.parse_and_cache_decls(path, text).unwrap()
     }
 
-    fn add_shallow_decls(&self, decls: &[&(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)]) {
+    fn add_shallow_decls(&self, decls: Vec<(String, oxidized::shallow_decl_defs::Decl)>) {
         self.add_decls(decls).unwrap();
     }
 

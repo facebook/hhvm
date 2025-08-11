@@ -249,6 +249,16 @@ struct PreDefStruct {
   1: string data;
 }
 
+struct PackageCollisionsTest {
+  1: string thrift;
+  2: string context;
+  3: string fmt;
+  4: string strings;
+  5: string sync;
+  6: string metadata;
+  7: string maps;
+}
+
 struct StructWithManyFields {
   843: i64 field01;
   219: i64 field02;

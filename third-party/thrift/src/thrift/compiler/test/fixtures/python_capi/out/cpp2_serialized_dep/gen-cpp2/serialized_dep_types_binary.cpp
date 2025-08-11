@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.tcc"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types_custom_protocol.h"
 
 namespace test::fixtures::python_capi {
 

@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.tcc"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types_custom_protocol.h"
 
 namespace thrift::shared_interactions {
 

@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.tcc"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_custom_protocol.h"
 
 namespace py3::simple {
 

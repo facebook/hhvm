@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::Mixin1>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -69,6 +73,8 @@ Mixin1::Mixin1(apache::thrift::FragileConstructor, ::std::string field1__arg) :
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Mixin1::__fbthrift_clear() {
   // clear all fields
@@ -102,6 +108,8 @@ void swap([[maybe_unused]] Mixin1& a, [[maybe_unused]] Mixin1& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -122,6 +130,8 @@ void TccStructTraits<::cpp2::Mixin2>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -162,6 +172,8 @@ Mixin2::Mixin2(apache::thrift::FragileConstructor, ::cpp2::Mixin1 m1__arg, ::std
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Mixin2::__fbthrift_clear() {
   // clear all fields
@@ -219,6 +231,8 @@ static_assert(
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -239,6 +253,8 @@ void TccStructTraits<::cpp2::Mixin3Base>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -275,6 +291,8 @@ Mixin3Base::Mixin3Base(apache::thrift::FragileConstructor, ::std::string field3_
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Mixin3Base::__fbthrift_clear() {
   // clear all fields
@@ -308,6 +326,8 @@ void swap([[maybe_unused]] Mixin3Base& a, [[maybe_unused]] Mixin3Base& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -328,6 +348,8 @@ void TccStructTraits<::cpp2::Foo>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -372,6 +394,8 @@ Foo::Foo(apache::thrift::FragileConstructor, ::std::string field4__arg, ::cpp2::
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Foo::__fbthrift_clear() {
   // clear all fields

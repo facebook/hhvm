@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.tcc"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types_custom_protocol.h"
 
 namespace cpp2 {
 

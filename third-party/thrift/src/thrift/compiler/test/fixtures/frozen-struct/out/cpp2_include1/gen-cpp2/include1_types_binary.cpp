@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.tcc"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types_custom_protocol.h"
 
 namespace some::ns {
 

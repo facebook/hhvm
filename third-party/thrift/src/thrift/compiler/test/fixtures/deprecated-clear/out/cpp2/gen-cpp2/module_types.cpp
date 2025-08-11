@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,6 +30,8 @@ bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(std::string_view nam
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -50,6 +52,8 @@ void TccStructTraits<::apache::thrift::test::StructWithDefaultStruct>::translate
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -147,6 +151,8 @@ StructWithDefaultStruct::StructWithDefaultStruct(apache::thrift::FragileConstruc
   __isset.set(folly::index_constant<12>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void StructWithDefaultStruct::__fbthrift_clear() {
   // clear all fields

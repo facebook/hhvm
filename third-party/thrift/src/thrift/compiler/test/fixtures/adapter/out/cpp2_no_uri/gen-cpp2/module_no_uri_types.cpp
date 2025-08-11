@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.h"
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.tcc"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module_no_uri";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::RefUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 

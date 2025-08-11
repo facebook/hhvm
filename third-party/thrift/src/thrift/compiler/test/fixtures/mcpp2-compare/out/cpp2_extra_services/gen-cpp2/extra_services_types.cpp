@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.tcc"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "extra_services";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::extra::svc::containerStruct2>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace extra::svc {
 
@@ -131,6 +135,8 @@ containerStruct2::containerStruct2(apache::thrift::FragileConstructor, bool fiel
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void containerStruct2::__fbthrift_clear() {
   // clear all fields
@@ -271,10 +277,12 @@ void swap([[maybe_unused]] containerStruct2& a, [[maybe_unused]] containerStruct
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void containerStruct2::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t containerStruct2::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t containerStruct2::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace extra::svc

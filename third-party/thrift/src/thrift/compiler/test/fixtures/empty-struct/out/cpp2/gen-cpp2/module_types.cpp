@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::Empty>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -47,6 +51,8 @@ std::string_view Empty::__fbthrift_get_class_name() {
 
 Empty::Empty(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Empty::__fbthrift_clear() {
   // clear all fields
@@ -76,6 +82,8 @@ void swap([[maybe_unused]] Empty& a, [[maybe_unused]] Empty& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -96,6 +104,8 @@ void TccStructTraits<::cpp2::Nada>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 

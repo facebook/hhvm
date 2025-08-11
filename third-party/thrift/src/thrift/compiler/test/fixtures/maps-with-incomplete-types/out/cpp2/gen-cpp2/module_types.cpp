@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/maps-with-incomplete-types/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/maps-with-incomplete-types/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/maps-with-incomplete-types/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/maps-with-incomplete-types/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::apache::thrift::test::A>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -69,6 +73,8 @@ A::A(apache::thrift::FragileConstructor, std::unordered_map<::std::int32_t, ::ap
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void A::__fbthrift_clear() {
   // clear all fields
@@ -112,6 +118,8 @@ static_assert(
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -132,6 +140,8 @@ void TccStructTraits<::apache::thrift::test::B>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -149,6 +159,8 @@ B::B(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void B::__fbthrift_clear() {
   // clear all fields

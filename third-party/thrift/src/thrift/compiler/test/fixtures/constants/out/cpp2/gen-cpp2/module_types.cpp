@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -64,6 +64,8 @@ bool TEnumTraits<::cpp2::Company>::findValue(std::string_view name, type* out) n
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -84,6 +86,8 @@ void TccStructTraits<::cpp2::Internship>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -138,6 +142,8 @@ Internship::Internship(apache::thrift::FragileConstructor, ::std::int32_t weeks_
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Internship::__fbthrift_clear() {
   // clear all fields
@@ -222,6 +228,8 @@ void swap([[maybe_unused]] Internship& a, [[maybe_unused]] Internship& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -242,6 +250,8 @@ void TccStructTraits<::cpp2::Range>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -259,6 +269,8 @@ Range::Range(apache::thrift::FragileConstructor, ::std::int32_t min__arg, ::std:
     __fbthrift_field_max(std::move(max__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Range::__fbthrift_clear() {
   // clear all fields
@@ -310,6 +322,8 @@ void swap([[maybe_unused]] Range& a, [[maybe_unused]] Range& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -330,6 +344,8 @@ void TccStructTraits<::cpp2::struct1>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -372,6 +388,8 @@ struct1::struct1(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::st
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void struct1::__fbthrift_clear() {
   // clear all fields
@@ -416,6 +434,8 @@ void swap([[maybe_unused]] struct1& a, [[maybe_unused]] struct1& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -436,6 +456,8 @@ void TccStructTraits<::cpp2::struct2>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -485,6 +507,8 @@ struct2::struct2(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::st
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void struct2::__fbthrift_clear() {
   // clear all fields
@@ -555,6 +579,8 @@ static_assert(
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -575,6 +601,8 @@ void TccStructTraits<::cpp2::struct3>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -620,6 +648,8 @@ struct3::struct3(apache::thrift::FragileConstructor, ::std::string a__arg, ::std
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void struct3::__fbthrift_clear() {
   // clear all fields
@@ -680,6 +710,8 @@ static_assert(
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -700,6 +732,8 @@ void TccStructTraits<::cpp2::struct4>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -738,6 +772,8 @@ struct4::struct4(apache::thrift::FragileConstructor, ::std::int32_t a__arg, doub
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void struct4::__fbthrift_clear() {
   // clear all fields
@@ -810,6 +846,8 @@ void swap([[maybe_unused]] struct4& a, [[maybe_unused]] struct4& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -830,6 +868,8 @@ void TccStructTraits<::cpp2::union1>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -933,6 +973,8 @@ void swap(union1& a, union1& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -953,6 +995,8 @@ void TccStructTraits<::cpp2::union2>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 

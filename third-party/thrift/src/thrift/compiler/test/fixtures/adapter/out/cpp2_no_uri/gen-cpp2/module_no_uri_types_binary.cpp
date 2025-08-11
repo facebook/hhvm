@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.tcc"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types_custom_protocol.h"
 
 namespace cpp2 {
 

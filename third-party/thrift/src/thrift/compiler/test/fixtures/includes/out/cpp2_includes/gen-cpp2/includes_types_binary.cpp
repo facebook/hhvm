@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.tcc"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types_custom_protocol.h"
 
 namespace cpp2 {
 

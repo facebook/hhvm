@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,6 +30,8 @@ bool TEnumTraits<::cpp2::YourEnum>::findValue(std::string_view name, type* out) 
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -50,6 +52,8 @@ void TccStructTraits<::cpp2::MyStructNestedAnnotation>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -86,6 +90,8 @@ MyStructNestedAnnotation::MyStructNestedAnnotation(apache::thrift::FragileConstr
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStructNestedAnnotation::__fbthrift_clear() {
   // clear all fields
@@ -119,6 +125,8 @@ void swap([[maybe_unused]] MyStructNestedAnnotation& a, [[maybe_unused]] MyStruc
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -139,6 +147,8 @@ void TccStructTraits<::cpp2::detail::YourUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -226,6 +236,8 @@ void swap(YourUnion& a, YourUnion& b) {
 } // namespace detail
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -246,6 +258,8 @@ void TccStructTraits<::cpp2::detail::YourException>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 namespace detail {
@@ -274,6 +288,8 @@ YourException& YourException::operator=([[maybe_unused]] YourException&& other) 
 
 YourException::YourException(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void YourException::__fbthrift_clear() {
   // clear all fields
@@ -304,6 +320,8 @@ void swap([[maybe_unused]] YourException& a, [[maybe_unused]] YourException& b) 
 } // namespace detail
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -324,6 +342,8 @@ void TccStructTraits<::cpp2::detail::YourStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 namespace detail {
@@ -421,6 +441,8 @@ YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorV
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void YourStruct::__fbthrift_clear() {
   // clear all fields
@@ -502,6 +524,8 @@ static_assert(
 } // namespace detail
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -522,6 +546,8 @@ void TccStructTraits<::cpp2::SecretStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -563,6 +589,8 @@ SecretStruct::SecretStruct(apache::thrift::FragileConstructor, ::std::int64_t id
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void SecretStruct::__fbthrift_clear() {
   // clear all fields

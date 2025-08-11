@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.h"
-#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.tcc"
+#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,6 +30,8 @@ bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(std::string_view nam
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -50,6 +52,8 @@ void TccStructTraits<::apache::thrift::test::MyStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -64,6 +68,8 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -93,6 +99,8 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -113,6 +121,8 @@ void TccStructTraits<::apache::thrift::test::EmptiableStruct>::translateFieldNam
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -209,6 +219,8 @@ EmptiableStruct::EmptiableStruct(apache::thrift::FragileConstructor, bool bool_f
   __isset.set(folly::index_constant<13>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void EmptiableStruct::__fbthrift_clear() {
   // clear all fields
@@ -438,6 +450,8 @@ static_assert(
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -458,6 +472,8 @@ void TccStructTraits<::apache::thrift::test::EmptiableTerseStruct>::translateFie
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -538,6 +554,8 @@ EmptiableTerseStruct::EmptiableTerseStruct(apache::thrift::FragileConstructor, b
     __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void EmptiableTerseStruct::__fbthrift_clear() {
   // clear all fields
@@ -626,6 +644,8 @@ static_assert(
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -646,6 +666,8 @@ void TccStructTraits<::apache::thrift::test::NotEmptiableStruct>::translateField
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -742,6 +764,8 @@ NotEmptiableStruct::NotEmptiableStruct(apache::thrift::FragileConstructor, bool 
   __isset.set(folly::index_constant<13>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void NotEmptiableStruct::__fbthrift_clear() {
   // clear all fields

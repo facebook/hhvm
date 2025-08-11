@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
@@ -44,6 +44,8 @@ void __fbthrift_static_init_MyException() {
 }
 } // namespace facebook::thrift::compiler::test::fixtures::any
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -64,6 +66,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::any {
 namespace detail {
@@ -105,6 +109,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::string myString__a
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -139,6 +145,8 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 } // namespace detail
 } // namespace facebook::thrift::compiler::test::fixtures::any
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -159,6 +167,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion>
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -260,6 +270,8 @@ void swap(MyUnion& a, MyUnion& b) {
 
 } // namespace facebook::thrift::compiler::test::fixtures::any
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -280,6 +292,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyExcept
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::any {
 
@@ -320,6 +334,8 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::string myStr
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyException::__fbthrift_clear() {
   // clear all fields

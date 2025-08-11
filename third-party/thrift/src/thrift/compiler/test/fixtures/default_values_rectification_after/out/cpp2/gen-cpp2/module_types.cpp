@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
 
@@ -51,6 +55,8 @@ std::string_view EmptyStruct::__fbthrift_get_class_name() {
 
 EmptyStruct::EmptyStruct(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void EmptyStruct::__fbthrift_clear() {
   // clear all fields
@@ -80,6 +86,8 @@ void swap([[maybe_unused]] EmptyStruct& a, [[maybe_unused]] EmptyStruct& b) {
 
 } // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -100,6 +108,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
 
@@ -172,6 +182,8 @@ TestStruct::TestStruct(apache::thrift::FragileConstructor, ::std::int32_t unqual
   __isset.set(folly::index_constant<7>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TestStruct::__fbthrift_clear() {
   // clear all fields

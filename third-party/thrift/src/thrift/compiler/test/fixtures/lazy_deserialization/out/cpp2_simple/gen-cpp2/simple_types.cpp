@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_types.h"
-#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_types.tcc"
+#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "simple";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::apache::thrift::test::Foo>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -81,6 +85,8 @@ Foo::Foo(apache::thrift::FragileConstructor, ::std::vector<double> field1__arg, 
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Foo::__fbthrift_clear() {
   // clear all fields
@@ -152,6 +158,8 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -172,6 +180,8 @@ void TccStructTraits<::apache::thrift::test::LazyFoo>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -274,6 +284,7 @@ LazyFoo::LazyFoo(apache::thrift::FragileConstructor, ::std::vector<double> field
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 const ::std::vector<double>& LazyFoo::__fbthrift_read_field_field3() const {
   const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
   if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
@@ -348,6 +359,7 @@ void LazyFoo::__fbthrift_read_field_field4_slow() const {
   __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
 }
 
+#endif
 
 void LazyFoo::__fbthrift_clear() {
   // clear all fields
@@ -411,6 +423,8 @@ void swap([[maybe_unused]] LazyFoo& a, [[maybe_unused]] LazyFoo& b) {
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -431,6 +445,8 @@ void TccStructTraits<::apache::thrift::test::OptionalFoo>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -479,6 +495,8 @@ OptionalFoo::OptionalFoo(apache::thrift::FragileConstructor, ::std::vector<doubl
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void OptionalFoo::__fbthrift_clear() {
   // clear all fields
@@ -553,6 +571,8 @@ void swap([[maybe_unused]] OptionalFoo& a, [[maybe_unused]] OptionalFoo& b) {
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -573,6 +593,8 @@ void TccStructTraits<::apache::thrift::test::OptionalLazyFoo>::translateFieldNam
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -673,6 +695,7 @@ OptionalLazyFoo::OptionalLazyFoo(apache::thrift::FragileConstructor, ::std::vect
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 const ::std::vector<double>& OptionalLazyFoo::__fbthrift_read_field_field3() const {
   const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
   if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
@@ -747,6 +770,7 @@ void OptionalLazyFoo::__fbthrift_read_field_field4_slow() const {
   __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
 }
 
+#endif
 
 void OptionalLazyFoo::__fbthrift_clear() {
   // clear all fields
@@ -813,6 +837,8 @@ void swap([[maybe_unused]] OptionalLazyFoo& a, [[maybe_unused]] OptionalLazyFoo&
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -833,6 +859,8 @@ void TccStructTraits<::apache::thrift::test::OptionalBoxedLazyFoo>::translateFie
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -926,6 +954,7 @@ OptionalBoxedLazyFoo::OptionalBoxedLazyFoo(apache::thrift::FragileConstructor, :
     __fbthrift_field_field4(std::move(field4__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 const ::apache::thrift::detail::boxed_value_ptr<::std::vector<double>>& OptionalBoxedLazyFoo::__fbthrift_read_field_field3() const {
   const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
   if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
@@ -1000,6 +1029,7 @@ void OptionalBoxedLazyFoo::__fbthrift_read_field_field4_slow() const {
   __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
 }
 
+#endif
 
 void OptionalBoxedLazyFoo::__fbthrift_clear() {
   // clear all fields
@@ -1050,6 +1080,8 @@ void swap([[maybe_unused]] OptionalBoxedLazyFoo& a, [[maybe_unused]] OptionalBox
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1070,6 +1102,8 @@ void TccStructTraits<::apache::thrift::test::LazyCppRef>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -1196,6 +1230,7 @@ LazyCppRef::LazyCppRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::s
     __fbthrift_field_field4(std::move(field4__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 const ::std::unique_ptr<::std::vector<::std::int32_t>>& LazyCppRef::__fbthrift_read_field_field1() const {
   const auto isDeserialized = __fbthrift_isDeserialized_.field1.load(std::memory_order_relaxed);
   if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
@@ -1344,6 +1379,7 @@ void LazyCppRef::__fbthrift_read_field_field4_slow() const {
   __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
 }
 
+#endif
 
 void LazyCppRef::__fbthrift_clear() {
   // clear all fields
@@ -1391,6 +1427,8 @@ void swap([[maybe_unused]] LazyCppRef& a, [[maybe_unused]] LazyCppRef& b) {
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1411,6 +1449,8 @@ void TccStructTraits<::apache::thrift::test::IndexedFoo>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -1468,6 +1508,8 @@ IndexedFoo::IndexedFoo(apache::thrift::FragileConstructor, double serialized_dat
   __isset.set(folly::index_constant<5>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void IndexedFoo::__fbthrift_clear() {
   // clear all fields
@@ -1560,6 +1602,8 @@ void swap([[maybe_unused]] IndexedFoo& a, [[maybe_unused]] IndexedFoo& b) {
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1580,6 +1624,8 @@ void TccStructTraits<::apache::thrift::test::OptionalIndexedFoo>::translateField
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -1637,6 +1683,8 @@ OptionalIndexedFoo::OptionalIndexedFoo(apache::thrift::FragileConstructor, doubl
   __isset.set(folly::index_constant<5>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void OptionalIndexedFoo::__fbthrift_clear() {
   // clear all fields
@@ -1729,6 +1777,8 @@ void swap([[maybe_unused]] OptionalIndexedFoo& a, [[maybe_unused]] OptionalIndex
 
 } // namespace apache::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1749,6 +1799,8 @@ void TccStructTraits<::apache::thrift::test::Empty>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache::thrift::test {
 
@@ -1763,6 +1815,8 @@ std::string_view Empty::__fbthrift_get_class_name() {
 
 Empty::Empty(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Empty::__fbthrift_clear() {
   // clear all fields

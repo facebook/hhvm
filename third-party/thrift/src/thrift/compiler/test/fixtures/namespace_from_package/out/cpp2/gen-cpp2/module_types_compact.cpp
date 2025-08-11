@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_types_custom_protocol.h"
 
 namespace test::namespace_from_package::module {
 

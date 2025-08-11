@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -47,6 +47,8 @@ bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(std::st
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -67,6 +69,8 @@ void TccStructTraits<::facebook::thrift::test::MyAnnotation>::translateFieldName
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -112,6 +116,8 @@ MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string sig
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyAnnotation::__fbthrift_clear() {
   // clear all fields
@@ -156,6 +162,8 @@ void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -176,6 +184,8 @@ void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -346,6 +356,8 @@ Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::ada
   __isset.set(folly::index_constant<14>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Foo::__fbthrift_clear() {
   // clear all fields
@@ -439,6 +451,8 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -459,6 +473,8 @@ void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -596,6 +612,8 @@ void swap(Baz& a, Baz& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -616,6 +634,8 @@ void TccStructTraits<::facebook::thrift::test::Bar>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -716,6 +736,8 @@ Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, 
   __isset.set(folly::index_constant<6>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Bar::__fbthrift_clear() {
   // clear all fields
@@ -807,6 +829,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -827,6 +851,8 @@ void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdapted>::transla
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 namespace detail {
@@ -849,6 +875,8 @@ DirectlyAdapted::DirectlyAdapted(apache::thrift::FragileConstructor, ::std::int3
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void DirectlyAdapted::__fbthrift_clear() {
   // clear all fields
@@ -892,6 +920,8 @@ void swap([[maybe_unused]] DirectlyAdapted& a, [[maybe_unused]] DirectlyAdapted&
 } // namespace detail
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -912,6 +942,8 @@ void TccStructTraits<::facebook::thrift::test::detail::IndependentDirectlyAdapte
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 namespace detail {
@@ -934,6 +966,8 @@ IndependentDirectlyAdapted::IndependentDirectlyAdapted(apache::thrift::FragileCo
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void IndependentDirectlyAdapted::__fbthrift_clear() {
   // clear all fields
@@ -977,6 +1011,8 @@ void swap([[maybe_unused]] IndependentDirectlyAdapted& a, [[maybe_unused]] Indep
 } // namespace detail
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -997,6 +1033,8 @@ void TccStructTraits<::facebook::thrift::test::StructWithFieldAdapter>::translat
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1075,6 +1113,8 @@ StructWithFieldAdapter::StructWithFieldAdapter(apache::thrift::FragileConstructo
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void StructWithFieldAdapter::__fbthrift_clear() {
   // clear all fields
@@ -1114,6 +1154,8 @@ void swap([[maybe_unused]] StructWithFieldAdapter& a, [[maybe_unused]] StructWit
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1134,6 +1176,8 @@ void TccStructTraits<::facebook::thrift::test::TerseAdaptedFields>::translateFie
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1201,6 +1245,8 @@ TerseAdaptedFields::TerseAdaptedFields(apache::thrift::FragileConstructor, ::apa
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TerseAdaptedFields::__fbthrift_clear() {
   // clear all fields
@@ -1241,6 +1287,8 @@ void swap([[maybe_unused]] TerseAdaptedFields& a, [[maybe_unused]] TerseAdaptedF
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1261,6 +1309,8 @@ void TccStructTraits<::facebook::thrift::test::B>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1308,6 +1358,8 @@ B::B(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptedA a__a
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void B::__fbthrift_clear() {
   // clear all fields
@@ -1346,6 +1398,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1366,6 +1420,8 @@ void TccStructTraits<::facebook::thrift::test::A>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1384,6 +1440,8 @@ std::string_view A::__fbthrift_get_class_name() {
 
 A::A(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void A::__fbthrift_clear() {
   // clear all fields
@@ -1413,6 +1471,8 @@ void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1433,6 +1493,8 @@ void TccStructTraits<::facebook::thrift::test::Config>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1473,6 +1535,8 @@ Config::Config(apache::thrift::FragileConstructor, ::std::string path__arg) :
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Config::__fbthrift_clear() {
   // clear all fields
@@ -1506,6 +1570,8 @@ void swap([[maybe_unused]] Config& a, [[maybe_unused]] Config& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1526,6 +1592,8 @@ void TccStructTraits<::facebook::thrift::test::MyStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1586,6 +1654,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -1630,6 +1700,8 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1650,6 +1722,8 @@ void TccStructTraits<::facebook::thrift::test::AdaptTestStruct>::translateFieldN
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -1786,6 +1860,8 @@ AdaptTestStruct::AdaptTestStruct(apache::thrift::FragileConstructor, ::facebook:
   __isset.set(folly::index_constant<9>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AdaptTestStruct::__fbthrift_clear() {
   // clear all fields
@@ -1837,6 +1913,8 @@ void swap([[maybe_unused]] AdaptTestStruct& a, [[maybe_unused]] AdaptTestStruct&
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1857,6 +1935,8 @@ void TccStructTraits<::facebook::thrift::test::AdaptTemplatedTestStruct>::transl
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -2118,6 +2198,8 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct(apache::thrift::FragileConstr
   __isset.set(folly::index_constant<21>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AdaptTemplatedTestStruct::__fbthrift_clear() {
   // clear all fields
@@ -2193,6 +2275,8 @@ void swap([[maybe_unused]] AdaptTemplatedTestStruct& a, [[maybe_unused]] AdaptTe
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2213,6 +2297,8 @@ void TccStructTraits<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -2247,6 +2333,8 @@ AdaptTemplatedNestedTestStruct::AdaptTemplatedNestedTestStruct(apache::thrift::F
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AdaptTemplatedNestedTestStruct::__fbthrift_clear() {
   // clear all fields
@@ -2294,6 +2382,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2314,6 +2404,8 @@ void TccStructTraits<::facebook::thrift::test::ThriftAdaptTestUnion>::translateF
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -2424,6 +2516,8 @@ void swap(ThriftAdaptTestUnion& a, ThriftAdaptTestUnion& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2444,6 +2538,8 @@ void TccStructTraits<::facebook::thrift::test::ThriftAdaptedStruct>::translateFi
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -2465,6 +2561,8 @@ ThriftAdaptedStruct::ThriftAdaptedStruct(apache::thrift::FragileConstructor, ::s
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ThriftAdaptedStruct::__fbthrift_clear() {
   // clear all fields
@@ -2507,6 +2605,8 @@ void swap([[maybe_unused]] ThriftAdaptedStruct& a, [[maybe_unused]] ThriftAdapte
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2527,6 +2627,8 @@ void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::t
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 namespace detail {
@@ -2549,6 +2651,8 @@ DirectlyAdaptedStruct::DirectlyAdaptedStruct(apache::thrift::FragileConstructor,
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void DirectlyAdaptedStruct::__fbthrift_clear() {
   // clear all fields
@@ -2592,6 +2696,8 @@ void swap([[maybe_unused]] DirectlyAdaptedStruct& a, [[maybe_unused]] DirectlyAd
 } // namespace detail
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2612,6 +2718,8 @@ void TccStructTraits<::facebook::thrift::test::StructFieldAdaptedStruct>::transl
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -2683,6 +2791,8 @@ StructFieldAdaptedStruct::StructFieldAdaptedStruct(apache::thrift::FragileConstr
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void StructFieldAdaptedStruct::__fbthrift_clear() {
   // clear all fields
@@ -2746,6 +2856,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2766,6 +2878,8 @@ void TccStructTraits<::facebook::thrift::test::CircularAdaptee>::translateFieldN
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -2800,6 +2914,8 @@ CircularAdaptee::CircularAdaptee(apache::thrift::FragileConstructor, ::facebook:
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void CircularAdaptee::__fbthrift_clear() {
   // clear all fields
@@ -2847,6 +2963,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2867,6 +2985,8 @@ void TccStructTraits<::facebook::thrift::test::CircularStruct>::translateFieldNa
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -2917,6 +3037,8 @@ CircularStruct::CircularStruct(apache::thrift::FragileConstructor, ::std::unique
   if (__fbthrift_field_field) ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MemberAccessAdapter, 1>(*__fbthrift_field_field, *this);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void CircularStruct::__fbthrift_clear() {
   // clear all fields
@@ -2954,6 +3076,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2974,6 +3098,8 @@ void TccStructTraits<::facebook::thrift::test::ReorderedStruct>::translateFieldN
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3026,6 +3152,8 @@ ReorderedStruct::ReorderedStruct(apache::thrift::FragileConstructor, ::std::uniq
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ReorderedStruct::__fbthrift_clear() {
   // clear all fields
@@ -3062,6 +3190,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3082,6 +3212,8 @@ void TccStructTraits<::facebook::thrift::test::detail::DeclaredAfterStruct>::tra
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 namespace detail {
@@ -3101,6 +3233,8 @@ std::string_view DeclaredAfterStruct::__fbthrift_get_class_name() {
 
 DeclaredAfterStruct::DeclaredAfterStruct(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void DeclaredAfterStruct::__fbthrift_clear() {
   // clear all fields
@@ -3131,6 +3265,8 @@ void swap([[maybe_unused]] DeclaredAfterStruct& a, [[maybe_unused]] DeclaredAfte
 } // namespace detail
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3151,6 +3287,8 @@ void TccStructTraits<::facebook::thrift::test::UnderlyingRenamedStruct>::transla
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3172,6 +3310,8 @@ UnderlyingRenamedStruct::UnderlyingRenamedStruct(apache::thrift::FragileConstruc
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void UnderlyingRenamedStruct::__fbthrift_clear() {
   // clear all fields
@@ -3214,6 +3354,8 @@ void swap([[maybe_unused]] UnderlyingRenamedStruct& a, [[maybe_unused]] Underlyi
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3234,6 +3376,8 @@ void TccStructTraits<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::t
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3255,6 +3399,8 @@ UnderlyingSameNamespaceStruct::UnderlyingSameNamespaceStruct(apache::thrift::Fra
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void UnderlyingSameNamespaceStruct::__fbthrift_clear() {
   // clear all fields
@@ -3297,6 +3443,8 @@ void swap([[maybe_unused]] UnderlyingSameNamespaceStruct& a, [[maybe_unused]] Un
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3317,6 +3465,8 @@ void TccStructTraits<::facebook::thrift::test::detail::HeapAllocated>::translate
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 namespace detail {
@@ -3336,6 +3486,8 @@ std::string_view HeapAllocated::__fbthrift_get_class_name() {
 
 HeapAllocated::HeapAllocated(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void HeapAllocated::__fbthrift_clear() {
   // clear all fields
@@ -3366,6 +3518,8 @@ void swap([[maybe_unused]] HeapAllocated& a, [[maybe_unused]] HeapAllocated& b) 
 } // namespace detail
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3386,6 +3540,8 @@ void TccStructTraits<::facebook::thrift::test::MoveOnly>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3421,6 +3577,8 @@ MoveOnly::MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test:
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MoveOnly::__fbthrift_clear() {
   // clear all fields
@@ -3459,6 +3617,8 @@ static_assert(
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3479,6 +3639,8 @@ void TccStructTraits<::facebook::thrift::test::AlsoMoveOnly>::translateFieldName
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3514,6 +3676,8 @@ AlsoMoveOnly::AlsoMoveOnly(apache::thrift::FragileConstructor, ::apache::thrift:
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AlsoMoveOnly::__fbthrift_clear() {
   // clear all fields
@@ -3547,6 +3711,8 @@ void swap([[maybe_unused]] AlsoMoveOnly& a, [[maybe_unused]] AlsoMoveOnly& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3567,6 +3733,8 @@ void TccStructTraits<::facebook::thrift::test::ApplyAdapter>::translateFieldName
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3585,6 +3753,8 @@ std::string_view ApplyAdapter::__fbthrift_get_class_name() {
 
 ApplyAdapter::ApplyAdapter(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ApplyAdapter::__fbthrift_clear() {
   // clear all fields
@@ -3614,6 +3784,8 @@ void swap([[maybe_unused]] ApplyAdapter& a, [[maybe_unused]] ApplyAdapter& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3634,6 +3806,8 @@ void TccStructTraits<::facebook::thrift::test::detail::TransitiveAdapted>::trans
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 namespace detail {
@@ -3653,6 +3827,8 @@ std::string_view TransitiveAdapted::__fbthrift_get_class_name() {
 
 TransitiveAdapted::TransitiveAdapted(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TransitiveAdapted::__fbthrift_clear() {
   // clear all fields
@@ -3683,6 +3859,8 @@ void swap([[maybe_unused]] TransitiveAdapted& a, [[maybe_unused]] TransitiveAdap
 } // namespace detail
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3703,6 +3881,8 @@ void TccStructTraits<::facebook::thrift::test::CountingStruct>::translateFieldNa
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3777,6 +3957,8 @@ CountingStruct::CountingStruct(apache::thrift::FragileConstructor, ::apache::thr
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void CountingStruct::__fbthrift_clear() {
   // clear all fields
@@ -3816,6 +3998,8 @@ void swap([[maybe_unused]] CountingStruct& a, [[maybe_unused]] CountingStruct& b
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3836,6 +4020,8 @@ void TccStructTraits<::facebook::thrift::test::Person>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3876,6 +4062,8 @@ Person::Person(apache::thrift::FragileConstructor, ::std::string name__arg) :
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Person::__fbthrift_clear() {
   // clear all fields
@@ -3909,6 +4097,8 @@ void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3929,6 +4119,8 @@ void TccStructTraits<::facebook::thrift::test::Person2>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -3969,6 +4161,8 @@ Person2::Person2(apache::thrift::FragileConstructor, ::std::string name__arg) :
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Person2::__fbthrift_clear() {
   // clear all fields
@@ -4002,6 +4196,8 @@ void swap([[maybe_unused]] Person2& a, [[maybe_unused]] Person2& b) {
 
 } // namespace facebook::thrift::test
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -4022,6 +4218,8 @@ void TccStructTraits<::facebook::thrift::test::Renamed>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -4057,6 +4255,8 @@ Renamed::Renamed(apache::thrift::FragileConstructor, ::apache::thrift::adapt_det
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Renamed::__fbthrift_clear() {
   // clear all fields

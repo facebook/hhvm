@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.tcc"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "shared";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::thrift::shared_interactions::DoSomethingResult>::translat
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace thrift::shared_interactions {
 
@@ -74,6 +78,8 @@ DoSomethingResult::DoSomethingResult(apache::thrift::FragileConstructor, ::std::
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void DoSomethingResult::__fbthrift_clear() {
   // clear all fields

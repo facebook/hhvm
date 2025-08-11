@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,6 +30,8 @@ bool TEnumTraits<::cpp2::Animal>::findValue(std::string_view name, type* out) no
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -50,6 +52,8 @@ void TccStructTraits<::cpp2::Color>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -73,6 +77,8 @@ Color::Color(apache::thrift::FragileConstructor, double red__arg, double green__
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Color::__fbthrift_clear() {
   // clear all fields
@@ -148,6 +154,8 @@ void swap([[maybe_unused]] Color& a, [[maybe_unused]] Color& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -168,6 +176,8 @@ void TccStructTraits<::cpp2::Vehicle>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -221,6 +231,8 @@ Vehicle::Vehicle(apache::thrift::FragileConstructor, ::cpp2::Color color__arg, :
   __isset.set(folly::index_constant<4>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Vehicle::__fbthrift_clear() {
   // clear all fields
@@ -313,6 +325,8 @@ static_assert(
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -333,6 +347,8 @@ void TccStructTraits<::cpp2::Person>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -409,6 +425,8 @@ Person::Person(apache::thrift::FragileConstructor, ::cpp2::PersonID id__arg, ::s
   __isset.set(folly::index_constant<9>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Person::__fbthrift_clear() {
   // clear all fields

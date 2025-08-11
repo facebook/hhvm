@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -132,6 +132,8 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::findValue(std::string
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -152,6 +154,8 @@ void TccStructTraits<::test::fixtures::enums::SomeStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::enums {
 
@@ -207,6 +211,8 @@ SomeStruct::SomeStruct(apache::thrift::FragileConstructor, ::test::fixtures::enu
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void SomeStruct::__fbthrift_clear() {
   // clear all fields
@@ -281,6 +287,8 @@ void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
 
 } // namespace test::fixtures::enums
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -301,6 +309,8 @@ void TccStructTraits<::test::fixtures::enums::MyStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::enums {
 
@@ -328,6 +338,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::test::fixtures::enums::
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields

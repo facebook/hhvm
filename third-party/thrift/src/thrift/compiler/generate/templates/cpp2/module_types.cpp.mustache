@@ -17,7 +17,7 @@
 }}
 {{> Autogen}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-#include "{{program:include_prefix}}{{program:name}}_types.tcc"
+#include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 {{#program:any?}}
@@ -92,9 +92,14 @@ FOLLY_POP_WARNING
 }}} // apache::thrift::detail
 {{/program:tablebased?}}
 {{#program:split_structs}}{{!
-}}{{^program:tablebased?}}
-{{> module_types_cpp/tcc_struct_traits}}
+}}
+
+{{^program:tablebased?}}
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+{{> module_types_cpp/struct_traits}}
+#endif
 {{/program:tablebased?}}
+
 {{> module_types_cpp/frozen}}
 {{#struct:union?}}
 {{> module_types_cpp/declare_union_types}}
@@ -174,10 +179,12 @@ std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_class_name() {
 {{/struct:union?}}
 
 {{#program:json?}}
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 {{/program:json?}}
 
 {{#program:tablebased?}}

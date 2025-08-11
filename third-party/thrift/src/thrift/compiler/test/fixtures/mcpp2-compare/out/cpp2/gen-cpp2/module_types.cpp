@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -81,6 +81,8 @@ bool TEnumTraits<::some::valid::ns::MyEnumB>::findValue(std::string_view name, t
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -101,6 +103,8 @@ void TccStructTraits<::some::valid::ns::Empty>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -115,6 +119,8 @@ std::string_view Empty::__fbthrift_get_class_name() {
 
 Empty::Empty(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Empty::__fbthrift_clear() {
   // clear all fields
@@ -140,13 +146,17 @@ void swap([[maybe_unused]] Empty& a, [[maybe_unused]] Empty& b) {
   using ::std::swap;
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void Empty::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t Empty::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t Empty::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t Empty::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -168,6 +178,8 @@ void TccStructTraits<::some::valid::ns::ASimpleStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -185,6 +197,8 @@ ASimpleStruct::ASimpleStruct(apache::thrift::FragileConstructor, ::std::int64_t 
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ASimpleStruct::__fbthrift_clear() {
   // clear all fields
@@ -219,13 +233,17 @@ void swap([[maybe_unused]] ASimpleStruct& a, [[maybe_unused]] ASimpleStruct& b) 
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void ASimpleStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ASimpleStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ASimpleStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t ASimpleStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -247,6 +265,8 @@ void TccStructTraits<::some::valid::ns::ASimpleStructNoexcept>::translateFieldNa
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -264,6 +284,8 @@ ASimpleStructNoexcept::ASimpleStructNoexcept(apache::thrift::FragileConstructor,
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ASimpleStructNoexcept::__fbthrift_clear() {
   // clear all fields
@@ -302,13 +324,17 @@ void swap([[maybe_unused]] ASimpleStructNoexcept& a, [[maybe_unused]] ASimpleStr
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void ASimpleStructNoexcept::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ASimpleStructNoexcept::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ASimpleStructNoexcept::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t ASimpleStructNoexcept::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -330,6 +356,8 @@ void TccStructTraits<::some::valid::ns::MyStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -439,6 +467,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, bool MyBoolField__arg, ::
   __isset.set(folly::index_constant<9>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -530,13 +560,17 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void MyStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t MyStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -558,6 +592,8 @@ void TccStructTraits<::some::valid::ns::SimpleUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -660,13 +696,17 @@ void swap(SimpleUnion& a, SimpleUnion& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void SimpleUnion::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t SimpleUnion::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t SimpleUnion::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -688,6 +728,8 @@ void TccStructTraits<::some::valid::ns::ComplexUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -1056,10 +1098,12 @@ void swap(ComplexUnion& a, ComplexUnion& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void ComplexUnion::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ComplexUnion::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ComplexUnion::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t ComplexUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1112,6 +1156,8 @@ static_assert(
 
 } // namespace some::valid::ns
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1132,6 +1178,8 @@ void TccStructTraits<::some::valid::ns::AnException>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -1273,6 +1321,8 @@ AnException::AnException(apache::thrift::FragileConstructor, ::std::int32_t code
   __isset.set(folly::index_constant<13>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AnException::__fbthrift_clear() {
   // clear all fields
@@ -1441,10 +1491,12 @@ void swap([[maybe_unused]] AnException& a, [[maybe_unused]] AnException& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void AnException::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t AnException::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t AnException::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t AnException::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1473,6 +1525,8 @@ static_assert(
 
 } // namespace some::valid::ns
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1493,6 +1547,8 @@ void TccStructTraits<::some::valid::ns::AnotherException>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -1538,6 +1594,8 @@ AnotherException::AnotherException(apache::thrift::FragileConstructor, ::std::in
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AnotherException::__fbthrift_clear() {
   // clear all fields
@@ -1589,13 +1647,17 @@ void swap([[maybe_unused]] AnotherException& a, [[maybe_unused]] AnotherExceptio
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void AnotherException::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t AnotherException::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t AnotherException::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -1617,6 +1679,8 @@ void TccStructTraits<::some::valid::ns::containerStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -1767,6 +1831,8 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
   __isset.set(folly::index_constant<36>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void containerStruct::__fbthrift_clear() {
   // clear all fields
@@ -2230,10 +2296,12 @@ void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct&
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void containerStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t containerStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t containerStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -2298,6 +2366,8 @@ static_assert(
 
 } // namespace some::valid::ns
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2318,6 +2388,8 @@ void TccStructTraits<::some::valid::ns::MyIncludedStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -2380,6 +2452,8 @@ MyIncludedStruct::MyIncludedStruct(apache::thrift::FragileConstructor, ::a::diff
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyIncludedStruct::__fbthrift_clear() {
   // clear all fields
@@ -2440,10 +2514,12 @@ void swap([[maybe_unused]] MyIncludedStruct& a, [[maybe_unused]] MyIncludedStruc
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void MyIncludedStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t MyIncludedStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t MyIncludedStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t MyIncludedStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -2466,6 +2542,8 @@ static_assert(
 
 } // namespace some::valid::ns
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2486,6 +2564,8 @@ void TccStructTraits<::some::valid::ns::AnnotatedStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -2579,6 +2659,8 @@ AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::val
   __isset.set(folly::index_constant<18>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AnnotatedStruct::__fbthrift_clear() {
   // clear all fields
@@ -2797,10 +2879,12 @@ void swap([[maybe_unused]] AnnotatedStruct& a, [[maybe_unused]] AnnotatedStruct&
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void AnnotatedStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t AnnotatedStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t AnnotatedStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t AnnotatedStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -2895,6 +2979,8 @@ static_assert(
 
 } // namespace some::valid::ns
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2915,6 +3001,8 @@ void TccStructTraits<::some::valid::ns::ComplexContainerStruct>::translateFieldN
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -2967,6 +3055,8 @@ ComplexContainerStruct::ComplexContainerStruct(apache::thrift::FragileConstructo
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ComplexContainerStruct::__fbthrift_clear() {
   // clear all fields
@@ -3015,13 +3105,17 @@ void swap([[maybe_unused]] ComplexContainerStruct& a, [[maybe_unused]] ComplexCo
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void ComplexContainerStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ComplexContainerStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ComplexContainerStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t ComplexContainerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -3043,6 +3137,8 @@ void TccStructTraits<::some::valid::ns::FloatStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -3062,6 +3158,8 @@ FloatStruct::FloatStruct(apache::thrift::FragileConstructor, float floatField__a
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void FloatStruct::__fbthrift_clear() {
   // clear all fields
@@ -3112,13 +3210,17 @@ void swap([[maybe_unused]] FloatStruct& a, [[maybe_unused]] FloatStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void FloatStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t FloatStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t FloatStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t FloatStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -3140,6 +3242,8 @@ void TccStructTraits<::some::valid::ns::FloatUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -3239,13 +3343,17 @@ void swap(FloatUnion& a, FloatUnion& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void FloatUnion::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t FloatUnion::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t FloatUnion::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t FloatUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -3267,6 +3375,8 @@ void TccStructTraits<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::trans
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::valid::ns {
 
@@ -3283,6 +3393,8 @@ AllRequiredNoExceptMoveCtrStruct::AllRequiredNoExceptMoveCtrStruct(apache::thrif
     __fbthrift_field_intField(std::move(intField__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AllRequiredNoExceptMoveCtrStruct::__fbthrift_clear() {
   // clear all fields
@@ -3319,10 +3431,12 @@ void swap([[maybe_unused]] AllRequiredNoExceptMoveCtrStruct& a, [[maybe_unused]]
   swap(a.__fbthrift_field_intField, b.__fbthrift_field_intField);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void AllRequiredNoExceptMoveCtrStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t AllRequiredNoExceptMoveCtrStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 
 } // namespace some::valid::ns

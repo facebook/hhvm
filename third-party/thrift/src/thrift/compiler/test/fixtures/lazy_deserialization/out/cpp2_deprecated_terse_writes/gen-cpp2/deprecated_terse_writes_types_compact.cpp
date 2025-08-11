@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.tcc"
+#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types_custom_protocol.h"
 
 namespace apache::thrift::test {
 

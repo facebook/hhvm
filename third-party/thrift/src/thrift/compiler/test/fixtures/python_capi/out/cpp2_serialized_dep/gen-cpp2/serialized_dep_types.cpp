@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.h"
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.tcc"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "serialized_dep";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::test::fixtures::python_capi::SerializedStruct>::translate
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -85,6 +89,8 @@ SerializedStruct::SerializedStruct(apache::thrift::FragileConstructor, ::std::st
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void SerializedStruct::__fbthrift_clear() {
   // clear all fields
@@ -141,6 +147,8 @@ void swap([[maybe_unused]] SerializedStruct& a, [[maybe_unused]] SerializedStruc
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -161,6 +169,8 @@ void TccStructTraits<::test::fixtures::python_capi::SerializedUnion>::translateF
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -271,6 +281,8 @@ void swap(SerializedUnion& a, SerializedUnion& b) {
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -291,6 +303,8 @@ void TccStructTraits<::test::fixtures::python_capi::SerializedError>::translateF
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -338,6 +352,8 @@ SerializedError::SerializedError(apache::thrift::FragileConstructor, ::std::stri
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void SerializedError::__fbthrift_clear() {
   // clear all fields
@@ -383,6 +399,8 @@ void swap([[maybe_unused]] SerializedError& a, [[maybe_unused]] SerializedError&
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -403,6 +421,8 @@ void TccStructTraits<::test::fixtures::python_capi::MarshalStruct>::translateFie
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -455,6 +475,8 @@ MarshalStruct::MarshalStruct(apache::thrift::FragileConstructor, ::std::string s
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MarshalStruct::__fbthrift_clear() {
   // clear all fields
@@ -511,6 +533,8 @@ void swap([[maybe_unused]] MarshalStruct& a, [[maybe_unused]] MarshalStruct& b) 
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -531,6 +555,8 @@ void TccStructTraits<::test::fixtures::python_capi::MarshalUnion>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -641,6 +667,8 @@ void swap(MarshalUnion& a, MarshalUnion& b) {
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -661,6 +689,8 @@ void TccStructTraits<::test::fixtures::python_capi::MarshalError>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -708,6 +738,8 @@ MarshalError::MarshalError(apache::thrift::FragileConstructor, ::std::string msg
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MarshalError::__fbthrift_clear() {
   // clear all fields

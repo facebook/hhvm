@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h"
-#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.tcc"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,6 +30,8 @@ bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findValue(std::
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -50,6 +52,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyStruct>::translate
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test::terse_write {
 
@@ -68,6 +72,8 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -97,6 +103,8 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 } // namespace facebook::thrift::test::terse_write
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -117,6 +125,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyUnion>::translateF
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -341,6 +351,8 @@ static_assert(
 
 } // namespace facebook::thrift::test::terse_write
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -361,6 +373,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyStructWithCustomDe
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test::terse_write {
 
@@ -382,6 +396,8 @@ MyStructWithCustomDefault::MyStructWithCustomDefault(apache::thrift::FragileCons
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStructWithCustomDefault::__fbthrift_clear() {
   // clear all fields
@@ -424,6 +440,8 @@ void swap([[maybe_unused]] MyStructWithCustomDefault& a, [[maybe_unused]] MyStru
 
 } // namespace facebook::thrift::test::terse_write
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -444,6 +462,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::StructLevelTerseStru
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test::terse_write {
 
@@ -531,6 +551,8 @@ StructLevelTerseStruct::StructLevelTerseStruct(apache::thrift::FragileConstructo
     __fbthrift_field_union_field(std::move(union_field__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void StructLevelTerseStruct::__fbthrift_clear() {
   // clear all fields
@@ -629,6 +651,8 @@ static_assert(
 
 } // namespace facebook::thrift::test::terse_write
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -649,6 +673,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::FieldLevelTerseStruc
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test::terse_write {
 
@@ -806,6 +832,8 @@ FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor,
   __isset.set(folly::index_constant<14>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void FieldLevelTerseStruct::__fbthrift_clear() {
   // clear all fields
@@ -1045,6 +1073,8 @@ static_assert(
 
 } // namespace facebook::thrift::test::terse_write
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1065,6 +1095,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::AdaptedFields>::tran
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test::terse_write {
 
@@ -1122,6 +1154,8 @@ AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::facebook::thr
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AdaptedFields::__fbthrift_clear() {
   // clear all fields
@@ -1162,6 +1196,8 @@ void swap([[maybe_unused]] AdaptedFields& a, [[maybe_unused]] AdaptedFields& b) 
 
 } // namespace facebook::thrift::test::terse_write
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1182,6 +1218,8 @@ void TccStructTraits<::facebook::thrift::test::terse_write::TerseException>::tra
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test::terse_write {
 
@@ -1223,6 +1261,8 @@ TerseException::TerseException(apache::thrift::FragileConstructor, ::std::string
     __fbthrift_field_msg(std::move(msg__arg)) { 
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TerseException::__fbthrift_clear() {
   // clear all fields

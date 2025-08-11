@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::ComplexUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -177,6 +181,8 @@ void swap(ComplexUnion& a, ComplexUnion& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -197,6 +203,8 @@ void TccStructTraits<::cpp2::ListUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -303,6 +311,8 @@ void swap(ListUnion& a, ListUnion& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -323,6 +333,8 @@ void TccStructTraits<::cpp2::DataUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -429,6 +441,8 @@ void swap(DataUnion& a, DataUnion& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -449,6 +463,8 @@ void TccStructTraits<::cpp2::Val>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -494,6 +510,8 @@ Val::Val(apache::thrift::FragileConstructor, ::std::string strVal__arg, ::std::i
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Val::__fbthrift_clear() {
   // clear all fields
@@ -548,6 +566,8 @@ void swap([[maybe_unused]] Val& a, [[maybe_unused]] Val& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -568,6 +588,8 @@ void TccStructTraits<::cpp2::ValUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -686,6 +708,8 @@ static_assert(
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -706,6 +730,8 @@ void TccStructTraits<::cpp2::VirtualComplexUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -812,6 +838,8 @@ void swap(VirtualComplexUnion& a, VirtualComplexUnion& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -832,6 +860,8 @@ void TccStructTraits<::cpp2::NonCopyableStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -849,6 +879,8 @@ NonCopyableStruct::NonCopyableStruct(apache::thrift::FragileConstructor, ::std::
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void NonCopyableStruct::__fbthrift_clear() {
   // clear all fields
@@ -891,6 +923,8 @@ void swap([[maybe_unused]] NonCopyableStruct& a, [[maybe_unused]] NonCopyableStr
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -911,6 +945,8 @@ void TccStructTraits<::cpp2::NonCopyableUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 

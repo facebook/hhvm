@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,6 +30,8 @@ bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::findVa
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -50,6 +52,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::runtime_ann
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -68,6 +72,8 @@ std::string_view runtime_annotation::__fbthrift_get_class_name() {
 
 runtime_annotation::runtime_annotation(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void runtime_annotation::__fbthrift_clear() {
   // clear all fields
@@ -97,6 +103,8 @@ void swap([[maybe_unused]] runtime_annotation& a, [[maybe_unused]] runtime_annot
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -117,6 +125,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -163,6 +173,8 @@ structured_annotation_inline::structured_annotation_inline(apache::thrift::Fragi
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void structured_annotation_inline::__fbthrift_clear() {
   // clear all fields
@@ -207,6 +219,8 @@ void swap([[maybe_unused]] structured_annotation_inline& a, [[maybe_unused]] str
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -227,6 +241,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -268,6 +284,8 @@ structured_annotation_with_default::structured_annotation_with_default(apache::t
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void structured_annotation_with_default::__fbthrift_clear() {
   // clear all fields
@@ -301,6 +319,8 @@ void swap([[maybe_unused]] structured_annotation_with_default& a, [[maybe_unused
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -321,6 +341,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -381,6 +403,8 @@ structured_annotation_recursive::structured_annotation_recursive(apache::thrift:
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void structured_annotation_recursive::__fbthrift_clear() {
   // clear all fields
@@ -438,6 +462,8 @@ static_assert(
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -458,6 +484,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -479,6 +507,8 @@ structured_annotation_forward::structured_annotation_forward(apache::thrift::Fra
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void structured_annotation_forward::__fbthrift_clear() {
   // clear all fields
@@ -521,6 +551,8 @@ void swap([[maybe_unused]] structured_annotation_forward& a, [[maybe_unused]] st
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -541,6 +573,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -585,6 +619,8 @@ structured_annotation_nested::structured_annotation_nested(apache::thrift::Fragi
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void structured_annotation_nested::__fbthrift_clear() {
   // clear all fields
@@ -634,6 +670,8 @@ static_assert(
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -654,6 +692,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::MyStruct>::
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -708,6 +748,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -765,6 +807,8 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -785,6 +829,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::MyException
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -825,6 +871,8 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::string conte
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyException::__fbthrift_clear() {
   // clear all fields
@@ -858,6 +906,8 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
 
 } // namespace test::fixtures::basic-structured-annotations
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -878,6 +928,8 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::MyUnion>::t
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 

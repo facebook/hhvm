@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.tcc"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -64,6 +64,8 @@ bool TEnumTraits<::py3::simple::Flags>::findValue(std::string_view name, type* o
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -84,6 +86,8 @@ void TccStructTraits<::py3::simple::SimpleException>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -121,6 +125,8 @@ SimpleException::SimpleException(apache::thrift::FragileConstructor, ::std::int1
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void SimpleException::__fbthrift_clear() {
   // clear all fields
@@ -163,6 +169,8 @@ void swap([[maybe_unused]] SimpleException& a, [[maybe_unused]] SimpleException&
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -183,6 +191,8 @@ void TccStructTraits<::py3::simple::OptionalRefStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -230,6 +240,8 @@ OptionalRefStruct::OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void OptionalRefStruct::__fbthrift_clear() {
   // clear all fields
@@ -271,6 +283,8 @@ void swap([[maybe_unused]] OptionalRefStruct& a, [[maybe_unused]] OptionalRefStr
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -291,6 +305,8 @@ void TccStructTraits<::py3::simple::SimpleStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -382,6 +398,8 @@ SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, 
   __isset.set(folly::index_constant<11>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void SimpleStruct::__fbthrift_clear() {
   // clear all fields
@@ -547,6 +565,8 @@ void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -567,6 +587,8 @@ void TccStructTraits<::py3::simple::HiddenTypeFieldsStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -627,6 +649,8 @@ HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(apache::thrift::FragileConstructo
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void HiddenTypeFieldsStruct::__fbthrift_clear() {
   // clear all fields
@@ -682,6 +706,8 @@ static_assert(
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -702,6 +728,8 @@ void TccStructTraits<::py3::simple::detail::AdaptedUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -798,6 +826,8 @@ void swap(AdaptedUnion& a, AdaptedUnion& b) {
 } // namespace detail
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -818,6 +848,8 @@ void TccStructTraits<::py3::simple::HiddenException>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -855,6 +887,8 @@ HiddenException::HiddenException(apache::thrift::FragileConstructor, ::std::int1
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void HiddenException::__fbthrift_clear() {
   // clear all fields
@@ -897,6 +931,8 @@ void swap([[maybe_unused]] HiddenException& a, [[maybe_unused]] HiddenException&
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -917,6 +953,8 @@ void TccStructTraits<::py3::simple::ComplexStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -987,6 +1025,8 @@ ComplexStruct::ComplexStruct(apache::thrift::FragileConstructor, ::py3::simple::
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ComplexStruct::__fbthrift_clear() {
   // clear all fields
@@ -1078,6 +1118,8 @@ static_assert(
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1098,6 +1140,8 @@ void TccStructTraits<::py3::simple::BinaryUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -1188,6 +1232,8 @@ void swap(BinaryUnion& a, BinaryUnion& b) {
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1208,6 +1254,8 @@ void TccStructTraits<::py3::simple::BinaryUnionStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -1238,6 +1286,8 @@ BinaryUnionStruct::BinaryUnionStruct(apache::thrift::FragileConstructor, ::py3::
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void BinaryUnionStruct::__fbthrift_clear() {
   // clear all fields
@@ -1279,6 +1329,8 @@ static_assert(
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1299,6 +1351,8 @@ void TccStructTraits<::py3::simple::CustomFields>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -1370,6 +1424,8 @@ CustomFields::CustomFields(apache::thrift::FragileConstructor, ::MyType bool_fie
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void CustomFields::__fbthrift_clear() {
   // clear all fields
@@ -1480,6 +1536,8 @@ static_assert(
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1500,6 +1558,8 @@ void TccStructTraits<::py3::simple::CustomTypedefFields>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -1571,6 +1631,8 @@ CustomTypedefFields::CustomTypedefFields(apache::thrift::FragileConstructor, ::p
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void CustomTypedefFields::__fbthrift_clear() {
   // clear all fields
@@ -1681,6 +1743,8 @@ static_assert(
 
 } // namespace py3::simple
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1701,6 +1765,8 @@ void TccStructTraits<::py3::simple::AdaptedTypedefFields>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace py3::simple {
 
@@ -1826,6 +1892,8 @@ AdaptedTypedefFields::AdaptedTypedefFields(apache::thrift::FragileConstructor, :
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void AdaptedTypedefFields::__fbthrift_clear() {
   // clear all fields

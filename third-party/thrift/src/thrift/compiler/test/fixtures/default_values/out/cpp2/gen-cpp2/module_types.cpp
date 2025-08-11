@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
@@ -54,6 +58,8 @@ TrivialStruct::TrivialStruct(apache::thrift::FragileConstructor, ::std::int32_t 
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TrivialStruct::__fbthrift_clear() {
   // clear all fields
@@ -96,6 +102,8 @@ void swap([[maybe_unused]] TrivialStruct& a, [[maybe_unused]] TrivialStruct& b) 
 
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -116,6 +124,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
@@ -145,6 +155,8 @@ StructWithNoCustomDefaultValues::StructWithNoCustomDefaultValues(apache::thrift:
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void StructWithNoCustomDefaultValues::__fbthrift_clear() {
   // clear all fields
@@ -261,6 +273,8 @@ static_assert(
 
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -281,6 +295,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
@@ -310,6 +326,8 @@ StructWithCustomDefaultValues::StructWithCustomDefaultValues(apache::thrift::Fra
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void StructWithCustomDefaultValues::__fbthrift_clear() {
   // clear all fields

@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.h"
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.tcc"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "containers";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::test::fixtures::python_capi::TemplateLists>::translateFie
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -89,6 +93,8 @@ TemplateLists::TemplateLists(apache::thrift::FragileConstructor, std::vector<::s
   __isset.set(folly::index_constant<4>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TemplateLists::__fbthrift_clear() {
   // clear all fields
@@ -164,6 +170,8 @@ void swap([[maybe_unused]] TemplateLists& a, [[maybe_unused]] TemplateLists& b) 
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -184,6 +192,8 @@ void TccStructTraits<::test::fixtures::python_capi::TemplateSets>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -248,6 +258,8 @@ TemplateSets::TemplateSets(apache::thrift::FragileConstructor, std::set<::std::s
   __isset.set(folly::index_constant<6>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TemplateSets::__fbthrift_clear() {
   // clear all fields
@@ -349,6 +361,8 @@ void swap([[maybe_unused]] TemplateSets& a, [[maybe_unused]] TemplateSets& b) {
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -369,6 +383,8 @@ void TccStructTraits<::test::fixtures::python_capi::TemplateMaps>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -433,6 +449,8 @@ TemplateMaps::TemplateMaps(apache::thrift::FragileConstructor, std::map<::std::s
   __isset.set(folly::index_constant<6>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TemplateMaps::__fbthrift_clear() {
   // clear all fields
@@ -534,6 +552,8 @@ void swap([[maybe_unused]] TemplateMaps& a, [[maybe_unused]] TemplateMaps& b) {
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -554,6 +574,8 @@ void TccStructTraits<::test::fixtures::python_capi::TWrapped>::translateFieldNam
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -598,6 +620,8 @@ TWrapped::TWrapped(apache::thrift::FragileConstructor, ::std::string fieldA__arg
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TWrapped::__fbthrift_clear() {
   // clear all fields
@@ -633,6 +657,8 @@ void swap([[maybe_unused]] TWrapped& a, [[maybe_unused]] TWrapped& b) {
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -653,6 +679,8 @@ void TccStructTraits<::test::fixtures::python_capi::IndirectionA>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -693,6 +721,8 @@ IndirectionA::IndirectionA(apache::thrift::FragileConstructor, ::test::fixtures:
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void IndirectionA::__fbthrift_clear() {
   // clear all fields
@@ -740,6 +770,8 @@ static_assert(
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -760,6 +792,8 @@ void TccStructTraits<::test::fixtures::python_capi::IndirectionB>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -800,6 +834,8 @@ IndirectionB::IndirectionB(apache::thrift::FragileConstructor, ::test::fixtures:
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void IndirectionB::__fbthrift_clear() {
   // clear all fields
@@ -847,6 +883,8 @@ static_assert(
 
 } // namespace test::fixtures::python_capi
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -867,6 +905,8 @@ void TccStructTraits<::test::fixtures::python_capi::IndirectionC>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::python_capi {
 
@@ -907,6 +947,8 @@ IndirectionC::IndirectionC(apache::thrift::FragileConstructor, ::test::fixtures:
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void IndirectionC::__fbthrift_clear() {
   // clear all fields

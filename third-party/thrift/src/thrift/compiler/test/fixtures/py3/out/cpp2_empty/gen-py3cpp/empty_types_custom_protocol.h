@@ -16,3 +16,17 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.tcc"
 
+
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+} // namespace cpp2

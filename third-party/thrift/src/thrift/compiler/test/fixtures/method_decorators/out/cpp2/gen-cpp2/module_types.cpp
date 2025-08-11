@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::Request>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -69,6 +73,8 @@ Request::Request(apache::thrift::FragileConstructor, ::std::string id__arg) :
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Request::__fbthrift_clear() {
   // clear all fields
@@ -102,6 +108,8 @@ void swap([[maybe_unused]] Request& a, [[maybe_unused]] Request& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -122,6 +130,8 @@ void TccStructTraits<::cpp2::Response>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -158,6 +168,8 @@ Response::Response(apache::thrift::FragileConstructor, ::std::string text__arg) 
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Response::__fbthrift_clear() {
   // clear all fields

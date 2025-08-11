@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -92,6 +92,8 @@ constexpr ptrdiff_t unionTypeOffset<::test::fixtures::tablebased::ExampleUnion>(
 FOLLY_POP_WARNING
 }}} // apache::thrift::detail
 
+
+
 namespace test::fixtures::tablebased {
 
 std::string_view TrivialTypesStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -160,6 +162,8 @@ TrivialTypesStruct::TrivialTypesStruct(apache::thrift::FragileConstructor, ::std
   __isset.set(folly::index_constant<4>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void TrivialTypesStruct::__fbthrift_clear() {
   // clear all fields
@@ -243,10 +247,12 @@ void swap([[maybe_unused]] TrivialTypesStruct& a, [[maybe_unused]] TrivialTypesS
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void TrivialTypesStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t TrivialTypesStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t TrivialTypesStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t TrivialTypesStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 constexpr ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_TrivialTypesStruct = {
   /* .numFields */ 5,
@@ -300,6 +306,8 @@ constexpr ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_Trivia
 };
 
 } // namespace test::fixtures::tablebased
+
+
 
 namespace test::fixtures::tablebased {
 
@@ -364,6 +372,8 @@ ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, ::std::vect
   __isset.set(folly::index_constant<7>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ContainerStruct::__fbthrift_clear() {
   // clear all fields
@@ -467,10 +477,12 @@ void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct&
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void ContainerStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ContainerStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ContainerStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 constexpr ::apache::thrift::detail::StructInfoN<8> __fbthrift_struct_info_ContainerStruct = {
   /* .numFields */ 8,
@@ -554,6 +566,8 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::tablebased
+
+
 
 namespace apache { namespace thrift {
 
@@ -652,10 +666,12 @@ void swap(ExampleUnion& a, ExampleUnion& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 template void ExampleUnion::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ExampleUnion::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ExampleUnion::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t ExampleUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+#endif
 
 constexpr ::apache::thrift::detail::UnionExtN<2> ExampleUnion_unionExt = {
   /* .clear */ ::apache::thrift::detail::clearUnion<::test::fixtures::tablebased::ExampleUnion>,

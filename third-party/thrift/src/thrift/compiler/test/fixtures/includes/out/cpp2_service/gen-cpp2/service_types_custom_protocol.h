@@ -18,3 +18,17 @@
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/module_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types_custom_protocol.h"
+
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+} // namespace cpp2

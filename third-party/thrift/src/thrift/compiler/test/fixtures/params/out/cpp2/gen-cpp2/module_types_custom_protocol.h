@@ -16,3 +16,17 @@
 
 #include "thrift/compiler/test/fixtures/params/gen-cpp2/module_types.tcc"
 
+
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+} // namespace cpp2

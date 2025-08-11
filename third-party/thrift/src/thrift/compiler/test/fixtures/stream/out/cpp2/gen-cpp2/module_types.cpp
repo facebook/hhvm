@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::FooStreamEx>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -60,6 +64,8 @@ FooStreamEx& FooStreamEx::operator=([[maybe_unused]] FooStreamEx&& other) noexce
 
 FooStreamEx::FooStreamEx(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void FooStreamEx::__fbthrift_clear() {
   // clear all fields
@@ -89,6 +95,8 @@ void swap([[maybe_unused]] FooStreamEx& a, [[maybe_unused]] FooStreamEx& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -109,6 +117,8 @@ void TccStructTraits<::cpp2::FooEx>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -136,6 +146,8 @@ FooEx& FooEx::operator=([[maybe_unused]] FooEx&& other) noexcept {
 
 FooEx::FooEx(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void FooEx::__fbthrift_clear() {
   // clear all fields
@@ -165,6 +177,8 @@ void swap([[maybe_unused]] FooEx& a, [[maybe_unused]] FooEx& b) {
 
 } // namespace cpp2
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -185,6 +199,8 @@ void TccStructTraits<::cpp2::FooEx2>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -212,6 +228,8 @@ FooEx2& FooEx2::operator=([[maybe_unused]] FooEx2&& other) noexcept {
 
 FooEx2::FooEx2(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void FooEx2::__fbthrift_clear() {
   // clear all fields

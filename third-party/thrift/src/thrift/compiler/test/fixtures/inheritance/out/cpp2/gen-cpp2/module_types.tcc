@@ -10,16 +10,5 @@
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace cpp2 {
-
 } // namespace cpp2

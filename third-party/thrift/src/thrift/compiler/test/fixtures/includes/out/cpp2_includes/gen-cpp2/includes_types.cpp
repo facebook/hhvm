@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.h"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.tcc"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "includes";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::Included>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -52,6 +56,8 @@ Included::Included(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Included::__fbthrift_clear() {
   // clear all fields

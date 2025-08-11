@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 

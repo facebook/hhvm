@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.h"
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.tcc"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "include2";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::some::ns::IncludedB>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace some::ns {
 
@@ -74,6 +78,8 @@ IncludedB::IncludedB(apache::thrift::FragileConstructor, ::std::int32_t i32Field
   __isset.set(folly::index_constant<1>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void IncludedB::__fbthrift_clear() {
   // clear all fields

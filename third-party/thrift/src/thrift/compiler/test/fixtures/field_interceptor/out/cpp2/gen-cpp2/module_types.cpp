@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::facebook::thrift::test::InterceptedFields>::translateFiel
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace facebook::thrift::test {
 
@@ -91,6 +95,8 @@ InterceptedFields::InterceptedFields(apache::thrift::FragileConstructor, ::std::
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void InterceptedFields::__fbthrift_clear() {
   // clear all fields

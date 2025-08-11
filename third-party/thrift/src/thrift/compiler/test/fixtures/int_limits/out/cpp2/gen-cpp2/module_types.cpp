@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::cpp2::Limits>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace cpp2 {
 
@@ -91,6 +95,8 @@ Limits::Limits(apache::thrift::FragileConstructor, ::std::int64_t max_i64_field_
   __isset.set(folly::index_constant<7>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Limits::__fbthrift_clear() {
   // clear all fields

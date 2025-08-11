@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.tcc"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -47,6 +47,8 @@ bool TEnumTraits<::test::fixtures::basic::HackEnum>::findValue(std::string_view 
 }} // apache::thrift
 
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -67,6 +69,8 @@ void TccStructTraits<::test::fixtures::basic::MyStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic {
 
@@ -144,6 +148,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
   __isset.set(folly::index_constant<8>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -259,6 +265,8 @@ static_assert(
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -279,6 +287,8 @@ void TccStructTraits<::test::fixtures::basic::Containers>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic {
 
@@ -327,6 +337,8 @@ Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::std::
   __isset.set(folly::index_constant<2>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void Containers::__fbthrift_clear() {
   // clear all fields
@@ -388,6 +400,8 @@ void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -408,6 +422,8 @@ void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic {
 
@@ -426,6 +442,8 @@ std::string_view MyDataItem::__fbthrift_get_class_name() {
 
 MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyDataItem::__fbthrift_clear() {
   // clear all fields
@@ -455,6 +473,8 @@ void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -475,6 +495,8 @@ void TccStructTraits<::test::fixtures::basic::MyUnion>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 
@@ -615,6 +637,8 @@ static_assert(
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -635,6 +659,8 @@ void TccStructTraits<::test::fixtures::basic::MyException>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic {
 
@@ -688,6 +714,8 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::int64_t MyIn
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyException::__fbthrift_clear() {
   // clear all fields
@@ -764,6 +792,8 @@ static_assert(
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -784,6 +814,8 @@ void TccStructTraits<::test::fixtures::basic::MyExceptionWithMessage>::translate
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic {
 
@@ -841,6 +873,8 @@ MyExceptionWithMessage::MyExceptionWithMessage(apache::thrift::FragileConstructo
   __isset.set(folly::index_constant<3>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyExceptionWithMessage::__fbthrift_clear() {
   // clear all fields
@@ -917,6 +951,8 @@ static_assert(
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -937,6 +973,8 @@ void TccStructTraits<::test::fixtures::basic::ReservedKeyword>::translateFieldNa
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace test::fixtures::basic {
 
@@ -958,6 +996,8 @@ ReservedKeyword::ReservedKeyword(apache::thrift::FragileConstructor, ::std::int3
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void ReservedKeyword::__fbthrift_clear() {
   // clear all fields
@@ -1000,6 +1040,8 @@ void swap([[maybe_unused]] ReservedKeyword& a, [[maybe_unused]] ReservedKeyword&
 
 } // namespace test::fixtures::basic
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1020,6 +1062,8 @@ void TccStructTraits<::test::fixtures::basic::UnionToBeRenamed>::translateFieldN
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace apache { namespace thrift {
 

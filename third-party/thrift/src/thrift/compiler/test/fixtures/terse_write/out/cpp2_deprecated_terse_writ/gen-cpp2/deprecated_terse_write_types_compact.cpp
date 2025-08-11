@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types.tcc"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types_custom_protocol.h"
 
 namespace facebook::thrift::test::terse_write::deprecated {
 

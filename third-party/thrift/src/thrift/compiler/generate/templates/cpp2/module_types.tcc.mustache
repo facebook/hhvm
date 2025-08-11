@@ -22,10 +22,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
 
-{{^program:tablebased?}}
-{{> module_types_tcc/tcc_struct_traits}}
-{{/program:tablebased?}}
-
 namespace {{program:qualified_namespace}} {
 {{#program:structs}}
 {{#struct:extra_namespace}}
@@ -34,37 +30,11 @@ namespace {{struct:extra_namespace}} {
 {{#program:tablebased?}}
 extern const ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}};
 {{/program:tablebased?}}
-
-{{^struct:union?}}
-{{> module_types_tcc/deserialize_struct}}
-
-{{> module_types_tcc/serialize_struct}}
-{{/struct:union?}}
 {{#struct:union?}}
 {{> module_types_tcc/union_setters}}
-{{> module_types_tcc/deserialize_union}}
-
-{{> module_types_tcc/serialize_union}}
 {{/struct:union?}}
-
-extern template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-extern template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::BinaryProtocolWriter*) const;
-extern template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-extern template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-extern template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-extern template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::CompactProtocolWriter*) const;
-extern template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-extern template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-{{#program:json?}}
-extern template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-extern template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-extern template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-extern template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-{{/program:json?}}
 {{#struct:extra_namespace}}
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
-
 {{/program:structs}}
-
 } // namespace {{program:qualified_namespace}}

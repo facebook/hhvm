@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.tcc"
+#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types_custom_protocol.h"
 
 namespace apache::thrift::test {
 

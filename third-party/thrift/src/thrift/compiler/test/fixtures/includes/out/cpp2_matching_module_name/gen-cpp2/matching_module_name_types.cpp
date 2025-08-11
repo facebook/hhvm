@@ -5,13 +5,15 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types.h"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types.tcc"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types_custom_protocol.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "matching_module_name";
 
+
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
 
 namespace apache {
 namespace thrift {
@@ -33,6 +35,8 @@ void TccStructTraits<::matching_module_name::MyStruct>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+#endif
+
 
 namespace matching_module_name {
 
@@ -50,6 +54,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::matching_module_name::O
   __isset.set(folly::index_constant<0>(), true);
 }
 
+#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
+#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields

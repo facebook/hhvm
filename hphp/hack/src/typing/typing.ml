@@ -11406,7 +11406,15 @@ end = struct
           ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
             (ty, err_res) )
         in
-        let base_ty = TUtils.get_base_type env ty in
+        let (env, base_ty) = TUtils.get_base_type env ty in
+        (* Unfortunately base_ty might itself be a tyvar, in the case of newtype with a naked generic bound *)
+        let ((env, _), base_ty) =
+          Typing_solver.expand_type_and_solve
+            ~description_of_expected:"an object"
+            env
+            p
+            base_ty
+        in
         match deref base_ty with
         | (_, Tnewtype (classname, [the_cls], as_ty))
           when String.equal classname SN.Classes.cClassname ->
@@ -11574,7 +11582,8 @@ end = struct
           (* Instantiation on an abstract class (e.g. from classname<T>) is
            * via the base type (to check constructor args), but the actual
            * type `ty` must be preserved. *)
-          (match get_node (TUtils.get_base_type env ty) with
+          let (env, base_type) = TUtils.get_base_type env ty in
+          (match get_node base_type with
           | Tdynamic -> get_info (`Dynamic :: res) tyl
           | Tclass (sid, _, _) ->
             let class_ = Env.get_class env (snd sid) in

@@ -222,7 +222,7 @@ val get_base_type :
   ?expand_supportdyn:bool ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_defs.locl_ty
+  Typing_env_types.env * Typing_defs.locl_ty
 
 val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 

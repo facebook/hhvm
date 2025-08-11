@@ -68,7 +68,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
   match get_node ty with
   | Toption ty -> transform_shapemap ~nullable:true env pos ty shape
   | _ ->
-    let base_type = TUtils.get_base_type env ty in
+    let (env, base_type) = TUtils.get_base_type env ty in
     (* If the abstract type is unbounded we do not specialize at all *)
     let is_unbound =
       match get_node base_type with
@@ -81,7 +81,9 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       | _ -> false
     in
     let (supportdyn, env, ty) = TUtils.strip_supportdyn env ty in
-    let base_type = TUtils.get_base_type ~expand_supportdyn:false env ty in
+    let (env, base_type) =
+      TUtils.get_base_type ~expand_supportdyn:false env ty
+    in
     let (supportdyn_bound, env, base_type) =
       TUtils.strip_supportdyn env base_type
     in

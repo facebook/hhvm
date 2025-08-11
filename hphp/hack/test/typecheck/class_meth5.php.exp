@@ -1,8 +1,8 @@
 ERROR: File "class_meth5.php", line 20, characters 10-18:
 Too many arguments (expected 0 but got 1) (Typing[4105])
-  File "class_meth5.php", line 13, characters 26-27:
+  File "class_meth5.php", line 19, characters 8-14:
   Definition is here
 ERROR: File "class_meth5.php", line 25, characters 10-18:
 Too many arguments (expected 0 but got 1) (Typing[4105])
-  File "class_meth5.php", line 13, characters 26-27:
+  File "class_meth5.php", line 24, characters 8-14:
   Definition is here

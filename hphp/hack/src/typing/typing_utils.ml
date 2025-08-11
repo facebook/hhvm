@@ -472,26 +472,30 @@ let get_concrete_supertypes
     | ty :: tyl ->
       let (env, ty) = Env.expand_type env ty in
       (match get_node ty with
-      (* Enums with arraykey upper bound are treated as "abstract" *)
-      | Tnewtype (cid, _, bound_ty)
-        when abstract_enum
-             && is_prim Aast.Tarraykey bound_ty
-             && Env.is_enum env cid ->
-        iter seen env acc tyl
-      (* Special casing for intersection bound on FunctionRef *)
-      | Tnewtype (n, _, as_ty) when String.equal n SN.Classes.cFunctionRef ->
-        iter seen env acc (as_ty :: tyl)
-      (* Don't expand enums or newtype; just return the type itself *)
-      | Tnewtype (n, _, as_ty)
-        when expand_supportdyn || not (String.equal n SN.Classes.cSupportDyn) ->
-        let acc = TySet.add as_ty acc in
-        let acc =
-          if include_case_types then
-            TySet.add ty acc
-          else
-            acc
-        in
-        iter seen env acc tyl
+      | Tnewtype (cid, _, _)
+        when (not expand_supportdyn) && String.equal cid SN.Classes.cSupportDyn
+        ->
+        iter seen env (TySet.add ty acc) tyl
+      | Tnewtype (cid, tyargs, _) ->
+        let (env, as_ty) = get_newtype_super env (get_reason ty) cid tyargs in
+        let (env, as_ty) = Env.expand_type env as_ty in
+        (* Enums with arraykey upper bound are treated as "abstract" *)
+        if abstract_enum && is_prim Aast.Tarraykey as_ty && Env.is_enum env cid
+        then
+          iter seen env acc tyl
+        else if String.equal cid SN.Classes.cFunctionRef then
+          iter seen env acc (as_ty :: tyl)
+        (* Don't expand enums or newtype; just return the type itself *)
+        else begin
+          let acc = TySet.add as_ty acc in
+          let acc =
+            if include_case_types then
+              TySet.add ty acc
+            else
+              acc
+          in
+          iter seen env acc tyl
+        end
       | Tdependent (_, ty) -> iter seen env (TySet.add ty acc) tyl
       | Tgeneric n ->
         if SSet.mem n seen then
@@ -620,52 +624,58 @@ let no_upper_bound ~include_sd_mixed env tyl =
 
 (* Gets the base type of an abstract type *)
 let get_base_type ?(expand_supportdyn = true) env ty =
-  let rec loop seen_generics ty =
+  let rec loop env seen_generics ty =
     let (env, ty) = Env.expand_type env ty in
     let r = get_reason ty in
+    let default env =
+      let (env, tys) =
+        get_concrete_supertypes ~expand_supportdyn ~abstract_enum:true env ty
+      in
+      let (env, has_no_bounds) =
+        no_upper_bound ~include_sd_mixed:expand_supportdyn env tys
+      in
+      match tys with
+      | [ty] when not has_no_bounds -> loop env seen_generics ty
+      | _ -> (env, ty)
+    in
     match get_node ty with
     | Tnewtype (classname, _, _)
       when String.equal classname SN.Classes.cClassname ->
-      ty
-    | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn ->
-      let ty = loop seen_generics ty in
+      (env, ty)
+    | Tnewtype (n, [ty], _) when String.equal n SN.Classes.cSupportDyn ->
+      let (env, ty) = loop env seen_generics ty in
       if expand_supportdyn then
-        ty
+        (env, ty)
       else
-        MakeType.supportdyn r ty
+        (env, MakeType.supportdyn r ty)
     (* If we have an expression dependent type and it only has one super
        type, we can treat it similarly to AKdependent _, Some ty *)
     | Tgeneric n when DependentKind.is_generic_dep_ty n -> begin
       match TySet.elements (Env.get_upper_bounds env n) with
-      | ty2 :: _ when ty_equal ty ty2 -> ty
+      | ty2 :: _ when ty_equal ty ty2 -> (env, ty)
       (* If it's exactly equal, then the base ty is just this one *)
       | ty :: _ ->
         if TySet.mem ty (Env.get_lower_bounds env n) then
-          ty
+          (env, ty)
         else if SSet.mem n seen_generics then
-          ty
+          (env, ty)
         else
-          loop (SSet.add n seen_generics) ty
-      | [] -> ty
+          loop env (SSet.add n seen_generics) ty
+      | [] -> (env, ty)
     end
-    | Tnewtype (cid, _, bound_ty)
-      when is_prim Aast.Tarraykey bound_ty && Env.is_enum env cid ->
-      ty
+    | Tnewtype (cid, tyargs, _) when Env.is_enum env cid ->
+      let (env, bound_ty) = get_newtype_super env r cid tyargs in
+      if is_prim Aast.Tarraykey bound_ty then
+        (env, ty)
+      else
+        default env
     | Tgeneric _
     | Tnewtype _
     | Tdependent _ ->
-      let (env, tys) =
-        get_concrete_supertypes ~expand_supportdyn ~abstract_enum:true env ty
-      in
-      let (_env, has_no_bounds) =
-        no_upper_bound ~include_sd_mixed:expand_supportdyn env tys
-      in
-      (match tys with
-      | [ty] when not has_no_bounds -> loop seen_generics ty
-      | _ -> ty)
-    | _ -> ty
+      default env
+    | _ -> (env, ty)
   in
-  loop SSet.empty ty
+  loop env SSet.empty ty
 
 let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
@@ -839,7 +849,9 @@ let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
          true
   | Tvec_or_dict (ty1, ty2) -> recurse ty1 && recurse ty2
   | Tnewtype (n, [_], _) when String.equal n SN.Classes.cSupportDyn -> true
-  | Tnewtype (_, _, bound) -> recurse bound
+  | Tnewtype (n, tyl, _) ->
+    let (_, bound) = get_newtype_super env (get_reason ty) n tyl in
+    recurse bound
   | Tdependent (_, ty) -> recurse ty
   | Tclass ((_, class_id), _exact, tyargs) ->
     List.for_all tyargs ~f:recurse

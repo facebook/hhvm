@@ -526,7 +526,9 @@ let to_dict env pos shape_ty res =
       shape_ty
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
-  let shape_ty = TUtils.get_base_type ~expand_supportdyn:true env shape_ty in
+  let (env, shape_ty) =
+    TUtils.get_base_type ~expand_supportdyn:true env shape_ty
+  in
   to_collection env pos shape_ty res (fun env r key value ->
       (env, MakeType.dict r key value))
 

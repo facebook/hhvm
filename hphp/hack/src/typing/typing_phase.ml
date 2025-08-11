@@ -880,7 +880,8 @@ and localize_typedef_instantiation
         tyargs
         tparams
     in
-    let ((env, e2, cycles_td), lty) =
+    let TUtils.{ env; ty_err_opt = e2; cycles = cycles_td; ty = lty; bound = _ }
+        =
       TUtils.expand_typedef ety_env env r type_name tyargs
     in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in

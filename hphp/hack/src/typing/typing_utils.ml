@@ -25,16 +25,24 @@ module MakeType = Typing_make_type
 let not_implemented s _ =
   failwith (Printf.sprintf "Function %s not implemented" s)
 
+type expand_typedef_result = {
+  env: env;
+  ty_err_opt: Typing_error.t option;
+  cycles: Type_expansions.cycle_reporter list;
+  ty: locl_ty;
+  bound: locl_ty;
+}
+
 type expand_typedef =
   expand_env ->
   env ->
   Reason.t ->
   string ->
   locl_ty list ->
-  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
+  expand_typedef_result
 
 let (expand_typedef_ref : expand_typedef ref) =
-  ref (not_implemented "expand_typedef")
+  ref (fun _ -> not_implemented "expand_typedef")
 
 let expand_typedef x = !expand_typedef_ref x
 
@@ -390,6 +398,58 @@ let wrap_union_inter_ty_in_var env r ty =
       (env, ty)
   else
     (env, ty)
+
+let get_newtype_super env r name tyargs =
+  if Env.is_enum env name then
+    match Env.get_enum_constraint env name with
+    | Decl_entry.Found (Some ty) ->
+      let ((env, _err), ty) = localize ~ety_env:empty_expand_env env ty in
+      (env, ty)
+    | _ ->
+      ( env,
+        (match Env.get_enum env name with
+        | Decl_entry.Found tc ->
+          MakeType.arraykey
+            (Reason.implicit_upper_bound (Cls.pos tc, "arraykey"))
+        | _ ->
+          MakeType.arraykey
+            (Reason.implicit_upper_bound (Reason.to_pos r, "arraykey"))) )
+  else begin
+    match Env.get_typedef env name with
+    | Decl_entry.Found _
+      when (not (Typing_reason.Predicates.is_opaque_type_from_module r))
+           || String.equal name SN.Classes.cSupportDyn ->
+      let { env; ty_err_opt = _; cycles; ty = _; bound } =
+        expand_typedef empty_expand_env env r name tyargs
+      in
+      let (env, bound) =
+        if List.is_empty cycles then
+          (env, bound)
+        else
+          let r = Typing_reason.illegal_recursive_type (get_pos bound) name in
+          (env, MakeType.mixed r)
+      in
+      ( env,
+        (* It's not helpful to report the trivial bound for FunctionRef. Also,
+         * preserve the reason for opaque types created during localization *)
+        if
+          String.equal name Naming_special_names.Classes.cFunctionRef
+          || Typing_reason.Predicates.is_opaque_type_from_module r
+        then
+          with_reason bound r
+        else
+          bound )
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable
+    | _ ->
+      let ty =
+        if TypecheckerOptions.everything_sdt env.genv.tcopt then
+          Typing_make_type.supportdyn_mixed r
+        else
+          Typing_make_type.mixed r
+      in
+      (env, ty)
+  end
 
 (*****************************************************************************
  * Get the "as" constraints from an abstract type or generic parameter, or

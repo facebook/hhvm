@@ -12,7 +12,6 @@ use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
 
-use arena_deserializer::ArenaDeserializer;
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use direct_decl_parser::Decls;
@@ -230,12 +229,10 @@ pub fn serialize_batch_decls(
         .serialize_into(&mut w, &parsed_files)
 }
 
-pub fn deserialize_batch_decls<'a>(
+pub fn deserialize_batch_decls(
     r: impl Read,
-    arena: &'a bumpalo::Bump,
 ) -> Result<IndexMap<PathBuf, ParsedFile>, bincode::Error> {
     let r = BufReader::new(r);
     let mut de = bincode::de::Deserializer::with_reader(r, bincode::options().with_native_endian());
-    let de = ArenaDeserializer::new(arena, &mut de);
-    IndexMap::deserialize(de)
+    IndexMap::deserialize(&mut de)
 }

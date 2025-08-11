@@ -72,7 +72,6 @@ class MockTicketCodec {
   static MockTicketCodecInstance* instance;
 };
 MockTicketCodecInstance* MockTicketCodec::instance;
-constexpr folly::StringPiece MockTicketCodec::Label;
 
 using TestAeadTicketCipher = Aead128GCMTicketCipher<MockTicketCodec>;
 

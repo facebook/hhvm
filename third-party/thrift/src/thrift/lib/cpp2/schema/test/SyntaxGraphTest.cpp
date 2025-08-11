@@ -66,7 +66,7 @@ TEST_F(ServiceSchemaTest, Programs) {
   EXPECT_EQ(programs.size(), 3);
 
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
-  EXPECT_EQ(mainProgram.definitionsByName().size(), 15);
+  EXPECT_EQ(mainProgram.definitionsByName().size(), 16);
   EXPECT_EQ(mainProgram.namespaces().size(), 1);
   EXPECT_EQ(
       mainProgram.namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
@@ -578,7 +578,7 @@ TEST_F(ServiceSchemaTest, Interaction) {
 
 void checkAnnotationsOnTestUnion(const UnionNode& node) {
   const auto& annotations = node.definition().annotations();
-  EXPECT_EQ(annotations.size(), 1);
+  EXPECT_EQ(annotations.size(), 2);
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
       &node.definition()
@@ -591,6 +591,18 @@ void checkAnnotationsOnTestUnion(const UnionNode& node) {
   EXPECT_TRUE(annotations[0].value()["field2"].isObject());
   const auto& innerField = annotations[0].value()["field2"];
   EXPECT_EQ(innerField["field1"].asInt(), 4);
+
+  EXPECT_EQ(
+      &annotations[1].type().asStruct(),
+      &node.definition()
+           .program()
+           .definitionsByName()
+           .at("ComplexAnnotation")
+           ->asStruct());
+  EXPECT_EQ(annotations[1].value().size(), 3);
+  EXPECT_EQ(annotations[1].value()["l"][0]["field1"].asInt(), 1);
+  EXPECT_EQ(annotations[1].value()["s"][0], "foo");
+  EXPECT_EQ(annotations[1].value()["m"]["bar"]["field1"].asInt(), 2);
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotation) {
@@ -795,12 +807,39 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       &mainProgram.definitionsByName().at("TestUnion")->asUnion(),
       &sgUnionNode);
   checkAnnotationsOnTestUnion(sgUnionNode);
-  const auto& annot = *unionNode.getAnnotationOrNull(
-      "meta.com/thrift_test/TestStructuredAnnotation");
-  EXPECT_EQ(annot.asFieldSet().at(FieldId{1}).asInt64(), 3);
-  EXPECT_EQ(
-      annot.asFieldSet().at(FieldId{2}).asFieldSet().at(FieldId{1}).asInt64(),
-      4);
+  {
+    const auto& annot = *unionNode.getAnnotationOrNull(
+        "meta.com/thrift_test/TestStructuredAnnotation");
+    EXPECT_EQ(annot.asFieldSet().at(FieldId{1}).asInt64(), 3);
+    EXPECT_EQ(
+        annot.asFieldSet().at(FieldId{2}).asFieldSet().at(FieldId{1}).asInt64(),
+        4);
+  }
+  {
+    const auto& annot = *unionNode.getAnnotationOrNull(
+        "meta.com/thrift_test/ComplexAnnotation");
+    EXPECT_EQ(
+        annot.asFieldSet()
+            .at(FieldId{1})
+            .asList()[0]
+            .asFieldSet()
+            .at(FieldId{1})
+            .asInt64(),
+        1);
+    EXPECT_TRUE(annot.asFieldSet()
+                    .at(FieldId{2})
+                    .asSet()
+                    .contains(type_system::SerializableRecord::Text("foo")));
+    EXPECT_EQ(
+        annot.asFieldSet()
+            .at(FieldId{3})
+            .asMap()
+            .at(type_system::SerializableRecord::Text("bar"))
+            .asFieldSet()
+            .at(FieldId{1})
+            .asInt64(),
+        2);
+  }
 
   uri = "meta.com/thrift_test/TestEnum";
   const type_system::EnumNode& enumNode =

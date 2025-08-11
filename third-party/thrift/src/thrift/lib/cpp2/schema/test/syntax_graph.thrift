@@ -25,6 +25,14 @@ struct TestRecursiveStruct {
   1: optional TestRecursiveStruct myself;
 }
 
+@thrift.Uri{value = "meta.com/thrift_test/ComplexAnnotation"}
+@scope.Structured
+struct ComplexAnnotation {
+  1: list<TestInnerStructuredAnnotation> l;
+  2: set<string> s;
+  3: map<string, TestInnerStructuredAnnotation> m;
+}
+
 @thrift.Uri{value = "meta.com/thrift_test/TestStructuredAnnotation"}
 @scope.Definition
 @scope.Field
@@ -61,6 +69,11 @@ typedef TestStructuredAnnotation TypedefToTestStructuredAnnotation
 @TestStructuredAnnotation{
   field1 = 3,
   field2 = TestInnerStructuredAnnotation{field1 = 4},
+}
+@ComplexAnnotation{
+  l = [TestInnerStructuredAnnotation{field1 = 1}],
+  s = ["foo"],
+  m = {"bar": TestInnerStructuredAnnotation{field1 = 2}},
 }
 @thrift.Uri{value = "meta.com/thrift_test/TestUnion"}
 union TestUnion {

@@ -523,6 +523,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            NamedArgument(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.name),
+                    1 => Some(&x.equal),
+                    2 => Some(&x.expression),
+                        _ => None,
+                    }
+                })
+            },
             ParameterDeclaration(x) => {
                 get_index(12).and_then(|index| { match index {
                         0 => Some(&x.attribute),

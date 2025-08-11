@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6764e7501a5647cc123fe14a806273ed>>
+// @generated SignedSource<<5793c79b3b88792682060cb1d5d7df0a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -128,7 +128,20 @@ pub enum FeatureName {
     PolymorphicLambda,
     ExpressionTreeCoalesceOperator,
     ExpressionTreeNullsafeObjGet,
+    /// "named_parameters": can use named parameters in function declarations
+    /// `function f(int $x, named int $y);
     NamedParameters,
+    /// "named_parameters_use":
+    /// - will cover both named arguments and named parameters in types.
+    /// - will not cover named parameters in function declarations. That will
+    /// be covered by the "named_parameters" feature. This enables us to
+    /// do staged rollout of named parameters in declarations without making
+    /// calling such function awkward.
+    /// ```
+    /// f(x=4);
+    /// function take((function(int, named int $b)) $f): void {}
+    /// ```
+    NamedParametersUse,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

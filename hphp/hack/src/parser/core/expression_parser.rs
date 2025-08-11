@@ -1611,16 +1611,35 @@ where
         //
         // This function parses the parens as well.
         self.parse_parenthesized_comma_list_opt_allow_trailing(|x| {
-            x.with_reset_precedence(|x| x.parse_decorated_expression_opt())
+            x.with_reset_precedence(|x| x.parse_argument_expression())
         })
     }
 
-    fn parse_decorated_expression_opt(&mut self) -> S::Output {
+    fn parse_argument_expression(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::DotDotDot | TokenKind::Inout => {
                 let decorator = self.fetch_token();
                 let expr = self.parse_expression();
                 self.sc_mut().make_decorated_expression(decorator, expr)
+            }
+            TokenKind::Name => {
+                // Might be a named argument (name=expression)
+                let mut parser1 = self.clone();
+                let name_token = parser1.next_token();
+                if parser1.peek_token_kind() == TokenKind::Equal {
+                    self.continue_from(parser1);
+                    let name_token = self.sc_mut().make_token(name_token);
+                    let equal_token_raw = self.next_token();
+                    let equal_token = self.sc_mut().make_token(equal_token_raw);
+                    let expr = self.parse_expression();
+
+                    // Create a named argument node
+                    self.sc_mut()
+                        .make_named_argument(name_token, equal_token, expr)
+                } else {
+                    // Not a named parameter, parse normally
+                    self.parse_expression()
+                }
             }
             _ => self.parse_expression(),
         }

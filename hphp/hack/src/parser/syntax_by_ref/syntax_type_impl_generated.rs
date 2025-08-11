@@ -558,6 +558,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_named_argument(ctx: &C, name: Self, equal: Self, expression: Self) -> Self {
+        let syntax = SyntaxVariant::NamedArgument(ctx.get_arena().alloc(NamedArgumentChildren {
+            name,
+            equal,
+            expression,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, optional: Self, call_convention: Self, named: Self, readonly: Self, pre_ellipsis: Self, type_: Self, ellipsis: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(ctx.get_arena().alloc(ParameterDeclarationChildren {
             attribute,

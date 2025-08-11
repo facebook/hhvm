@@ -450,6 +450,11 @@ struct
         decorated_expression_decorator: t;
         decorated_expression_expression: t;
       }
+    | NamedArgument of {
+        named_argument_name: t;
+        named_argument_equal: t;
+        named_argument_expression: t;
+      }
     | ParameterDeclaration of {
         parameter_attribute: t;
         parameter_visibility: t;

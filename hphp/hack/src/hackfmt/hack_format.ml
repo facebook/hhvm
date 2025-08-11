@@ -2617,6 +2617,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           end;
           t env expr;
         ]
+    | Syntax.NamedArgument
+        {
+          named_argument_name = name;
+          named_argument_equal = equal;
+          named_argument_expression = expr;
+        } ->
+      Concat [t env name; t env equal; t env expr]
     | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax
     | Syntax.EnumClassDeclaration
         {

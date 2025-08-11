@@ -552,6 +552,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_named_argument(_: &C, named_argument_name: Self, named_argument_equal: Self, named_argument_expression: Self) -> Self {
+        let syntax = SyntaxVariant::NamedArgument(Box::new(NamedArgumentChildren {
+            named_argument_name,
+            named_argument_equal,
+            named_argument_expression,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_optional: Self, parameter_call_convention: Self, parameter_named: Self, parameter_readonly: Self, parameter_pre_ellipsis: Self, parameter_type: Self, parameter_ellipsis: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
             parameter_attribute,
@@ -2444,6 +2454,13 @@ where
                 let acc = f(decorated_expression_expression, acc);
                 acc
             },
+            SyntaxVariant::NamedArgument(x) => {
+                let NamedArgumentChildren { named_argument_name, named_argument_equal, named_argument_expression } = *x;
+                let acc = f(named_argument_name, acc);
+                let acc = f(named_argument_equal, acc);
+                let acc = f(named_argument_expression, acc);
+                acc
+            },
             SyntaxVariant::ParameterDeclaration(x) => {
                 let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_optional, parameter_call_convention, parameter_named, parameter_readonly, parameter_pre_ellipsis, parameter_type, parameter_ellipsis, parameter_name, parameter_default_value, parameter_parameter_end } = *x;
                 let acc = f(parameter_attribute, acc);
@@ -3570,6 +3587,7 @@ where
             SyntaxVariant::TypeConstDeclaration {..} => SyntaxKind::TypeConstDeclaration,
             SyntaxVariant::ContextConstDeclaration {..} => SyntaxKind::ContextConstDeclaration,
             SyntaxVariant::DecoratedExpression {..} => SyntaxKind::DecoratedExpression,
+            SyntaxVariant::NamedArgument {..} => SyntaxKind::NamedArgument,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
             SyntaxVariant::OldAttributeSpecification {..} => SyntaxKind::OldAttributeSpecification,
             SyntaxVariant::AttributeSpecification {..} => SyntaxKind::AttributeSpecification,
@@ -4053,6 +4071,12 @@ where
              (SyntaxKind::DecoratedExpression, 2) => SyntaxVariant::DecoratedExpression(Box::new(DecoratedExpressionChildren {
                  decorated_expression_expression: ts.pop().unwrap(),
                  decorated_expression_decorator: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamedArgument, 3) => SyntaxVariant::NamedArgument(Box::new(NamedArgumentChildren {
+                 named_argument_expression: ts.pop().unwrap(),
+                 named_argument_equal: ts.pop().unwrap(),
+                 named_argument_name: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ParameterDeclaration, 12) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
@@ -5044,6 +5068,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts(&x.decorated_expression_decorator, 2) },
+            SyntaxVariant::NamedArgument(x) => unsafe { std::slice::from_raw_parts(&x.named_argument_name, 3) },
             SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 12) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.attribute_specification_attributes, 1) },
@@ -5235,6 +5260,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.decorated_expression_decorator, 2) },
+            SyntaxVariant::NamedArgument(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.named_argument_name, 3) },
             SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 12) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_specification_attributes, 1) },
@@ -5807,6 +5833,14 @@ pub struct ContextConstDeclarationChildren<T, V> {
 pub struct DecoratedExpressionChildren<T, V> {
     pub decorated_expression_decorator: Syntax<T, V>,
     pub decorated_expression_expression: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct NamedArgumentChildren<T, V> {
+    pub named_argument_name: Syntax<T, V>,
+    pub named_argument_equal: Syntax<T, V>,
+    pub named_argument_expression: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -7069,6 +7103,7 @@ pub enum SyntaxVariant<T, V> {
     TypeConstDeclaration(Box<TypeConstDeclarationChildren<T, V>>),
     ContextConstDeclaration(Box<ContextConstDeclarationChildren<T, V>>),
     DecoratedExpression(Box<DecoratedExpressionChildren<T, V>>),
+    NamedArgument(Box<NamedArgumentChildren<T, V>>),
     ParameterDeclaration(Box<ParameterDeclarationChildren<T, V>>),
     OldAttributeSpecification(Box<OldAttributeSpecificationChildren<T, V>>),
     AttributeSpecification(Box<AttributeSpecificationChildren<T, V>>),
@@ -7705,6 +7740,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.decorated_expression_decorator),
                     1 => Some(&x.decorated_expression_expression),
+                        _ => None,
+                    }
+                })
+            },
+            NamedArgument(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.named_argument_name),
+                    1 => Some(&x.named_argument_equal),
+                    2 => Some(&x.named_argument_expression),
                         _ => None,
                     }
                 })

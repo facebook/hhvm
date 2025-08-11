@@ -195,5 +195,6 @@ let is_statement =
     | EnumClassLabelExpression _
     | ModuleDeclaration _
     | ModuleMembershipDeclaration _
-    | PackageExpression _ ->
+    | PackageExpression _
+    | NamedArgument _ ->
       false)

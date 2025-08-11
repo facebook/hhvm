@@ -67,6 +67,7 @@ type t =
   | TypeConstDeclaration
   | ContextConstDeclaration
   | DecoratedExpression
+  | NamedArgument
   | ParameterDeclaration
   | OldAttributeSpecification
   | AttributeSpecification
@@ -257,6 +258,7 @@ let to_string kind =
   | TypeConstDeclaration -> "type_const_declaration"
   | ContextConstDeclaration -> "context_const_declaration"
   | DecoratedExpression -> "decorated_expression"
+  | NamedArgument -> "named_argument"
   | ParameterDeclaration -> "parameter_declaration"
   | OldAttributeSpecification -> "old_attribute_specification"
   | AttributeSpecification -> "attribute_specification"

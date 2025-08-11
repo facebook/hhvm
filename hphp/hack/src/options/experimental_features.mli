@@ -68,6 +68,21 @@ type feature_name =
   | ExpressionTreeCoalesceOperator
   | ExpressionTreeNullsafeObjGet
   | NamedParameters
+      (** "named_parameters": can use named parameters in function declarations
+    * `function f(int $x, named int $y);
+  *)
+  | NamedParametersUse
+      (** "named_parameters_use":
+  * - will cover both named arguments and named parameters in types.
+  * - will not cover named parameters in function declarations. That will
+  * be covered by the "named_parameters" feature. This enables us to
+  * do staged rollout of named parameters in declarations without making
+  * calling such function awkward.
+  * ```
+  * f(x=4);
+  * function take((function(int, named int $b)) $f): void {}
+  * ```
+  *)
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

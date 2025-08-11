@@ -712,6 +712,28 @@ let schema : schema_node list =
       fields = [("decorator", Token); ("expression", Aggregate Expression)];
     };
     {
+      kind_name = "NamedArgument";
+      type_name = "named_argument";
+      func_name = "named_argument";
+      description = "named_argument";
+      prefix = "named_argument";
+      aggregates =
+        [
+          (* Calling named arguments `Expression`s enables us to avoid making large incompatible changes to the parser
+             * because we can continue to treat the arguments to a function as expressions.
+             * We do NOT actually parse named arguments as expressions outside of argument lists:
+             *    see hphp/hack/test/full_fidelity/cases/named_args_not.php
+          *)
+          Expression;
+          ConstructorExpression;
+          LambdaBody;
+        ];
+      fields =
+        [
+          ("name", Token); ("equal", Token); ("expression", Aggregate Expression);
+        ];
+    };
+    {
       kind_name = "ParameterDeclaration";
       type_name = "parameter_declaration";
       func_name = "parameter_declaration";

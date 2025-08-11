@@ -250,6 +250,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_decorated_expression(self, decorator, expression)
     }
 
+    fn make_named_argument(&mut self, name: Self::Output, equal: Self::Output, expression: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_named_argument(self, name, equal, expression)
+    }
+
     fn make_parameter_declaration(&mut self, attribute: Self::Output, visibility: Self::Output, optional: Self::Output, call_convention: Self::Output, named: Self::Output, readonly: Self::Output, pre_ellipsis: Self::Output, type_: Self::Output, ellipsis: Self::Output, name: Self::Output, default_value: Self::Output, parameter_end: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_parameter_declaration(self, attribute, visibility, optional, call_convention, named, readonly, pre_ellipsis, type_, ellipsis, name, default_value, parameter_end)
     }

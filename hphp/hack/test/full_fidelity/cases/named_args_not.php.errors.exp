@@ -1,0 +1,3 @@
+(6,3)-(6,8) You cannot use this syntax on the left-hand side of an assignment.
+(8,8)-(8,9) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
+(8,8)-(8,9) You cannot use this syntax on the left-hand side of an assignment.

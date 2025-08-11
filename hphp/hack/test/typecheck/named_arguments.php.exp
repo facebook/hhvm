@@ -1,0 +1,22 @@
+ERROR: File "named_arguments.php", line 2, characters 33-54:
+This is an invalid use of `__EnableUnstableFeatures` because there is no feature named named_parameters_use.
+Available features are:
+	class_const_default
+	class_type
+	context_alias_declaration_short
+	newtype_super_bounds
+	no_disjoint_union
+	readonly
+	require_class
+	union_intersection_type_hints
+	upcast_expression (Parsing[1002])
+ERROR: File "named_arguments.php", line 10, characters 7-11:
+Cannot use unstable feature: `named_parameters_use` (Parsing[1002])
+ERROR: File "named_arguments.php", line 10, characters 7-11:
+Encountered unexpected text `x = 3`, was expecting a expression. (Parsing[1002])
+ERROR: File "named_arguments.php", line 10, characters 7-11:
+Invalid argument (Typing[4110])
+  File "named_arguments.php", line 6, characters 14-16:
+  Expected `int`
+  File "named_arguments.php", line 10, characters 7-11:
+  But got `null`

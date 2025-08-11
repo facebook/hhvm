@@ -71,6 +71,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::TypeConstDeclaration {..} => SyntaxKind::TypeConstDeclaration,
             SyntaxVariant::ContextConstDeclaration {..} => SyntaxKind::ContextConstDeclaration,
             SyntaxVariant::DecoratedExpression {..} => SyntaxKind::DecoratedExpression,
+            SyntaxVariant::NamedArgument {..} => SyntaxKind::NamedArgument,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
             SyntaxVariant::OldAttributeSpecification {..} => SyntaxKind::OldAttributeSpecification,
             SyntaxVariant::AttributeSpecification {..} => SyntaxKind::AttributeSpecification,

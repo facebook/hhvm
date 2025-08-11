@@ -476,6 +476,14 @@ SyntaxVariant::DecoratedExpression (DecoratedExpressionChildren{decorator,expres
 ss.serialize_field("decorated_expression_expression", &self.with(expression))?;
       ss.end()
 } 
+SyntaxVariant::NamedArgument (NamedArgumentChildren{name,equal,expression} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "named_argument")?;
+      ss.serialize_field("named_argument_name", &self.with(name))?;
+ss.serialize_field("named_argument_equal", &self.with(equal))?;
+ss.serialize_field("named_argument_expression", &self.with(expression))?;
+      ss.end()
+} 
 SyntaxVariant::ParameterDeclaration (ParameterDeclarationChildren{attribute,visibility,optional,call_convention,named,readonly,pre_ellipsis,type_,ellipsis,name,default_value,parameter_end} ) => {
       let mut ss = s.serialize_struct("", 13)?;
       ss.serialize_field("kind", "parameter_declaration")?;

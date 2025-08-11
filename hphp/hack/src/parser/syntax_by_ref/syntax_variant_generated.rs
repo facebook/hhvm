@@ -72,6 +72,7 @@ pub enum SyntaxVariant<'a, T, V> {
     TypeConstDeclaration(&'a TypeConstDeclarationChildren<'a, T, V>),
     ContextConstDeclaration(&'a ContextConstDeclarationChildren<'a, T, V>),
     DecoratedExpression(&'a DecoratedExpressionChildren<'a, T, V>),
+    NamedArgument(&'a NamedArgumentChildren<'a, T, V>),
     ParameterDeclaration(&'a ParameterDeclarationChildren<'a, T, V>),
     OldAttributeSpecification(&'a OldAttributeSpecificationChildren<'a, T, V>),
     AttributeSpecification(&'a AttributeSpecificationChildren<'a, T, V>),
@@ -595,6 +596,13 @@ pub struct ContextConstDeclarationChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct DecoratedExpressionChildren<'a, T, V> {
     pub decorator: Syntax<'a, T, V>,
+    pub expression: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct NamedArgumentChildren<'a, T, V> {
+    pub name: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
 }
 

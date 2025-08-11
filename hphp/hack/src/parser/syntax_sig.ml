@@ -315,6 +315,11 @@ module type Syntax_S = sig
         decorated_expression_decorator: t;
         decorated_expression_expression: t;
       }
+    | NamedArgument of {
+        named_argument_name: t;
+        named_argument_equal: t;
+        named_argument_expression: t;
+      }
     | ParameterDeclaration of {
         parameter_attribute: t;
         parameter_visibility: t;
@@ -1260,6 +1265,8 @@ module type Syntax_S = sig
 
   val make_decorated_expression : t -> t -> t
 
+  val make_named_argument : t -> t -> t -> t
+
   val make_parameter_declaration :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
@@ -1638,6 +1645,8 @@ module type Syntax_S = sig
   val is_context_const_declaration : t -> bool
 
   val is_decorated_expression : t -> bool
+
+  val is_named_argument : t -> bool
 
   val is_parameter_declaration : t -> bool
 

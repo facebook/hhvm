@@ -59,6 +59,7 @@ impl FeatureName {
             ExpressionTreeCoalesceOperator => Preview,
             ExpressionTreeNullsafeObjGet => Preview,
             NamedParameters => Unstable,
+            NamedParametersUse => Unstable,
         }
     }
 

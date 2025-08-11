@@ -2353,6 +2353,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         );
     }
 
+    fn named_argument_errors(&mut self, node: S<'a>) {
+        if !FeatureName::NamedParametersUse.can_use(
+            &self.env.parser_options,
+            &self.env.context.active_experimental_features,
+        ) {
+            self.errors.push(make_error_from_node(
+                node,
+                errors::cannot_use_feature("named_parameters_use"),
+            ));
+        }
+    }
+
     fn check_parameter_this(&mut self, node: S<'a>) {
         let mut this_param = None;
         if let ParameterDeclaration(p) = &node.children {
@@ -2735,7 +2747,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         .first_parent_function_name()
                         .is_none_or(|s| s == "include")
                     {
-                        return {};
+                        return;
                     }
                     self.errors
                         .push(make_error_from_node(node, errors::invalid_this))
@@ -5561,6 +5573,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.dynamic_method_call_errors(node);
                 self.expression_errors(node);
                 self.assignment_errors(node);
+            }
+
+            NamedArgument(_) => {
+                self.named_argument_errors(node);
             }
 
             ParameterDeclaration(_) => self.param_default_decl_errors(node),

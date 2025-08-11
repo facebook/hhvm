@@ -103,6 +103,7 @@ module WithToken (Token : TokenType) = struct
       | TypeConstDeclaration _ -> SyntaxKind.TypeConstDeclaration
       | ContextConstDeclaration _ -> SyntaxKind.ContextConstDeclaration
       | DecoratedExpression _ -> SyntaxKind.DecoratedExpression
+      | NamedArgument _ -> SyntaxKind.NamedArgument
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | OldAttributeSpecification _ -> SyntaxKind.OldAttributeSpecification
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
@@ -364,6 +365,8 @@ module WithToken (Token : TokenType) = struct
       has_kind SyntaxKind.ContextConstDeclaration
 
     let is_decorated_expression = has_kind SyntaxKind.DecoratedExpression
+
+    let is_named_argument = has_kind SyntaxKind.NamedArgument
 
     let is_parameter_declaration = has_kind SyntaxKind.ParameterDeclaration
 
@@ -1279,6 +1282,16 @@ module WithToken (Token : TokenType) = struct
           { decorated_expression_decorator; decorated_expression_expression } ->
         let acc = f acc decorated_expression_decorator in
         let acc = f acc decorated_expression_expression in
+        acc
+      | NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          } ->
+        let acc = f acc named_argument_name in
+        let acc = f acc named_argument_equal in
+        let acc = f acc named_argument_expression in
         acc
       | ParameterDeclaration
           {
@@ -3146,6 +3159,13 @@ module WithToken (Token : TokenType) = struct
       | DecoratedExpression
           { decorated_expression_decorator; decorated_expression_expression } ->
         [decorated_expression_decorator; decorated_expression_expression]
+      | NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          } ->
+        [named_argument_name; named_argument_equal; named_argument_expression]
       | ParameterDeclaration
           {
             parameter_attribute;
@@ -4938,6 +4958,17 @@ module WithToken (Token : TokenType) = struct
       | DecoratedExpression
           { decorated_expression_decorator; decorated_expression_expression } ->
         ["decorated_expression_decorator"; "decorated_expression_expression"]
+      | NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          } ->
+        [
+          "named_argument_name";
+          "named_argument_equal";
+          "named_argument_expression";
+        ]
       | ParameterDeclaration
           {
             parameter_attribute;
@@ -6874,6 +6905,15 @@ module WithToken (Token : TokenType) = struct
           [decorated_expression_decorator; decorated_expression_expression] ) ->
         DecoratedExpression
           { decorated_expression_decorator; decorated_expression_expression }
+      | ( SyntaxKind.NamedArgument,
+          [named_argument_name; named_argument_equal; named_argument_expression]
+        ) ->
+        NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          }
       | ( SyntaxKind.ParameterDeclaration,
           [
             parameter_attribute;
@@ -9027,6 +9067,19 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           DecoratedExpression
             { decorated_expression_decorator; decorated_expression_expression }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_named_argument
+          named_argument_name named_argument_equal named_argument_expression =
+        let syntax =
+          NamedArgument
+            {
+              named_argument_name;
+              named_argument_equal;
+              named_argument_expression;
+            }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

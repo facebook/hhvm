@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f9be37592fe60eec494390c0c2dd324d>>
+// @generated SignedSource<<b659b79d5cf3d2bc47eabc4ceb7d0c51>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -507,14 +507,10 @@ pub struct FunType {
     Clone,
     Debug,
     Deserialize,
-    Eq,
     EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
     Serialize,
     ToOcamlRep
 )]

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cmp::Ordering;
+
 use crate::ast_defs::Id;
 use crate::pos::Pos;
 use crate::typing_defs::TypedefTypeAssignment;
@@ -45,6 +47,31 @@ impl ConsistentKind {
             // would have to be a final class
             Self::FinalClass => parent,
         }
+    }
+}
+
+// Compare two types syntactically, ignoring reason information and other
+// small differences that do not affect type inference behaviour. This
+// comparison function can be used to construct tree-based sets of types,
+// or to compare two types for "exact" equality.
+// Note that this function does *not* expand type variables, or type
+// aliases.
+// But if compare_locl/decl_ty ty1 ty2 = 0, then the types must not be distinguishable
+// by any typing rules.
+impl PartialEq for Ty {
+    fn eq(&self, other: &Self) -> bool {
+        self.1 == other.1
+    }
+}
+impl Eq for Ty {}
+impl PartialOrd for Ty {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Ty {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.1.cmp(&other.1)
     }
 }
 

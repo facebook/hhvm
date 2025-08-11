@@ -187,8 +187,7 @@ end = struct
     | "ast_defs::Id" -> ["Debug"]
     | "errors::Errors" when is_by_ref -> ["Debug"]
     | "typing_reason::T_" when is_by_ref -> ["Debug"]
-    | "typing_defs_core::Ty" when is_by_ref ->
-      ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+    | "typing_defs_core::Ty" -> ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
     | "typing_defs_core::Ty_" -> ["Debug"]
     | "typing_defs_core::ConstraintType" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]

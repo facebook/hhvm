@@ -19,7 +19,6 @@ use hackrs_test_utils::store::populate_shallow_decl_store;
 use indicatif::ParallelProgressIterator;
 use jwalk::WalkDir;
 use ocamlrep::FromOcamlRep;
-use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
@@ -28,7 +27,7 @@ use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use pos::ToOxidizedByRef;
+use pos::ToOxidized;
 use pos::TypeName;
 use rayon::iter::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
@@ -46,31 +45,31 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
 }
 
 /// Panic if the (possibly-handwritten) impl of ToOcamlRep doesn't match the
-/// result of invoking to_oxidized_by_ref followed by to_ocamlrep (since oxidized types
+/// result of invoking to_oxidized followed by to_ocamlrep (since oxidized types
 /// have a generated ToOcamlRep impl with stronger correctness guarantees).
-fn verify_to_ocamlrep<'a, T>(bump: &'a Bump, value: &'a T)
+fn verify_to_ocamlrep<T>(value: T)
 where
     T: ToOcamlRep + FromOcamlRep,
-    T: ToOxidizedByRef<'a> + From<<T as ToOxidizedByRef<'a>>::Output>,
+    T: Clone,
+    T: ToOxidized + From<<T as ToOxidized>::Output>,
     T: std::fmt::Debug + PartialEq,
-    <T as ToOxidizedByRef<'a>>::Output: std::fmt::Debug + PartialEq + FromOcamlRepIn<'a>,
+    <T as ToOxidized>::Output: std::fmt::Debug + PartialEq + FromOcamlRep,
 {
     let alloc = &ocamlrep::Arena::new();
-    let oxidized_val = value.to_oxidized_by_ref(bump);
+    let oxidized_val = value.clone().to_oxidized();
     let ocaml_val = unsafe { ocamlrep::Value::from_bits(value.to_ocamlrep(alloc).to_bits()) };
-    let ocamlrep_round_trip_val =
-        <T as ToOxidizedByRef<'_>>::Output::from_ocamlrep_in(ocaml_val, bump).unwrap();
+    let ocamlrep_round_trip_val = <T as ToOxidized>::Output::from_ocamlrep(ocaml_val).unwrap();
     let type_name = std::any::type_name::<T>();
     assert_eq!(
         ocamlrep_round_trip_val, oxidized_val,
-        "{}::to_ocamlrep does not match {}::to_oxidized_by_ref",
+        "{}::to_ocamlrep does not match {}::to_oxidized",
         type_name, type_name
     );
     let from_ocaml_val = T::from_ocamlrep(ocaml_val).unwrap();
     assert_eq!(
         from_ocaml_val,
         T::from(ocamlrep_round_trip_val),
-        "{}::from_ocamlrep does not match From<oxidized_by_ref> value",
+        "{}::from_ocamlrep does not match From<oxidized> value",
         type_name
     );
 }
@@ -112,13 +111,13 @@ ocaml_ffi! {
             let decls = decl_parser
                 .parse(filename)
                 .map_err(|e| format!("Failed to parse {:?}: {:?}", filename, e))?;
-            for decl in decls.iter() {
+            for decl in decls.clone().into_iter() {
                 match decl {
-                    shallow::NamedDecl::Class(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::NamedDecl::Fun(_, decl)     => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::NamedDecl::Typedef(_, decl) => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::NamedDecl::Const(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::NamedDecl::Module(_, decl)  => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::NamedDecl::Class(_, decl)   => verify_to_ocamlrep(decl),
+                    shallow::NamedDecl::Fun(_, decl)     => verify_to_ocamlrep(decl),
+                    shallow::NamedDecl::Typedef(_, decl) => verify_to_ocamlrep(decl),
+                    shallow::NamedDecl::Const(_, decl)   => verify_to_ocamlrep(decl),
+                    shallow::NamedDecl::Module(_, decl)  => verify_to_ocamlrep(decl),
                 }
             }
             let classes: Vec<TypeName> = decls
@@ -140,7 +139,7 @@ ocaml_ffi! {
                     .get_class(name)
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?
                     .ok_or_else(|| format!("Decl not found: class {}", name))?;
-                verify_to_ocamlrep(&Bump::new(), &*folded_class);
+                verify_to_ocamlrep((*folded_class).clone());
                 Ok(folded_class)
             }).collect::<Result<_, String>>()?))
         })

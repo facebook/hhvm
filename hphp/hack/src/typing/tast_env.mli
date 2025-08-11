@@ -302,6 +302,19 @@ val restore_fun_env : env -> Tast.fun_ -> env
 
 val typing_env_as_tast_env : Typing_env_types.env -> env
 
+(**
+   * Evil, defeats the purpose of separating Tast_env and Typing_env.
+   *
+   * If you're reaching for this:
+   * - to pass an env to a Typing_env function:
+   *    - There may already be a corresponding Tast_env function you
+   *      can use.
+  *     - Or it may be safe to expose the Typing_env function as
+   *       a tast_env function. See the comment at the top of typing_env.ml
+   * - to pass an env into typing or error reporting:
+   *    - sigh and do the conversion. It's probabaly safe, but nothing
+   *      guarantees it. One day there may be a better API.
+ *)
 val tast_env_as_typing_env : env -> Typing_env_types.env
 
 (** Verify that an XHP body expression is legal. *)

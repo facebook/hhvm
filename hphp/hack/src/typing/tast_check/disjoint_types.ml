@@ -255,14 +255,13 @@ let handler ~as_lint =
               targs = _ :: _ as tal;
               _;
             } ) ->
-        let tenv = Env.tast_env_as_typing_env env in
         let class_result =
           match ci with
-          | CI cls -> Typing_env.get_class tenv (snd cls)
+          | CI cls -> Tast_env.get_class env (snd cls)
           | CIself
           | CIstatic ->
-            Typing_env.get_self_class tenv
-          | CIparent -> Typing_env.get_parent_class tenv
+            Tast_env.get_self_class env
+          | CIparent -> Tast_env.get_parent_class env
           | _ -> Decl_entry.DoesNotExist
         in
 

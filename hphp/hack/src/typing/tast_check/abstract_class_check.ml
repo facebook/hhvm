@@ -17,8 +17,7 @@ let check_expr env (_, pos, e) =
   match e with
   | Class_const ((_, _, CIparent), (_, construct))
     when String.equal construct SN.Members.__construct ->
-    let tenv = Env.tast_env_as_typing_env env in
-    (match Typing_env.get_parent_class tenv with
+    (match Tast_env.get_parent_class env with
     | Decl_entry.Found parent_class
       when Ast_defs.is_c_abstract (Cls.kind parent_class)
            && Option.is_none (fst (Cls.construct parent_class)) ->

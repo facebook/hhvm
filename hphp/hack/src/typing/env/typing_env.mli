@@ -15,6 +15,8 @@ module TPEnv = Type_parameter_env
 (* Expose the subset of Typing_env that is safe to use
    * in tast checks: that is, anything that depends only
    * on the tast and providers (not mutable or visitor state).
+   *
+   * You can use this to avoid the evil Tast_env.tast_env_as_typing_env
 *)
 module Expose_to_tast_env : sig
   type env

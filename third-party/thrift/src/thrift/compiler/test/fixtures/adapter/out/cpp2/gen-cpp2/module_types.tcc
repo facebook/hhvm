@@ -9,18 +9,3 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace facebook::thrift::test {
-namespace detail {
-} // namespace detail
-namespace detail {
-} // namespace detail
-namespace detail {
-} // namespace detail
-namespace detail {
-} // namespace detail
-namespace detail {
-} // namespace detail
-namespace detail {
-} // namespace detail
-} // namespace facebook::thrift::test

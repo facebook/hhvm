@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace cpp2 {
-} // namespace cpp2

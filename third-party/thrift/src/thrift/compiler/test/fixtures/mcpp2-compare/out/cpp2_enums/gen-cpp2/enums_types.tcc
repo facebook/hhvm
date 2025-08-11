@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace facebook::ns::qwerty {
-} // namespace facebook::ns::qwerty

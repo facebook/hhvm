@@ -16,9 +16,9 @@
 
 }}
 {{#field:type}}
-{{> module_types_tcc/if_should_write}}
+{{> module_types_custom_protocol_h/if_should_write}}
     constexpr int16_t kPrevFieldId = {{#first?}}{{#struct:indexing?}}::apache::thrift::detail::kSizeField.id{{/struct:indexing?}}{{^struct:indexing?}}0{{/struct:indexing?}}{{/first?}}{{^first?}}{{field:serialization_prev_field_key}}{{/first?}};
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::{{> module_types_tcc/struct_type}}, {{field:key}}, kPrevFieldId>(*prot_, "{{field:name}}", {{^struct:union?}}previousFieldHasValue{{/struct:union?}}{{#struct:union?}}false{{/struct:union?}});
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::{{> common/struct_type}}, {{field:key}}, kPrevFieldId>(*prot_, "{{field:name}}", {{^struct:union?}}previousFieldHasValue{{/struct:union?}}{{#struct:union?}}false{{/struct:union?}});
 {{^struct:union?}}
     previousFieldHasValue = true;
 {{/struct:union?}}
@@ -42,7 +42,7 @@
     xfer += ::apache::thrift::op::encode<{{field:type_tag}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}});
 {{/field:use_op_encode?}}
 {{^field:use_op_encode?}}
-    xfer += {{> module_types_tcc/pm}}::write(*prot_, {{> module_types_tcc/pm_value}});
+    xfer += {{> module_types_custom_protocol_h/pm}}::write(*prot_, {{> module_types_custom_protocol_h/pm_value}});
 {{/field:use_op_encode?}}
 {{/field:non_opt_cpp_ref?}}
 {{#field:non_opt_cpp_ref?}}
@@ -51,12 +51,12 @@
       xfer += ::apache::thrift::op::encode<{{field:type_tag}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}});
 {{/field:use_op_encode?}}
 {{^field:use_op_encode?}}
-      xfer += {{> module_types_tcc/pm}}::write(*prot_, {{> module_types_tcc/pm_value}});
+      xfer += {{> module_types_custom_protocol_h/pm}}::write(*prot_, {{> module_types_custom_protocol_h/pm_value}});
 {{/field:use_op_encode?}}
 {{#type:resolves_to_container_or_enum?}}
     } else {
-      xfer += prot_->write{{> module_types_tcc/struct_field_type}}Begin({{> module_types_tcc/container_struct_type}}, 0);
-      xfer += prot_->write{{> module_types_tcc/struct_field_type}}End();
+      xfer += prot_->write{{> module_types_custom_protocol_h/struct_field_type}}Begin({{> module_types_custom_protocol_h/container_struct_type}}, 0);
+      xfer += prot_->write{{> module_types_custom_protocol_h/struct_field_type}}End();
 {{/type:resolves_to_container_or_enum?}}
 {{#type:structured?}}
     } else {
@@ -68,11 +68,11 @@
 {{/field:non_opt_cpp_ref?}}
 {{#field:lazy?}}
     written_lazy_field_{{field:cpp_name}}:
-    indexWriter.template recordFieldEnd<decltype({{> module_types_tcc/pm_value}})>({{type:type_class}}{}, {{field:key}});
+    indexWriter.template recordFieldEnd<decltype({{> module_types_custom_protocol_h/pm_value}})>({{type:type_class}}{}, {{field:key}});
 {{/field:lazy?}}
     xfer += prot_->writeFieldEnd();
 {{#struct:union?}}
-{{> module_types_tcc/if_should_write_end}}
+{{> module_types_custom_protocol_h/if_should_write_end}}
 {{/struct:union?}}
 {{^struct:union?}}
 {{#field:optional?}}

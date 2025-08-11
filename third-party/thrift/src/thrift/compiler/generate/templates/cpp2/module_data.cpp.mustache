@@ -39,7 +39,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, {{struct:num_fields}}> TStructDataS
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_types = { {
   {{#struct:fields}}{{#field:type}}
-  TType::{{> module_types_tcc/struct_type}},
+  TType::{{> common/struct_type}},
   {{/field:type}}{{/struct:fields}}
 }};
 THRIFT_DATA_MEMBER const std::array<int, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::isset_indexes = { {

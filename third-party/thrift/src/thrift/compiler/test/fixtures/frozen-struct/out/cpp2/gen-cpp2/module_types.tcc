@@ -9,8 +9,3 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace some::ns {
-namespace detail {
-} // namespace detail
-} // namespace some::ns

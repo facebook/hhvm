@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace cpp2 {
-} // namespace cpp2

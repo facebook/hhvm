@@ -21,20 +21,17 @@
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
+{{#program:tablebased?}}
 
 namespace {{program:qualified_namespace}} {
 {{#program:structs}}
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
-{{#program:tablebased?}}
 extern const ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}};
-{{/program:tablebased?}}
-{{#struct:union?}}
-{{> module_types_tcc/union_setters}}
-{{/struct:union?}}
 {{#struct:extra_namespace}}
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
 {{/program:structs}}
 } // namespace {{program:qualified_namespace}}
+{{/program:tablebased?}}

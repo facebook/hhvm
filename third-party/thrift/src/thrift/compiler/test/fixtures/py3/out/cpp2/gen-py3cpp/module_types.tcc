@@ -9,8 +9,3 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace py3::simple {
-namespace detail {
-} // namespace detail
-} // namespace py3::simple

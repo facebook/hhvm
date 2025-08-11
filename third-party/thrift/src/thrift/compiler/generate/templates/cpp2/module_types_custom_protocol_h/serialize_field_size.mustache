@@ -16,13 +16,14 @@
 
 }}
 {{#field:type}}
-{{> module_types_tcc/if_should_write}}
-    xfer += prot_->serializedFieldSize("{{field:name}}", apache::thrift::protocol::{{> module_types_tcc/struct_type}}, {{field:key}});
+{{> module_types_custom_protocol_h/if_should_write}}
+    xfer += prot_->serializedFieldSize("{{field:name}}", apache::thrift::protocol::{{> common/struct_type}}, {{field:key}});
 {{#field:lazy?}}
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
         auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.{{field:cpp_name}}.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+          xfer += ({{#field:lazy_ref?}}*{{/field:lazy_ref?}}__fbthrift_serializedData_.{{field:cpp_name}}).computeChainDataLength();
           goto written_lazy_field_{{field:cpp_name}};
         }
       }
@@ -31,34 +32,34 @@
 {{/field:lazy?}}
 {{^field:non_opt_cpp_ref?}}
 {{#field:use_op_encode?}}
-    xfer += ::apache::thrift::op::serialized_size<{{field:zero_copy_arg}}, {{field:type_tag}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}});
+    xfer += ::apache::thrift::op::serialized_size<false, {{field:type_tag}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}});
 {{/field:use_op_encode?}}
 {{^field:use_op_encode?}}
 {{^field:cpp_exactly_one_adapter?}}
-    xfer += {{> module_types_tcc/pm}}::serializedSize<{{field:zero_copy_arg}}>(*prot_, {{> module_types_tcc/pm_value}});
+    xfer += {{> module_types_custom_protocol_h/pm}}::serializedSize<false>(*prot_, {{> module_types_custom_protocol_h/pm_value}});
 {{/field:cpp_exactly_one_adapter?}}
 {{#field:cpp_exactly_one_adapter?}}
-    xfer += ::apache::thrift::adapt_detail::serializedSize<{{field:zero_copy_arg}}, {{field:type_tag}}, {{field:cpp_first_adapter}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}}, [&] {return {{> module_types_tcc/pm}}::serializedSize<{{field:zero_copy_arg}}>(*prot_, {{> module_types_tcc/pm_value}});});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<false, {{field:type_tag}}, {{field:cpp_first_adapter}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}}, [&] {return {{> module_types_custom_protocol_h/pm}}::serializedSize<false>(*prot_, {{> module_types_custom_protocol_h/pm_value}});});
 {{/field:cpp_exactly_one_adapter?}}
 {{/field:use_op_encode?}}
 {{/field:non_opt_cpp_ref?}}
 {{#field:non_opt_cpp_ref?}}
     if ({{> field/member}}) {
 {{#field:use_op_encode?}}
-      xfer += ::apache::thrift::op::serialized_size<{{field:zero_copy_arg}}, {{field:type_tag}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}});
+      xfer += ::apache::thrift::op::serialized_size<false, {{field:type_tag}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}});
 {{/field:use_op_encode?}}
 {{^field:use_op_encode?}}
 {{^field:cpp_exactly_one_adapter?}}
-      xfer += {{> module_types_tcc/pm}}::serializedSize<{{field:zero_copy_arg}}>(*prot_, {{> module_types_tcc/pm_value}});
+      xfer += {{> module_types_custom_protocol_h/pm}}::serializedSize<false>(*prot_, {{> module_types_custom_protocol_h/pm_value}});
 {{/field:cpp_exactly_one_adapter?}}
 {{#field:cpp_exactly_one_adapter?}}
-      xfer += ::apache::thrift::adapt_detail::serializedSize<{{field:zero_copy_arg}}, {{field:type_tag}}, {{field:cpp_first_adapter}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}}, [&] {return {{> module_types_tcc/pm}}::serializedSize<{{field:zero_copy_arg}}>(*prot_, {{> module_types_tcc/pm_value}});});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<false, {{field:type_tag}}, {{field:cpp_first_adapter}}>(*prot_, {{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}}, [&] {return {{> module_types_custom_protocol_h/pm}}::serializedSize<false>(*prot_, {{> module_types_custom_protocol_h/pm_value}});});
 {{/field:cpp_exactly_one_adapter?}}
 {{/field:use_op_encode?}}
 {{#type:resolves_to_container_or_enum?}}
     } else {
-      xfer += prot_->serializedSize{{> module_types_tcc/struct_field_type}}Begin({{> module_types_tcc/container_struct_type}}, 0);
-      xfer += prot_->serializedSize{{> module_types_tcc/struct_field_type}}End();
+      xfer += prot_->serializedSize{{> module_types_custom_protocol_h/struct_field_type}}Begin({{> module_types_custom_protocol_h/container_struct_type}}, 0);
+      xfer += prot_->serializedSize{{> module_types_custom_protocol_h/struct_field_type}}End();
 {{/type:resolves_to_container_or_enum?}}
 {{#type:structured?}}
     } else {
@@ -70,5 +71,5 @@
 {{#field:lazy?}}
     written_lazy_field_{{field:cpp_name}}:;
 {{/field:lazy?}}
-{{> module_types_tcc/if_should_write_end}}
+{{> module_types_custom_protocol_h/if_should_write_end}}
 {{/field:type}}

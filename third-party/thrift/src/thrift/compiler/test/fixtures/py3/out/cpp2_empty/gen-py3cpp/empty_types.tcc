@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace cpp2 {
-} // namespace cpp2

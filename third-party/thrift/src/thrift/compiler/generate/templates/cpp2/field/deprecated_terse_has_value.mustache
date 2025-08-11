@@ -38,7 +38,7 @@
     // TODO(afuller): As with containers, binary, and string above, this should check for
     // the 'intrinsic' default so the behavior does not change when IDL-specified defaults
     // change.
-    }}{{> module_types_tcc/field_ref }} != {{> field/default}}{{!
+    }}{{> field/field_ref }} != {{> field/default}}{{!
   }}{{/field:cpp_first_adapter}}{{!
 }}{{/field:raw_string_or_binary?}}{{/type:resolves_to_container?}}{{/field:cpp_ref?}}{{!
 }}

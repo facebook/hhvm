@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace thrift::shared_interactions {
-} // namespace thrift::shared_interactions

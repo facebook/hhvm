@@ -50,7 +50,7 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
           iprot,
           0,
           {{field:key}},
-          apache::thrift::protocol::{{> module_types_tcc/struct_type}}))) {
+          apache::thrift::protocol::{{> common/struct_type}}))) {
     goto _advance_failure;
   }
 {{/first?}}
@@ -62,7 +62,7 @@ _readField_{{field:cpp_name}}:
           {{type:cpp_type}}
       >(iprot,
         {{field:key}},
-        apache::thrift::protocol::{{> module_types_tcc/struct_type}})) {
+        apache::thrift::protocol::{{> common/struct_type}})) {
     const auto isDeserialized = __fbthrift_isDeserialized_.{{field:cpp_name}}.load();
     __fbthrift_serializedData_.{{field:cpp_name}} = {{!
     }}{{^field:lazy_ref?}}std::move(*iobuf);{{/field:lazy_ref?}}{{!
@@ -73,7 +73,7 @@ _readField_{{field:cpp_name}}:
 {{^field:lazy?}}
   {
 {{/field:lazy?}}
-    {{> module_types_tcc/deserialize_field}}
+    {{> module_types_custom_protocol_h/deserialize_field}}
   }
 {{#program:enforce_required?}}{{#field:required?}}
   isset_{{field:cpp_name}} = true;
@@ -88,7 +88,7 @@ _readField_{{field:cpp_name}}:
           iprot,
           {{field:key}},
           {{field:serialization_next_field_key}},
-          apache::thrift::protocol::{{> module_types_tcc/struct_type}}))) {
+          apache::thrift::protocol::{{> common/struct_type}}))) {
     goto _advance_failure;
   }
 {{/field:serialization_next_field_type}}
@@ -140,7 +140,7 @@ _loop:
 {{#struct:fields_in_serialization_order}}{{#field:type}}
     case {{field:key}}:
     {
-      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{> module_types_tcc/struct_type}}))) {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{> common/struct_type}}))) {
         goto _readField_{{field:cpp_name}};
       } else {
         goto _skip;
@@ -168,7 +168,7 @@ void {{struct:cpp_underlying_name}}::__fbthrift_read_field_{{field:cpp_name}}_im
   reader.setInput(&{{#field:lazy_ref?}}*{{/field:lazy_ref?}}__fbthrift_serializedData_.{{field:cpp_name}});
   ProtocolReader *iprot = &reader;
   [[maybe_unused]] apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
-  {{> module_types_tcc/deserialize_field}}
+  {{> module_types_custom_protocol_h/deserialize_field}}
 }
 {{/field:lazy?}}
 {{/field:type}}

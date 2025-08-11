@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace test::fixtures::basic {
-} // namespace test::fixtures::basic

@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace apache::thrift::test {
-} // namespace apache::thrift::test

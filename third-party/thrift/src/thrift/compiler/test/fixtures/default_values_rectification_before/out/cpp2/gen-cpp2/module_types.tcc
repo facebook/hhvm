@@ -9,6 +9,3 @@
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification

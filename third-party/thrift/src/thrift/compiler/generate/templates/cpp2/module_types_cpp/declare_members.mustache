@@ -98,9 +98,9 @@ bool {{struct:cpp_underlying_name}}::__fbthrift_is_empty() const {
 {{^struct:has_non_optional_and_non_terse_field?}}
 {{#struct:fields?}}
   return{{#struct:fields}}{{#field:type}}{{!
-  }}{{#field:optional?}} !({{> module_types_tcc/optional_has_value}}){{^last?}} &&{{/last?}}{{/field:optional?}}{{!
-  }}{{#field:deprecated_terse_writes?}} !({{> module_types_tcc/deprecated_terse_has_value }}){{^last?}} &&{{/last?}}{{/field:deprecated_terse_writes?}}{{!
-  }}{{#field:terse?}} {{> module_types_tcc/terse_has_no_value }}{{^last?}} &&{{/last?}}{{/field:terse?}}{{!
+  }}{{#field:optional?}} !({{> field/optional_has_value}}){{^last?}} &&{{/last?}}{{/field:optional?}}{{!
+  }}{{#field:deprecated_terse_writes?}} !({{> field/deprecated_terse_has_value }}){{^last?}} &&{{/last?}}{{/field:deprecated_terse_writes?}}{{!
+  }}{{#field:terse?}} {{> field/terse_has_no_value }}{{^last?}} &&{{/last?}}{{/field:terse?}}{{!
   }}{{#last?}};{{/last?}}
 {{/field:type}}{{/struct:fields}}
 {{/struct:fields?}}

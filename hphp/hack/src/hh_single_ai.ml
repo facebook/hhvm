@@ -39,6 +39,10 @@ let print_error ?(oc = stderr) l =
 let comma_string_to_iset (s : string) : ISet.t =
   Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
 
+let sound_dynamic = true
+
+let distc = false
+
 let parse_options () =
   let fn_ref = ref [] in
   let extra_builtins = ref [] in
@@ -85,7 +89,8 @@ let parse_options () =
       {
         ai_options with
         run_hh_distc_workers_locally = true;
-        compute_folded_class_decls_with_hh_distc = true;
+        compute_folded_class_decls_with_hh_distc = distc;
+        compute_type_infos_with_hh_distc = distc;
       }
   in
 
@@ -97,7 +102,7 @@ let parse_options () =
         disable_xhp_element_mangling = false;
         disable_xhp_children_declarations = false;
         enable_xhp_class_modifier = false;
-        everything_sdt = true;
+        everything_sdt = sound_dynamic;
         disable_hh_ignore_error = 0;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
@@ -110,7 +115,7 @@ let parse_options () =
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~tco_check_xhp_attribute:false
-      ~tco_enable_sound_dynamic:true
+      ~tco_enable_sound_dynamic:sound_dynamic
       GlobalOptions.default
   in
   Errors.allowed_fixme_codes_strict :=
@@ -305,8 +310,8 @@ let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
           let files = opts.files in
           let hh_config_options =
             [
-              "enable_sound_dynamic_type=true";
-              "everything_sdt=true";
+              Printf.sprintf "enable_sound_dynamic_type=%b" sound_dynamic;
+              Printf.sprintf "everything_sdt=%b" sound_dynamic;
               "disable_xhp_element_mangling=false";
               "disable_xhp_children_declarations=false";
               "enable_xhp_class_modifier=false";

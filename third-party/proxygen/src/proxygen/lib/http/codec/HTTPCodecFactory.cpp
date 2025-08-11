@@ -29,7 +29,6 @@ std::unique_ptr<HTTPCodec> HTTPCodecFactory::getCodec(
     }
     default:
       LOG(FATAL) << "Unreachable";
-      return nullptr;
   }
 }
 

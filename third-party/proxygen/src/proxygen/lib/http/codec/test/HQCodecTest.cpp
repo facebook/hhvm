@@ -905,7 +905,6 @@ std::string frameParamsToTestName(
       break;
     default:
       LOG(FATAL) << "Unknown Codec Type";
-      break;
   }
   switch (info.param.frameType) {
     case FrameType::DATA:
@@ -982,7 +981,6 @@ TEST_P(HQCodecTestFrameAllowed, FrameAllowedOnCodec) {
       break;
     default:
       CHECK(false);
-      break;
   }
   expectedFrames += GetParam().allowed ? 1 : 0;
   EXPECT_EQ(callbacks_.headerFrames, expectedFrames);
@@ -1015,7 +1013,6 @@ TEST_P(HQCodecTestFrameAllowed, FrameAllowedOnCodec) {
         break;
       default:
         CHECK(false);
-        break;
     }
     EXPECT_EQ(lenBefore, lenAfter);
     EXPECT_EQ(callbacks_.headerFrames, expectedFrames);

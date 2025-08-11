@@ -279,7 +279,6 @@ unique_ptr<CompressionScheme> CompressionSimulator::makeScheme() {
       return make_unique<HPACKScheme>(this, params_.tableSize);
   }
   LOG(FATAL) << "Bad scheme";
-  return nullptr;
 }
 
 std::pair<FrameFlags, unique_ptr<IOBuf>> CompressionSimulator::encode(

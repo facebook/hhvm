@@ -386,7 +386,6 @@ class HTTPCodec {
         [[fallthrough]];
       default:
         LOG(FATAL) << "Unreachable";
-        return std::numeric_limits<size_t>::max();
     }
   }
 

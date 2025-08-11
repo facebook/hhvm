@@ -141,7 +141,6 @@ namespace proxygen {
 bool QPACKStaticHeaderTable::isHeaderCodeInTableWithNonEmptyValue(
     HTTPHeaderCode /*headerCode*/) {
   LOG(FATAL) << __func__ << " not supported for QPACK";
-  return false;
 }
 
 const StaticHeaderTable& QPACKStaticHeaderTable::get() {

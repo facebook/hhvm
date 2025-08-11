@@ -10,12 +10,6 @@
 open Hh_prelude
 open Option.Monad_infix
 
-let remove_dead_warning name =
-  "hh_server was started without '--no-load', which is required when removing dead "
-  ^ name
-  ^ "s.\n"
-  ^ "Please run 'hh_client restart --no-load' to restart it."
-
 (** [take_max_errors n errors] truncate [errors] so its length is
   at most [n].
 
@@ -332,17 +326,11 @@ let handle :
         | Error e -> (env, Done (Error e))
         | Ok r -> map_env r ~f:(fun x -> Ok x))
   | ServerCommandTypes.REMOVE_DEAD_FIXMES codes ->
-    if genv.ServerEnv.options |> ServerArgs.no_load then (
-      log_check_response env;
-      (env, `Ok (ServerRename.get_fixme_patches codes env))
-    ) else
-      (env, `Error (remove_dead_warning "fixme"))
+    log_check_response env;
+    (env, `Ok (ServerRename.get_fixme_patches codes env))
   | ServerCommandTypes.REMOVE_DEAD_UNSAFE_CASTS ->
-    if genv.ServerEnv.options |> ServerArgs.no_load then (
-      log_check_response env;
-      (env, `Ok (ServerRename.get_dead_unsafe_cast_patches env))
-    ) else
-      (env, `Error (remove_dead_warning "unsafe cast"))
+    log_check_response env;
+    (env, `Ok (ServerRename.get_dead_unsafe_cast_patches env))
   | ServerCommandTypes.REWRITE_LAMBDA_PARAMETERS files ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerRename.get_lambda_parameter_rewrite_patches ctx files)

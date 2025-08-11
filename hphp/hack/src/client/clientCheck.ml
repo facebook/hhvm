@@ -858,9 +858,6 @@ let main_internal
     print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
     Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_REMOVE_DEAD_FIXMES codes ->
-    (* we need to confirm that the server is not already started
-     * in a non-no-load (yes-load) state
-     *)
     let%lwt conn = connect args in
     let%lwt (response, telemetry) =
       ClientConnect.rpc conn ~desc:args.desc

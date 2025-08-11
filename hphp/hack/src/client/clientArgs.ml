@@ -188,6 +188,15 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
     end
   in
   let add_single x = single_files := x :: !single_files in
+  let add_multi f =
+    let files =
+      Sys_utils.read_file f
+      |> Bytes.to_string
+      |> String.strip
+      |> String.split ~on:'\n'
+    in
+    single_files := files @ !single_files
+  in
   let add_warning_switch switch =
     warning_switches := switch :: !warning_switches
   in
@@ -648,6 +657,10 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
       ( "--single",
         Arg.String add_single,
         "<path> Return errors in file with provided name (give '-' for stdin)"
+      );
+      ( "--multi",
+        Arg.String add_multi,
+        "<path> Return errors for files read from the given file (one per line)"
       );
       ( "--show-tast",
         Arg.Unit (fun () -> show_tast := true),

@@ -117,3 +117,78 @@ class TestStatusSingle(common_tests.CommonTests):
             self.assertTrue(
                 len(file_errors) > 0, f"No errors found for typing_error_multi{i}.php"
             )
+
+    def test_status_multi(self) -> None:
+        """
+        Test hh_client check --multi
+        """
+        self.test_driver.start_hh_server()
+
+        # Also create the typing_error_multi files for the large file test
+        for i in range(1, 16):
+            with open(
+                os.path.join(self.test_driver.repo_dir, f"typing_error_multi{i}.php"),
+                "w",
+            ) as f:
+                f.write(
+                    f"<?hh //strict\n function error_multi{i}(): int {{ return h(); }}"
+                )
+
+        # Create a file with the list of files to check
+        file_list_path = os.path.join(self.test_driver.repo_dir, "files_to_check.txt")
+        with open(file_list_path, "w") as f:
+            for i in range(1, 6):
+                f.write(f"{self.test_driver.repo_dir}/typing_error_multi{i}.php\n")
+
+        # Test with --multi option
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}typing_error_multi1.php:2:40,42: Invalid return type (Typing[4110])",
+                "  {root}typing_error_multi1.php:2:27,29: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
+                "ERROR: {root}typing_error_multi2.php:2:40,42: Invalid return type (Typing[4110])",
+                "  {root}typing_error_multi2.php:2:27,29: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
+                "ERROR: {root}typing_error_multi3.php:2:40,42: Invalid return type (Typing[4110])",
+                "  {root}typing_error_multi3.php:2:27,29: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
+                "ERROR: {root}typing_error_multi4.php:2:40,42: Invalid return type (Typing[4110])",
+                "  {root}typing_error_multi4.php:2:27,29: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
+                "ERROR: {root}typing_error_multi5.php:2:40,42: Invalid return type (Typing[4110])",
+                "  {root}typing_error_multi5.php:2:27,29: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
+            ],
+            options=["--multi", file_list_path],
+            stdin="",
+        )
+
+        # Test with a large number of files (15) to trigger parallel processing
+        large_file_list_path = os.path.join(
+            self.test_driver.repo_dir, "large_files_to_check.txt"
+        )
+        with open(large_file_list_path, "w") as f:
+            for i in range(1, 16):
+                # Use the typing_error_multi files from the first test
+                f.write(f"{self.test_driver.repo_dir}/typing_error_multi{i}.php\n")
+
+        # We're not checking the exact error messages here because the order might vary due to
+        # parallel processing. Instead, we'll check that we get the expected number of errors.
+        output, _ = self.test_driver.check_cmd(
+            None, options=["--multi", large_file_list_path], stdin=""
+        )
+        error_lines = [
+            line for line in output.splitlines() if line.startswith("ERROR:")
+        ]
+
+        # We should have 15 type errors (one for each file)
+        self.assertEqual(len(error_lines), 15)
+
+        # Verify that each file has an error
+        for i in range(1, 16):
+            file_errors = [
+                line for line in error_lines if f"typing_error_multi{i}.php" in line
+            ]
+            self.assertTrue(
+                len(file_errors) > 0, f"No errors found for typing_error_multi{i}.php"
+            )

@@ -768,7 +768,7 @@ class Type:
   standard type:
   
   ```
-  @rust.Type{name = "OrderdedFloat<f64>"}
+  @rust.Type{name = "OrderedFloat<f64>"}
   typedef double Double
   
   struct T {

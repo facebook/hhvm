@@ -343,7 +343,8 @@ TEST_F(MstchCompatTest, fallback_through_self) {
     std::string baz;
   };
 
-  static whisker::dsl::prototype_builder<whisker::native_handle<t_mock_node>>
+  static whisker::dsl::prototype_builder<
+      whisker::dsl::named_native_handle<"foo", t_mock_node>>
       prototype_builder;
   prototype_builder.property(
       "bar", [](const t_mock_node& self) { return self.bar; });

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/eval_context.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
@@ -172,46 +171,41 @@ class mstch_object_proxy
   std::shared_ptr<mstch_object> proxied_;
   diagnostics_engine& diags_;
 
-  // For a lookup of the form "foo:bar", returns a pair of ["foo:self", "bar"]
-  // Returns nullopt if property can't be split to a self lookup, or is already
-  // a self lookup.
-  // Otherwise returns a pair of the self property and the nested property name.
-  std::optional<std::pair<std::string, std::string_view>>
-  get_self_property_name(const std::string_view& id) const {
-    if (boost::algorithm::ends_with(id, ":self")) {
+  // Try to resolve a property through the Whisker prototype under `:self`.
+  // For a lookup `foo:bar`, this will try to resolve the property
+  // `foo:self.bar`. If the lookup is already of the form `foo:self.bar`, or the
+  // mstch object does not have a `:self` property, or the prototype does not
+  // have a `bar` property, then the result will be `std::nullopt`.
+  std::optional<object> lookup_property_through_self(
+      std::string_view id) const {
+    if (id.ends_with(":self")) {
       // Already a self lookup that was tried - don't recurse
       return std::nullopt;
     }
 
+    // For a lookup of the form "foo:bar", split to qualifier="foo",
+    // property="bar"
     const size_t delimiter_pos = id.find_last_of(':');
     if (delimiter_pos == std::string::npos) {
       return std::nullopt;
     }
 
-    return std::make_optional(std::make_pair(
-        fmt::format("{}:self", id.substr(0, delimiter_pos)),
-        id.substr(delimiter_pos + 1)));
-  }
-
-  std::optional<object> lookup_property_through_self(
-      std::string_view id) const {
-    const std::optional<std::pair<std::string, std::string_view>>
-        self_property = get_self_property_name(id);
-    if (!self_property.has_value() || !proxied_->has(self_property->first)) {
+    const std::string_view qualifier = id.substr(0, delimiter_pos);
+    const std::string_view property = id.substr(delimiter_pos + 1);
+    const std::string self_name = fmt::format("{}:self", qualifier);
+    if (!proxied_->has(self_name)) {
       return std::nullopt;
     }
 
-    const mstch_object::lookup_result self_value =
-        proxied_->at(self_property->first);
+    const mstch_object::lookup_result self_value = proxied_->at(self_name);
     if (const object* self_whisker_obj = std::get_if<object>(&self_value)) {
       return detail::find_property(
           diags_,
           *self_whisker_obj,
           ast::variable_component{
               source_range{},
-              std::nullopt /* prototype */,
-              ast::identifier{
-                  source_range{}, std::string(self_property->second)}});
+              ast::identifier{source_range{}, std::string(qualifier)},
+              ast::identifier{source_range{}, std::string(property)}});
     }
 
     return std::nullopt;

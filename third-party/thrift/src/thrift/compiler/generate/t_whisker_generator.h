@@ -289,48 +289,50 @@ class t_whisker_generator : public t_generator {
   // Each `t_{node_type}` has a corresponding `h_{node}` alias which a
   // polymorphic_native_handle describing its polymorphic hierarchy
   // (subclasses).
-  template <typename... Cases>
-  using make_handle =
-      whisker::dsl::make_polymorphic_native_handle<"", Cases...>;
+  template <whisker::dsl::fixed_string Q, typename... Cases>
+  using make_handle = whisker::dsl::make_polymorphic_native_handle<Q, Cases...>;
 
-  using h_interaction = make_handle<t_interaction>;
-  using h_service = make_handle<t_service>;
-  using h_interface = make_handle<t_interface, h_interaction, h_service>;
+  using h_interaction = make_handle<"interaction", t_interaction>;
+  using h_service = make_handle<"service", t_service>;
+  using h_interface = make_handle<"", t_interface, h_interaction, h_service>;
 
-  using h_function = make_handle<t_function>;
-  using h_stream = make_handle<t_stream>;
-  using h_sink = make_handle<t_sink>;
-  using h_include = make_handle<t_include>;
-  using h_package = make_handle<t_package>;
+  using h_function = make_handle<"function", t_function>;
+  using h_stream = make_handle<"", t_stream>;
+  using h_sink = make_handle<"", t_sink>;
+  using h_include = make_handle<"", t_include>;
+  using h_package = make_handle<"", t_package>;
 
-  using h_program = make_handle<t_program>;
+  using h_program = make_handle<"program", t_program>;
 
-  using h_list = make_handle<t_list>;
-  using h_set = make_handle<t_set>;
-  using h_map = make_handle<t_map>;
-  using h_container = make_handle<t_container, h_set, h_list, h_map>;
+  using h_list = make_handle<"", t_list>;
+  using h_set = make_handle<"", t_set>;
+  using h_map = make_handle<"", t_map>;
+  using h_container = make_handle<"", t_container, h_set, h_list, h_map>;
 
-  using h_const = make_handle<t_const>;
-  using h_const_value = whisker::native_handle<t_const_value>;
-  using h_enum = make_handle<t_enum>;
-  using h_enum_value = make_handle<t_enum_value>;
-  using h_field = make_handle<t_field>;
-  using h_primitive_type = make_handle<t_primitive_type>;
+  using h_const = make_handle<"constant", t_const>;
+  using h_const_value =
+      whisker::dsl::named_native_handle<"value", t_const_value>;
+  using h_enum = make_handle<"enum", t_enum>;
+  using h_enum_value = make_handle<"enum_value", t_enum_value>;
+  using h_field = make_handle<"field", t_field>;
+  using h_primitive_type = make_handle<"", t_primitive_type>;
 
-  using h_exception = make_handle<t_exception>;
-  using h_union = make_handle<t_union>;
-  using h_throws = make_handle<t_throws>;
-  using h_paramlist = make_handle<t_paramlist>;
-  using h_struct = make_handle<t_struct>;
+  using h_exception = make_handle<"", t_exception>;
+  using h_union = make_handle<"", t_union>;
+  using h_throws = make_handle<"", t_throws>;
+  using h_paramlist = make_handle<"", t_paramlist>;
+  using h_struct = make_handle<"", t_struct>;
   using h_structured = make_handle<
+      "struct",
       t_structured,
       h_exception,
       h_paramlist,
       h_struct,
       h_throws,
       h_union>;
-  using h_typedef = make_handle<t_typedef>;
+  using h_typedef = make_handle<"typedef", t_typedef>;
   using h_type = make_handle<
+      "type",
       t_type,
       h_primitive_type,
       h_enum,
@@ -340,6 +342,7 @@ class t_whisker_generator : public t_generator {
       h_interface>;
 
   using h_named = make_handle<
+      "",
       t_named,
       h_const,
       h_enum_value,
@@ -347,7 +350,7 @@ class t_whisker_generator : public t_generator {
       h_function,
       h_type,
       h_program>;
-  using h_node = make_handle<t_node, h_named>;
+  using h_node = make_handle<"", t_node, h_named>;
 
   // The `mem_fn` family of functions below are intended to create properties in
   // `dsl::make_prototype`. These helpers make it easy to map member functions

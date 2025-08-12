@@ -3,3 +3,4 @@
 --config pessimise_builtins=true --enable-supportdyn-hint --union-intersection-type-hints
 --config enable_no_auto_dynamic=true
 --config everything_sdt=false
+--config constraint_array_index=true

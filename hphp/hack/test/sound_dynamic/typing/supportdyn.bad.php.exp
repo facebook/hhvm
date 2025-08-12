@@ -1,7 +1,9 @@
 ERROR: File "supportdyn.bad.php", line 7, characters 3-8:
-This is not an object of type `KeyedContainer`, this is a value of type supportdyn<nonnull> (Typing[4324])
-  File "supportdyn.bad.php", line 6, characters 15-33:
-  Definition is here
+Typing error (Typing[4110])
+  File "supportdyn.bad.php", line 7, characters 3-8:
+  Expected an array that can be indexed
+  File "supportdyn.bad.php", line 6, characters 26-32:
+  But got `nonnull`
 ERROR: File "supportdyn.bad.php", line 8, characters 3-11:
 a nonnull value does not allow array append (Typing[4006])
   File "supportdyn.bad.php", line 6, characters 26-32:

@@ -298,7 +298,7 @@ struct BasicIntrusiveSharedPtrControlBlock {
         old >= 0, "call to acquireRef() revealed that ref count is negative");
   }
   RefCount releaseRef() noexcept {
-    auto old = refCount_.fetch_sub(1, std::memory_order_release);
+    auto old = refCount_.fetch_sub(1, std::memory_order_acq_rel);
     FOLLY_SAFE_DCHECK(
         old >= 1, "call to releaseRef() when ref count is already 0");
     return old - 1;

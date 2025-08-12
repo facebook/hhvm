@@ -25,22 +25,64 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 
 ::cpp2::MyServiceFastServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::__fbthrift_serviceInfoHolder;
 
+//
+// Service Methods
+//
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_hasDataById(apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t /*id*/) {
-  callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("hasDataById"));
+//
+// Method 'hasDataById'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_hasDataById(
+    apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t /*id*/) {
+  callback->exception(
+      apache::thrift::detail::si::create_app_exn_unimplemented("hasDataById"));
 }
+//
+// End of Method 'hasDataById'
+//
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_getDataById(apache::thrift::HandlerCallbackPtr<::std::string> callback, ::std::int64_t /*id*/) {
-  callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("getDataById"));
+//
+// Method 'getDataById'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_getDataById(
+    apache::thrift::HandlerCallbackPtr<::std::string> callback, ::std::int64_t /*id*/) {
+  callback->exception(
+      apache::thrift::detail::si::create_app_exn_unimplemented("getDataById"));
 }
+//
+// End of Method 'getDataById'
+//
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_putDataById(apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
-  callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("putDataById"));
+//
+// Method 'putDataById'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_putDataById(
+    apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
+  callback->exception(
+      apache::thrift::detail::si::create_app_exn_unimplemented("putDataById"));
 }
+//
+// End of Method 'putDataById'
+//
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr /*callback*/, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
+//
+// Method 'lobDataById'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById(
+    apache::thrift::HandlerCallbackOneWay::Ptr /*callback*/, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
   LOG(DFATAL) << "Function lobDataById is unimplemented";
 }
+//
+// End of Method 'lobDataById'
+//
+
+//
+// End of Service Methods
+//
 
 
 namespace cpp2 {

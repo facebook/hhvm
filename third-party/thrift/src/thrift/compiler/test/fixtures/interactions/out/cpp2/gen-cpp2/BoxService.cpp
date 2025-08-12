@@ -25,6 +25,13 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 
 ::cpp2::BoxServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::BoxService>::__fbthrift_serviceInfoHolder;
 
+//
+// Service Methods
+//
+
+//
+// Method 'getABoxSession'
+//
 
 apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>> apache::thrift::ServiceHandler<::cpp2::BoxService>::getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> /*req*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getABoxSession");
@@ -34,33 +41,53 @@ apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxServic
   return getABoxSession(std::move(p_req));
 }
 
-folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> apache::thrift::ServiceHandler<::cpp2::BoxService>::semifuture_getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
+folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>
+apache::thrift::ServiceHandler<::cpp2::BoxService>::semifuture_getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_getABoxSession.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_getABoxSession.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_getABoxSession(std::move(p_req));
 }
 
-folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> apache::thrift::ServiceHandler<::cpp2::BoxService>::future_getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
+folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>
+apache::thrift::ServiceHandler<::cpp2::BoxService>::future_getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_getABoxSession.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_getABoxSession(std::move(p_req)), getInternalKeepAlive());
+  __fbthrift_invocation_getABoxSession.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_getABoxSession(std::move(p_req)),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> apache::thrift::ServiceHandler<::cpp2::BoxService>::co_getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
+folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>
+apache::thrift::ServiceHandler<::cpp2::BoxService>::co_getABoxSession(std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_getABoxSession.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::cpp2::ShouldBeBoxed> /*req*/>(std::move(p_req)));
+  __fbthrift_invocation_getABoxSession.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<std::unique_ptr<::cpp2::ShouldBeBoxed> /*req*/>(std::move(p_req)));
 }
 
-folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> apache::thrift::ServiceHandler<::cpp2::BoxService>::co_getABoxSession(apache::thrift::RequestParams /* params */, std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
+folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> apache::thrift::ServiceHandler<::cpp2::BoxService>::co_getABoxSession(
+    apache::thrift::RequestParams /* params */, std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_getABoxSession.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_getABoxSession.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_getABoxSession(std::move(p_req));
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::BoxService>::async_tm_getABoxSession(apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> callback, std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
+void apache::thrift::ServiceHandler<::cpp2::BoxService>::async_tm_getABoxSession(
+    apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>> callback, std::unique_ptr<::cpp2::ShouldBeBoxed> p_req) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -69,58 +96,69 @@ void apache::thrift::ServiceHandler<::cpp2::BoxService>::async_tm_getABoxSession
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_getABoxSession.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_getABoxSession.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_getABoxSession.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_getABoxSession.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_getABoxSession(params, std::move(p_req));
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_getABoxSession.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_getABoxSession.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_getABoxSession(std::move(p_req));
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_getABoxSession(std::move(p_req));
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_getABoxSession(params, std::move(p_req));
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_getABoxSession(std::move(p_req));
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_getABoxSession(std::move(p_req)));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -133,7 +171,21 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'getABoxSession'
+//
 
+//
+// End of Service Methods
+//
+
+//
+// Service Methods
+//
+
+//
+// Method 'getABox'
+//
 
 void apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::getABox(::cpp2::ShouldBeBoxed& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getABox");
@@ -143,29 +195,43 @@ void apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::syn
   return getABox(_return);
 }
 
-folly::SemiFuture<std::unique_ptr<::cpp2::ShouldBeBoxed>> apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::semifuture_getABox() {
+folly::SemiFuture<std::unique_ptr<::cpp2::ShouldBeBoxed>>
+apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::semifuture_getABox() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_getABox.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_getABox.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   auto ret = std::make_unique<::cpp2::ShouldBeBoxed>();
   sync_getABox(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<std::unique_ptr<::cpp2::ShouldBeBoxed>> apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::co_getABox() {
+folly::coro::Task<std::unique_ptr<::cpp2::ShouldBeBoxed>>
+apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::co_getABox() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_getABox.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<>());
+  __fbthrift_invocation_getABox.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<>());
 }
 
-folly::coro::Task<std::unique_ptr<::cpp2::ShouldBeBoxed>> apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::co_getABox(apache::thrift::RequestParams /* params */) {
+folly::coro::Task<std::unique_ptr<::cpp2::ShouldBeBoxed>> apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::co_getABox(
+    apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_getABox.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_getABox.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_getABox();
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::async_tm_getABox(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>> callback) {
+void apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::async_tm_getABox(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -174,54 +240,65 @@ void apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf::asy
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_getABox.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_getABox.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_getABox.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_getABox.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_getABox(params);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_getABox.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
+        __fbthrift_invocation_getABox.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::SemiFuture,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_getABox();
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_getABox(params);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_getABox();
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         ::cpp2::ShouldBeBoxed _return;
         sync_getABox(_return);
         callback->result(std::move(_return));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -234,6 +311,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'getABox'
+//
+
+//
+// End of Service Methods
+//
 
 namespace cpp2 {
 

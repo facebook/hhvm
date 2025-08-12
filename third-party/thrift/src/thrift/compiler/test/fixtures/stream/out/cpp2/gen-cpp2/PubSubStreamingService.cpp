@@ -25,6 +25,13 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 
 ::cpp2::PubSubStreamingServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::__fbthrift_serviceInfoHolder;
 
+//
+// Service Methods
+//
+
+//
+// Method 'returnstream'
+//
 
 ::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::returnstream(::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("returnstream");
@@ -34,33 +41,53 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
   return returnstream(p_i32_from, p_i32_to);
 }
 
-folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_returnstream.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_returnstream.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_returnstream(p_i32_from, p_i32_to);
 }
 
-folly::Future<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+folly::Future<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_returnstream.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_returnstream(p_i32_from, p_i32_to), getInternalKeepAlive());
+  __fbthrift_invocation_returnstream.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_returnstream(p_i32_from, p_i32_to),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_returnstream.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/>(p_i32_from, p_i32_to));
+  __fbthrift_invocation_returnstream.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/>(p_i32_from, p_i32_to));
 }
 
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_returnstream(apache::thrift::RequestParams /* params */, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_returnstream(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_returnstream.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_returnstream.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_returnstream(p_i32_from, p_i32_to);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_returnstream(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_returnstream(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -69,58 +96,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_re
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_returnstream.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_returnstream.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_returnstream.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_returnstream.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_returnstream(params, p_i32_from, p_i32_to);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_returnstream.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_returnstream.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_returnstream(p_i32_from, p_i32_to);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_returnstream(p_i32_from, p_i32_to);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_returnstream(params, p_i32_from, p_i32_to);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_returnstream(p_i32_from, p_i32_to);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_returnstream(p_i32_from, p_i32_to));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -133,6 +171,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'returnstream'
+//
+
+//
+// Method 'streamthrows'
+//
 
 ::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::streamthrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("streamthrows");
@@ -142,33 +187,53 @@ determineInvocationType:
   return streamthrows(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_streamthrows(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_streamthrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_streamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_streamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_streamthrows(p_foo);
 }
 
-folly::Future<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_streamthrows(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_streamthrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_streamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_streamthrows(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_streamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_streamthrows(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_streamthrows(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_streamthrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_streamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_streamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_streamthrows(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_streamthrows(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_streamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_streamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_streamthrows(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_streamthrows(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_streamthrows(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -177,58 +242,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_st
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_streamthrows.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_streamthrows.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_streamthrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_streamthrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_streamthrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_streamthrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_streamthrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_streamthrows(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_streamthrows(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_streamthrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_streamthrows(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_streamthrows(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -241,6 +317,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'streamthrows'
+//
+
+//
+// Method 'servicethrows'
+//
 
 ::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::servicethrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("servicethrows");
@@ -250,33 +333,53 @@ determineInvocationType:
   return servicethrows(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_servicethrows(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_servicethrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_servicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_servicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_servicethrows(p_foo);
 }
 
-folly::Future<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_servicethrows(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_servicethrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_servicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_servicethrows(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_servicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_servicethrows(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_servicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_servicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_servicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_servicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_servicethrows(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -285,58 +388,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_se
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_servicethrows.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_servicethrows.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_servicethrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_servicethrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_servicethrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_servicethrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_servicethrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_servicethrows(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_servicethrows(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_servicethrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_servicethrows(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_servicethrows(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -349,6 +463,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'servicethrows'
+//
+
+//
+// Method 'servicethrows2'
+//
 
 ::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::servicethrows2(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("servicethrows2");
@@ -358,33 +479,53 @@ determineInvocationType:
   return servicethrows2(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_servicethrows2(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_servicethrows2(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_servicethrows2.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_servicethrows2.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_servicethrows2(p_foo);
 }
 
-folly::Future<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_servicethrows2(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_servicethrows2(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_servicethrows2.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_servicethrows2(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_servicethrows2.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_servicethrows2(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows2(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows2(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_servicethrows2.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_servicethrows2.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows2(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_servicethrows2(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_servicethrows2.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_servicethrows2.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_servicethrows2(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows2(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows2(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -393,58 +534,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_se
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_servicethrows2.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_servicethrows2.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_servicethrows2.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_servicethrows2.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_servicethrows2(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_servicethrows2.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_servicethrows2.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_servicethrows2(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_servicethrows2(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_servicethrows2(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_servicethrows2(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_servicethrows2(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -457,6 +609,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'servicethrows2'
+//
+
+//
+// Method 'boththrows'
+//
 
 ::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::boththrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("boththrows");
@@ -466,33 +625,53 @@ determineInvocationType:
   return boththrows(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_boththrows(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_boththrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_boththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_boththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_boththrows(p_foo);
 }
 
-folly::Future<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_boththrows(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_boththrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_boththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_boththrows(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_boththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_boththrows(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_boththrows(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_boththrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_boththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_boththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_boththrows(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_boththrows(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_boththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_boththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_boththrows(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_boththrows(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_boththrows(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -501,58 +680,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_bo
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_boththrows.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_boththrows.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_boththrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_boththrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_boththrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_boththrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_boththrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_boththrows(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_boththrows(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_boththrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_boththrows(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_boththrows(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -565,6 +755,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'boththrows'
+//
+
+//
+// Method 'responseandstreamstreamthrows'
+//
 
 ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamstreamthrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("responseandstreamstreamthrows");
@@ -574,33 +771,53 @@ determineInvocationType:
   return responseandstreamstreamthrows(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamstreamthrows(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamstreamthrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_responseandstreamstreamthrows(p_foo);
 }
 
-folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_responseandstreamstreamthrows(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_responseandstreamstreamthrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_responseandstreamstreamthrows(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_responseandstreamstreamthrows(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamstreamthrows(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamstreamthrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamstreamthrows(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamstreamthrows(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_responseandstreamstreamthrows(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamstreamthrows(apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamstreamthrows(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -609,58 +826,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_re
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_responseandstreamstreamthrows.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_responseandstreamstreamthrows.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_responseandstreamstreamthrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_responseandstreamstreamthrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_responseandstreamstreamthrows(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_responseandstreamstreamthrows(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_responseandstreamstreamthrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_responseandstreamstreamthrows(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_responseandstreamstreamthrows(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -673,6 +901,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'responseandstreamstreamthrows'
+//
+
+//
+// Method 'responseandstreamservicethrows'
+//
 
 ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamservicethrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("responseandstreamservicethrows");
@@ -682,33 +917,53 @@ determineInvocationType:
   return responseandstreamservicethrows(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamservicethrows(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamservicethrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_responseandstreamservicethrows(p_foo);
 }
 
-folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_responseandstreamservicethrows(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_responseandstreamservicethrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_responseandstreamservicethrows(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_responseandstreamservicethrows(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamservicethrows(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamservicethrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamservicethrows(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamservicethrows(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_responseandstreamservicethrows(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamservicethrows(apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamservicethrows(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -717,58 +972,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_re
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_responseandstreamservicethrows.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_responseandstreamservicethrows.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_responseandstreamservicethrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_responseandstreamservicethrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_responseandstreamservicethrows(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_responseandstreamservicethrows(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_responseandstreamservicethrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_responseandstreamservicethrows(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_responseandstreamservicethrows(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -781,6 +1047,13 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'responseandstreamservicethrows'
+//
+
+//
+// Method 'responseandstreamboththrows'
+//
 
 ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamboththrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("responseandstreamboththrows");
@@ -790,33 +1063,53 @@ determineInvocationType:
   return responseandstreamboththrows(p_foo);
 }
 
-folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamboththrows(::std::int32_t p_foo) {
+folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamboththrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
   return sync_responseandstreamboththrows(p_foo);
 }
 
-folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_responseandstreamboththrows(::std::int32_t p_foo) {
+folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::future_responseandstreamboththrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(semifuture_responseandstreamboththrows(p_foo), getInternalKeepAlive());
+  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_responseandstreamboththrows(p_foo),
+      getInternalKeepAlive());
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamboththrows(::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>
+apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamboththrows(::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
+  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*foo*/>(p_foo));
 }
 
-folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamboththrows(apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
+folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::co_responseandstreamboththrows(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
   return co_responseandstreamboththrows(p_foo);
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamboththrows(apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamboththrows(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -825,58 +1118,69 @@ void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_re
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-  auto invocationType = __fbthrift_invocation_responseandstreamboththrows.load(std::memory_order_relaxed);
+  auto invocationType =
+      __fbthrift_invocation_responseandstreamboththrows.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm:
-      {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
 #if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_responseandstreamboththrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        __fbthrift_invocation_responseandstreamboththrows.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
         [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
-      case apache::thrift::detail::si::InvocationType::Future:
-      {
+      case apache::thrift::detail::si::InvocationType::Future: {
         auto fut = future_responseandstreamboththrows(p_foo);
-        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::SemiFuture:
-      {
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
         auto fut = semifuture_responseandstreamboththrows(p_foo);
-        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam:
-      {
-        apache::thrift::RequestParams params{callback->getRequestContext(),
-          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
         auto task = co_responseandstreamboththrows(params, p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
-      case apache::thrift::detail::si::InvocationType::Coro:
-      {
+      case apache::thrift::detail::si::InvocationType::Coro: {
         auto task = co_responseandstreamboththrows(p_foo);
-        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync:
-      {
+      case apache::thrift::detail::si::InvocationType::Sync: {
         callback->result(sync_responseandstreamboththrows(p_foo));
         return;
       }
-      default:
-      {
+      default: {
         folly::assume_unreachable();
       }
     }
@@ -889,10 +1193,26 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
+//
+// End of Method 'responseandstreamboththrows'
+//
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_eb_returnstreamFast(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
-  callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("returnstreamFast"));
+//
+// Method 'returnstreamFast'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_eb_returnstreamFast(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>> callback, ::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
+  callback->exception(
+      apache::thrift::detail::si::create_app_exn_unimplemented("returnstreamFast"));
 }
+//
+// End of Method 'returnstreamFast'
+//
+
+//
+// End of Service Methods
+//
 
 
 namespace cpp2 {

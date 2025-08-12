@@ -2747,7 +2747,7 @@ void hphp_process_init(bool skipExtensions) {
       BootStats::set("prof_data_source_host",
                      jit::ProfData::buildHost()->toCppString());
       BootStats::set("prof_data_timestamp", jit::ProfData::buildTime());
-      Cfg::Jit::ProfileRequests = 0;
+      Cfg::Jit::ProfileBCSize = 0;
       Cfg::Jit::WorkerThreads = numWorkers;
       // Run retranslateAll asynchronously, without waiting for it to finish
       // here.

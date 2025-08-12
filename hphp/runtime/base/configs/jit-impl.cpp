@@ -54,10 +54,6 @@ int JitLoader::WorkerArenasDefault() {
   return std::max(1, Process::GetCPUCount() / 8);
 }
 
-uint32_t JitLoader::ProfileRequestsDefault() {
-  return debug ? std::numeric_limits<uint32_t>::max() : 2500;
-}
-
 uint32_t JitLoader::ProfileBCSizeDefault() {
   return debug ? std::numeric_limits<uint32_t>::max()
     : Jit::Concurrently ? 3750000

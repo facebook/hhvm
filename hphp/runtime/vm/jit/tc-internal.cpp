@@ -414,13 +414,9 @@ void checkFreeProfData() {
 bool shouldProfileNewFuncs() {
   if (profData() == nullptr) return false;
 
-  // We have two knobs to control the number of functions we're allowed to
-  // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
-  // functions until either of these limits is exceeded. In practice, we expect
-  // to hit the bytecode size limit first, but we keep the request limit around
-  // as a safety net.
-  return profData()->profilingBCSize() < Cfg::Jit::ProfileBCSize &&
-    requestCount() < Cfg::Jit::ProfileRequests;
+  // We have one knob to control the number of functions we're allowed to
+  // profile:Eval.JitProfileBCSize. We profile new functions this limit is exceeded.
+  return profData()->profilingBCSize() < Cfg::Jit::ProfileBCSize;
 }
 
 bool profileFunc(const Func* func) {

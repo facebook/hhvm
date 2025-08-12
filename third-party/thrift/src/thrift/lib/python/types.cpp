@@ -1703,7 +1703,7 @@ void MutableMapHandler::read(
   for (std::uint32_t i = 0; i < mapSize; ++i) {
     UniquePyObjectPtr mkey = read(keyReader);
     UniquePyObjectPtr mvalue = read(valueReader);
-    PyDict_SetItem(dict.get(), mkey.release(), mvalue.release());
+    PyDict_SetItem(dict.get(), mkey.get(), mvalue.get());
   }
   setPyObject(objectPtr, std::move(dict));
 }

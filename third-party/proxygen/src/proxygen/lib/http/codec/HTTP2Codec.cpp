@@ -241,7 +241,12 @@ ErrorCode HTTP2Codec::parseFrame(folly::io::Cursor& cursor) {
   }
 
   // Landing here means unknown, unimplemented or ignored frame.
-  VLOG(2) << "Skipping frame (type=" << (uint8_t)curHeader_.type << ")";
+  // PRIORITY frames are deprecated in RFC 9113/9218 but still sent by legacy H2
+  // implementations. Skip logging these frames to reduce noise.
+  if (curHeader_.type != http2::FrameType::PRIORITY) {
+    VLOG(2) << "Skipping frame (type=" << static_cast<int>(curHeader_.type)
+            << ")";
+  }
   cursor.skip(curHeader_.length);
   return ErrorCode::NO_ERROR;
 }

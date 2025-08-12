@@ -18,6 +18,8 @@
 from __future__ import annotations
 
 import os
+import time
+from typing import Generator
 
 import click
 import memray
@@ -39,6 +41,7 @@ from thrift.benchmark.struct.thrift_types import (
     StringBucket as StringBucketImmutable,
 )
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
+from thrift.python.protocol import Protocol
 
 
 """
@@ -90,15 +93,15 @@ def _create_immutable() -> (
     )
     my_struct = MyStructImmutable(
         val_bool=True,
-        val_i32=32,
-        val_i64=64,
+        val_i32=12332,
+        val_i64=12364,
         val_string="str",
-        val_list=[1, 2, 3],
+        val_list=[1001, 1002, 1003],
         str_list=["1", "2", "3"],
-        val_map={1: "1", 2: "2", 3: "3"},
+        val_map={1100: "1", 2100: "2", 3100: "3"},
         str_map={"1": "1", "2": "2", "3": "3"},
-        val_set={1, 2, 3},
-        val_map_structs={1: included, 2: included},
+        val_set={1123, 2123, 3123},
+        val_map_structs={1231: included, 1232: included},
         val_struct=string_bucket,
         val_enum=MyEnum.FOO,
     )
@@ -122,15 +125,15 @@ def _create_mutable() -> tuple[IncludedMutable, StringBucketMutable, MyStructMut
     )
     my_struct = MyStructMutable(
         val_bool=True,
-        val_i32=32,
-        val_i64=64,
+        val_i32=12332,
+        val_i64=12364,
         val_string="str",
-        val_list=to_thrift_list([1, 2, 3]),
+        val_list=to_thrift_list([1001, 1002, 1003]),
         str_list=to_thrift_list(["1", "2", "3"]),
-        val_map=to_thrift_map({1: "1", 2: "2", 3: "3"}),
+        val_map=to_thrift_map({1100: "1", 2100: "2", 3100: "3"}),
         str_map=to_thrift_map({"1": "1", "2": "2", "3": "3"}),
-        val_set=to_thrift_set({1, 2, 3}),
-        val_map_structs=to_thrift_map({1: included, 2: included}),
+        val_set=to_thrift_set({1123, 2123, 3123}),
+        val_map_structs=to_thrift_map({1231: included, 1232: included}),
         val_struct=string_bucket,
         val_enum=MyEnum.FOO,
     )
@@ -181,34 +184,60 @@ def mutable_initialize() -> None:
         lst.append(included)
 
 
-@cli.command()
-def immutable_deserialize() -> None:
+def all_protocols() -> Generator[Protocol, None, None]:
+    yield Protocol.COMPACT
+    yield Protocol.BINARY
+    yield Protocol.JSON
+
+
+def immutable_deserialize_impl(leak: bool) -> None:
     lst = []
     _, _, my_struct = _create_immutable()
-    bytes = immutable_serializer.serialize(
-        my_struct, protocol=immutable_serializer.Protocol.COMPACT
-    )
-    for _ in range(1000):
-        my_struct = immutable_serializer.deserialize(
-            MyStructImmutable, bytes, protocol=immutable_serializer.Protocol.COMPACT
-        )
-        lst.append(my_struct)
+    for protocol in all_protocols():
+        buf: bytes = immutable_serializer.serialize(my_struct, protocol=protocol)
+        for _ in range(10000):
+            my_struct = immutable_serializer.deserialize(
+                MyStructImmutable, buf, protocol=protocol
+            )
+            if not leak:
+                lst.append(my_struct)
+
+
+@cli.command()
+def immutable_deserialize() -> None:
+    immutable_deserialize_impl(leak=False)
+
+
+@cli.command()
+def immutable_deserialize_leak() -> None:
+    immutable_deserialize_impl(leak=True)
+
+
+def mutable_deserialize_impl(leak: bool) -> None:
+    lst = []
+    _, _, my_struct = _create_mutable()
+    for protocol in all_protocols():
+        buf: bytes = mutable_serializer.serialize(my_struct, protocol=protocol)
+        for _ in range(10000):
+            my_struct = mutable_serializer.deserialize(
+                MyStructMutable,
+                buf,
+                protocol=protocol,
+            )
+            if not leak:
+                lst.append(my_struct)
+
+    time.sleep(1)
 
 
 @cli.command()
 def mutable_deserialize() -> None:
-    lst = []
-    _, _, my_struct = _create_mutable()
-    serialized_data = mutable_serializer.serialize(
-        my_struct, protocol=mutable_serializer.Protocol.COMPACT
-    )
-    for _ in range(1000):
-        my_struct = mutable_serializer.deserialize(
-            MyStructMutable,
-            serialized_data,
-            protocol=mutable_serializer.Protocol.COMPACT,
-        )
-        lst.append(my_struct)
+    mutable_deserialize_impl(leak=False)
+
+
+@cli.command()
+def mutable_deserialize_leak() -> None:
+    mutable_deserialize_impl(leak=True)
 
 
 def main() -> None:

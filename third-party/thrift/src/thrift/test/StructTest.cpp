@@ -24,20 +24,17 @@
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
-using namespace apache::thrift;
-using namespace apache::thrift::test;
-
+namespace apache::thrift::test {
 namespace {
+
 using apache::thrift::detail::st::struct_private_access;
 
-class StructTest : public testing::Test {};
-
-TEST_F(StructTest, compilation_terse_writes_refs_shared) {
+TEST(StructTest, compilation_terse_writes_refs_shared) {
   BasicRefsSharedTerseWrites a;
   (void)a;
 }
 
-TEST_F(StructTest, serialization_terse_writes_refs_shared) {
+TEST(StructTest, serialization_terse_writes_refs_shared) {
   using apache::thrift::CompactSerializer;
 
   BasicRefsSharedTerseWrites a;
@@ -64,7 +61,7 @@ TEST_F(StructTest, serialization_terse_writes_refs_shared) {
   EXPECT_EQ(a, b);
 }
 
-TEST_F(StructTest, serialization_terse_writes_default_values) {
+TEST(StructTest, serialization_terse_writes_default_values) {
   using apache::thrift::CompactSerializer;
 
   BasicRefsSharedTerseWrites empty;
@@ -80,7 +77,7 @@ TEST_F(StructTest, serialization_terse_writes_default_values) {
       CompactSerializer::serialize<std::string>(defaults));
 }
 
-TEST_F(StructTest, equal_to) {
+TEST(StructTest, equal_to) {
   std::equal_to<Basic> op;
 
   {
@@ -168,7 +165,7 @@ TEST_F(StructTest, equal_to) {
 }
 
 // currently, binary fields are handled specially, so they get their own tests
-TEST_F(StructTest, equal_to_binary) {
+TEST(StructTest, equal_to_binary) {
   std::equal_to<BasicBinaries> op;
 
   {
@@ -257,7 +254,7 @@ TEST_F(StructTest, equal_to_binary) {
 
 // current equal-to codegen implements def/opt/req ref fields with a single
 // code path, so no need to test the different cases separately
-TEST_F(StructTest, equal_to_refs) {
+TEST(StructTest, equal_to_refs) {
   std::equal_to<BasicRefs> op;
 
   {
@@ -308,7 +305,7 @@ TEST_F(StructTest, equal_to_refs) {
   }
 }
 
-TEST_F(StructTest, equal_to_refs_shared) {
+TEST(StructTest, equal_to_refs_shared) {
   std::equal_to<BasicRefsShared> op;
 
   {
@@ -340,7 +337,7 @@ TEST_F(StructTest, equal_to_refs_shared) {
   }
 }
 
-TEST_F(StructTest, less) {
+TEST(StructTest, less) {
   std::less<Basic> op;
 
   {
@@ -428,7 +425,7 @@ TEST_F(StructTest, less) {
 }
 
 // currently, binary fields are handled specially, so they get their own tests
-TEST_F(StructTest, less_binary) {
+TEST(StructTest, less_binary) {
   std::less<BasicBinaries> op;
 
   {
@@ -517,7 +514,7 @@ TEST_F(StructTest, less_binary) {
 
 // current less codegen implements def/opt/req ref fields with a single
 // code path, so no need to test the different cases separately
-TEST_F(StructTest, less_refs) {
+TEST(StructTest, less_refs) {
   std::less<BasicRefs> op;
 
   {
@@ -545,7 +542,7 @@ TEST_F(StructTest, less_refs) {
   }
 }
 
-TEST_F(StructTest, less_refs_shared) {
+TEST(StructTest, less_refs_shared) {
   std::less<BasicRefsShared> op;
 
   {
@@ -604,7 +601,7 @@ TEST_F(StructTest, less_refs_shared) {
   }
 }
 
-TEST_F(StructTest, small_sorted_vector) {
+TEST(StructTest, small_sorted_vector) {
   using Set = folly::small_sorted_vector_set<int32_t>;
   using Map = folly::small_sorted_vector_map<int32_t, int32_t>;
   using serializer = apache::thrift::BinarySerializer;
@@ -626,7 +623,7 @@ TEST_F(StructTest, small_sorted_vector) {
   EXPECT_EQ(*o.map_field(), *a.map_field());
 }
 
-TEST_F(StructTest, noexcept_move_annotation) {
+TEST(StructTest, noexcept_move_annotation) {
   EXPECT_TRUE(std::is_nothrow_move_constructible<NoexceptMoveStruct>::value);
   EXPECT_TRUE(std::is_nothrow_move_assignable<NoexceptMoveStruct>::value);
   NoexceptMoveStruct a;
@@ -638,7 +635,7 @@ TEST_F(StructTest, noexcept_move_annotation) {
   EXPECT_EQ(c.string_field().value(), "hello world");
 }
 
-TEST_F(StructTest, clear) {
+TEST(StructTest, clear) {
   Basic obj;
   obj.def_field() = 7;
   obj.req_field() = 8;
@@ -650,7 +647,7 @@ TEST_F(StructTest, clear) {
   EXPECT_FALSE(obj.opt_field());
 }
 
-TEST_F(StructTest, EmptiableOptionalFieldsStruct) {
+TEST(StructTest, EmptiableOptionalFieldsStruct) {
   EmptiableOptionalFieldsStruct obj;
   EXPECT_TRUE(apache::thrift::empty(obj));
 
@@ -661,7 +658,7 @@ TEST_F(StructTest, EmptiableOptionalFieldsStruct) {
   EXPECT_TRUE(apache::thrift::empty(obj));
 }
 
-TEST_F(StructTest, NotEmptiableStruct) {
+TEST(StructTest, NotEmptiableStruct) {
   NotEmptiableStruct obj;
   EXPECT_FALSE(apache::thrift::empty(obj));
 
@@ -669,12 +666,12 @@ TEST_F(StructTest, NotEmptiableStruct) {
   EXPECT_FALSE(apache::thrift::empty(obj2));
 }
 
-TEST_F(StructTest, EmptyTerseStruct) {
+TEST(StructTest, EmptyTerseStruct) {
   EmptyTerseStruct obj;
   EXPECT_TRUE(apache::thrift::empty(obj));
 }
 
-TEST_F(StructTest, EmptiableTerseFieldsStruct) {
+TEST(StructTest, EmptiableTerseFieldsStruct) {
   EmptiableTerseFieldsStruct obj;
   EXPECT_TRUE(apache::thrift::empty(obj));
 
@@ -685,7 +682,7 @@ TEST_F(StructTest, EmptiableTerseFieldsStruct) {
   EXPECT_TRUE(apache::thrift::empty(obj));
 }
 
-TEST_F(StructTest, OptionalFieldsStruct) {
+TEST(StructTest, OptionalFieldsStruct) {
   OptionalFieldsStruct obj;
   EXPECT_TRUE(apache::thrift::empty(obj));
 
@@ -696,7 +693,7 @@ TEST_F(StructTest, OptionalFieldsStruct) {
   EXPECT_TRUE(apache::thrift::empty(obj));
 }
 
-TEST_F(StructTest, OptionalFieldsTerseStruct) {
+TEST(StructTest, OptionalFieldsTerseStruct) {
   OptionalFieldsTerseStruct obj;
   EXPECT_TRUE(apache::thrift::empty(obj));
 
@@ -707,7 +704,7 @@ TEST_F(StructTest, OptionalFieldsTerseStruct) {
   EXPECT_TRUE(apache::thrift::empty(obj));
 }
 
-TEST_F(StructTest, RefsWithStringAndContainerTerseWrites) {
+TEST(StructTest, RefsWithStringAndContainerTerseWrites) {
   {
     RefsWithStringAndContainerTerseWrites obj;
     EXPECT_TRUE(apache::thrift::empty(obj));
@@ -729,7 +726,7 @@ TEST_F(StructTest, RefsWithStringAndContainerTerseWrites) {
   }
 }
 
-TEST_F(StructTest, NotEligibleForConstexpr) {
+TEST(StructTest, NotEligibleForConstexpr) {
   [[maybe_unused]] NotEligibleForConstexpr foo;
 }
 
@@ -744,7 +741,7 @@ bool serializedField(const T& t) {
   return serializeToObject(t).contains(op::get_field_id_v<T, Id>);
 }
 
-TEST_F(StructTest, TerseFields) {
+TEST(StructTest, TerseFields) {
   TerseFieldsWithCustomDefault terse;
 
   static_assert(apache::thrift::detail::qualifier::
@@ -863,7 +860,7 @@ TEST_F(StructTest, TerseFields) {
   EXPECT_FALSE(serializedField<ident::cpp_ref_exception_field>(terse));
 }
 
-TEST_F(StructTest, TestInitListEmplaceContainers) {
+TEST(StructTest, TestInitListEmplaceContainers) {
   AllContainersStruct obj;
   obj.list_field().emplace({1, 2});
   obj.set_field().emplace({1, 2});
@@ -873,4 +870,54 @@ TEST_F(StructTest, TestInitListEmplaceContainers) {
   obj.map_field_opt().emplace({{1, 1}, {2, 2}});
 }
 
+TEST(StructTest, has_value) {
+  {
+    Basic b;
+
+    // Unqualified (i.e., "always-present") field
+    // NOTE: The test below captures the current behavior, which is NOT exactly
+    // desirable: we believe that `has_value()` should ALWAYS return true for
+    // always-present fields (as their name indicates). but that has
+    // historically not been the behavior of this API. This is why the method is
+    // marked as deprecated.
+    //
+    // Ideally, the next line should be flipped, i.e.:
+    // EXPECT_TRUE(b.def_field().has_value());
+    EXPECT_FALSE(b.def_field().has_value());
+
+    // Optional field
+    EXPECT_FALSE(b.opt_field().has_value());
+    b.opt_field() = 42;
+    EXPECT_TRUE(b.opt_field().has_value());
+    b.opt_field().reset();
+    EXPECT_FALSE(b.opt_field().has_value());
+
+    // [Deprecated] "required" field
+    EXPECT_TRUE(b.req_field().has_value());
+  }
+
+  {
+    // Boxed optional (primitive) field
+
+    OptionalFieldsStruct s;
+    EXPECT_FALSE(s.boxed_field().has_value());
+    s.boxed_field().ensure();
+    EXPECT_TRUE(s.boxed_field().has_value());
+    s.boxed_field().reset();
+    EXPECT_FALSE(s.boxed_field().has_value());
+  }
+
+  {
+    // Boxed optional (container) field
+
+    EmptiableOptionalFieldsStruct s;
+    EXPECT_FALSE(s.int_list_field_ref().has_value());
+    s.int_list_field_ref().ensure();
+    EXPECT_TRUE(s.int_list_field_ref().has_value());
+    s.int_list_field_ref().reset();
+    EXPECT_FALSE(s.int_list_field_ref().has_value());
+  }
+}
+
 } // namespace
+} // namespace apache::thrift::test

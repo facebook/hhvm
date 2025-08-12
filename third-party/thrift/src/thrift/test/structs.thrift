@@ -52,6 +52,7 @@ struct BasicRefsShared {
 struct HasSmallSortedVector {
   @cpp.Type{name = "folly::small_sorted_vector_set<int32_t>"}
   1: set<i32> set_field;
+
   @cpp.Type{name = "folly::small_sorted_vector_map<int32_t, int32_t>"}
   2: i32_map map_field;
 }
@@ -63,28 +64,36 @@ struct NoexceptMoveStruct {
 
 struct EmptiableOptionalFieldsStruct {
   1: optional i32 int_field;
+
   @thrift.Box
   2: optional list<i32> int_list_field_ref;
 }
 
 struct NotEmptiableStruct {
   1: optional i32 int_field;
+
   @thrift.Box
   2: optional list<i32> int_list_field_ref;
+
   3: i64 long_field;
 }
 
 struct OptionalFieldsStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
   1: optional HasInt def_field;
+
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   2: optional HasInt shared_field;
+
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   3: optional list<HasInt> shared_fields;
+
   @cpp.Ref{type = cpp.RefType.Shared}
   4: optional HasInt shared_field_const;
+
   @cpp.Ref{type = cpp.RefType.Shared}
   5: optional list<HasInt> shared_fields_const;
+
   @thrift.Box
   6: optional HasInt boxed_field;
 }

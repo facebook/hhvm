@@ -149,6 +149,10 @@ Options:
                   that have a custom default value.
                   Default: warn
 
+                required_field_qualifier=none|warn|error
+                  Action to take on `required` (struct and exception) fields.
+                  Default: warn
+
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
 
@@ -868,6 +872,13 @@ std::string parse_args(
                   "union_field_custom_default",
                   validator,
                   &sparams.union_field_custom_default)) {
+            continue;
+          }
+
+          if (parse_extra_validation_with_level(
+                  "required_field_qualifier",
+                  validator,
+                  &sparams.required_field_qualifier)) {
             continue;
           }
         } catch (const std::exception& e) {

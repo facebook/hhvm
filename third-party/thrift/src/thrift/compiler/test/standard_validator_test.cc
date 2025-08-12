@@ -60,7 +60,7 @@ TEST(StandardValidatorTest, UnionErrors) {
 
     union Union {
       1: required i64 req; # expected-error: Unions cannot contain qualified fields. Remove `required` qualifier from field `req`.
-        # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
+        # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `req` (in `Union`).
       2: optional i64 opt; # expected-error: Unions cannot contain qualified fields. Remove `optional` qualifier from field `opt`.
       3: Struct mixin (cpp.mixin); # expected-error: Union `Union` cannot contain mixin field `mixin`.
         # expected-warning@-1: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.

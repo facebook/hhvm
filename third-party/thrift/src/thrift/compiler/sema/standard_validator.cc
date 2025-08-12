@@ -677,12 +677,26 @@ void validate_mixin_field_attributes(sema_context& ctx, const t_field& node) {
 }
 
 void validate_required_field(sema_context& ctx, const t_field& field) {
-  if (field.qualifier() == t_field_qualifier::required) {
-    ctx.warning(
-        field,
-        "The 'required' qualifier is deprecated and ignored by most language implementations."
-        " Leave the field unqualified instead.");
+  if (field.qualifier() != t_field_qualifier::required) {
+    return;
   }
+
+  // field qualifier is "required"
+
+  if (field.has_structured_annotation(kAllowUnsafeRequiredFieldQualifierUri)) {
+    // Field is annotated with @AllowUnsafeRequiredFieldQualifier => allow
+    return;
+  }
+
+  const sema_params& sema_parameters = ctx.sema_parameters();
+
+  ctx.report(
+      field,
+      validation_to_diagnostic_level(sema_parameters.required_field_qualifier),
+      "The 'required' qualifier is deprecated and ignored by most language "
+      "implementations. Leave the field unqualified instead: `{}` (in `{}`).",
+      field.name(),
+      dynamic_cast<const t_structured&>(*ctx.parent()).name());
 }
 
 void validate_enum_value_name_uniqueness(

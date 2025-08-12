@@ -58,6 +58,8 @@ inline constexpr auto kAllowLegacyTypedefUriUri =
     "facebook.com/thrift/annotation/AllowLegacyTypedefUri";
 inline constexpr auto kAllowUnsafeOptionalCustomDefaultValueUri =
     "facebook.com/thrift/annotation/AllowUnsafeOptionalCustomDefaultValue";
+inline constexpr auto kAllowUnsafeRequiredFieldQualifierUri =
+    "facebook.com/thrift/annotation/AllowUnsafeRequiredFieldQualifier";
 
 // Scope:
 inline constexpr auto kScopeProgramUri =

@@ -1529,7 +1529,7 @@ TEST(CompilerTest, terse_write_annotation) {
       2: optional i64 field2;
       @thrift.TerseWrite
         # expected-error@-1: `@thrift.TerseWrite` cannot be used with qualified fields
-        # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
+        # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `field3` (in `TerseFields`).
       3: required i64 field3;
     }
 
@@ -1665,8 +1665,8 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
           # expected-error@-1: Field `field1` is already defined for `Injected5`.
         2: optional i64 field2;
         3: required i64 field3;
-          # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
-          # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
+          # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `field3` (in `Fields`).
+          # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `field3` (in `Injected5`).
     }
 
     @internal.InjectMetadataFields{type="foo.Fields"}
@@ -2463,7 +2463,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write) {
 
       @cpp.DeprecatedTerseWrite
       3: required i32 field3;
-        # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
+        # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `field3` (in `Foo`).
         # expected-error@-3: @cpp.DeprecatedTerseWrite can be only used on unqualified field.
 
       @thrift.TerseWrite
@@ -3046,4 +3046,32 @@ TEST(Compilertest, typedef_explicit_uri) {
     typedef i32 MyInt6;
   )",
       {"--extra-validation", "typedef_explicit_uri=warn"});
+}
+
+TEST(CompilerTest, required_field_qualifier) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    struct TestStruct {
+      1: i32 a;
+
+      2: required i32 b;
+        # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `b` (in `TestStruct`).
+
+      @thrift.AllowUnsafeRequiredFieldQualifier
+      3: required i32 c;
+    }
+
+    exception TestException {
+      1: i32 a;
+
+      2: required i32 b;
+        # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `b` (in `TestException`).
+
+      @thrift.AllowUnsafeRequiredFieldQualifier
+      3: required i32 c;
+    }
+  )",
+      {"--extra-validation", "required_field_qualifier=warn"});
 }

@@ -156,6 +156,9 @@ struct sema_params {
   // Action to take on union fields (which are implicitly optional) that have a
   // custom default value.
   validation_level union_field_custom_default = validation_level::warn;
+
+  // Action to take on `required` (struct and exception) fields.
+  validation_level required_field_qualifier = validation_level::warn;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

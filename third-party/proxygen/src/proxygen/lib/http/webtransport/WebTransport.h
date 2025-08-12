@@ -15,6 +15,7 @@
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
 #include <quic/api/QuicCallbacks.h>
+#include <quic/api/TransportInfo.h>
 
 namespace proxygen {
 
@@ -283,6 +284,9 @@ class WebTransport {
   //
   // Any pending futures will complete with a folly::OperationCancelled
   // exception
+  // Return QUIC transport statistics similar to TCPInfo
+  [[nodiscard]] virtual quic::TransportInfo getTransportInfo() const = 0;
+
   virtual folly::Expected<folly::Unit, ErrorCode> closeSession(
       folly::Optional<uint32_t> error = folly::none) = 0;
 };

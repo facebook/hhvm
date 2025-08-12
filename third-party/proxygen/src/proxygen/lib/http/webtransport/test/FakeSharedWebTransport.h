@@ -196,6 +196,10 @@ class FakeSharedWebTransport : public WebTransport {
     writeHandles.clear();
     readHandles.clear();
   }
+  quic::TransportInfo getTransportInfo() const override {
+    return quic::TransportInfo{};
+  }
+
   const folly::SocketAddress& getPeerAddress() const override {
     return peerAddress_;
   }

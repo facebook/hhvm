@@ -1466,6 +1466,13 @@ class HQSession
       return nullptr;
     }
 
+    quic::TransportInfo getTransportInfo() const override {
+      if (session_.sock_) {
+        return session_.sock_->getTransportInfo();
+      }
+      return {};
+    }
+
     bool isReplaySafe() const override {
       return session_.isReplaySafe();
     }

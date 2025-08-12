@@ -71,6 +71,10 @@ class WebTransportImpl : public WebTransport {
     virtual const folly::SocketAddress& getLocalAddress() const = 0;
     virtual const folly::SocketAddress& getPeerAddress() const = 0;
 
+    [[nodiscard]] virtual quic::TransportInfo getTransportInfo() const {
+      return {};
+    }
+
     virtual bool usesEncodedApplicationErrorCodes() = 0;
   };
 
@@ -176,6 +180,10 @@ class WebTransportImpl : public WebTransport {
 
   const folly::SocketAddress& getPeerAddress() const override {
     return tp_.getPeerAddress();
+  }
+
+  [[nodiscard]] quic::TransportInfo getTransportInfo() const override {
+    return tp_.getTransportInfo();
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(

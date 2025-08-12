@@ -128,6 +128,11 @@ class QuicWebTransport
     return quicSocket_->getPeerAddress();
   }
 
+  [[nodiscard]] quic::TransportInfo getTransportInfo() const override {
+    XCHECK(quicSocket_);
+    return quicSocket_->getTransportInfo();
+  }
+
   bool usesEncodedApplicationErrorCodes() override {
     return false;
   }

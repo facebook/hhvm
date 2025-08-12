@@ -23,14 +23,25 @@ where
     at :1
 #1  include ("")
 out
-Program %s/stack1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 where
 #0   ()
     at :1
 #1  include ("")
 out
-stack1.php loaded
-Program %s/stack1.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 where
 #0   ()
     at :1
@@ -38,7 +49,13 @@ where
 set sa off
 StackArgs(sa) set to off
 out
-Program %s/stack1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 where
 #0   ()
     at :1
@@ -47,47 +64,51 @@ set sa on
 StackArgs(sa) set to on.
 
 continue
-stack1.php loaded
-Program %s/stack1.php exited normally.
+Program %s/stack1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break stack1.php:9
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @ test(2, 2)
-test 2 2
-in pub:2 2
-in pri:2 2
-foo:2 2
-bar:2 2
-in pub:2 1
-in pri:2 1
-foo:2 1
-bar:2 1
-in pub:2 0
-in pri:2 0
-foo:2 0
-bar:2 0
-out pri:2 0
-out pub:2 0
-out pri:2 1
-out pub:2 1
-out pri:2 2
-out pub:2 2
-test done 2 2
+Hit fatal : Call to undefined function test()
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 where
 #0   ()
     at :1
 #1  include ("")
 frame 6
-#1  include ("")
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `6`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 variable
-(no variable was defined)
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
 up
-#1  include ("")
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'up'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 down
-#0   ()
-    at :1
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'down'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 @ $x=3
 continue
-Program %s/stack1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+stack1.php loaded
+Program %s/stack1.php exited normally.
 where
 #0   ()
     at :1
@@ -96,4 +117,5 @@ variable
 $__debugger$this = 1
 $__debugger_exn$output = 1
 $__debugger$return_val = 1
+$x = 3
 quit

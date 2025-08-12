@@ -64,7 +64,13 @@ Warning: Cannot access property on non-object
 
 Warning: Cannot access property on non-object
 next
-Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 @ $this->pub = $x->seven()
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: x' in :1
 Stack trace:
@@ -81,6 +87,5 @@ Stack trace:
 #1 (): include()
 #2 {main}
 continue
-eval1.php loaded
-Program %s/eval1.php exited normally.
+Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 quit

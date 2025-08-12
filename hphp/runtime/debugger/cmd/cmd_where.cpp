@@ -58,8 +58,6 @@ void CmdWhere::help(DebuggerClient &client) {
     nullptr
   );
   client.helpBody(
-    "Use '[u]p {num}' or '[d]own {num}' to walk up or down the stacktrace. "
-    "Use '[f]rame {index}' to jump to one particular frame. At any frame, "
     "Use '[v]ariable' command to display all local variables."
   );
 }

@@ -10,7 +10,13 @@ Stack trace:
 #1 (): include()
 #2 {main}
 n
-Program %s/print1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'n'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 = $a
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
 Stack trace:

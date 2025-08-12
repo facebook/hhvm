@@ -1717,23 +1717,17 @@ DebuggerCommandPtr DebuggerClient::createCommand() {
     case 'a': return match_cmd<CmdAbort>("abort");
     case 'b': return match_cmd<CmdBreak>("break");
     case 'c': return match_cmd<CmdContinue>("continue");
-    case 'd': return match_cmd<CmdDown>("down");
     case 'e': return match_cmd<CmdException>("exception");
-    case 'f': return match_cmd<CmdFrame>("frame");
     case 'g': return match_cmd<CmdGlobal>("global");
     case 'h': return match_cmd<CmdHelp>("help");
     case 'i': return match_cmd<CmdInfo>("info");
     case 'k': return match_cmd<CmdConstant>("konstant");
     case 'l': return match_cmd<CmdList>("list");
     case 'm': return match_cmd<CmdMachine>("machine");
-    case 'n': return match_cmd<CmdNext>("next");
-    case 'o': return match_cmd<CmdOut>("out");
     case 'p': return match_cmd<CmdPrint>("print");
     case 'q': return match_cmd<CmdQuit>("quit");
     case 'r': return match_cmd<CmdRun>("run");
-    case 's': return match_cmd<CmdStep>("step");
     case 't': return match_cmd<CmdThread>("thread");
-    case 'u': return match_cmd<CmdUp>("up");
     case 'v': return match_cmd<CmdVariable>("variable");
     case 'w': return match_cmd<CmdWhere>("where");
 

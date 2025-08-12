@@ -1,5 +1,5 @@
 Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-break slow/debugger/break2.php:7
+break %s/break2.php:7
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break foo2()
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/

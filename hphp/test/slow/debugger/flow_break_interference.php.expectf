@@ -6,31 +6,39 @@ Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger ins
 b c 1
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 o
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'o'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+c
 int(8)
 int(1)
 Finished in genFoo
 int(42)
 Program %s/flow_break_interference.php exited normally.
-c
-Program %s/flow_break_interference.php loaded. Type '[r]un' or '[c]ontinue' to go.
 n
-Break at main_entry() on line 35 of %s/flow_break_interference.php
-  34 
-  35*  main();
-  36 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'n'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 p $z
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: z' in :1
 Stack trace:
-#0 %s/flow_break_interference.php(35): include()
-#1 (): main_entry()
+#0 (1): include()
+#1 (): include()
 #2 {main}
 null
 p $a
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
 Stack trace:
-#0 %s/flow_break_interference.php(35): include()
-#1 (): main_entry()
+#0 (1): include()
+#1 (): include()
 #2 {main}
 null
 q

@@ -14,88 +14,152 @@ int(2)
 cont
 Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
 next
-Break at main() on line 34 of %s/flow_gen.php
-  33 <<__EntryPoint>> function main() {
-  34*  error_log('flow_gen.php loaded');
-  35 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-flow_gen.php loaded
-Break at main() on line 35 of %s/flow_gen.php
-  34   error_log('flow_gen.php loaded');
-  35*}
-  36 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen.php exited normally.
-next
-Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at main() on line 34 of %s/flow_gen.php
-  33 <<__EntryPoint>> function main() {
-  34*  error_log('flow_gen.php loaded');
-  35 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-flow_gen.php loaded
-Break at main() on line 35 of %s/flow_gen.php
-  34   error_log('flow_gen.php loaded');
-  35*}
-  36 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
 
-step
-Program %s/flow_gen.php exited normally.
-next
-Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at main() on line 34 of %s/flow_gen.php
-  33 <<__EntryPoint>> function main() {
-  34*  error_log('flow_gen.php loaded');
-  35 }
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-flow_gen.php loaded
-Break at main() on line 35 of %s/flow_gen.php
-  34   error_log('flow_gen.php loaded');
-  35*}
-  36 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen.php exited normally.
-next
-Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at main() on line 34 of %s/flow_gen.php
-  33 <<__EntryPoint>> function main() {
-  34*  error_log('flow_gen.php loaded');
-  35 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 step
-flow_gen.php loaded
-Break at main() on line 35 of %s/flow_gen.php
-  34   error_log('flow_gen.php loaded');
-  35*}
-  36 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen.php exited normally.
-next
-Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at main() on line 34 of %s/flow_gen.php
-  33 <<__EntryPoint>> function main() {
-  34*  error_log('flow_gen.php loaded');
-  35 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-flow_gen.php loaded
-Break at main() on line 35 of %s/flow_gen.php
-  34   error_log('flow_gen.php loaded');
-  35*}
-  36 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
+flow_gen.php loaded
 Program %s/flow_gen.php exited normally.
 quit

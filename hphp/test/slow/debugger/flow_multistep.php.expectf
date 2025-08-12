@@ -12,45 +12,15 @@ object(C1) (1) {
 int(46)
 Program %s/flow_multistep.php exited normally.
 step 8
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-continue
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
-run
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
-step 4
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-step 4
-C1 oh hai
-Break at C1::__construct() on line 26 of %s/flow_multistep.php
-  25     echo "C1 oh hai\n";
-  26*    $x = $a;
-  27   }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `8`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 continue
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
 C1 oh hai
 C2 oh hai
@@ -62,17 +32,49 @@ object(C1) (1) {
 int(46)
 Program %s/flow_multistep.php exited normally.
 step 4
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `4`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step 4
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `4`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+continue
 Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
+step 4
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `4`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next 4
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `4`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
 Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
@@ -86,17 +88,21 @@ object(C1) (1) {
 int(46)
 Program %s/flow_multistep.php exited normally.
 step 4
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `4`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 out 4
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `4`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
 Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break clear all
@@ -116,29 +122,31 @@ Program %s/flow_multistep.php exited normally.
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 step 12
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `12`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 out 2
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `2`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 out
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break flow_multistep.php:54
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
@@ -154,27 +162,29 @@ Program %s/flow_multistep.php exited normally.
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 step 12
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `12`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next 5
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `5`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
-C1 oh hai
-C2 oh hai
-C2 oh hai
-object(C1) (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-int(46)
-Program %s/flow_multistep.php exited normally.
+Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 quit

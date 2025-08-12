@@ -8,99 +8,151 @@ Program %s/flow_gen_excep.php exited normally.
 break foo()
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 next
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_gen_excep() on line 43 of %s/flow_gen_excep.php
-  42 
-  43*  main(1);
-  44 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-int(8)
-Caught Exception given to continuation 8 in genFoo()
-int(4)
-Caught Exception given to continuation 4 in foo()
-Break at entrypoint_flow_gen_excep() on line 44 of %s/flow_gen_excep.php
-  43   main(1);
-  44*}
-  45 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen_excep.php exited normally.
-next
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_gen_excep() on line 43 of %s/flow_gen_excep.php
-  42 
-  43*  main(1);
-  44 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-int(8)
-Caught Exception given to continuation 8 in genFoo()
-int(4)
-Caught Exception given to continuation 4 in foo()
-Break at entrypoint_flow_gen_excep() on line 44 of %s/flow_gen_excep.php
-  43   main(1);
-  44*}
-  45 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen_excep.php exited normally.
-next
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_gen_excep() on line 43 of %s/flow_gen_excep.php
-  42 
-  43*  main(1);
-  44 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-int(8)
-Caught Exception given to continuation 8 in genFoo()
-int(4)
-Caught Exception given to continuation 4 in foo()
-Break at entrypoint_flow_gen_excep() on line 44 of %s/flow_gen_excep.php
-  43   main(1);
-  44*}
-  45 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen_excep.php exited normally.
-next
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_gen_excep() on line 43 of %s/flow_gen_excep.php
-  42 
-  43*  main(1);
-  44 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-int(8)
-Caught Exception given to continuation 8 in genFoo()
-int(4)
-Caught Exception given to continuation 4 in foo()
-Break at entrypoint_flow_gen_excep() on line 44 of %s/flow_gen_excep.php
-  43   main(1);
-  44*}
-  45 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_gen_excep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
-Break at entrypoint_flow_gen_excep() on line 43 of %s/flow_gen_excep.php
-  42 
-  43*  main(1);
-  44 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
-int(8)
-Caught Exception given to continuation 8 in genFoo()
-int(4)
-Caught Exception given to continuation 4 in foo()
-Program %s/flow_gen_excep.php exited normally.
+Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 quit

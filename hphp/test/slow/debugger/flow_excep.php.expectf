@@ -11,82 +11,29 @@ Caught Thrown from throwAndCatch 8 in throwAndCatch()
 int(10)
 Program %s/flow_excep.php exited normally.
 next
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Break at entrypoint_flow_excep() on line 67 of %s/flow_excep.php
-  66   main();
-  67*}
-  68 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
 
-continue
-Program %s/flow_excep.php exited normally.
-run
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-step
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-out
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-next 2
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-step
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Break at entrypoint_flow_excep() on line 67 of %s/flow_excep.php
-  66   main();
-  67*}
-  68 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
 
-step
-Program %s/flow_excep.php exited normally.
-out
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-out
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
 Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
@@ -99,162 +46,72 @@ Caught Thrown from throwAndCatch 8 in throwAndCatch()
 int(10)
 Program %s/flow_excep.php exited normally.
 step
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
 
-next
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Break at entrypoint_flow_excep() on line 67 of %s/flow_excep.php
-  66   main();
-  67*}
-  68 (END)
-
-next
-Program %s/flow_excep.php exited normally.
-next
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-continue
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-run
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-step
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
-
-step
-Break at main() on line 55 of %s/flow_excep.php
-  54 function main() {
-  55*  $x = throwFromCallee(1);
-  56   var_dump($x);
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 out
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Break at entrypoint_flow_excep() on line 67 of %s/flow_excep.php
-  66   main();
-  67*}
-  68 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
 
-next
-Program %s/flow_excep.php exited normally.
-out
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-continue
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-run
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-step
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
-
-step
-Break at main() on line 55 of %s/flow_excep.php
-  54 function main() {
-  55*  $x = throwFromCallee(1);
-  56   var_dump($x);
-
-next
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-Break at main() on line 56 of %s/flow_excep.php
-  55   $x = throwFromCallee(1);
-  56*  var_dump($x);
-  57 
-
-next
-int(3)
-Break at main() on line 58 of %s/flow_excep.php
-  57 
-  58*  $x = foo(2);
-  59   var_dump($x);
-
-step
-Break at foo() on line 41 of %s/flow_excep.php
-  40 function foo($a) {
-  41*  $x = $a + 1;
-  42   $x = throwAndCatch($x);
-
-step
-Break at foo() on line 42 of %s/flow_excep.php
-  41   $x = $a + 1;
-  42*  $x = throwAndCatch($x);
-  43   try {
-
-continue
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-run
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
-next 2
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-step
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next 2
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `2`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+continue
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
 Caught Thrown from throwAndCatch 4 in throwAndCatch()
@@ -264,54 +121,48 @@ Caught Thrown from throwAndCatch 8 in throwAndCatch()
 int(10)
 Program %s/flow_excep.php exited normally.
 step
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Break at entrypoint_flow_excep() on line 67 of %s/flow_excep.php
-  66   main();
-  67*}
-  68 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_excep.php exited normally.
-out
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Break at entrypoint_flow_excep() on line 67 of %s/flow_excep.php
-  66   main();
-  67*}
-  68 (END)
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next
-Program %s/flow_excep.php exited normally.
-out
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
 Caught Thrown from throwAndCatch 4 in throwAndCatch()
@@ -320,6 +171,123 @@ Caught Thrown from foo 7 in foo()
 Caught Thrown from throwAndCatch 8 in throwAndCatch()
 int(10)
 Program %s/flow_excep.php exited normally.
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+continue
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+continue
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -330,33 +298,146 @@ Caught Thrown from throwAndCatch 8 in throwAndCatch()
 int(10)
 Program %s/flow_excep.php exited normally.
 next 2
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `2`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 step
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next 2
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `2`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+continue
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
+next 2
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `2`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next 6
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `6`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -367,50 +448,63 @@ Caught Thrown from throwAndCatch 8 in throwAndCatch()
 int(10)
 Program %s/flow_excep.php exited normally.
 next 2
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `2`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 step
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 next 6
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Encountered unexpected token `6`.
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 step
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
-Break at entrypoint_flow_excep() on line 66 of %s/flow_excep.php
-  65 
-  66*  main();
-  67 }
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 out
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 continue
-Caught Thrown from throwNoCatch 3 in throwFromCallee()
-int(3)
-Caught Thrown from throwAndCatch 4 in throwAndCatch()
-Caught Thrown from throwAndCatch 6 in throwAndCatch()
-Caught Thrown from foo 7 in foo()
-Caught Thrown from throwAndCatch 8 in throwAndCatch()
-int(10)
-Program %s/flow_excep.php exited normally.
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)

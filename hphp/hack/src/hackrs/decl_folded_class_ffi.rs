@@ -8,7 +8,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use bumpalo::Bump;
 use decl_parser::DeclParser;
 use decl_parser::DeclParserOptions;
 use folded_decl_provider::FoldedDeclProvider;
@@ -21,9 +20,8 @@ use jwalk::WalkDir;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
-use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
+use oxidized::decl_defs::DeclClassType;
 use oxidized::decl_fold_options::DeclFoldOptions;
-use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
@@ -147,16 +145,15 @@ ocaml_ffi! {
     }
 }
 
-ocaml_ffi_with_arena! {
-    fn show_decl_class_type_ffi<'a>(arena: &'a Bump, decl: &'a DeclClassType<'a>) -> String {
+ocaml_ffi! {
+    fn show_decl_class_type_ffi(decl: DeclClassType) -> String {
         let decl = <FoldedClass<BReason>>::from(decl);
         format!("{:#?}", decl)
     }
 
-    fn decls_equal_ffi<'a>(
-        arena: &'a Bump,
-        ocaml_decl: &'a DeclClassType<'a>,
-        rust_decl: &'a DeclClassType<'a>
+    fn decls_equal_ffi(
+        ocaml_decl: DeclClassType,
+        rust_decl: DeclClassType
     ) -> bool {
         let ocaml_decl = <FoldedClass<BReason>>::from(ocaml_decl);
         let rust_decl = <FoldedClass<BReason>>::from(rust_decl);

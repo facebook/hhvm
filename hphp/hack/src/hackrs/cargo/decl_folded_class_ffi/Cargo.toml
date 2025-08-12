@@ -14,7 +14,6 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 decl_parser = { version = "0.0.0", path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { version = "0.0.0", path = "../../file_provider/cargo/file_provider" }
 find_utils = { version = "0.0.0", path = "../../../utils/find_utils" }
@@ -26,7 +25,6 @@ jwalk = "0.6"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
 rayon = "1.9.0"
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

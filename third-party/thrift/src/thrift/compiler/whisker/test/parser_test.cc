@@ -135,6 +135,52 @@ TEST_F(ParserTest, variable_starts_with_dot) {
           1)));
 }
 
+TEST_F(ParserTest, variable_is_colon_qualified) {
+  auto ast = parse_ast("{{ foo:bar }}");
+  EXPECT_EQ(
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation <line:1:1, col:14> 'foo:bar'\n",
+      to_string(ast));
+}
+
+TEST_F(ParserTest, variable_is_dot_and_colon_qualified) {
+  auto ast = parse_ast("{{ foo.bar:baz }}");
+  EXPECT_EQ(
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation <line:1:1, col:18> 'foo.bar:baz'\n",
+      to_string(ast));
+}
+
+TEST_F(ParserTest, variable_is_colon_and_dot_qualified) {
+  auto ast = parse_ast("{{ foo:bar.baz }}");
+  EXPECT_EQ(
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation <line:1:1, col:18> 'foo:bar.baz'\n",
+      to_string(ast));
+}
+
+TEST_F(ParserTest, variable_starts_with_colon) {
+  parse_ast_should_fail("{{ :foo }}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression in interpolation but found `:`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, variable_has_dangling_colon) {
+  parse_ast_should_fail("{{ foo: }}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in qualified variable-component but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, variable_has_extra_stuff_after) {
   parse_ast_should_fail("{{foo.bar!}}");
   EXPECT_THAT(

@@ -1057,7 +1057,31 @@ class parser {
         scan};
   }
 
-  // variable-lookup → { "." | "this" | (identifier ~ ("." ~ identifier)*) }
+  // variable-component → { identifier ~ [":" ~ identifier] }
+  parse_result<ast::variable_component> parse_variable_component(
+      parser_scan_window scan) {
+    const token& first_id = scan.advance();
+    if (first_id.kind != tok::identifier) {
+      return no_parse_result();
+    }
+
+    if (!try_consume_token(&scan, tok::colon)) {
+      // No ':', treat it as a raw property identifier
+      return {make_variable_component(nullptr /* qualifier */, first_id), scan};
+    }
+
+    // first_id precedes ':', treat it as a qualifier
+    // Try parse an additional identifier after ':' for the property name
+    if (const token* second_id = try_consume_token(&scan, tok::identifier)) {
+      return {make_variable_component(&first_id, *second_id), scan};
+    }
+
+    report_fatal_expected(scan, "identifier in qualified variable-component");
+  }
+
+  // variable-lookup → { "."
+  // | "this"
+  // | (variable-component ~ ("." ~ variable-component)*) }
   parse_result<ast::variable_lookup> parse_variable_lookup(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -1072,20 +1096,18 @@ class parser {
     }
 
     scan = scan.make_fresh();
-    const token& first_id = scan.advance();
-    if (first_id.kind != tok::identifier) {
+    parse_result first_component = parse_variable_component(scan);
+    if (!first_component) {
       return no_parse_result();
     }
     std::vector<ast::variable_component> path;
-    path.emplace_back(
-        make_variable_component(nullptr /* prototype */, first_id));
+    path.emplace_back(std::move(first_component).consume_and_advance(&scan));
 
     while (try_consume_token(&scan, tok::dot)) {
-      if (const token* id_part = try_consume_token(&scan, tok::identifier)) {
-        path.emplace_back(
-            make_variable_component(nullptr /* prototype */, *id_part));
+      if (parse_result component = parse_variable_component(scan)) {
+        path.emplace_back(std::move(component).consume_and_advance(&scan));
       } else {
-        report_fatal_expected(scan, "identifier in variable-lookup");
+        report_fatal_expected(scan, "variable-component in variable-lookup");
       }
     }
 

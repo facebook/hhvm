@@ -64,6 +64,7 @@ enum class tok : unsigned {
   eq,        // "="
   star,      // "*"
   dollar,    // "$"
+  colon,     // ":"
   // clang-format on
 
   // Literals:
@@ -119,6 +120,7 @@ constexpr tok to_tok(char c) {
     case '=': return tok::eq;
     case '*': return tok::star;
     case '$': return tok::dollar;
+    case ':': return tok::colon;
     default:
       return tok::error;
   }

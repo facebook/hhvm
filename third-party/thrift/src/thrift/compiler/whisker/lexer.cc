@@ -65,7 +65,6 @@ bool is_identifier_continuation(char c) {
   return is_identifier_start(c) || detail::is_digit(c)
     || c == '-'
     || c == '+'
-    || c == ':'
     || c == '?';
   // clang-format on
 }

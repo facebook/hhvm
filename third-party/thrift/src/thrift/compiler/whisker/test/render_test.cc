@@ -1254,15 +1254,23 @@ TEST_F(RenderTest, user_defined_function_native_ref_prototype) {
   SomeCppObject cpp_object;
 
   using base_handle_type =
-      dsl::polymorphic_native_handle<"", SomeCppObjectBase, SomeCppObject>;
+      dsl::polymorphic_native_handle<"base", SomeCppObjectBase, SomeCppObject>;
+  using child_handle_type =
+      dsl::make_polymorphic_native_handle<"proto", SomeCppObject>;
+
   const auto base_proto = dsl::make_prototype<base_handle_type>([](auto&& def) {
+    def.property(
+        "name", [](const SomeCppObjectBase&) { return w::string("base"); });
     def.property("return42", [](const SomeCppObjectBase& self) {
       return w::i64(self.return42());
     });
   });
 
-  const auto proto = dsl::make_prototype<native_handle<SomeCppObject>>(
-      base_proto, [](auto&& def) {
+  const auto proto =
+      dsl::make_prototype<child_handle_type>(base_proto, [](auto&& def) {
+        def.property("name", [](const SomeCppObjectBase&) {
+          return w::string("proto");
+        });
         def.property("get", [](const SomeCppObject& self) {
           return w::i64(self.get());
         });
@@ -1285,7 +1293,8 @@ TEST_F(RenderTest, user_defined_function_native_ref_prototype) {
       "{{ foo.get }}\n"
       "{{ (foo.increment) }}\n"
       "{{ foo.get }}\n"
-      "{{ foo.return42 }}\n",
+      "{{ foo.return42 }}\n"
+      "{{ foo.name }}\n",
       context);
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(
@@ -1295,7 +1304,47 @@ TEST_F(RenderTest, user_defined_function_native_ref_prototype) {
       "1\n"
       "incremented!\n"
       "2\n"
-      "42\n");
+      "42\n"
+      "proto\n");
+
+  result = render(
+      "{{ foo.proto:get }}\n"
+      "{{ (foo.proto:increment) }}\n"
+      "{{ foo.proto:get }}\n"
+      "{{ (foo.proto:increment) }}\n"
+      "{{ foo.proto:get }}\n"
+      "{{ foo.proto:return42 }}\n"
+      "{{ foo.base:return42 }}\n"
+      "{{ foo.name }}\n"
+      "{{ foo.proto:name }}\n"
+      "{{ foo.base:name }}\n",
+      context);
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "2\n"
+      "incremented!\n"
+      "3\n"
+      "incremented!\n"
+      "4\n"
+      "42\n"
+      "42\n"
+      "proto\n"
+      "proto\n"
+      "base\n");
+
+  result = render("{{ (foo.base:increment) }}", context);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Object 'foo' has no property named 'base:increment'.\n"
+          "The object with the missing property is:\n"
+          "<native_handle type='whisker::RenderTest_user_defined_function_native_ref_prototype_Test::TestBody()::SomeCppObject'>\n"
+          "╰─ ...\n",
+          path_to_file,
+          1)));
 }
 
 TEST_F(RenderTest, let_statement) {

@@ -171,12 +171,12 @@ struct identifier {
 
 /**
  * A single component in a variable lookup path. A single component represents
- * either a raw identifier lookup ("foo"), or an explicit prototype lookup
+ * either a raw identifier lookup ("foo"), or an explicitly qualified lookup
  * ("my_obj:foo").
  */
 struct variable_component {
   source_range loc;
-  std::optional<identifier> prototype;
+  std::optional<identifier> qualifier;
   identifier property;
 
   variable_component() = delete;
@@ -184,7 +184,7 @@ struct variable_component {
   // Explicit constructor to ensure string representation is initialized
   variable_component(
       source_range loc,
-      std::optional<identifier> prototype,
+      std::optional<identifier> qualifier,
       identifier property);
 
   /**
@@ -193,7 +193,7 @@ struct variable_component {
    */
   friend bool operator==(
       const variable_component& lhs, const variable_component& rhs) {
-    return lhs.prototype == rhs.prototype && lhs.property == rhs.property;
+    return lhs.qualifier == rhs.qualifier && lhs.property == rhs.property;
   }
   // Remove in C++20 which introduces comparison operator synthesis
   WHISKER_DEFINE_OPERATOR_INEQUALITY(variable_component)
@@ -201,7 +201,7 @@ struct variable_component {
   /**
    * Returns a source-identical string representation of this variable
    * component.
-   * For a prototype-qualified lookup, it takes the form "prototype:property".
+   * For a qualified lookup, it takes the form "qualifier:property".
    * For a raw identifier lookup, it is just "property".
    */
   const std::string& as_string() const;

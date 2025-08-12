@@ -20,6 +20,7 @@
 #include <folly/Utility.h>
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
@@ -66,7 +67,7 @@ TEST_F(ServiceSchemaTest, Programs) {
   EXPECT_EQ(programs.size(), 3);
 
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
-  EXPECT_EQ(mainProgram.definitionsByName().size(), 16);
+  EXPECT_EQ(mainProgram.definitionsByName().size(), 17);
   EXPECT_EQ(mainProgram.namespaces().size(), 1);
   EXPECT_EQ(
       mainProgram.namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
@@ -891,6 +892,84 @@ TEST(SyntaxGraphTest, anyField) {
   const auto& f = s.fields()[0];
   const auto& anyStruct = f.type().trueType();
   EXPECT_EQ(anyStruct.asStruct().uri(), "facebook.com/thrift/type/Any");
+}
+
+TEST(SyntaxGraphTest, StructWithCustomDefault) {
+  auto& registry = SchemaRegistry::get();
+  const auto& sgStructNode = registry.getNode<test::StructWithCustomDefault>();
+
+  test::TestUnion testUnion;
+  testUnion.e() = test::TestEnum::VALUE_1;
+  protocol::Value testUnionValue =
+      protocol::asValueStruct<type::union_t<test::TestUnion>>(testUnion);
+  testUnionValue.as_object().type() = apache::thrift::uri<test::TestUnion>();
+
+  type_system::SerializableRecord::FieldSet testUnionFieldSet;
+  testUnionFieldSet.emplace(
+      FieldId{2}, type_system::SerializableRecord::Int32(1));
+  type_system::SerializableRecord testUnionRecord(std::move(testUnionFieldSet));
+
+  // SyntaxGraph
+  EXPECT_EQ(sgStructNode.fields().size(), 8);
+  EXPECT_EQ(
+      *sgStructNode.at(FieldId{1}).customDefault(),
+      protocol::asValueStruct<type::bool_t>(true));
+  EXPECT_EQ(
+      *sgStructNode.at(FieldId{2}).customDefault(),
+      protocol::asValueStruct<type::i32_t>(10));
+  EXPECT_EQ(
+      *sgStructNode.at(FieldId{3}).customDefault(),
+      protocol::asValueStruct<type::string_t>("foo"));
+  EXPECT_EQ(
+      *sgStructNode.at(FieldId{4}).customDefault(),
+      protocol::asValueStruct<type::binary_t>("bar"));
+  EXPECT_EQ(
+      sgStructNode.at(FieldId{5}).customDefault()->as_list()[0],
+      testUnionValue);
+  EXPECT_EQ(
+      *sgStructNode.at(FieldId{6}).customDefault(),
+      protocol::asValueStruct<type::set<type::i32_t>>({1, 2, 3}));
+  EXPECT_EQ(
+      sgStructNode.at(FieldId{7})
+          .customDefault()
+          ->as_map()
+          .at(protocol::asValueStruct<type::i32_t>(1)),
+      testUnionValue);
+  EXPECT_EQ(*sgStructNode.at(FieldId{8}).customDefault(), testUnionValue);
+
+  // TypeSystemFacade
+  const auto& tsStructNode =
+      registry.getTypeSystemNode<test::StructWithCustomDefault>();
+  EXPECT_EQ(tsStructNode.fields().size(), 8);
+  EXPECT_EQ(
+      *tsStructNode.at(FieldId{1}).customDefault(),
+      type_system::SerializableRecord::Bool(true));
+  EXPECT_EQ(
+      *tsStructNode.at(FieldId{2}).customDefault(),
+      type_system::SerializableRecord::Int32(10));
+  EXPECT_EQ(
+      *tsStructNode.at(FieldId{3}).customDefault(),
+      type_system::SerializableRecord::Text("foo"));
+  EXPECT_EQ(
+      *tsStructNode.at(FieldId{4}).customDefault(),
+      type_system::SerializableRecord::ByteArray(
+          folly::IOBuf::fromString("bar")));
+  EXPECT_EQ(
+      tsStructNode.at(FieldId{5}).customDefault()->asList()[0],
+      testUnionRecord);
+  EXPECT_EQ(
+      *tsStructNode.at(FieldId{6}).customDefault(),
+      type_system::SerializableRecord::Set(
+          {type_system::SerializableRecord::Int32(1),
+           type_system::SerializableRecord::Int32(2),
+           type_system::SerializableRecord::Int32(3)}));
+  EXPECT_EQ(
+      tsStructNode.at(FieldId{7})
+          .customDefault()
+          ->asMap()
+          .at(type_system::SerializableRecord::Int32(1)),
+      testUnionRecord);
+  EXPECT_EQ(*tsStructNode.at(FieldId{8}).customDefault(), testUnionRecord);
 }
 
 } // namespace apache::thrift::syntax_graph

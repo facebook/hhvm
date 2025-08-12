@@ -110,3 +110,15 @@ service TestService {
   i32, stream<i32> createStream();
   TestInteraction, i32, stream<i32> createInteractionAndStream();
 }
+
+@thrift.Uri{value = "meta.com/thrift_test/StructWithCustomDefault"}
+struct StructWithCustomDefault {
+  1: bool field1 = true;
+  2: i32 field2 = 10;
+  3: string field3 = "foo";
+  4: binary field4 = "bar";
+  5: list<TestUnion> field5 = [TestUnion{e = VALUE_1}];
+  6: set<i32> field6 = [1, 2, 3];
+  7: map<i32, TestUnion> field7 = {1: TestUnion{e = VALUE_1}};
+  8: TestUnion field8 = TestUnion{e = VALUE_1};
+}

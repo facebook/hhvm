@@ -314,7 +314,7 @@ let get_disallowed_fixme_pos pos code = get_entry get_disallowed_fixmes pos code
 
 let get_ignore_pos pos code = get_entry get_ignores pos code
 
-let inf_err_codes = [4110; 4323]
+let inf_err_codes = [4110; 4323; 4324]
 
 let is_inf_err_code =
   let inf_err_codes = ISet.of_list inf_err_codes in

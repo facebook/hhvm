@@ -143,10 +143,10 @@ struct sema_params {
 
   // Action to take on typedef with URI (but without the annotation that
   // explicitly allows it, i.e. @thrift.AllowLegacyTypedefUri).
-  validation_level nonallowed_typedef_with_uri = validation_level::none;
+  validation_level nonallowed_typedef_with_uri = validation_level::warn;
 
   // Action to take on a typedef with explicit URI specified using @thrift.Uri.
-  validation_level typedef_explicit_uri = validation_level::none;
+  validation_level typedef_explicit_uri = validation_level::warn;
 
   // Action to take on optional fields in structs (and exceptions) that have a
   // custom default value.

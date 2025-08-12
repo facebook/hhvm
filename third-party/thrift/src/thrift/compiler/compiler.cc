@@ -132,12 +132,12 @@ Options:
                   Action to take on typedef with URI (but without the annotation
                   that explicitly allows it, i.e.
                   @thrift.AllowLegacyTypedefUri).
-                  Default: none
+                  Default: warn
 
                 typedef_explicit_uri=none|warn|error
                   Action to take on typedef with a non-empty explicit URI
                   (specified using the @thrift.Uri annotation).
-                  Default: none
+                  Default: warn
 
                 struct_optional_field_custom_default=none|warn|error
                   Action to take on optional fields in structs (and exceptions)

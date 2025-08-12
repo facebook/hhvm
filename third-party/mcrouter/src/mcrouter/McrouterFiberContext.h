@@ -103,8 +103,8 @@ class fiber_local {
   };
 
   static auto makeGuardHelperBase(McrouterFiberContext&& tmp) {
-    return folly::makeGuard([tmp]() mutable {
-      folly::fibers::local<McrouterFiberContext>() = std::move(tmp);
+    return folly::makeGuard([temp = std::move(tmp)]() mutable {
+      folly::fibers::local<McrouterFiberContext>() = std::move(temp);
     });
   }
 
